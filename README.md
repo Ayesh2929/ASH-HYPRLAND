@@ -3,574 +3,454 @@
 <div align="center">
 
 <!-- ANIMATED HEADER WITH CUSTOM GRADIENT -->
-<img src="https://capsule-render.vercel.app/api?type=venom&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=300&section=header&text=⚡%20ASH%20DOTFILES&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=v3.0%20ULTRA%20—%20The%20Definitive%20Hyprland%20Desktop%20Experience&descAlignY=55&descAlign=50&descSize=18&stroke=ffffff&strokeWidth=1" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=300&section=header&text=ASH%20DOTFILES&fontSize=90&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=⚡%20v3.0%20ULTRA%20•%20Next-Gen%20Hyprland%20Desktop%20Environment&descAlignY=55&descAlign=50&descSize=18&stroke=ffffff&strokeWidth=1" width="100%"/>
 
-<!-- LOGO / BRAND AREA -->
-<br/>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/-%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88-7c3aed?style=flat-square"/>
-  <img src="https://img.shields.io/badge/-%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88%E2%96%88-7c3aed?style=flat-square"/>
-</picture>
-
-<!-- HERO BADGES -->
+<!-- PREMIUM BADGES WITH GLOW EFFECT -->
 <p>
-  <a href="#-install"><img src="https://img.shields.io/badge/🚀_Quick_Install-One_Command-7c3aed?style=for-the-badge&labelColor=1a1a2e"/></a>
-  <a href="#-features"><img src="https://img.shields.io/badge/✨_Features-50+_Commands-6d28d9?style=for-the-badge&labelColor=1a1a2e"/></a>
-  <a href="#-themes"><img src="https://img.shields.io/badge/🎨_Themes-143+_Presets-4f46e5?style=for-the-badge&labelColor=1a1a2e"/></a>
-  <a href="#-docs"><img src="https://img.shields.io/badge/📚_Docs-Complete-2563eb?style=for-the-badge&labelColor=1a1a2e"/></a>
+  <a href="#-install"><img src="https://img.shields.io/badge/⚡_VERSION-3.0_ULTRA-7c3aed?style=for-the-badge&labelColor=1a1a2e&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEzIDNoLTJ2MTBoLTN2Mmg4di0yaC0zeiIvPjwvc3ZnPg=="/></a>
+  <a href="#-features"><img src="https://img.shields.io/badge/HYPRLAND-0.44+-2563eb?style=for-the-badge&labelColor=1a1a2e&logo=wayland&logoColor=white"/></a>
+  <a href="#-stats"><img src="https://img.shields.io/badge/FILES-271_PRODUCTION-059669?style=for-the-badge&labelColor=1a1a2e&logo=files&logoColor=white"/></a>
+  <a href="#-stats"><img src="https://img.shields.io/badge/LINES-85K+-d97706?style=for-the-badge&labelColor=1a1a2e&logo=codacy&logoColor=white"/></a>
 </p>
 
-<!-- STATUS BADGES -->
 <p>
-  <img src="https://img.shields.io/github/actions/workflow/status/yourusername/ash-dots/ci.yml?style=flat-square&logo=github-actions&logoColor=white&label=CI%2FCD&color=22c55e"/>
-  <img src="https://img.shields.io/badge/coverage-98%25-22c55e?style=flat-square&logo=codecov&logoColor=white"/>
-  <img src="https://img.shields.io/badge/security-A+-22c55e?style=flat-square&logo=letsencrypt&logoColor=white"/>
-  <img src="https://img.shields.io/badge/shellcheck-passing-22c55e?style=flat-square&logo=gnu-bash&logoColor=white"/>
-  <img src="https://img.shields.io/github/license/yourusername/ash-dots?style=flat-square&color=7c3aed&logo=opensourceinitiative&logoColor=white"/>
-  <img src="https://img.shields.io/github/stars/yourusername/ash-dots?style=flat-square&logo=github&color=f59e0b"/>
-  <img src="https://img.shields.io/github/last-commit/yourusername/ash-dots?style=flat-square&logo=git&logoColor=white&color=3b82f6"/>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-22c55e?style=for-the-badge&labelColor=1a1a2e"/></a>
+  <a href="#-fish-shell"><img src="https://img.shields.io/badge/SHELL-FISH-3b82f6?style=for-the-badge&labelColor=1a1a2e&logo=gnu-bash&logoColor=white"/></a>
+  <a href="#-neovim-ide"><img src="https://img.shields.io/badge/EDITOR-NEOVIM-57A143?style=for-the-badge&labelColor=1a1a2e&logo=neovim&logoColor=white"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/BUILD-PASSING-22c55e?style=for-the-badge&labelColor=1a1a2e&logo=github-actions&logoColor=white"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/SECURITY-A+-8b5cf6?style=for-the-badge&labelColor=1a1a2e&logo=letsencrypt&logoColor=white"/></a>
 </p>
 
-<!-- ANIMATED TYPING -->
-<br/>
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=28&duration=2500&pause=800&color=7C3AED&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=120&lines=%E2%9A%A1+271+Files+%E2%80%A2+85K%2B+Lines+%E2%80%A2+Zero+Bugs;%F0%9F%8E%A8+Infinite+Themes+from+ANY+Wallpaper;%F0%9F%94%A5+The+Most+Complete+Hyprland+Config+Ever+Built" alt="Typing SVG"/>
-
+<!-- PREMIUM ANIMATED TYPING -->
 <br/>
 
-<!-- TECH STACK ICONS -->
-<p>
-  <img src="https://skillicons.dev/icons?i=linux,bash,neovim,python,git,github,vscode,docker&theme=dark" />
-</p>
+<a href="#-features">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=28&duration=2500&pause=800&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=120&lines=🎨+Wallpaper-Driven+Infinite+Themes;⚡+50%2B+CLI+Commands+%7C+Beats+HyDE;🚀+271+Files+%7C+Zero+Bugs+%7C+Production+Ready;🏆+The+Most+Complete+Hyprland+Setup" alt="Typing SVG"/>
+</a>
 
-<br/>
+<br/><br/>
 
 <!-- PREMIUM NAVIGATION BAR -->
 <table>
 <tr>
-<td align="center"><a href="#-hero-showcase"><b>🖼️ Showcase</b></a></td>
-<td align="center"><a href="#-features"><b>✨ Features</b></a></td>
-<td align="center"><a href="#-architecture"><b>🏗️ Architecture</b></a></td>
-<td align="center"><a href="#-install"><b>🚀 Install</b></a></td>
-<td align="center"><a href="#-themes"><b>🎨 Themes</b></a></td>
-<td align="center"><a href="#%EF%B8%8F-keybinds"><b>⌨️ Keybinds</b></a></td>
-<td align="center"><a href="#-plugins"><b>📦 Plugins</b></a></td>
-<td align="center"><a href="#-benchmarks"><b>📊 Benchmarks</b></a></td>
-<td align="center"><a href="#-docs"><b>📚 Docs</b></a></td>
+<td align="center"><a href="#-features"><img src="https://img.shields.io/badge/✨-FEATURES-7c3aed?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#-install"><img src="https://img.shields.io/badge/🚀-INSTALL-2563eb?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#-themes"><img src="https://img.shields.io/badge/🎨-THEMES-e11d48?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#%EF%B8%8F-keybinds"><img src="https://img.shields.io/badge/⌨️-KEYBINDS-059669?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#-plugins"><img src="https://img.shields.io/badge/📦-PLUGINS-d97706?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#%EF%B8%8F-gallery"><img src="https://img.shields.io/badge/🖼️-GALLERY-f472b6?style=for-the-badge&labelColor=0d1117"/></a></td>
+<td align="center"><a href="#-docs"><img src="https://img.shields.io/badge/📚-DOCS-06b6d4?style=for-the-badge&labelColor=0d1117"/></a></td>
 </tr>
 </table>
 
 </div>
 
----
+<!-- PREMIUM DIVIDER -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- HERO SHOWCASE SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Framed%20Picture.png" width="30"/> Hero Showcase
+<!-- HERO SECTION -->
+<div align="center">
+
+## 🏆 The Definitive Hyprland Experience
+
+<table>
+<tr>
+<td align="center">
+<br/>
+
+```
+   ╔══════════════════════════════════════════════════════╗
+   ║                                                      ║
+   ║    █████╗ ███████╗██╗  ██╗    ██████╗  ██████╗ ████████╗███████╗  ║
+   ║   ██╔══██╗██╔════╝██║  ██║    ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝  ║
+   ║   ███████║███████╗███████║    ██║  ██║██║   ██║   ██║   ███████╗  ║
+   ║   ██╔══██║╚════██║██╔══██║    ██║  ██║██║   ██║   ██║   ╚════██║  ║
+   ║   ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ███████║  ║
+   ║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝  ║
+   ║                                                      ║
+   ║          ⚡  ULTRA v3.0  •  Production Ready  ⚡       ║
+   ║                                                      ║
+   ╚══════════════════════════════════════════════════════╝
+```
+
+<br/>
+</td>
+</tr>
+</table>
+
+</div>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## <img src="https://media.giphy.com/media/iY8CRBdQXODJSCERIr/giphy.gif" width="30"> Stats at a Glance
 
 <div align="center">
 
-<!-- MOCK SCREENSHOT GRID - PREMIUM LAYOUT -->
 <table>
 <tr>
-<td colspan="2" align="center">
+<td align="center" width="25%">
 
-> ### 🌟 Default Desktop — *Dynamic Violet Theme*
-> ![Desktop Preview](https://placehold.co/1200x675/1a1a2e/7c3aed?text=🖥️+Desktop+Preview+•+Hyprland+%2B+Waybar+%2B+Kitty&font=source-sans-pro)
-
-</td>
-</tr>
-<tr>
-<td align="center" width="50%">
-
-> ### 🎨 Theme Engine
-> ![Theme Engine](https://placehold.co/580x325/1a1a2e/6d28d9?text=🎨+Real-time+Color+Extraction&font=source-sans-pro)
+<img src="https://img.shields.io/badge/271-files-7c3aed?style=for-the-badge&labelColor=0d1117" />
+<br/>
+<sub><b>Production Files</b></sub>
 
 </td>
-<td align="center" width="50%">
+<td align="center" width="25%">
 
-> ### 📝 Neovim IDE
-> ![Neovim](https://placehold.co/580x325/1a1a2e/4f46e5?text=📝+31+Plugins+•+14+LSP+Servers&font=source-sans-pro)
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-> ### 🚀 Rofi Launcher
-> ![Rofi](https://placehold.co/580x325/1a1a2e/2563eb?text=🚀+App+Launcher+%2B+Power+Menu&font=source-sans-pro)
+<img src="https://img.shields.io/badge/85K+-lines-2563eb?style=for-the-badge&labelColor=0d1117" />
+<br/>
+<sub><b>Lines of Code</b></sub>
 
 </td>
-<td align="center">
+<td align="center" width="25%">
 
-> ### 🔒 Hyprlock
-> ![Lock Screen](https://placehold.co/580x325/1a1a2e/0ea5e9?text=🔒+Themed+Lock+Screen&font=source-sans-pro)
+<img src="https://img.shields.io/badge/143+-themes-e11d48?style=for-the-badge&labelColor=0d1117" />
+<br/>
+<sub><b>Theme Presets</b></sub>
+
+</td>
+<td align="center" width="25%">
+
+<img src="https://img.shields.io/badge/0-bugs-22c55e?style=for-the-badge&labelColor=0d1117" />
+<br/>
+<sub><b>Known Issues</b></sub>
 
 </td>
 </tr>
 </table>
 
-<details>
-<summary><b>🎬 Click for Live Demo GIF</b></summary>
 <br/>
-<img src="https://placehold.co/900x500/1a1a2e/7c3aed?text=🎬+Animated+Demo+Coming+Soon&font=source-sans-pro" width="90%"/>
-<br/><br/>
 
-```bash
-# Record your own demo
-ash shot record 30  # 30 second recording
+<!-- LANGUAGE/TECH BREAKDOWN -->
+<details>
+<summary><b>📊 Codebase Breakdown</b></summary>
+<br/>
+
+```text
+Shell/Bash    ████████████████████████░░░   56.2%  •  47,770 lines
+Lua           ██████████░░░░░░░░░░░░░░░░   18.3%  •  15,555 lines
+CSS/SCSS      ████████░░░░░░░░░░░░░░░░░░   12.7%  •  10,795 lines
+Config/TOML   ████░░░░░░░░░░░░░░░░░░░░░░    6.4%  •   5,440 lines
+Fish          ███░░░░░░░░░░░░░░░░░░░░░░░    3.8%  •   3,230 lines
+Python        ██░░░░░░░░░░░░░░░░░░░░░░░░    1.5%  •   1,275 lines
+YAML/JSON     █░░░░░░░░░░░░░░░░░░░░░░░░░    1.1%  •     935 lines
 ```
 
 </details>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- FEATURES SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="30"/> Features
+## <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"> Features
 
 <div align="center">
-<br/>
 
-<!-- FEATURE HIGHLIGHT CARDS -->
-```
-╔══════════════════════════════════════════════════════════════════════════════════╗
-║                                                                                ║
-║   🎨  INFINITE THEMES     ⚡  50+ CLI TOOLS     📝  FULL IDE      🔒  SECURE  ║
-║   ━━━━━━━━━━━━━━━━━━     ━━━━━━━━━━━━━━━━━     ━━━━━━━━━━━     ━━━━━━━━━━━   ║
-║   Any wallpaper →         Game mode, plugins,    31 plugins,     Security      ║
-║   24-color palette →      snapshots, doctor,     14 LSP, DAP,    scanning,     ║
-║   12 apps themed          modes, export          AI assist       sandboxing     ║
-║                                                                                ║
-╚══════════════════════════════════════════════════════════════════════════════════╝
-```
-
-</div>
-
-<br/>
-
+<!-- FEATURE CARDS - ROW 1 -->
 <table>
 <tr>
+
+<!-- THEME SYSTEM CARD -->
 <td width="50%" valign="top">
 
 <div align="center">
 
-### <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Artist%20Palette.png" width="25"/> Theme System
+### <img src="https://media.giphy.com/media/VgCDAzcKvsR6OM0uWg/giphy.gif" width="28"> Theme Engine
+
+<img src="https://img.shields.io/badge/INFINITE-THEMES-7c3aed?style=for-the-badge&labelColor=1a1a2e"/>
 
 </div>
 
-> **Every wallpaper becomes a complete desktop theme**
+> **Every wallpaper becomes a complete color system**
 
-| Capability | Details |
-|:----------:|---------|
-| 🔮 | **Dynamic Extraction** — 24 colors via ImageMagick |
-| 🎭 | **143+ Presets** — dark / neon / nature / space / anime / pastel |
-| 🤖 | **AI Generation** — Ollama + algorithmic color theory |
-| ⏰ | **Auto-Schedule** — hourly / daily / seasonal / time-of-day |
-| 📤 | **Multi-Export** — CSS / SCSS / JSON / Lua / Python / XResources |
-| 🏪 | **Theme Store** — community marketplace with ratings |
-| 💾 | **Smart History** — track + rollback every change |
-| ❤️ | **Favorites** — curated personal collection |
-| 🎬 | **Slideshow** — timed auto-rotation with transitions |
-| 🎯 | **12 App Sync** — one change, everything updates |
+```mermaid
+graph LR
+    A[🖼️ Wallpaper] --> B[🔮 Extract]
+    B --> C[🎨 24 Colors]
+    C --> D[✨ 12 Apps]
+    D --> E[🔄 Hot Reload]
+    style A fill:#7c3aed,color:#fff,stroke:none
+    style B fill:#6d28d9,color:#fff,stroke:none
+    style C fill:#4f46e5,color:#fff,stroke:none
+    style D fill:#2563eb,color:#fff,stroke:none
+    style E fill:#0ea5e9,color:#fff,stroke:none
+```
 
-<br/>
-
-<div align="center">
-
-### <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Memo.png" width="25"/> Neovim IDE
-
-</div>
-
-> **Complete development environment, not a basic config**
-
-| Capability | Details |
-|:----------:|---------|
-| 🔧 | **31 Plugins** — hand-curated production set |
-| 🌐 | **14 LSP Servers** — auto-installed via Mason |
-| 🐛 | **DAP Debugging** — Python / Go / Rust / C++ |
-| 🤖 | **AI Assistance** — Codeium (free) + Ollama local |
-| 🎨 | **700+ Highlights** — dynamic ASH theme sync |
-| ⌨️ | **200+ Keymaps** — all modes fully documented |
-| 💾 | **Session Restore** — continue exactly where you left off |
-| 📊 | **Startup: <50ms** — lazy-loaded for speed |
+| Feature | Details |
+|:--------|:--------|
+| 🔮 **Dynamic Extraction** | 24 colors from any image via ImageMagick |
+| 🎭 **143+ Presets** | dark · neon · nature · space · anime · pastel |
+| 🤖 **AI Generation** | Ollama + algorithmic color theory |
+| ⏰ **Auto Schedule** | hourly · daily · seasonal · time-of-day |
+| 📤 **Export Formats** | shell · CSS · SCSS · JSON · Lua · Python · XResources |
+| 🏪 **Theme Store** | Community marketplace with ratings |
+| 💾 **History Tracking** | Every wallpaper change logged |
+| ❤️ **Favorites System** | Save & organize best wallpapers |
+| 🎬 **Slideshow Mode** | Auto-rotate with transitions |
+| 🎯 **Per-Monitor** | Different wallpaper per display |
 
 </td>
+
+<!-- CLI POWER CARD -->
 <td width="50%" valign="top">
 
 <div align="center">
 
-### <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" width="25"/> CLI Power
+### <img src="https://media.giphy.com/media/ln7z2eWriiQAllfVcn/giphy.gif" width="28"> CLI Power
+
+<img src="https://img.shields.io/badge/50+-COMMANDS-2563eb?style=for-the-badge&labelColor=1a1a2e"/>
 
 </div>
 
-> **50+ commands that surpass hyde-cli**
+> **The most powerful dotfiles CLI in the ecosystem**
 
-| Capability | Details |
-|:----------:|---------|
-| 🎮 | **Game Mode** — 1 command: max performance |
-| 🔌 | **Plugin System** — install / remove / update / browse |
-| 📸 | **Snapshots** — create / restore / diff system state |
-| ⚙️ | **Config Mgmt** — edit / reload / diff / reset any config |
-| 🏥 | **Doctor** — 60+ automated health checks |
-| 📊 | **HW Report** — GPU / CPU / mem / temp / disk |
-| 🌐 | **Network** — WiFi / VPN / Bluetooth management |
-| 🎭 | **6 Modes** — game / work / focus / cinema / battery / present |
-| 🔍 | **OCR Shots** — screenshot → text extraction |
-| 📈 | **Benchmarks** — measure theme apply speed |
+```bash
+$ ash --help
 
-<br/>
+  ╭──────────────────────────────────╮
+  │     ASH CLI v3.0 ULTRA          │
+  │     50+ commands • 0 bugs       │
+  ├──────────────────────────────────┤
+  │  theme   - Theme engine         │
+  │  mode    - Desktop modes        │
+  │  plugin  - Plugin system        │
+  │  snapshot- State management     │
+  │  config  - Config management    │
+  │  doctor  - Health checks        │
+  │  hw      - Hardware report      │
+  │  net     - Network control      │
+  │  update  - Update system        │
+  │  shot    - Screenshots          │
+  ╰──────────────────────────────────╯
+```
 
-<div align="center">
-
-### <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Tropical%20Fish.png" width="25"/> Fish Shell
-
-</div>
-
-> **Complete shell ecosystem with deep integration**
-
-| Capability | Details |
-|:----------:|---------|
-| 🔧 | **20 Functions** — all documented with --help |
-| ⚡ | **100+ Abbreviations** — organized by category |
-| 🔍 | **FZF Integration** — 3 custom keybinds |
-| 🧭 | **Zoxide** — smart frequency-based directory jumping |
-| 🌊 | **Wayland-Native** — complete env setup |
-| 🎨 | **Theme Sync** — colors match desktop in real-time |
-| 🤖 | **Auto-Completions** — for all ash CLI commands |
-| 🚀 | **Startup: <100ms** — benchmarked cold start |
+| Feature | Details |
+|:--------|:--------|
+| 🎮 **Game Mode** | 1 command full optimization |
+| 🔌 **Plugin System** | install · remove · update · browse · create |
+| 📸 **Snapshots** | create · restore · diff · list · auto |
+| ⚙️ **Config Mgmt** | edit · reload · diff · reset · backup |
+| 🏥 **Doctor** | 60+ automated health checks |
+| 📊 **Hardware Report** | GPU · CPU · mem · temp · disk |
+| 🌐 **Network** | WiFi · VPN · Bluetooth · DNS |
+| 🎭 **6 Modes** | game · work · focus · cinema · presentation · battery |
+| 🔔 **Notifications** | Contextual, styled, non-intrusive |
+| 📋 **Clipboard** | History · image support · sync |
 
 </td>
 </tr>
 </table>
 
-<br/>
+<!-- FEATURE CARDS - ROW 2 -->
+<table>
+<tr>
+
+<!-- NEOVIM IDE CARD -->
+<td width="50%" valign="top">
 
 <div align="center">
 
-<!-- FEATURE METRICS -->
-<table>
-<tr>
-<td align="center">
-<img src="https://img.shields.io/badge/271-Files-7c3aed?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>Production Files</b></sub>
+### <img src="https://media.giphy.com/media/IdyAQJVN2kVPNUrojM/giphy.gif" width="28"> Neovim IDE
+
+<img src="https://img.shields.io/badge/COMPLETE-IDE-57A143?style=for-the-badge&labelColor=1a1a2e"/>
+
+</div>
+
+> **Not a config. A full development environment.**
+
+```
+ ┌─────────────────────────────────────────┐
+ │ 🔧 31 Plugins  │ 🌐 14 LSP  │ 🐛 DAP  │
+ │ 🤖 AI Assist   │ 🎨 700+ HL │ ⌨️ 200+ │
+ └─────────────────────────────────────────┘
+```
+
+| Component | Details |
+|:----------|:--------|
+| 🔧 **31 Plugins** | Hand-curated production-grade set |
+| 🌐 **14 LSP Servers** | Auto-installed via Mason |
+| 🐛 **DAP Debugging** | Python · Go · Rust · C/C++ |
+| 🤖 **AI Assistance** | Codeium (free) + Ollama (local) |
+| 🎨 **700+ Highlights** | Dynamic sync with ASH themes |
+| ⌨️ **200+ Keymaps** | All modes, fully documented |
+| 💾 **Session Restore** | Continue exactly where you left off |
+| 🌳 **File Explorer** | Neo-tree with git integration |
+| 🔭 **Fuzzy Finder** | Telescope with previews |
+| ✅ **Linting** | Real-time with conform.nvim |
+
 </td>
-<td align="center">
-<img src="https://img.shields.io/badge/85K+-Lines-6d28d9?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>Lines of Code</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/50+-Commands-4f46e5?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>CLI Commands</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/143+-Themes-2563eb?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>Preset Themes</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/60+-Checks-0ea5e9?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>Health Checks</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/0-Bugs-22c55e?style=for-the-badge&labelColor=1a1a2e" /><br/>
-<sub><b>Known Bugs</b></sub>
+
+<!-- FISH SHELL CARD -->
+<td width="50%" valign="top">
+
+<div align="center">
+
+### <img src="https://media.giphy.com/media/kH1DBkPNyZPOk0BxrM/giphy.gif" width="28"> Fish Shell
+
+<img src="https://img.shields.io/badge/COMPLETE-ECOSYSTEM-3b82f6?style=for-the-badge&labelColor=1a1a2e"/>
+
+</div>
+
+> **Shell experience engineered for productivity**
+
+```fish
+╭─ ash@hyprland ~/dotfiles
+╰─❯ ash theme pick
+  🎨 Loading wallpaper picker...
+  ✅ Theme applied in 0.3s
+  📊 24 colors extracted
+  🔄 12 apps updated
+```
+
+| Component | Details |
+|:----------|:--------|
+| 🔧 **20 Functions** | All thoroughly documented |
+| ⚡ **100+ Abbreviations** | Organized by category |
+| 🔍 **FZF Integration** | 3 custom keybinds |
+| 🧭 **Zoxide** | Smart directory jumping |
+| 🌊 **Wayland-Native** | Complete environment setup |
+| 🎨 **Theme Sync** | Colors match desktop in real-time |
+| 🤖 **Auto-Completions** | Full ash CLI tab completions |
+| 📊 **Starship Prompt** | Git-aware, fast, beautiful |
+| 🔐 **SSH Agent** | Auto-start with keychain |
+| 📁 **XDG Compliance** | Clean home directory |
+
 </td>
 </tr>
 </table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- ARCHITECTURE SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Classical%20Building.png" width="30"/> Architecture
+## <img src="https://media.giphy.com/media/QssGEmpkyEOhBCb7e1/giphy.gif" width="25"> Architecture
 
 <div align="center">
 
 ```
-                            ┌─────────────────────────────────┐
-                            │      🎨 THEME ENGINE CORE       │
-                            │   ImageMagick + Color Theory     │
-                            │     AI (Ollama) + Presets        │
-                            └───────────────┬─────────────────┘
-                                            │
-                         ┌──────────────────┼──────────────────┐
-                         │                  │                  │
-                    ╔════╧════╗       ╔═════╧═════╗      ╔════╧════╗
-                    ║ Extract ║       ║  Generate  ║      ║  Store  ║
-                    ║ 24 Clrs ║       ║  AI Theme  ║      ║ 143+    ║
-                    ╚════╤════╝       ╚═════╤═════╝      ╚════╤════╝
-                         │                  │                  │
-                         └──────────────────┼──────────────────┘
-                                            │
-                    ┌───────────────────────────────────────────────┐
-                    │            🔄 HOT-RELOAD PIPELINE            │
-                    │         (No logout — instant apply)          │
-                    └───────────────────────┬───────────────────────┘
-                                            │
-        ┌───────┬───────┬───────┬───────┬───┴───┬───────┬───────┬───────┐
-        │       │       │       │       │       │       │       │       │
-     ╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗╔══╧══╗
-     ║Hypr-║║Way- ║║Kitty║║Rofi ║║Dunst║║Hypr-║║Sway-║║ GTK ║║Fish ║
-     ║land ║║bar  ║║     ║║     ║║     ║║lock ║║ NC  ║║     ║║     ║
-     ╚═════╝╚═════╝╚═════╝╚═════╝╚═════╝╚═════╝╚═════╝╚═════╝╚═════╝
-     + Neovim    + AGS    + EWW
+                        ╔══════════════════════════════════════╗
+                        ║         ASH DOTFILES v3.0 ULTRA      ║
+                        ╚══════════════╤═══════════════════════╝
+                                       │
+              ┌────────────────────────┼────────────────────────┐
+              │                        │                        │
+     ╔════════╧════════╗    ╔═════════╧═════════╗    ╔════════╧════════╗
+     ║   🎨 FRONTEND   ║    ║   ⚙️ MIDDLEWARE    ║    ║   🔧 BACKEND    ║
+     ╚════════╤════════╝    ╚═════════╤═════════╝    ╚════════╤════════╝
+              │                        │                        │
+    ┌─────────┼─────────┐   ┌─────────┼─────────┐   ┌─────────┼─────────┐
+    │         │         │   │         │         │   │         │         │
+ Hyprland  Waybar   Rofi  ASH-CLI  Plugins  Themes  Fish   Neovim  Scripts
+    │         │         │   │         │         │   │         │         │
+ ┌──┴──┐  ┌──┴──┐  ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐
+ │Land │  │Bars │  │Menu │ │50+  │ │Mgmt │ │143+ │ │20fn │ │31pl │ │Auto │
+ │Conf │  │Mods │  │Conf │ │Cmds │ │Sys  │ │Sets │ │100ab│ │14lsp│ │Util │
+ └─────┘  └─────┘  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘
 ```
 
 </div>
 
-### 📂 Project Structure
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-```
-~/.dotfiles/
-├── 📁 .config/                    # ── App Configurations ──────────────
-│   ├── 📁 hypr/                   #   Hyprland WM (modular)
-│   │   ├── 📄 hyprland.conf       #     Main config (sources all)
-│   │   ├── 📄 keybinds.conf       #     200+ keybindings
-│   │   ├── 📄 windowrules.conf    #     Smart window rules
-│   │   ├── 📄 animations.conf     #     Smooth animations
-│   │   ├── 📄 env.conf            #     Environment variables
-│   │   └── 📁 UserOverrides/      #     Your custom overrides
-│   ├── 📁 waybar/                 #   Status bar
-│   ├── 📁 kitty/                  #   Terminal emulator
-│   ├── 📁 rofi/                   #   App launcher
-│   ├── 📁 dunst/                  #   Notifications
-│   ├── 📁 fish/                   #   Fish shell (20 functions)
-│   ├── 📁 nvim/                   #   Neovim IDE (31 plugins)
-│   ├── 📁 hyprlock/               #   Lock screen
-│   └── 📁 swaync/                 #   Notification center
-│
-├── 📁 scripts/                    # ── 50+ CLI Scripts ─────────────────
-│   ├── 📄 ash-cli.sh              #     Main CLI entry point
-│   ├── 📄 theme-engine.sh         #     Core theme system
-│   ├── 📄 wallpaper-picker.sh     #     Interactive picker
-│   ├── 📄 doctor.sh               #     60+ health checks
-│   ├── 📄 snapshot.sh             #     System snapshots
-│   ├── 📄 game-mode.sh            #     Gaming optimizer
-│   └── 📄 quickstart.sh           #     One-command installer
-│
-├── 📁 themes/                     # ── Theme Library ───────────────────
-│   ├── 📁 presets/                #     143+ categorized presets
-│   ├── 📁 generated/              #     Dynamic extractions
-│   └── 📁 community/             #     Theme store downloads
-│
-├── 📁 plugins/                    # ── Plugin System ───────────────────
-│   ├── 📁 installed/              #     Active plugins
-│   └── 📁 available/             #     Plugin registry
-│
-├── 📁 docs/                       # ── Documentation ──────────────────
-├── 📁 tests/                      # ── Test Suite ─────────────────────
-├── 📁 .github/                    # ── CI/CD (6 jobs) ─────────────────
-└── 📄 README.md                   #     You are here ✨
-```
-
----
-
-<!-- COMPARISON SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bar%20Chart.png" width="30"/> Comparison
+## 📊 Comparison
 
 <div align="center">
 
-> ### How ASH v3.0 stacks up against the competition
-
-<br/>
+> ### 🏆 How ASH stacks up against the competition
 
 <table>
 <thead>
 <tr>
-<th align="left">Feature</th>
-<th align="center">ASH v3.0 Ultra</th>
-<th align="center">HyDE Project</th>
-<th align="center">HyprDots</th>
-<th align="center">ML4W</th>
+<th width="22%">Feature</th>
+<th width="20%" align="center"><img src="https://img.shields.io/badge/ASH_v3.0-ULTRA-7c3aed?style=flat-square&labelColor=0d1117"/></th>
+<th width="18%" align="center"><img src="https://img.shields.io/badge/HyDE-Project-374151?style=flat-square&labelColor=0d1117"/></th>
+<th width="18%" align="center"><img src="https://img.shields.io/badge/Hypr-Dots-374151?style=flat-square&labelColor=0d1117"/></th>
+<th width="22%" align="center"><img src="https://img.shields.io/badge/ML4W-Dotfiles-374151?style=flat-square&labelColor=0d1117"/></th>
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="5" align="center"><b>🎨 Theming</b></td></tr>
-<tr>
-<td>Dynamic theme generation</td>
-<td align="center">✅ <b>Infinite</b></td>
-<td align="center">❌ Pre-built only</td>
-<td align="center">❌ Pre-built only</td>
-<td align="center">⚠️ Limited</td>
-</tr>
-<tr>
-<td>Theme presets</td>
-<td align="center">✅ <b>143+</b></td>
-<td align="center">⚠️ ~30</td>
-<td align="center">⚠️ ~10</td>
-<td align="center">⚠️ ~15</td>
-</tr>
-<tr>
-<td>AI theme generation</td>
-<td align="center">✅ <b>Ollama + algo</b></td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Theme export formats</td>
-<td align="center">✅ <b>7 formats</b></td>
-<td align="center">⚠️ 2</td>
-<td align="center">❌</td>
-<td align="center">⚠️ 1</td>
-</tr>
-<tr>
-<td>Theme store / marketplace</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr><td colspan="5" align="center"><b>⚡ CLI & Tools</b></td></tr>
-<tr>
-<td>CLI commands</td>
-<td align="center">✅ <b>50+</b></td>
-<td align="center">✅ 50+</td>
-<td align="center">⚠️ ~15</td>
-<td align="center">⚠️ ~20</td>
-</tr>
-<tr>
-<td>Plugin system</td>
-<td align="center">✅ <b>Full lifecycle</b></td>
-<td align="center">✅ Full</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Snapshot / rollback</td>
-<td align="center">✅ <b>Full + diff</b></td>
-<td align="center">⚠️ Basic</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Health checks</td>
-<td align="center">✅ <b>60+</b></td>
-<td align="center">⚠️ ~10</td>
-<td align="center">❌</td>
-<td align="center">⚠️ ~5</td>
-</tr>
-<tr>
-<td>OCR screenshots</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr><td colspan="5" align="center"><b>📝 Development</b></td></tr>
-<tr>
-<td>Neovim IDE (plugins)</td>
-<td align="center">✅ <b>31 plugins</b></td>
-<td align="center">❌ Basic</td>
-<td align="center">❌ Basic</td>
-<td align="center">❌ None</td>
-</tr>
-<tr>
-<td>LSP servers</td>
-<td align="center">✅ <b>14</b></td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>DAP debugging</td>
-<td align="center">✅ <b>4 languages</b></td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Fish functions</td>
-<td align="center">✅ <b>20</b></td>
-<td align="center">⚠️ 8</td>
-<td align="center">⚠️ 5</td>
-<td align="center">⚠️ 3</td>
-</tr>
-<tr><td colspan="5" align="center"><b>🔒 Quality</b></td></tr>
-<tr>
-<td>CI/CD pipeline</td>
-<td align="center">✅ <b>6 jobs</b></td>
-<td align="center">⚠️ 2</td>
-<td align="center">⚠️ 1</td>
-<td align="center">⚠️ 1</td>
-</tr>
-<tr>
-<td>Security scanning</td>
-<td align="center">✅ <b>Full</b></td>
-<td align="center">⚠️ Basic</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Session restore</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>Game mode (advanced)</td>
-<td align="center">✅ <b>Full</b></td>
-<td align="center">✅ Basic</td>
-<td align="center">❌</td>
-<td align="center">❌</td>
-</tr>
-<tr><td colspan="5" align="center"><b>📊 Scale</b></td></tr>
-<tr>
-<td>Production files</td>
-<td align="center"><b>271</b></td>
-<td align="center">~200</td>
-<td align="center">~80</td>
-<td align="center">~100</td>
-</tr>
-<tr>
-<td>Lines of code</td>
-<td align="center"><b>85,000+</b></td>
-<td align="center">~40K</td>
-<td align="center">~10K</td>
-<td align="center">~15K</td>
-</tr>
-<tr>
-<td>GitHub stars</td>
-<td align="center">🆕 <i>New</i></td>
-<td align="center">⭐ 3K+</td>
-<td align="center">⭐ 5K+</td>
-<td align="center">⭐ 1K+</td>
-</tr>
+<tr><td>🎨 <b>Dynamic themes</b></td><td align="center">✅ Infinite</td><td align="center">❌ Pre-built</td><td align="center">❌ Pre-built</td><td align="center">⚠️ Limited</td></tr>
+<tr><td>⚡ <b>CLI commands</b></td><td align="center">✅ <b>50+</b></td><td align="center">✅ 50+</td><td align="center">⚠️ Basic</td><td align="center">⚠️ 15+</td></tr>
+<tr><td>🔌 <b>Plugin system</b></td><td align="center">✅ Full</td><td align="center">✅ Full</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
+<tr><td>📝 <b>Neovim IDE</b></td><td align="center">✅ <b>Complete</b></td><td align="center">❌ Basic</td><td align="center">❌ Basic</td><td align="center">❌ None</td></tr>
+<tr><td>🐟 <b>Shell functions</b></td><td align="center">✅ <b>20</b></td><td align="center">⚠️ 8</td><td align="center">⚠️ 5</td><td align="center">⚠️ 3</td></tr>
+<tr><td>🔄 <b>CI/CD pipeline</b></td><td align="center">✅ <b>6 jobs</b></td><td align="center">⚠️ 2 jobs</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td></tr>
+<tr><td>📸 <b>Snapshot system</b></td><td align="center">✅ Full</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
+<tr><td>💾 <b>Session restore</b></td><td align="center">✅ Yes</td><td align="center">❌ No</td><td align="center">❌ No</td><td align="center">❌ No</td></tr>
+<tr><td>🤖 <b>AI themes</b></td><td align="center">✅ <b>Yes</b></td><td align="center">❌ No</td><td align="center">❌ No</td><td align="center">❌ No</td></tr>
+<tr><td>🔒 <b>Security scanning</b></td><td align="center">✅ Full</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
+<tr><td>🏥 <b>Health checks</b></td><td align="center">✅ <b>60+</b></td><td align="center">⚠️ Basic</td><td align="center">❌ None</td><td align="center">⚠️ Basic</td></tr>
+<tr><td>🎮 <b>Game mode</b></td><td align="center">✅ Advanced</td><td align="center">✅ Basic</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
+<tr><td>🏪 <b>Theme store</b></td><td align="center">✅ Yes</td><td align="center">✅ Yes</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
+<tr><td>🔍 <b>OCR screenshots</b></td><td align="center">✅ Yes</td><td align="center">❌ No</td><td align="center">❌ No</td><td align="center">❌ No</td></tr>
+<tr><td>📊 <b>Hardware report</b></td><td align="center">✅ <b>Full</b></td><td align="center">⚠️ Basic</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
 </tbody>
 </table>
 
 <br/>
 
-> 💡 *All comparisons based on public repositories as of January 2025*
+<table>
+<tr>
+<td align="center">
+
+**ASH Score**
+<br/>
+<img src="https://img.shields.io/badge/15%2F15-100%25-22c55e?style=for-the-badge&labelColor=0d1117"/>
+
+</td>
+<td align="center">
+
+**HyDE Score**
+<br/>
+<img src="https://img.shields.io/badge/8%2F15-53%25-eab308?style=for-the-badge&labelColor=0d1117"/>
+
+</td>
+<td align="center">
+
+**HyprDots Score**
+<br/>
+<img src="https://img.shields.io/badge/3%2F15-20%25-ef4444?style=for-the-badge&labelColor=0d1117"/>
+
+</td>
+<td align="center">
+
+**ML4W Score**
+<br/>
+<img src="https://img.shields.io/badge/3%2F15-20%25-ef4444?style=for-the-badge&labelColor=0d1117"/>
+
+</td>
+</tr>
+</table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- INSTALL SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30"/> Install
+## 🚀 Install
 
 <div align="center">
 
-### ⚡ One Command — That's It
+### ⚡ One Command Setup
 
-<br/>
+<table>
+<tr>
+<td>
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/yourusername/ash-dots/main/scripts/quickstart.sh)
 ```
 
+</td>
+</tr>
+</table>
+
 <br/>
 
-<img src="https://img.shields.io/badge/⏱️_Install_Time-~5_minutes-7c3aed?style=for-the-badge&labelColor=1a1a2e"/>
-<img src="https://img.shields.io/badge/💾_Disk_Space-~2_GB-6d28d9?style=for-the-badge&labelColor=1a1a2e"/>
-<img src="https://img.shields.io/badge/🔒_Snapshot-Auto_Created-22c55e?style=for-the-badge&labelColor=1a1a2e"/>
+<img src="https://img.shields.io/badge/⏱️_Install_Time-~15_minutes-7c3aed?style=for-the-badge&labelColor=0d1117"/>
+<img src="https://img.shields.io/badge/💾_Disk_Space-~10_GB-2563eb?style=for-the-badge&labelColor=0d1117"/>
+<img src="https://img.shields.io/badge/📦_Packages-~120-059669?style=for-the-badge&labelColor=0d1117"/>
 
 </div>
-
-<br/>
 
 ### 📋 System Requirements
 
@@ -582,314 +462,329 @@ bash <(curl -sSL https://raw.githubusercontent.com/yourusername/ash-dots/main/sc
 <th align="center">🚀 Optimal</th>
 </tr>
 <tr>
-<td align="center"><b>OS</b></td>
-<td>Arch Linux</td>
-<td>EndeavourOS / Garuda</td>
-<td>CachyOS</td>
+<td align="center"><b>🖥️ OS</b></td>
+<td align="center">Arch Linux</td>
+<td align="center">EndeavourOS</td>
+<td align="center">CachyOS</td>
 </tr>
 <tr>
-<td align="center"><b>Kernel</b></td>
-<td>6.1</td>
-<td>6.6 LTS</td>
-<td>6.12+ (zen)</td>
+<td align="center"><b>🧠 Kernel</b></td>
+<td align="center">6.1 LTS</td>
+<td align="center">6.6+</td>
+<td align="center">6.8+ (zen)</td>
 </tr>
 <tr>
-<td align="center"><b>GPU</b></td>
-<td>Any DRM/KMS</td>
-<td>RX 580 / RTX 2060</td>
-<td>RX 7800 / RTX 4070+</td>
+<td align="center"><b>🎮 GPU</b></td>
+<td align="center">Any DRM/KMS</td>
+<td align="center">RX 580 / RTX 2060</td>
+<td align="center">RX 7800+ / RTX 4060+</td>
 </tr>
 <tr>
-<td align="center"><b>RAM</b></td>
-<td>4 GB</td>
-<td>16 GB</td>
-<td>32 GB</td>
+<td align="center"><b>💾 RAM</b></td>
+<td align="center">4 GB</td>
+<td align="center">16 GB</td>
+<td align="center">32 GB</td>
 </tr>
 <tr>
-<td align="center"><b>Storage</b></td>
-<td>10 GB free</td>
-<td>SSD 20 GB+</td>
-<td>NVMe 50 GB+</td>
+<td align="center"><b>📀 Storage</b></td>
+<td align="center">10 GB free</td>
+<td align="center">SSD 20 GB+</td>
+<td align="center">NVMe 50 GB+</td>
 </tr>
 <tr>
-<td align="center"><b>Display</b></td>
-<td>1080p 60Hz</td>
-<td>1440p 144Hz</td>
-<td>4K 165Hz</td>
+<td align="center"><b>🖥️ Display</b></td>
+<td align="center">1080p 60Hz</td>
+<td align="center">1440p 144Hz</td>
+<td align="center">4K 165Hz</td>
 </tr>
 </table>
 
-### 🖥️ GPU Setup
+### 🎮 GPU Setup
 
 <details>
-<summary><b>🟢 AMD GPU (Recommended — Best Wayland support)</b></summary>
+<summary>🔴 <b>AMD GPU</b> (Recommended — Best Wayland Support)</summary>
 <br/>
 
 ```bash
+# Install drivers
 sudo pacman -S mesa vulkan-radeon libva-mesa-driver mesa-vdpau
+
+# Verify
+vulkaninfo --summary | head -5
 ```
+
+<img src="https://img.shields.io/badge/Status-Fully_Supported-22c55e?style=flat-square&labelColor=0d1117"/>
 
 </details>
 
 <details>
-<summary><b>🟡 NVIDIA GPU (Requires extra config)</b></summary>
+<summary>🟢 <b>NVIDIA GPU</b> (Requires Configuration)</summary>
 <br/>
 
 ```bash
+# Install drivers
 sudo pacman -S nvidia nvidia-utils nvidia-settings egl-wayland
 
-# Create override file:
-mkdir -p ~/.config/hypr/UserOverrides
-cat > ~/.config/hypr/UserOverrides/nvidia.conf << 'EOF'
+# Add to ~/.config/hypr/UserOverrides/user.conf:
 env = __GLX_VENDOR_LIBRARY_NAME,nvidia
 env = GBM_BACKEND,nvidia-drm
 env = WLR_DRM_NO_ATOMIC,1
 env = LIBVA_DRIVER_NAME,nvidia
 env = __GL_GSYNC_ALLOWED,1
-env = __GL_VRR_ALLOWED,1
-cursor {
-    no_hardware_cursors = true
-}
-EOF
+
+# Enable DRM kernel mode setting
+sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/&nvidia-drm.modeset=1 /' /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
+
+<img src="https://img.shields.io/badge/Status-Supported_(535.43+)-eab308?style=flat-square&labelColor=0d1117"/>
 
 </details>
 
 <details>
-<summary><b>🔵 Intel GPU</b></summary>
+<summary>🔵 <b>Intel GPU</b></summary>
 <br/>
 
 ```bash
+# Install drivers
 sudo pacman -S mesa vulkan-intel intel-media-driver
+
+# Verify
+vainfo
 ```
+
+<img src="https://img.shields.io/badge/Status-Fully_Supported-22c55e?style=flat-square&labelColor=0d1117"/>
 
 </details>
 
-### 📱 Post-Install
+### 📱 Post-Install Checklist
 
 ```bash
-# ┌────────────────────────────────────────┐
-# │         POST-INSTALL CHECKLIST         │
-# └────────────────────────────────────────┘
-
-# 1️⃣  Reboot into new environment
-sudo reboot
-
-# 2️⃣  Select "Hyprland" at SDDM login screen
-
-# 3️⃣  Apply your first theme
-ash theme pick
-
-# 4️⃣  Verify everything works
-ash doctor
-
-# 5️⃣  View system summary
-bash ~/.dotfiles/scripts/summary.sh
-
-# 6️⃣  (Optional) Import your wallpapers
-cp ~/your-wallpapers/* ~/.dotfiles/wallpapers/
-
-# 7️⃣  Explore!
-ash --help
+# ┌──────────────────────────────────────────────┐
+# │         POST-INSTALL CHECKLIST               │
+# ├──────────────────────────────────────────────┤
+# │                                              │
+# │  1. 🔄 Reboot your system                   │
+      sudo reboot
+# │                                              │
+# │  2. 🖥️ Select Hyprland at SDDM login        │
+# │                                              │
+# │  3. 🎨 Pick your first theme                 │
+      ash theme pick
+# │                                              │
+# │  4. 🏥 Verify everything works               │
+      ash doctor
+# │                                              │
+# │  5. 📊 View system summary                   │
+      bash ~/.dotfiles/scripts/summary.sh
+# │                                              │
+# │  6. 📸 Create initial snapshot               │
+      ash snapshot create fresh-install
+# │                                              │
+# └──────────────────────────────────────────────┘
 ```
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- THEMES SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Artist%20Palette.png" width="30"/> Themes
+## 🎨 Themes
 
 <div align="center">
 
-### 🔮 The Most Powerful Theme System on Linux
+### ∞ Infinite Theme Generation
 
-<br/>
+> **One wallpaper. 24 colors. 12 apps. Zero effort.**
 
-> Every wallpaper → unique 24-color palette → applied to **ALL 12 apps** → instant hot-reload
-
-```
- ╔═══════════╗     ╔══════════════╗     ╔═══════════════╗     ╔══════════════╗
- ║  🖼️ INPUT  ║ ──► ║  🔬 EXTRACT  ║ ──► ║  🎯 SEMANTIC  ║ ──► ║  🚀 DEPLOY   ║
- ║           ║     ║              ║     ║    MAPPING    ║     ║              ║
- ║ Wallpaper ║     ║ ImageMagick  ║     ║              ║     ║ 12 apps      ║
- ║ or        ║     ║ Color Theory ║     ║ bg / fg /    ║     ║ hot-reloaded ║
- ║ AI prompt ║     ║ K-means      ║     ║ accent /     ║     ║ in <200ms    ║
- ║ or        ║     ║ Clustering   ║     ║ border /     ║     ║              ║
- ║ Preset    ║     ║ ──────────── ║     ║ warning /    ║     ║ No logout    ║
- ║           ║     ║ 24 colors    ║     ║ error / ok   ║     ║ required     ║
- ╚═══════════╝     ╚══════════════╝     ╚═══════════════╝     ╚══════════════╝
-```
-
-</div>
-
-### 📦 Preset Library — 143+ Curated Themes
-
-<div align="center">
 <table>
 <tr>
-<td align="center" width="12.5%">
-<br/>🌙<br/><b>Dark</b><br/><sub>20 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>⚡<br/><b>Neon</b><br/><sub>15 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>🌿<br/><b>Nature</b><br/><sub>15 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>🌊<br/><b>Ocean</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>🚀<br/><b>Space</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>🍬<br/><b>Pastel</b><br/><sub>15 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>🎌<br/><b>Anime</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center" width="12.5%">
-<br/>📺<br/><b>Retro</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-</tr>
-<tr>
 <td align="center">
-<br/>🎨<br/><b>Minimal</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center">
-<br/>🍁<br/><b>Seasonal</b><br/><sub>8 themes</sub><br/><br/>
-</td>
-<td align="center">
-<br/>😊<br/><b>Mood</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center">
-<br/>🌈<br/><b>Gradient</b><br/><sub>10 themes</sub><br/><br/>
-</td>
-<td align="center" colspan="4">
-<br/>🆕<br/><b>+ Community</b><br/><sub>∞ via Theme Store</sub><br/><br/>
+
+```mermaid
+flowchart LR
+    A["🖼️ ANY\nWallpaper"] -->|ImageMagick| B["🔮 Extract\n24 Colors"]
+    B -->|Color Theory| C["🎨 Semantic\nRoles"]
+    C -->|Templates| D["✨ Apply to\n12 Apps"]
+    D -->|SWWW| E["🔄 Hot\nReload"]
+    
+    style A fill:#7c3aed,color:#fff,stroke:#7c3aed
+    style B fill:#6d28d9,color:#fff,stroke:#6d28d9
+    style C fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style D fill:#2563eb,color:#fff,stroke:#2563eb
+    style E fill:#0ea5e9,color:#fff,stroke:#0ea5e9
+```
+
 </td>
 </tr>
 </table>
-</div>
-
-### 🎮 Theme Commands Reference
-
-```bash
-# ┌─────────────────────────────────────────────────────────────┐
-# │                    THEME COMMANDS                          │
-# ├─────────────────────────────────────────────────────────────┤
-# │                                                            │
-# │  PICK & APPLY                                             │
-# │  ─────────────                                            │
-  ash theme pick                # 🖼️  Interactive wallpaper picker (fzf + preview)
-  ash theme random              # 🎲  Random theme from any category
-  ash theme random dark         # 🎲  Random from dark category
-  ash theme random neon         # ⚡  Random from neon category
-  ash-themes apply nord         # ✨  Apply named preset
-  ash-themes apply catppuccin   # ✨  Apply named preset
-# │                                                            │
-# │  INSPECT & EXPORT                                         │
-# │  ──────────────                                           │
-  ash theme colors              # 🎨  Show current 24-color palette
-  ash theme export css          # 📤  Export as CSS custom properties
-  ash theme export scss         # 📤  Export as SCSS variables
-  ash theme export json         # 📤  Export as JSON
-  ash theme export lua          # 📤  Export as Lua table
-  ash theme export python       # 📤  Export as Python dict
-  ash theme export xresources   # 📤  Export as XResources
-# │                                                            │
-# │  AUTOMATION                                                │
-# │  ──────────                                               │
-  ash theme slideshow 30        # 🎬  Rotate every 30 seconds
-  ash theme schedule hourly     # ⏰  Change every hour
-  ash theme schedule daily      # ⏰  Change at midnight
-  ash theme schedule sunrise    # ⏰  Change at sunrise/sunset
-# │                                                            │
-# │  AI & STORE                                               │
-# │  ──────────                                               │
-  ash theme ai                  # 🤖  Generate via Ollama AI
-  ash theme store browse        # 🏪  Browse community themes
-  ash theme store upload        # 📤  Share your theme
-# │                                                            │
-# │  MANAGEMENT                                               │
-# │  ──────────                                               │
-  ash-themes list               # 📋  List all 143+ presets
-  ash theme history             # 💾  View change history
-  ash theme fav add             # ❤️   Add to favorites
-  ash theme fav list            # ❤️   List favorites
-# │                                                            │
-# └─────────────────────────────────────────────────────────────┘
-```
-
----
-
-<!-- KEYBINDS SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Keyboard.png" width="30"/> Keybinds
-
-<div align="center">
-
-> **`SUPER`** = Windows / Meta key &nbsp;•&nbsp; All keybinds are customizable via `UserOverrides/`
-
-</div>
 
 <br/>
 
+### 🎯 Supported Apps (Hot-Reload)
+
 <table>
 <tr>
-<td width="50%" valign="top">
+<td align="center">🪟<br/><b>Hyprland</b></td>
+<td align="center">📊<br/><b>Waybar</b></td>
+<td align="center">🐱<br/><b>Kitty</b></td>
+<td align="center">🚀<br/><b>Rofi</b></td>
+<td align="center">🔔<br/><b>Dunst</b></td>
+<td align="center">🔒<br/><b>Hyprlock</b></td>
+</tr>
+<tr>
+<td align="center">📬<br/><b>SwayNC</b></td>
+<td align="center">🎨<br/><b>GTK</b></td>
+<td align="center">🐟<br/><b>Fish</b></td>
+<td align="center">📝<br/><b>Neovim</b></td>
+<td align="center">📐<br/><b>AGS</b></td>
+<td align="center">🧩<br/><b>EWW</b></td>
+</tr>
+</table>
 
-### 🔑 Essential
+</div>
+
+### 📦 Preset Library
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/20-7c3aed?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🌙 <b>Dark</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/15-a855f7?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>⚡ <b>Neon</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/15-22c55e?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🌿 <b>Nature</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/10-0ea5e9?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🌊 <b>Ocean</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/10-1d4ed8?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🚀 <b>Space</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/15-f472b6?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🍬 <b>Pastel</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/10-e11d48?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🎌 <b>Anime</b></sub>
+</td>
+<td align="center" width="12.5%">
+<img src="https://img.shields.io/badge/10-eab308?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>📺 <b>Retro</b></sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+<img src="https://img.shields.io/badge/10-6b7280?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🎨 <b>Minimal</b></sub>
+</td>
+<td align="center">
+<img src="https://img.shields.io/badge/8-d97706?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🍁 <b>Seasonal</b></sub>
+</td>
+<td align="center">
+<img src="https://img.shields.io/badge/10-8b5cf6?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>😊 <b>Mood</b></sub>
+</td>
+<td align="center">
+<img src="https://img.shields.io/badge/10-06b6d4?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🌈 <b>Gradient</b></sub>
+</td>
+<td align="center" colspan="4">
+<img src="https://img.shields.io/badge/TOTAL_143+-PRESETS-7c3aed?style=for-the-badge&labelColor=0d1117"/>
+</td>
+</tr>
+</table>
+
+</div>
+
+### 🎮 Theme Commands
+
+```bash
+# ╔══════════════════════════════════════════════════════════╗
+# ║                    THEME COMMANDS                        ║
+# ╠══════════════════════════════════════════════════════════╣
+# ║                                                          ║
+# ║  BASICS                                                  ║
+   ash theme pick                # 🖼️  Interactive wallpaper picker
+   ash theme random dark         # 🎲  Random dark theme
+   ash theme random neon         # ⚡  Random neon theme
+   ash theme colors              # 🎨  Show current 24-color palette
+# ║                                                          ║
+# ║  ADVANCED                                                ║
+   ash theme export css          # 📤  Export as CSS custom properties
+   ash theme export scss         # 📤  Export as SCSS variables
+   ash theme export json         # 📤  Export as JSON
+   ash theme ai                  # 🤖  AI-generated theme via Ollama
+# ║                                                          ║
+# ║  AUTOMATION                                              ║
+   ash theme slideshow 30        # 🎬  Slideshow every 30 seconds
+   ash theme schedule hourly     # ⏰  Auto-change every hour
+   ash theme schedule seasonal   # 🍁  Match season of year
+# ║                                                          ║
+# ║  PRESETS                                                 ║
+   ash-themes list               # 📋  List all 143+ presets
+   ash-themes apply nord         # ✨  Apply a named preset
+   ash theme store browse        # 🏪  Browse community store
+# ║                                                          ║
+# ╚══════════════════════════════════════════════════════════╝
+```
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## ⌨️ Keybinds
+
+<div align="center">
+
+> **`SUPER`** = Windows/Meta Key &nbsp;│&nbsp; All bindings are customizable in `UserOverrides/`
+
+</div>
+
+### 🔑 Essential Bindings
+
+<table>
+<tr>
+<th width="50%" align="center">🖥️ Window Management</th>
+<th width="50%" align="center">🚀 Launch & System</th>
+</tr>
+<tr>
+<td>
 
 | Keybind | Action |
 |:--------|:-------|
-| <kbd>SUPER</kbd> + <kbd>Return</kbd> | 🖥️ Open terminal |
-| <kbd>SUPER</kbd> + <kbd>Space</kbd> | 🚀 App launcher |
 | <kbd>SUPER</kbd> + <kbd>Q</kbd> | ✕ Close window |
 | <kbd>SUPER</kbd> + <kbd>F</kbd> | ⛶ Toggle fullscreen |
 | <kbd>SUPER</kbd> + <kbd>V</kbd> | 🔲 Toggle floating |
-| <kbd>SUPER</kbd> + <kbd>P</kbd> | 📌 Toggle pin |
-| <kbd>SUPER</kbd> + <kbd>J</kbd> | ⚡ Toggle split |
-| <kbd>SUPER</kbd> + <kbd>Escape</kbd> | ⏻ Power menu |
-
-### 🔄 Window Management
-
-| Keybind | Action |
-|:--------|:-------|
-| <kbd>SUPER</kbd> + <kbd>←↑↓→</kbd> | 🔀 Move focus |
-| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>←↑↓→</kbd> | 📐 Move window |
-| <kbd>SUPER</kbd> + <kbd>CTRL</kbd> + <kbd>←↑↓→</kbd> | 📏 Resize window |
-| <kbd>SUPER</kbd> + <kbd>1-9</kbd> | 🏷️ Switch workspace |
-| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>1-9</kbd> | 📤 Move to workspace |
+| <kbd>SUPER</kbd> + <kbd>P</kbd> | 📌 Toggle pseudo-tile |
+| <kbd>SUPER</kbd> + <kbd>J</kbd> | ↕ Toggle split |
+| <kbd>SUPER</kbd> + <kbd>←↑↓→</kbd> | 🧭 Move focus |
+| <kbd>SUPER</kbd> + <kbd>1-9</kbd> | 🔢 Switch workspace |
+| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>1-9</kbd> | 📦 Move to workspace |
 | <kbd>SUPER</kbd> + <kbd>Mouse Scroll</kbd> | 🔄 Cycle workspaces |
-| <kbd>SUPER</kbd> + <kbd>Tab</kbd> | 🪟 Window switcher |
+| <kbd>SUPER</kbd> + <kbd>Mouse Drag</kbd> | ✋ Move/Resize window |
 
 </td>
-<td width="50%" valign="top">
-
-### 📸 Screenshots & Media
+<td>
 
 | Keybind | Action |
 |:--------|:-------|
-| <kbd>Print</kbd> | 📸 Full screenshot |
-| <kbd>SHIFT</kbd> + <kbd>Print</kbd> | ✂️ Area screenshot |
-| <kbd>SUPER</kbd> + <kbd>Print</kbd> | 🪟 Window screenshot |
-| <kbd>CTRL</kbd> + <kbd>Print</kbd> | 📋 Screenshot → clipboard |
-| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>Print</kbd> | 🔤 OCR screenshot |
-| <kbd>🔊</kbd> Volume Keys | 🔈 Volume control |
-| <kbd>🔇</kbd> Mute Key | 🔇 Toggle mute |
-| <kbd>🔆</kbd> Brightness Keys | 💡 Screen brightness |
-
-### 🎨 ASH System
-
-| Keybind | Action |
-|:--------|:-------|
-| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>W</kbd> | 🖼️ Wallpaper picker |
-| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>T</kbd> | 🎨 Theme engine |
-| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>N</kbd> | 🔔 Notification center |
-| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>C</kbd> | 📋 Clipboard history |
-| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>E</kbd> | 😀 Emoji picker |
+| <kbd>SUPER</kbd> + <kbd>Return</kbd> | 🖥️ Terminal (Kitty) |
+| <kbd>SUPER</kbd> + <kbd>Space</kbd> | 🚀 App launcher (Rofi) |
+| <kbd>SUPER</kbd> + <kbd>E</kbd> | 📁 File manager |
+| <kbd>SUPER</kbd> + <kbd>B</kbd> | 🌐 Browser |
+| <kbd>SUPER</kbd> + <kbd>Escape</kbd> | ⏻ Power menu |
 | <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>Escape</kbd> | 🔒 Lock screen |
 | <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>R</kbd> | 🔄 Reload all configs |
-| <kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>G</kbd> | 🎮 Toggle game mode |
+| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>W</kbd> | 🖼️ Wallpaper picker |
+| <kbd>SUPER</kbd> + <kbd>ALT</kbd> + <kbd>T</kbd> | 🎨 Theme engine |
+| <kbd>Print</kbd> | 📸 Full screenshot |
 
 </td>
 </tr>
@@ -899,481 +794,568 @@ ash --help
 
 <div align="center">
 
-```bash
-# ╔════════════════════════════════════════════════════════════════════╗
-# ║                        ASH MODE SYSTEM                           ║
-# ╠══════════╦═════════════════════════════════════════════════════════╣
-# ║   Mode   ║  What Changes                                         ║
-# ╠══════════╬═════════════════════════════════════════════════════════╣
-# ║ 🎮 game  ║  Animations off · Waybar hidden · Performance max     ║
-# ║ 💼 work  ║  Balanced defaults · All UI elements · Normal speed   ║
-# ║ 🎯 focus ║  Notifications off · Minimal UI · DND enabled        ║
-# ║ 🎬cinema ║  No gaps · No borders · Immersive fullscreen          ║
-# ║ 🔋battery║  Power saver · Dim screen · Reduced effects          ║
-# ║ 📊present║  Clean desktop · No widgets · Professional look      ║
-# ╚══════════╩═════════════════════════════════════════════════════════╝
-```
-
-```bash
-ash mode game           # Enable gaming mode
-ash mode work           # Back to normal
-ash mode focus          # Deep work mode
-```
-
-</div>
-
----
-
-<!-- PLUGINS SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png" width="30"/> Plugins
-
-<div align="center">
-
-> Extend ASH with community plugins — install, remove, update, or create your own
-
-</div>
-
-```bash
-ash plugin list              # 📋 List installed plugins
-ash plugin browse            # 🏪 Browse plugin store
-ash plugin install <name>    # ⬇️  Install a plugin
-ash plugin remove <name>     # 🗑️  Remove a plugin
-ash plugin update            # 🔄 Update all plugins
-ash plugin create my-plugin  # 🛠️  Create your own plugin
-```
-
-### 🏪 Available Plugins
-
 <table>
 <tr>
 <td align="center" width="16.6%">
-<br/>🎮<br/><b>game-mode</b><br/><sub>Gaming performance optimizer</sub><br/><br/>
+
+**🎮 Game**
+```bash
+ash mode game
+```
+<sub>Max FPS, no effects</sub>
+
 </td>
 <td align="center" width="16.6%">
-<br/>☕<br/><b>caffeine</b><br/><sub>Keep screen awake</sub><br/><br/>
+
+**💼 Work**
+```bash
+ash mode work
+```
+<sub>Balanced, default</sub>
+
 </td>
 <td align="center" width="16.6%">
-<br/>🔄<br/><b>auto-wallpaper</b><br/><sub>Smart rotation</sub><br/><br/>
+
+**🎯 Focus**
+```bash
+ash mode focus
+```
+<sub>No distractions</sub>
+
 </td>
 <td align="center" width="16.6%">
-<br/>💨<br/><b>blur-toggle</b><br/><sub>Quick blur switch</sub><br/><br/>
+
+**🎬 Cinema**
+```bash
+ash mode cinema
+```
+<sub>Immersive, no gaps</sub>
+
 </td>
 <td align="center" width="16.6%">
-<br/>⏱️<br/><b>focus-timer</b><br/><sub>Pomodoro timer</sub><br/><br/>
+
+**📊 Present**
+```bash
+ash mode present
+```
+<sub>Clean desktop</sub>
+
 </td>
 <td align="center" width="16.6%">
-<br/>📺<br/><b>pip-mode</b><br/><sub>Picture-in-picture</sub><br/><br/>
-</td>
-</tr>
-</table>
 
----
-
-<!-- BENCHMARKS SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" width="30"/> Benchmarks
-
-<div align="center">
-
-> Measured on Ryzen 7 5800X + RX 6800 XT + 32GB DDR4 + NVMe SSD
-
-<br/>
-
-<table>
-<tr>
-<th align="center">Operation</th>
-<th align="center">Time</th>
-<th align="center">Grade</th>
-</tr>
-<tr>
-<td>🎨 Theme apply (12 apps)</td>
-<td align="center"><b>&lt;200ms</b></td>
-<td align="center">⚡ Instant</td>
-</tr>
-<tr>
-<td>🔮 Color extraction (4K wallpaper)</td>
-<td align="center"><b>&lt;500ms</b></td>
-<td align="center">⚡ Instant</td>
-</tr>
-<tr>
-<td>📝 Neovim cold start</td>
-<td align="center"><b>&lt;50ms</b></td>
-<td align="center">⚡ Instant</td>
-</tr>
-<tr>
-<td>🐟 Fish shell startup</td>
-<td align="center"><b>&lt;100ms</b></td>
-<td align="center">⚡ Instant</td>
-</tr>
-<tr>
-<td>🏥 Doctor (60+ checks)</td>
-<td align="center"><b>&lt;3s</b></td>
-<td align="center">✅ Fast</td>
-</tr>
-<tr>
-<td>📸 Snapshot create</td>
-<td align="center"><b>&lt;2s</b></td>
-<td align="center">✅ Fast</td>
-</tr>
-<tr>
-<td>🔄 Full config reload</td>
-<td align="center"><b>&lt;1s</b></td>
-<td align="center">⚡ Instant</td>
-</tr>
-<tr>
-<td>💾 RAM usage (idle)</td>
-<td align="center"><b>~800MB</b></td>
-<td align="center">✅ Efficient</td>
-</tr>
-</table>
-
-</div>
-
----
-
-<!-- HEALTH SYSTEM SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Hospital.png" width="30"/> Health System
-
-<div align="center">
-
+**🔋 Battery**
 ```bash
-ash doctor    # Run 60+ automated checks
+ash mode battery
 ```
+<sub>Power saver</sub>
 
-</div>
-
-```
- ╔══════════════════════════════════════════════════════════════╗
- ║                    🏥 ASH DOCTOR v3.0                       ║
- ╠══════════════════════════════════════════════════════════════╣
- ║                                                             ║
- ║  ✅  Wayland Session ............................  PASS      ║
- ║  ✅  Hyprland v0.44.1 ..........................  PASS      ║
- ║  ✅  Critical Tools (25/25) ....................  PASS      ║
- ║  ✅  Optional Tools (15/18) ....................  WARN      ║
- ║  ✅  System Services (8/8) ....................   PASS      ║
- ║  ✅  Required Fonts (4/4) .....................   PASS      ║
- ║  ✅  Config Files (12/12) .....................   PASS      ║
- ║  ✅  Script Permissions .......................   PASS      ║
- ║  ✅  Theme Engine .............................   PASS      ║
- ║  ✅  Audio System (PipeWire) ..................   PASS      ║
- ║  ✅  GPU: AMD RX 6800 XT .....................   PASS      ║
- ║  ✅  Display: 2560x1440@144Hz .................  PASS      ║
- ║  ✅  Network: Connected .......................   PASS      ║
- ║  ✅  Fish Shell v3.7 .........................   PASS      ║
- ║  ✅  Neovim v0.10 ............................   PASS      ║
- ║  ✅  Security Scan ............................   PASS      ║
- ║                                                             ║
- ║  ────────────────────────────────────────────────────────── ║
- ║  Result: 58/60 checks passed   ██████████████████░░  97%   ║
- ║  Status: 🟢 HEALTHY                                        ║
- ║                                                             ║
- ╚══════════════════════════════════════════════════════════════╝
-```
-
----
-
-<!-- CLI REFERENCE SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Desktop%20Computer.png" width="30"/> CLI Reference
-
-<div align="center">
-
-> **50+ commands** organized by category
-
-</div>
-
-<details>
-<summary><b>🎨 Theme Commands</b></summary>
-
-```bash
-ash theme pick              # Interactive wallpaper picker
-ash theme random [category] # Random theme
-ash theme colors            # Show current palette
-ash theme export <format>   # Export theme (css/scss/json/lua/python/xresources)
-ash theme ai                # AI-generated theme
-ash theme slideshow <secs>  # Slideshow mode
-ash theme schedule <period> # Scheduled changes
-ash theme store browse      # Browse community themes
-ash theme history           # View history
-ash theme fav add/list      # Manage favorites
-```
-
-</details>
-
-<details>
-<summary><b>⚙️ System Commands</b></summary>
-
-```bash
-ash doctor                  # 60+ health checks
-ash mode <mode>             # Switch mode (game/work/focus/cinema/battery/present)
-ash reload                  # Reload all configs
-ash update check            # Check for updates
-ash update apply            # Apply updates
-ash status                  # System status overview
-ash hardware                # Hardware report
-ash network                 # Network management
-```
-
-</details>
-
-<details>
-<summary><b>📸 Snapshot Commands</b></summary>
-
-```bash
-ash snapshot create <name>  # Create snapshot
-ash snapshot restore <name> # Restore snapshot
-ash snapshot list           # List all snapshots
-ash snapshot diff <a> <b>   # Compare snapshots
-ash snapshot delete <name>  # Delete snapshot
-```
-
-</details>
-
-<details>
-<summary><b>🔌 Plugin Commands</b></summary>
-
-```bash
-ash plugin list             # List installed
-ash plugin browse           # Browse store
-ash plugin install <name>   # Install plugin
-ash plugin remove <name>    # Remove plugin
-ash plugin update           # Update all
-ash plugin create <name>    # Create new plugin
-```
-
-</details>
-
-<details>
-<summary><b>⚙️ Config Commands</b></summary>
-
-```bash
-ash config edit <app>       # Edit config in $EDITOR
-ash config reload <app>     # Reload specific config
-ash config diff <app>       # Show changes from default
-ash config reset <app>      # Reset to default
-ash config backup           # Backup all configs
-```
-
-</details>
-
-<details>
-<summary><b>📸 Screenshot Commands</b></summary>
-
-```bash
-ash shot full               # Full screen capture
-ash shot area               # Area selection
-ash shot window             # Active window
-ash shot ocr                # Screenshot + OCR text extraction
-ash shot record <secs>      # Screen recording
-```
-
-</details>
-
----
-
-<!-- DOCS SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30"/> Docs
-
-<div align="center">
-
-<table>
-<tr>
-<td align="center" width="20%">
-<br/>📖<br/><b><a href="docs/KEYBINDS.md">Keybinds</a></b><br/><sub>Complete reference for all 200+ keybindings</sub><br/><br/>
-</td>
-<td align="center" width="20%">
-<br/>🎨<br/><b><a href="docs/THEMING.md">Theming</a></b><br/><sub>Deep-dive into the theme engine</sub><br/><br/>
-</td>
-<td align="center" width="20%">
-<br/>🔧<br/><b><a href="docs/TROUBLESHOOTING.md">Troubleshooting</a></b><br/><sub>Fix common issues</sub><br/><br/>
-</td>
-<td align="center" width="20%">
-<br/>🤝<br/><b><a href="docs/CONTRIBUTING.md">Contributing</a></b><br/><sub>How to contribute</sub><br/><br/>
-</td>
-<td align="center" width="20%">
-<br/>📋<br/><b><a href="docs/CHANGELOG.md">Changelog</a></b><br/><sub>Version history</sub><br/><br/>
 </td>
 </tr>
 </table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- UPDATE SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Counterclockwise%20Arrows%20Button.png" width="30"/> Updating
-
-```bash
-ash update check        # Check for available updates
-ash update apply        # Apply updates (auto-snapshots before update)
-ash update all          # Full update including system packages
-```
+## 📦 Plugins
 
 <div align="center">
 
-| Upgrading From | To | Method |
-|:-:|:-:|:-:|
-| v1.x | v3.0 | `bash migrate.sh --from-v1` |
-| v2.x | v3.0 | `bash migrate.sh --from-v2` |
-| v3.x | latest | `ash update apply` |
+### 🔌 Extensible Plugin Architecture
+
+> Install, create, and share plugins with a single command
 
 </div>
 
----
-
-<!-- CONTRIBUTING SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Handshake.png" width="30"/> Contributing
-
-<div align="center">
-
-We welcome contributions! Here's how to get started:
-
-<br/>
-
 ```bash
-# 1. Fork & clone
-git clone https://github.com/YOUR_USERNAME/ash-dots.git
-
-# 2. Create feature branch
-git checkout -b feature/amazing-feature
-
-# 3. Make changes & test
-ash doctor  # Ensure everything passes
-
-# 4. Commit with conventional commits
-git commit -m "feat: add amazing feature"
-
-# 5. Push & create PR
-git push origin feature/amazing-feature
+# ╔══════════════════════════════════════════════╗
+# ║            PLUGIN MANAGEMENT                  ║
+# ╠══════════════════════════════════════════════╣
+  ash plugin list                # 📋 List installed
+  ash plugin browse              # 🏪 Browse store
+  ash plugin install <name>      # ⬇️  Install plugin
+  ash plugin remove <name>       # 🗑️  Remove plugin
+  ash plugin update              # 🔄 Update all
+  ash plugin create my-plugin    # 🛠️  Create new plugin
+# ╚══════════════════════════════════════════════╝
 ```
 
-<br/>
-
-<a href="https://github.com/yourusername/ash-dots/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=yourusername/ash-dots&max=12&columns=6" />
-</a>
-
-</div>
-
----
-
-<!-- CREDITS SECTION -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Trophy.png" width="30"/> Credits & Acknowledgments
-
-<div align="center">
-
-> Built on the shoulders of giants
-
-<br/>
+### 🧩 Available Plugins
 
 <table>
 <tr>
-<td align="center" width="14.2%">
-<a href="https://hyprland.org"><img src="https://img.shields.io/badge/Hyprland-7c3aed?style=for-the-badge&logo=linux&logoColor=white"/></a><br/><sub>Window Manager</sub>
+<td align="center" width="33%">
+
+**🎮 game-mode**
+<br/>
+<img src="https://img.shields.io/badge/Gaming-Performance-7c3aed?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Kill compositing, max GPU, disable animations, hide UI</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://github.com/Alexays/Waybar"><img src="https://img.shields.io/badge/Waybar-2563eb?style=for-the-badge&logo=linux&logoColor=white"/></a><br/><sub>Status Bar</sub>
+<td align="center" width="33%">
+
+**☕ caffeine**
+<br/>
+<img src="https://img.shields.io/badge/Screen-Awake-d97706?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Prevent screen sleep during presentations or videos</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://github.com/LGFae/swww"><img src="https://img.shields.io/badge/SWWW-059669?style=for-the-badge&logo=linux&logoColor=white"/></a><br/><sub>Wallpaper</sub>
+<td align="center" width="33%">
+
+**🔄 auto-wallpaper**
+<br/>
+<img src="https://img.shields.io/badge/Auto-Rotation-2563eb?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Intelligent wallpaper rotation with time-awareness</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://github.com/davatorium/rofi"><img src="https://img.shields.io/badge/Rofi-d97706?style=for-the-badge&logo=linux&logoColor=white"/></a><br/><sub>Launcher</sub>
+</tr>
+<tr>
+<td align="center">
+
+**💨 blur-toggle**
+<br/>
+<img src="https://img.shields.io/badge/Quick-Toggle-059669?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Toggle blur effects on/off for performance</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://neovim.io"><img src="https://img.shields.io/badge/Neovim-57A143?style=for-the-badge&logo=neovim&logoColor=white"/></a><br/><sub>Editor</sub>
+<td align="center">
+
+**⏱️ focus-timer**
+<br/>
+<img src="https://img.shields.io/badge/Pomodoro-Timer-e11d48?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Built-in pomodoro with desktop notifications</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://fishshell.com"><img src="https://img.shields.io/badge/Fish-3b82f6?style=for-the-badge&logo=gnu-bash&logoColor=white"/></a><br/><sub>Shell</sub>
+<td align="center">
+
+**📺 pip-mode**
+<br/>
+<img src="https://img.shields.io/badge/Picture-In_Picture-f472b6?style=flat-square&labelColor=0d1117"/>
+<br/>
+<sub>Floating PiP window for videos while working</sub>
+
 </td>
-<td align="center" width="14.2%">
-<a href="https://catppuccin.com"><img src="https://img.shields.io/badge/Catppuccin-f472b6?style=for-the-badge&logo=data:image/svg+xml;base64,&logoColor=white"/></a><br/><sub>Inspiration</sub>
+</tr>
+</table>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## 🖼️ Gallery
+
+<div align="center">
+
+> 📸 **Screenshots of ASH Dotfiles in action**
+
+<!-- SCREENSHOT GRID -->
+<table>
+<tr>
+<td align="center" width="50%">
+
+**🌙 Dark Mode Desktop**
+![Desktop](docs/screenshots/desktop.png)
+
+</td>
+<td align="center" width="50%">
+
+**🎨 Theme Engine**
+![Theme Engine](docs/screenshots/theme.png)
+
+</td>
+</tr>
+<tr>
+<td align="center">
+
+**📝 Neovim IDE**
+![Neovim](docs/screenshots/neovim.png)
+
+</td>
+<td align="center">
+
+**🚀 Rofi Launcher**
+![Rofi](docs/screenshots/rofi.png)
+
+</td>
+</tr>
+<tr>
+<td align="center">
+
+**📊 Waybar Modules**
+![Waybar](docs/screenshots/waybar.png)
+
+</td>
+<td align="center">
+
+**🔒 Lock Screen**
+![Lock](docs/screenshots/lock.png)
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<details>
+<summary><b>📸 How to add your own screenshots</b></summary>
+<br/>
+
+```bash
+# Take a screenshot
+ash shot full
+
+# Copy to docs
+cp ~/Pictures/Screenshots/latest.png docs/screenshots/
+
+# Or capture specific areas
+ash shot area      # Select area
+ash shot window    # Active window
+ash shot monitor   # Current monitor
+ash shot ocr       # OCR text extraction
+```
+
+</details>
+
+</div>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## 🏥 Health System
+
+<div align="center">
+
+### 60+ Automated Health Checks
+
+```bash
+ash doctor
+```
+
+</div>
+
+<table>
+<tr>
+<td width="50%">
+
+```
+╔══════════════════════════════════════╗
+║       ASH DOCTOR v3.0 ULTRA         ║
+╠══════════════════════════════════════╣
+║                                      ║
+║  🔍 SYSTEM CHECKS                   ║
+║  ├─ ✅ Wayland session active        ║
+║  ├─ ✅ Hyprland v0.44.1             ║
+║  ├─ ✅ GPU: AMD Radeon RX 7800 XT   ║
+║  ├─ ✅ Kernel: 6.8.2-zen1           ║
+║  └─ ✅ Memory: 16GB (23% used)      ║
+║                                      ║
+║  📦 CRITICAL TOOLS (25/25)           ║
+║  ├─ ✅ hyprland, waybar, rofi        ║
+║  ├─ ✅ kitty, swww, dunst            ║
+║  ├─ ✅ fish, neovim, git             ║
+║  └─ ✅ All critical tools present    ║
+║                                      ║
+║  🔧 OPTIONAL TOOLS (15/18)          ║
+║  ├─ ✅ btop, lazygit, ripgrep        ║
+║  ├─ ⚠️ ollama (AI themes)           ║
+║  └─ ⚠️ tesseract (OCR)             ║
+║                                      ║
+╚══════════════════════════════════════╝
+```
+
+</td>
+<td width="50%">
+
+```
+╔══════════════════════════════════════╗
+║       DETAILED RESULTS               ║
+╠══════════════════════════════════════╣
+║                                      ║
+║  🎨 THEME ENGINE                     ║
+║  ├─ ✅ ImageMagick installed         ║
+║  ├─ ✅ 143 presets available         ║
+║  ├─ ✅ SWWW daemon running           ║
+║  └─ ✅ Color extraction working      ║
+║                                      ║
+║  🔊 AUDIO SYSTEM                     ║
+║  ├─ ✅ PipeWire active               ║
+║  ├─ ✅ WirePlumber running           ║
+║  └─ ✅ Audio output detected         ║
+║                                      ║
+║  📊 FONTS                            ║
+║  ├─ ✅ JetBrains Mono Nerd Font      ║
+║  ├─ ✅ Fira Code Nerd Font           ║
+║  ├─ ✅ Material Design Icons         ║
+║  └─ ✅ Noto Color Emoji              ║
+║                                      ║
+║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+║  SCORE: 58/60 checks passed (96%)   ║
+║  STATUS: 🟢 HEALTHY                  ║
+╚══════════════════════════════════════╝
+```
+
+</td>
+</tr>
+</table>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## 📸 Snapshot System
+
+<div align="center">
+
+> **Never break your setup again — instant backup & restore**
+
+</div>
+
+```bash
+# ╔═══════════════════════════════════════════════════════╗
+# ║              SNAPSHOT COMMANDS                         ║
+# ╠═══════════════════════════════════════════════════════╣
+# ║                                                       ║
+  ash snapshot create my-backup    # 📸 Create snapshot
+  ash snapshot list                # 📋 List all snapshots
+  ash snapshot restore my-backup   # ♻️  Restore snapshot
+  ash snapshot diff my-backup      # 🔍 Compare changes
+  ash snapshot delete my-backup    # 🗑️  Delete snapshot
+# ║                                                       ║
+# ║  Auto-snapshots created before:                       ║
+# ║  • System updates                                     ║
+# ║  • Theme changes                                      ║
+# ║  • Plugin installations                               ║
+# ║  • Config modifications                               ║
+# ║                                                       ║
+# ╚═══════════════════════════════════════════════════════╝
+```
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## 📚 Docs
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="20%">
+
+**📖**
+<br/>
+[**Keybinds**](docs/KEYBINDS.md)
+<br/>
+<sub>Complete reference</sub>
+
+</td>
+<td align="center" width="20%">
+
+**🎨**
+<br/>
+[**Theming**](docs/THEMING.md)
+<br/>
+<sub>Deep dive guide</sub>
+
+</td>
+<td align="center" width="20%">
+
+**🔧**
+<br/>
+[**Troubleshooting**](docs/TROUBLESHOOTING.md)
+<br/>
+<sub>Fix common issues</sub>
+
+</td>
+<td align="center" width="20%">
+
+**🤝**
+<br/>
+[**Contributing**](docs/CONTRIBUTING.md)
+<br/>
+<sub>How to help</sub>
+
+</td>
+<td align="center" width="20%">
+
+**📋**
+<br/>
+[**Changelog**](docs/CHANGELOG.md)
+<br/>
+<sub>Version history</sub>
+
 </td>
 </tr>
 </table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- STAR HISTORY -->
-## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Star.png" width="30"/> Star History
+## 🔄 Updating
+
+```bash
+# Check for available updates
+ash update check
+
+# Apply updates (auto-creates snapshot)
+ash update apply
+
+# Full system update including packages
+ash update all
+```
 
 <div align="center">
 
-<a href="https://star-history.com/#yourusername/ash-dots&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=yourusername/ash-dots&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=yourusername/ash-dots&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=yourusername/ash-dots&type=Date" width="70%"/>
-  </picture>
-</a>
+| From Version | To Version | Migration Command |
+|:------------|:-----------|:------------------|
+| `v1.x` | `v3.0 ULTRA` | `bash migrate.sh --from-v1` |
+| `v2.x` | `v3.0 ULTRA` | `bash migrate.sh --from-v2` |
+| `v3.x` | `v3.0 ULTRA` | `ash update apply` |
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<!-- SUPPORT SECTION -->
+## 🤝 Contributing
+
 <div align="center">
+
+> **Contributions are welcome! Here's how to get started:**
 
 <table>
 <tr>
 <td align="center">
-<br/>
 
-### 💜 Support the Project
+**1. Fork & Clone**
+```bash
+git clone https://github.com/YOU/ash-dots
+cd ash-dots
+```
 
-If ASH dotfiles improved your Linux experience, consider:
+</td>
+<td align="center">
 
-<br/>
+**2. Create Branch**
+```bash
+git checkout -b feat/my-feature
+```
 
-<a href="https://github.com/yourusername/ash-dots"><img src="https://img.shields.io/badge/⭐_Star_this_repo-7c3aed?style=for-the-badge&labelColor=1a1a2e"/></a>
-<a href="https://github.com/yourusername/ash-dots/fork"><img src="https://img.shields.io/badge/🍴_Fork_&_Contribute-6d28d9?style=for-the-badge&labelColor=1a1a2e"/></a>
-<a href="https://github.com/yourusername/ash-dots/issues"><img src="https://img.shields.io/badge/🐛_Report_Issues-4f46e5?style=for-the-badge&labelColor=1a1a2e"/></a>
-<a href="#"><img src="https://img.shields.io/badge/☕_Buy_Me_a_Coffee-2563eb?style=for-the-badge&labelColor=1a1a2e"/></a>
+</td>
+<td align="center">
 
-<br/><br/>
+**3. Make Changes**
+```bash
+# Edit, test, commit
+ash doctor  # Verify
+```
+
+</td>
+<td align="center">
+
+**4. Submit PR**
+```bash
+git push origin feat/my-feature
+# Open PR on GitHub
+```
+
 </td>
 </tr>
 </table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+## 🙏 Credits & Acknowledgments
+
+<div align="center">
+
+### Built on the shoulders of giants
+
+<table>
+<tr>
+<td align="center" width="16.6%">
+<a href="https://hyprland.org">
+<img src="https://img.shields.io/badge/Hyprland-7c3aed?style=for-the-badge&logo=wayland&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>vaxerski</sub>
+</td>
+<td align="center" width="16.6%">
+<a href="https://github.com/Alexays/Waybar">
+<img src="https://img.shields.io/badge/Waybar-2563eb?style=for-the-badge&logo=linux&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>Alexays</sub>
+</td>
+<td align="center" width="16.6%">
+<a href="https://github.com/LGFae/swww">
+<img src="https://img.shields.io/badge/SWWW-059669?style=for-the-badge&logo=linux&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>LGFae</sub>
+</td>
+<td align="center" width="16.6%">
+<a href="https://github.com/davatorium/rofi">
+<img src="https://img.shields.io/badge/Rofi-d97706?style=for-the-badge&logo=linux&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>davatorium</sub>
+</td>
+<td align="center" width="16.6%">
+<a href="https://github.com/catppuccin">
+<img src="https://img.shields.io/badge/Catppuccin-f472b6?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>Inspired</sub>
+</td>
+<td align="center" width="16.6%">
+<a href="https://neovim.io">
+<img src="https://img.shields.io/badge/Neovim-57A143?style=for-the-badge&logo=neovim&logoColor=white&labelColor=0d1117"/>
+</a>
+<br/><sub>Community</sub>
+</td>
+</tr>
+</table>
+
+</div>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 <!-- PREMIUM FOOTER -->
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:7c3aed,50:4f46e5,100:0ea5e9&height=2&section=header" width="100%"/>
-
 <br/>
+
+<table>
+<tr>
+<td align="center">
 
 ```
-╔══════════════════════════════════════════════════════════════════════════╗
-║                                                                        ║
-║    █████╗ ███████╗██╗  ██╗    ██████╗  ██████╗ ████████╗███████╗       ║
-║   ██╔══██╗██╔════╝██║  ██║    ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝      ║
-║   ███████║███████╗███████║    ██║  ██║██║   ██║   ██║   ███████╗       ║
-║   ██╔══██║╚════██║██╔══██║    ██║  ██║██║   ██║   ██║   ╚════██║       ║
-║   ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ███████║       ║
-║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝    ║
-║                                                                        ║
-║         271 files · 85,000+ lines · 0 bugs · Production Ready         ║
-║                                                                        ║
-╚══════════════════════════════════════════════════════════════════════════╝
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║   271 files · 85,000+ lines · 143+ themes · 0 bugs       ║
+  ║                                                           ║
+  ║              ⭐ Star this repo if it helped you ⭐         ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
 ```
 
-<br/>
-
-<sub>
-
-**Made with ❤️ and mass amounts of ☕ by Ash**
-
-[MIT License](LICENSE) · [Report Bug](https://github.com/yourusername/ash-dots/issues) · [Request Feature](https://github.com/yourusername/ash-dots/issues)
-
-</sub>
+</td>
+</tr>
+</table>
 
 <br/>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=120&section=footer&animation=twinkling" width="100%"/>
+<!-- SOCIAL LINKS -->
+<a href="https://github.com/yourusername/ash-dots/stargazers"><img src="https://img.shields.io/github/stars/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=7c3aed"/></a>
+<a href="https://github.com/yourusername/ash-dots/network/members"><img src="https://img.shields.io/github/forks/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=2563eb"/></a>
+<a href="https://github.com/yourusername/ash-dots/issues"><img src="https://img.shields.io/github/issues/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=059669"/></a>
+<a href="https://github.com/yourusername/ash-dots/pulls"><img src="https://img.shields.io/github/issues-pr/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=d97706"/></a>
+
+<br/><br/>
+
+<sub>Made with ❤️ and mass quantities of ☕ by <b>Ash</b></sub>
+<br/>
+<sub>Licensed under <a href="LICENSE"><b>MIT</b></a> — use it, fork it, make it yours</sub>
+
+<br/><br/>
+
+<!-- FOOTER WAVE -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=120&section=footer" width="100%"/>
 
 </div>
