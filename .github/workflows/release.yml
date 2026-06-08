@@ -1,0 +1,114 @@
+# name: Create Release
+# on:
+# push:
+# tags:
+# - 'v*.*.*'
+# workflow_dispatch:
+# inputs:
+# version:
+# description: 'Release version (e.g. v3.1.0)'
+# required: true
+# type: string
+# permissions:
+# contents: write
+# issues: write
+# jobs:
+# ##################################################
+# # BUILD RELEASE #
+# ##################################################
+# release:
+# name: Create Release
+# runs-on: ubuntu-latest
+# steps:
+# - name: Checkout
+# uses: actions/checkout@v4
+# with:
+# fetch-depth: 0
+# - name: Get version
+# id: version
+# run: |
+# else
+# if [ -n "${{ github.event.inputs.version }}" ]; then
+# VERSION="${{ github.event.inputs.version }}"
+# VERSION="${GITHUB_REF#refs/tags/}"
+# fi
+# echo "version=$VERSION" &gt;&gt; $GITHUB_OUTPUT
+# echo "Version: $VERSION"
+# - name: Generate release notes
+# id: notes
+# run: |
+# cat &gt; /tmp/release_notes.md &lt;&lt; 'NOTES'
+# ## ASH Hyprland Dotfiles ${{ steps.version.outputs.version }}
+# ### What's Included
+# | System | Files | Description |
+# |--------|-------|-------------|
+# | Hyprland | 50 | Core WM configuration |
+# | Waybar | 24 | Status bar + scripts |
+# | Rofi | 17 | Launcher suite |
+# | Fish Shell | 29 | Shell + functions |
+# | Neovim | 25 | Complete IDE |
+# | AGS | 11 | Widget system |
+# | EWW | 8 | Dashboard widgets |
+# | Terminals | 6 | Kitty/WezTerm/Alacritty |
+# | **Total** | **271** | **Production complete** |
+# ### Quick Install
+# ```bash
+# bash &lt;(curl -sSL https://raw.githubusercontent.com/\
+# ${{ github.repository }}/main/scripts/quickstart.sh)
+# ```
+# ### Requirements
+# - Arch Linux or Arch-based distro
+# - Kernel 6.1+
+# - GPU with DRM/KMS support
+# ### Verify Installation
+# ```bash
+# ash doctor
+# ash theme pick
+# bash ~/.dotfiles/scripts/validate.sh
+# ```
+# NOTES
+# # Add changelog if available
+# if [ -f "docs/CHANGELOG.md" ]; then
+# echo "" &gt;&gt; /tmp/release_notes.md
+# echo "### Changelog" &gt;&gt; /tmp/release_notes.md
+# head -50 docs/CHANGELOG.md &gt;&gt; /tmp/release_notes.md
+# fi
+# - name: Create release archive
+# run: |
+# # Create clean archive excluding private files
+# git archive \
+# --format=tar.gz \
+# --prefix=ash-dots-${{ steps.version.outputs.version }}/ \
+# --output=/tmp/ash-dots-${{ steps.version.outputs.version }}.tar.gz \
+# HEAD
+# # Create zip archive
+# git archive \
+# --format=zip \
+# --prefix=ash-dots-${{ steps.version.outputs.version }}/ \
+# --output=/tmp/ash-dots-${{ steps.version.outputs.version }}.zip \
+# HEAD
+# # Generate checksums
+# cd /tmp
+# sha256sum \
+# ash-dots-${{ steps.version.outputs.version }}.tar.gz \
+# ash-dots-${{ steps.version.outputs.version }}.zip \
+# &gt; SHA256SUMS
+# echo "Archives created:"
+# ls -lh ash-dots-*.tar.gz ash-dots-*.zip SHA256SUMS
+# - name: Create GitHub Release
+# uses: softprops/action-gh-release@v2
+# with:
+# name: "ASH Dotfiles ${{ steps.version.outputs.version }}"
+# body_path: /tmp/release_notes.md
+# draft: false
+# prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+# files: |
+# /tmp/ash-dots-${{ steps.version.outputs.version }}.tar.gz
+# /tmp/ash-dots-${{ steps.version.outputs.version }}.zip
+# /tmp/SHA256SUMS
+# token: ${{ secrets.GITHUB_TOKEN }}
+# - name: Update latest tag
+# run: |
+# git tag -f latest
+# git push origin latest --force
+# if: "!contains(steps.version.outputs.version, '-')"
