@@ -1,0 +1,476 @@
+// ╔═══════════════════════════════════════════════════════════════════════════════╗
+// ║           ASH DOTFILES v3.0 — WAYBAR TOP BAR                               ║
+// ║           Complete status bar with 50+ modules                              ║
+// ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+{
+    // ── Bar Identity ─────────────────────────────────────────────────────────
+    "name": "top-bar",
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "margin-top": 6,
+    "margin-left": 12,
+    "margin-right": 12,
+    "margin-bottom": 0,
+    "spacing": 4,
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "reload_style_on_change": true,
+
+    // ── Module Layout ─────────────────────────────────────────────────────────
+    "modules-left": [
+        "custom/launcher",
+        "hyprland/workspaces",
+        "hyprland/submap",
+        "custom/separator",
+        "hyprland/window"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "custom/media",
+        "custom/separator",
+        "custom/recorder",
+        "custom/idle-inhibitor",
+        "custom/separator",
+        "network",
+        "bluetooth",
+        "custom/separator",
+        "pulseaudio",
+        "pulseaudio#mic",
+        "custom/separator",
+        "cpu",
+        "memory",
+        "temperature",
+        "custom/gpu",
+        "custom/separator",
+        "battery",
+        "custom/power-profile",
+        "custom/separator",
+        "backlight",
+        "custom/separator",
+        "custom/weather",
+        "custom/updates",
+        "custom/separator",
+        "tray",
+        "custom/notification",
+        "custom/power"
+    ],
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🚀 LAUNCHER BUTTON
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/launcher": {
+        "format": "  ",
+        "tooltip": false,
+        "on-click": "~/.config/rofi/scripts/launcher.sh",
+        "on-click-right": "~/.config/rofi/scripts/launcher-full.sh",
+        "on-click-middle": "hyprctl dispatch togglespecialworkspace overview"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🗂️ WORKSPACES
+    // ══════════════════════════════════════════════════════════════════════════
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1":  "󰆍",
+            "2":  "󰖟",
+            "3":  "󰘦",
+            "4":  "󰉋",
+            "5":  "󰝚",
+            "6":  "󰭹",
+            "7":  "󰇮",
+            "8":  "󰊗",
+            "9":  "󰍹",
+            "10": "󱃠",
+            "special": "󰍹",
+            "urgent": "󰗖",
+            "active": "󰮯",
+            "default": "󰊠"
+        },
+        "on-click": "activate",
+        "on-scroll-up": "hyprctl dispatch workspace e+1",
+        "on-scroll-down": "hyprctl dispatch workspace e-1",
+        "all-outputs": false,
+        "show-special": false,
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": []
+        }
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🗺️ SUBMAP INDICATOR
+    // ══════════════════════════════════════════════════════════════════════════
+    "hyprland/submap": {
+        "format": "󰌌  {}",
+        "always-on": false,
+        "tooltip": true,
+        "tooltip-format": "Submap active: {}"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🪟 ACTIVE WINDOW
+    // ══════════════════════════════════════════════════════════════════════════
+    "hyprland/window": {
+        "format": "  {title}",
+        "max-length": 60,
+        "separate-outputs": true,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "🌐 $1",
+            "(.*) — Chromium": "🌐 $1",
+            "(.*)Neovim": "󰈚 $1",
+            "(.*)nvim": "󰈚 $1",
+            "(.*)kitty": "  Terminal",
+            "(.*)fish": "  Terminal",
+            "(.*) — Nemo": "󰉋 $1",
+            "(.*)Discord": "󰭹 Discord",
+            "(.*)Spotify": "󰝚 Spotify",
+            "(.*)Steam": "󰊗 Steam"
+        },
+        "icon": true,
+        "icon-size": 14
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🕐 CLOCK
+    // ══════════════════════════════════════════════════════════════════════════
+    "clock": {
+        "interval": 1,
+        "format": "  {:%H:%M}",
+        "format-alt": "  {:%A, %B %d %Y  🕐 %H:%M:%S}",
+        "tooltip": true,
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "year",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "on-click-right": "mode",
+            "format": {
+                "months":   "<span color='#cba6f7'><b>{}</b></span>",
+                "days":     "<span color='#cdd6f4'>{}</span>",
+                "weeks":    "<span color='#94e2d5'>W{}</span>",
+                "weekdays": "<span color='#89b4fa'><b>{}</b></span>",
+                "today":    "<span color='#f38ba8' background='#313244'><b>{}</b></span>"
+            }
+        },
+        "actions": {
+            "on-click-right": "mode",
+            "on-click-forward": "tz_up",
+            "on-click-backward": "tz_down",
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        },
+        "timezones": [
+            "America/New_York",
+            "Europe/London",
+            "Europe/Paris",
+            "Asia/Tokyo",
+            "UTC"
+        ]
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🎵 MEDIA PLAYER
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/media": {
+        "exec": "~/.config/waybar/scripts/media/player.sh status",
+        "interval": 2,
+        "format": "{}",
+        "return-type": "json",
+        "on-click": "playerctl play-pause",
+        "on-click-right": "~/.config/hypr/scripts/media/player-picker.sh",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "max-length": 40,
+        "escape": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🎬 RECORDER
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/recorder": {
+        "exec": "~/.config/hypr/scripts/media/recorder.sh status",
+        "interval": 2,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "~/.config/hypr/scripts/media/recorder.sh toggle",
+        "on-click-right": "~/.config/hypr/scripts/media/recorder.sh stop",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 💤 IDLE INHIBITOR
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/idle-inhibitor": {
+        "exec": "~/.config/waybar/scripts/utils/idle-inhibitor.sh status",
+        "interval": 5,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "~/.config/hypr/scripts/system/idle-inhibit.sh toggle",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🌐 NETWORK
+    // ══════════════════════════════════════════════════════════════════════════
+    "network": {
+        "interval": 5,
+        "format-wifi": "  {signalStrength}%",
+        "format-ethernet": "󰈀  {ipaddr}",
+        "format-linked": "󰈀  {ifname} (No IP)",
+        "format-disconnected": "󰖪  Offline",
+        "format-alt": "  {ifname}: {ipaddr}/{cidr}",
+        "tooltip-format-wifi": "SSID: {essid}\nSignal: {signalStrength}%\nFrequency: {frequency}GHz\nIP: {ipaddr}\nGateway: {gwaddr}\n↑ {bandwidthUpBits}  ↓ {bandwidthDownBits}",
+        "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}/{cidr}\nGateway: {gwaddr}\n↑ {bandwidthUpBits}  ↓ {bandwidthDownBits}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click": "~/.config/hypr/scripts/network/wifi-toggle.sh connect",
+        "on-click-right": "nm-connection-editor",
+        "on-click-middle": "~/.config/hypr/scripts/network/wifi-toggle.sh toggle",
+        "max-length": 30
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔵 BLUETOOTH
+    // ══════════════════════════════════════════════════════════════════════════
+    "bluetooth": {
+        "format": "󰂯",
+        "format-connected": "󰂱  {device_alias}",
+        "format-connected-battery": "󰂱  {device_alias} 󰁹{device_battery_percentage}%",
+        "format-off": "󰂲",
+        "tooltip-format": "Bluetooth: {status}",
+        "tooltip-format-connected": "Bluetooth: Connected\nDevices:\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "  {device_alias} {device_battery_percentage}%",
+        "on-click": "~/.config/hypr/scripts/network/bluetooth-toggle.sh toggle",
+        "on-click-right": "~/.config/hypr/scripts/network/bluetooth-toggle.sh connect",
+        "on-click-middle": "blueman-manager"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔊 AUDIO
+    // ══════════════════════════════════════════════════════════════════════════
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "format-bluetooth": "󰂯  {icon}  {volume}%",
+        "format-bluetooth-muted": "󰂯  󰝟",
+        "format-muted": "󰝟",
+        "format-source": "  {volume}%",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone":  "󰋋",
+            "hands-free": "󰋎",
+            "headset":    "󰋎",
+            "phone":      "",
+            "portable":   "",
+            "car":        "",
+            "alsa_output.pci-0000_00_1f.3.analog-stereo": "󰎆",
+            "default":    ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 5,
+        "on-click": "~/.config/hypr/scripts/media/volume.sh mute",
+        "on-click-right": "pavucontrol",
+        "on-scroll-up": "~/.config/hypr/scripts/media/volume.sh up 5",
+        "on-scroll-down": "~/.config/hypr/scripts/media/volume.sh down 5",
+        "tooltip-format": "Volume: {volume}%\nDevice: {desc}\nNode: {node_name}"
+    },
+
+    "pulseaudio#mic": {
+        "format": "{format_source}",
+        "format-source": "  {volume}%",
+        "format-source-muted": " ",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+        "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-",
+        "tooltip-format": "Mic: {volume}%\n{desc}"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 💻 CPU
+    // ══════════════════════════════════════════════════════════════════════════
+    "cpu": {
+        "interval": 3,
+        "format": "  {usage}%",
+        "format-alt": "  {avg_frequency}GHz",
+        "tooltip": true,
+        "tooltip-format": "CPU Usage: {usage}%\nFrequency: {avg_frequency}GHz\nCores: {core0_usage}% {core1_usage}% {core2_usage}% {core3_usage}%",
+        "on-click": "kitty --class=btop -e btop",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🧠 MEMORY
+    // ══════════════════════════════════════════════════════════════════════════
+    "memory": {
+        "interval": 5,
+        "format": "  {percentage}%",
+        "format-alt": "  {used:0.1f}G / {total:0.1f}G",
+        "tooltip": true,
+        "tooltip-format": "RAM: {used:0.2f}G / {total:0.2f}G ({percentage}%)\nSwap: {swapUsed:0.2f}G / {swapTotal:0.2f}G ({swapPercentage}%)",
+        "on-click": "kitty --class=btop -e btop",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🌡️ TEMPERATURE
+    // ══════════════════════════════════════════════════════════════════════════
+    "temperature": {
+        "critical-threshold": 80,
+        "interval": 5,
+        "format": "{icon}  {temperatureC}°C",
+        "format-critical": "🔥  {temperatureC}°C",
+        "format-icons": ["󱃃", "󱃃", "󰔏", "󱃂", "󱃂"],
+        "tooltip": true,
+        "tooltip-format": "Temperature: {temperatureC}°C / {temperatureF}°F",
+        "on-click": "kitty --class=btop -e btop"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🎮 GPU (custom script)
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/gpu": {
+        "exec": "~/.config/waybar/scripts/hardware/gpu.sh status",
+        "interval": 4,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "kitty --class=btop -e btop",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔋 BATTERY
+    // ══════════════════════════════════════════════════════════════════════════
+    "battery": {
+        "interval": 30,
+        "states": {
+            "full":     100,
+            "good":     80,
+            "warning":  30,
+            "critical": 15
+        },
+        "format":            "{icon}  {capacity}%",
+        "format-charging":   "󰂄  {capacity}%",
+        "format-plugged":    "󰚥  {capacity}%",
+        "format-full":       "󰁹  {capacity}%",
+        "format-alt":        "{icon}  {time}",
+        "format-icons":      ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format":    "Battery: {capacity}%\nStatus: {timeTo}\nPower: {power}W",
+        "tooltip-format-charging": "Charging: {capacity}%\nTime to full: {timeTo}\nPower: {power}W",
+        "on-click": "~/.config/hypr/scripts/system/power-profile.sh picker"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ⚡ POWER PROFILE
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/power-profile": {
+        "exec": "~/.config/hypr/scripts/system/power-profile.sh status",
+        "interval": 10,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "~/.config/hypr/scripts/system/power-profile.sh picker",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ☀️ BACKLIGHT
+    // ══════════════════════════════════════════════════════════════════════════
+    "backlight": {
+        "interval": 5,
+        "format": "{icon}  {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-scroll-up": "~/.config/hypr/scripts/media/brightness.sh up 5",
+        "on-scroll-down": "~/.config/hypr/scripts/media/brightness.sh down 5",
+        "on-click": "~/.config/hypr/scripts/hardware/dpms.sh night-toggle",
+        "tooltip-format": "Brightness: {percent}%\nClick: Night mode toggle\nScroll: Adjust"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🌤️ WEATHER
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/weather": {
+        "exec": "~/.config/waybar/scripts/utils/weather.sh",
+        "interval": 1800,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "xdg-open 'https://wttr.in'",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📦 UPDATES
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/updates": {
+        "exec": "~/.config/waybar/scripts/system/updates.sh",
+        "interval": 3600,
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "kitty --class=update-term -e bash -c 'paru -Syu; read'",
+        "tooltip": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔔 NOTIFICATION CENTER
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/notification": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification":  "󱅫",
+            "none":          "󰂚",
+            "dnd-notification": "󱅬",
+            "dnd-none":      "󰂛",
+            "inhibited-notification": "󱅮",
+            "inhibited-none": "󰂛",
+            "dnd-inhibited-notification": "󱅬",
+            "dnd-inhibited-none": "󰂛"
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📥 SYSTEM TRAY
+    // ══════════════════════════════════════════════════════════════════════════
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8,
+        "show-passive-items": true
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔌 POWER BUTTON
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/power": {
+        "format": "⏻",
+        "tooltip": false,
+        "on-click": "~/.config/rofi/scripts/powermenu.sh",
+        "on-click-right": "~/.config/hypr/scripts/system/lock.sh"
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ─── SEPARATOR ────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    "custom/separator": {
+        "format": "|",
+        "tooltip": false
+    }
+}
