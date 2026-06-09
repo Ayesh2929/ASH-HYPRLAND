@@ -1,111 +1,110 @@
-# # Runs before every commit
-# set -euo pipefail
-# G='\033[0;32m'; R='\033[0;31m'; Y='\033[1;33m'; N='\033[0m'
-# echo ""
-# echo " ASH Pre-commit Hook"
-# echo " ■■■■■■■■■■■■■■■■■■■■■"
-# ERRORS=0
-# ##################################################
-# # CHECK FOR SECRETS #
-# ##################################################
-# echo -n " Checking for secrets... "
-# SECRET_PATTERNS=(
-# "password\s*=\s*['\"][^'\"]{4,}"
-# "api_key\s*=\s*['\"][^'\"]{8,}"
-# "secret\s*=\s*['\"][^'\"]{8,}"
-# "BEGIN RSA PRIVATE"
-# "BEGIN OPENSSH PRIVATE"
-# "ghp_[A-Za-z0-9]{36}"
-# "github_pat_[A-Za-z0-9_]{82}"
-# "sk-[A-Za-z0-9]{48}"
-# )
-# FOUND_SECRETS=false
-# for PATTERN in "${SECRET_PATTERNS[@]}"; do
-# MATCHES=$(git diff --cached --name-only | \
-# xargs grep -l -E "$PATTERN" 2&gt;/dev/null || true)
-# if [ -n "$MATCHES" ]; then
-# echo -e "${R}FAILED${N}"
-# echo " ■ Potential secret in: $MATCHES"
-# FOUND_SECRETS=true
-# ERRORS=$((ERRORS + 1))
-# fi
-# done
-# [ "$FOUND_SECRETS" = "false" ] &amp;&amp; \
-# echo -e "${G}OK${N}"
-# ##################################################
-# # CHECK SHELLCHECK ON STAGED SCRIPTS #
-# ##################################################
-# if command -v shellcheck &amp;&gt;/dev/null; then
-# echo -n " ShellCheck staged scripts... "
-# SHELL_ERRORS=0
-# while IFS= read -r SCRIPT; do
-# [ -f "$SCRIPT" ] || continue
-# [[ "$SCRIPT" == *.sh ]] || continue
-# if ! shellcheck \
-# --severity=error \
-# --exclude=SC1090,SC1091 \
-# "$SCRIPT" 2&gt;/dev/null; then
-# SHELL_ERRORS=$((SHELL_ERRORS + 1))
-# fi
-# done &lt; &lt;(git diff --cached --name-only)
-# if [ "$SHELL_ERRORS" -gt 0 ]; then
-# echo -e "${R}FAILED ($SHELL_ERRORS errors)${N}"
-# ERRORS=$((ERRORS + 1))
-# else
-# echo -e "${G}OK${N}"
-# fi
-# fi
-# ##################################################
-# # CHECK FISH SYNTAX ON STAGED FILES #
-# ##################################################
-# if command -v fish &amp;&gt;/dev/null; then
-# echo -n " Fish syntax check... "
-# FISH_ERRORS=0
-# while IFS= read -r FILE; do
-# [ -f "$FILE" ] || continue
-# [[ "$FILE" == *.fish ]] || continue
-# if ! fish --no-execute "$FILE" 2&gt;/dev/null; then
-# FISH_ERRORS=$((FISH_ERRORS + 1))
-# fi
-# done &lt; &lt;(git diff --cached --name-only)
-# if [ "$FISH_ERRORS" -gt 0 ]; then
-# echo -e "${R}FAILED${N}"
-# ERRORS=$((ERRORS + 1))
-# else
-# echo -e "${G}OK${N}"
-# fi
-# fi
-# ##################################################
-# # CHECK NO LARGE FILES #
-# ##################################################
-# echo -n " Checking file sizes... "
-# LARGE_FILES=0
-# while IFS= read -r FILE; do
-# [ -f "$FILE" ] || continue
-# SIZE=$(stat -c %s "$FILE" 2&gt;/dev/null || echo 0)
-# if [ "$SIZE" -gt 1048576 ]; then # 1MB
-# echo ""
-# echo " ■ Large file: $FILE ($(( SIZE / 1024 ))KB)"
-# LARGE_FILES=$((LARGE_FILES + 1))
-# fi
-# done &lt; &lt;(git diff --cached --name-only)
-# if [ "$LARGE_FILES" -gt 0 ]; then
-# echo -e "${Y}WARNING ($LARGE_FILES large files)${N}"
-# echo " Consider using Git LFS for large files"
-# else
-# echo -e "${G}OK${N}"
-# fi
-# ##################################################
-# # FINAL RESULT #
-# ##################################################
-# echo ""
-# if [ "$ERRORS" -gt 0 ]; then
-# echo -e " ${R}✗ Pre-commit failed ($ERRORS error(s))${N}"
-# echo " Fix the issues above before committing"
-# echo ""
-# exit 1
-# else
-# echo -e " ${G}✓ Pre-commit checks passed${N}"
-# echo ""
-# exit 0
-# fi
+set -euo pipefail
+G='\033[0;32m'; R='\033[0;31m'; Y='\033[1;33m'; N='\033[0m'
+echo ""
+echo " ASH Pre-commit Hook"
+echo " ■■■■■■■■■■■■■■■■■■■■■"
+ERRORS=0
+##################################################
+# CHECK FOR SECRETS #
+##################################################
+echo -n " Checking for secrets... "
+SECRET_PATTERNS=(
+"password\s*=\s*['\"][^'\"]{4,}"
+"api_key\s*=\s*['\"][^'\"]{8,}"
+"secret\s*=\s*['\"][^'\"]{8,}"
+"BEGIN RSA PRIVATE"
+"BEGIN OPENSSH PRIVATE"
+"ghp_[A-Za-z0-9]{36}"
+"github_pat_[A-Za-z0-9_]{82}"
+"sk-[A-Za-z0-9]{48}"
+)
+FOUND_SECRETS=false
+for PATTERN in "${SECRET_PATTERNS[@]}"; do
+MATCHES=$(git diff --cached --name-only | \
+xargs grep -l -E "$PATTERN" 2&gt;/dev/null || true)
+if [ -n "$MATCHES" ]; then
+echo -e "${R}FAILED${N}"
+echo " ■ Potential secret in: $MATCHES"
+FOUND_SECRETS=true
+ERRORS=$((ERRORS + 1))
+fi
+done
+[ "$FOUND_SECRETS" = "false" ] &amp;&amp; \
+echo -e "${G}OK${N}"
+##################################################
+# CHECK SHELLCHECK ON STAGED SCRIPTS #
+##################################################
+if command -v shellcheck &amp;&gt;/dev/null; then
+echo -n " ShellCheck staged scripts... "
+SHELL_ERRORS=0
+while IFS= read -r SCRIPT; do
+[ -f "$SCRIPT" ] || continue
+[[ "$SCRIPT" == *.sh ]] || continue
+if ! shellcheck \
+--severity=error \
+--exclude=SC1090,SC1091 \
+"$SCRIPT" 2&gt;/dev/null; then
+SHELL_ERRORS=$((SHELL_ERRORS + 1))
+fi
+done &lt; &lt;(git diff --cached --name-only)
+if [ "$SHELL_ERRORS" -gt 0 ]; then
+echo -e "${R}FAILED ($SHELL_ERRORS errors)${N}"
+ERRORS=$((ERRORS + 1))
+else
+echo -e "${G}OK${N}"
+fi
+fi
+##################################################
+# CHECK FISH SYNTAX ON STAGED FILES #
+##################################################
+if command -v fish &amp;&gt;/dev/null; then
+echo -n " Fish syntax check... "
+FISH_ERRORS=0
+while IFS= read -r FILE; do
+[ -f "$FILE" ] || continue
+[[ "$FILE" == *.fish ]] || continue
+if ! fish --no-execute "$FILE" 2&gt;/dev/null; then
+FISH_ERRORS=$((FISH_ERRORS + 1))
+fi
+done &lt; &lt;(git diff --cached --name-only)
+if [ "$FISH_ERRORS" -gt 0 ]; then
+echo -e "${R}FAILED${N}"
+ERRORS=$((ERRORS + 1))
+else
+echo -e "${G}OK${N}"
+fi
+fi
+##################################################
+# CHECK NO LARGE FILES #
+##################################################
+echo -n " Checking file sizes... "
+LARGE_FILES=0
+while IFS= read -r FILE; do
+[ -f "$FILE" ] || continue
+SIZE=$(stat -c %s "$FILE" 2&gt;/dev/null || echo 0)
+if [ "$SIZE" -gt 1048576 ]; then # 1MB
+echo ""
+echo " ■ Large file: $FILE ($(( SIZE / 1024 ))KB)"
+LARGE_FILES=$((LARGE_FILES + 1))
+fi
+done &lt; &lt;(git diff --cached --name-only)
+if [ "$LARGE_FILES" -gt 0 ]; then
+echo -e "${Y}WARNING ($LARGE_FILES large files)${N}"
+echo " Consider using Git LFS for large files"
+else
+echo -e "${G}OK${N}"
+fi
+##################################################
+# FINAL RESULT #
+##################################################
+echo ""
+if [ "$ERRORS" -gt 0 ]; then
+echo -e " ${R}✗ Pre-commit failed ($ERRORS error(s))${N}"
+echo " Fix the issues above before committing"
+echo ""
+exit 1
+else
+echo -e " ${G}✓ Pre-commit checks passed${N}"
+echo ""
+exit 0
+fi
