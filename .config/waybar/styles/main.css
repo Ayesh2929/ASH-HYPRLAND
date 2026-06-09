@@ -1,0 +1,621 @@
+/* ╔═══════════════════════════════════════════════════════════════════════════════╗
+   ║           ASH DOTFILES v3.0 — WAYBAR MAIN STYLESHEET                       ║
+   ║           Complete CSS with animations, states, and dynamic colors         ║
+   ╚═══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── Import Generated Colors ─────────────────────────────────────────────────── */
+@import "colors.css";
+@import "animations.css";
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🌐 GLOBAL STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    text-shadow: none;
+    -gtk-icon-effect: none;
+    transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🏠 BAR CONTAINER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window#waybar {
+    background-color:  alpha(@base, 0.88);
+    border:            1px solid alpha(@overlay0, 0.4);
+    border-radius:     14px;
+    color:             @text;
+    transition:        background-color 400ms ease;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+window#waybar.fullscreen {
+    background-color: transparent;
+    border-color:     transparent;
+}
+
+/* Tooltip global style */
+tooltip {
+    background-color: @mantle;
+    border:           1px solid @overlay0;
+    border-radius:    10px;
+    padding:          8px 12px;
+    color:            @text;
+}
+
+tooltip label {
+    color: @text;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   📦 MODULE BASE STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background-color: transparent;
+}
+
+#workspaces,
+#clock,
+#cpu,
+#memory,
+#temperature,
+#battery,
+#network,
+#bluetooth,
+#pulseaudio,
+#backlight,
+#tray,
+#custom-launcher,
+#custom-media,
+#custom-weather,
+#custom-updates,
+#custom-gpu,
+#custom-recorder,
+#custom-power,
+#custom-notification,
+#custom-idle-inhibitor,
+#custom-power-profile,
+#custom-separator,
+#hyprland-window,
+#hyprland-submap {
+    padding:          2px 10px;
+    margin:           2px 0px;
+    color:            @text;
+    background-color: transparent;
+    border-radius:    10px;
+    transition:       all 200ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🚀 LAUNCHER BUTTON
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-launcher {
+    font-size:        18px;
+    color:            @primary;
+    padding:          2px 14px;
+    margin-left:      4px;
+    background-color: alpha(@primary, 0.1);
+    border-radius:    12px;
+    border:           1px solid alpha(@primary, 0.3);
+}
+
+#custom-launcher:hover {
+    background-color: alpha(@primary, 0.2);
+    border-color:     @primary;
+    color:            @primary;
+    transform:        scale(1.08);
+}
+
+#custom-launcher:active {
+    transform: scale(0.95);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🗂️ WORKSPACES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#workspaces {
+    padding:          2px 4px;
+    margin:           2px 4px;
+    background-color: alpha(@surface0, 0.6);
+    border-radius:    12px;
+    border:           1px solid alpha(@overlay0, 0.2);
+}
+
+#workspaces button {
+    padding:          3px 8px;
+    margin:           0px 2px;
+    color:            @overlay1;
+    background-color: transparent;
+    border-radius:    10px;
+    font-size:        14px;
+    min-width:        26px;
+    transition:       all 200ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+#workspaces button:hover {
+    background-color: alpha(@surface1, 0.8);
+    color:            @subtext1;
+    transform:        scale(1.1);
+}
+
+#workspaces button.active {
+    background-color: @primary;
+    color:            @base;
+    font-weight:      700;
+    box-shadow:       0 0 8px alpha(@primary, 0.5);
+    transform:        scale(1.05);
+}
+
+#workspaces button.urgent {
+    background-color: alpha(@error, 0.8);
+    color:            @base;
+    animation:        urgent-blink 1s steps(1) infinite;
+}
+
+@keyframes urgent-blink {
+    0%, 100% { background-color: alpha(@error, 0.8); }
+    50%       { background-color: alpha(@error, 0.3); }
+}
+
+#workspaces button.special {
+    background-color: alpha(@tertiary, 0.2);
+    color:            @tertiary;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🪟 ACTIVE WINDOW TITLE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#hyprland-window {
+    color:       @subtext1;
+    font-size:   12px;
+    font-weight: 400;
+    max-width:   300px;
+    padding:     2px 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🕐 CLOCK
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#clock {
+    font-size:        14px;
+    font-weight:      700;
+    color:            @text;
+    background-color: alpha(@surface0, 0.5);
+    border:           1px solid alpha(@overlay0, 0.3);
+    border-radius:    12px;
+    padding:          4px 16px;
+    letter-spacing:   0.5px;
+}
+
+#clock:hover {
+    background-color: alpha(@surface1, 0.7);
+    color:            @primary;
+    border-color:     alpha(@primary, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎵 MEDIA PLAYER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-media {
+    color:            @success;
+    background-color: alpha(@success, 0.1);
+    border-radius:    10px;
+    padding:          2px 12px;
+    max-width:        200px;
+}
+
+#custom-media.paused {
+    color:       @muted;
+    background:  transparent;
+}
+
+#custom-media.stopped {
+    display: none;
+}
+
+#custom-media:hover {
+    background-color: alpha(@success, 0.2);
+    color:            @success;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎬 RECORDER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-recorder {
+    color:  @muted;
+    padding: 2px 8px;
+}
+
+#custom-recorder.recording {
+    color:     @error;
+    animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recording-pulse {
+    0%, 100% { color: @error; }
+    50%       { color: alpha(@error, 0.4); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🌐 NETWORK
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#network {
+    color: @info;
+}
+
+#network.disconnected {
+    color: @error;
+}
+
+#network.disabled {
+    color: @muted;
+}
+
+#network.excellent { color: @success; }
+#network.good      { color: @info; }
+#network.fair      { color: @warning; }
+#network.poor      { color: @error; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔵 BLUETOOTH
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#bluetooth {
+    color: @info;
+}
+
+#bluetooth.connected {
+    color: @secondary;
+}
+
+#bluetooth.off,
+#bluetooth.disabled {
+    color: @muted;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔊 AUDIO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#pulseaudio {
+    color: @text;
+}
+
+#pulseaudio.muted {
+    color: @muted;
+}
+
+#pulseaudio.high {
+    color: @warning;
+}
+
+#pulseaudio.boost {
+    color: @error;
+    animation: volume-boost 0.5s ease-in-out;
+}
+
+@keyframes volume-boost {
+    0%   { transform: scale(1.0); }
+    50%  { transform: scale(1.2); color: @error; }
+    100% { transform: scale(1.0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   💻 CPU
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#cpu {
+    color: @tertiary;
+}
+
+#cpu.warning {
+    color: @warning;
+}
+
+#cpu.critical {
+    color:     @error;
+    animation: critical-pulse 1s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🧠 MEMORY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#memory {
+    color: @secondary;
+}
+
+#memory.warning {
+    color: @warning;
+}
+
+#memory.critical {
+    color:     @error;
+    animation: critical-pulse 1s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🌡️ TEMPERATURE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#temperature {
+    color: @text;
+}
+
+#temperature.critical {
+    color:     @error;
+    animation: critical-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes critical-pulse {
+    0%, 100% { color: @error; }
+    50%       { color: alpha(@error, 0.5); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔋 BATTERY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#battery {
+    color: @success;
+}
+
+#battery.charging {
+    color:     @info;
+    animation: charging-flow 2s linear infinite;
+}
+
+#battery.plugged {
+    color: @success;
+}
+
+#battery.full {
+    color: @success;
+}
+
+#battery.good {
+    color: @success;
+}
+
+#battery.warning {
+    color: @warning;
+}
+
+#battery.critical {
+    color:     @error;
+    animation: critical-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes charging-flow {
+    0%   { color: @info; }
+    50%  { color: alpha(@info, 0.6); }
+    100% { color: @info; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ☀️ BACKLIGHT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#backlight {
+    color: @warning;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ⚡ POWER PROFILE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-power-profile.performance {
+    color: @error;
+}
+
+#custom-power-profile.balanced {
+    color: @success;
+}
+
+#custom-power-profile.saver {
+    color: @info;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🌤️ WEATHER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-weather {
+    color: @info;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   📦 UPDATES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-updates {
+    color: @muted;
+}
+
+#custom-updates.has-updates {
+    color:     @warning;
+    animation: update-bounce 3s ease-in-out infinite;
+}
+
+#custom-updates.many-updates {
+    color: @error;
+}
+
+@keyframes update-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-2px); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎮 GPU
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-gpu {
+    color: @primary;
+}
+
+#custom-gpu.warning {
+    color: @warning;
+}
+
+#custom-gpu.critical {
+    color: @error;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔔 NOTIFICATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-notification {
+    color:   @text;
+    padding: 2px 10px;
+}
+
+#custom-notification.notification {
+    color:     @primary;
+    animation: notification-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+@keyframes notification-pop {
+    0%   { transform: scale(0.8); }
+    100% { transform: scale(1.0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   📥 TRAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#tray {
+    padding: 2px 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: alpha(@warning, 0.2);
+    border-radius:    6px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔌 POWER BUTTON
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-power {
+    color:            @error;
+    font-size:        16px;
+    padding:          2px 14px;
+    margin-right:     4px;
+    background-color: alpha(@error, 0.1);
+    border-radius:    12px;
+    border:           1px solid alpha(@error, 0.2);
+}
+
+#custom-power:hover {
+    background-color: alpha(@error, 0.25);
+    border-color:     @error;
+    transform:        scale(1.1) rotate(15deg);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ─── SEPARATOR ────────────────────────────────────────────────────────────────
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-separator {
+    color:       alpha(@overlay0, 0.5);
+    font-size:   10px;
+    padding:     0px 4px;
+    min-width:   8px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🗺️ SUBMAP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#hyprland-submap {
+    background-color: alpha(@warning, 0.2);
+    color:            @warning;
+    border:           1px solid alpha(@warning, 0.4);
+    border-radius:    10px;
+    font-weight:      700;
+    padding:          2px 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   💤 IDLE INHIBITOR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#custom-idle-inhibitor.active {
+    color:     @warning;
+    animation: idle-glow 2s ease-in-out infinite;
+}
+
+#custom-idle-inhibitor.inactive {
+    color: @muted;
+}
+
+@keyframes idle-glow {
+    0%, 100% { color: @warning; }
+    50%       { color: alpha(@warning, 0.5); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🖱️ HOVER EFFECTS (Global)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#cpu:hover,
+#memory:hover,
+#temperature:hover,
+#battery:hover,
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover,
+#backlight:hover,
+#clock:hover,
+#custom-weather:hover,
+#custom-updates:hover,
+#custom-gpu:hover {
+    background-color: alpha(@surface1, 0.5);
+    border-radius:    10px;
+    cursor:           pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ✨ ACTIVE CLICK STATES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#cpu:active,
+#memory:active,
+#battery:active,
+#network:active,
+#pulseaudio:active,
+#backlight:active {
+    transform: scale(0.95);
+}

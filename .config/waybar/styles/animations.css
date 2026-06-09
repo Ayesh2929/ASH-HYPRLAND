@@ -1,0 +1,306 @@
+/* ╔═══════════════════════════════════════════════════════════════════════════════╗
+   ║           ASH DOTFILES v3.0 — WAYBAR ANIMATION LIBRARY                     ║
+   ║           Complete keyframe animations for all Waybar states               ║
+   ╚═══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎬 ENTRANCE ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Slide in from top */
+@keyframes slide-in-top {
+    0% {
+        opacity:   0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    60% {
+        transform: translateY(4px) scale(1.01);
+    }
+    100% {
+        opacity:   1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Slide in from bottom */
+@keyframes slide-in-bottom {
+    0% {
+        opacity:   0;
+        transform: translateY(20px) scale(0.95);
+    }
+    60% {
+        transform: translateY(-4px) scale(1.01);
+    }
+    100% {
+        opacity:   1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Pop in with scale */
+@keyframes pop-in {
+    0% {
+        opacity:   0;
+        transform: scale(0.7);
+    }
+    70% {
+        transform: scale(1.05);
+    }
+    100% {
+        opacity:   1;
+        transform: scale(1);
+    }
+}
+
+/* Fade in */
+@keyframes fade-in {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Bounce in */
+@keyframes bounce-in {
+    0%   { transform: scale(0.8); }
+    50%  { transform: scale(1.12); }
+    70%  { transform: scale(0.96); }
+    85%  { transform: scale(1.04); }
+    100% { transform: scale(1.0); }
+}
+
+/* Swing in */
+@keyframes swing-in {
+    0%   { transform: rotate(-10deg) scale(0.9); opacity: 0; }
+    60%  { transform: rotate(4deg) scale(1.02); opacity: 1; }
+    80%  { transform: rotate(-2deg) scale(0.99); }
+    100% { transform: rotate(0deg) scale(1.0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🔄 STATE TRANSITION ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Workspace switch flash */
+@keyframes workspace-flash {
+    0%   { background-color: alpha(@primary, 0.6); }
+    100% { background-color: alpha(@primary, 0.0); }
+}
+
+/* Active workspace pulse */
+@keyframes workspace-active-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px alpha(@primary, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 16px alpha(@primary, 0.8);
+    }
+}
+
+/* Notification badge pulse */
+@keyframes badge-pulse {
+    0% {
+        transform: scale(1.0);
+        box-shadow: 0 0 0 0 alpha(@error, 0.6);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px alpha(@error, 0.0);
+    }
+    100% {
+        transform: scale(1.0);
+        box-shadow: 0 0 0 0 alpha(@error, 0.0);
+    }
+}
+
+/* Update available bounce */
+@keyframes update-available {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40%                      { transform: translateY(-4px); }
+    60%                      { transform: translateY(-2px); }
+}
+
+/* Battery low flash */
+@keyframes battery-low {
+    0%, 100% {
+        color:            @error;
+        background-color: alpha(@error, 0.1);
+    }
+    50% {
+        color:            alpha(@error, 0.5);
+        background-color: transparent;
+    }
+}
+
+/* Temperature critical shake */
+@keyframes temp-critical {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80%       { transform: translateX(2px); }
+}
+
+/* CPU spike flash */
+@keyframes cpu-spike {
+    0%   { color: @error; transform: scale(1.1); }
+    100% { color: @tertiary; transform: scale(1.0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ✨ AMBIENT ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Border gradient rotation (for active workspace) */
+@keyframes border-rotate {
+    0%   { border-image: linear-gradient(0deg, @primary, @secondary, @tertiary) 1; }
+    33%  { border-image: linear-gradient(120deg, @primary, @secondary, @tertiary) 1; }
+    66%  { border-image: linear-gradient(240deg, @primary, @secondary, @tertiary) 1; }
+    100% { border-image: linear-gradient(360deg, @primary, @secondary, @tertiary) 1; }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+    0%   { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Color breathe */
+@keyframes breathe {
+    0%, 100% { opacity: 1.0; }
+    50%       { opacity: 0.6; }
+}
+
+/* Float up/down */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-3px); }
+}
+
+/* Spin (for loading states) */
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎯 MODULE-SPECIFIC APPLIED ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Bar entrance animation */
+window#waybar {
+    animation: slide-in-top 600ms cubic-bezier(0.34, 1.56, 0.64, 1.0) both;
+}
+
+/* Launcher button hover animation */
+#custom-launcher:hover {
+    animation: bounce-in 300ms cubic-bezier(0.34, 1.56, 0.64, 1.0) forwards;
+}
+
+/* Active workspace continuous glow */
+#workspaces button.active {
+    animation: workspace-active-pulse 3s ease-in-out infinite;
+}
+
+/* Urgent workspace */
+#workspaces button.urgent {
+    animation: urgent-blink 800ms steps(1) infinite;
+}
+
+@keyframes urgent-blink {
+    0%, 100% {
+        background-color: alpha(@error, 0.8);
+        color:            @base;
+    }
+    50% {
+        background-color: alpha(@error, 0.2);
+        color:            @error;
+    }
+}
+
+/* Media player scroll animation */
+#custom-media {
+    animation: none;
+}
+
+#custom-media.playing {
+    /* Subtle glow when playing */
+    text-shadow: 0 0 8px alpha(@success, 0.6);
+}
+
+/* Volume change flash */
+#pulseaudio.changed {
+    animation: pop-in 200ms cubic-bezier(0.34, 1.56, 0.64, 1.0) forwards;
+}
+
+/* Critical alerts */
+#battery.critical,
+#temperature.critical,
+#memory.critical,
+#cpu.critical {
+    animation: critical-pulse 800ms ease-in-out infinite;
+}
+
+@keyframes critical-pulse {
+    0%, 100% {
+        opacity:   1.0;
+        transform: scale(1.0);
+    }
+    50% {
+        opacity:   0.7;
+        transform: scale(0.97);
+    }
+}
+
+/* Recording indicator */
+#custom-recorder.recording {
+    animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recording-pulse {
+    0%, 100% {
+        color:            @error;
+        text-shadow:      0 0 8px alpha(@error, 0.8);
+    }
+    50% {
+        color:            alpha(@error, 0.5);
+        text-shadow:      none;
+    }
+}
+
+/* Update notification bounce */
+#custom-updates.has-updates {
+    animation: update-available 2s ease-in-out 3;
+}
+
+/* Power button hover */
+#custom-power:hover {
+    animation: swing-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1.0) forwards;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE / MEDIA QUERIES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* High DPI displays */
+@media (min-resolution: 2dppx) {
+    * {
+        font-size: 12px;
+    }
+
+    window#waybar {
+        border-radius: 12px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   🎨 THEME TRANSITION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Smooth theme color transitions */
+window#waybar,
+#workspaces button.active,
+#clock,
+#custom-launcher {
+    transition:
+        background-color 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0),
+        border-color 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0),
+        color 400ms ease,
+        box-shadow 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
