@@ -1,296 +1,303 @@
-# name: ASH Dotfiles CI
-# on:
-# push:
-# branches: [ main, develop, "release/*" ]
-# pull_request:
-# branches: [ main ]
-# schedule:
-# - cron: '0 6 * * 1' # Weekly Monday 6AM
-# workflow_dispatch: # Manual trigger
-# permissions:
-# contents: read
-# issues: write
-# pull-requests: write
-# jobs:
-# ##################################################
-# # VALIDATE SHELL SCRIPTS #
-# ##################################################
-# shellcheck:
-# name: ShellCheck
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Install ShellCheck
-# run: sudo apt-get install -y shellcheck
-# - name: Run ShellCheck on all scripts
-# run: |
-# echo "Checking shell scripts..."
-# ERRORS=0
-# while IFS= read -r -d '' SCRIPT; do
-# echo " Checking: $SCRIPT"
-# if ! shellcheck \
-# --severity=warning \
-# --exclude=SC1090,SC1091,SC2034,SC2086 \
-# "$SCRIPT" 2&gt;&amp;1; then
-# ERRORS=$((ERRORS + 1))
-# fi
-# done &lt; &lt;(find . \
-# -name "*.sh" \
-# -not -path "./.git/*" \
-# -not -path "*/node_modules/*" \
-# -print0)
-# if [ "$ERRORS" -gt 0 ]; then
-# echo "■ ShellCheck failed: $ERRORS script(s) have issues"
-# exit 1
-# else
-# echo "■ All shell scripts passed ShellCheck"
-# fi
-# ##################################################
-# # VALIDATE FILE STRUCTURE #
-# ##################################################
-# validate-structure:
-# name: Validate File Structure
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Check required files exist
-# run: |
-# MISSING=0
-# REQUIRED_FILES=(
-# "README.md"
-# "LICENSE"
-# ".gitignore"
-# "install.sh"
-# "scripts/quickstart.sh"
-# "scripts/doctor.sh"
-# "scripts/validate.sh"
-# "config/hypr/hyprland.conf"
-# "config/hypr/core/env.conf"
-# "config/waybar/configs/top-bar.jsonc"
-# "config/fish/config.fish"
-# "config/nvim/init.lua"
-# "docs/README.md"
-# "docs/KEYBINDS.md"
-# "docs/THEMING.md"
-# )
-# for FILE in "${REQUIRED_FILES[@]}"; do
-# if [ -f "$FILE" ]; then
-# echo " ✓ $FILE"
-# else
-# echo " ✗ MISSING: $FILE"
-# MISSING=$((MISSING + 1))
-# fi
-# done
-# if [ "$MISSING" -gt 0 ]; then
-# echo "■ $MISSING required file(s) missing"
-# exit 1
-# else
-# echo "■ All required files present"
-# fi
-# ##################################################
-# # VALIDATE FISH SYNTAX #
-# ##################################################
-# fish-syntax:
-# name: Fish Shell Syntax
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Install Fish
-# run: |
-# sudo apt-add-repository ppa:fish-shell/release-3 -y
-# sudo apt-get update -y
-# sudo apt-get install -y fish
-# - name: Check Fish syntax
-# run: |
-# ERRORS=0
-# while IFS= read -r -d '' FILE; do
-# echo " Checking: $FILE"
-# if ! fish --no-execute "$FILE" 2&gt;&amp;1; then
-# ERRORS=$((ERRORS + 1))
-# fi
-# done &lt; &lt;(find . \
-# -name "*.fish" \
-# -not -path "./.git/*" \
-# -print0)
-# if [ "$ERRORS" -gt 0 ]; then
-# echo "■ Fish syntax errors: $ERRORS file(s)"
-# exit 1
-# else
-# echo "■ All Fish files valid"
-# fi
-# ##################################################
-# # VALIDATE LUA SYNTAX #
-# ##################################################
-# lua-syntax:
-# name: Lua Syntax Check
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Install Lua
-# run: sudo apt-get install -y lua5.4 luarocks
-# - name: Install luacheck
-# run: sudo luarocks install luacheck
-# - name: Check Lua syntax
-# run: |
-# ERRORS=0
-# while IFS= read -r -d '' FILE; do
-# echo " Checking: $FILE"
-# if ! lua -e "loadfile('$FILE')" 2&gt;&amp;1; then
-# ERRORS=$((ERRORS + 1))
-# fi
-# done &lt; &lt;(find config/nvim \
-# -name "*.lua" \
-# -print0 2&gt;/dev/null)
-# if [ "$ERRORS" -gt 0 ]; then
-# echo "■ Lua syntax errors: $ERRORS file(s)"
-# exit 1
-# else
-# echo "■ All Lua files valid"
-# fi
-# ##################################################
-# # VALIDATE JSON #
-# ##################################################
-# json-validate:
-# name: JSON Validation
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Validate JSON files
-# run: |
-# ERRORS=0
-# while IFS= read -r -d '' FILE; do
-# echo " Checking: $FILE"
-# if ! python3 -c "
-# import json, sys
-# try:
-# # Handle JSONC (strip comments)
-# import re
-# with open('$FILE') as f:
-# content = f.read()
-# # Remove single-line comments
-# content = re.sub(r'//.*', '', content)
-# # Remove multi-line comments
-# content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
-# json.loads(content)
-# print(' OK: $FILE')
-# except Exception as e:
-# print(f' ERROR: $FILE: {e}')
-# sys.exit(1)
-# " 2&gt;&amp;1; then
-# ERRORS=$((ERRORS + 1))
-# fi
-# done &lt; &lt;(find . \
-# \( -name "*.json" -o -name "*.jsonc" \) \
-# -not -path "./.git/*" \
-# -not -path "*/node_modules/*" \
-# -print0)
-# if [ "$ERRORS" -gt 0 ]; then
-# echo "■ JSON validation failed: $ERRORS file(s)"
-# exit 1
-# else
-# echo "■ All JSON files valid"
-# fi
-# ##################################################
-# # SECURITY SCAN #
-# ##################################################
-# security:
-# name: Security Scan
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Scan for secrets (gitleaks)
-# uses: gitleaks/gitleaks-action@v2
-# env:
-# GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-# - name: Check for hardcoded credentials
-# run: |
-# FOUND=0
-# PATTERNS=(
-# "password\s*="
-# "passwd\s*="
-# "secret\s*="
-# "api_key\s*="
-# "private_key"
-# "BEGIN RSA"
-# "BEGIN EC"
-# "BEGIN OPENSSH"
-# "ghp_[A-Za-z0-9]"
-# "sk-[A-Za-z0-9]"
-# )
-# for PATTERN in "${PATTERNS[@]}"; do
-# MATCHES=$(grep -rn \
-# --include="*.sh" \
-# --include="*.conf" \
-# --include="*.fish" \
-# --include="*.lua" \
-# --include="*.js" \
-# -iE "$PATTERN" . \
-# --exclude-dir=.git \
-# 2&gt;/dev/null | \
-# grep -v "# example" | \
-# grep -v "\.gitignore" || true)
-# if [ -n "$MATCHES" ]; then
-# echo "■ Potential secret pattern '$PATTERN':"
-# echo "$MATCHES"
-# FOUND=$((FOUND + 1))
-# fi
-# done
-# if [ "$FOUND" -gt 0 ]; then
-# echo "■ Review $FOUND potential secret pattern(s)"
-# else
-# echo "■ No hardcoded secrets found"
-# fi
-# ##################################################
-# # MARKDOWN LINT #
-# ##################################################
-# markdown:
-# name: Markdown Lint
-# runs-on: ubuntu-latest
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# - name: Lint Markdown
-# uses: DavidAnson/markdownlint-cli2-action@v16
-# with:
-# globs: |
-# **/*.md
-# !node_modules/**
-# ##################################################
-# # GENERATE RELEASE NOTES #
-# ##################################################
-# release-notes:
-# name: Release Notes Preview
-# runs-on: ubuntu-latest
-# if: github.ref == 'refs/heads/main'
-# needs:
-# - shellcheck
-# - validate-structure
-# - fish-syntax
-# - lua-syntax
-# - json-validate
-# - security
-# steps:
-# - name: Checkout
-# uses: actions/checkout@v4
-# with:
-# fetch-depth: 0
-# - name: Generate release preview
-# run: |
-# echo "## Changes in this push" &gt; /tmp/notes.md
-# git log --oneline --no-merges \
-# $(git describe --tags --abbrev=0 2&gt;/dev/null || \
-# git rev-list --max-parents=0 HEAD)..HEAD \
-# &gt;&gt; /tmp/notes.md 2&gt;/dev/null || \
-# git log --oneline -20 &gt;&gt; /tmp/notes.md
-# echo ""
-# cat /tmp/notes.md
-# - name: All checks passed
-# run: |
-# echo "■ All CI checks passed!"
-# echo "Ready to publish ASH Dotfiles v3.0"
+name: ASH Dotfiles CI
+on:
+  push:
+    branches: [ main, develop, "release/*" ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1' # Weekly Monday 6AM
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  ##################################################
+  # VALIDATE SHELL SCRIPTS #
+  ##################################################
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on all scripts
+        run: |
+          echo "Checking shell scripts..."
+          ERRORS=0
+          while IFS= read -r -d '' SCRIPT; do
+            echo " Checking: $SCRIPT"
+            if ! shellcheck \
+              --severity=warning \
+              --exclude=SC1090,SC1091,SC2034,SC2086 \
+              "$SCRIPT" 2>&1; then
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(find . \
+            -name "*.sh" \
+            -not -path "./.git/*" \
+            -not -path "*/node_modules/*" \
+            -print0)
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "ShellCheck failed: $ERRORS script(s) have issues"
+            exit 1
+          else
+            echo "All shell scripts passed ShellCheck"
+          fi
+
+  ##################################################
+  # VALIDATE FILE STRUCTURE #
+  ##################################################
+  validate-structure:
+    name: Validate File Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          MISSING=0
+          REQUIRED_FILES=(
+            "README.md"
+            "LICENSE"
+            ".gitignore"
+            "install.sh"
+            "scripts/quickstart.sh"
+            "scripts/doctor.sh"
+            "scripts/validate.sh"
+            "config/hypr/hyprland.conf"
+            "config/hypr/core/env.conf"
+            "config/waybar/configs/top-bar.jsonc"
+            "config/fish/config.fish"
+            "config/nvim/init.lua"
+            "docs/README.md"
+            "docs/KEYBINDS.md"
+            "docs/THEMING.md"
+          )
+          for FILE in "${REQUIRED_FILES[@]}"; do
+            if [ -f "$FILE" ]; then
+              echo "OK: $FILE"
+            else
+              echo "MISSING: $FILE"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          if [ "$MISSING" -gt 0 ]; then
+            echo "$MISSING required file(s) missing"
+            exit 1
+          else
+            echo "All required files present"
+          fi
+
+  ##################################################
+  # VALIDATE FISH SYNTAX #
+  ##################################################
+  fish-syntax:
+    name: Fish Shell Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Fish
+        run: |
+          sudo apt-add-repository ppa:fish-shell/release-3 -y
+          sudo apt-get update -y
+          sudo apt-get install -y fish
+
+      - name: Check Fish syntax
+        run: |
+          ERRORS=0
+          while IFS= read -r -d '' FILE; do
+            echo " Checking: $FILE"
+            if ! fish --no-execute "$FILE" 2>&1; then
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(find . \
+            -name "*.fish" \
+            -not -path "./.git/*" \
+            -print0)
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "Fish syntax errors: $ERRORS file(s)"
+            exit 1
+          else
+            echo "All Fish files valid"
+          fi
+
+  ##################################################
+  # VALIDATE LUA SYNTAX #
+  ##################################################
+  lua-syntax:
+    name: Lua Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Lua
+        run: sudo apt-get install -y lua5.4 luarocks
+
+      - name: Install luacheck
+        run: sudo luarocks install luacheck
+
+      - name: Check Lua syntax
+        run: |
+          ERRORS=0
+          while IFS= read -r -d '' FILE; do
+            echo " Checking: $FILE"
+            if ! lua -e "loadfile('$FILE')" 2>&1; then
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(find config/nvim \
+            -name "*.lua" \
+            -print0 2>/dev/null)
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "Lua syntax errors: $ERRORS file(s)"
+            exit 1
+          else
+            echo "All Lua files valid"
+          fi
+
+  ##################################################
+  # VALIDATE JSON #
+  ##################################################
+  json-validate:
+    name: JSON Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          ERRORS=0
+          while IFS= read -r -d '' FILE; do
+            echo " Checking: $FILE"
+            if ! python3 -c "import json, sys, re; content = open('$FILE').read(); content = re.sub(r'//.*', '', content); content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL); json.loads(content); print('OK: $FILE')" 2>&1; then
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(find . \
+            \( -name "*.json" -o -name "*.jsonc" \) \
+            -not -path "./.git/*" \
+            -not -path "*/node_modules/*" \
+            -print0)
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "JSON validation failed: $ERRORS file(s)"
+            exit 1
+          else
+            echo "All JSON files valid"
+          fi
+
+  ##################################################
+  # SECURITY SCAN #
+  ##################################################
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan for secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for hardcoded credentials
+        run: |
+          FOUND=0
+          PATTERNS=(
+            "password\s*="
+            "passwd\s*="
+            "secret\s*="
+            "api_key\s*="
+            "private_key"
+            "BEGIN RSA"
+            "BEGIN EC"
+            "BEGIN OPENSSH"
+            "ghp_[A-Za-z0-9]"
+            "sk-[A-Za-z0-9]"
+          )
+          for PATTERN in "${PATTERNS[@]}"; do
+            MATCHES=$(grep -rn \
+              --include="*.sh" \
+              --include="*.conf" \
+              --include="*.fish" \
+              --include="*.lua" \
+              --include="*.js" \
+              -iE "$PATTERN" . \
+              --exclude-dir=.git \
+              2>/dev/null | \
+              grep -v "# example" | \
+              grep -v "\.gitignore" || true)
+            if [ -n "$MATCHES" ]; then
+              echo "Potential secret pattern '$PATTERN':"
+              echo "$MATCHES"
+              FOUND=$((FOUND + 1))
+            fi
+          done
+          if [ "$FOUND" -gt 0 ]; then
+            echo "Review $FOUND potential secret pattern(s)"
+          else
+            echo "No hardcoded secrets found"
+          fi
+
+  ##################################################
+  # MARKDOWN LINT #
+  ##################################################
+  markdown:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            **/*.md
+            !node_modules/**
+
+  ##################################################
+  # GENERATE RELEASE NOTES #
+  ##################################################
+  release-notes:
+    name: Release Notes Preview
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - shellcheck
+      - validate-structure
+      - fish-syntax
+      - lua-syntax
+      - json-validate
+      - security
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release preview
+        run: |
+          echo "## Changes in this push" > /tmp/notes.md
+          git log --oneline --no-merges \
+            $(git describe --tags --abbrev=0 2>/dev/null || \
+            git rev-list --max-parents=0 HEAD)..HEAD \
+            >> /tmp/notes.md 2>/dev/null || \
+            git log --oneline -20 >> /tmp/notes.md
+          echo ""
+          cat /tmp/notes.md
+
+      - name: All checks passed
+        run: |
+          echo "All CI checks passed!"
+          echo "Ready to publish ASH Dotfiles v3.0"
