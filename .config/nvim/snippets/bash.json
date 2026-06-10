@@ -1,0 +1,193 @@
+{
+    "Script header": {
+        "prefix": ["header", "shebang"],
+        "body": [
+            "#!/bin/bash",
+            "# ╔═══════════════════════════════════════════════════════════════╗",
+            "# ║  ${1:Script Name}",
+            "# ║  ${2:Description}",
+            "# ╚═══════════════════════════════════════════════════════════════╝",
+            "",
+            "set -euo pipefail",
+            "IFS=$$'\\n\\t'",
+            "",
+            "readonly SCRIPT_DIR=\"$$(cd \"$$(dirname \"$${BASH_SOURCE[0]}\")\" && pwd)\"",
+            "",
+            "$0"
+        ],
+        "description": "Complete bash script header"
+    },
+    "Function": {
+        "prefix": ["fn", "func"],
+        "body": [
+            "${1:function_name}() {",
+            "    local ${2:arg}=\"$$1\"",
+            "    $0",
+            "}"
+        ],
+        "description": "Bash function"
+    },
+    "If statement": {
+        "prefix": ["if"],
+        "body": [
+            "if [[ ${1:condition} ]]; then",
+            "    $0",
+            "fi"
+        ],
+        "description": "Bash if statement"
+    },
+    "If else": {
+        "prefix": ["ife"],
+        "body": [
+            "if [[ ${1:condition} ]]; then",
+            "    $2",
+            "else",
+            "    $0",
+            "fi"
+        ],
+        "description": "Bash if-else"
+    },
+    "Case statement": {
+        "prefix": ["case"],
+        "body": [
+            "case \"$${1:variable}\" in",
+            "    ${2:pattern1})",
+            "        $0",
+            "        ;;",
+            "    ${3:pattern2})",
+            "        $4",
+            "        ;;",
+            "    *)",
+            "        $5",
+            "        ;;",
+            "esac"
+        ],
+        "description": "Bash case statement"
+    },
+    "For loop": {
+        "prefix": ["for"],
+        "body": [
+            "for ${1:item} in $${2:list}; do",
+            "    $0",
+            "done"
+        ],
+        "description": "Bash for loop"
+    },
+    "While loop": {
+        "prefix": ["while"],
+        "body": [
+            "while [[ ${1:condition} ]]; do",
+            "    $0",
+            "done"
+        ],
+        "description": "Bash while loop"
+    },
+    "Read file lines": {
+        "prefix": ["readfile", "readline"],
+        "body": [
+            "while IFS= read -r ${1:line}; do",
+            "    $0",
+            "done < \"${2:file.txt}\""
+        ],
+        "description": "Read file line by line"
+    },
+    "Color output": {
+        "prefix": ["colors"],
+        "body": [
+            "readonly R='\\033[0m'",
+            "readonly B='\\033[1m'",
+            "readonly G='\\033[92m'",
+            "readonly Y='\\033[93m'",
+            "readonly C='\\033[96m'",
+            "readonly M='\\033[95m'",
+            "readonly RED='\\033[91m'",
+            "",
+            "info()  { echo -e \"  $${C}→$${R} $$*\"; }",
+            "ok()    { echo -e \"  $${G}✓$${R} $$*\"; }",
+            "warn()  { echo -e \"  $${Y}⚠$${R} $$*\" >&2; }",
+            "err()   { echo -e \"  $${RED}✗$${R} $$*\" >&2; }",
+            "$0"
+        ],
+        "description": "Colored output helpers"
+    },
+    "Log function": {
+        "prefix": ["log"],
+        "body": [
+            "readonly LOG_FILE=\"$${CACHE_DIR:-/tmp}/logs/${1:script}.log\"",
+            "",
+            "log() { echo \"$$(date '+%Y-%m-%d %H:%M:%S') $$*\" >> \"$${LOG_FILE}\" 2>/dev/null || true; }",
+            "$0"
+        ],
+        "description": "Logging function"
+    },
+    "Parse args": {
+        "prefix": ["args", "getopts"],
+        "body": [
+            "while [[ $$# -gt 0 ]]; do",
+            "    case \"$$1\" in",
+            "        --${1:flag}|-${2:f})",
+            "            ${3:FLAG}=true",
+            "            shift",
+            "            ;;",
+            "        --${4:option}|-${5:o})",
+            "            ${6:OPTION}=\"$$2\"",
+            "            shift 2",
+            "            ;;",
+            "        --help|-h)",
+            "            echo \"Usage: $$(basename \"$$0\") [OPTIONS]\"",
+            "            exit 0",
+            "            ;;",
+            "        *)",
+            "            echo \"Unknown option: $$1\" >&2",
+            "            exit 1",
+            "            ;;",
+            "    esac",
+            "done",
+            "$0"
+        ],
+        "description": "Parse command line arguments"
+    },
+    "Trap cleanup": {
+        "prefix": ["trap"],
+        "body": [
+            "cleanup() {",
+            "    local exit_code=$$?",
+            "    $0",
+            "    exit $$exit_code",
+            "}",
+            "",
+            "trap cleanup EXIT INT TERM"
+        ],
+        "description": "Trap with cleanup function"
+    },
+    "Check command": {
+        "prefix": ["check", "require"],
+        "body": [
+            "if ! command -v ${1:cmd} &>/dev/null; then",
+            "    echo \"Error: ${1:cmd} is required but not installed\" >&2",
+            "    exit 1",
+            "fi",
+            "$0"
+        ],
+        "description": "Check if command exists"
+    },
+    "JSON output": {
+        "prefix": ["json"],
+        "body": [
+            "printf '{\"text\": \"%s\", \"tooltip\": \"%s\", \"class\": \"%s\"}\\n' \\",
+            "    \"${1:text}\" \"${2:tooltip}\" \"${3:class}\""
+        ],
+        "description": "Waybar JSON output"
+    },
+    "Notify send": {
+        "prefix": ["notify"],
+        "body": [
+            "notify-send \"${1:Title}\" \\",
+            "    \"${2:Message}\" \\",
+            "    --app-name=\"${3:ASH}\" \\",
+            "    --expire-time=${4:3000} \\",
+            "    2>/dev/null || true"
+        ],
+        "description": "Send desktop notification"
+    }
+}
