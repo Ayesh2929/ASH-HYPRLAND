@@ -1,0 +1,36 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — CLIPBOARD MANAGER SERVICE                    ║
+# ║           Manages cliphist clipboard history daemon                        ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[Unit]
+Description=ASH Clipboard History Manager (cliphist)
+Documentation=https://github.com/sentriz/cliphist
+After=graphical-session.target
+Wants=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=3
+
+Environment="HOME=%h"
+Environment="XDG_RUNTIME_DIR=/run/user/%U"
+Environment="WAYLAND_DISPLAY=wayland-1"
+
+# Text clipboard daemon
+ExecStart=/usr/bin/wl-paste --type text --watch cliphist store
+
+# Note: Image clipboard requires a second instance
+# Create ash-clipboard-image.service for image support
+
+KillMode=mixed
+TimeoutStopSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ash-clipboard
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,38 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — ASH THEME SYSTEMD SERVICE                    ║
+# ║           Auto-restore theme on login                                      ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[Unit]
+Description=ASH Theme Engine — Auto-restore theme on login
+Documentation=https://github.com/yourusername/ash-dots
+After=graphical-session.target hyprland.service
+Wants=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Environment
+Environment="HOME=%h"
+Environment="XDG_RUNTIME_DIR=/run/user/%U"
+Environment="ASH_DOTFILES=%h/.dotfiles"
+Environment="ASH_CACHE=%h/.cache/ash-dots"
+
+# Wait for Hyprland socket
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do test -S "$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket.sock" && break; sleep 1; done'
+
+# Apply last theme
+ExecStart=/bin/bash -c '%h/.config/hypr/scripts/theme/theme-engine.sh "" boot'
+
+# Reload on resume from suspend
+ExecStartPost=/bin/bash -c 'sleep 1 && pkill -SIGUSR2 waybar 2>/dev/null || true'
+
+# Standard output goes to journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ash-theme
+
+[Install]
+WantedBy=graphical-session.target
