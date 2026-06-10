@@ -1,224 +1,181 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR CPU TEMPERATURE MODULE                ║
-# ║           Multi-source temperature detection with status classes           ║
+# ║           Multi-sensor detection with thresholds and alerts               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
 readonly CACHE_DIR="${HOME}/.cache/ash-dots"
-readonly SENSOR_CACHE="${CACHE_DIR}/cpu-sensor-path"
+readonly LOG_FILE="${CACHE_DIR}/logs/cpu-temp.log"
+readonly TEMP_CRITICAL=85
+readonly TEMP_WARNING=70
+readonly NOTIF_LOCKFILE="/tmp/ash-temp-notified"
+
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 🌡️ TEMPERATURE DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-find_best_sensor() {
-    # Check cached sensor path
-    if [[ -f "${SENSOR_CACHE}" ]]; then
-        local cached
-        cached=$(cat "${SENSOR_CACHE}")
-        if [[ -f "${cached}" ]]; then
-            echo "${cached}"
-            return 0
-        fi
-        rm -f "${SENSOR_CACHE}"
-    fi
+detect_cpu_temp() {
+    local temp=0
 
-    local best_path=""
+    # Method 1: sensors (lm-sensors)
+    if command -v sensors &>/dev/null; then
+        local sensors_out
+        sensors_out=$(sensors 2>/dev/null)
 
-    # Priority order: k10temp, coretemp, acpitz, generic
-    local sensor_types=("k10temp" "coretemp" "zenpower" "nct6775" "it8" "acpitz")
+        # Try multiple sensor chips
+        local candidates=(
+            "$(echo "${sensors_out}" | grep -i "core 0\|Package id 0\|Tdie\|Tctl" | head -1 | grep -oP '[\+]?[\d.]+(?=°C)')"
+            "$(echo "${sensors_out}" | grep -i "cpu_thermal\|cpu temp\|k10temp" | head -1 | grep -oP '[\+]?[\d.]+(?=°C)' | head -1)"
+        )
 
-    for sensor_type in "${sensor_types[@]}"; do
-        local hwmon_path
-        hwmon_path=$(find /sys/class/hwmon -maxdepth 1 -mindepth 1 2>/dev/null \
-            | while read -r hwmon; do
-                local name
-                name=$(cat "${hwmon}/name" 2>/dev/null || echo "")
-                if [[ "${name}" == "${sensor_type}"* ]]; then
-                    echo "${hwmon}"
-                    break
-                fi
-            done | head -1)
-
-        if [[ -n "${hwmon_path}" ]]; then
-            # Find the best temperature file (prefer Tdie or Package)
-            local temp_file=""
-
-            # Try Tdie (AMD)
-            for label_file in "${hwmon_path}"/temp*_label; do
-                [[ -f "${label_file}" ]] || continue
-                local label
-                label=$(cat "${label_file}" 2>/dev/null || echo "")
-                if [[ "${label}" == "Tdie" ]] || [[ "${label}" == "Package id 0" ]]; then
-                    temp_file="${label_file/_label/_input}"
-                    break
-                fi
-            done
-
-            # Fallback to temp1_input
-            if [[ -z "${temp_file}" ]] && [[ -f "${hwmon_path}/temp1_input" ]]; then
-                temp_file="${hwmon_path}/temp1_input"
-            fi
-
-            if [[ -n "${temp_file}" ]] && [[ -f "${temp_file}" ]]; then
-                best_path="${temp_file}"
-                break
-            fi
-        fi
-    done
-
-    # Final fallback: thermal zones
-    if [[ -z "${best_path}" ]]; then
-        for zone in /sys/class/thermal/thermal_zone*/temp; do
-            if [[ -f "${zone}" ]]; then
-                local temp
-                temp=$(cat "${zone}" 2>/dev/null || echo "0")
-                if (( temp > 20000 && temp < 120000 )); then
-                    best_path="${zone}"
-                    break
-                fi
+        for candidate in "${candidates[@]}"; do
+            if [[ -n "${candidate}" ]] && [[ "${candidate}" != "0" ]]; then
+                temp=$(echo "${candidate}" | tr -d '+' | awk '{printf "%.0f", $1}')
+                [[ "${temp}" -gt 0 ]] && echo "${temp}" && return 0
             fi
         done
     fi
 
-    if [[ -n "${best_path}" ]]; then
-        echo "${best_path}" > "${SENSOR_CACHE}"
-        echo "${best_path}"
-    fi
-}
+    # Method 2: Thermal zones (sysfs)
+    local thermal_zones=(/sys/class/thermal/thermal_zone*/temp)
+    local best_temp=0
+    local best_type=""
 
-get_temperature() {
-    local sensor_path
-    sensor_path=$(find_best_sensor)
+    for zone_temp in "${thermal_zones[@]}"; do
+        local zone_dir
+        zone_dir=$(dirname "${zone_temp}")
+        local zone_type
+        zone_type=$(cat "${zone_dir}/type" 2>/dev/null || echo "unknown")
 
-    if [[ -z "${sensor_path}" ]]; then
-        echo ""
-        return 1
-    fi
-
-    local raw_temp
-    raw_temp=$(cat "${sensor_path}" 2>/dev/null || echo "0")
-
-    # Convert millidegrees to degrees
-    local temp_c=$(( raw_temp / 1000 ))
-
-    # Sanity check (valid CPU temp range)
-    if (( temp_c < 1 || temp_c > 150 )); then
-        echo ""
-        return 1
-    fi
-
-    echo "${temp_c}"
-}
-
-get_all_core_temps() {
-    local hwmon_paths=()
-    while IFS= read -r hwmon; do
-        local name
-        name=$(cat "${hwmon}/name" 2>/dev/null || echo "")
-        if [[ "${name}" == "k10temp" ]] || [[ "${name}" == "coretemp" ]] || \
-           [[ "${name}" == "zenpower" ]]; then
-            hwmon_paths+=("${hwmon}")
-        fi
-    done < <(find /sys/class/hwmon -maxdepth 1 -mindepth 1 2>/dev/null)
-
-    local core_temps=""
-    for hwmon in "${hwmon_paths[@]}"; do
-        for temp_file in "${hwmon}"/temp*_input; do
-            [[ -f "${temp_file}" ]] || continue
-            local label_file="${temp_file/_input/_label}"
-            local label="Core"
-            [[ -f "${label_file}" ]] && label=$(cat "${label_file}" 2>/dev/null || echo "Core")
-
+        # Prefer CPU-related zones
+        if echo "${zone_type,,}" | grep -qE "cpu|x86|acpi"; then
             local raw
-            raw=$(cat "${temp_file}" 2>/dev/null || echo "0")
-            local temp_c=$(( raw / 1000 ))
+            raw=$(cat "${zone_temp}" 2>/dev/null || echo "0")
+            local current=$(( raw / 1000 ))
 
-            if (( temp_c > 10 && temp_c < 150 )); then
-                core_temps+="${label}: ${temp_c}°C\n"
+            # Sanity check (0-120°C)
+            if (( current > 5 && current < 120 )); then
+                if (( current > best_temp )) || [[ -z "${best_type}" ]]; then
+                    best_temp="${current}"
+                    best_type="${zone_type}"
+                fi
             fi
-        done
+        fi
     done
 
-    echo -e "${core_temps}"
+    if (( best_temp > 0 )); then
+        echo "${best_temp}"
+        return 0
+    fi
+
+    # Method 3: hwmon
+    local hwmon_dirs=(/sys/class/hwmon/hwmon*/temp1_input)
+    for hwmon_temp in "${hwmon_dirs[@]}"; do
+        if [[ -f "${hwmon_temp}" ]]; then
+            local hwmon_dir
+            hwmon_dir=$(dirname "${hwmon_temp}")
+            local name
+            name=$(cat "${hwmon_dir}/name" 2>/dev/null || echo "")
+
+            if echo "${name,,}" | grep -qE "coretemp|k10temp|nct|w83|it87|acpitz"; then
+                local raw
+                raw=$(cat "${hwmon_temp}" 2>/dev/null || echo "0")
+                local current=$(( raw / 1000 ))
+                if (( current > 5 && current < 120 )); then
+                    echo "${current}"
+                    return 0
+                fi
+            fi
+        fi
+    done
+
+    # Could not detect
+    echo "?"
+}
+
+get_all_temps() {
+    if ! command -v sensors &>/dev/null; then
+        echo "lm-sensors not installed"
+        return 0
+    fi
+    sensors 2>/dev/null | grep -E "°C" | head -20
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 📊 FORMAT OUTPUT
 # ═══════════════════════════════════════════════════════════════════════════════
 
+format_output() {
+    local temp
+    temp=$(detect_cpu_temp)
+
+    if [[ "${temp}" == "?" ]]; then
+        printf '{"text": "? °C", "tooltip": "Temperature unavailable", "class": "unknown"}\n'
+        return 0
+    fi
+
+    # Determine class and icon
+    local class icon
+    if (( temp >= TEMP_CRITICAL )); then
+        class="critical"; icon="🔥"
+        # Critical notification
+        if [[ ! -f "${NOTIF_LOCKFILE}" ]]; then
+            notify-send "🔥 CPU Temperature Critical!" \
+                "CPU at ${temp}°C — check cooling!" \
+                --urgency=critical \
+                --app-name="ASH Temperature" \
+                2>/dev/null || true
+            touch "${NOTIF_LOCKFILE}"
+            log "CRIT" "CPU temp critical: ${temp}°C"
+        fi
+    elif (( temp >= TEMP_WARNING )); then
+        class="warning";  icon="🌡️"
+        rm -f "${NOTIF_LOCKFILE}" 2>/dev/null || true
+    elif (( temp >= 50 )); then
+        class="warm";     icon="󰔏"
+        rm -f "${NOTIF_LOCKFILE}" 2>/dev/null || true
+    else
+        class="cool";     icon="󱃃"
+        rm -f "${NOTIF_LOCKFILE}" 2>/dev/null || true
+    fi
+
+    # Build tooltip
+    local all_temps
+    all_temps=$(get_all_temps)
+
+    local tooltip
+    tooltip="🌡️ CPU Temperature\n"
+    tooltip+="────────────────────\n"
+    tooltip+="Current: ${temp}°C\n"
+    tooltip+="Warning: ${TEMP_WARNING}°C\n"
+    tooltip+="Critical: ${TEMP_CRITICAL}°C\n"
+
+    if [[ -n "${all_temps}" ]]; then
+        tooltip+="────────────────────\n"
+        tooltip+="All sensors:\n${all_temps}"
+    fi
+
+    printf '{"text": "%s %s°C", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
+        "${icon}" "${temp}" "${tooltip}" "${class}" "$(( temp ))"
+}
+
 main() {
     local action="${1:-status}"
 
-    mkdir -p "${CACHE_DIR}"
+    mkdir -p "${CACHE_DIR}/logs"
 
     case "${action}" in
-        status | "")
-            local temp
-            temp=$(get_temperature)
-
-            if [[ -z "${temp}" ]]; then
-                printf '{"text": "󰔏 ?°C", "class": "unknown", "tooltip": "Temperature sensor not found"}\n'
-                return 0
-            fi
-
-            # Determine icon and class
-            local icon class
-            if (( temp >= 90 )); then
-                icon="󰸁"
-                class="critical"
-            elif (( temp >= 80 )); then
-                icon="󱃂"
-                class="hot"
-            elif (( temp >= 70 )); then
-                icon="󰔏"
-                class="warm"
-            elif (( temp >= 60 )); then
-                icon="󰔏"
-                class="moderate"
-            elif (( temp >= 40 )); then
-                icon="󰔏"
-                class="cool"
-            else
-                icon="󱃃"
-                class="cold"
-            fi
-
-            # Get all core temps for tooltip
-            local core_temps
-            core_temps=$(get_all_core_temps)
-
-            local tooltip="🌡️ CPU Temperature\n"
-            tooltip+="────────────────────\n"
-            tooltip+="Current: ${temp}°C\n"
-            if [[ -n "${core_temps}" ]]; then
-                tooltip+="────────────────────\n"
-                tooltip+="${core_temps}"
-            fi
-
-            printf '{"text": "%s %s°C", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
-                "${icon}" "${temp}" "${tooltip}" "${class}" "${temp}"
-            ;;
-
-        celsius)
-            get_temperature
-            ;;
-
-        fahrenheit)
-            local temp
-            temp=$(get_temperature)
-            [[ -n "${temp}" ]] && awk "BEGIN{printf \"%.0f\", ${temp}*9/5+32}" || echo "?"
-            ;;
-
-        reset-cache)
-            rm -f "${SENSOR_CACHE}"
-            echo "Sensor cache cleared"
-            ;;
-
+        status | "") format_output ;;
+        temp)        detect_cpu_temp ;;
+        all)         get_all_temps ;;
+        critical)    echo "${TEMP_CRITICAL}" ;;
+        warning)     echo "${TEMP_WARNING}" ;;
         *)
-            echo "Usage: cpu-temp.sh [status|celsius|fahrenheit|reset-cache]"
+            echo "Usage: cpu-temp.sh [status|temp|all]"
             exit 1
             ;;
     esac

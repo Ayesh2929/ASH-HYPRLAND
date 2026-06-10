@@ -1,132 +1,125 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR MEMORY MODULE                         ║
-# ║           Detailed RAM/Swap usage with process info                        ║
+# ║           Detailed RAM/swap monitoring with alerts                         ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
 readonly CACHE_DIR="${HOME}/.cache/ash-dots"
-readonly LOG_FILE="${CACHE_DIR}/logs/waybar.log"
+readonly LOG_FILE="${CACHE_DIR}/logs/memory.log"
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# 📊 MEMORY DATA
+# 📊 MEMORY STATS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-get_memory_info() {
-    # Parse /proc/meminfo for accurate values
+get_mem_stats() {
+    local mem_info
+    mem_info=$(cat /proc/meminfo 2>/dev/null)
+
     local mem_total mem_free mem_available mem_buffers mem_cached
-    local swap_total swap_free swap_used
-    local mem_used mem_pct swap_pct
+    local mem_slab_reclaim swap_total swap_free
 
-    while IFS=': ' read -r key value _unit; do
-        case "${key}" in
-            MemTotal)     mem_total="${value}" ;;
-            MemFree)      mem_free="${value}" ;;
-            MemAvailable) mem_available="${value}" ;;
-            Buffers)      mem_buffers="${value}" ;;
-            Cached)       mem_cached="${value}" ;;
-            SwapTotal)    swap_total="${value}" ;;
-            SwapFree)     swap_free="${value}" ;;
-        esac
-    done < /proc/meminfo
+    mem_total=$(echo "${mem_info}"       | awk '/^MemTotal:/{print $2}')
+    mem_free=$(echo "${mem_info}"        | awk '/^MemFree:/{print $2}')
+    mem_available=$(echo "${mem_info}"   | awk '/^MemAvailable:/{print $2}')
+    mem_buffers=$(echo "${mem_info}"     | awk '/^Buffers:/{print $2}')
+    mem_cached=$(echo "${mem_info}"      | awk '/^Cached:/{print $2}')
+    mem_slab_reclaim=$(echo "${mem_info}" | awk '/^SReclaimable:/{print $2}')
+    swap_total=$(echo "${mem_info}"      | awk '/^SwapTotal:/{print $2}')
+    swap_free=$(echo "${mem_info}"       | awk '/^SwapFree:/{print $2}')
 
-    # Calculate used memory (total - available)
-    mem_used=$(( mem_total - mem_available ))
-    swap_used=$(( swap_total - swap_free ))
+    # Calculate used memory
+    local mem_used=$(( mem_total - mem_available ))
+    local mem_pct=$(( mem_used * 100 / mem_total ))
 
-    # Calculate percentages
-    mem_pct=0
-    (( mem_total > 0 )) && mem_pct=$(( mem_used * 100 / mem_total ))
-
-    swap_pct=0
-    (( swap_total > 0 )) && swap_pct=$(( swap_used * 100 / swap_total ))
-
-    # Convert to human-readable (MiB/GiB)
-    local mem_used_h mem_total_h swap_used_h swap_total_h
-
-    if (( mem_used >= 1048576 )); then
-        mem_used_h=$(awk "BEGIN{printf \"%.1f\", ${mem_used}/1048576}")G
-    else
-        mem_used_h=$(awk "BEGIN{printf \"%.0f\", ${mem_used}/1024}")M
-    fi
-
-    if (( mem_total >= 1048576 )); then
-        mem_total_h=$(awk "BEGIN{printf \"%.1f\", ${mem_total}/1048576}")G
-    else
-        mem_total_h=$(awk "BEGIN{printf \"%.0f\", ${mem_total}/1024}")M
-    fi
-
+    # Swap
+    local swap_used=0
+    local swap_pct=0
     if (( swap_total > 0 )); then
-        swap_used_h=$(awk "BEGIN{printf \"%.1f\", ${swap_used}/1048576}")G
-        swap_total_h=$(awk "BEGIN{printf \"%.1f\", ${swap_total}/1048576}")G
+        swap_used=$(( swap_total - swap_free ))
+        swap_pct=$(( swap_used * 100 / swap_total ))
     fi
 
-    # Get top memory-consuming processes
-    local top_procs=""
-    top_procs=$(ps -eo pid,rss,comm --sort=-rss 2>/dev/null \
-        | awk 'NR>1 && NR<=6 {printf "%s(%.0fMB) ", $3, $2/1024}')
+    # Human-readable
+    local mem_used_gb mem_total_gb swap_used_gb swap_total_gb
+    mem_used_gb=$(awk "BEGIN{printf \"%.1f\", ${mem_used}/1024/1024}")
+    mem_total_gb=$(awk "BEGIN{printf \"%.1f\", ${mem_total}/1024/1024}")
+    swap_used_gb=$(awk "BEGIN{printf \"%.1f\", ${swap_used}/1024/1024}")
+    swap_total_gb=$(awk "BEGIN{printf \"%.1f\", ${swap_total}/1024/1024}")
 
-    echo "${mem_used}|${mem_total}|${mem_pct}|${mem_used_h}|${mem_total_h}|${swap_used}|${swap_total}|${swap_pct}|${swap_used_h:-0}|${swap_total_h:-0}|${top_procs}"
+    echo "${mem_used}|${mem_total}|${mem_pct}|${mem_used_gb}|${mem_total_gb}|${swap_used_gb}|${swap_total_gb}|${swap_pct}"
 }
 
+get_top_processes() {
+    ps aux --sort=-%mem 2>/dev/null \
+        | awk 'NR>1 && NR<=6 {printf "  %-20s %s%%\n", $11, $4}' \
+        | sed 's|.*/||'
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📊 FORMAT OUTPUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
 format_output() {
-    local info="$1"
-    local mem_used mem_total mem_pct mem_used_h mem_total_h
-    local swap_used swap_total swap_pct swap_used_h swap_total_h top_procs
+    local stats
+    stats=$(get_mem_stats)
 
-    IFS='|' read -r mem_used mem_total mem_pct mem_used_h mem_total_h \
-                     swap_used swap_total swap_pct swap_used_h swap_total_h top_procs \
-                     <<< "${info}"
+    local mem_used mem_total mem_pct mem_used_gb mem_total_gb
+    local swap_used_gb swap_total_gb swap_pct
+    IFS='|' read -r mem_used mem_total mem_pct mem_used_gb mem_total_gb \
+        swap_used_gb swap_total_gb swap_pct <<< "${stats}"
 
-    # Memory icon based on usage
-    local icon class
+    # Determine class
+    local class icon
     if (( mem_pct >= 90 )); then
-        icon="󰀦"
-        class="critical"
+        class="critical"; icon="󰍛"
     elif (( mem_pct >= 75 )); then
-        icon="󰍞"
-        class="warning"
+        class="warning";  icon="󰍛"
     elif (( mem_pct >= 50 )); then
-        icon="󰍛"
-        class="moderate"
+        class="moderate"; icon="󰍛"
     else
-        icon="󰍛"
-        class="normal"
+        class="normal";   icon="󰍛"
     fi
 
-    # Build progress bar
-    local bar_width=10
-    local filled=$(( mem_pct * bar_width / 100 ))
-    local bar=""
-    for (( i=0; i<filled; i++ )); do bar+="█"; done
-    for (( i=filled; i<bar_width; i++ )); do bar+="░"; done
+    # Build tooltip
+    local top_procs
+    top_procs=$(get_top_processes)
 
-    # Display text
-    local text="${icon} ${mem_used_h}/${mem_total_h}"
-
-    # Tooltip
     local tooltip
     tooltip="󰍛 Memory Usage\n"
-    tooltip+="────────────────────────\n"
-    tooltip+="Used:      ${mem_used_h} / ${mem_total_h} (${mem_pct}%)\n"
-    tooltip+="${bar}\n"
-    tooltip+="Available: $(awk "BEGIN{printf \"%.1f\", (${mem_total} - ${mem_used})/1048576}")G\n"
+    tooltip+="────────────────────\n"
+    tooltip+="Used:      ${mem_used_gb}G / ${mem_total_gb}G\n"
+    tooltip+="Usage:     ${mem_pct}%\n"
 
-    if (( swap_total > 0 )); then
-        tooltip+="────────────────────────\n"
-        tooltip+="Swap: ${swap_used_h}G / ${swap_total_h}G (${swap_pct}%)\n"
+    if (( swap_pct > 0 )); then
+        tooltip+="────────────────────\n"
+        tooltip+="Swap Used: ${swap_used_gb}G / ${swap_total_gb}G (${swap_pct}%)\n"
     fi
 
-    if [[ -n "${top_procs}" ]]; then
-        tooltip+="────────────────────────\n"
-        tooltip+="Top processes:\n${top_procs}"
+    tooltip+="────────────────────\n"
+    tooltip+="Top by memory:\n${top_procs}"
+
+    # Send warning notification if critical
+    if (( mem_pct >= 90 )); then
+        local notif_file="/tmp/ash-mem-notified"
+        if [[ ! -f "${notif_file}" ]]; then
+            notify-send "🚨 Memory Critical" \
+                "RAM usage at ${mem_pct}%\nUsed: ${mem_used_gb}G / ${mem_total_gb}G" \
+                --urgency=critical \
+                --app-name="ASH Memory" \
+                2>/dev/null || true
+            touch "${notif_file}"
+            log "WARN" "Critical memory: ${mem_pct}%"
+        fi
+    else
+        rm -f /tmp/ash-mem-notified 2>/dev/null || true
     fi
 
-    printf '{"text": "%s", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
-        "${text}" "${tooltip}" "${class}" "${mem_pct}"
+    printf '{"text": "%s %s%%", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
+        "${icon}" "${mem_pct}" "${tooltip}" "${class}" "${mem_pct}"
 }
 
 main() {
@@ -135,22 +128,24 @@ main() {
     mkdir -p "${CACHE_DIR}/logs"
 
     case "${action}" in
-        status | "")
-            local info
-            info=$(get_memory_info)
-            format_output "${info}"
-            ;;
+        status | "") format_output ;;
         used)
-            awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%.0f\n", (t-a)/1024}' /proc/meminfo
-            ;;
-        total)
-            awk '/MemTotal/{printf "%.0f\n", $2/1024}' /proc/meminfo
+            local stats
+            stats=$(get_mem_stats)
+            echo "${stats}" | cut -d'|' -f4
             ;;
         percent)
-            awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%.0f\n", (t-a)*100/t}' /proc/meminfo
+            local stats
+            stats=$(get_mem_stats)
+            echo "${stats}" | cut -d'|' -f3
+            ;;
+        total)
+            local stats
+            stats=$(get_mem_stats)
+            echo "${stats}" | cut -d'|' -f5
             ;;
         *)
-            echo "Usage: memory.sh [status|used|total|percent]"
+            echo "Usage: memory.sh [status|used|percent|total]"
             exit 1
             ;;
     esac
