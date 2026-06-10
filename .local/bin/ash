@@ -1,0 +1,673 @@
+#!/bin/bash
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — MASTER CLI TOOL                               ║
+# ║           Complete command interface for all dotfile operations             ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# USAGE: ash [COMMAND] [SUBCOMMAND] [OPTIONS]
+#
+# COMMANDS:
+#   theme    — Theme and wallpaper management
+#   shot     — Screenshot tools
+#   vol      — Volume control
+#   bright   — Brightness control
+#   lock     — Lock screen
+#   reload   — Hot-reload configuration
+#   doctor   — Health check (60+ tests)
+#   update   — Update dotfiles
+#   backup   — Backup configuration
+#   restore  — Restore from backup
+#   clean    — Clean caches
+#   log      — View logs
+#   help     — Show help
+#   version  — Show version
+
+set -euo pipefail
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📌 CONSTANTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+readonly ASH_VERSION="3.0.0"
+readonly ASH_DOTFILES="${HOME}/.dotfiles"
+readonly ASH_CONFIG="${HOME}/.config"
+readonly ASH_CACHE="${HOME}/.cache/ash-dots"
+readonly ASH_LOG="${ASH_CACHE}/logs/cli.log"
+readonly ASH_SCRIPTS="${ASH_CONFIG}/hypr/scripts"
+
+# Colors
+readonly R='\033[0m'
+readonly B='\033[1m'
+readonly CYAN='\033[96m'
+readonly GREEN='\033[92m'
+readonly YELLOW='\033[93m'
+readonly RED='\033[91m'
+readonly MAGENTA='\033[95m'
+readonly DIM='\033[2m'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🖨️ OUTPUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log()    { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${ASH_LOG}" 2>/dev/null || true; }
+info()   { echo -e "  ${CYAN}→${R} $*"; }
+ok()     { echo -e "  ${GREEN}✓${R} $*"; }
+warn()   { echo -e "  ${YELLOW}⚠${R} $*" >&2; }
+err()    { echo -e "  ${RED}✗${R} $*" >&2; }
+section(){ echo -e "\n  ${B}${MAGENTA}${1}${R}"; }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🎨 THEME COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_theme() {
+    local subcmd="${1:-help}"
+    shift || true
+
+    case "${subcmd}" in
+        pick | p)
+            info "Opening wallpaper picker..."
+            log "INFO" "theme pick"
+            exec "${ASH_SCRIPTS}/theme/wallpaper-picker.sh" picker
+            ;;
+        random | r)
+            local category="${1:-}"
+            info "Setting random wallpaper${category:+ from ${category}}..."
+            log "INFO" "theme random ${category}"
+            exec "${ASH_SCRIPTS}/theme/wallpaper-picker.sh" random "${category}"
+            ;;
+        next | n)
+            "${ASH_SCRIPTS}/theme/wallpaper-picker.sh" next
+            ;;
+        prev | previous)
+            "${ASH_SCRIPTS}/theme/wallpaper-picker.sh" prev
+            ;;
+        apply | a)
+            local wall="${1:-}"
+            if [[ -z "${wall}" ]]; then
+                err "Usage: ash theme apply <wallpaper-path>"
+                exit 1
+            fi
+            "${ASH_SCRIPTS}/theme/theme-engine.sh" "${wall}" apply
+            ;;
+        reapply)
+            info "Re-applying current theme..."
+            "${ASH_SCRIPTS}/theme/theme-engine.sh" "" reapply
+            ;;
+        colors | c)
+            info "Current color palette:"
+            if [[ -f "${ASH_CACHE}/colors/current.json" ]]; then
+                cat "${ASH_CACHE}/colors/current.json" | python3 -m json.tool 2>/dev/null \
+                    || cat "${ASH_CACHE}/colors/current.json"
+            else
+                warn "No color palette found — run: ash theme pick"
+            fi
+            ;;
+        export)
+            info "Exporting current palette..."
+            "${ASH_SCRIPTS}/theme/theme-engine.sh" "" export
+            ;;
+        list | l)
+            info "Available wallpapers:"
+            "${ASH_SCRIPTS}/theme/wallpaper-picker.sh" list
+            ;;
+        current)
+            if [[ -f "${ASH_CACHE}/wallpaper/last" ]]; then
+                cat "${ASH_CACHE}/wallpaper/last"
+            else
+                warn "No wallpaper history found"
+            fi
+            ;;
+        *)
+            echo -e "${B}ash theme${R} — Theme & wallpaper management"
+            echo ""
+            echo "  ${CYAN}ash theme pick${R}           Interactive wallpaper picker"
+            echo "  ${CYAN}ash theme random${R}         Random wallpaper"
+            echo "  ${CYAN}ash theme random dark${R}    Random from 'dark' folder"
+            echo "  ${CYAN}ash theme next${R}           Next wallpaper"
+            echo "  ${CYAN}ash theme prev${R}           Previous wallpaper"
+            echo "  ${CYAN}ash theme apply PATH${R}     Apply specific wallpaper"
+            echo "  ${CYAN}ash theme reapply${R}        Re-apply current colors"
+            echo "  ${CYAN}ash theme colors${R}         Show current palette"
+            echo "  ${CYAN}ash theme export${R}         Export palette to JSON"
+            echo "  ${CYAN}ash theme list${R}           List all wallpapers"
+            echo "  ${CYAN}ash theme current${R}        Show current wallpaper path"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📸 SCREENSHOT COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_shot() {
+    local subcmd="${1:-area}"
+    shift || true
+
+    log "INFO" "shot ${subcmd}"
+
+    case "${subcmd}" in
+        full | f)      exec "${ASH_SCRIPTS}/utils/screenshot.sh" full ;;
+        area | a)      exec "${ASH_SCRIPTS}/utils/screenshot.sh" area ;;
+        window | w)    exec "${ASH_SCRIPTS}/utils/screenshot.sh" window ;;
+        monitor | m)   exec "${ASH_SCRIPTS}/utils/screenshot.sh" monitor ;;
+        edit | e)      exec "${ASH_SCRIPTS}/utils/screenshot.sh" edit ;;
+        ocr | o)       exec "${ASH_SCRIPTS}/utils/screenshot.sh" ocr ;;
+        color | c)     exec "${ASH_SCRIPTS}/utils/screenshot.sh" color ;;
+        delay)         exec "${ASH_SCRIPTS}/utils/screenshot.sh" delay "${1:-3}" ;;
+        open)          xdg-open "${HOME}/Pictures/Screenshots" ;;
+        *)
+            echo -e "${B}ash shot${R} — Screenshot tools"
+            echo ""
+            echo "  ${CYAN}ash shot area${R}     Interactive selection"
+            echo "  ${CYAN}ash shot full${R}     Full screen"
+            echo "  ${CYAN}ash shot window${R}   Active window"
+            echo "  ${CYAN}ash shot monitor${R}  Current monitor"
+            echo "  ${CYAN}ash shot edit${R}     Area → editor"
+            echo "  ${CYAN}ash shot ocr${R}      Area → text (OCR)"
+            echo "  ${CYAN}ash shot color${R}    Pick color"
+            echo "  ${CYAN}ash shot delay N${R}  Delayed (N seconds)"
+            echo "  ${CYAN}ash shot open${R}     Open screenshots folder"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔊 VOLUME COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_vol() {
+    local subcmd="${1:-status}"
+    local amount="${2:-5}"
+
+    log "INFO" "vol ${subcmd} ${amount}"
+
+    case "${subcmd}" in
+        up | u)     "${ASH_SCRIPTS}/media/volume.sh" up   "${amount}" ;;
+        down | d)   "${ASH_SCRIPTS}/media/volume.sh" down "${amount}" ;;
+        mute | m)   "${ASH_SCRIPTS}/media/volume.sh" mute ;;
+        set | s)    "${ASH_SCRIPTS}/media/volume.sh" set  "${amount}" ;;
+        get)        "${ASH_SCRIPTS}/media/volume.sh" get  ;;
+        status)     "${ASH_SCRIPTS}/media/volume.sh" status ;;
+        *)
+            echo -e "${B}ash vol${R} — Volume control"
+            echo ""
+            echo "  ${CYAN}ash vol up [N]${R}    Increase by N% (default 5)"
+            echo "  ${CYAN}ash vol down [N]${R}  Decrease by N%"
+            echo "  ${CYAN}ash vol mute${R}      Toggle mute"
+            echo "  ${CYAN}ash vol set N${R}     Set to N%"
+            echo "  ${CYAN}ash vol get${R}       Print current volume"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ☀️ BRIGHTNESS COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_bright() {
+    local subcmd="${1:-status}"
+    local amount="${2:-5}"
+
+    log "INFO" "bright ${subcmd} ${amount}"
+
+    case "${subcmd}" in
+        up | u)     "${ASH_SCRIPTS}/media/brightness.sh" up   "${amount}" ;;
+        down | d)   "${ASH_SCRIPTS}/media/brightness.sh" down "${amount}" ;;
+        set | s)    "${ASH_SCRIPTS}/media/brightness.sh" set  "${amount}" ;;
+        get)        "${ASH_SCRIPTS}/media/brightness.sh" get ;;
+        max)        "${ASH_SCRIPTS}/media/brightness.sh" max ;;
+        min)        "${ASH_SCRIPTS}/media/brightness.sh" min ;;
+        night)      "${ASH_SCRIPTS}/media/brightness.sh" night ;;
+        status)     "${ASH_SCRIPTS}/media/brightness.sh" status ;;
+        *)
+            echo -e "${B}ash bright${R} — Brightness control"
+            echo ""
+            echo "  ${CYAN}ash bright up [N]${R}   Increase by N% (default 5)"
+            echo "  ${CYAN}ash bright down [N]${R} Decrease by N%"
+            echo "  ${CYAN}ash bright set N${R}    Set to N%"
+            echo "  ${CYAN}ash bright max${R}      Maximum brightness"
+            echo "  ${CYAN}ash bright min${R}      Minimum brightness"
+            echo "  ${CYAN}ash bright night${R}    Toggle night mode (30%)"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔒 LOCK COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_lock() {
+    local mode="${1:-lock}"
+    log "INFO" "lock ${mode}"
+    exec "${ASH_SCRIPTS}/system/lock.sh" "${mode}"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔄 RELOAD COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_reload() {
+    local target="${1:-all}"
+    log "INFO" "reload ${target}"
+
+    case "${target}" in
+        all | "")
+            info "Reloading all modules..."
+            exec "${ASH_SCRIPTS}/system/reload-all.sh"
+            ;;
+        hypr | hyprland)
+            hyprctl reload 2>/dev/null && ok "Hyprland reloaded"
+            ;;
+        waybar)
+            pkill -SIGUSR2 waybar 2>/dev/null \
+                || (pkill -x waybar 2>/dev/null; sleep 0.3; waybar &)
+            ok "Waybar reloaded"
+            ;;
+        dunst)
+            pkill -x dunst 2>/dev/null; sleep 0.2; dunst &
+            ok "Dunst reloaded"
+            ;;
+        theme)
+            "${ASH_SCRIPTS}/theme/theme-engine.sh" "" reapply
+            ;;
+        *)
+            echo "Usage: ash reload [all|hypr|waybar|dunst|theme]"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏥 DOCTOR COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_doctor() {
+    local pass=0 fail=0 warn_count=0
+
+    echo ""
+    echo -e "  ${B}${MAGENTA}🏥 ASH Doctor — Health Check v${ASH_VERSION}${R}"
+    echo -e "  ${DIM}$(date '+%Y-%m-%d %H:%M:%S')${R}"
+    echo ""
+
+    check() {
+        local name="$1"
+        local cmd="$2"
+        local type="${3:-required}"
+
+        if eval "${cmd}" &>/dev/null; then
+            echo -e "  ${GREEN}✓${R} ${name}"
+            ((pass++)) || true
+        else
+            if [[ "${type}" == "required" ]]; then
+                echo -e "  ${RED}✗${R} ${name} ${RED}(MISSING)${R}"
+                ((fail++)) || true
+            else
+                echo -e "  ${YELLOW}⚠${R} ${name} ${YELLOW}(optional)${R}"
+                ((warn_count++)) || true
+            fi
+        fi
+    }
+
+    section "🔍 Critical Tools"
+    check "hyprland"          "command -v hyprland"
+    check "waybar"            "command -v waybar"
+    check "rofi"              "command -v rofi"
+    check "kitty"             "command -v kitty"
+    check "fish"              "command -v fish"
+    check "dunst"             "command -v dunst"
+    check "swww"              "command -v swww"
+    check "hyprlock"          "command -v hyprlock"
+    check "hypridle"          "command -v hypridle"
+    check "grim"              "command -v grim"
+    check "slurp"             "command -v slurp"
+    check "wl-copy"           "command -v wl-copy"
+    check "convert (ImageMagick)" "command -v convert"
+    check "jq"                "command -v jq"
+    check "curl"              "command -v curl"
+    check "git"               "command -v git"
+    check "nvim"              "command -v nvim"
+
+    section "🟡 Optional Tools"
+    check "swappy"            "command -v swappy"         "optional"
+    check "hyprpicker"        "command -v hyprpicker"     "optional"
+    check "wf-recorder"       "command -v wf-recorder"    "optional"
+    check "playerctl"         "command -v playerctl"      "optional"
+    check "pamixer"           "command -v pamixer"        "optional"
+    check "brightnessctl"     "command -v brightnessctl"  "optional"
+    check "cliphist"          "command -v cliphist"       "optional"
+    check "tesseract"         "command -v tesseract"      "optional"
+    check "swaync-client"     "command -v swaync-client"  "optional"
+    check "lazygit"           "command -v lazygit"        "optional"
+    check "btop"              "command -v btop"           "optional"
+    check "fastfetch"         "command -v fastfetch"      "optional"
+    check "starship"          "command -v starship"       "optional"
+    check "fzf"               "command -v fzf"            "optional"
+    check "fd"                "command -v fd"             "optional"
+    check "rg (ripgrep)"      "command -v rg"             "optional"
+    check "bat"               "command -v bat"            "optional"
+    check "eza"               "command -v eza"            "optional"
+    check "zoxide"            "command -v zoxide"         "optional"
+
+    section "⚙️ Services"
+    check "pipewire running"      "pgrep -x pipewire"
+    check "wireplumber running"   "pgrep -x wireplumber"
+    check "NetworkManager"        "systemctl is-active NetworkManager"
+    check "bluetooth"             "systemctl is-active bluetooth" "optional"
+    check "swww-daemon running"   "pgrep -x swww-daemon" "optional"
+    check "dunst running"         "pgrep -x dunst"
+    check "hypridle running"      "pgrep -x hypridle"   "optional"
+    check "waybar running"        "pgrep -x waybar"
+
+    section "🔤 Fonts"
+    check "JetBrainsMono Nerd Font"  "fc-list | grep -qi 'JetBrainsMono'"
+    check "Noto Color Emoji"         "fc-list | grep -qi 'Noto.*Emoji'"
+    check "Symbols Nerd Font"        "fc-list | grep -qi 'Symbols'" "optional"
+
+    section "📋 Config Files"
+    local configs=(
+        "${ASH_CONFIG}/hypr/hyprland.conf"
+        "${ASH_CONFIG}/waybar/configs/top.jsonc"
+        "${ASH_CONFIG}/rofi/config.rasi"
+        "${ASH_CONFIG}/fish/config.fish"
+        "${ASH_CONFIG}/kitty/kitty.conf"
+        "${ASH_CONFIG}/dunst/dunstrc"
+        "${ASH_CONFIG}/hypridle/hypridle.conf"
+        "${ASH_CONFIG}/nvim/init.lua"
+        "${ASH_CONFIG}/hypr/UserOverrides/user.conf"
+    )
+    for cfg in "${configs[@]}"; do
+        check "${cfg/$HOME/~}" "test -f '${cfg}'"
+    done
+
+    section "🎨 Theme"
+    check "Color cache exists"    "test -f '${ASH_CACHE}/colors/current.json'"
+    check "Wallpaper history"     "test -f '${ASH_CACHE}/wallpaper/last'"
+    check "Hyprland theme active" "test -f '${ASH_CONFIG}/hypr/themes/active.conf'"
+    check "Waybar colors CSS"     "test -f '${ASH_CONFIG}/waybar/styles/colors.css'"
+    check "Kitty theme"           "test -f '${ASH_CONFIG}/kitty/themes/current.conf'"
+
+    section "🌐 Wayland"
+    check "WAYLAND_DISPLAY set"   "test -n '${WAYLAND_DISPLAY:-}'"
+    check "XDG_RUNTIME_DIR set"   "test -n '${XDG_RUNTIME_DIR:-}'"
+    check "Hyprland running"      "pgrep -x Hyprland"
+
+    section "🔊 Audio"
+    check "wpctl available"       "command -v wpctl"
+    check "pactl available"       "command -v pactl"
+    check "Audio sink active"     "wpctl status 2>/dev/null | grep -q 'sink'" "optional"
+
+    # ── Summary ─────────────────────────────────────────────────────────────────
+    echo ""
+    echo -e "  ${DIM}─────────────────────────────────────────${R}"
+    echo -e "  ${GREEN}✓ Passed:${R}  ${pass}"
+    echo -e "  ${YELLOW}⚠ Warnings:${R} ${warn_count}"
+    echo -e "  ${RED}✗ Failed:${R}  ${fail}"
+    echo ""
+
+    if (( fail == 0 )); then
+        echo -e "  ${GREEN}${B}🎉 All critical checks passed!${R}"
+    elif (( fail < 3 )); then
+        echo -e "  ${YELLOW}${B}⚠ ${fail} critical issue(s) found${R}"
+    else
+        echo -e "  ${RED}${B}❌ ${fail} critical issues — some features may not work${R}"
+    fi
+
+    echo ""
+    log "INFO" "doctor: pass=${pass} warn=${warn_count} fail=${fail}"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📦 UPDATE COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_update() {
+    section "📦 Updating ASH Dotfiles"
+
+    info "Creating backup before update..."
+    cmd_backup silent
+
+    info "Pulling latest changes..."
+    if [[ -d "${ASH_DOTFILES}/.git" ]]; then
+        cd "${ASH_DOTFILES}"
+        local current_branch
+        current_branch=$(git branch --show-current 2>/dev/null || echo "main")
+
+        git fetch origin 2>/dev/null || warn "Could not fetch from remote"
+
+        local behind
+        behind=$(git rev-list HEAD...origin/${current_branch} --count 2>/dev/null || echo "0")
+
+        if (( behind > 0 )); then
+            git pull origin "${current_branch}" 2>/dev/null \
+                && ok "Updated ${behind} commits" \
+                || warn "Pull failed — resolve conflicts manually"
+        else
+            ok "Already up to date"
+        fi
+
+        # Fix permissions
+        find "${ASH_DOTFILES}/config" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+        find "${HOME}/.local/bin" -name "ash*" -exec chmod +x {} \; 2>/dev/null || true
+
+        # Reload theme
+        info "Reapplying theme..."
+        cmd_reload theme 2>/dev/null || true
+
+    else
+        warn "Not a git repository: ${ASH_DOTFILES}"
+        warn "Manual update required"
+    fi
+
+    ok "Update complete"
+    log "INFO" "update complete"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 💾 BACKUP COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_backup() {
+    local silent="${1:-}"
+    local backup_dir="${HOME}/.local/share/ash-dots/backups"
+    local timestamp
+    timestamp=$(date '+%Y%m%d_%H%M%S')
+    local backup_path="${backup_dir}/backup-${timestamp}"
+
+    mkdir -p "${backup_path}"
+
+    [[ "${silent}" != "silent" ]] && info "Creating backup: ${backup_path}"
+
+    local dirs_to_backup=(
+        "${ASH_CONFIG}/hypr/UserOverrides"
+        "${ASH_CONFIG}/hypr/themes"
+        "${ASH_CACHE}/colors"
+        "${ASH_CACHE}/wallpaper"
+    )
+
+    for dir in "${dirs_to_backup[@]}"; do
+        if [[ -d "${dir}" ]]; then
+            local dest_name
+            dest_name=$(echo "${dir}" | sed "s|${HOME}/||" | tr '/' '_')
+            cp -r "${dir}" "${backup_path}/${dest_name}" 2>/dev/null || true
+        fi
+    done
+
+    # Save manifest
+    {
+        echo "ASH Dotfiles v${ASH_VERSION} Backup"
+        echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+        echo "User: ${USER}"
+        echo "Hostname: $(hostname)"
+        echo ""
+        echo "Contents:"
+        ls "${backup_path}/" 2>/dev/null
+    } > "${backup_path}/MANIFEST.txt"
+
+    # Compress
+    tar czf "${backup_path}.tar.gz" -C "${backup_dir}" "backup-${timestamp}" 2>/dev/null \
+        && rm -rf "${backup_path}" \
+        && [[ "${silent}" != "silent" ]] && ok "Backup: ${backup_path}.tar.gz" || true
+
+    # Keep only last 10 backups
+    local backup_count
+    backup_count=$(find "${backup_dir}" -name "backup-*.tar.gz" | wc -l)
+    if (( backup_count > 10 )); then
+        find "${backup_dir}" -name "backup-*.tar.gz" | sort | head -$(( backup_count - 10 )) | xargs rm -f
+    fi
+
+    log "INFO" "backup: ${backup_path}.tar.gz"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🧹 CLEAN COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_clean() {
+    local mode="${1:-normal}"
+
+    section "🧹 Cleaning Caches"
+
+    info "Cleaning thumbnail cache..."
+    rm -rf "${ASH_CACHE}/thumbnails/"* 2>/dev/null || true
+    ok "Thumbnails cleared"
+
+    if [[ "${mode}" == "deep" ]]; then
+        info "Deep clean: removing all caches..."
+        rm -f  "${ASH_CACHE}/weather-cache.json" 2>/dev/null || true
+        rm -f  "${ASH_CACHE}/updates-cache.json" 2>/dev/null || true
+        rm -f  "${ASH_CACHE}/gpu-vendor"         2>/dev/null || true
+        ok "All caches cleared"
+
+        info "Cleaning Neovim cache..."
+        rm -rf "${HOME}/.local/share/nvim/lazy/.cache" 2>/dev/null || true
+        ok "Neovim cache cleared"
+    fi
+
+    info "Trimming logs (keeping last 1000 lines)..."
+    for log_file in "${ASH_CACHE}/logs/"*.log; do
+        if [[ -f "${log_file}" ]]; then
+            local lines
+            lines=$(wc -l < "${log_file}" 2>/dev/null || echo 0)
+            if (( lines > 1000 )); then
+                tail -1000 "${log_file}" > "${log_file}.tmp" \
+                    && mv "${log_file}.tmp" "${log_file}"
+            fi
+        fi
+    done
+    ok "Logs trimmed"
+
+    ok "Clean complete"
+    log "INFO" "clean: ${mode}"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📋 LOG COMMAND
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_log() {
+    local lines="${1:-50}"
+    local log_type="${2:-cli}"
+
+    local log_file="${ASH_CACHE}/logs/${log_type}.log"
+
+    if [[ ! -f "${log_file}" ]]; then
+        warn "Log not found: ${log_file}"
+        info "Available logs:"
+        ls "${ASH_CACHE}/logs/" 2>/dev/null || echo "  None"
+        return 0
+    fi
+
+    echo -e "  ${B}📋 Last ${lines} lines of ${log_type}.log${R}"
+    echo ""
+    tail -"${lines}" "${log_file}" | while IFS= read -r line; do
+        echo "  ${DIM}${line}${R}"
+    done
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ❓ HELP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cmd_help() {
+    cat << EOF
+
+$(echo -e "${B}${MAGENTA}  ASH DOTFILES v${ASH_VERSION}${R}")
+$(echo -e "  ${DIM}The most complete Hyprland desktop ecosystem${R}")
+
+$(echo -e "  ${B}USAGE:${R}")
+  ash [command] [subcommand] [options]
+
+$(echo -e "  ${B}COMMANDS:${R}")
+  $(echo -e "${CYAN}ash theme${R} [pick|random|next|prev|apply|colors]  Theme management")
+  $(echo -e "${CYAN}ash shot${R}  [area|full|window|edit|ocr|color]      Screenshots")
+  $(echo -e "${CYAN}ash vol${R}   [up|down|mute|set] [N]                 Volume control")
+  $(echo -e "${CYAN}ash bright${R} [up|down|set|max|min|night] [N]       Brightness")
+  $(echo -e "${CYAN}ash lock${R}  [lock|suspend|hibernate]               Lock screen")
+  $(echo -e "${CYAN}ash reload${R} [all|hypr|waybar|dunst|theme]         Hot-reload")
+  $(echo -e "${CYAN}ash doctor${R}                                        Health check")
+  $(echo -e "${CYAN}ash update${R}                                        Update dotfiles")
+  $(echo -e "${CYAN}ash backup${R}                                        Backup config")
+  $(echo -e "${CYAN}ash clean${R}  [normal|deep]                         Clean caches")
+  $(echo -e "${CYAN}ash log${R}   [N] [type]                             View logs")
+  $(echo -e "${CYAN}ash version${R}                                       Show version")
+
+$(echo -e "  ${B}EXAMPLES:${R}")
+  ash theme pick              # Interactive wallpaper picker
+  ash theme random cyberpunk  # Random from cyberpunk folder
+  ash vol up 10               # Increase volume 10%
+  ash bright set 60           # Set brightness to 60%
+  ash shot area               # Screenshot area selection
+  ash lock suspend            # Lock and suspend
+  ash doctor                  # Run 60+ health checks
+  ash clean deep              # Deep cache clean
+
+$(echo -e "  ${B}DOTFILES:${R}  ${DIM}${ASH_DOTFILES}${R}")
+$(echo -e "  ${B}CONFIG:${R}    ${DIM}${ASH_CONFIG}${R}")
+$(echo -e "  ${B}CACHE:${R}     ${DIM}${ASH_CACHE}${R}")
+
+EOF
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🎯 MAIN DISPATCHER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+main() {
+    mkdir -p "${ASH_CACHE}/logs"
+
+    local cmd="${1:-help}"
+    shift || true
+
+    log "INFO" "ash ${cmd} $*"
+
+    case "${cmd}" in
+        theme | t)          cmd_theme "$@" ;;
+        shot | screenshot)  cmd_shot  "$@" ;;
+        vol | volume)       cmd_vol   "$@" ;;
+        bright | brightness) cmd_bright "$@" ;;
+        lock)               cmd_lock  "$@" ;;
+        reload | r)         cmd_reload "$@" ;;
+        doctor | d)         cmd_doctor ;;
+        update | up)        cmd_update ;;
+        backup | bk)        cmd_backup ;;
+        restore)
+            info "Opening restore menu..."
+            "${ASH_DOTFILES}/scripts/core/restore.sh" "$@"
+            ;;
+        clean | c)          cmd_clean "$@" ;;
+        log | logs)         cmd_log   "$@" ;;
+        version | v)
+            echo -e "  ${B}ASH Dotfiles v${ASH_VERSION}${R}"
+            echo -e "  ${DIM}${ASH_DOTFILES}${R}"
+            ;;
+        help | h | --help | -h) cmd_help ;;
+        *)
+            err "Unknown command: ${cmd}"
+            echo ""
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
