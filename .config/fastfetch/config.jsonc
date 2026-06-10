@@ -1,15 +1,17 @@
 // ╔═══════════════════════════════════════════════════════════════════════════════╗
-// ║           ASH DOTFILES v3.0 — FASTFETCH SYSTEM INFO CONFIGURATION          ║
-// ║           Beautiful system information display                             ║
+// ║           ASH DOTFILES v3.0 — FASTFETCH CONFIGURATION                      ║
+// ║           System info display with ASH branding                            ║
 // ╚═══════════════════════════════════════════════════════════════════════════════╝
+
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
 
     "logo": {
         "source": "~/.config/fastfetch/logo.txt",
         "color": {
-            "1": "35",
-            "2": "33"
+            "1": "magenta",
+            "2": "blue",
+            "3": "cyan"
         },
         "padding": {
             "top": 1,
@@ -19,171 +21,161 @@
     },
 
     "display": {
-        "separator": "  ",
-        "color": {
-            "keys":   "35",
-            "title":  "35",
-            "output": "37"
-        },
-        "keyWidth": 14
+        "separator":     "  ",
+        "color":         "magenta",
+        "brightColor":   true,
+        "size": {
+            "ndigits": 2,
+            "maxPrefix": "giga"
+        }
     },
 
     "modules": [
         {
-            "type": "title",
-            "format": "{6}@{7}",
-            "color": {
-                "user": "35",
-                "at": "37",
-                "host": "33"
-            }
+            "type": "custom",
+            "format": "╭──────────────────────────────────────────╮"
         },
-        "separator",
+        {
+            "type": "title",
+            "format": "│  \u001b[1;35m{user-name}\u001b[0m @ \u001b[1;34m{host-name}\u001b[0m  │"
+        },
+        {
+            "type": "custom",
+            "format": "├──────────────────────────────────────────┤"
+        },
         {
             "type": "os",
-            "key": "  OS",
-            "keyColor": "35",
+            "key": "│  \u001b[1;35m OS",
+            "keyWidth": 14,
             "format": "{pretty-name} {version}"
         },
         {
             "type": "kernel",
-            "key": "  Kernel",
-            "keyColor": "35",
+            "key": "│  \u001b[1;34m Kernel",
+            "keyWidth": 14,
             "format": "{release}"
         },
         {
             "type": "uptime",
-            "key": " 󰔟 Uptime",
-            "keyColor": "35"
-        },
-        {
-            "type": "packages",
-            "key": " 󰏗 Packages",
-            "keyColor": "35"
+            "key": "│  \u001b[1;36m Uptime",
+            "keyWidth": 14,
+            "format": "{days}d {hours}h {minutes}m"
         },
         {
             "type": "shell",
-            "key": "  Shell",
-            "keyColor": "35",
+            "key": "│   Shell",
+            "keyWidth": 14,
             "format": "{name} {version}"
         },
         {
             "type": "display",
-            "key": " 󰍹 Display",
-            "keyColor": "35",
+            "key": "│  \u001b[1;35m Display",
+            "keyWidth": 14,
             "format": "{width}x{height} @ {refresh-rate}Hz"
         },
         {
-            "type": "de",
-            "key": "  Desktop",
-            "keyColor": "35"
-        },
-        {
             "type": "wm",
-            "key": "  WM",
-            "keyColor": "35",
-            "format": "{name} ({type})"
+            "key": "│  \u001b[1;34m WM",
+            "keyWidth": 14,
+            "format": "{name} {version}"
         },
         {
             "type": "wmtheme",
-            "key": "  WM Theme",
-            "keyColor": "35"
+            "key": "│  \u001b[1;36m WM Theme",
+            "keyWidth": 14
         },
         {
             "type": "theme",
-            "key": "  Theme",
-            "keyColor": "35"
+            "key": "│  \u001b[1;35m GTK Theme",
+            "keyWidth": 14
         },
         {
             "type": "icons",
-            "key": "  Icons",
-            "keyColor": "35"
-        },
-        {
-            "type": "font",
-            "key": "  Font",
-            "keyColor": "35",
-            "format": "{name} {size}"
+            "key": "│  \u001b[1;34m Icons",
+            "keyWidth": 14
         },
         {
             "type": "cursor",
-            "key": " 󰳽 Cursor",
-            "keyColor": "35",
-            "format": "{name} ({size}px)"
+            "key": "│   Cursor",
+            "keyWidth": 14
+        },
+        {
+            "type": "font",
+            "key": "│   Font",
+            "keyWidth": 14,
+            "format": "{name} {size}pt"
         },
         {
             "type": "terminal",
-            "key": "  Terminal",
-            "keyColor": "35"
+            "key": "│  \u001b[1;35m Terminal",
+            "keyWidth": 14,
+            "format": "{name} {version}"
         },
         {
             "type": "terminalfont",
-            "key": "  Term Font",
-            "keyColor": "35"
+            "key": "│   Term Font",
+            "keyWidth": 14
         },
-        "separator",
+        {
+            "type": "custom",
+            "format": "├──────────────────────────────────────────┤"
+        },
         {
             "type": "cpu",
-            "key": "  CPU",
-            "keyColor": "35",
-            "format": "{name} ({cores-physical}C/{cores-logical}T) @ {freq-max}GHz"
+            "key": "│  \u001b[1;34m CPU",
+            "keyWidth": 14,
+            "format": "{name} ({cores-physical}C/{cores-logical}T)"
         },
         {
             "type": "gpu",
-            "key": " 󰾲 GPU",
-            "keyColor": "35",
-            "format": "{name} [{memory}]",
-            "detectionMethod": "pci"
+            "key": "│  \u001b[1;35m GPU",
+            "keyWidth": 14,
+            "format": "{name}",
+            "hideType": "integrated"
         },
         {
             "type": "memory",
-            "key": " 󰍛 Memory",
-            "keyColor": "35",
-            "format": "{used} / {total} ({percentage}%)"
-        },
-        {
-            "type": "swap",
-            "key": " 󰾵 Swap",
-            "keyColor": "35",
+            "key": "│  \u001b[1;36m RAM",
+            "keyWidth": 14,
             "format": "{used} / {total} ({percentage}%)"
         },
         {
             "type": "disk",
-            "key": " 󰋊 Disk",
-            "keyColor": "35",
-            "format": "{used} / {total} ({percentage}%) — {filesystem}",
+            "key": "│  \u001b[1;34m Disk",
+            "keyWidth": 14,
+            "format": "{used} / {total} ({percentage}%)",
             "folders": "/"
         },
         {
-            "type": "localip",
-            "key": " 󰈀 Local IP",
-            "keyColor": "35",
-            "showIPv6": false,
-            "defaultRouteOnly": true,
-            "compact": true
-        },
-        {
             "type": "battery",
-            "key": " 󰁹 Battery",
-            "keyColor": "35",
+            "key": "│  \u001b[1;35m Battery",
+            "keyWidth": 14,
             "format": "{capacity}% [{status}]"
         },
         {
-            "type": "poweradapter",
-            "key": " 󰚥 Power",
-            "keyColor": "35"
+            "type": "custom",
+            "format": "├──────────────────────────────────────────┤"
         },
         {
-            "type": "player",
-            "key": "  Music",
-            "keyColor": "35",
-            "format": "{artist} — {title} [{status}]"
+            "type": "packages",
+            "key": "│  \u001b[1;35m Packages",
+            "keyWidth": 14,
+            "format": "{count} (pacman), {all} total"
         },
-        "separator",
+        {
+            "type": "locale",
+            "key": "│   Locale",
+            "keyWidth": 14
+        },
+        {
+            "type": "custom",
+            "format": "╰──────────────────────────────────────────╯"
+        },
+        "break",
         {
             "type": "colors",
             "symbol": "circle",
-            "paddingLeft": 2
+            "paddingLeft": 4
         }
     ]
 }
