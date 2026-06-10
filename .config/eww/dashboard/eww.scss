@@ -1,0 +1,327 @@
+// ╔═══════════════════════════════════════════════════════════════════════════════╗
+// ║           ASH DOTFILES v3.0 — EWW DASHBOARD STYLES                         ║
+// ║           Beautiful dashboard with ASH theme integration                   ║
+// ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+// ── Color Variables (from ASH theme) ─────────────────────────────────────────
+$base:      #1e1e2e;
+$mantle:    #181825;
+$crust:     #11111b;
+$surface0:  #313244;
+$surface1:  #45475a;
+$surface2:  #585b70;
+$overlay0:  #6c7086;
+$overlay1:  #7f849c;
+$primary:   #cba6f7;
+$secondary: #89b4fa;
+$tertiary:  #94e2d5;
+$text:      #cdd6f4;
+$subtext1:  #bac2de;
+$subtext0:  #a6adc8;
+$success:   #a6e3a1;
+$warning:   #f9e2af;
+$error:     #f38ba8;
+
+// ── Mixins ────────────────────────────────────────────────────────────────────
+
+@mixin card {
+    background-color: alpha($surface0, 0.85);
+    border:           1px solid alpha($overlay0, 0.3);
+    border-radius:    14px;
+    padding:          16px;
+    margin:           6px;
+}
+
+@mixin glass {
+    background-color: alpha($base, 0.90);
+    border:           1px solid alpha($overlay0, 0.25);
+    border-radius:    16px;
+}
+
+@mixin label-title {
+    color:            $primary;
+    font-weight:      bold;
+    font-size:        14px;
+    margin-bottom:    8px;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🌐 GLOBAL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+* {
+    all:          unset;
+    font-family:  "JetBrainsMono Nerd Font", sans-serif;
+    font-size:    13px;
+    color:        $text;
+    box-sizing:   border-box;
+    transition:   200ms ease;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🏠 DASHBOARD CONTAINER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.dashboard {
+    @include glass;
+    background-color: alpha($base, 0.95);
+    padding:          16px;
+    min-width:        460px;
+
+    .dashboard-header {
+        padding:        8px 4px 16px 4px;
+        border-bottom:  1px solid alpha($overlay0, 0.3);
+        margin-bottom:  12px;
+
+        .dashboard-title {
+            font-size:    18px;
+            font-weight:  bold;
+            color:        $primary;
+        }
+
+        .dashboard-version {
+            font-size:  12px;
+            color:      $overlay1;
+            margin-top: 2px;
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🃏 CARD COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.card {
+    @include card;
+
+    .card-title {
+        @include label-title;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🕐 CLOCK CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.clock-card {
+    text-align:   center;
+    padding:      20px 16px;
+
+    .clock-time {
+        font-size:    52px;
+        font-weight:  bold;
+        color:        $text;
+        letter-spacing: 2px;
+        text-shadow:  0 0 20px alpha($primary, 0.3);
+    }
+
+    .clock-day {
+        font-size:    18px;
+        color:        $primary;
+        font-weight:  600;
+        margin-top:   4px;
+    }
+
+    .clock-date {
+        font-size:    14px;
+        color:        $subtext1;
+        margin-top:   2px;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 📊 SYSTEM CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.system-card {
+    .sys-bar-container {
+        margin-bottom: 10px;
+    }
+
+    .sys-icon {
+        font-size:  16px;
+        min-width:  20px;
+        color:      $primary;
+    }
+
+    .sys-label {
+        color:      $subtext0;
+        font-size:  12px;
+        min-width:  40px;
+    }
+
+    .sys-value {
+        color:      $text;
+        font-weight: 600;
+        font-size:  13px;
+        margin-left: auto;
+
+        &.critical { color: $error; }
+        &.warning  { color: $warning; }
+        &.normal   { color: $success; }
+    }
+
+    .sys-scale {
+        min-height: 6px;
+        border-radius: 4px;
+
+        trough {
+            background-color: $surface1;
+            border-radius:    4px;
+            min-height:       6px;
+        }
+
+        highlight {
+            border-radius: 4px;
+            background-color: $primary;
+            min-height:     6px;
+        }
+
+        &.critical highlight { background-color: $error; }
+        &.warning  highlight { background-color: $warning; }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🎵 MEDIA CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.media-card {
+    .media-title {
+        font-size:    14px;
+        font-weight:  700;
+        color:        $text;
+    }
+
+    .media-artist {
+        font-size:  12px;
+        color:      $subtext1;
+        font-style: italic;
+    }
+
+    .media-controls {
+        margin-top: 10px;
+
+        .media-btn {
+            background-color: alpha($surface1, 0.7);
+            border:           1px solid alpha($overlay0, 0.3);
+            border-radius:    50%;
+            padding:          8px;
+            min-width:        36px;
+            min-height:       36px;
+            font-size:        16px;
+            color:            $text;
+            cursor:           pointer;
+            transition:       all 200ms ease;
+
+            &:hover {
+                background-color: alpha($primary, 0.2);
+                border-color:     $primary;
+                color:            $primary;
+                transform:        scale(1.1);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            &.play-pause {
+                background-color: alpha($primary, 0.15);
+                border-color:     alpha($primary, 0.5);
+                color:            $primary;
+                font-size:        18px;
+                min-width:        44px;
+                min-height:       44px;
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🌐 NETWORK CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.network-card {
+    .net-icon {
+        font-size:  18px;
+        min-width:  24px;
+        color:      $secondary;
+    }
+
+    .net-ssid {
+        color:      $text;
+        font-weight: 600;
+    }
+
+    .net-ip {
+        color:      $subtext0;
+        font-size:  12px;
+        font-family: monospace;
+    }
+
+    .net-signal {
+        color:      $success;
+        margin-left: auto;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 🌤️ WEATHER CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.weather-card {
+    text-align: center;
+
+    .weather-icon {
+        font-size:  36px;
+        margin:     8px 0;
+    }
+
+    .weather-temp {
+        font-size:    28px;
+        font-weight:  bold;
+        color:        $tertiary;
+    }
+
+    .weather-desc {
+        font-size:  13px;
+        color:      $subtext1;
+        margin-top: 4px;
+        font-style: italic;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ⚡ QUICK LAUNCH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+.quick-launch {
+    .launch-grid {
+        flex-wrap: wrap;
+
+        .launch-btn {
+            background-color: alpha($surface1, 0.7);
+            border:           1px solid alpha($overlay0, 0.3);
+            border-radius:    12px;
+            padding:          10px 14px;
+            font-size:        18px;
+            color:            $subtext1;
+            cursor:           pointer;
+            min-width:        52px;
+            min-height:       48px;
+            transition:       all 200ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+
+            &:hover {
+                background-color: alpha($primary, 0.2);
+                border-color:     $primary;
+                color:            $primary;
+                transform:        scale(1.1) translateY(-2px);
+                box-shadow:       0 4px 12px alpha($primary, 0.3);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+    }
+}
