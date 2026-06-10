@@ -1,0 +1,33 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — RECORDER WATCH SERVICE                       ║
+# ║           Monitors recording state and updates Waybar                      ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[Unit]
+Description=ASH Screen Recorder Monitor
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+
+Environment="HOME=%h"
+Environment="XDG_RUNTIME_DIR=/run/user/%U"
+
+# Watch for recording state changes and signal Waybar
+ExecStart=/bin/bash -c '\
+    while true; do \
+        if [ -f /tmp/ash-recorder.pid ] && kill -0 $(cat /tmp/ash-recorder.pid) 2>/dev/null; then \
+            pkill -SIGRTMIN+12 waybar 2>/dev/null || true; \
+        fi; \
+        sleep 2; \
+    done'
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ash-recorder
+
+[Install]
+WantedBy=graphical-session.target

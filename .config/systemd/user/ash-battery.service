@@ -1,0 +1,52 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — BATTERY MONITOR SERVICE                      ║
+# ║           Monitors battery and triggers power profile changes              ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[Unit]
+Description=ASH Battery Monitor & Power Profile Auto-switcher
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+
+Environment="HOME=%h"
+Environment="XDG_RUNTIME_DIR=/run/user/%U"
+
+# Auto-switch power profile based on AC state
+ExecStart=/bin/bash -c '\
+    LAST_AC=""; \
+    while true; do \
+        if [ -f /sys/class/power_supply/AC/online ]; then \
+            AC=$(cat /sys/class/power_supply/AC/online 2>/dev/null || echo "1"); \
+        elif [ -f /sys/class/power_supply/AC0/online ]; then \
+            AC=$(cat /sys/class/power_supply/AC0/online 2>/dev/null || echo "1"); \
+        else \
+            AC="1"; \
+        fi; \
+        if [ "$AC" != "$LAST_AC" ]; then \
+            if [ "$AC" = "1" ]; then \
+                %h/.config/hypr/scripts/system/power-profile.sh auto 2>/dev/null || true; \
+            else \
+                BAT=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "100"); \
+                if [ "$BAT" -le 20 ]; then \
+                    %h/.config/hypr/scripts/system/power-profile.sh power-saver 2>/dev/null || true; \
+                else \
+                    %h/.config/hypr/scripts/system/power-profile.sh balanced 2>/dev/null || true; \
+                fi; \
+            fi; \
+            LAST_AC="$AC"; \
+            pkill -SIGRTMIN+11 waybar 2>/dev/null || true; \
+        fi; \
+        sleep 15; \
+    done'
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ash-battery
+
+[Install]
+WantedBy=graphical-session.target
