@@ -1,0 +1,370 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — STARSHIP PROMPT CONFIGURATION                ║
+# ║           Beautiful, fast, cross-shell prompt                              ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🎨 GLOBAL FORMAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+format = """
+[╭─](bold purple)$os$username$hostname$directory$git_branch$git_status$git_state$git_metrics$fill$cmd_duration$jobs$time
+[╰─](bold purple)$character"""
+
+right_format = """$status$python$nodejs$rust$golang$java$kotlin$ruby$php$lua$dotnet"""
+
+# Prompt follows on new line
+add_newline = true
+
+# Wait time before prompt
+scan_timeout = 30
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🖥️ OS ICON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[os]
+format          = "[$symbol](bold purple) "
+disabled        = false
+
+[os.symbols]
+Arch            = " "
+Debian          = " "
+Ubuntu          = " "
+Fedora          = " "
+CentOS          = " "
+EndeavourOS     = " "
+Manjaro         = " "
+NixOS           = " "
+openSUSE        = " "
+Gentoo          = " "
+Raspbian        = " "
+Windows         = " "
+Macos           = " "
+Linux           = " "
+Unknown         = " "
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 👤 USERNAME & HOSTNAME
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[username]
+style_user      = "bold #cba6f7"
+style_root      = "bold red"
+format          = "[$user]($style)"
+disabled        = false
+show_always     = false
+
+[hostname]
+ssh_only        = true
+format          = "[@$hostname](bold #89b4fa) "
+disabled        = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📁 DIRECTORY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[directory]
+style                    = "bold #89b4fa"
+read_only                = " 󰌾"
+read_only_style          = "red"
+format                   = "[ $path]($style)[$read_only]($read_only_style) "
+truncation_length        = 4
+truncation_symbol        = "…/"
+truncate_to_repo         = true
+home_symbol              = "~"
+use_logical_path         = true
+
+[directory.substitutions]
+"Documents"   = "󰈙 "
+"Downloads"   = " "
+"Music"       = "󰝚 "
+"Pictures"    = " "
+"Videos"      = " "
+".config"     = " "
+".dotfiles"   = " "
+"Development" = "󰲋 "
+"Projects"    = " "
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔀 GIT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[git_branch]
+symbol          = " "
+style           = "bold #cba6f7"
+format          = "[on](dimmed white) [$symbol$branch(:$remote_branch)]($style) "
+truncation_length = 30
+truncation_symbol = "…"
+always_show_remote = false
+
+[git_status]
+style           = "bold #fab387"
+format          = '([$all_status$ahead_behind]($style) )'
+conflicted      = "🔥"
+ahead           = "⇡${count}"
+behind          = "⇣${count}"
+diverged        = "⇕⇡${ahead_count}⇣${behind_count}"
+up_to_date      = ""
+untracked       = "?${count}"
+stashed         = "󰏗"
+modified        = "!${count}"
+staged          = "+${count}"
+renamed         = "»${count}"
+deleted         = "✘${count}"
+
+[git_state]
+format          = '[\($state( $progress_current of $progress_total)\)](bold yellow) '
+cherry_pick     = "[🍒 PICKING](bold red)"
+bisect          = "[󰃸 BISECT](bold yellow)"
+merge           = "[󰙓 MERGING](bold purple)"
+rebase          = "[ REBASE](bold red)"
+revert          = "[ REVERTING](bold red)"
+
+[git_metrics]
+format          = "([+$added]($added_style) )([-$deleted]($deleted_style) )"
+added_style     = "bold #a6e3a1"
+deleted_style   = "bold #f38ba8"
+only_nonzero_diffs = true
+disabled        = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ⌨️ CHARACTER (prompt symbol)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[character]
+success_symbol  = "[❯](bold #a6e3a1)"
+error_symbol    = "[❯](bold #f38ba8)"
+vimcmd_symbol   = "[❮](bold #cba6f7)"
+vimcmd_replace_one_symbol = "[❮](bold #fab387)"
+vimcmd_replace_symbol     = "[❮](bold #fab387)"
+vimcmd_visual_symbol      = "[❮](bold #f9e2af)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ⏱️ COMMAND DURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[cmd_duration]
+min_time        = 2000
+format          = " [󱦟 $duration]($style)"
+style           = "bold #fab387"
+show_milliseconds = false
+show_notifications = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📋 JOBS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[jobs]
+symbol          = "⚙ "
+style           = "bold #94e2d5"
+format          = "[$symbol$number]($style) "
+number_threshold = 1
+symbol_threshold = 1
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🕐 TIME
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[time]
+disabled        = false
+format          = "[ 󱑍 $time]($style)"
+style           = "dimmed #7f849c"
+use_12hr        = false
+time_format     = "%H:%M"
+utc_time_offset = "local"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ✅ STATUS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[status]
+style           = "bold #f38ba8"
+symbol          = "✗ "
+success_symbol  = ""
+not_found_symbol = "󰍉 "
+sigint_symbol   = "󰗖 "
+signal_symbol   = "⚡"
+format          = '[$symbol$status]($style) '
+map_symbol      = true
+disabled        = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📊 FILL (separator between left and right)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[fill]
+symbol          = " "
+style           = "dimmed #45475a"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐍 PYTHON
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[python]
+symbol          = " "
+style           = "bold #f9e2af"
+format          = '[$symbol$pyenv_prefix($version )(\($virtualenv\) )]($style)'
+python_binary   = ["python3", "python"]
+detect_extensions = ["py"]
+detect_files    = [".python-version", "Pipfile", "__init__.py", "pyproject.toml",
+                   "setup.py", "setup.cfg", "requirements.txt", "tox.ini"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🦀 RUST
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[rust]
+symbol          = " "
+style           = "bold #fab387"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["rs"]
+detect_files    = ["Cargo.toml"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐹 GO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[golang]
+symbol          = " "
+style           = "bold #94e2d5"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["go"]
+detect_files    = ["go.mod", "go.sum", "go.work", ".go-version"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🟨 NODE.JS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[nodejs]
+symbol          = " "
+style           = "bold #a6e3a1"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts"]
+detect_files    = ["package.json", ".node-version", ".nvmrc"]
+detect_folders  = ["node_modules"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ☕ JAVA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[java]
+symbol          = " "
+style           = "bold #f38ba8"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["java", "class", "gradle", "jar", "cljs", "cljc"]
+detect_files    = ["pom.xml", "build.gradle.kts", "build.sbt", ".java-version",
+                   "deps.edn", "project.clj", "build.boot"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🌙 LUA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[lua]
+symbol          = " "
+style           = "bold #89b4fa"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["lua"]
+detect_files    = [".lua-version"]
+detect_folders  = ["lua"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐘 PHP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[php]
+symbol          = " "
+style           = "bold #cba6f7"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["php"]
+detect_files    = ["composer.json", ".php-version"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 💎 RUBY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[ruby]
+symbol          = " "
+style           = "bold #f38ba8"
+format          = "[$symbol$version]($style) "
+detect_extensions = ["rb"]
+detect_files    = ["Gemfile", ".ruby-version"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔷 DOTNET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[dotnet]
+symbol          = "󰪮 "
+style           = "bold #cba6f7"
+format          = "[$symbol$version( 🎯 $tfm)]($style) "
+detect_extensions = ["csproj", "fsproj", "xproj"]
+detect_files    = ["global.json", "project.json", "Directory.Build.props",
+                   "Directory.Build.targets", "Packages.props"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐳 DOCKER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[docker_context]
+symbol          = " "
+style           = "bold #89b4fa"
+format          = "[$symbol$context]($style) "
+detect_files    = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+detect_folders  = [".docker"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📦 PACKAGE VERSION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[package]
+symbol          = "󰏗 "
+style           = "bold #fab387"
+format          = "[$symbol$version]($style) "
+display_private = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ☁️ CLOUD / TERRAFORM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[terraform]
+symbol          = "󱁢 "
+style           = "bold #cba6f7"
+format          = "[$symbol$workspace]($style) "
+
+[aws]
+symbol          = " "
+style           = "bold #f9e2af"
+format          = "[$symbol($profile )(\[$duration\] )]($style)"
+
+[gcloud]
+symbol          = " "
+style           = "bold #89b4fa"
+format          = "[$symbol$account(@$domain)(\($region\))]($style) "
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔒 NIX SHELL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[nix_shell]
+symbol          = " "
+style           = "bold #89b4fa"
+format          = "[$symbol$state( \($name\))]($style) "
+impure_msg      = "impure"
+pure_msg        = "pure"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏝️ ENV VAR
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[env_var]
+disabled        = true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ⌨️ KOTLIN
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[kotlin]
+symbol          = " "
+style           = "bold #cba6f7"
+format          = "[$symbol$version]($style) "
