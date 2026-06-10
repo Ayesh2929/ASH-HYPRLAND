@@ -34,10 +34,9 @@ case "${1:-usage}" in
 
     temp)
         # CPU temperature
-        local temp=""
+        temp=""
         for zone in /sys/class/thermal/thermal_zone*/temp; do
             if [[ -f "${zone}" ]]; then
-                local raw
                 raw=$(cat "${zone}" 2>/dev/null || echo "0")
                 if (( raw > 0 && raw < 150000 )); then
                     temp=$(( raw / 1000 ))
