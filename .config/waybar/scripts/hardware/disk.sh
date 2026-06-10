@@ -1,181 +1,128 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR DISK MODULE                           ║
-# ║           Multiple mount points with progress bars and IO stats            ║
+# ║           Multi-mountpoint disk usage with IO stats                        ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
 readonly CACHE_DIR="${HOME}/.cache/ash-dots"
+readonly LOG_FILE="${CACHE_DIR}/logs/disk.log"
 
-# Mount points to monitor
-readonly -a MOUNT_POINTS=("/" "/home" "/boot" "/tmp" "/var")
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
+
+# Mountpoints to monitor
+readonly -a WATCH_MOUNTS=("/" "/home" "/boot" "/tmp" "/var")
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# 📊 DISK DATA
+# 💾 DISK STATS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-get_disk_info() {
+get_disk_stats() {
     local mount="${1:-/}"
 
-    if ! mountpoint -q "${mount}" 2>/dev/null && [[ "${mount}" != "/" ]]; then
-        return 1
+    local df_output
+    df_output=$(df -h "${mount}" 2>/dev/null | tail -1)
+
+    if [[ -z "${df_output}" ]]; then
+        echo "0|0|0|0|?"
+        return 0
     fi
 
-    local info
-    info=$(df -BM "${mount}" 2>/dev/null | awk 'NR==2 {
-        total = $2
-        used  = $3
-        avail = $4
-        pct   = $5
-        gsub(/M/, "", total)
-        gsub(/M/, "", used)
-        gsub(/M/, "", avail)
-        gsub(/%/, "", pct)
-        printf "%s|%s|%s|%s", total, used, avail, pct
-    }') || return 1
+    local total used avail pct fstype
+    read -r _ total used avail pct _ <<< "${df_output}"
+    pct="${pct//%/}"
 
-    echo "${info}"
+    # Filesystem type
+    fstype=$(findmnt -n -o FSTYPE "${mount}" 2>/dev/null || echo "?")
+
+    echo "${used}|${avail}|${total}|${pct}|${fstype}"
 }
 
-format_size() {
-    local mb="$1"
-    if (( mb >= 1024 )); then
-        awk "BEGIN{printf \"%.1fG\", ${mb}/1024}"
+get_all_disks() {
+    local output=""
+
+    for mount in "${WATCH_MOUNTS[@]}"; do
+        if mountpoint -q "${mount}" 2>/dev/null || [[ "${mount}" == "/" ]]; then
+            local stats
+            stats=$(get_disk_stats "${mount}")
+            local used avail total pct fstype
+            IFS='|' read -r used avail total pct fstype <<< "${stats}"
+            output+="${mount}: ${used}/${total} (${pct}%)\n"
+        fi
+    done
+
+    echo -e "${output}"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📊 FORMAT OUTPUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+format_output() {
+    local mount="${1:-/}"
+
+    local stats
+    stats=$(get_disk_stats "${mount}")
+
+    local used avail total pct fstype
+    IFS='|' read -r used avail total pct fstype <<< "${stats}"
+
+    # Determine class
+    local class icon
+    if (( pct >= 90 )); then
+        class="critical"; icon="󰋊"
+    elif (( pct >= 75 )); then
+        class="warning";  icon="󰋊"
+    elif (( pct >= 50 )); then
+        class="moderate"; icon="󰋊"
     else
-        echo "${mb}M"
+        class="normal";   icon="󰋊"
     fi
-}
 
-build_bar() {
-    local pct="$1"
-    local width=8
-    local filled=$(( pct * width / 100 ))
-    local bar=""
-    for (( i=0; i<filled; i++ )); do bar+="█"; done
-    for (( i=filled; i<width; i++ )); do bar+="░"; done
-    echo "${bar}"
-}
+    # All disks for tooltip
+    local all_disks
+    all_disks=$(get_all_disks)
 
-get_disk_io() {
-    # Get disk I/O stats if iostat is available
-    if command -v iostat &>/dev/null; then
-        iostat -d -k 1 1 2>/dev/null \
-            | awk 'NR>3 && $1!="" {printf "%s: R:%.0fK/s W:%.0fK/s\n", $1, $3, $4}' \
-            | head -3
-    fi
-}
+    local tooltip
+    tooltip="󰋊 Disk Usage\n"
+    tooltip+="────────────────────\n"
+    tooltip+="${all_disks}"
+    tooltip+="────────────────────\n"
+    tooltip+="Root: ${used} used / ${avail} free\n"
+    tooltip+="Total: ${total}\n"
+    tooltip+="FS: ${fstype}"
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 🎯 MAIN
-# ═══════════════════════════════════════════════════════════════════════════════
+    printf '{"text": "%s %s%%", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
+        "${icon}" "${pct}" "${tooltip}" "${class}" "${pct}"
+}
 
 main() {
     local action="${1:-status}"
+    local mount="${2:-/}"
 
-    mkdir -p "${CACHE_DIR}"
+    mkdir -p "${CACHE_DIR}/logs"
 
     case "${action}" in
-        status | "")
-            # Get root filesystem stats
-            local root_info
-            root_info=$(get_disk_info "/") || {
-                printf '{"text": "󰋊 N/A", "class": "error"}\n'
-                return 0
-            }
-
-            local total used avail pct
-            IFS='|' read -r total used avail pct <<< "${root_info}"
-
-            local used_h avail_h total_h
-            used_h=$(format_size "${used}")
-            avail_h=$(format_size "${avail}")
-            total_h=$(format_size "${total}")
-
-            # Icon and class
-            local icon class
-            if (( pct >= 90 )); then
-                icon="󰪥"
-                class="critical"
-            elif (( pct >= 75 )); then
-                icon="󰪤"
-                class="warning"
-            elif (( pct >= 50 )); then
-                icon="󰪣"
-                class="moderate"
-            else
-                icon="󰋊"
-                class="normal"
-            fi
-
-            # Build tooltip with all mount points
-            local tooltip="󰋊 Disk Usage\n"
-            tooltip+="─────────────────────────────────\n"
-
-            for mount in "${MOUNT_POINTS[@]}"; do
-                local info
-                info=$(get_disk_info "${mount}" 2>/dev/null) || continue
-
-                local m_total m_used m_avail m_pct
-                IFS='|' read -r m_total m_used m_avail m_pct <<< "${info}"
-
-                local bar
-                bar=$(build_bar "${m_pct}")
-                local m_used_h m_total_h
-                m_used_h=$(format_size "${m_used}")
-                m_total_h=$(format_size "${m_total}")
-
-                local m_icon="󰋊"
-                (( m_pct >= 90 )) && m_icon="󰪥"
-                (( m_pct >= 75 )) && m_icon="󰪤"
-
-                tooltip+="${m_icon} ${mount}\n"
-                tooltip+="   ${bar} ${m_pct}%  (${m_used_h}/${m_total_h}, ${m_avail_h} free)\n"
-            done
-
-            # Add IO stats
-            local io_stats
-            io_stats=$(get_disk_io 2>/dev/null || echo "")
-            if [[ -n "${io_stats}" ]]; then
-                tooltip+="─────────────────────────────────\n"
-                tooltip+="I/O Stats:\n${io_stats}\n"
-            fi
-
-            local text="${icon} ${used_h}/${total_h}"
-
-            printf '{"text": "%s", "tooltip": "%s", "class": "%s", "percentage": %s}\n' \
-                "${text}" "${tooltip}" "${class}" "${pct}"
-            ;;
-
-        percent)
-            df "/" | awk 'NR==2{print $5}' | tr -d '%'
-            ;;
-
+        status | "")  format_output "${mount}" ;;
         used)
-            df -BG "/" | awk 'NR==2{print $3}' | tr -d 'G'
+            local stats
+            stats=$(get_disk_stats "${mount}")
+            echo "${stats}" | cut -d'|' -f1
             ;;
-
-        free)
-            df -BG "/" | awk 'NR==2{print $4}' | tr -d 'G'
+        avail)
+            local stats
+            stats=$(get_disk_stats "${mount}")
+            echo "${stats}" | cut -d'|' -f2
             ;;
-
-        all)
-            for mount in "${MOUNT_POINTS[@]}"; do
-                local info
-                info=$(get_disk_info "${mount}" 2>/dev/null) || continue
-                local total used avail pct
-                IFS='|' read -r total used avail pct <<< "${info}"
-                printf "%-15s %8s/%8s (%3s%%) %8s free\n" \
-                    "${mount}" \
-                    "$(format_size "${used}")" \
-                    "$(format_size "${total}")" \
-                    "${pct}" \
-                    "$(format_size "${avail}")"
-            done
+        percent)
+            local stats
+            stats=$(get_disk_stats "${mount}")
+            echo "${stats}" | cut -d'|' -f4
             ;;
-
+        all)  get_all_disks ;;
         *)
-            echo "Usage: disk.sh [status|percent|used|free|all]"
+            echo "Usage: disk.sh [status|used|avail|percent|all] [mountpoint]"
             exit 1
             ;;
     esac
