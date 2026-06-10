@@ -1,0 +1,33 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.0 — ASH IDLE SYSTEMD SERVICE                     ║
+# ║           Manages hypridle daemon lifecycle                                 ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[Unit]
+Description=ASH Idle Manager (hypridle)
+Documentation=https://github.com/hyprwm/hypridle
+After=graphical-session.target
+Wants=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=3
+
+Environment="HOME=%h"
+Environment="XDG_RUNTIME_DIR=/run/user/%U"
+
+ExecStart=/usr/bin/hypridle
+
+# Signal handling
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ash-idle
+
+[Install]
+WantedBy=graphical-session.target
