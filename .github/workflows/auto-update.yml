@@ -1,0 +1,97 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.1.0 — AUTO-UPDATE DEPENDENCIES                   ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+name: 🔄 Auto Update
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'    # Monday 8am — check updates
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  check-hyprland-updates:
+    name: 🖥️ Check Hyprland Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔍 Check latest Hyprland version
+        id: hyprland
+        run: |
+          LATEST=$(curl -s \
+              https://api.github.com/repos/hyprwm/Hyprland/releases/latest \
+              | jq -r '.tag_name' 2>/dev/null || echo "unknown")
+          echo "version=${LATEST}" >> $GITHUB_OUTPUT
+          echo "Latest Hyprland: ${LATEST}"
+
+      - name: 📝 Update version badge if needed
+        run: |
+          LATEST="${{ steps.hyprland.outputs.version }}"
+          echo "Latest Hyprland version: ${LATEST}"
+          # Could update README badge here
+
+  check-package-updates:
+    name: 📦 Check Package Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔍 Check GitHub Action versions
+        run: |
+          python3 - << 'PYEOF'
+          import re
+          from pathlib import Path
+
+          actions = {}
+          for workflow in Path('.github/workflows').glob('*.yml'):
+              content = workflow.read_text()
+              matches = re.findall(r'uses:\s+([^@\s]+)@([^\s]+)', content)
+              for action, version in matches:
+                  if action not in actions:
+                      actions[action] = set()
+                  actions[action].add(version)
+
+          print("📋 GitHub Actions used:")
+          for action, versions in sorted(actions.items()):
+              print(f"  {action}: {', '.join(sorted(versions))}")
+          PYEOF
+
+  create-update-pr:
+    name: 🔄 Create Update PR
+    needs: [check-hyprland-updates]
+    runs-on: ubuntu-latest
+    if: false  # Enable when needed
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔄 Create PR with updates
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update dependencies"
+          title: "chore: automated dependency updates"
+          body: |
+            ## 🔄 Automated Dependency Updates
+
+            This PR was automatically created by the auto-update workflow.
+
+            ### Changes
+            - Updated GitHub Action versions
+            - Updated version references in README
+
+            ### Review
+            Please review and merge if everything looks correct.
+          branch: auto-update/dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
