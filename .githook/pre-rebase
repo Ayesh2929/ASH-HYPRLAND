@@ -1,0 +1,30 @@
+#!/bin/bash
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.1.0 — PRE-REBASE HOOK                            ║
+# ║           Warns before rebasing main branch                                ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+readonly R='\033[0m' B='\033[1m' Y='\033[93m' RED='\033[91m'
+
+UPSTREAM="$1"
+BRANCH="$2"
+
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+
+# Prevent rebasing main
+if [[ "${CURRENT_BRANCH}" == "main" ]]; then
+    echo ""
+    echo -e "${RED}${B}🚨 WARNING: Rebasing main branch!${R}"
+    echo ""
+    echo -e "  ${Y}Rebasing main can rewrite published history.${R}"
+    echo -e "  ${Y}This is dangerous if others are using this branch.${R}"
+    echo ""
+    read -rp "  Continue? [y/N]: " confirm
+
+    if [[ "${confirm,,}" != "y" ]]; then
+        echo -e "  ${RED}Rebase aborted${R}"
+        exit 1
+    fi
+fi
+
+echo -e "${B}🪝 Rebasing ${CURRENT_BRANCH}...${R}"
