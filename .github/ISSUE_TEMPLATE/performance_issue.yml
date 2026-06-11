@@ -1,0 +1,102 @@
+name: ⚡ Performance Issue
+description: Report performance problems (slow startup, high CPU, memory leaks)
+title: "perf: [description of slowdown]"
+labels: ["performance", "needs-triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Performance Issue
+        Help us identify and fix performance bottlenecks.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: ⚡ Performance Issue Description
+      description: Describe the performance problem
+      placeholder: "Waybar uses 15% CPU constantly when..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 🔧 Affected Component
+      multiple: true
+      options:
+        - Waybar (high CPU)
+        - Waybar (slow update)
+        - Theme engine (slow apply)
+        - Fish shell (slow startup)
+        - Neovim (slow startup)
+        - Hyprland (animations lag)
+        - Screenshot (slow capture)
+        - Rofi (slow open)
+        - Desktop startup time
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: 📊 Performance Metrics
+      description: Provide measurements if possible
+      render: shell
+      placeholder: |
+        # Startup time
+        time ash theme pick
+
+        # Waybar CPU
+        top -b -n1 | grep waybar
+
+        # Memory usage
+        free -h
+
+        # Hyprland performance
+        hyprctl statistics
+    validations:
+      required: false
+
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: 🎮 GPU Type
+      options:
+        - AMD (best)
+        - NVIDIA (may have issues)
+        - Intel (integrated)
+        - Virtual Machine
+    validations:
+      required: true
+
+  - type: input
+    id: ram
+    attributes:
+      label: 💾 RAM Amount
+      placeholder: "8GB"
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 🔧 Workarounds Tried
+      description: What have you tried to improve performance?
+      placeholder: |
+        - Reduced blur.passes to 2
+        - Disabled animations
+        - Reduced Waybar update intervals
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I checked `ash score` for performance category
+          required: true
+        - label: I tried `ash workspace apply gaming` (disables eye candy)
+          required: false
+        - label: I've set an appropriate power profile (`ash score fix`)
+          required: false

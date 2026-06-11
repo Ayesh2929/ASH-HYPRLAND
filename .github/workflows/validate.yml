@@ -1,0 +1,695 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║           ASH DOTFILES v3.1.0 — ADVANCED VALIDATION WORKFLOW               ║
+# ║           Comprehensive file validation with detailed reporting            ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+name: 🔍 Validate
+
+on:
+  push:
+    branches: [ main, dev, 'feat/**', 'fix/**', 'hotfix/**' ]
+  pull_request:
+    branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug output'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+  FORCE_COLOR: '1'
+
+jobs:
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📋 JOB 1: VALIDATE CONFIG FILES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validate-configs:
+    name: 📋 Config Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      total-files: ${{ steps.count.outputs.total }}
+      failed-files: ${{ steps.results.outputs.failed }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: 📦 Install Python deps
+        run: |
+          pip install --quiet \
+            jsonschema \
+            tomli \
+            pyyaml \
+            colorama \
+            rich
+
+      - name: 🔢 Count files
+        id: count
+        run: |
+          TOTAL=$(find . -not -path './.git/*' -type f | wc -l)
+          echo "total=${TOTAL}" >> $GITHUB_OUTPUT
+          echo "📊 Total files: ${TOTAL}"
+
+      - name: 🔍 Validate JSONC files
+        run: |
+          python3 - << 'PYEOF'
+          import re, json, sys, os
+          from pathlib import Path
+          from rich.console import Console
+          from rich.table import Table
+
+          console = Console()
+          table = Table(title="JSONC Validation", show_header=True)
+          table.add_column("File", style="cyan")
+          table.add_column("Status", style="green")
+          table.add_column("Info")
+
+          failed = 0
+          files = list(Path('.').rglob('*.jsonc'))
+          files = [f for f in files if '.git' not in str(f)]
+
+          for filepath in sorted(files):
+              try:
+                  content = filepath.read_text(encoding='utf-8')
+                  # Strip comments
+                  content = re.sub(r'//[^\n]*', '', content)
+                  content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+                  # Remove trailing commas
+                  content = re.sub(r',(\s*[}\]])', r'\1', content)
+                  json.loads(content)
+                  table.add_row(str(filepath), "✅ PASS", "Valid JSON")
+              except Exception as e:
+                  table.add_row(str(filepath), "❌ FAIL", str(e)[:60])
+                  failed += 1
+
+          console.print(table)
+          if failed > 0:
+              console.print(f"\n[red]❌ {failed} JSONC file(s) failed[/red]")
+              sys.exit(1)
+          console.print(f"\n[green]✅ All {len(files)} JSONC files valid[/green]")
+          PYEOF
+
+      - name: 🔍 Validate JSON files
+        run: |
+          python3 - << 'PYEOF'
+          import json, sys
+          from pathlib import Path
+          from rich.console import Console
+
+          console = Console()
+          failed = 0
+          skip = {'lazy-lock.json', 'package-lock.json'}
+          files = [f for f in Path('.').rglob('*.json')
+                   if '.git' not in str(f) and f.name not in skip]
+
+          for filepath in sorted(files):
+              try:
+                  json.loads(filepath.read_text(encoding='utf-8'))
+                  console.print(f"  [green]✓[/green] {filepath}")
+              except Exception as e:
+                  console.print(f"  [red]✗[/red] {filepath}: {e}")
+                  failed += 1
+
+          if failed:
+              sys.exit(1)
+          console.print(f"\n[green]✅ All {len(files)} JSON files valid[/green]")
+          PYEOF
+
+      - name: 🔍 Validate TOML files
+        run: |
+          python3 - << 'PYEOF'
+          import sys
+          from pathlib import Path
+          from rich.console import Console
+
+          try:
+              import tomllib
+          except ImportError:
+              import tomli as tomllib
+
+          console = Console()
+          failed = 0
+          files = [f for f in Path('.').rglob('*.toml') if '.git' not in str(f)]
+
+          for filepath in sorted(files):
+              try:
+                  with open(filepath, 'rb') as f:
+                      tomllib.load(f)
+                  console.print(f"  [green]✓[/green] {filepath}")
+              except Exception as e:
+                  console.print(f"  [red]✗[/red] {filepath}: {e}")
+                  failed += 1
+
+          if failed:
+              sys.exit(1)
+          console.print(f"\n[green]✅ All {len(files)} TOML files valid[/green]")
+          PYEOF
+
+      - name: 🔍 Validate INI files
+        run: |
+          python3 - << 'PYEOF'
+          import configparser, sys
+          from pathlib import Path
+
+          failed = 0
+          files = [f for f in Path('.').rglob('*.ini') if '.git' not in str(f)]
+
+          for filepath in sorted(files):
+              try:
+                  c = configparser.ConfigParser()
+                  c.read(str(filepath))
+                  print(f"  ✅ {filepath}")
+              except Exception as e:
+                  print(f"  ❌ {filepath}: {e}")
+                  failed += 1
+
+          if failed:
+              sys.exit(1)
+          print(f"\n✅ All {len(files)} INI files valid")
+          PYEOF
+
+      - name: 🔍 Validate YAML files
+        run: |
+          python3 - << 'PYEOF'
+          import yaml, sys
+          from pathlib import Path
+
+          failed = 0
+          files = [f for f in Path('.').rglob('*.yml')
+                   if '.git' not in str(f)]
+          files += [f for f in Path('.').rglob('*.yaml')
+                    if '.git' not in str(f)]
+
+          for filepath in sorted(files):
+              try:
+                  with open(filepath) as f:
+                      list(yaml.safe_load_all(f))
+                  print(f"  ✅ {filepath}")
+              except yaml.YAMLError as e:
+                  print(f"  ❌ {filepath}: {e}")
+                  failed += 1
+
+          if failed:
+              sys.exit(1)
+          print(f"\n✅ All {len(files)} YAML files valid")
+          PYEOF
+
+      - name: 📁 Check required files exist
+        id: required-files
+        run: |
+          python3 - << 'PYEOF'
+          import sys
+          from pathlib import Path
+
+          REQUIRED = [
+              "config/hypr/hyprland.conf",
+              "config/hypr/core/env.conf",
+              "config/hypr/core/monitors.conf",
+              "config/hypr/core/input.conf",
+              "config/hypr/core/general.conf",
+              "config/hypr/core/cursor.conf",
+              "config/hypr/core/binds.conf",
+              "config/hypr/modules/decorations.conf",
+              "config/hypr/modules/animations.conf",
+              "config/hypr/modules/keybinds.conf",
+              "config/hypr/modules/autostart.conf",
+              "config/hypr/rules/windowrules.conf",
+              "config/hypr/rules/workspacerules.conf",
+              "config/hypr/rules/layerrules.conf",
+              "config/hypr/scripts/theme/theme-engine.sh",
+              "config/hypr/scripts/theme/wallpaper-picker.sh",
+              "config/hypr/scripts/media/volume.sh",
+              "config/hypr/scripts/media/brightness.sh",
+              "config/hypr/scripts/system/lock.sh",
+              "config/hypr/scripts/network/wifi-toggle.sh",
+              "config/waybar/configs/top.jsonc",
+              "config/waybar/styles/main.css",
+              "config/waybar/styles/animations.css",
+              "config/rofi/config.rasi",
+              "config/rofi/scripts/launcher.sh",
+              "config/rofi/scripts/powermenu.sh",
+              "config/fish/config.fish",
+              "config/fish/conf.d/30-abbr.fish",
+              "config/fish/functions/fish_greeting.fish",
+              "config/nvim/init.lua",
+              "config/nvim/lua/core/options.lua",
+              "config/nvim/lua/core/keymaps.lua",
+              "config/nvim/lua/plugins/lsp.lua",
+              "config/nvim/lua/themes/ash.lua",
+              "config/dunst/dunstrc",
+              "config/hypridle/hypridle.conf",
+              "config/kitty/kitty.conf",
+              "config/starship.toml",
+              "config/btop/btop.conf",
+              "bin/ash",
+              "install.sh",
+              "quickstart.sh",
+              "README.md",
+              "LICENSE",
+              ".gitignore",
+              "ATTRIBUTION.md",
+              "docs/KEYBINDS.md",
+              "docs/THEMING.md",
+              "docs/TROUBLESHOOTING.md",
+              "docs/CUSTOMIZATION.md",
+              "scripts/health/doctor.sh",
+              "scripts/health/validate.sh",
+              "scripts/health/final-check.sh",
+              "scripts/core/backup.sh",
+              "scripts/core/update.sh",
+              "scripts/core/restore.sh",
+          ]
+
+          base = Path('.')
+          failed = []
+          passed = 0
+
+          for f in REQUIRED:
+              p = base / f
+              if p.exists():
+                  print(f"  ✅ {f}")
+                  passed += 1
+              else:
+                  print(f"  ❌ MISSING: {f}")
+                  failed.append(f)
+
+          print(f"\n{'='*60}")
+          print(f"✅ Present: {passed}/{len(REQUIRED)}")
+          if failed:
+              print(f"❌ Missing: {len(failed)}")
+              for f in failed:
+                  print(f"   - {f}")
+              sys.exit(1)
+          PYEOF
+
+      - name: 📊 Store results
+        id: results
+        if: always()
+        run: |
+          FAILED=$(grep -c "MISSING:" /tmp/required-output.txt 2>/dev/null || echo "0")
+          echo "failed=${FAILED}" >> $GITHUB_OUTPUT
+
+      - name: 📊 Generate validation report
+        if: always()
+        run: |
+          echo "## 📋 Config Validation Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| JSONC Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| JSON Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TOML Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Required Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total files scanned:** ${{ steps.count.outputs.total }}" >> $GITHUB_STEP_SUMMARY
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📜 JOB 2: SHELL SCRIPT VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validate-scripts:
+    name: 📜 Shell Scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔧 Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y shellcheck
+          pip install --quiet bashate
+
+      - name: 🔍 Bash syntax check (bash -n)
+        run: |
+          echo "## Bash Syntax Check" >> $GITHUB_STEP_SUMMARY
+          FAILED=0
+          TOTAL=0
+
+          while IFS= read -r script; do
+              TOTAL=$((TOTAL + 1))
+              if bash -n "$script" 2>/dev/null; then
+                  echo "  ✅ $script"
+              else
+                  echo "  ❌ $script"
+                  bash -n "$script" 2>&1 | head -3
+                  FAILED=$((FAILED + 1))
+              fi
+          done < <(find . -name "*.sh" -not -path "./.git/*" 2>/dev/null | sort)
+
+          echo ""
+          echo "📊 Checked: $TOTAL scripts"
+          if [[ $FAILED -gt 0 ]]; then
+              echo "❌ $FAILED script(s) have syntax errors"
+              exit 1
+          fi
+          echo "✅ All $TOTAL scripts have valid syntax"
+          echo "- **Total scripts:** $TOTAL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Syntax errors:** $FAILED" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔍 ShellCheck analysis
+        run: |
+          FAILED=0
+          WARNED=0
+
+          while IFS= read -r script; do
+              OUTPUT=$(shellcheck \
+                  --severity=error \
+                  --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
+                  --shell=bash \
+                  "$script" 2>&1)
+
+              if [[ $? -eq 0 ]]; then
+                  echo "  ✅ $script"
+              else
+                  echo "  ⚠️  $script"
+                  echo "$OUTPUT" | head -5 | sed 's/^/     /'
+                  WARNED=$((WARNED + 1))
+              fi
+          done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
+
+          echo ""
+          echo "⚠️  ShellCheck warnings: $WARNED"
+          echo "- **ShellCheck warnings:** $WARNED" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔍 Check set -euo pipefail
+        run: |
+          MISSING=0
+          while IFS= read -r script; do
+              if ! head -5 "$script" | grep -q "set -euo pipefail"; then
+                  echo "  ⚠️  Missing set -euo pipefail: $script"
+                  MISSING=$((MISSING + 1))
+              fi
+          done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
+
+          if [[ $MISSING -gt 0 ]]; then
+              echo "⚠️  $MISSING scripts missing 'set -euo pipefail'"
+          else
+              echo "✅ All scripts have 'set -euo pipefail'"
+          fi
+
+      - name: 🔐 Check script permissions
+        run: |
+          NOT_EXEC=0
+          while IFS= read -r script; do
+              if [[ ! -x "$script" ]]; then
+                  echo "  ⚠️  Not executable: $script"
+                  NOT_EXEC=$((NOT_EXEC + 1))
+              fi
+          done < <(find . -name "*.sh" -not -path "./.git/*")
+
+          if [[ $NOT_EXEC -gt 0 ]]; then
+              echo "⚠️  $NOT_EXEC scripts need +x permission"
+          else
+              echo "✅ All scripts are executable"
+          fi
+
+      - name: 🔍 Check for dangerous patterns
+        run: |
+          ISSUES=0
+
+          patterns=(
+              "rm -rf /"
+              "mkfs\."
+              "dd if=/dev/zero"
+              ":(){:|:&};:"
+              "chmod -R 777 /"
+          )
+
+          for pattern in "${patterns[@]}"; do
+              if grep -r "${pattern}" . \
+                  --include="*.sh" \
+                  --exclude-dir=".git" \
+                  -l 2>/dev/null; then
+                  echo "🚨 DANGEROUS PATTERN FOUND: ${pattern}"
+                  ISSUES=$((ISSUES + 1))
+              fi
+          done
+
+          if [[ $ISSUES -gt 0 ]]; then
+              echo "❌ $ISSUES dangerous patterns found!"
+              exit 1
+          fi
+          echo "✅ No dangerous patterns found"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🌙 JOB 3: LUA VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validate-lua:
+    name: 🌙 Lua Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔧 Install Lua tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 luarocks
+          sudo luarocks install luacheck 2>/dev/null || true
+
+      - name: 🔍 Lua syntax check
+        run: |
+          FAILED=0
+
+          while IFS= read -r file; do
+              if luac5.4 -p "$file" 2>/dev/null; then
+                  echo "  ✅ $file"
+              else
+                  echo "  ❌ $file"
+                  luac5.4 -p "$file" 2>&1 | head -3
+                  FAILED=$((FAILED + 1))
+              fi
+          done < <(find config/nvim -name "*.lua" 2>/dev/null | sort)
+
+          if [[ $FAILED -gt 0 ]]; then
+              echo "❌ $FAILED Lua file(s) invalid"
+              exit 1
+          fi
+          echo "✅ All Lua files valid"
+
+      - name: 🔍 Luacheck linting
+        run: |
+          if command -v luacheck >/dev/null; then
+              luacheck config/nvim/lua/ \
+                  --globals vim \
+                  --no-unused-args \
+                  --max-line-length 150 \
+                  --ignore 211 212 213 631 \
+                  --quiet \
+                  2>/dev/null || echo "⚠️  Luacheck warnings (non-blocking)"
+          fi
+
+      - name: 🔍 Check Neovim plugin specs
+        run: |
+          python3 - << 'PYEOF'
+          import re
+          from pathlib import Path
+
+          plugin_files = list(Path('config/nvim/lua/plugins').glob('*.lua'))
+          issues = 0
+
+          for f in sorted(plugin_files):
+              content = f.read_text()
+
+              # Check returns a table
+              if not re.search(r'^return\s*\{', content, re.MULTILINE):
+                  print(f"  ⚠️  {f}: Missing 'return {...}'")
+                  issues += 1
+              else:
+                  print(f"  ✅ {f}")
+
+          if issues:
+              print(f"\n⚠️  {issues} plugin file(s) have structure issues")
+          else:
+              print(f"\n✅ All {len(plugin_files)} plugin files have valid structure")
+          PYEOF
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🎨 JOB 4: CSS/SCSS VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validate-styles:
+    name: 🎨 CSS/SCSS
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Install style tools
+        run: |
+          npm install -g sass stylelint \
+            stylelint-config-standard \
+            stylelint-config-standard-scss \
+            2>/dev/null || true
+
+      - name: 🔍 CSS brace matching
+        run: |
+          python3 - << 'PYEOF'
+          from pathlib import Path
+          import sys
+
+          failed = 0
+          for f in sorted(Path('.').rglob('*.css')):
+              if '.git' in str(f):
+                  continue
+              content = f.read_text()
+              opens = content.count('{')
+              closes = content.count('}')
+              if opens != closes:
+                  print(f"  ❌ {f}: {opens} opens vs {closes} closes")
+                  failed += 1
+              else:
+                  print(f"  ✅ {f}: {opens} matched braces")
+
+          if failed:
+              print(f"\n❌ {failed} CSS file(s) have mismatched braces")
+              sys.exit(1)
+          PYEOF
+
+      - name: 🔍 SCSS compilation test
+        run: |
+          FAILED=0
+          while IFS= read -r file; do
+              [[ "$file" == *"_"* ]] && continue  # Skip partials
+              if sass --no-source-map "$file" /dev/null 2>/dev/null; then
+                  echo "  ✅ $file"
+              else
+                  echo "  ⚠️  $file (SCSS issue)"
+                  FAILED=$((FAILED + 1))
+              fi
+          done < <(find . -name "*.scss" -not -path "./.git/*" 2>/dev/null)
+
+          echo "SCSS files processed: $FAILED warnings"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐟 JOB 5: FISH SHELL VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validate-fish:
+    name: 🐟 Fish Shell
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔧 Install Fish
+        run: |
+          sudo apt-add-repository ppa:fish-shell/release-3 -y 2>/dev/null || true
+          sudo apt-get update -qq
+          sudo apt-get install -y fish
+
+      - name: 🔍 Fish syntax validation
+        run: |
+          FAILED=0
+
+          while IFS= read -r file; do
+              if fish --no-execute "$file" 2>/dev/null; then
+                  echo "  ✅ $file"
+              else
+                  echo "  ❌ $file"
+                  fish --no-execute "$file" 2>&1 | head -3
+                  FAILED=$((FAILED + 1))
+              fi
+          done < <(find config/fish -name "*.fish" 2>/dev/null | sort)
+
+          if [[ $FAILED -gt 0 ]]; then
+              echo "❌ $FAILED Fish file(s) have syntax errors"
+              exit 1
+          fi
+          echo "✅ All Fish files valid"
+
+      - name: 🔍 Check Fish function definitions
+        run: |
+          python3 - << 'PYEOF'
+          import re
+          from pathlib import Path
+
+          issues = 0
+          for f in sorted(Path('config/fish/functions').glob('*.fish')):
+              content = f.read_text()
+              func_name = f.stem
+              pattern = rf'function\s+{re.escape(func_name)}\b'
+              if re.search(pattern, content):
+                  print(f"  ✅ {f.name}: function '{func_name}' defined")
+              else:
+                  print(f"  ⚠️  {f.name}: function '{func_name}' not found")
+                  issues += 1
+
+          if issues:
+              print(f"\n⚠️  {issues} function file(s) may have naming issues")
+          else:
+              print(f"\n✅ All function files have correct definitions")
+          PYEOF
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📊 JOB 6: SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  validation-summary:
+    name: 📊 Summary
+    needs:
+      - validate-configs
+      - validate-scripts
+      - validate-lua
+      - validate-styles
+      - validate-fish
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: 📊 Generate summary
+        run: |
+          echo "# 🔍 ASH Dotfiles Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Config Files | ${{ needs.validate-configs.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell Scripts | ${{ needs.validate-scripts.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lua Files | ${{ needs.validate-lua.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| CSS/SCSS | ${{ needs.validate-styles.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fish Shell | ${{ needs.validate-fish.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          JOBS=("${{ needs.validate-configs.result }}" "${{ needs.validate-scripts.result }}" "${{ needs.validate-lua.result }}" "${{ needs.validate-styles.result }}" "${{ needs.validate-fish.result }}")
+          FAILED=0
+          for result in "${JOBS[@]}"; do
+              [[ "$result" == "failure" ]] && FAILED=$((FAILED+1))
+          done
+
+          if [[ $FAILED -eq 0 ]]; then
+              echo "## ✅ ALL VALIDATIONS PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+              echo "## ❌ $FAILED VALIDATION(S) FAILED" >> $GITHUB_STEP_SUMMARY
+              exit 1
+          fi

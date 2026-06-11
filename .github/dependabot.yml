@@ -1,0 +1,37 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v3.1.0 — DEPENDABOT CONFIGURATION                            ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+version: 2
+
+updates:
+  # GitHub Actions — keep up to date
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: "UTC"
+    commit-message:
+      prefix: "ci"
+      include: scope
+    labels:
+      - dependencies
+      - ci
+      - automated
+    reviewers:
+      - yourusername
+    assignees:
+      - yourusername
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+      security-actions:
+        patterns:
+          - "aquasecurity/*"
+          - "ossf/*"

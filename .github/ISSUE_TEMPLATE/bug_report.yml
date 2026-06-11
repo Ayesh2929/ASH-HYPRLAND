@@ -1,127 +1,154 @@
-name: Bug Report
-description: Report a bug or issue with ASH Dotfiles
-title: "[BUG] "
+name: 🐛 Bug Report
+description: Report a bug in ASH Dotfiles
+title: "fix: [brief description of bug]"
 labels: ["bug", "needs-triage"]
 assignees: []
+
 body:
-- type: markdown
-attributes:
-value: |
-## Bug Report
-Thanks for taking the time to report an issue!
-Please fill this out completely.
-- type: checkboxes
-id: checklist
-attributes:
-label: Pre-flight Checklist
-options:
-- label: I ran `ash doctor` and checked the output
-required: true
-- label: I searched existing issues before opening this one
-required: true
-- label: I am on Arch Linux or an Arch-based distro
-required: true
-- label: I have the latest version (`ash update`)
-required: true
-- type: dropdown
-id: component
-attributes:
-label: Affected Component
-multiple: true
-options:
-- Hyprland (compositor)
-- Waybar (status bar)
-- Rofi (launcher)
-- Theme Engine
-- Hyprlock (lock screen)
-- Hypridle (idle)
-- Fish Shell
-- Neovim
-- AGS Widgets
-- EWW Widgets
-- Dunst/SwayNC
-- Kitty Terminal
-- Screenshots
-- Recorder
-- Clipboard
-- ASH CLI
-- Installation
-- Other
-- type: dropdown
-id: gpu
-attributes:
-label: GPU Type
-options:
-- AMD (Mesa/RADV)
-- NVIDIA (proprietary)
-- Intel
-- Multiple GPUs
-- Unknown
-- type: textarea
-id: description
-attributes:
-label: Bug Description
-description: A clear description of what the bug is
-placeholder: Describe the bug...
-validations:
-required: true
-- type: textarea
-id: reproduce
-attributes:
-label: Steps to Reproduce
-description: How to reproduce the issue
-value: |
-1. Open terminal
-2. Run '...'
-3. See error
-validations:
-required: true
-- type: textarea
-id: expected
-attributes:
-label: Expected Behavior
-description: What should happen
-validations:
-required: true
-- type: textarea
-id: actual
-attributes:
-label: Actual Behavior
-description: What actually happens
-validations:
-required: true
-- type: textarea
-id: doctor
-attributes:
-label: Doctor Output
-description: Output of `ash doctor`
-render: shell
-validations:
-required: true
-- type: textarea
-id: logs
-attributes:
-label: Relevant Logs
-description: Paste logs from `~/.cache/ash-dots/logs/`
-render: shell
-- type: textarea
-id: system
-attributes:
-label: System Information
-description: Output of `bash ~/.dotfiles/scripts/summary.sh`
-render: shell
-validations:
-required: true
-- type: textarea
-id: screenshots
-attributes:
-label: Screenshots
-description: Add screenshots if applicable
-- type: input
-id: version
-attributes:
-label: ASH Version
-description: Run `ash version`
-placeholder: "3.0"
-validations:
-required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+        Thank you for taking the time to report a bug!
+        Please fill in all sections below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🐛 Bug Description
+      description: A clear description of what the bug is
+      placeholder: "When I run 'ash theme pick', the terminal crashes with..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Steps to reproduce the behavior
+      value: |
+        1. Open terminal
+        2. Run: `ash ...`
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Logs
+      description: Paste relevant log output
+      render: shell
+      placeholder: |
+        # Run these and paste output:
+        ash doctor
+        ash log 50
+        cat ~/.cache/ash-dots/logs/cli.log | tail -30
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 🔧 Affected Component
+      description: Which part of ASH is affected?
+      multiple: true
+      options:
+        - Theme Engine (ash theme)
+        - Wallpaper Picker
+        - Waybar
+        - Rofi Launcher
+        - Hyprlock
+        - Fish Shell
+        - Neovim
+        - Music Reactive (ash music)
+        - Health Score (ash score)
+        - Workspace Profiles (ash workspace)
+        - Smart Wallpaper (ash smart)
+        - AI Theme (ash theme ai)
+        - Analytics (ash analytics)
+        - Context Theming (ash context)
+        - ASH CLI
+        - Installation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: gpu
+    attributes:
+      label: 🎮 GPU Type
+      options:
+        - AMD
+        - NVIDIA
+        - Intel
+        - Virtual/Other
+    validations:
+      required: true
+
+  - type: input
+    id: hyprland-version
+    attributes:
+      label: 🖥️ Hyprland Version
+      description: Run `hyprctl version`
+      placeholder: "v0.41.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ash-version
+    attributes:
+      label: 📦 ASH Version
+      description: Run `ash version`
+      placeholder: "3.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 🐧 Operating System
+      options:
+        - Arch Linux
+        - EndeavourOS
+        - CachyOS
+        - Manjaro
+        - Garuda Linux
+        - Other Arch-based
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-info
+    attributes:
+      label: 🖥️ System Information
+      description: Run `fastfetch` or `ash score quick` and paste output
+      render: text
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I ran `ash doctor` and checked the output
+          required: true
+        - label: I searched existing issues for duplicates
+          required: true
+        - label: I'm running the latest version (`ash update`)
+          required: true
+        - label: I checked `~/.cache/ash-dots/logs/` for errors
+          required: true
