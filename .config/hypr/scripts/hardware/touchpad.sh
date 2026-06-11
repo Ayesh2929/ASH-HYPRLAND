@@ -1,24 +1,14 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH DOTFILES v3.0 — TOUCHPAD CONTROL                             ║
-# ║           Enable/disable/toggle touchpad + auto-disable with mouse         ║
+# ║           ASH DOTFILES v3.0 — TOUCHPAD CONTROL (FULL)                      ║
+# ║           Enable/disable/toggle with auto-disable on mouse connect         ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-#
-# USAGE: touchpad.sh [ACTION]
-#
-# ACTIONS:
-#   toggle   — Toggle touchpad on/off
-#   enable   — Enable touchpad
-#   disable  — Disable touchpad
-#   status   — Show touchpad status
-#   auto     — Auto-disable when mouse connected (daemon mode)
-#   config   — Show current touchpad config
 
 set -euo pipefail
 
 readonly CACHE_DIR="${HOME}/.cache/ash-dots"
-readonly LOG_FILE="${CACHE_DIR}/logs/touchpad.log"
 readonly STATE_FILE="${CACHE_DIR}/touchpad-state"
+readonly LOG_FILE="${CACHE_DIR}/logs/touchpad.log"
 
 log()  { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 info() { echo -e "  \033[96m→\033[0m $*"; }
@@ -29,209 +19,193 @@ warn() { echo -e "  \033[93m⚠\033[0m $*" >&2; }
 # 🔍 TOUCHPAD DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-get_touchpad_name() {
-    # Try hyprctl first
-    local name
-    name=$(hyprctl devices -j 2>/dev/null \
-        | jq -r '.[] | select(.type == "touchpad") | .name' 2>/dev/null \
-        | head -1)
+find_touchpad_device() {
+    # Try Hyprland device list first
+    local hypr_tp
+    hypr_tp=$(hyprctl devices -j 2>/dev/null \
+        | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    for section_name, devices in data.items():
+        if isinstance(devices, list):
+            for d in devices:
+                if isinstance(d, dict) and 'touchpad' in d.get('type', '').lower():
+                    print(d.get('name', ''))
+                    break
+except:
+    pass
+" 2>/dev/null | head -1)
 
-    if [[ -n "${name}" ]]; then
-        echo "${name}"
+    if [[ -n "${hypr_tp}" ]]; then
+        echo "${hypr_tp}"
         return 0
     fi
 
-    # Fallback: libinput
-    name=$(libinput list-devices 2>/dev/null \
-        | grep -A5 "Capabilities.*pointer" \
-        | grep "Device:" \
+    # Fallback: search /sys for touchpad
+    local sysfs_tp
+    sysfs_tp=$(find /sys/class/input -name "mouse*" 2>/dev/null \
+        | xargs -I{} cat {}/device/name 2>/dev/null \
         | grep -i "touchpad\|trackpad\|synaptics\|elan\|alps" \
-        | head -1 \
-        | sed 's/Device:\s*//')
+        | head -1)
 
-    echo "${name:-}"
+    echo "${sysfs_tp:-}"
 }
 
 is_touchpad_enabled() {
     if [[ -f "${STATE_FILE}" ]]; then
-        local state
-        state=$(cat "${STATE_FILE}")
-        [[ "${state}" == "enabled" ]]
+        [[ "$(cat "${STATE_FILE}" 2>/dev/null)" == "enabled" ]]
     else
-        # Default: enabled
-        echo "enabled" > "${STATE_FILE}"
-        return 0
+        return 0  # Default: enabled
     fi
-}
-
-is_mouse_connected() {
-    # Check for external mouse (USB/Bluetooth, not touchpad)
-    local devices
-    devices=$(hyprctl devices -j 2>/dev/null \
-        | jq -r '.[] | select(.type == "pointer" and (.name | contains("touchpad") | not)) | .name' \
-        2>/dev/null)
-
-    [[ -n "${devices}" ]]
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 🖱️ TOUCHPAD CONTROL
 # ═══════════════════════════════════════════════════════════════════════════════
 
-enable_touchpad() {
-    info "Enabling touchpad..."
+set_touchpad() {
+    local state="$1"  # enabled or disabled
+    local bool_val
+    [[ "${state}" == "enabled" ]] && bool_val="true" || bool_val="false"
 
-    # hyprctl method
-    hyprctl keyword device[synps/2 synaptics touchpad]:enabled true 2>/dev/null || true
-    hyprctl keyword device[elan touchpad]:enabled true 2>/dev/null || true
+    # Try multiple methods for maximum compatibility
+    local success=false
 
-    # Try by keyword
-    local tp_name
-    tp_name=$(get_touchpad_name)
-    if [[ -n "${tp_name}" ]]; then
-        hyprctl keyword "device[${tp_name}]:enabled" true 2>/dev/null || true
-    fi
+    # Method 1: Hyprland keyword (most reliable)
+    # Try common touchpad device names
+    local tp_names=(
+        "synps/2 synaptics touchpad"
+        "elan touchpad"
+        "alps ps/2 alps dm touchpad"
+        "elantech touchpad"
+        "microsoft precision touchpad"
+    )
 
-    # libinput via xinput fallback
+    for tp_name in "${tp_names[@]}"; do
+        if hyprctl keyword "device[${tp_name}]:enabled" "${bool_val}" 2>/dev/null; then
+            success=true
+        fi
+    done
+
+    # Method 2: libinput via xinput (X11 fallback)
     if command -v xinput &>/dev/null; then
-        local id
-        id=$(xinput list 2>/dev/null \
+        local tp_id
+        tp_id=$(xinput list 2>/dev/null \
             | grep -i "touchpad\|trackpad" \
             | grep -oP 'id=\K\d+' \
             | head -1)
-        [[ -n "${id}" ]] && xinput enable "${id}" 2>/dev/null || true
+
+        if [[ -n "${tp_id}" ]]; then
+            if [[ "${state}" == "enabled" ]]; then
+                xinput enable "${tp_id}" 2>/dev/null && success=true
+            else
+                xinput disable "${tp_id}" 2>/dev/null && success=true
+            fi
+        fi
     fi
 
-    echo "enabled" > "${STATE_FILE}"
+    # Save state
+    echo "${state}" > "${STATE_FILE}"
 
-    notify-send "🖱️ Touchpad Enabled" \
-        "Touchpad is now active" \
+    local msg
+    [[ "${state}" == "enabled" ]] && msg="Touchpad enabled" || msg="Touchpad disabled"
+    local icon
+    [[ "${state}" == "enabled" ]] && icon="🖱️" || icon="🚫"
+
+    notify-send "${icon} Input" \
+        "${msg}" \
         --app-name="ASH Input" \
         --expire-time=2000 \
-        --icon=input-touchpad-symbolic \
         2>/dev/null || true
 
-    ok "Touchpad enabled"
-    log "INFO" "Touchpad enabled"
-}
-
-disable_touchpad() {
-    info "Disabling touchpad..."
-
-    # hyprctl method
-    hyprctl keyword device[synps/2 synaptics touchpad]:enabled false 2>/dev/null || true
-    hyprctl keyword device[elan touchpad]:enabled false 2>/dev/null || true
-
-    local tp_name
-    tp_name=$(get_touchpad_name)
-    if [[ -n "${tp_name}" ]]; then
-        hyprctl keyword "device[${tp_name}]:enabled" false 2>/dev/null || true
-    fi
-
-    # xinput fallback
-    if command -v xinput &>/dev/null; then
-        local id
-        id=$(xinput list 2>/dev/null \
-            | grep -i "touchpad\|trackpad" \
-            | grep -oP 'id=\K\d+' \
-            | head -1)
-        [[ -n "${id}" ]] && xinput disable "${id}" 2>/dev/null || true
-    fi
-
-    echo "disabled" > "${STATE_FILE}"
-
-    notify-send "🚫 Touchpad Disabled" \
-        "Touchpad is now inactive" \
-        --app-name="ASH Input" \
-        --expire-time=2000 \
-        --icon=input-touchpad-symbolic \
-        2>/dev/null || true
-
-    ok "Touchpad disabled"
-    log "INFO" "Touchpad disabled"
+    log "INFO" "Touchpad ${state}"
+    [[ "${success}" == "true" ]] && ok "${msg}" || warn "Partial: ${msg} (some methods failed)"
 }
 
 toggle_touchpad() {
     if is_touchpad_enabled; then
-        disable_touchpad
+        set_touchpad "disabled"
     else
-        enable_touchpad
+        set_touchpad "enabled"
     fi
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 🤖 AUTO-DISABLE DAEMON
-# ═══════════════════════════════════════════════════════════════════════════════
-
+# Auto-disable when external mouse is connected
 auto_daemon() {
-    info "Auto-disable touchpad daemon starting..."
+    info "Touchpad auto-disable daemon starting..."
     log "INFO" "Auto-disable daemon started"
 
     local last_mouse_state=""
 
     while true; do
+        # Check for external USB/Bluetooth mice (not touchpads)
+        local mouse_count
+        mouse_count=$(hyprctl devices -j 2>/dev/null \
+            | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    count = 0
+    for section, devices in data.items():
+        if isinstance(devices, list):
+            for d in devices:
+                if isinstance(d, dict):
+                    name = d.get('name', '').lower()
+                    dtype = d.get('type', '').lower()
+                    if 'pointer' in dtype and 'touchpad' not in name and 'trackpad' not in name:
+                        count += 1
+    print(count)
+except:
+    print(0)
+" 2>/dev/null || echo "0")
+
         local current_state
-        is_mouse_connected && current_state="mouse" || current_state="no-mouse"
+        (( mouse_count > 0 )) && current_state="mouse" || current_state="no-mouse"
 
         if [[ "${current_state}" != "${last_mouse_state}" ]]; then
             if [[ "${current_state}" == "mouse" ]]; then
-                info "Mouse connected — disabling touchpad"
-                disable_touchpad
+                info "External mouse detected — disabling touchpad"
+                set_touchpad "disabled"
             else
-                info "Mouse disconnected — enabling touchpad"
-                enable_touchpad
+                info "External mouse removed — enabling touchpad"
+                set_touchpad "enabled"
             fi
             last_mouse_state="${current_state}"
-            log "INFO" "Auto-switch: ${current_state}"
         fi
 
         sleep 3
     done
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 📊 STATUS
-# ═══════════════════════════════════════════════════════════════════════════════
-
 show_status() {
-    local enabled
-    is_touchpad_enabled && enabled="✅ Enabled" || enabled="❌ Disabled"
-
-    local mouse
-    is_mouse_connected && mouse="🖱️ Connected" || mouse="No external mouse"
-
     local tp_name
-    tp_name=$(get_touchpad_name)
+    tp_name=$(find_touchpad_device)
+    local state
+    is_touchpad_enabled && state="✅ Enabled" || state="❌ Disabled"
 
     echo ""
     echo "  🖱️ Touchpad Status"
     echo "  ─────────────────────────────"
-    echo "  State:  ${enabled}"
+    echo "  State:  ${state}"
     echo "  Device: ${tp_name:-Unknown}"
-    echo "  Mouse:  ${mouse}"
     echo ""
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 🎯 MAIN
-# ═══════════════════════════════════════════════════════════════════════════════
-
 main() {
-    local action="${1:-toggle}"
+    local action="${1:-status}"
 
     mkdir -p "${CACHE_DIR}/logs"
 
     case "${action}" in
-        toggle)    toggle_touchpad ;;
-        enable)    enable_touchpad ;;
-        disable)   disable_touchpad ;;
-        status)    show_status ;;
-        auto)      auto_daemon ;;
-        config)
-            hyprctl devices 2>/dev/null | grep -A5 -i touchpad || echo "No touchpad found"
-            ;;
+        toggle | t)     toggle_touchpad ;;
+        enable | on)    set_touchpad "enabled" ;;
+        disable | off)  set_touchpad "disabled" ;;
+        auto)           auto_daemon ;;
+        status)         show_status ;;
+        find)           find_touchpad_device ;;
         *)
-            echo "Usage: touchpad.sh [toggle|enable|disable|status|auto|config]"
+            echo "Usage: touchpad.sh [toggle|enable|disable|auto|status|find]"
             exit 1
             ;;
     esac

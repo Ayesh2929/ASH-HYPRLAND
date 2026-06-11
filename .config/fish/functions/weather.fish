@@ -1,50 +1,32 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH DOTFILES v3.0 — WEATHER FUNCTION                             ║
+# ║           ASH DOTFILES v3.0 — WEATHER FISH FUNCTION                        ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
-function weather -d "Show weather forecast"
+function weather -d "Show weather for location (default: auto-detect)"
     set -l c_info  (set_color 89b4fa)
-    set -l c_ok    (set_color a6e3a1)
-    set -l c_warn  (set_color f9e2af)
     set -l c_err   (set_color f38ba8)
     set -l c_reset (set_color normal)
 
     set -l location ""
-    set -l format "full"
+    set -l format   "full"
 
-    # Parse arguments
     for arg in $argv
         switch $arg
             case --short -s
-                set format "short"
+                set format short
             case --json -j
-                set format "json"
+                set format json
             case --help -h
-                echo "Usage: weather [location] [--short|-s] [--json|-j]"
-                echo ""
-                echo "Examples:"
-                echo "  weather              # Auto-detect location"
-                echo "  weather London       # Weather for London"
-                echo "  weather 'New York'   # Weather for New York"
-                echo "  weather --short      # One-line summary"
+                echo "Usage: weather [location] [--short] [--json]"
                 return 0
             case '*'
                 set location $arg
         end
     end
 
-    # Check connectivity
     if not command -q curl
-        echo -s $c_err"❌ curl not installed"$c_reset
+        echo -e "  $c_err✗$c_reset curl not installed"
         return 1
-    end
-
-    # Auto-detect location if not provided
-    if test -z "$location"
-        # Check cache
-        if test -f ~/.cache/ash-dots/weather-location
-            set location (cat ~/.cache/ash-dots/weather-location)
-        end
     end
 
     set -l url "https://wttr.in"
@@ -52,31 +34,20 @@ function weather -d "Show weather forecast"
 
     switch $format
         case short
-            # One-line format
-            set -l result (curl -s --max-time 10 "$url?format=3" 2>/dev/null)
-            if test $status -eq 0 && test -n "$result"
-                echo -s "🌤️  "$c_ok$result$c_reset
-            else
-                echo -s $c_err"❌ Weather unavailable"$c_reset
-                return 1
-            end
+            set -l result (curl -s --max-time 8 "$url?format=3" 2>/dev/null)
+            and echo "🌤️  $result"
+            or echo -e "  $c_err✗$c_reset Weather unavailable"
 
         case json
-            curl -s --max-time 10 "$url?format=j1" 2>/dev/null | jq .
+            curl -s --max-time 10 "$url?format=j1" 2>/dev/null | python3 -m json.tool
 
         case full
-            # Full forecast display
-            echo -s $c_info"🌤️ Fetching weather"(test -n "$location" && echo " for $location" || echo "")$c_reset"..."
-            echo ""
+            echo -e "  $c_info→$c_reset Fetching weather"(test -n "$location" && echo " for $location" || echo "...")"$c_reset"
             curl -s --max-time 15 "$url?FQpAn1" 2>/dev/null
-
-            if test $status -ne 0
-                echo -s $c_err"❌ Failed to fetch weather"$c_reset
-                return 1
-            end
+            or echo -e "  $c_err✗$c_reset Could not fetch weather"
     end
 end
 
-complete -c weather -s s -l short -d "Short format"
-complete -c weather -s j -l json  -d "JSON format"
+complete -c weather -s s -l short -d "One-line summary"
+complete -c weather -s j -l json  -d "JSON output"
 complete -c weather -s h -l help  -d "Show help"
