@@ -31,16 +31,28 @@ permissions:
 
 jobs:
 
-  pre-release-checks:
-    name: ✅ Pre-Release Validation
+  validate:
+    name: ✅ Validation
     uses: ./.github/workflows/validate.yml
+    permissions:
+      contents: read
+
+  test:
+    name: 🧪 Tests
     uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+
+  security:
+    name: 🔒 Security
     uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
 
   prepare-release:
     name: 📦 Prepare Release
     runs-on: ubuntu-latest
-    needs: pre-release-checks
+    needs: [validate, test, security]
     timeout-minutes: 20
 
     outputs:
@@ -147,8 +159,8 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: "🚀 ASH Dotfiles ${{ steps.version.outputs.version }}"
-          prerelease: ${{ github.event.inputs.prerelease || false }}
-          draft: ${{ github.event.inputs.draft || false }}
+          prerelease: ${{ github.event.inputs.prerelease == true }}
+          draft: ${{ github.event.inputs.draft == true }}
           files: |
             /tmp/ash-dots-${{ steps.version.outputs.version }}.tar.gz
             /tmp/ash-dots-${{ steps.version.outputs.version }}.zip
@@ -158,7 +170,7 @@ jobs:
             # 🚀 ASH Dotfiles ${{ steps.version.outputs.version }}
 
             > **The most complete, feature-rich Hyprland dotfiles system.**
-            > *274+ files • 125,000+ lines • 10 unique features • 0 known bugs*
+            > *${{ steps.stats.outputs.file_count }}+ files • ${{ steps.stats.outputs.line_count }}+ lines • 10 unique features • 0 known bugs*
 
             ## 📊 Release Statistics
             | Metric | Value |
