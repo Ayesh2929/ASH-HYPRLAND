@@ -93,12 +93,12 @@ jobs:
     outputs:
       python-cache-key: ${{ steps.cache-keys.outputs.python }}
       node-cache-key: ${{ steps.cache-keys.outputs.node }}
-      should-skip: ${{ steps.skip-check.outputs.should_skip }}
+      should-skip: ${{ steps.skip-check.outputs.should-skip }}
       changed-files: ${{ steps.changes.outputs.files }}
-      has-scripts: ${{ steps.changes.outputs.scripts }}
-      has-configs: ${{ steps.changes.outputs.configs }}
-      has-lua: ${{ steps.changes.outputs.lua }}
-      has-docs: ${{ steps.changes.outputs.docs }}
+      has-scripts: ${{ steps.changes.outputs.has-scripts }}
+      has-configs: ${{ steps.changes.outputs.has-configs }}
+      has-lua: ${{ steps.changes.outputs.has-lua }}
+      has-docs: ${{ steps.changes.outputs.has-docs }}
 
     steps:
       - name: 📥 Checkout
@@ -109,12 +109,16 @@ jobs:
       - name: 🔍 Check for skip signals
         id: skip-check
         run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          if echo "${COMMIT_MSG}" | grep -qiE '\[skip ci\]|\[ci skip\]|\[no ci\]'; then
-            echo "should_skip=true" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            COMMIT_MSG="${{ github.event.pull_request.title }} ${{ github.event.pull_request.body }}"
+          else
+            COMMIT_MSG="${{ github.event.head_commit.message }}"
+          fi
+          if [[ -n "${COMMIT_MSG}" ]] && echo "${COMMIT_MSG}" | grep -qiE '\[skip ci\]|\[ci skip\]|\[no ci\]'; then
+            echo "should-skip=true" >> $GITHUB_OUTPUT
             echo "⏭️ Skipping CI by commit message request"
           else
-            echo "should_skip=false" >> $GITHUB_OUTPUT
+            echo "should-skip=false" >> $GITHUB_OUTPUT
           fi
 
       - name: 🔍 Detect changed files
@@ -128,13 +132,13 @@ jobs:
 
           echo "files=${CHANGED}" >> $GITHUB_OUTPUT
 
-          # Detect categories
-          echo "${CHANGED}" | grep -q "\.sh$"    && echo "scripts=true"  >> $GITHUB_OUTPUT || echo "scripts=false"  >> $GITHUB_OUTPUT
+          # Detect categories - output with underscore for step reference
+          echo "${CHANGED}" | grep -q "\.sh$"    && echo "has-scripts=true"  >> $GITHUB_OUTPUT || echo "has-scripts=false"  >> $GITHUB_OUTPUT
           echo "${CHANGED}" | grep -q "\.conf$\|\.jsonc$\|\.json$\|\.toml$\|\.css$\|\.scss$" \
-                                                  && echo "configs=true"  >> $GITHUB_OUTPUT || echo "configs=false"  >> $GITHUB_OUTPUT
-          echo "${CHANGED}" | grep -q "\.lua$"   && echo "lua=true"      >> $GITHUB_OUTPUT || echo "lua=false"      >> $GITHUB_OUTPUT
+                                                  && echo "has-configs=true"  >> $GITHUB_OUTPUT || echo "has-configs=false"  >> $GITHUB_OUTPUT
+          echo "${CHANGED}" | grep -q "\.lua$"   && echo "has-lua=true"      >> $GITHUB_OUTPUT || echo "has-lua=false"      >> $GITHUB_OUTPUT
           echo "${CHANGED}" | grep -q "\.md$\|docs/" \
-                                                  && echo "docs=true"     >> $GITHUB_OUTPUT || echo "docs=false"     >> $GITHUB_OUTPUT
+                                                  && echo "has-docs=true"     >> $GITHUB_OUTPUT || echo "has-docs=false"     >> $GITHUB_OUTPUT
 
           echo "📝 Changed files:"
           echo "${CHANGED}" | head -20
@@ -276,16 +280,8 @@ jobs:
               echo "  ✅ $script"
               PASSED=$((PASSED+1))
             else
-              ISSUES=$(echo "$OUTPUT" | python3 -c "
-import json, sys
-try:
-    data = json.load(sys.stdin)
-    errors = [i for i in data if i['level'] == 'error']
-    warns = [i for i in data if i['level'] == 'warning']
-    print(f'errors={len(errors)} warnings={len(warns)}')
-except:
-    print('errors=? warnings=?')
-" 2>/dev/null || echo "errors=? warnings=?")
+              # Extract issues from shellcheck JSON output
+              ISSUES=$(echo "$OUTPUT" | python3 -c 'import json,sys; data=json.load(sys.stdin); errors=[i for i in data if i["level"]=="error"]; warns=[i for i in data if i["level"]=="warning"]; print(f"errors={len(errors)} warnings={len(warns)}")' 2>/dev/null || echo "errors=? warnings=?")
               echo "  ⚠️  $script ($ISSUES)"
               WARNED=$((WARNED+1))
             fi
@@ -335,25 +331,8 @@ except:
       - name: 🔍 Run Stylelint
         if: matrix.tool == 'stylelint'
         run: |
-          # Create minimal stylelint config
-          cat > .stylelintrc.json << 'EOF'
-          {
-            "extends": ["stylelint-config-standard"],
-            "rules": {
-              "selector-class-pattern": null,
-              "custom-property-pattern": null,
-              "alpha-value-notation": null,
-              "color-function-notation": null,
-              "import-notation": null,
-              "no-descending-specificity": null
-            },
-            "ignoreFiles": [
-              "**/*.scss",
-              "node_modules/**",
-              ".git/**"
-            ]
-          }
-EOF
+          # Create minimal stylelint config (inline JSON to avoid heredoc YAML issues)
+          printf '{"extends":["stylelint-config-standard"],"rules":{"selector-class-pattern":null,"custom-property-pattern":null,"alpha-value-notation":null,"color-function-notation":null,"import-notation":null,"no-descending-specificity":null},"ignoreFiles":["**/*.scss","node_modules/**",".git/**"]}' > .stylelintrc.json
           FAILED=0
           while IFS= read -r file; do
             if stylelint --quiet "$file" 2>/dev/null; then
@@ -389,16 +368,8 @@ EOF
       - name: 🔍 Run Markdownlint
         if: matrix.tool == 'markdownlint'
         run: |
-          cat > .markdownlint.json << 'EOF'
-          {
-            "default": true,
-            "MD013": false,
-            "MD033": false,
-            "MD041": false,
-            "MD024": false,
-            "MD036": false
-          }
-EOF
+          # Create minimal markdownlint config (inline JSON to avoid heredoc YAML issues)
+          printf '{"default":true,"MD013":false,"MD033":false,"MD041":false,"MD024":false,"MD036":false}' > .markdownlint.json
           markdownlint '**/*.md' \
             --ignore node_modules \
             --ignore '.git' \
@@ -1391,7 +1362,7 @@ EOF
     needs: [setup, validate]
     if: |
       needs.setup.outputs.should-skip != 'true' &&
-      github.event.inputs.skip_tests != 'true'
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -1796,6 +1767,7 @@ EOF
       - name: 📊 Write GitHub summary
         run: |
           python3 - << 'PYEOF'
+          import os
           from pathlib import Path
 
           total_sh = len(list(Path('.').rglob('*.sh')))
