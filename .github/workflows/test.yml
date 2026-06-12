@@ -171,7 +171,7 @@ jobs:
 
           MISSING=0
           for var in "${REQUIRED_VARS[@]}"; do
-              if grep -q "${var}=" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "${var}=" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ Variable: ${var}"
               else
                   echo "  ❌ Missing: ${var}"
@@ -223,8 +223,8 @@ jobs:
           MISSING=0
 
           for mode in "${MODES[@]}"; do
-              if grep -q "\"${mode}\"" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null \
-              || grep -q "'${mode}'" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "\"${mode}\"" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null \
+              || grep -q "'${mode}'" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ Mode: ${mode}"
               else
                   echo "  ❌ Missing mode: ${mode}"
@@ -253,9 +253,9 @@ jobs:
               "generate_firefox"
           )
 
-          MISSING=0
+          MISSING=0 
           for gen in "${GENERATORS[@]}"; do
-              if grep -q "^${gen}()" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "^${gen}()" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ ${gen}"
               else
                   echo "  ❌ Missing: ${gen}"
