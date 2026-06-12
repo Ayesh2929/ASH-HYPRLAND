@@ -1,0 +1,127 @@
+#!/bin/bash
+set -euo pipefail
+
+# ASH - Unified CLI for Hyprland Dotfiles
+
+ASH_DIR="${HOME}/.config/hypr"
+SCRIPTS_DIR="${ASH_DIR}/scripts"
+
+cmd_theme() {
+    "${SCRIPTS_DIR}/theme/theme-switcher.sh" "$@"
+}
+
+cmd_shot() {
+    "${SCRIPTS_DIR}/media/screenshot.sh" "$@"
+}
+
+cmd_vol() {
+    "${SCRIPTS_DIR}/system/volume.sh" "$@"
+}
+
+cmd_bright() {
+    "${SCRIPTS_DIR}/system/brightness.sh" "$@"
+}
+
+cmd_lock() {
+    "${SCRIPTS_DIR}/system/lock.sh" "$@"
+}
+
+cmd_reload() {
+    "${SCRIPTS_DIR}/system/reload.sh" "$@"
+}
+
+cmd_doctor() {
+    "${SCRIPTS_DIR}/health/doctor.sh" "$@"
+}
+
+cmd_update() {
+    "${SCRIPTS_DIR}/core/update.sh" "$@"
+}
+
+cmd_backup() {
+    "${SCRIPTS_DIR}/core/backup.sh" "$@"
+}
+
+cmd_clean() {
+    "${SCRIPTS_DIR}/core/clean.sh" "$@"
+}
+
+cmd_music() {
+    "${SCRIPTS_DIR}/media/music.sh" "$@"
+}
+
+cmd_score() {
+    "${SCRIPTS_DIR}/system/score.sh" "$@"
+}
+
+cmd_workspace() {
+    "${SCRIPTS_DIR}/hypr/workspace.sh" "$@"
+}
+
+cmd_smart() {
+    "${SCRIPTS_DIR}/theme/smart-wallpaper.sh" "$@"
+}
+
+cmd_analytics() {
+    "${SCRIPTS_DIR}/theme/desktop-analytics.sh" "$@"
+}
+
+cmd_context() {
+    "${SCRIPTS_DIR}/system/context.sh" "$@"
+}
+
+main() {
+    local cmd="${1:-help}"
+    shift || true
+
+    case "${cmd}" in
+        theme)        cmd_theme "$@" ;;
+        shot)         cmd_shot "$@" ;;
+        vol)          cmd_vol "$@" ;;
+        bright)       cmd_bright "$@" ;;
+        lock)         cmd_lock "$@" ;;
+        reload)       cmd_reload "$@" ;;
+        doctor)       cmd_doctor "$@" ;;
+        update)       cmd_update "$@" ;;
+        backup)       cmd_backup "$@" ;;
+        clean)        cmd_clean "$@" ;;
+        music)        cmd_music "$@" ;;
+        score)        cmd_score "$@" ;;
+        workspace)    cmd_workspace "$@" ;;
+        smart)        cmd_smart "$@" ;;
+        analytics)    cmd_analytics "$@" ;;
+        context)      cmd_context "$@" ;;
+        help|--help|-h|"")
+            cat << 'EOF'
+ASH - Unified CLI for Hyprland Dotfiles
+
+Usage: ash <command> [args...]
+
+Commands:
+  theme       - Theme switcher
+  shot        - Screenshot tool
+  vol         - Volume control
+  bright      - Brightness control
+  lock        - Screen lock
+  reload      - Reload Hyprland config
+  doctor      - System health check
+  update      - Update dotfiles
+  backup      - Backup configurations
+  clean       - Clean cache/temp files
+  music       - Music player control
+  score       - System benchmark
+  workspace   - Workspace management
+  smart       - Smart wallpaper (time/weather)
+  analytics   - Desktop analytics dashboard
+  context     - Context-aware settings
+EOF
+            ;;
+        *)
+            echo "Unknown command: ${cmd}"
+            echo "Run 'ash help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
