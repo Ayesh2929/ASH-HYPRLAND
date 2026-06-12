@@ -259,8 +259,8 @@ jobs:
       - name: 🔍 Run ShellCheck
         if: matrix.tool == 'shellcheck'
         run: |
-          echo "## 🔍 ShellCheck Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 ShellCheck Results" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
 
           FAILED=0
           WARNED=0
@@ -287,16 +287,17 @@ jobs:
             fi
           done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
-          echo "| ✅ Pass | $PASSED |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚠️ Warn | $WARNED |" >> $GITHUB_STEP_SUMMARY
-          echo "| ❌ Fail | $FAILED |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ✅ Pass | $PASSED |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ⚠️ Warn | $WARNED |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ❌ Fail | $FAILED |" >> $GITHUB_STEP_SUMMARY || true
 
           [[ $FAILED -gt 0 ]] && exit 1
           echo "✅ ShellCheck: $PASSED/$TOTAL passed"
+          exit 0
 
       - name: 🔍 Run Bashate
         if: matrix.tool == 'bashate'
