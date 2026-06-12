@@ -414,31 +414,33 @@ jobs:
       - name: 🔍 ShellCheck analysis
         run: |
           FAILED=0
-          WARNED=0
 
           while IFS= read -r script; do
-              if OUTPUT=$(shellcheck \
+              if shellcheck \
                   --severity=error \
                   --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
                   --shell=bash \
-                  "$script" 2>&1) && [[ -z "$OUTPUT" ]]; then
+                  "$script" >/dev/null 2>&1; then
                   echo "  ✅ $script"
               else
                   echo "  ⚠️  $script"
-                  echo "$OUTPUT" | head -5 | sed 's/^/     /'
-                  WARNED=$((WARNED + 1))
+                  shellcheck \
+                      --severity=error \
+                      --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
+                      --shell=bash \
+                      "$script" 2>&1 | head -5 | sed 's/^/     /'
                   FAILED=$((FAILED + 1))
               fi
           done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
           echo ""
-          echo "⚠️  ShellCheck issues: $WARNED"
-          echo "- **ShellCheck issues:** $WARNED" >> $GITHUB_STEP_SUMMARY || true
           if [[ $FAILED -gt 0 ]]; then
-              echo "❌ $FAILED script(s) have ShellCheck issues"
+              echo "❌ ShellCheck errors: $FAILED"
+              echo "- **ShellCheck errors:** $FAILED" >> $GITHUB_STEP_SUMMARY || true
               exit 1
           fi
           echo "✅ All scripts passed ShellCheck"
+          echo "- **ShellCheck errors:** 0" >> $GITHUB_STEP_SUMMARY || true
 
       - name: 🔍 Check set -euo pipefail
         run: |
