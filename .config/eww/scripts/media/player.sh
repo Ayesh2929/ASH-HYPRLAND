@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — EWW MEDIA PLAYER SCRIPT                      ║
 # ║           Media player status for EWW widgets                              ║

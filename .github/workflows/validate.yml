@@ -305,22 +305,22 @@ jobs:
               ".config/starship.toml",
               ".config/btop/btop.conf",
               ".local/bin/ash",
-              ".dotfiles/scripts/install.sh",
-              ".dotfiles/quickstart.sh",
-              ".dotfiles/README.md",
-              ".dotfiles/LICENSE",
-              ".dotfiles/.gitignore",
-              ".dotfiles/ATTRIBUTION.md",
-              ".dotfiles/docs/KEYBINDS.md",
-              ".dotfiles/docs/THEMING.md",
-              ".dotfiles/docs/TROUBLESHOOTING.md",
-              ".dotfiles/docs/CUSTOMIZATION.md",
-              ".dotfiles/scripts/health/doctor.sh",
-              ".dotfiles/scripts/health/validate.sh",
-              ".dotfiles/scripts/health/final-check.sh",
-              ".dotfiles/scripts/core/backup.sh",
-              ".dotfiles/scripts/core/update.sh",
-              ".dotfiles/scripts/core/restore.sh",
+              "scripts/install.sh",
+              "quickstart.sh",
+              "README.md",
+              "LICENSE",
+              ".gitignore",
+              "ATTRIBUTION.md",
+              "docs/KEYBINDS.md",
+              "docs/THEMING.md",
+              "docs/TROUBLESHOOTING.md",
+              "docs/CUSTOMIZATION.md",
+              "scripts/health/doctor.sh",
+              "scripts/health/validate.sh",
+              "scripts/health/final-check.sh",
+              "scripts/core/backup.sh",
+              "scripts/core/update.sh",
+              "scripts/core/restore.sh",
           ]
 
           base = Path('.')
@@ -355,16 +355,16 @@ jobs:
       - name: 📊 Generate validation report
         if: always()
         run: |
-          echo "## 📋 Config Validation Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| JSONC Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| JSON Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| TOML Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Required Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total files scanned:** ${{ steps.count.outputs.total }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Config Validation Report" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| JSONC Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| JSON Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| TOML Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Required Files | ${{ job.status == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "**Total files scanned:** ${{ steps.count.outputs.total }}" >> $GITHUB_STEP_SUMMARY || true
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 📜 JOB 2: SHELL SCRIPT VALIDATION
@@ -386,7 +386,7 @@ jobs:
 
       - name: 🔍 Bash syntax check (bash -n)
         run: |
-          echo "## Bash Syntax Check" >> $GITHUB_STEP_SUMMARY
+          echo "## Bash Syntax Check" >> $GITHUB_STEP_SUMMARY || true
           FAILED=0
           TOTAL=0
 
@@ -408,33 +408,39 @@ jobs:
               exit 1
           fi
           echo "✅ All $TOTAL scripts have valid syntax"
-          echo "- **Total scripts:** $TOTAL" >> $GITHUB_STEP_SUMMARY
-          echo "- **Syntax errors:** $FAILED" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total scripts:** $TOTAL" >> $GITHUB_STEP_SUMMARY || true
+          echo "- **Syntax errors:** $FAILED" >> $GITHUB_STEP_SUMMARY || true
 
       - name: 🔍 ShellCheck analysis
         run: |
           FAILED=0
-          WARNED=0
 
           while IFS= read -r script; do
+              # Capture both output and exit code properly
               OUTPUT=$(shellcheck \
                   --severity=error \
                   --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
                   --shell=bash \
                   "$script" 2>&1)
+              EXIT_CODE=$?
 
-              if [[ $? -eq 0 ]]; then
+              if [[ $EXIT_CODE -eq 0 ]]; then
                   echo "  ✅ $script"
               else
                   echo "  ⚠️  $script"
                   echo "$OUTPUT" | head -5 | sed 's/^/     /'
-                  WARNED=$((WARNED + 1))
+                  FAILED=$((FAILED + 1))
               fi
           done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
           echo ""
-          echo "⚠️  ShellCheck warnings: $WARNED"
-          echo "- **ShellCheck warnings:** $WARNED" >> $GITHUB_STEP_SUMMARY
+          if [[ $FAILED -gt 0 ]]; then
+              echo "❌ ShellCheck errors: $FAILED"
+              echo "- **ShellCheck errors:** $FAILED" >> $GITHUB_STEP_SUMMARY || true
+              exit 1
+          fi
+          echo "✅ All scripts passed ShellCheck"
+          echo "- **ShellCheck errors:** 0" >> $GITHUB_STEP_SUMMARY || true
 
       - name: 🔍 Check set -euo pipefail
         run: |
@@ -448,9 +454,9 @@ jobs:
 
           if [[ $MISSING -gt 0 ]]; then
               echo "⚠️  $MISSING scripts missing 'set -euo pipefail'"
-          else
-              echo "✅ All scripts have 'set -euo pipefail'"
+              exit 1
           fi
+          echo "✅ All scripts have 'set -euo pipefail'"
 
       - name: 🔐 Check script permissions
         run: |
@@ -460,13 +466,13 @@ jobs:
                   echo "  ⚠️  Not executable: $script"
                   NOT_EXEC=$((NOT_EXEC + 1))
               fi
-          done < <(find . -name "*.sh" -not -path "./.git/*")
+          done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
           if [[ $NOT_EXEC -gt 0 ]]; then
               echo "⚠️  $NOT_EXEC scripts need +x permission"
-          else
-              echo "✅ All scripts are executable"
+              exit 1
           fi
+          echo "✅ All scripts are executable"
 
       - name: 🔍 Check for dangerous patterns
         run: |
@@ -713,16 +719,16 @@ jobs:
     steps:
       - name: 📊 Generate summary
         run: |
-          echo "# 🔍 ASH Dotfiles Validation Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Config Files | ${{ needs.validate-configs.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shell Scripts | ${{ needs.validate-scripts.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lua Files | ${{ needs.validate-lua.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| CSS/SCSS | ${{ needs.validate-styles.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
-          echo "| Fish Shell | ${{ needs.validate-fish.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# 🔍 ASH Dotfiles Validation Summary" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|-----|--------|----------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Config Files | ${{ needs.validate-configs.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Shell Scripts | ${{ needs.validate-scripts.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Lua Files | ${{ needs.validate-lua.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| CSS/SCSS | ${{ needs.validate-styles.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Fish Shell | ${{ needs.validate-fish.result == 'success' && '✅ Pass' || '❌ Fail' }} | - |" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
 
           JOBS=("${{ needs.validate-configs.result }}" "${{ needs.validate-scripts.result }}" "${{ needs.validate-lua.result }}" "${{ needs.validate-styles.result }}" "${{ needs.validate-fish.result }}")
           FAILED=0
@@ -731,8 +737,8 @@ jobs:
           done
 
           if [[ $FAILED -eq 0 ]]; then
-              echo "## ✅ ALL VALIDATIONS PASSED" >> $GITHUB_STEP_SUMMARY
+              echo "## ✅ ALL VALIDATIONS PASSED" >> $GITHUB_STEP_SUMMARY || true
           else
-              echo "## ❌ $FAILED VALIDATION(S) FAILED" >> $GITHUB_STEP_SUMMARY
+              echo "## ❌ $FAILED VALIDATION(S) FAILED" >> $GITHUB_STEP_SUMMARY || true
               exit 1
           fi

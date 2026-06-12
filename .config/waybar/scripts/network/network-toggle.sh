@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR NETWORK TOGGLE SCRIPT                 ║
 # ║           Quick WiFi toggle for Waybar module                              ║

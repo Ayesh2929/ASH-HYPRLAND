@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — CORE INSTALL HELPER                          ║
 # ║           Called by main install.sh for modular installation               ║

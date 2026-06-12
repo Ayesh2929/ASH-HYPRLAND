@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — HYPRLOCK NETWORK SCRIPT                      ║
 # ║           Network status for lock screen                                   ║

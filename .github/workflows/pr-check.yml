@@ -57,11 +57,11 @@ jobs:
           echo "  Files changed: $FILES"
           echo "  Lines added:   $ADDITIONS"
           echo "  Lines removed: $DELETIONS"
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📏 PR Size" >> $GITHUB_STEP_SUMMARY
-          echo "- Files changed: **$FILES**" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines added: **$ADDITIONS**" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines removed: **$DELETIONS**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "## 📏 PR Size" >> $GITHUB_STEP_SUMMARY || true
+          echo "- Files changed: **$FILES**" >> $GITHUB_STEP_SUMMARY || true
+          echo "- Lines added: **$ADDITIONS**" >> $GITHUB_STEP_SUMMARY || true
+          echo "- Lines removed: **$DELETIONS**" >> $GITHUB_STEP_SUMMARY || true
 
           if [[ $FILES -gt 100 ]]; then
               echo "::warning::Very large PR ($FILES files). Consider splitting."

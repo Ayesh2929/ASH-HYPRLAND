@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI FULL MULTI-MODE LAUNCHER               ║
 # ║           All-in-one launcher: apps + run + ssh + windows + more          ║

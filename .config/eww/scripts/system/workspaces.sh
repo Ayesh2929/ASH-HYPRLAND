@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — EWW WORKSPACES LISTENER                      ║
 # ║           Listen to Hyprland workspace events and output JSON              ║

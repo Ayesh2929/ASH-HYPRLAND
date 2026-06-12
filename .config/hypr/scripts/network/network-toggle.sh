@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — NETWORK TOGGLE                               ║
 # ║           Quick toggle for WiFi, Bluetooth, VPN with Rofi menu            ║

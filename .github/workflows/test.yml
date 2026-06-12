@@ -171,7 +171,7 @@ jobs:
 
           MISSING=0
           for var in "${REQUIRED_VARS[@]}"; do
-              if grep -q "${var}=" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "${var}=" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ Variable: ${var}"
               else
                   echo "  ❌ Missing: ${var}"
@@ -223,8 +223,8 @@ jobs:
           MISSING=0
 
           for mode in "${MODES[@]}"; do
-              if grep -q "\"${mode}\"" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null \
-              || grep -q "'${mode}'" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "\"${mode}\"" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null \
+              || grep -q "'${mode}'" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ Mode: ${mode}"
               else
                   echo "  ❌ Missing mode: ${mode}"
@@ -253,9 +253,9 @@ jobs:
               "generate_firefox"
           )
 
-          MISSING=0
+          MISSING=0 
           for gen in "${GENERATORS[@]}"; do
-              if grep -q "^${gen}()" config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
+              if grep -q "^${gen}()" .config/hypr/scripts/theme/theme-engine.sh 2>/dev/null; then
                   echo "  ✅ ${gen}"
               else
                   echo "  ❌ Missing: ${gen}"
@@ -283,7 +283,7 @@ jobs:
 
       - name: ✅ Test music reactive script structure
         run: |
-          SCRIPT="config/hypr/scripts/theme/album-art-theme.sh"
+          SCRIPT=".config/hypr/scripts/theme/album-art-theme.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing: ${SCRIPT}"; exit 1; }
 
           # Check key functions
@@ -296,7 +296,7 @@ jobs:
 
       - name: ✅ Test health score categories
         run: |
-          SCRIPT="config/hypr/scripts/theme/health-score.sh"
+          SCRIPT=".config/hypr/scripts/theme/health-score.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
 
           CHECKS=("check_performance" "check_security" "check_cleanliness" \
@@ -312,7 +312,7 @@ jobs:
 
       - name: ✅ Test workspace profiles
         run: |
-          SCRIPT="config/hypr/scripts/theme/workspace-profiles.sh"
+          SCRIPT=".config/hypr/scripts/theme/workspace-profiles.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -323,7 +323,7 @@ jobs:
 
       - name: ✅ Test smart wallpaper
         run: |
-          SCRIPT="config/hypr/scripts/theme/smart-wallpaper.sh"
+          SCRIPT=".config/hypr/scripts/theme/smart-wallpaper.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -332,7 +332,7 @@ jobs:
 
       - name: ✅ Test AI theme generator
         run: |
-          SCRIPT="config/hypr/scripts/theme/ai-theme.sh"
+          SCRIPT=".config/hypr/scripts/theme/ai-theme.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -342,7 +342,7 @@ jobs:
 
       - name: ✅ Test theme undo system
         run: |
-          SCRIPT="config/hypr/scripts/theme/theme-undo.sh"
+          SCRIPT=".config/hypr/scripts/theme/theme-undo.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -351,7 +351,7 @@ jobs:
 
       - name: ✅ Test light/dark mode
         run: |
-          SCRIPT="config/hypr/scripts/theme/light-theme.sh"
+          SCRIPT=".config/hypr/scripts/theme/light-theme.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -361,7 +361,7 @@ jobs:
 
       - name: ✅ Test context theming
         run: |
-          SCRIPT="config/hypr/scripts/theme/context-theme.sh"
+          SCRIPT=".config/hypr/scripts/theme/context-theme.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 
@@ -370,7 +370,7 @@ jobs:
 
       - name: ✅ Test analytics
         run: |
-          SCRIPT="config/hypr/scripts/analytics/desktop-analytics.sh"
+          SCRIPT=".config/hypr/scripts/analytics/desktop-analytics.sh"
           [[ -f "${SCRIPT}" ]] || { echo "❌ Missing"; exit 1; }
           bash -n "${SCRIPT}" && echo "✅ Syntax valid"
 

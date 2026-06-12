@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — UNIQUE FEATURES INSTALLER                    ║
 # ║           Sets up all new unique features                                  ║

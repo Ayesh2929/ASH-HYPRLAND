@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.1.0 — COMPLETE DOCTOR SCRIPT                     ║
 # ║           60+ health checks covering all system components                 ║

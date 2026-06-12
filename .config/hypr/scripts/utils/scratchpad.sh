@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SCRATCHPAD MANAGER                           ║
 # ║           8 scratchpad types with smart toggle and Rofi manager            ║

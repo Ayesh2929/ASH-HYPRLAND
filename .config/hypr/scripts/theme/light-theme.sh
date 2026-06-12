@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — LIGHT/DARK MODE TOGGLE                       ║
 # ║           Switch between light and dark themes with auto-detection         ║

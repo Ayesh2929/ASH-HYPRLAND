@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — FILE VALIDATOR                               ║
 # ║           Validate all 271+ config files exist and are correct             ║

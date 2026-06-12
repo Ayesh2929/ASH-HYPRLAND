@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — MIGRATION SCRIPT                             ║
 # ║           Migrate from v2.x to v3.0 configuration format                  ║

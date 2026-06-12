@@ -173,17 +173,17 @@ jobs:
 
       - name: 📊 Pipeline info
         run: |
-          echo "## ⚙️ CI Pipeline Started" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔀 Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 👤 Actor | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📝 Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🎯 Event | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐍 Python | ${{ env.PYTHON_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 ASH | v${{ env.ASH_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚙️ CI Pipeline Started" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🔀 Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 👤 Actor | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 📝 Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🎯 Event | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🐍 Python | ${{ env.PYTHON_VERSION }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 📦 ASH | v${{ env.ASH_VERSION }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # JOB 2: LINT MATRIX
@@ -259,8 +259,8 @@ jobs:
       - name: 🔍 Run ShellCheck
         if: matrix.tool == 'shellcheck'
         run: |
-          echo "## 🔍 ShellCheck Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 ShellCheck Results" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
 
           FAILED=0
           WARNED=0
@@ -287,16 +287,17 @@ jobs:
             fi
           done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
-          echo "| ✅ Pass | $PASSED |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚠️ Warn | $WARNED |" >> $GITHUB_STEP_SUMMARY
-          echo "| ❌ Fail | $FAILED |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ✅ Pass | $PASSED |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ⚠️ Warn | $WARNED |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ❌ Fail | $FAILED |" >> $GITHUB_STEP_SUMMARY || true
 
           [[ $FAILED -gt 0 ]] && exit 1
           echo "✅ ShellCheck: $PASSED/$TOTAL passed"
+          exit 0
 
       - name: 🔍 Run Bashate
         if: matrix.tool == 'bashate'
@@ -1375,7 +1376,7 @@ jobs:
 
       - name: 🧪 Test color extraction pipeline
         run: |
-          echo "## 🧪 Integration Test: Color Extraction" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Integration Test: Color Extraction" >> $GITHUB_STEP_SUMMARY || true
 
           # Create test images with known dominant colors
           declare -A TEST_IMAGES=(
@@ -1414,9 +1415,9 @@ jobs:
               fi
           done
 
-          echo "| Test | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Color extraction | $([[ $FAILED -eq 0 ]] && echo '✅ Pass' || echo '❌ Fail') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Result |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Color extraction | $([[ $FAILED -eq 0 ]] && echo '✅ Pass' || echo '❌ Fail') |" >> $GITHUB_STEP_SUMMARY || true
 
           [[ $FAILED -gt 0 ]] && exit 1
           echo "✅ Color extraction: $PASSED/$((PASSED+FAILED)) tests passed"
@@ -1835,23 +1836,23 @@ jobs:
               esac
           done
 
-          echo "## ✅ CI Pipeline Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚙️ Setup | ${{ needs.setup.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Lint | ${{ needs.lint.result == 'success' && '✅' || needs.lint.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📋 Validate | ${{ needs.validate.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security | ${{ needs.security.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Integration | ${{ needs.integration-tests.result == 'success' && '✅' || needs.integration-tests.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Coverage | ${{ needs.coverage.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ CI Pipeline Complete" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
+          echo "| Job | Result |" >> $GITHUB_STEP_SUMMARY || true
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY || true
+          echo "| ⚙️ Setup | ${{ needs.setup.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🔍 Lint | ${{ needs.lint.result == 'success' && '✅' || needs.lint.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 📋 Validate | ${{ needs.validate.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🔒 Security | ${{ needs.security.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 🧪 Integration | ${{ needs.integration-tests.result == 'success' && '✅' || needs.integration-tests.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "| 📊 Coverage | ${{ needs.coverage.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY || true
 
           if [[ $FAILED -eq 0 ]]; then
-              echo "## 🎉 ALL CHECKS PASSED!" >> $GITHUB_STEP_SUMMARY
+              echo "## 🎉 ALL CHECKS PASSED!" >> $GITHUB_STEP_SUMMARY || true
               echo "✅ CI Pipeline: ALL PASSED"
           else
-              echo "## ❌ $FAILED JOB(S) FAILED" >> $GITHUB_STEP_SUMMARY
+              echo "## ❌ $FAILED JOB(S) FAILED" >> $GITHUB_STEP_SUMMARY || true
               echo "❌ CI Pipeline: $FAILED failure(s)"
               exit 1
           fi

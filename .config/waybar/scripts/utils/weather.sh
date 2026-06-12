@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR WEATHER MODULE                        ║
 # ║           wttr.in weather with icons, caching, and rich tooltips           ║

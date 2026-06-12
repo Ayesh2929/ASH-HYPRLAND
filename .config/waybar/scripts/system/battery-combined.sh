@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — COMBINED BATTERY MODULE                      ║
 # ║           Multi-battery support with AC state and time estimates            ║

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — LOCK SCREEN                                  ║
 # ║           Hyprlock with pre/post hooks, media pause, notifications          ║

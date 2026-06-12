@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — THEME UNDO / HISTORY                         ║
 # ║           Undo last theme change, browse history, restore any past theme   ║

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — GENERATE ALL PLACEHOLDER FILES               ║
 # ║           Creates placeholder files for generated content                  ║

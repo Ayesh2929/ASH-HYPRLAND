@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SCREENSHOT SYSTEM                             ║
 # ║           8 capture modes with editing, OCR, clipboard support              ║

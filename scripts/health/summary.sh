@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SYSTEM SUMMARY SCRIPT                        ║
 # ║           8-section status dashboard with complete system overview         ║

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR GPU MODULE                            ║
 # ║           AMD/NVIDIA/Intel GPU monitoring with auto-detection              ║

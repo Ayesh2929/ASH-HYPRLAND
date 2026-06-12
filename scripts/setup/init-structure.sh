@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — DIRECTORY STRUCTURE INITIALIZER              ║
 # ║           Creates all required directories for the dotfiles system         ║

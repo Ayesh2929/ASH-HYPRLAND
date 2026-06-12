@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — MUSIC REACTIVE THEME                          ║
 # ║           Album art → extract colors → apply as accent theme               ║

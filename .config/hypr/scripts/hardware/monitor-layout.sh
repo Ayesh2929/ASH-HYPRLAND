@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — MONITOR LAYOUT MANAGER                       ║
 # ║           Auto-detect, Rofi picker, common layout presets                  ║

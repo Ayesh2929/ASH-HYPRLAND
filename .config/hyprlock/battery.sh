@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — HYPRLOCK BATTERY SCRIPT                      ║
 # ║           Battery status display for lock screen                           ║

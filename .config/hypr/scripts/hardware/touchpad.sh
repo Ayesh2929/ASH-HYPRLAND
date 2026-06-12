@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — TOUCHPAD CONTROL (FULL)                      ║
 # ║           Enable/disable/toggle with auto-disable on mouse connect         ║

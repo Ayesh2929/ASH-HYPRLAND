@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — MAGNIFIER / ZOOM                             ║
 # ║           Screen zoom in/out with OSD notification                        ║

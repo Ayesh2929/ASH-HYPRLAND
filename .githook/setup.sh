@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.1.0 — GIT HOOKS INSTALLER                        ║
 # ║           Sets up all git hooks for the project                            ║

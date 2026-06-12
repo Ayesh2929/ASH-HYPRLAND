@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — FINAL CHECK SCRIPT                           ║
 # ║           Ultimate validation — runs after installation to confirm all     ║

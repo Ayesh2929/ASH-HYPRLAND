@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.1.0 — THEME ENGINE (COMPLETE FINAL)              ║
 # ║           Wallpaper → 24 Colors → 15+ App Targets                         ║

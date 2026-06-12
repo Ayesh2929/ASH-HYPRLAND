@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — HYPRLOCK PLAYER SCRIPT                       ║
 # ║           Now playing info for lock screen                                 ║

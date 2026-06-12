@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SPOTIFY STATUS MODULE                        ║
 # ║           Spotify-specific status with Catppuccin green branding           ║
