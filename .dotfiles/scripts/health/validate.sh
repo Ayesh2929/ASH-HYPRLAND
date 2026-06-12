@@ -325,6 +325,37 @@ print_report() {
     log "INFO" "Validate: pass=${PASS} warn=${WARN} fail=${FAIL} skip=${SKIP}"
 }
 
+verify_file_count() {
+    echo ""
+    echo -e "  \033[1m\033[95m📊 FILE COUNT VERIFICATION\033[0m"
+    echo -e "  \033[2m$(printf '─%.0s' {1..50})\033[0m"
+
+    local config_files scripts_configs total
+    config_files=$(find "${HOME}/.config" -type f \( \
+        -name "*.conf" -o -name "*.rasi" -o -name "*.css" -o -name "*.jsonc" \
+        -o -name "*.json" -o -name "*.toml" -o -name "*.lua" -o -name "*.js" \
+        -o -name "*.fish" -o -name "*.yaml" -o -name "*.ini" -o -name "*.yuck" \
+        -o -name "*.scss" -o -name "*.glsl" \
+    \) 2>/dev/null | wc -l)
+
+    scripts_configs=$(find "${HOME}/.config" -name "*.sh" 2>/dev/null | wc -l)
+    total=$(( config_files + scripts_configs ))
+
+    echo -e "  Config files:   \033[97m${config_files}\033[0m"
+    echo -e "  Shell scripts:  \033[97m${scripts_configs}\033[0m"
+    echo -e "  Total:          \033[97m${total}\033[0m"
+
+    local dotfiles_scripts
+    dotfiles_scripts=$(find "${HOME}/.dotfiles/scripts" -name "*.sh" 2>/dev/null | wc -l)
+    echo -e "  Dotfiles scripts: \033[97m${dotfiles_scripts}\033[0m"
+
+    if (( total >= 200 )); then
+        echo -e "\n  \033[92m✓ File count verified — 200+ files present\033[0m"
+    else
+        echo -e "\n  \033[93m⚠ Low file count (${total}) — some files may be missing\033[0m"
+    fi
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 🎯 MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -338,8 +369,10 @@ main() {
 
     validate_all
     print_report
+    verify_file_count
 
     exit $(( FAIL > 0 ? 1 : 0 ))
 }
 
 main "$@"
+
