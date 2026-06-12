@@ -92,9 +92,51 @@ jobs:
           for filepath in sorted(files):
               try:
                   content = filepath.read_text(encoding='utf-8')
-                  # Strip comments
-                  content = re.sub(r'//[^\n]*', '', content)
-                  content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+                  # Strip comments properly (not inside strings)
+                  def strip_comments(text):
+                      # State machine: track if we're in a string
+                      result = []
+                      i = 0
+                      in_string = False
+                      escape = False
+                      while i < len(text):
+                          c = text[i]
+                          if in_string:
+                              result.append(c)
+                              if escape:
+                                  escape = False
+                              elif c == '\\':
+                                  escape = True
+                              elif c == '"':
+                                  in_string = False
+                          else:
+                              if c == '"':
+                                  in_string = True
+                                  result.append(c)
+                              elif c == '/' and i + 1 < len(text):
+                                  next_c = text[i + 1]
+                                  if next_c == '/':
+                                      # Line comment - skip to newline
+                                      while i < len(text) and text[i] != '\n':
+                                          i += 1
+                                      if i < len(text):
+                                          result.append(text[i])
+                                  elif next_c == '*':
+                                      # Block comment - skip to */
+                                      i += 2
+                                      while i + 1 < len(text):
+                                          if text[i] == '*' and text[i + 1] == '/':
+                                              i += 2
+                                              break
+                                          i += 1
+                                  else:
+                                      result.append(c)
+                              else:
+                                  result.append(c)
+                          i += 1
+                      return ''.join(result)
+
+                  content = strip_comments(content)
                   # Remove trailing commas
                   content = re.sub(r',(\s*[}\]])', r'\1', content)
                   json.loads(content)
