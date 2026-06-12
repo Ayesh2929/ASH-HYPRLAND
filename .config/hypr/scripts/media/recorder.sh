@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SCREEN RECORDER                              ║
 # ║           wf-recorder with area/window/audio modes + Waybar integration    ║

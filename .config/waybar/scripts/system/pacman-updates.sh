@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — PACMAN UPDATES HOOK                          ║
 # ║           Track package updates via pacman hooks                           ║

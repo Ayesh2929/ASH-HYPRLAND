@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SERVICE SETUP SCRIPT                         ║
 # ║           Enable and configure all required systemd services               ║

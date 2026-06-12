@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.1.0 — FIRST RUN SETUP                            ║
 # ║           Interactive first-boot configuration wizard                      ║

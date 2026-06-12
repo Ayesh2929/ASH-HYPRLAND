@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH'S HYPRLAND DOTFILES v3.0 — QUICKSTART                         ║
 # ║           One-Command Setup Script                                           ║

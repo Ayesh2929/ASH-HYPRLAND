@@ -416,19 +416,19 @@ jobs:
           FAILED=0
 
           while IFS= read -r script; do
-              if shellcheck \
+              # Capture both output and exit code properly
+              OUTPUT=$(shellcheck \
                   --severity=error \
                   --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
                   --shell=bash \
-                  "$script" >/dev/null 2>&1; then
+                  "$script" 2>&1)
+              EXIT_CODE=$?
+
+              if [[ $EXIT_CODE -eq 0 ]]; then
                   echo "  ✅ $script"
               else
                   echo "  ⚠️  $script"
-                  shellcheck \
-                      --severity=error \
-                      --exclude=SC2034,SC2086,SC2155,SC1091,SC2317,SC2206,SC2148 \
-                      --shell=bash \
-                      "$script" 2>&1 | head -5 | sed 's/^/     /'
+                  echo "$OUTPUT" | head -5 | sed 's/^/     /'
                   FAILED=$((FAILED + 1))
               fi
           done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
@@ -454,9 +454,9 @@ jobs:
 
           if [[ $MISSING -gt 0 ]]; then
               echo "⚠️  $MISSING scripts missing 'set -euo pipefail'"
-          else
-              echo "✅ All scripts have 'set -euo pipefail'"
+              exit 1
           fi
+          echo "✅ All scripts have 'set -euo pipefail'"
 
       - name: 🔐 Check script permissions
         run: |
@@ -466,13 +466,13 @@ jobs:
                   echo "  ⚠️  Not executable: $script"
                   NOT_EXEC=$((NOT_EXEC + 1))
               fi
-          done < <(find . -name "*.sh" -not -path "./.git/*")
+          done < <(find . -name "*.sh" -not -path "./.git/*" | sort)
 
           if [[ $NOT_EXEC -gt 0 ]]; then
               echo "⚠️  $NOT_EXEC scripts need +x permission"
-          else
-              echo "✅ All scripts are executable"
+              exit 1
           fi
+          echo "✅ All scripts are executable"
 
       - name: 🔍 Check for dangerous patterns
         run: |

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR DISK MODULE                           ║
 # ║           Multi-mountpoint disk usage with IO stats                        ║

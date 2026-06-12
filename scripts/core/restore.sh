@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — RESTORE SCRIPT                               ║
 # ║           Restore configuration from backup with selection UI              ║

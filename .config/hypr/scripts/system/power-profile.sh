@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — POWER PROFILE MANAGER                        ║
 # ║           Auto-switch AC/battery + Rofi picker + OSD                       ║

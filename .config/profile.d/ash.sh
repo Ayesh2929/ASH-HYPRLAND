@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — PROFILE.D SCRIPT                             ║
 # ║           Loaded by login shell for environment setup                      ║

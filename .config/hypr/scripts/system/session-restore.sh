@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SESSION SAVE/RESTORE                         ║
 # ║           Save and restore window layouts and workspaces                    ║

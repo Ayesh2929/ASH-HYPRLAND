@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — SMART WORKSPACE PROFILES                      ║
 # ║           Save/restore complete workspace environments                      ║

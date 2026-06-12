@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH'S HYPRLAND DOTFILES v3.0 — MASTER INSTALLER                   ║
 # ║           Epic Production-Ready Wayland Desktop Environment                  ║

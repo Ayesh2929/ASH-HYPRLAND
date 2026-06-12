@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI WINDOW SWITCHER                        ║
 # ║           Switch between open windows with preview and actions             ║

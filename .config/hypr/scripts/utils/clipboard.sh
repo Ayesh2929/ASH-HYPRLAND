@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ENHANCED CLIPBOARD MANAGER                   ║
 # ║           cliphist with image preview, pin, categories, search             ║

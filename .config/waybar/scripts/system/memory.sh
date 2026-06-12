@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — WAYBAR MEMORY MODULE                         ║
 # ║           Detailed RAM/swap monitoring with alerts                         ║

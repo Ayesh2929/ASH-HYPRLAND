@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — UPDATE SCRIPT                                ║
 # ║           Update dotfiles and packages with safety checks                  ║

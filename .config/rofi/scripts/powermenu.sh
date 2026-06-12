@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI POWER MENU                              ║
 # ║           Beautiful power menu with confirmation dialogs                   ║

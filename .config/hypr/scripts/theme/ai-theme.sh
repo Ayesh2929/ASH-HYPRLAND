@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — AI THEME GENERATOR                            ║
 # ║           Generate custom color palettes from text descriptions            ║

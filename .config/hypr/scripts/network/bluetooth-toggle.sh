@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — BLUETOOTH TOGGLE                             ║
 # ║           Bluetooth control with device picker and battery status           ║

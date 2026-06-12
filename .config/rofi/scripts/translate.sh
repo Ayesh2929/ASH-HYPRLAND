@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI TRANSLATOR                              ║
 # ║           Quick text translation via multiple backends                     ║

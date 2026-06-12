@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI APP LAUNCHER                            ║
 # ║           Feature-rich application launcher with categories                ║

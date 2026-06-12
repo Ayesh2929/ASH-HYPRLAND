@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — IDLE INHIBITOR                               ║
 # ║           Toggle system idle prevention with multiple backends             ║

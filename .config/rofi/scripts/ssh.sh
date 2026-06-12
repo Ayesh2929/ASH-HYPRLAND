@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI SSH LAUNCHER                            ║
 # ║           SSH host picker from config + history with quick actions         ║

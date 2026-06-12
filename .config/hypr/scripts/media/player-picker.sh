@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — MEDIA PLAYER PICKER                          ║
 # ║           Rofi-based MPRIS player selector with actions                    ║

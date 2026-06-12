@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — LAYOUT SWITCH                                ║
 # ║           Toggle between Dwindle and Master layouts with Rofi picker       ║

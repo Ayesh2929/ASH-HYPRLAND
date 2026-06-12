@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — BACKUP SCRIPT                                ║
 # ║           Complete configuration backup with compression and rotation      ║

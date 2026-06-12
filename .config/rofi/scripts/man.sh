@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — ROFI MAN PAGE VIEWER                         ║
 # ║           Search and view man pages with syntax highlighting               ║

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — RELOAD ALL MODULES                           ║
 # ║           Hot-reload all Hyprland components without logout                ║

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.0 — PLAYERCTL STATUS SCRIPT                      ║
 # ║           Simple play/pause icon for Waybar                                ║

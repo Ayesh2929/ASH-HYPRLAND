@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║           ASH DOTFILES v3.1.0 — QUICKSTART                                 ║
 # ║           One-command setup: bash <(curl -sSL URL/quickstart.sh)           ║
