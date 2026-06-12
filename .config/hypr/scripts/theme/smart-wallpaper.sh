@@ -278,14 +278,9 @@ SQL
 
     # Check if any workspace is barely used
     local unused_ws
-    unused_ws=$(sqlite3 "${DB_FILE}" << SQL 2>/dev/null || echo "")
-SELECT workspace
-FROM app_usage
-WHERE timestamp > datetime('now', '-${days} days')
-GROUP BY workspace
-HAVING COUNT(*) < 5
-ORDER BY COUNT(*);
-SQL
+    unused_ws=$(sqlite3 "${DB_FILE}" \
+        "SELECT workspace FROM app_usage WHERE timestamp > datetime('now', '-${days} days') GROUP BY workspace HAVING COUNT(*) < 5 ORDER BY COUNT(*);" \
+        2>/dev/null || echo "")
 
     if [[ -n "${unused_ws}" ]]; then
         echo "  • Workspace ${unused_ws} rarely used — consider removing it"

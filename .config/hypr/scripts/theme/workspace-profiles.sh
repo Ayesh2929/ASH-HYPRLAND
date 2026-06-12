@@ -59,16 +59,24 @@ create_profile() {
             | awk '{print $2}' | head -1 || echo "12")
     fi
 
+    # Export variables for Python heredoc
+    export CLIENTS="${clients}"
+    export WORKSPACES="${workspaces}"
+    export ACTIVE_WS="${active_ws}"
+    export CURRENT_WALLPAPER="${current_wallpaper}"
+    export POWER_PROFILE="${power_profile}"
+    export FONT_SIZE="${font_size}"
+    export PROFILE_NAME="${name}"
+    export PROFILE_FILE="${profile_file}"
+
     # Build profile JSON
-    python3 - << EOF 2>/dev/null || {
-        warn "Python3 required for profile creation"
-        return 1
-    }
+    python3 - << 'PYEOF' 2>/dev/null
 import json
+import os
 from datetime import datetime
 
-clients = json.loads("""${clients}""")
-workspaces = json.loads("""${workspaces}""")
+clients = json.loads(os.environ.get("CLIENTS", "[]"))
+workspaces = json.loads(os.environ.get("WORKSPACES", "[]"))
 
 # Extract relevant client info
 client_list = []
@@ -109,13 +117,13 @@ for c in client_list:
     c["command"] = APP_COMMANDS.get(cls, cls)
 
 profile = {
-    "name":            "${name}",
-    "created":         datetime.now().isoformat(),
-    "active_workspace": int("${active_ws}"),
-    "wallpaper":       "${current_wallpaper}",
-    "power_profile":   "${power_profile}",
-    "font_size":       float("${font_size}"),
-    "clients":         client_list,
+    "name":             os.environ.get("PROFILE_NAME", ""),
+    "created":          datetime.now().isoformat(),
+    "active_workspace": int(os.environ.get("ACTIVE_WS", "1")),
+    "wallpaper":        os.environ.get("CURRENT_WALLPAPER", ""),
+    "power_profile":    os.environ.get("POWER_PROFILE", "balanced"),
+    "font_size":        float(os.environ.get("FONT_SIZE", "12")),
+    "clients":          client_list,
     "settings": {
         "animations":  True,
         "blur":        True,
@@ -124,12 +132,17 @@ profile = {
     }
 }
 
-with open("${profile_file}", "w") as f:
+profile_file = os.environ.get("PROFILE_FILE", "")
+with open(profile_file, "w") as f:
     json.dump(profile, f, indent=2)
 
-print(f"  Profile saved: ${profile_file}")
+print(f"  Profile saved: {profile_file}")
 print(f"  Apps captured: {len(client_list)}")
-EOF
+PYEOF
+    if [[ $? -ne 0 ]]; then
+        warn "Python3 required for profile creation"
+        return 1
+    fi
 
     ok "Profile '${name}' created with $(echo "${clients}" | jq 'length' 2>/dev/null || echo '?') apps"
     log "INFO" "Profile created: ${name}"

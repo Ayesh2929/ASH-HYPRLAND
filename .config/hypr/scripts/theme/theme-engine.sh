@@ -1527,8 +1527,9 @@ main() {
 
             show_palette
 
+            local wall_name="$(basename "${wall:-wallpaper}")"
             notify-send "🎨 ASH Theme Applied" \
-                "$(basename "${wall:-wallpaper")" \
+                "${wall_name}" \
                 --icon="${wall:-dialog-information}" \
                 --app-name="ASH Theme" \
                 --expire-time=3000 \
