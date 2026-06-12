@@ -74,6 +74,7 @@ env:
   CI: 'true'
   ASH_VERSION: '3.1.0'
   CACHE_VERSION: 'v2'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 defaults:
   run:
@@ -215,7 +216,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
       - name: 🟢 Setup Node
         if: matrix.tool == 'stylelint' || matrix.tool == 'markdownlint'
@@ -406,7 +406,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
       - name: 📦 Install dependencies
         run: pip install --quiet rich jsonschema tomli pyyaml

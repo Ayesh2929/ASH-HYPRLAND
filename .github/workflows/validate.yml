@@ -27,6 +27,7 @@ env:
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
   FORCE_COLOR: '1'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
 
@@ -53,7 +54,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
       - name: 📦 Install Python deps
         run: |
@@ -92,9 +92,51 @@ jobs:
           for filepath in sorted(files):
               try:
                   content = filepath.read_text(encoding='utf-8')
-                  # Strip comments
-                  content = re.sub(r'//[^\n]*', '', content)
-                  content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+                  # Strip comments properly (not inside strings)
+                  def strip_comments(text):
+                      # State machine: track if we're in a string
+                      result = []
+                      i = 0
+                      in_string = False
+                      escape = False
+                      while i < len(text):
+                          c = text[i]
+                          if in_string:
+                              result.append(c)
+                              if escape:
+                                  escape = False
+                              elif c == '\\':
+                                  escape = True
+                              elif c == '"':
+                                  in_string = False
+                          else:
+                              if c == '"':
+                                  in_string = True
+                                  result.append(c)
+                              elif c == '/' and i + 1 < len(text):
+                                  next_c = text[i + 1]
+                                  if next_c == '/':
+                                      # Line comment - skip to newline
+                                      while i < len(text) and text[i] != '\n':
+                                          i += 1
+                                      if i < len(text):
+                                          result.append(text[i])
+                                  elif next_c == '*':
+                                      # Block comment - skip to */
+                                      i += 2
+                                      while i + 1 < len(text):
+                                          if text[i] == '*' and text[i + 1] == '/':
+                                              i += 2
+                                              break
+                                          i += 1
+                                  else:
+                                      result.append(c)
+                              else:
+                                  result.append(c)
+                          i += 1
+                      return ''.join(result)
+
+                  content = strip_comments(content)
                   # Remove trailing commas
                   content = re.sub(r',(\s*[}\]])', r'\1', content)
                   json.loads(content)
@@ -223,62 +265,62 @@ jobs:
           from pathlib import Path
 
           REQUIRED = [
-              "config/hypr/hyprland.conf",
-              "config/hypr/core/env.conf",
-              "config/hypr/core/monitors.conf",
-              "config/hypr/core/input.conf",
-              "config/hypr/core/general.conf",
-              "config/hypr/core/cursor.conf",
-              "config/hypr/core/binds.conf",
-              "config/hypr/modules/decorations.conf",
-              "config/hypr/modules/animations.conf",
-              "config/hypr/modules/keybinds.conf",
-              "config/hypr/modules/autostart.conf",
-              "config/hypr/rules/windowrules.conf",
-              "config/hypr/rules/workspacerules.conf",
-              "config/hypr/rules/layerrules.conf",
-              "config/hypr/scripts/theme/theme-engine.sh",
-              "config/hypr/scripts/theme/wallpaper-picker.sh",
-              "config/hypr/scripts/media/volume.sh",
-              "config/hypr/scripts/media/brightness.sh",
-              "config/hypr/scripts/system/lock.sh",
-              "config/hypr/scripts/network/wifi-toggle.sh",
-              "config/waybar/configs/top.jsonc",
-              "config/waybar/styles/main.css",
-              "config/waybar/styles/animations.css",
-              "config/rofi/config.rasi",
-              "config/rofi/scripts/launcher.sh",
-              "config/rofi/scripts/powermenu.sh",
-              "config/fish/config.fish",
-              "config/fish/conf.d/30-abbr.fish",
-              "config/fish/functions/fish_greeting.fish",
-              "config/nvim/init.lua",
-              "config/nvim/lua/core/options.lua",
-              "config/nvim/lua/core/keymaps.lua",
-              "config/nvim/lua/plugins/lsp.lua",
-              "config/nvim/lua/themes/ash.lua",
-              "config/dunst/dunstrc",
-              "config/hypridle/hypridle.conf",
-              "config/kitty/kitty.conf",
-              "config/starship.toml",
-              "config/btop/btop.conf",
-              "bin/ash",
-              "install.sh",
-              "quickstart.sh",
-              "README.md",
-              "LICENSE",
-              ".gitignore",
-              "ATTRIBUTION.md",
-              "docs/KEYBINDS.md",
-              "docs/THEMING.md",
-              "docs/TROUBLESHOOTING.md",
-              "docs/CUSTOMIZATION.md",
-              "scripts/health/doctor.sh",
-              "scripts/health/validate.sh",
-              "scripts/health/final-check.sh",
-              "scripts/core/backup.sh",
-              "scripts/core/update.sh",
-              "scripts/core/restore.sh",
+              ".config/hypr/hyprland.conf",
+              ".config/hypr/core/env.conf",
+              ".config/hypr/core/monitors.conf",
+              ".config/hypr/core/input.conf",
+              ".config/hypr/core/general.conf",
+              ".config/hypr/core/cursor.conf",
+              ".config/hypr/core/binds.conf",
+              ".config/hypr/modules/decorations.conf",
+              ".config/hypr/modules/animations.conf",
+              ".config/hypr/modules/keybinds.conf",
+              ".config/hypr/modules/autostart.conf",
+              ".config/hypr/rules/windowrules.conf",
+              ".config/hypr/rules/workspacerules.conf",
+              ".config/hypr/rules/layerrules.conf",
+              ".config/hypr/scripts/theme/theme-engine.sh",
+              ".config/hypr/scripts/theme/wallpaper-picker.sh",
+              ".config/hypr/scripts/media/volume.sh",
+              ".config/hypr/scripts/media/brightness.sh",
+              ".config/hypr/scripts/system/lock.sh",
+              ".config/hypr/scripts/network/wifi-toggle.sh",
+              ".config/waybar/configs/top.jsonc",
+              ".config/waybar/styles/main.css",
+              ".config/waybar/styles/animations.css",
+              ".config/rofi/config.rasi",
+              ".config/rofi/scripts/launcher.sh",
+              ".config/rofi/scripts/powermenu.sh",
+              ".config/fish/config.fish",
+              ".config/fish/conf.d/30-abbr.fish",
+              ".config/fish/functions/fish_greeting.fish",
+              ".config/nvim/init.lua",
+              ".config/nvim/lua/core/options.lua",
+              ".config/nvim/lua/core/keymaps.lua",
+              ".config/nvim/lua/plugins/lsp.lua",
+              ".config/nvim/lua/themes/ash.lua",
+              ".config/dunst/dunstrc",
+              ".config/hypridle/hypridle.conf",
+              ".config/kitty/kitty.conf",
+              ".config/starship.toml",
+              ".config/btop/btop.conf",
+              ".local/bin/ash",
+              ".dotfiles/scripts/install.sh",
+              ".dotfiles/quickstart.sh",
+              ".dotfiles/README.md",
+              ".dotfiles/LICENSE",
+              ".dotfiles/.gitignore",
+              ".dotfiles/ATTRIBUTION.md",
+              ".dotfiles/docs/KEYBINDS.md",
+              ".dotfiles/docs/THEMING.md",
+              ".dotfiles/docs/TROUBLESHOOTING.md",
+              ".dotfiles/docs/CUSTOMIZATION.md",
+              ".dotfiles/scripts/health/doctor.sh",
+              ".dotfiles/scripts/health/validate.sh",
+              ".dotfiles/scripts/health/final-check.sh",
+              ".dotfiles/scripts/core/backup.sh",
+              ".dotfiles/scripts/core/update.sh",
+              ".dotfiles/scripts/core/restore.sh",
           ]
 
           base = Path('.')

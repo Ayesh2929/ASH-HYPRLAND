@@ -132,6 +132,17 @@ main() {
             || warn "Fisher update failed (fisher may not be installed)"
     fi
 
+# Quick verification stub — if called directly, sources the real file
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REAL_FILE="${SELF_DIR}/update.sh"
+
+if [[ -f "${REAL_FILE}" ]] && [[ "${BASH_SOURCE[0]}" != "${REAL_FILE}" ]]; then
+    exec bash "${REAL_FILE}" "$@"
+fi
+
+echo "ASH Update Script — v3.0.0"
+echo "Run: ash update"
+
     # ── Done ──────────────────────────────────────────────────────────────────
     echo ""
     echo -e "  ${G}${B}✓ Update complete!${R}"
