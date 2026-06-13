@@ -1,100 +1,77 @@
-# Labeler configuration for ASH Dotfiles
+# GitHub Labeler Configuration
+# Automatically adds labels to PRs based on changed files
 
-# Documentation
-"documentation":
-  - "*.md"
-  - "docs/**"
-  - "README*"
+# Documentation changes
+documentation:
+  - "**/*.md"
+  - "**/*.rst"
+  - "docs/**/*"
 
-# Configuration files
-"config":
-  - "config/**/*.conf"
-  - "config/**/*.json*"
-  - "config/**/*.yaml"
-  - "config/**/*.yml"
-  - "config/**/*.toml"
+# Configuration changes
+configuration:
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "**/*.json"
+  - "**/*.toml"
+  - ".github/**/*"
 
-# Shell scripts
-"scripts":
-  - "config/**/*.sh"
-  - "scripts/**/*.sh"
-  - "bin/**"
-
-# Lua configuration
-"lua":
-  - "config/**/*.lua"
-
-# Stylesheets
-"styles":
-  - "config/**/*.css"
-  - "config/**/*.scss"
-
-# Rofi themes
-"rofi":
-  - "config/rofi/**"
-
-# Waybar configuration
-"waybar":
-  - "config/waybar/**"
-
-# Hyprland configuration
-"hyprland":
-  - "config/hypr/**"
-
-# Kitty terminal
-"kitty":
-  - "config/kitty/**"
-
-# Fish shell
-"fish":
-  - "config/fish/**"
-
-# Neovim
-"neovim":
-  - "config/nvim/**"
-
-# GTK themes
-"gtk":
-  - "config/gtk-*/**"
-
-# Eww widgets
-"eww":
-  - "config/eww/**"
-
-# Notifications
-"notifications":
-  - "config/swaync/**"
-  - "config/mako/**"
-
-# GitHub Actions
-"github-actions":
-  - ".github/workflows/**"
+# Scripts and automation
+scripts:
+  - "scripts/**/*"
+  - "**/*.sh"
+  - "**/*.py"
 
 # Dependencies
-"dependencies":
-  - "package*.json"
+dependencies:
+  - "package.json"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - "yarn.lock"
   - "Cargo.toml"
+  - "Cargo.lock"
   - "go.mod"
-  - "requirements*.txt"
+  - "go.sum"
+  - "requirements.txt"
+  - "pyproject.toml"
 
 # CI/CD
-"ci":
-  - ".github/workflows/**"
-  - "*.yml"
-  - "*.yaml"
+ci:
+  - ".github/workflows/**/*"
+  - ".gitlab-ci.yml"
+  - "Jenkinsfile"
 
-# Breaking changes
-"breaking":
-  - "config/hypr/hyprland.conf"
-  - "config/hypr/keybinds.conf"
-  - "bin/ash"
+# Tests
+tests:
+  - "**/*test*"
+  - "**/*spec*"
+  - "**/__tests__/**"
+  - "**/__mocks__/**"
 
-# Bug fixes
-"bug":
-  - "**/fix*.sh"
-  - "**/*fix*.sh"
+# Types/TypeScript
+types:
+  - "**/*.d.ts"
+  - "**/*.ts"
+  - "**/*.tsx"
+
+# Styles
+styles:
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.sass"
+  - "**/*.less"
+
+# Bug fixes (based on branch name pattern)
+bug:
+  - branch: "fix/*"
+  - branch: "bugfix/*"
+  - branch: "hotfix/*"
 
 # Features
-"feature":
-  - "**/new*.sh"
-  - "**/*feature*.sh"
+feature:
+  - branch: "feat/*"
+  - branch: "feature/*"
+
+# Chores
+chore:
+  - branch: "chore/*"
+  - branch: "maintenance/*"
