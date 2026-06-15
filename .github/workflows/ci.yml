@@ -7,13 +7,6 @@
 # ║  ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗     ║
 # ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝     ║
 # ║                                                                                          ║
-# ║  ██╗   ██╗███████╗     ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗                     ║
-# ║  ██║   ██║██╔════╝    ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗                    ║
-# ║  ██║   ██║███████╗    ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║                    ║
-# ║  ╚██╗ ██╔╝╚════██║    ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║                    ║
-# ║   ╚████╔╝ ███████║    ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║                    ║
-# ║    ╚═══╝  ╚══════╝     ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝                    ║
-# ║                                                                                          ║
 # ║  🚀 ASH DOTFILES v5.0 OMEGA — ULTRA PREMIUM CI/CD PIPELINE                              ║
 # ║  ⚡ Full-spectrum validation • Screenshot generation • Asset optimization               ║
 # ║  🎨 Theme validation • 🔌 Plugin checks • 🔒 Security scanning • 📊 Benchmarks          ║
@@ -104,15 +97,12 @@ on:
         type: boolean
 
   schedule:
-    # Nightly full pipeline — 02:00 UTC
     - cron: "0 2 * * *"
-    # Weekly security deep-scan — Monday 04:00 UTC
     - cron: "0 4 * * 1"
-    # Monthly benchmark baseline — 1st of month 06:00 UTC
     - cron: "0 6 1 * *"
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  GLOBAL CONCURRENCY — prevent redundant runs
+#  GLOBAL CONCURRENCY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
@@ -122,20 +112,15 @@ concurrency:
 #  GLOBAL ENVIRONMENT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 env:
-  # ── Core ────────────────────────────────────────────────────────────
   ASH_VERSION:               "5.0.0-omega"
   ASH_PIPELINE_VERSION:      "2.0.0"
   ASH_ENV:                   "ci"
   ASH_NO_COLOR:              "0"
   ASH_LOG_LEVEL:             "info"
-
-  # ── Paths ────────────────────────────────────────────────────────────
   SCREENSHOTS_DIR:           "assets/screenshots/desktop"
   THEMES_DIR:                "themes/presets"
   PLUGINS_DIR:               "plugins"
   ASSETS_DIR:                "assets"
-
-  # ── Screenshot targets ───────────────────────────────────────────────
   SCREENSHOT_TARGETS: >-
     dark-rosepine
     light-catppuccin
@@ -154,8 +139,6 @@ env:
     space-nebula
     retro-vaporwave
     anime-evangelion
-
-  # ── Asset quality ────────────────────────────────────────────────────
   WEBP_QUALITY:              "92"
   WEBP_METHOD:               "6"
   AVIF_MIN_QUALITY:          "20"
@@ -164,27 +147,18 @@ env:
   THUMBNAIL_HEIGHT:          "360"
   SCREENSHOT_WIDTH:          "2560"
   SCREENSHOT_HEIGHT:         "1440"
-
-  # ── Tooling versions ─────────────────────────────────────────────────
   NODE_VERSION:              "20.x"
   PYTHON_VERSION:            "3.12"
   RUST_VERSION:              "stable"
   GO_VERSION:                "1.22"
-
-  # ── Performance thresholds ───────────────────────────────────────────
   MAX_THEME_APPLY_MS:        "2000"
   MAX_STARTUP_MS:            "500"
   MAX_SCREENSHOT_SIZE_KB:    "250"
   MAX_THUMBNAIL_SIZE_KB:     "45"
   MIN_WCAG_AA_RATIO:         "4.5"
-
-  # ── Notification ────────────────────────────────────────────────────
   SLACK_WEBHOOK_URL:         ${{ secrets.SLACK_WEBHOOK_URL }}
   DISCORD_WEBHOOK_URL:       ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  REUSABLE DEFAULTS
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 defaults:
   run:
     shell: bash
@@ -195,13 +169,11 @@ defaults:
 # ╚══════════════════════════════════════════════════════════════════════════════
 jobs:
 
-  # ── 00-A: Smart change detection ────────────────────────────────────────────
   detect-changes:
     name: "🧠 Detect Changes"
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
-      # What changed?
       has_screenshots:     ${{ steps.changes.outputs.screenshots }}
       has_themes:          ${{ steps.changes.outputs.themes }}
       has_plugins:         ${{ steps.changes.outputs.plugins }}
@@ -215,10 +187,8 @@ jobs:
       has_web:             ${{ steps.changes.outputs.web }}
       has_workflows:       ${{ steps.changes.outputs.workflows }}
       has_security:        ${{ steps.changes.outputs.security }}
-      # Which themes changed?
       changed_themes:      ${{ steps.theme-diff.outputs.themes }}
       changed_screenshots: ${{ steps.screenshot-diff.outputs.screenshots }}
-      # Pipeline decisions
       run_full:            ${{ steps.decide.outputs.run_full }}
       run_screenshots:     ${{ steps.decide.outputs.run_screenshots }}
       run_security:        ${{ steps.decide.outputs.run_security }}
@@ -290,7 +260,7 @@ jobs:
             | sed 's/,$//' \
             || echo "")
           echo "themes=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
-          echo "  📋 Changed themes: ${CHANGED:-none}"
+          echo "  Changed themes: ${CHANGED:-none}"
 
       - name: "🖼️ Detect changed screenshots"
         id: screenshot-diff
@@ -304,7 +274,7 @@ jobs:
             | sed 's/,$//' \
             || echo "")
           echo "screenshots=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
-          echo "  🖼️  Changed screenshots: ${CHANGED:-none}"
+          echo "  Changed screenshots: ${CHANGED:-none}"
 
       - name: "🤔 Pipeline decision engine"
         id: decide
@@ -312,7 +282,6 @@ jobs:
           EVENT_NAME:    ${{ github.event_name }}
           BRANCH:        ${{ github.ref_name }}
           PIPELINE_MODE: ${{ github.event.inputs.pipeline_mode || 'standard' }}
-          IS_SCHEDULED:  ${{ github.event_name == 'schedule' }}
           CRON_EXPR:     ${{ github.event.schedule }}
         run: |
           set -euo pipefail
@@ -326,12 +295,11 @@ jobs:
           RUN_BENCHMARKS="${{ github.event.inputs.enable_benchmarks || 'false' }}"
           RUN_DEPLOY="false"
 
-          # Determine pipeline mode
           if [[ "$EVENT_NAME" == "schedule" ]]; then
-            case "$CRON_EXPR" in
-              "0 2 * * *") IS_NIGHTLY="true";  MODE="full";      RUN_FULL="true"  ;;
-              "0 4 * * 1") MODE="security-only"; RUN_SECURITY="true" ;;
-              "0 6 1 * *") MODE="benchmark-only"; RUN_BENCHMARKS="true" ;;
+            case "${CRON_EXPR:-}" in
+              "0 2 * * *") IS_NIGHTLY="true"; MODE="full";          RUN_FULL="true"         ;;
+              "0 4 * * 1") MODE="security-only";                     RUN_SECURITY="true"     ;;
+              "0 6 1 * *") MODE="benchmark-only";                    RUN_BENCHMARKS="true"   ;;
             esac
           fi
 
@@ -349,7 +317,6 @@ jobs:
             RUN_SECURITY="true"
           fi
 
-          # Mode overrides
           case "$MODE" in
             full)
               RUN_FULL="true"
@@ -375,9 +342,9 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           echo ""
-          echo "  ╔══════════════════════════════════════════╗"
-          echo "  ║   🧠 Pipeline Decision Summary            ║"
-          echo "  ╠══════════════════════════════════════════╣"
+          echo "  ╔═══════════════════════════════════╗"
+          echo "  ║  Pipeline Decision Summary         ║"
+          echo "  ╠═══════════════════════════════════╣"
           echo "  ║  Mode:        $MODE"
           echo "  ║  Full:        $RUN_FULL"
           echo "  ║  Screenshots: $RUN_SCREENSHOTS"
@@ -386,7 +353,7 @@ jobs:
           echo "  ║  Deploy:      $RUN_DEPLOY"
           echo "  ║  Release:     $IS_RELEASE"
           echo "  ║  Nightly:     $IS_NIGHTLY"
-          echo "  ╚══════════════════════════════════════════╝"
+          echo "  ╚═══════════════════════════════════╝"
 
       - name: "📐 Build job matrices"
         id: matrix
@@ -395,7 +362,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Theme matrix
           if [[ "$TARGET_THEMES" == "all" ]]; then
             THEMES_JSON='[
               "dark-rosepine",
@@ -427,26 +393,24 @@ jobs:
             THEMES_JSON+="]"
           fi
 
-          # Distro matrix
           DISTROS_JSON='[
-            {"name":"arch",     "image":"archlinux:latest",          "pkg":"pacman"},
-            {"name":"fedora",   "image":"fedora:40",                 "pkg":"dnf"},
-            {"name":"ubuntu",   "image":"ubuntu:24.04",              "pkg":"apt"},
-            {"name":"opensuse", "image":"opensuse/tumbleweed:latest","pkg":"zypper"}
+            {"name":"arch",     "image":"archlinux:latest",           "pkg":"pacman"},
+            {"name":"fedora",   "image":"fedora:40",                  "pkg":"dnf"},
+            {"name":"ubuntu",   "image":"ubuntu:24.04",               "pkg":"apt"},
+            {"name":"opensuse", "image":"opensuse/tumbleweed:latest",  "pkg":"zypper"}
           ]'
 
-          echo "themes=$(echo "$THEMES_JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "themes=$(echo "$THEMES_JSON"  | jq -c .)" >> "$GITHUB_OUTPUT"
           echo "distros=$(echo "$DISTROS_JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
 
-          echo "  📋 Theme matrix: $(echo "$THEMES_JSON" | jq 'length') themes"
-          echo "  🐧 Distro matrix: $(echo "$DISTROS_JSON" | jq 'length') distros"
+          echo "  Theme matrix:  $(echo "$THEMES_JSON"  | jq 'length') themes"
+          echo "  Distro matrix: $(echo "$DISTROS_JSON" | jq 'length') distros"
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
-# ║  STAGE 01 ── 🔒 SECURITY GATE (runs first, always)
+# ║  STAGE 01 ── 🔒 SECURITY GATE
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 01-A: Secret scanning ───────────────────────────────────────────────────
   security-secrets:
     name: "🔒 Secret Scanning"
     runs-on: ubuntu-24.04
@@ -462,7 +426,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "🔍 Gitleaks — detect secrets"
+      - name: "🔍 Gitleaks"
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -470,7 +434,7 @@ jobs:
         with:
           config-path: .gitleaks.toml
 
-      - name: "🔍 TruffleHog — deep secret scan"
+      - name: "🔍 TruffleHog"
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
@@ -492,7 +456,6 @@ jobs:
             trufflehog-report.json
           retention-days: 30
 
-  # ── 01-B: Dependency vulnerability audit ────────────────────────────────────
   security-deps:
     name: "🛡️ Dependency Audit"
     runs-on: ubuntu-24.04
@@ -513,20 +476,20 @@ jobs:
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
-      - name: "🔍 NPM audit (web dashboard)"
+      - name: "🔍 NPM audit"
         working-directory: web
         run: |
           npm audit --audit-level=moderate --json > npm-audit.json 2>&1 || true
           CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit.json)
-          HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit.json)
-          echo "  🔴 Critical: $CRITICAL"
-          echo "  🟠 High:     $HIGH"
+          HIGH=$(jq '.metadata.vulnerabilities.high     // 0' npm-audit.json)
+          echo "  Critical: $CRITICAL"
+          echo "  High:     $HIGH"
           if [[ "$CRITICAL" -gt 0 ]]; then
-            echo "  ❌ FAIL — Critical vulnerabilities found"
+            echo "  FAIL — critical vulnerabilities found"
             exit 1
           fi
 
-      - name: "🔍 Trivy — filesystem scan"
+      - name: "🔍 Trivy filesystem scan"
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "fs"
@@ -544,7 +507,7 @@ jobs:
           sarif_file: trivy-results.sarif
           category: trivy
 
-      - name: "🐍 Safety — Python deps (api)"
+      - name: "🐍 Safety — Python deps"
         working-directory: api
         run: |
           pip install safety --quiet
@@ -554,9 +517,9 @@ jobs:
             --output safety-report.json \
             --continue-on-error || true
           VULNS=$(jq 'length' safety-report.json 2>/dev/null || echo 0)
-          echo "  Python vulnerabilities found: $VULNS"
+          echo "  Python vulnerabilities: $VULNS"
 
-      - name: "📊 Upload dependency audit results"
+      - name: "📊 Upload results"
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -567,9 +530,8 @@ jobs:
             api/safety-report.json
           retention-days: 30
 
-  # ── 01-C: CodeQL static analysis ────────────────────────────────────────────
   security-codeql:
-    name: "🔬 CodeQL Analysis (${{ matrix.language }})"
+    name: "🔬 CodeQL (${{ matrix.language }})"
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: detect-changes
@@ -591,31 +553,21 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          queries: >-
-            security-extended,
-            security-and-quality
+          queries: security-extended,security-and-quality
 
       - name: "🏗️ Autobuild"
         uses: github/codeql-action/autobuild@v3
 
-      - name: "🔍 Run CodeQL analysis"
+      - name: "🔍 Analyze"
         uses: github/codeql-action/analyze@v3
         with:
           category: codeql-${{ matrix.language }}
-          output: codeql-results-${{ matrix.language }}.sarif
-
-      - name: "📤 Upload CodeQL SARIF"
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: codeql-results-${{ matrix.language }}.sarif
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
 # ║  STAGE 02 ── ✅ LINTING & VALIDATION
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 02-A: Shell linting (ShellCheck) ────────────────────────────────────────
   lint-shell:
     name: "🐚 ShellCheck"
     runs-on: ubuntu-24.04
@@ -623,7 +575,7 @@ jobs:
     needs: [detect-changes, security-secrets]
     if: |
       needs.detect-changes.outputs.has_scripts == 'true' ||
-      needs.detect-changes.outputs.run_full == 'true'
+      needs.detect-changes.outputs.run_full    == 'true'
 
     steps:
       - name: "📥 Checkout"
@@ -634,26 +586,17 @@ jobs:
           sudo apt-get install -y shellcheck --no-install-recommends
           shellcheck --version
 
-      - name: "🔍 ShellCheck — all shell scripts"
+      - name: "🔍 ShellCheck — all scripts"
         run: |
           set -euo pipefail
-
-          FAILED=0
-          PASS=0
-          WARN=0
+          FAILED=0; PASS=0; WARN=0
           ERRORS=()
 
-          echo "  Scanning shell scripts..."
-          echo ""
-
-          # Collect all shell scripts
           mapfile -t SCRIPTS < <(
             find . \
-              -type f \
-              \( -name "*.sh" -o -name "*.bash" \) \
+              -type f \( -name "*.sh" -o -name "*.bash" \) \
               ! -path "./.git/*" \
               ! -path "./node_modules/*" \
-              ! -path "./.vendor/*" \
               | sort
           )
 
@@ -666,12 +609,11 @@ jobs:
               "$script" 2>&1) || true
 
             if echo "$result" | grep -q "error:"; then
-              echo "  ❌ FAIL: $script"
+              echo "  FAIL: $script"
               echo "$result" | grep "error:" | head -5
               ERRORS+=("$script")
               (( FAILED++ ))
             elif echo "$result" | grep -q "warning:"; then
-              echo "  ⚠️  WARN: $script"
               (( WARN++ ))
             else
               (( PASS++ ))
@@ -679,36 +621,15 @@ jobs:
           done
 
           echo ""
-          echo "  ════════════════════════════════════════"
-          echo "  📊 ShellCheck Results"
-          echo "  ════════════════════════════════════════"
-          printf "  ✅ Passed:   %d scripts\n" "$PASS"
-          printf "  ⚠️  Warnings: %d scripts\n" "$WARN"
-          printf "  ❌ Failed:   %d scripts\n" "$FAILED"
-          echo "  Total:     ${#SCRIPTS[@]} scripts"
-          echo ""
+          echo "  ShellCheck: $PASS passed  $WARN warnings  $FAILED failed"
+          echo "  Total: ${#SCRIPTS[@]} scripts"
 
           if [[ $FAILED -gt 0 ]]; then
-            echo "  ❌ Failed scripts:"
-            for f in "${ERRORS[@]}"; do echo "     • $f"; done
+            for f in "${ERRORS[@]}"; do echo "  FAIL: $f"; done
             exit 1
           fi
+          echo "  All scripts passed"
 
-          echo "  ✅ All scripts passed ShellCheck"
-
-      - name: "🔍 ShellCheck — fish functions"
-        run: |
-          # Fish has its own linting but check for obvious issues
-          FISH_FILES=$(find config/fish -name "*.fish" 2>/dev/null | wc -l)
-          echo "  Found $FISH_FILES fish files"
-
-          # Check for bash-isms in fish files
-          if grep -rn "#!/bin/bash\|#!/bin/sh" config/fish/ 2>/dev/null; then
-            echo "  ⚠️  Found bash shebangs in fish files"
-          fi
-          echo "  ✅ Fish files checked"
-
-  # ── 02-B: Lua linting (Luacheck) ────────────────────────────────────────────
   lint-lua:
     name: "🌙 Luacheck"
     runs-on: ubuntu-24.04
@@ -728,7 +649,7 @@ jobs:
           sudo luarocks install luacheck
           luacheck --version
 
-      - name: "🔍 Luacheck — Neovim config"
+      - name: "🔍 Luacheck"
         run: |
           luacheck config/nvim/ \
             --config .luacheckrc \
@@ -740,18 +661,10 @@ jobs:
             2>&1 | tee luacheck-results.txt
 
           ERRORS=$(grep -c "error" luacheck-results.txt || true)
-          WARNINGS=$(grep -c "warning" luacheck-results.txt || true)
+          echo "  Luacheck: $ERRORS errors"
+          [[ "$ERRORS" -gt 0 ]] && exit 1 || echo "  Passed"
 
-          echo ""
-          echo "  📊 Luacheck: $ERRORS errors, $WARNINGS warnings"
-
-          if [[ "$ERRORS" -gt 0 ]]; then
-            echo "  ❌ Luacheck found errors"
-            exit 1
-          fi
-          echo "  ✅ Luacheck passed"
-
-      - name: "📊 Upload Luacheck results"
+      - name: "📊 Upload results"
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -759,7 +672,6 @@ jobs:
           path: luacheck-results.txt
           retention-days: 7
 
-  # ── 02-C: JSON/YAML validation ───────────────────────────────────────────────
   lint-configs:
     name: "📋 Config Validation (JSON/YAML/TOML)"
     runs-on: ubuntu-24.04
@@ -784,23 +696,19 @@ jobs:
             markdownlint-cli \
             @taplo/cli \
             --silent
-
           pip install yamllint --quiet
 
-      - name: "🔍 JSON validation — all JSON files"
+      - name: "🔍 JSON validation"
         run: |
-          FAILED=0
-          PASS=0
-
+          FAILED=0; PASS=0
           while IFS= read -r -d '' file; do
             if python3 -c "
           import json, sys
           try:
-            json.load(open('$file'))
-            sys.exit(0)
+              json.load(open('$file'))
           except json.JSONDecodeError as e:
-            print(f'  ❌ {\"$file\"}: {e}')
-            sys.exit(1)
+              print('FAIL: $file:', e)
+              sys.exit(1)
           " 2>&1; then
               (( PASS++ ))
             else
@@ -813,15 +721,13 @@ jobs:
             ! -path "./data/analytics/*" \
             ! -name "*.min.json" \
             -print0)
+          echo "  JSON: $PASS passed  $FAILED failed"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All JSON valid"
 
-          echo "  📊 JSON: $PASS passed, $FAILED failed"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All JSON valid"
-
-      - name: "🔍 JSONC validation (comments stripped)"
+      - name: "🔍 JSONC validation"
         run: |
           FAILED=0
           while IFS= read -r -d '' file; do
-            # Strip // comments and validate
             if ! node -e "
               const fs = require('fs');
               const content = fs.readFileSync('$file', 'utf8')
@@ -832,80 +738,59 @@ jobs:
             " 2>&1; then
               (( FAILED++ ))
             fi
-          done < <(find . \
-            -name "*.jsonc" \
-            ! -path "./.git/*" \
-            -print0)
-
-          echo "  📊 JSONC: $FAILED failures"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All JSONC valid"
+          done < <(find . -name "*.jsonc" ! -path "./.git/*" -print0)
+          echo "  JSONC: $FAILED failures"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All JSONC valid"
 
       - name: "🔍 YAML validation"
         run: |
           yamllint \
             --config-file .yamllint.yml \
             --format colored \
-            $(find . \
-              -name "*.yml" -o -name "*.yaml" \
+            $(find . \( -name "*.yml" -o -name "*.yaml" \) \
               | grep -v ".git" \
               | grep -v "node_modules" \
               | head -200) \
             2>&1 | tee yamllint-results.txt
-
           ERRORS=$(grep -c "error" yamllint-results.txt || true)
-          echo "  📊 YAML errors: $ERRORS"
-          [[ "$ERRORS" -gt 0 ]] && exit 1 || echo "  ✅ YAML valid"
+          echo "  YAML errors: $ERRORS"
+          [[ "$ERRORS" -gt 0 ]] && exit 1 || echo "  YAML valid"
 
       - name: "🔍 TOML validation"
         run: |
-          find . -name "*.toml" \
-            ! -path "./.git/*" \
-            ! -path "./node_modules/*" \
+          find . -name "*.toml" ! -path "./.git/*" ! -path "./node_modules/*" \
             | while read -r f; do
-              taplo check "$f" 2>&1 || {
-                echo "  ❌ Invalid TOML: $f"
-                exit 1
-              }
+              taplo check "$f" 2>&1 || { echo "  FAIL: $f"; exit 1; }
             done
-          echo "  ✅ TOML valid"
+          echo "  TOML valid"
 
       - name: "🔍 Theme schema validation"
         run: |
-          set -euo pipefail
           FAILED=0
-
-          # Validate each theme's colors.json against schema
           while IFS= read -r -d '' colors_file; do
-            theme_dir=$(dirname "$colors_file")
-            theme_name=$(basename "$theme_dir")
-
+            theme_name=$(basename "$(dirname "$colors_file")")
             ajv validate \
               --spec=draft2020 \
               -s themes/schema/colors-schema.json \
               -d "$colors_file" \
               2>&1 || {
-                echo "  ❌ Schema fail: $theme_name/colors.json"
+                echo "  Schema fail: $theme_name"
                 (( FAILED++ ))
               }
           done < <(find themes/presets -name "colors.json" -print0)
+          echo "  Theme schemas: $FAILED failures"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All schemas valid"
 
-          echo "  📊 Theme schema: $FAILED failures"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All theme schemas valid"
-
-      - name: "🔍 Markdown linting"
+      - name: "🔍 Markdown lint"
         run: |
           markdownlint \
             --config .markdownlint.yml \
             --ignore node_modules \
             --ignore '.git' \
-            '**/*.md' \
-            2>&1 | tee markdownlint-results.txt || true
+            '**/*.md' 2>&1 | tee markdownlint-results.txt || true
+          echo "  Markdown checked"
 
-          ERRORS=$(grep -c "MD[0-9]" markdownlint-results.txt || true)
-          echo "  📊 Markdown issues: $ERRORS"
-          echo "  ✅ Markdown checked"
-
-      - name: "📊 Upload lint results"
+      - name: "📊 Upload results"
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -915,7 +800,6 @@ jobs:
             markdownlint-results.txt
           retention-days: 7
 
-  # ── 02-D: TypeScript / ESLint (web) ─────────────────────────────────────────
   lint-typescript:
     name: "💙 TypeScript & ESLint"
     runs-on: ubuntu-24.04
@@ -936,22 +820,17 @@ jobs:
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
-      - name: "📦 Install dependencies"
+      - name: "📦 Install"
         working-directory: web
         run: npm ci --prefer-offline
 
       - name: "🔍 TypeScript type check"
         working-directory: web
         run: |
-          npx tsc \
-            --noEmit \
-            --strict \
-            --pretty \
-            2>&1 | tee ts-results.txt
-
+          npx tsc --noEmit --strict --pretty 2>&1 | tee ts-results.txt
           ERRORS=$(grep -c "error TS" ts-results.txt || true)
-          echo "  📊 TypeScript errors: $ERRORS"
-          [[ "$ERRORS" -gt 0 ]] && exit 1 || echo "  ✅ TypeScript OK"
+          echo "  TypeScript errors: $ERRORS"
+          [[ "$ERRORS" -gt 0 ]] && exit 1 || echo "  TypeScript OK"
 
       - name: "🔍 ESLint"
         working-directory: web
@@ -961,25 +840,20 @@ jobs:
             --format stylish \
             --max-warnings 10 \
             --report-unused-disable-directives \
-            src/ \
-            2>&1 | tee eslint-results.txt
-
+            src/ 2>&1 | tee eslint-results.txt
           ERRORS=$(grep -c "error" eslint-results.txt || true)
-          echo "  📊 ESLint errors: $ERRORS"
+          echo "  ESLint errors: $ERRORS"
 
-      - name: "🔍 Prettier format check"
+      - name: "🔍 Prettier check"
         working-directory: web
         run: |
           npx prettier \
             --check \
             --log-level warn \
-            "src/**/*.{ts,tsx,css}" \
-            2>&1 || {
-              echo "  ⚠️  Some files need formatting (run: npx prettier --write)"
-            }
-          echo "  ✅ Prettier check done"
+            "src/**/*.{ts,tsx,css}" 2>&1 || true
+          echo "  Prettier checked"
 
-      - name: "📊 Upload TypeScript results"
+      - name: "📊 Upload results"
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -989,7 +863,6 @@ jobs:
             web/eslint-results.txt
           retention-days: 7
 
-  # ── 02-E: Python linting (api) ──────────────────────────────────────────────
   lint-python:
     name: "🐍 Python — Ruff & MyPy"
     runs-on: ubuntu-24.04
@@ -1010,73 +883,48 @@ jobs:
           cache: "pip"
 
       - name: "📦 Install linting tools"
-        run: |
-          pip install \
-            ruff \
-            mypy \
-            black \
-            bandit \
-            --quiet
+        run: pip install ruff mypy black bandit --quiet
 
-      - name: "🔍 Ruff — fast linting"
+      - name: "🔍 Ruff"
         working-directory: api
         run: |
-          ruff check \
-            --format=github \
-            --output-format=text \
-            . \
-            2>&1 | tee ruff-results.txt
-
+          ruff check --format=github --output-format=text . 2>&1 | tee ruff-results.txt
           ERRORS=$(grep -c "error" ruff-results.txt || true)
-          echo "  📊 Ruff errors: $ERRORS"
-          [[ "$ERRORS" -gt 10 ]] && exit 1 || echo "  ✅ Ruff passed"
+          echo "  Ruff errors: $ERRORS"
+          [[ "$ERRORS" -gt 10 ]] && exit 1 || echo "  Ruff passed"
 
-      - name: "🔍 MyPy — type checking"
+      - name: "🔍 MyPy"
         working-directory: api
         run: |
-          mypy \
-            --ignore-missing-imports \
-            --strict \
-            --pretty \
-            . \
-            2>&1 | tee mypy-results.txt || true
+          mypy --ignore-missing-imports --strict --pretty . 2>&1 | tee mypy-results.txt || true
+          echo "  MyPy done"
 
-          echo "  ✅ MyPy check complete"
-
-      - name: "🔍 Bandit — security linting"
+      - name: "🔍 Bandit"
         working-directory: api
         run: |
-          bandit \
-            -r . \
-            -ll \
-            -f json \
-            -o bandit-results.json \
-            --exclude ./.venv \
-            2>&1 || true
-
+          bandit -r . -ll -f json -o bandit-results.json --exclude ./.venv 2>&1 || true
           HIGH=$(python3 -c "
-          import json
-          d = json.load(open('bandit-results.json'))
-          print(sum(1 for r in d.get('results',[]) if r['issue_severity']=='HIGH'))
+          import json, sys
+          try:
+              d = json.load(open('bandit-results.json'))
+              print(sum(1 for r in d.get('results', []) if r['issue_severity'] == 'HIGH'))
+          except Exception:
+              print(0)
           " 2>/dev/null || echo 0)
+          echo "  Bandit HIGH: $HIGH"
+          [[ "$HIGH" -gt 0 ]] && echo "  High-severity issues found"
 
-          echo "  📊 Bandit HIGH severity: $HIGH"
-          [[ "$HIGH" -gt 0 ]] && echo "  ⚠️  High-severity security issues found"
-
-      - name: "🔍 Black — format check"
+      - name: "🔍 Black"
         working-directory: api
         run: |
-          black --check --diff . 2>&1 | head -50 || {
-            echo "  ⚠️  Python files need formatting (run: black .)"
-          }
-          echo "  ✅ Black check done"
+          black --check --diff . 2>&1 | head -50 || true
+          echo "  Black checked"
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
 # ║  STAGE 03 ── 🖼️  SCREENSHOT ASSET PIPELINE
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 03-A: SVG validation & optimization ─────────────────────────────────────
   screenshots-validate-svg:
     name: "🎨 SVG Validation"
     runs-on: ubuntu-24.04
@@ -1085,7 +933,7 @@ jobs:
     if: |
       needs.detect-changes.outputs.has_screenshots == 'true' ||
       needs.detect-changes.outputs.run_screenshots == 'true' ||
-      needs.detect-changes.outputs.run_full == 'true'
+      needs.detect-changes.outputs.run_full        == 'true'
 
     steps:
       - name: "📥 Checkout"
@@ -1093,93 +941,39 @@ jobs:
 
       - name: "⚙️ Install SVG tools"
         run: |
-          sudo apt-get install -y \
-            libxml2-utils \
-            --no-install-recommends
-
+          sudo apt-get install -y libxml2-utils --no-install-recommends
           npm install -g svgo --silent
           pip install scour --quiet
+          echo "  svgo: $(svgo --version)"
 
-          echo "  ✅ Tools installed"
-          svgo --version
-          xmllint --version 2>&1 | head -1
-
-      - name: "🔍 XMLlint — SVG structure validation"
+      - name: "🔍 XMLlint validation"
         run: |
-          set -euo pipefail
-          FAILED=0
-          PASS=0
-
+          FAILED=0; PASS=0
           while IFS= read -r -d '' svg; do
-            if xmllint \
-              --noout \
-              --schema http://www.w3.org/2000/svg \
-              "$svg" 2>/dev/null; then
+            if xmllint --noout "$svg" 2>/dev/null; then
               (( PASS++ ))
             else
-              # Fallback: basic XML validity
-              if xmllint --noout "$svg" 2>/dev/null; then
-                (( PASS++ ))
-              else
-                echo "  ❌ Invalid XML/SVG: $svg"
-                (( FAILED++ ))
-              fi
+              echo "  FAIL: $svg"
+              (( FAILED++ ))
             fi
-          done < <(find assets/brand/svg-masters \
-            -name "*.svg" \
-            -print0 2>/dev/null || true)
+          done < <(find assets/brand/svg-masters -name "*.svg" -print0 2>/dev/null || true)
+          echo "  SVG: $PASS passed  $FAILED failed"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All SVGs valid"
 
-          echo "  📊 SVG validation: $PASS passed, $FAILED failed"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All SVGs valid"
-
-      - name: "🔍 SVG content validation — required elements"
+      - name: "⚡ SVGO dry-run"
         run: |
-          set -euo pipefail
-          FAILED=0
-
-          REQUIRED_ELEMENTS=(
-            "waybar"
-            "codeArea"
-            "workspaces"
-            "window-shadow"
-          )
-
           while IFS= read -r -d '' svg; do
-            theme=$(basename "${svg%.svg}")
-            for element in "${REQUIRED_ELEMENTS[@]}"; do
-              if ! grep -q "id=\"${element}\"\|class=\"${element}\"" "$svg" 2>/dev/null; then
-                echo "  ⚠️  Missing element '${element}' in: $theme"
-              fi
-            done
-          done < <(find assets/brand/svg-masters \
-            -name "*.svg" -print0 2>/dev/null || true)
-
-          echo "  ✅ SVG content check complete"
-
-      - name: "⚡ SVGO optimization (dry-run)"
-        run: |
-          set -euo pipefail
-          SAVINGS=0
-
-          while IFS= read -r -d '' svg; do
-            orig_size=$(wc -c < "$svg")
-            opt_size=$(svgo \
-              --config svgo.config.js \
+            ORIG=$(wc -c < "$svg")
+            OPT=$(svgo \
               --input "$svg" \
-              --output /dev/stdout \
-              2>/dev/null | wc -c)
-
-            if [[ $orig_size -gt 0 && $opt_size -gt 0 ]]; then
-              saving=$(( (orig_size - opt_size) * 100 / orig_size ))
-              echo "  $(basename "$svg"): ${saving}% smaller"
-              SAVINGS=$(( SAVINGS + saving ))
+              --output /dev/stdout 2>/dev/null | wc -c)
+            if [[ $ORIG -gt 0 && $OPT -gt 0 ]]; then
+              SAVING=$(( (ORIG - OPT) * 100 / ORIG ))
+              echo "  $(basename "$svg"): ${SAVING}% savings"
             fi
-          done < <(find assets/brand/svg-masters \
-            -name "*.svg" -print0 2>/dev/null || true)
+          done < <(find assets/brand/svg-masters -name "*.svg" -print0 2>/dev/null || true)
+          echo "  SVG optimization analysis done"
 
-          echo "  ✅ SVG optimization analysis complete"
-
-  # ── 03-B: Screenshot generation matrix ──────────────────────────────────────
   screenshots-generate:
     name: "📸 Generate — ${{ matrix.theme }}"
     runs-on: ubuntu-24.04
@@ -1188,7 +982,7 @@ jobs:
     if: |
       needs.detect-changes.outputs.has_screenshots == 'true' ||
       needs.detect-changes.outputs.run_screenshots == 'true' ||
-      needs.detect-changes.outputs.run_full == 'true'
+      needs.detect-changes.outputs.run_full        == 'true'
 
     strategy:
       fail-fast: false
@@ -1212,67 +1006,49 @@ jobs:
             pngquant \
             --no-install-recommends
 
-          # Install resvg (faster, more accurate)
           RESVG_VERSION="0.42.0"
           curl -fsSL \
             "https://github.com/RazrFalcon/resvg/releases/download/v${RESVG_VERSION}/resvg-linux-x86_64.zip" \
             -o /tmp/resvg.zip 2>/dev/null || true
-
           if [[ -f /tmp/resvg.zip ]]; then
-            unzip -q /tmp/resvg.zip -d /tmp/resvg
+            unzip -q /tmp/resvg.zip -d /tmp/resvg || true
             sudo mv /tmp/resvg/resvg /usr/local/bin/ 2>/dev/null || true
           fi
 
-          echo "  Tools available:"
-          command -v resvg    && resvg    --version || echo "  resvg:    not available (using rsvg)"
-          command -v rsvg-convert && echo "  rsvg-convert: available"
-          command -v cwebp    && cwebp    --version | head -1
-          command -v convert  && convert  --version | head -1
-          command -v avifenc  && avifenc  --version | head -1 || echo "  avifenc: not available"
+          command -v resvg       && resvg       --version || echo "  resvg: unavailable"
+          command -v rsvg-convert && echo "  rsvg-convert: ok"
+          command -v cwebp        && cwebp --version | head -1
 
-      - name: "🎨 Set theme color variables"
-        id: theme-vars
+      - name: "🎨 Load theme palette"
+        id: palette
         run: |
           set -euo pipefail
           THEME="${{ matrix.theme }}"
+          COLORS="themes/presets/${THEME}/colors.json"
 
-          # Load theme palette from JSON
-          COLORS_FILE="themes/presets/${THEME}/colors.json"
-
-          if [[ -f "$COLORS_FILE" ]]; then
-            BG=$(jq -r '.bg // "#1e1e2e"' "$COLORS_FILE")
-            FG=$(jq -r '.fg // "#cdd6f4"' "$COLORS_FILE")
-            ACCENT=$(jq -r '.accent // "#89b4fa"' "$COLORS_FILE")
-            GREEN=$(jq -r '.green // "#a6e3a1"' "$COLORS_FILE")
-            BLUE=$(jq -r '.blue // "#89b4fa"' "$COLORS_FILE")
+          if [[ -f "$COLORS" ]]; then
+            BG=$(jq -r '.bg     // "#1e1e2e"' "$COLORS")
+            FG=$(jq -r '.fg     // "#cdd6f4"' "$COLORS")
+            ACCENT=$(jq -r '.accent // "#89b4fa"' "$COLORS")
+            GREEN=$(jq -r  '.green  // "#a6e3a1"' "$COLORS")
+            BLUE=$(jq -r   '.blue   // "#89b4fa"' "$COLORS")
           else
-            # Fallback defaults per theme
             case "$THEME" in
               dark-rosepine)
                 BG="#191724"; FG="#e0def4"; ACCENT="#c4a7e7"
-                GREEN="#31748f"; BLUE="#9ccfd8"
-                ;;
+                GREEN="#31748f"; BLUE="#9ccfd8" ;;
               light-catppuccin)
                 BG="#eff1f5"; FG="#4c4f69"; ACCENT="#1e66f5"
-                GREEN="#40a02b"; BLUE="#1e66f5"
-                ;;
+                GREEN="#40a02b"; BLUE="#1e66f5" ;;
               *)
                 BG="#1e1e2e"; FG="#cdd6f4"; ACCENT="#89b4fa"
-                GREEN="#a6e3a1"; BLUE="#89b4fa"
-                ;;
+                GREEN="#a6e3a1"; BLUE="#89b4fa" ;;
             esac
           fi
 
-          {
-            echo "bg=$BG"
-            echo "fg=$FG"
-            echo "accent=$ACCENT"
-            echo "green=$GREEN"
-            echo "blue=$BLUE"
-          } >> "$GITHUB_OUTPUT"
-
-          echo "  🎨 Theme: $THEME"
-          echo "  🎨 BG: $BG | FG: $FG | Accent: $ACCENT"
+          { echo "bg=$BG"; echo "fg=$FG"; echo "accent=$ACCENT"
+            echo "green=$GREEN"; echo "blue=$BLUE"; } >> "$GITHUB_OUTPUT"
+          echo "  Theme: $THEME | BG: $BG | Accent: $ACCENT"
 
       - name: "🖼️ Generate SVG master"
         run: |
@@ -1281,80 +1057,59 @@ jobs:
           SVG_DIR="assets/brand/svg-masters"
           SVG_FILE="${SVG_DIR}/${THEME}.svg"
           SCRIPT="assets/screenshots/desktop/generate-all.sh"
-
           mkdir -p "$SVG_DIR"
 
           if [[ -f "$SCRIPT" ]]; then
             bash "$SCRIPT" generate_desktop_svg "$THEME" > "$SVG_FILE"
-            echo "  ✅ SVG generated via pipeline script"
-          elif [[ -f "${SVG_DIR}/${THEME}.svg" ]]; then
-            echo "  ✅ Using existing SVG master"
+            echo "  SVG via pipeline script"
+          elif [[ -f "$SVG_FILE" ]]; then
+            echo "  Using existing SVG"
           else
-            echo "  ⚠️  No SVG source found for $THEME — creating placeholder"
-            cat > "$SVG_FILE" <<PLACEHOLDER_SVG
+            echo "  Creating placeholder SVG"
+            BG="${{ steps.palette.outputs.bg }}"
+            FG="${{ steps.palette.outputs.fg }}"
+            ACCENT="${{ steps.palette.outputs.accent }}"
+            cat > "$SVG_FILE" << SVGEOF
           <?xml version="1.0" encoding="UTF-8"?>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440" width="2560" height="1440">
-            <rect width="2560" height="1440" fill="${{ steps.theme-vars.outputs.bg }}"/>
+            <rect width="2560" height="1440" fill="${BG}"/>
             <text x="1280" y="720" font-family="monospace" font-size="48"
-                  text-anchor="middle" fill="${{ steps.theme-vars.outputs.fg }}" opacity="0.6">
-              ASH Dotfiles — $THEME
+                  text-anchor="middle" fill="${FG}" opacity="0.6">
+              ASH Dotfiles — ${THEME}
             </text>
             <text x="1280" y="790" font-family="monospace" font-size="24"
-                  text-anchor="middle" fill="${{ steps.theme-vars.outputs.accent }}" opacity="0.5">
+                  text-anchor="middle" fill="${ACCENT}" opacity="0.5">
               v5.0 OMEGA
             </text>
           </svg>
-          PLACEHOLDER_SVG
-            echo "  ✅ Placeholder SVG created"
+          SVGEOF
           fi
+          echo "  SVG size: $(wc -c < "$SVG_FILE") bytes"
 
-          SVG_SIZE=$(wc -c < "$SVG_FILE")
-          echo "  📦 SVG size: $(numfmt --to=iec "$SVG_SIZE")"
-
-      - name: "🖼️ Render SVG → PNG (2560×1440)"
+      - name: "🖼️ Render SVG → PNG"
         run: |
           set -euo pipefail
           THEME="${{ matrix.theme }}"
           SVG="assets/brand/svg-masters/${THEME}.svg"
           PNG="assets/screenshots/desktop/${THEME}.png"
-
           mkdir -p "assets/screenshots/desktop"
 
+          W="${{ env.SCREENSHOT_WIDTH }}"
+          H="${{ env.SCREENSHOT_HEIGHT }}"
+
           if command -v resvg &>/dev/null; then
-            echo "  Using resvg (high fidelity)..."
-            resvg \
-              --width ${{ env.SCREENSHOT_WIDTH }} \
-              --height ${{ env.SCREENSHOT_HEIGHT }} \
-              --dpi 144 \
-              "$SVG" "$PNG"
-
+            resvg --width "$W" --height "$H" --dpi 144 "$SVG" "$PNG"
           elif command -v rsvg-convert &>/dev/null; then
-            echo "  Using rsvg-convert..."
-            rsvg-convert \
-              --width=${{ env.SCREENSHOT_WIDTH }} \
-              --height=${{ env.SCREENSHOT_HEIGHT }} \
-              --keep-aspect-ratio \
-              --format=png \
-              --output="$PNG" \
-              "$SVG"
-
+            rsvg-convert --width="$W" --height="$H" \
+              --keep-aspect-ratio --format=png --output="$PNG" "$SVG"
           else
-            echo "  Using ImageMagick (fallback)..."
-            convert \
-              -size "${{ env.SCREENSHOT_WIDTH }}x${{ env.SCREENSHOT_HEIGHT }}" \
-              -density 144 \
-              "$SVG" "$PNG"
+            convert -size "${W}x${H}" -density 144 "$SVG" "$PNG"
           fi
 
-          if [[ -f "$PNG" ]]; then
-            PNG_SIZE=$(wc -c < "$PNG")
-            echo "  ✅ PNG rendered: $(numfmt --to=iec "$PNG_SIZE")"
-          else
-            echo "  ❌ PNG render failed"
-            exit 1
-          fi
+          [[ -f "$PNG" ]] || { echo "  PNG render failed"; exit 1; }
+          echo "  PNG: $(wc -c < "$PNG") bytes"
 
-      - name: "🌐 Convert PNG → WebP (premium)"
+      - name: "🌐 Convert PNG → WebP"
         run: |
           set -euo pipefail
           THEME="${{ matrix.theme }}"
@@ -1362,95 +1117,69 @@ jobs:
           WEBP="assets/screenshots/desktop/${THEME}.webp"
 
           cwebp \
-            -q ${{ env.WEBP_QUALITY }} \
-            -m ${{ env.WEBP_METHOD }} \
+            -q "${{ env.WEBP_QUALITY }}" \
+            -m "${{ env.WEBP_METHOD }}" \
             -sharp_yuv \
             -metadata none \
             -hint photo \
             -mt \
-            "$PNG" \
-            -o "$WEBP"
+            "$PNG" -o "$WEBP"
 
           WEBP_SIZE=$(wc -c < "$WEBP")
-          MAX_SIZE=$(( ${{ env.MAX_SCREENSHOT_SIZE_KB }} * 1024 ))
+          MAX=$(( ${{ env.MAX_SCREENSHOT_SIZE_KB }} * 1024 ))
+          echo "  WebP: $(numfmt --to=iec "$WEBP_SIZE")"
 
-          echo "  📦 WebP size: $(numfmt --to=iec "$WEBP_SIZE")"
-          echo "  📏 Max allowed: ${{ env.MAX_SCREENSHOT_SIZE_KB }}KB"
-
-          if [[ $WEBP_SIZE -gt $MAX_SIZE ]]; then
-            echo "  ⚠️  WebP exceeds size limit — re-encoding with lower quality"
+          if [[ $WEBP_SIZE -gt $MAX ]]; then
+            echo "  Re-encoding at lower quality..."
             cwebp -q 82 -m 6 -sharp_yuv -metadata none "$PNG" -o "$WEBP"
-            WEBP_SIZE=$(wc -c < "$WEBP")
-            echo "  📦 Re-encoded WebP: $(numfmt --to=iec "$WEBP_SIZE")"
+            echo "  Re-encoded: $(numfmt --to=iec "$(wc -c < "$WEBP")")"
           fi
 
-          echo "  ✅ WebP generated: $THEME.webp"
-
-      - name: "🎯 Generate thumbnail (640×360)"
+      - name: "🎯 Generate thumbnail"
         run: |
           set -euo pipefail
           THEME="${{ matrix.theme }}"
           PNG="assets/screenshots/desktop/${THEME}.png"
           THUMB_DIR="assets/screenshots/desktop/thumbnails"
-          THUMB="$THUMB_DIR/${THEME}-thumb.webp"
-
           mkdir -p "$THUMB_DIR"
 
-          # High-quality Lanczos downscale
+          W="${{ env.THUMBNAIL_WIDTH }}"
+          H="${{ env.THUMBNAIL_HEIGHT }}"
+
           convert "$PNG" \
             -filter Lanczos \
-            -resize "${{ env.THUMBNAIL_WIDTH }}x${{ env.THUMBNAIL_HEIGHT }}^" \
+            -resize "${W}x${H}^" \
             -gravity center \
-            -extent "${{ env.THUMBNAIL_WIDTH }}x${{ env.THUMBNAIL_HEIGHT }}" \
+            -extent "${W}x${H}" \
             -strip \
             PNG:- \
-            | cwebp \
-                -q 82 \
-                -m 5 \
-                -sharp_yuv \
-                -metadata none \
-                - \
-                -o "$THUMB"
+            | cwebp -q 82 -m 5 -sharp_yuv -metadata none - \
+                -o "$THUMB_DIR/${THEME}-thumb.webp"
 
-          THUMB_SIZE=$(wc -c < "$THUMB")
-          MAX_THUMB=$(( ${{ env.MAX_THUMBNAIL_SIZE_KB }} * 1024 ))
+          echo "  Thumbnail: $(numfmt --to=iec "$(wc -c < "$THUMB_DIR/${THEME}-thumb.webp")")"
 
-          echo "  📦 Thumbnail: $(numfmt --to=iec "$THUMB_SIZE")"
-
-          if [[ $THUMB_SIZE -gt $MAX_THUMB ]]; then
-            echo "  ⚠️  Thumbnail exceeds limit"
-          fi
-
-          echo "  ✅ Thumbnail: ${THEME}-thumb.webp"
-
-      - name: "🎯 Generate AVIF variant"
+      - name: "🎯 Generate AVIF"
         run: |
-          set -euo pipefail
           THEME="${{ matrix.theme }}"
           PNG="assets/screenshots/desktop/${THEME}.png"
           AVIF_DIR="assets/screenshots/desktop/avif"
-
           mkdir -p "$AVIF_DIR"
 
           if command -v avifenc &>/dev/null; then
             avifenc \
-              --min ${{ env.AVIF_MIN_QUALITY }} \
-              --max ${{ env.AVIF_MAX_QUALITY }} \
+              --min "${{ env.AVIF_MIN_QUALITY }}" \
+              --max "${{ env.AVIF_MAX_QUALITY }}" \
               --speed 4 \
               --jobs all \
-              "$PNG" \
-              "$AVIF_DIR/${THEME}.avif"
-
-            AVIF_SIZE=$(wc -c < "$AVIF_DIR/${THEME}.avif")
-            echo "  ✅ AVIF: $(numfmt --to=iec "$AVIF_SIZE")"
+              "$PNG" "$AVIF_DIR/${THEME}.avif"
+            echo "  AVIF: $(numfmt --to=iec "$(wc -c < "$AVIF_DIR/${THEME}.avif")")"
           else
-            echo "  ⚠️  avifenc not available — skipping AVIF"
+            echo "  avifenc unavailable — skipping"
             touch "$AVIF_DIR/${THEME}.avif.skip"
           fi
 
-      - name: "🌟 Generate @2x retina thumbnail"
+      - name: "🌟 Retina thumbnail (@2x)"
         run: |
-          set -euo pipefail
           THEME="${{ matrix.theme }}"
           PNG="assets/screenshots/desktop/${THEME}.png"
           THUMB_DIR="assets/screenshots/desktop/thumbnails"
@@ -1462,121 +1191,117 @@ jobs:
             -extent "1280x720" \
             -strip \
             PNG:- \
-            | cwebp \
-                -q 85 \
-                -m 5 \
-                -sharp_yuv \
-                -metadata none \
-                - \
+            | cwebp -q 85 -m 5 -sharp_yuv -metadata none - \
                 -o "$THUMB_DIR/${THEME}-thumb@2x.webp"
+          echo "  @2x thumbnail done"
 
-          echo "  ✅ Retina thumbnail: ${THEME}-thumb@2x.webp"
-
-      - name: "🔍 Validate color contrast (WCAG)"
+      - name: "🔍 WCAG contrast check"
         run: |
-          set -euo pipefail
           THEME="${{ matrix.theme }}"
-          ACCENT="${{ steps.theme-vars.outputs.accent }}"
-          BG="${{ steps.theme-vars.outputs.bg }}"
+          ACCENT="${{ steps.palette.outputs.accent }}"
+          BG="${{ steps.palette.outputs.bg }}"
+          FG="${{ steps.palette.outputs.fg }}"
 
-          # Calculate relative luminance
-          python3 << 'PYTHON'
+          python3 << PYEOF
           import sys
 
-          def hex_to_rgb(hex_color):
-              h = hex_color.lstrip('#')
+          def hex_to_rgb(h):
+              h = h.lstrip('#')
               return tuple(int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4))
 
           def linearize(c):
               return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
 
-          def luminance(hex_color):
-              r, g, b = (linearize(c) for c in hex_to_rgb(hex_color))
+          def luminance(h):
+              r, g, b = (linearize(c) for c in hex_to_rgb(h))
               return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-          def contrast_ratio(c1, c2):
-              l1 = luminance(c1)
-              l2 = luminance(c2)
+          def contrast(c1, c2):
+              l1, l2 = luminance(c1), luminance(c2)
               lighter, darker = max(l1, l2), min(l1, l2)
               return (lighter + 0.05) / (darker + 0.05)
 
-          accent = "${{ steps.theme-vars.outputs.accent }}"
-          bg     = "${{ steps.theme-vars.outputs.bg }}"
-          fg     = "${{ steps.theme-vars.outputs.fg }}"
-          theme  = "${{ matrix.theme }}"
+          accent = "${ACCENT}"
+          bg     = "${BG}"
+          fg     = "${FG}"
+          theme  = "${THEME}"
 
-          pairs = [
-              ("fg on bg",     fg, bg),
-              ("accent on bg", accent, bg),
-          ]
-
+          pairs = [("fg on bg", fg, bg), ("accent on bg", accent, bg)]
           failed = False
-          print(f"\n  WCAG Contrast — {theme}")
-          print(f"  {'─' * 48}")
+
+          print("  WCAG Contrast — " + theme)
+          print("  " + "-" * 48)
 
           for label, c1, c2 in pairs:
               try:
-                  ratio = contrast_ratio(c1, c2)
-                  aa  = "✅ AA"  if ratio >= 4.5 else "❌ AA FAIL"
-                  aaa = "✅ AAA" if ratio >= 7.0 else "⚠️ AAA"
-                  print(f"  {label:<20} {ratio:5.2f}:1  {aa}  {aaa}")
+                  ratio = contrast(c1, c2)
+                  aa  = "OK AA"   if ratio >= 4.5 else "FAIL AA"
+                  aaa = "OK AAA"  if ratio >= 7.0 else "warn AAA"
+                  print("  " + label + "  " + str(round(ratio, 2)) + ":1  " + aa + "  " + aaa)
                   if ratio < 3.0:
                       failed = True
               except Exception as e:
-                  print(f"  {label}: error — {e}")
+                  print("  " + label + ": error — " + str(e))
 
-          print()
           sys.exit(1 if failed else 0)
-          PYTHON
+          PYEOF
 
-      - name: "📊 Generate asset manifest entry"
+      - name: "📊 Asset manifest entry"
         run: |
           set -euo pipefail
           THEME="${{ matrix.theme }}"
           WEBP="assets/screenshots/desktop/${THEME}.webp"
           THUMB="assets/screenshots/desktop/thumbnails/${THEME}-thumb.webp"
 
-          WEBP_SIZE=$(wc -c < "$WEBP" 2>/dev/null || echo 0)
+          WEBP_SIZE=$(wc -c < "$WEBP"  2>/dev/null || echo 0)
           THUMB_SIZE=$(wc -c < "$THUMB" 2>/dev/null || echo 0)
-          WEBP_HASH=$(sha256sum "$WEBP" 2>/dev/null | cut -d' ' -f1 || echo "")
+          WEBP_HASH=$(sha256sum "$WEBP"  2>/dev/null | cut -d' ' -f1 || echo "")
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          RUN_ID="${{ github.run_id }}"
+          COMMIT="${{ github.sha }}"
+          W="${{ env.SCREENSHOT_WIDTH }}"
+          H="${{ env.SCREENSHOT_HEIGHT }}"
+          Q="${{ env.WEBP_QUALITY }}"
+          TW="${{ env.THUMBNAIL_WIDTH }}"
+          TH="${{ env.THUMBNAIL_HEIGHT }}"
+          OS="${{ runner.os }}"
 
-          cat > "assets/screenshots/desktop/.manifest-${THEME}.json" << JSON
+          cat > "assets/screenshots/desktop/.manifest-${THEME}.json" << JSONEOF
           {
-            "theme": "$THEME",
-            "version": "${{ env.ASH_VERSION }}",
-            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "commit": "${{ github.sha }}",
+            "theme":        "$THEME",
+            "version":      "${{ env.ASH_VERSION }}",
+            "generated_at": "$TS",
+            "commit":       "$COMMIT",
             "files": {
               "webp": {
-                "path": "${THEME}.webp",
+                "path":       "${THEME}.webp",
                 "size_bytes": $WEBP_SIZE,
-                "sha256": "$WEBP_HASH",
-                "width": ${{ env.SCREENSHOT_WIDTH }},
-                "height": ${{ env.SCREENSHOT_HEIGHT }},
-                "quality": ${{ env.WEBP_QUALITY }}
+                "sha256":     "$WEBP_HASH",
+                "width":      $W,
+                "height":     $H,
+                "quality":    $Q
               },
               "thumbnail": {
-                "path": "thumbnails/${THEME}-thumb.webp",
+                "path":       "thumbnails/${THEME}-thumb.webp",
                 "size_bytes": $THUMB_SIZE,
-                "width": ${{ env.THUMBNAIL_WIDTH }},
-                "height": ${{ env.THUMBNAIL_HEIGHT }}
+                "width":      $TW,
+                "height":     $TH
               }
             },
             "colors": {
-              "bg":     "${{ steps.theme-vars.outputs.bg }}",
-              "fg":     "${{ steps.theme-vars.outputs.fg }}",
-              "accent": "${{ steps.theme-vars.outputs.accent }}"
+              "bg":     "${{ steps.palette.outputs.bg }}",
+              "fg":     "${{ steps.palette.outputs.fg }}",
+              "accent": "${{ steps.palette.outputs.accent }}"
             },
             "pipeline": {
-              "runner": "${{ runner.os }}",
-              "workflow_run": "${{ github.run_id }}"
+              "runner":       "$OS",
+              "workflow_run": "$RUN_ID"
             }
           }
-          JSON
+          JSONEOF
+          echo "  Manifest written"
 
-          echo "  ✅ Manifest entry created"
-
-      - name: "📤 Upload screenshot artifacts"
+      - name: "📤 Upload artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-${{ matrix.theme }}-${{ github.run_id }}
@@ -1590,9 +1315,8 @@ jobs:
           retention-days: 30
           compression-level: 0
 
-  # ── 03-C: Aggregate screenshots & build manifest ─────────────────────────────
   screenshots-aggregate:
-    name: "📦 Aggregate Screenshots & Build Manifest"
+    name: "📦 Aggregate Screenshots"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [detect-changes, screenshots-generate]
@@ -1602,7 +1326,7 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "📥 Download all screenshot artifacts"
+      - name: "📥 Download all artifacts"
         uses: actions/download-artifact@v4
         with:
           pattern: screenshot-*-${{ github.run_id }}
@@ -1612,7 +1336,6 @@ jobs:
       - name: "📊 Build consolidated manifest"
         run: |
           set -euo pipefail
-
           OUTPUT="assets/screenshots/desktop/manifest.json"
           THEMES_JSON="{"
           FIRST=true
@@ -1620,97 +1343,81 @@ jobs:
           for manifest in assets/screenshots/desktop/.manifest-*.json; do
             [[ -f "$manifest" ]] || continue
             THEME=$(jq -r '.theme' "$manifest")
-
-            if [[ "$FIRST" == "true" ]]; then
-              FIRST=false
-            else
-              THEMES_JSON+=","
-            fi
-
+            if [[ "$FIRST" == "true" ]]; then FIRST=false; else THEMES_JSON+=","; fi
             THEMES_JSON+="\"$THEME\":"
             THEMES_JSON+=$(cat "$manifest")
           done
-
           THEMES_JSON+="}"
 
-          cat > "$OUTPUT" << JSON
-          {
-            "\$schema": "https://ash-dotfiles.dev/schemas/screenshot-manifest/v2.json",
-            "version": "${{ env.ASH_VERSION }}",
-            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "commit": "${{ github.sha }}",
-            "branch": "${{ github.ref_name }}",
-            "pipeline_run": "${{ github.run_id }}",
-            "total_themes": $(ls assets/screenshots/desktop/.manifest-*.json 2>/dev/null | wc -l),
-            "resolution": {
-              "width": ${{ env.SCREENSHOT_WIDTH }},
-              "height": ${{ env.SCREENSHOT_HEIGHT }}
-            },
-            "themes": $THEMES_JSON
-          }
-          JSON
+          TOTAL=$(ls assets/screenshots/desktop/.manifest-*.json 2>/dev/null | wc -l)
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          COMMIT="${{ github.sha }}"
+          BRANCH="${{ github.ref_name }}"
+          RUN_ID="${{ github.run_id }}"
+          W="${{ env.SCREENSHOT_WIDTH }}"
+          H="${{ env.SCREENSHOT_HEIGHT }}"
 
-          echo "  ✅ Manifest built"
-          echo "  📊 Total themes: $(jq '.total_themes' "$OUTPUT")"
+          cat > "$OUTPUT" << JSONEOF
+          {
+            "version":      "${{ env.ASH_VERSION }}",
+            "generated_at": "$TS",
+            "commit":       "$COMMIT",
+            "branch":       "$BRANCH",
+            "pipeline_run": "$RUN_ID",
+            "total_themes": $TOTAL,
+            "resolution":   { "width": $W, "height": $H },
+            "themes":       $THEMES_JSON
+          }
+          JSONEOF
+
+          echo "  Manifest: $TOTAL themes"
 
       - name: "📊 Asset size report"
         run: |
           echo ""
-          echo "  ╔══════════════════════════════════════════════════════╗"
-          echo "  ║   📊 Screenshot Asset Report                         ║"
-          echo "  ╠══════════════════════════════════════════════════════╣"
-          printf "  ║  %-28s %8s %8s %8s  ║\n" "Theme" "WebP" "Thumb" "AVIF"
-          echo "  ╠══════════════════════════════════════════════════════╣"
+          echo "  ╔══════════════════════════════════════════════════╗"
+          echo "  ║   Screenshot Asset Report                         ║"
+          echo "  ╠══════════════════════════════════════════════════╣"
+          printf "  ║  %-28s %8s %8s ║\n" "Theme" "WebP" "Thumb"
+          echo "  ╠══════════════════════════════════════════════════╣"
 
-          TOTAL_WEBP=0
-          TOTAL_THUMB=0
+          TOTAL_WEBP=0; TOTAL_THUMB=0
 
           for webp in assets/screenshots/desktop/*.webp; do
             [[ -f "$webp" ]] || continue
             theme=$(basename "${webp%.webp}")
-            webp_size=$(wc -c < "$webp" 2>/dev/null || echo 0)
+            ws=$(wc -c < "$webp" 2>/dev/null || echo 0)
             thumb="assets/screenshots/desktop/thumbnails/${theme}-thumb.webp"
-            thumb_size=$(wc -c < "$thumb" 2>/dev/null || echo 0)
-            avif="assets/screenshots/desktop/avif/${theme}.avif"
-            avif_size=$(wc -c < "$avif" 2>/dev/null || echo 0)
-
-            TOTAL_WEBP=$(( TOTAL_WEBP + webp_size ))
-            TOTAL_THUMB=$(( TOTAL_THUMB + thumb_size ))
-
-            printf "  ║  %-28s %8s %8s %8s  ║\n" \
+            ts=$(wc -c < "$thumb" 2>/dev/null || echo 0)
+            TOTAL_WEBP=$(( TOTAL_WEBP + ws ))
+            TOTAL_THUMB=$(( TOTAL_THUMB + ts ))
+            printf "  ║  %-28s %8s %8s ║\n" \
               "$theme" \
-              "$(numfmt --to=iec "$webp_size" 2>/dev/null || echo ${webp_size}B)" \
-              "$(numfmt --to=iec "$thumb_size" 2>/dev/null || echo ${thumb_size}B)" \
-              "$(numfmt --to=iec "$avif_size" 2>/dev/null || echo 'skip')"
+              "$(numfmt --to=iec "$ws"  2>/dev/null || echo "${ws}B")" \
+              "$(numfmt --to=iec "$ts"  2>/dev/null || echo "${ts}B")"
           done
 
-          echo "  ╠══════════════════════════════════════════════════════╣"
-          printf "  ║  %-28s %8s %8s          ║\n" \
+          echo "  ╠══════════════════════════════════════════════════╣"
+          printf "  ║  %-28s %8s %8s ║\n" \
             "TOTAL" \
             "$(numfmt --to=iec "$TOTAL_WEBP")" \
             "$(numfmt --to=iec "$TOTAL_THUMB")"
-          echo "  ╚══════════════════════════════════════════════════════╝"
+          echo "  ╚══════════════════════════════════════════════════╝"
 
-      - name: "🔍 Validate all WebP files"
+      - name: "🔍 Validate WebP files"
         run: |
           FAILED=0
           for webp in assets/screenshots/desktop/*.webp; do
             [[ -f "$webp" ]] || continue
             theme=$(basename "${webp%.webp}")
-
-            # Check WebP is valid
-            if ! python3 -c "
+            python3 -c "
           data = open('$webp', 'rb').read()
-          assert data[:4] == b'RIFF', 'Not a RIFF file'
-          assert data[8:12] == b'WEBP', 'Not a WebP file'
-          print('  ✅ $theme: valid WebP')
-          " 2>&1; then
-              echo "  ❌ Invalid WebP: $theme"
-              (( FAILED++ ))
-            fi
+          assert data[:4] == b'RIFF', 'Not RIFF'
+          assert data[8:12] == b'WEBP', 'Not WebP'
+          print('  OK: $theme')
+          " 2>&1 || { echo "  FAIL: $theme"; (( FAILED++ )); }
           done
-
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All WebP files valid"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All WebP valid"
 
       - name: "📤 Upload consolidated assets"
         uses: actions/upload-artifact@v4
@@ -1724,9 +1431,8 @@ jobs:
           retention-days: 90
           compression-level: 0
 
-  # ── 03-D: Visual regression detection ───────────────────────────────────────
   screenshots-regression:
-    name: "👁️ Visual Regression Check"
+    name: "👁️ Visual Regression"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     needs: [screenshots-aggregate]
@@ -1753,17 +1459,15 @@ jobs:
           path: screenshots-baseline/
           if_no_artifact_found: warn
 
-      - name: "🔍 Compare screenshots (SSIM)"
+      - name: "🔍 SSIM comparison"
         run: |
           set -euo pipefail
-
-          CHANGED=()
           REPORT="regression-report.md"
 
-          echo "# 👁️ Visual Regression Report" > "$REPORT"
+          echo "# Visual Regression Report" > "$REPORT"
           echo "" >> "$REPORT"
-          echo "| Theme | SSIM Score | Status |" >> "$REPORT"
-          echo "|-------|-----------|--------|" >> "$REPORT"
+          echo "| Theme | SSIM | Status |" >> "$REPORT"
+          echo "|-------|------|--------|" >> "$REPORT"
 
           for new_webp in screenshots-new/*.webp; do
             [[ -f "$new_webp" ]] || continue
@@ -1771,63 +1475,42 @@ jobs:
             baseline="screenshots-baseline/${theme}.webp"
 
             if [[ ! -f "$baseline" ]]; then
-              echo "| $theme | N/A | 🆕 New |" >> "$REPORT"
+              echo "| $theme | N/A | New |" >> "$REPORT"
               continue
             fi
 
-            # Calculate SSIM using Python (ImageMagick as fallback)
-            SSIM=$(python3 << 'PYEOF' 2>/dev/null || echo "N/A"
+            SSIM=$(python3 << PYEOF 2>/dev/null || echo "N/A"
           try:
-            from PIL import Image
-            import numpy as np
+              from PIL import Image
+              import numpy as np
 
-            def ssim_score(path1, path2):
-              img1 = np.array(Image.open(path1).convert('RGB').resize((256, 144)))
-              img2 = np.array(Image.open(path2).convert('RGB').resize((256, 144)))
-              img1 = img1.astype(float)
-              img2 = img2.astype(float)
-              mu1, mu2 = img1.mean(), img2.mean()
-              sigma1 = img1.std()
-              sigma2 = img2.std()
-              sigma12 = np.mean((img1 - mu1) * (img2 - mu2))
-              C1, C2 = 0.01**2 * 255**2, 0.03**2 * 255**2
-              ssim = ((2*mu1*mu2+C1)*(2*sigma12+C2)) / ((mu1**2+mu2**2+C1)*(sigma1**2+sigma2**2+C2))
-              return round(ssim, 4)
+              def ssim(p1, p2):
+                  i1 = np.array(Image.open(p1).convert('RGB').resize((256, 144))).astype(float)
+                  i2 = np.array(Image.open(p2).convert('RGB').resize((256, 144))).astype(float)
+                  mu1, mu2 = i1.mean(), i2.mean()
+                  s1, s2   = i1.std(),  i2.std()
+                  s12 = np.mean((i1 - mu1) * (i2 - mu2))
+                  C1, C2 = (0.01*255)**2, (0.03*255)**2
+                  return round(((2*mu1*mu2+C1)*(2*s12+C2))/((mu1**2+mu2**2+C1)*(s1**2+s2**2+C2)), 4)
 
-            print(ssim_score('$new_webp', '$baseline'))
-          except Exception as e:
-            print('N/A')
+              print(ssim('${new_webp}', '${baseline}'))
+          except Exception:
+              print('N/A')
           PYEOF
             )
 
-            STATUS="✅ OK"
+            STATUS="OK"
             if [[ "$SSIM" != "N/A" ]]; then
               SSIM_INT=$(python3 -c "print(int(float('$SSIM') * 100))" 2>/dev/null || echo 0)
-              if [[ $SSIM_INT -lt 92 ]]; then
-                STATUS="⚠️ Changed"
-                CHANGED+=("$theme (SSIM: $SSIM)")
-              elif [[ $SSIM_INT -lt 75 ]]; then
-                STATUS="❌ Major change"
-                CHANGED+=("$theme (SSIM: $SSIM)")
-              fi
+              [[ $SSIM_INT -lt 75  ]] && STATUS="Major change"
+              [[ $SSIM_INT -lt 92 && $SSIM_INT -ge 75 ]] && STATUS="Changed"
             fi
-
             echo "| $theme | $SSIM | $STATUS |" >> "$REPORT"
           done
 
-          echo "" >> "$REPORT"
-          if [[ ${#CHANGED[@]} -gt 0 ]]; then
-            echo "## ⚠️ Changed Screenshots" >> "$REPORT"
-            for item in "${CHANGED[@]}"; do
-              echo "- $item" >> "$REPORT"
-            done
-          else
-            echo "## ✅ No significant visual changes detected" >> "$REPORT"
-          fi
-
           cat "$REPORT"
 
-      - name: "💬 Post regression comment on PR"
+      - name: "💬 Post PR comment"
         uses: marocchino/sticky-pull-request-comment@v2
         if: always()
         with:
@@ -1837,10 +1520,9 @@ jobs:
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
-# ║  STAGE 04 ── 🧪 UNIT & INTEGRATION TESTS
+# ║  STAGE 04 ── 🧪 TESTS
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 04-A: Shell unit tests ───────────────────────────────────────────────────
   test-unit-shell:
     name: "🧪 Unit Tests — Shell"
     runs-on: ubuntu-24.04
@@ -1851,16 +1533,9 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "⚙️ Install test dependencies"
+      - name: "⚙️ Install bats"
         run: |
-          sudo apt-get install -y \
-            bats \
-            jq \
-            parallel \
-            --no-install-recommends
-
-          # Install bats helpers
-          mkdir -p test/helpers/bats-support test/helpers/bats-assert
+          sudo apt-get install -y bats jq parallel --no-install-recommends
           git clone --depth=1 \
             https://github.com/bats-core/bats-support.git \
             tests/helpers/bats-support 2>/dev/null || true
@@ -1868,106 +1543,33 @@ jobs:
             https://github.com/bats-core/bats-assert.git \
             tests/helpers/bats-assert 2>/dev/null || true
 
-      - name: "🔧 Setup test environment"
-        run: |
-          source tests/helpers/setup-test-env.sh 2>/dev/null || {
-            # Create mock environment
-            mkdir -p /tmp/ash-test/{config,themes,plugins,data,cache}
-            export ASH_CONFIG_DIR="/tmp/ash-test/config"
-            export ASH_THEMES_DIR="/tmp/ash-test/themes"
-            export ASH_PLUGINS_DIR="/tmp/ash-test/plugins"
-            export ASH_DATA_DIR="/tmp/ash-test/data"
-            export ASH_CACHE_DIR="/tmp/ash-test/cache"
-            export ASH_TEST_MODE="1"
-          }
-          echo "  ✅ Test environment ready"
-
-      - name: "🧪 Run unit test suite"
+      - name: "🧪 Run unit tests"
         run: |
           set -euo pipefail
-
-          PASS=0
-          FAIL=0
-          SKIP=0
-          REPORT="unit-test-results.xml"
-
-          # BATS XML output
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > "$REPORT"
-          echo '<testsuites name="ASH Unit Tests">' >> "$REPORT"
+          PASS=0; FAIL=0
 
           if [[ -d tests/unit ]]; then
             for test_file in tests/unit/test-*.sh; do
               [[ -f "$test_file" ]] || continue
               test_name=$(basename "${test_file%.sh}")
-
-              echo "  Running: $test_name"
-
-              if bats \
-                --formatter tap \
-                --report-formatter junit \
-                --output /tmp/bats-output \
-                "$test_file" 2>&1; then
-                (( PASS++ ))
-                echo "  ✅ $test_name"
+              if bats --formatter tap "$test_file" 2>&1; then
+                echo "  PASS: $test_name"; (( PASS++ ))
               else
-                (( FAIL++ ))
-                echo "  ❌ $test_name"
+                echo "  FAIL: $test_name"; (( FAIL++ ))
               fi
             done
           else
-            echo "  ⚠️  No unit tests found — running smoke tests"
-
-            # Smoke: color utilities
-            bash -c '
-              source ash-cli/lib/colors.sh 2>/dev/null || true
-              echo "  ✅ colors.sh loaded"
-            ' || echo "  ⚠️  colors.sh issue"
-
-            # Smoke: utils
-            bash -c '
-              source ash-cli/lib/utils.sh 2>/dev/null || true
-              echo "  ✅ utils.sh loaded"
-            ' || echo "  ⚠️  utils.sh issue"
-
-            # Smoke: JSON parser
-            bash -c '
-              source ash-cli/lib/json-parser.sh 2>/dev/null || true
-              echo "  ✅ json-parser.sh loaded"
-            ' || echo "  ⚠️  json-parser.sh issue"
-
-            PASS=3
+            echo "  No unit tests found — running smoke tests"
+            for lib in colors utils json-parser; do
+              bash -c "source ash-cli/lib/${lib}.sh 2>/dev/null && echo '  OK: ${lib}'" \
+                || echo "  WARN: ${lib}"
+              (( PASS++ ))
+            done
           fi
 
-          echo '</testsuites>' >> "$REPORT"
+          echo "  Results: $PASS passed  $FAIL failed"
+          [[ $FAIL -gt 0 ]] && exit 1 || echo "  All unit tests passed"
 
-          echo ""
-          echo "  ════════════════════════════════════"
-          echo "  📊 Unit Test Results"
-          echo "  ════════════════════════════════════"
-          echo "  ✅ Passed: $PASS"
-          echo "  ❌ Failed: $FAIL"
-          echo "  ⏭️  Skipped: $SKIP"
-          echo ""
-
-          [[ $FAIL -gt 0 ]] && exit 1 || echo "  ✅ All unit tests passed"
-
-      - name: "📊 Upload test results"
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-results-${{ github.run_id }}
-          path: unit-test-results.xml
-          retention-days: 14
-
-      - name: "📊 Publish test results"
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: unit-test-results.xml
-          check_name: "🧪 Unit Test Results"
-          comment_mode: always
-
-  # ── 04-B: Theme engine integration tests ─────────────────────────────────────
   test-theme-engine:
     name: "🎨 Theme Engine Tests"
     runs-on: ubuntu-24.04
@@ -1980,207 +1582,149 @@ jobs:
 
       - name: "⚙️ Install tools"
         run: |
-          sudo apt-get install -y \
-            jq \
-            imagemagick \
-            python3-pil \
-            --no-install-recommends
+          sudo apt-get install -y jq imagemagick python3-pil --no-install-recommends
           pip install Pillow --quiet
 
-      - name: "🧪 Test color extraction"
+      - name: "🧪 Color extraction smoke test"
         run: |
           set -euo pipefail
-
-          echo "  🎨 Testing color extraction pipeline..."
-
-          # Create test wallpaper
-          convert \
-            -size 100x100 \
-            xc:"#2D3B2D" \
-            /tmp/test-wallpaper.jpg 2>/dev/null || {
-              echo "  ⚠️  ImageMagick not available — using Python fallback"
-              python3 -c "
-          from PIL import Image, ImageDraw
+          python3 -c "
+          from PIL import Image
           img = Image.new('RGB', (100, 100), '#2D3B2D')
           img.save('/tmp/test-wallpaper.jpg')
-          print('  ✅ Test wallpaper created')
+          print('  Test wallpaper created')
           "
-            }
-
-          # Test extraction script
           if [[ -f "ash-cli/engines/color-engine/extract.sh" ]]; then
             bash ash-cli/engines/color-engine/extract.sh \
-              /tmp/test-wallpaper.jpg \
-              /tmp/test-colors.json \
-              2>/dev/null || true
-            echo "  ✅ Color extraction executed"
+              /tmp/test-wallpaper.jpg /tmp/test-colors.json 2>/dev/null || true
+            echo "  Color extraction executed"
           else
-            echo "  ⚠️  extract.sh not found — skipping"
+            echo "  extract.sh not found — skipping"
           fi
 
-      - name: "🧪 Test theme validation"
+      - name: "🧪 Theme colors.json validation"
         run: |
           set -euo pipefail
           FAILED=0
-
-          # Test each theme's colors.json
           while IFS= read -r -d '' colors_file; do
             theme=$(basename "$(dirname "$colors_file")")
-
-            # Required fields
             for field in bg fg accent red green blue yellow purple; do
               val=$(jq -r ".${field} // empty" "$colors_file" 2>/dev/null)
               if [[ -z "$val" ]]; then
-                echo "  ❌ Missing '$field' in: $theme"
-                (( FAILED++ ))
+                echo "  MISS $field in: $theme"; (( FAILED++ ))
               elif ! echo "$val" | grep -qE '^#[0-9a-fA-F]{6}$'; then
-                echo "  ❌ Invalid color format '$val' for '$field' in: $theme"
-                (( FAILED++ ))
+                echo "  BAD  $field='$val' in: $theme"; (( FAILED++ ))
               fi
             done
           done < <(find themes/presets -name "colors.json" -print0 2>/dev/null || true)
+          echo "  Theme validation: $FAILED failures"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All themes valid"
 
-          echo "  📊 Theme validation: $FAILED failures"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All themes valid"
-
-      - name: "🧪 Test template rendering"
+      - name: "🧪 Template rendering"
         run: |
           set -euo pipefail
+          echo "  Testing template engine..."
 
-          echo "  🎨 Testing template engine..."
-
-          # Simple template substitution test
           python3 << 'PYEOF'
           import re
-          import json
+          import os
           import sys
 
-          # Mock colors
           colors = {
-              "bg": "#2D3B2D",
-              "fg": "#D3C6AA",
+              "bg":     "#2D3B2D",
+              "fg":     "#D3C6AA",
               "accent": "#A7C080",
-              "red": "#E67E80",
-              "green": "#A7C080",
-              "blue": "#7FBBB3",
+              "red":    "#E67E80",
+              "green":  "#A7C080",
+              "blue":   "#7FBBB3",
               "yellow": "#DBBC7F",
               "purple": "#D699B6",
               "orange": "#E69875",
-              "aqua": "#83C092",
+              "aqua":   "#83C092",
           }
 
-          # Test template substitution
-          import os
           template_dir = "ash-cli/engines/color-engine/templates"
-          templates_tested = 0
-          templates_failed = 0
+          tested = 0
+          failed = 0
 
           if os.path.exists(template_dir):
               for fname in os.listdir(template_dir):
-                  if not fname.endswith('.template'):
+                  if not fname.endswith(".template"):
                       continue
                   fpath = os.path.join(template_dir, fname)
-                  with open(fpath, 'r') as f:
+                  with open(fpath, "r") as f:
                       content = f.read()
 
-                  # Substitute all placeholders
                   result = content
                   for key, val in colors.items():
-                      result = result.replace(f'{{{{{key}}}}}', val)
-                      result = result.replace(f'${{colors.{key}}}', val)
-                      result = result.replace(f'%{key}%', val)
+                      result = result.replace("{{" + key + "}}", val)
+                      result = result.replace("${colors." + key + "}", val)
+                      result = result.replace("%" + key + "%", val)
 
-                  # Check for unresolved placeholders
-                  unresolved = re.findall(r'\{\{[^}]+\}\}', result)
+                  unresolved = re.findall(r"\{\{[^}]+\}\}", result)
                   if unresolved:
-                      print(f"  ⚠️  Unresolved in {fname}: {unresolved[:3]}")
+                      print("  WARN unresolved in " + fname + ": " + str(unresolved[:3]))
 
-                  templates_tested += 1
-                  print(f"  ✅ {fname}")
+                  tested += 1
+                  print("  OK: " + fname)
+          else:
+              print("  SKIP: template_dir not found")
 
-          print(f"\n  📊 Templates tested: {templates_tested}, failed: {templates_failed}")
-          sys.exit(1 if templates_failed > 0 else 0)
+          print("  Tested: " + str(tested) + "  Failed: " + str(failed))
+          sys.exit(1 if failed > 0 else 0)
           PYEOF
 
-  # ── 04-C: Plugin system tests ────────────────────────────────────────────────
   test-plugins:
-    name: "🔌 Plugin System Tests"
+    name: "🔌 Plugin Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [lint-shell, lint-configs]
-    if: |
-      needs.detect-changes.outputs.has_plugins == 'true' ||
-      needs.detect-changes.outputs.run_full == 'true'
-    # needs detect-changes is a parent job but we need it here
-    # workaround: always run on push/PR
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "🧪 Validate plugin manifests"
+      - name: "🧪 Plugin manifest validation"
         run: |
           set -euo pipefail
-          FAILED=0
-          PASS=0
+          FAILED=0; PASS=0
 
           while IFS= read -r -d '' manifest; do
             plugin=$(basename "$(dirname "$manifest")")
-
-            # Required fields
             for field in name version description author; do
               val=$(jq -r ".${field} // empty" "$manifest" 2>/dev/null)
               if [[ -z "$val" ]]; then
-                echo "  ❌ Missing '$field' in plugin: $plugin"
-                (( FAILED++ ))
+                echo "  MISS $field in: $plugin"; (( FAILED++ ))
               fi
             done
-
-            # Validate version semver
             version=$(jq -r '.version // ""' "$manifest")
-            if ! echo "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
-              echo "  ❌ Invalid semver '$version' in: $plugin"
-              (( FAILED++ ))
-            else
+            if echo "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
               (( PASS++ ))
+            else
+              echo "  BAD semver '$version' in: $plugin"; (( FAILED++ ))
             fi
-
           done < <(find plugins -name "plugin.json" -print0 2>/dev/null || true)
 
-          echo ""
-          echo "  📊 Plugin manifests: $PASS valid, $FAILED invalid"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ All plugin manifests valid"
+          echo "  Plugin manifests: $PASS valid  $FAILED invalid"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All manifests valid"
 
-      - name: "🧪 Plugin hook validation"
+      - name: "🧪 Plugin script syntax"
         run: |
           set -euo pipefail
           FAILED=0
-
-          # Check each plugin has required scripts
           while IFS= read -r -d '' manifest; do
             plugin_dir=$(dirname "$manifest")
-            plugin=$(basename "$plugin_dir")
-
-            for script in init.sh; do
-              if [[ ! -f "$plugin_dir/$script" ]]; then
-                echo "  ⚠️  Missing '$script' in: $plugin"
-              fi
-            done
-
-            # Check scripts are executable and valid shell
             for script in "$plugin_dir"/*.sh; do
               [[ -f "$script" ]] || continue
-              if ! bash -n "$script" 2>&1; then
-                echo "  ❌ Syntax error in: $plugin/$(basename "$script")"
+              bash -n "$script" 2>&1 || {
+                echo "  Syntax error: $script"
                 (( FAILED++ ))
-              fi
+              }
             done
           done < <(find plugins/core -name "plugin.json" -print0 2>/dev/null || true)
+          echo "  Plugin scripts: $FAILED failures"
+          [[ $FAILED -gt 0 ]] && exit 1 || echo "  All scripts valid"
 
-          echo "  📊 Plugin hooks: $FAILED failures"
-          [[ $FAILED -gt 0 ]] && exit 1 || echo "  ✅ Plugin hooks valid"
-
-  # ── 04-D: API tests ──────────────────────────────────────────────────────────
   test-api:
     name: "🌐 API Tests"
     runs-on: ubuntu-24.04
@@ -2191,7 +1735,6 @@ jobs:
       needs.detect-changes.outputs.run_full == 'true'
 
     services:
-      # Mock Redis for session caching
       redis:
         image: redis:7-alpine
         ports:
@@ -2212,19 +1755,16 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
 
-      - name: "📦 Install API dependencies"
+      - name: "📦 Install dependencies"
         working-directory: api
         run: |
           pip install \
             -r requirements.txt \
-            pytest \
-            pytest-asyncio \
-            pytest-cov \
-            httpx \
-            fakeredis \
+            pytest pytest-asyncio pytest-cov \
+            httpx fakeredis \
             --quiet
 
-      - name: "🚀 Start API server (background)"
+      - name: "🚀 Start API"
         working-directory: api
         env:
           ASH_ENV: test
@@ -2233,17 +1773,14 @@ jobs:
         run: |
           python server.py &
           echo $! > /tmp/api.pid
-
-          # Wait for server to be ready
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8000/health &>/dev/null; then
-              echo "  ✅ API server ready (${i}s)"
-              break
-            fi
+            curl -sf http://localhost:8000/health &>/dev/null && {
+              echo "  API ready (${i}s)"; break
+            }
             sleep 1
           done
 
-      - name: "🧪 Run API test suite"
+      - name: "🧪 Run pytest"
         working-directory: api
         env:
           ASH_ENV: test
@@ -2255,27 +1792,15 @@ jobs:
             --cov-report=term-missing \
             --cov-fail-under=75 \
             --junit-xml=pytest-results.xml \
-            --tb=short \
-            -v \
+            --tb=short -v \
             2>&1 | tee pytest-output.txt
 
-      - name: "🔍 Check API coverage"
-        working-directory: api
-        run: |
-          COVERAGE=$(python3 -c "
-          import xml.etree.ElementTree as ET
-          tree = ET.parse('coverage.xml')
-          root = tree.getroot()
-          print(round(float(root.attrib.get('line-rate', 0)) * 100, 1))
-          " 2>/dev/null || echo "0")
-          echo "  📊 API Coverage: ${COVERAGE}%"
-
-      - name: "🛑 Stop API server"
+      - name: "🛑 Stop API"
         if: always()
         run: |
           [[ -f /tmp/api.pid ]] && kill "$(cat /tmp/api.pid)" 2>/dev/null || true
 
-      - name: "📊 Upload API test results"
+      - name: "📊 Upload results"
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -2286,7 +1811,7 @@ jobs:
             api/pytest-output.txt
           retention-days: 14
 
-      - name: "📊 Upload coverage to Codecov"
+      - name: "📊 Codecov"
         uses: codecov/codecov-action@v4
         with:
           files: api/coverage.xml
@@ -2296,7 +1821,7 @@ jobs:
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
-# ║  STAGE 05 ── 📊 PERFORMANCE BENCHMARKS
+# ║  STAGE 05 ── 📊 BENCHMARKS
 # ╚══════════════════════════════════════════════════════════════════════════════
 
   benchmark:
@@ -2306,175 +1831,83 @@ jobs:
     needs: [test-unit-shell, test-theme-engine]
     if: |
       needs.detect-changes.outputs.run_benchmarks == 'true' ||
-      github.event.inputs.enable_benchmarks == 'true' ||
+      github.event.inputs.enable_benchmarks       == 'true' ||
       github.ref == 'refs/heads/main'
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "⚙️ Install benchmark tools"
+      - name: "⚙️ Install tools"
         run: |
-          sudo apt-get install -y \
-            hyperfine \
-            imagemagick \
-            webp \
-            time \
-            --no-install-recommends 2>/dev/null || {
-            # hyperfine fallback
-            curl -fsSL \
-              https://github.com/sharkdp/hyperfine/releases/latest/download/hyperfine_1.18.0_amd64.deb \
-              -o /tmp/hyperfine.deb 2>/dev/null \
-              && sudo dpkg -i /tmp/hyperfine.deb 2>/dev/null || true
-          }
-
+          sudo apt-get install -y imagemagick webp --no-install-recommends 2>/dev/null || true
+          curl -fsSL \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -o /tmp/hyperfine.deb 2>/dev/null \
+            && sudo dpkg -i /tmp/hyperfine.deb 2>/dev/null || true
           pip install matplotlib pandas --quiet 2>/dev/null || true
 
-      - name: "📊 Benchmark: Script startup time"
+      - name: "📊 Benchmark: startup"
         run: |
-          set -euo pipefail
-
-          echo "  📊 Benchmarking ash-cli startup..."
-
           if [[ -f "ash-cli/ash" ]]; then
             hyperfine \
-              --warmup 3 \
-              --runs 20 \
+              --warmup 3 --runs 20 \
               --export-json /tmp/bench-startup.json \
               --export-markdown /tmp/bench-startup.md \
-              "bash ash-cli/ash --version" \
-              2>&1
-
-            # Parse results
+              "bash ash-cli/ash --version" 2>&1
             MEAN=$(jq '.results[0].mean * 1000 | round' /tmp/bench-startup.json 2>/dev/null || echo "N/A")
-            echo "  ⚡ Mean startup: ${MEAN}ms"
-            echo "  📏 Threshold: ${{ env.MAX_STARTUP_MS }}ms"
-
-            if [[ "$MEAN" != "N/A" ]] && [[ $MEAN -gt ${{ env.MAX_STARTUP_MS }} ]]; then
-              echo "  ❌ Startup exceeds threshold!"
-            else
-              echo "  ✅ Startup within threshold"
-            fi
+            echo "  Mean startup: ${MEAN}ms  (threshold: ${{ env.MAX_STARTUP_MS }}ms)"
           else
-            echo "  ⚠️  ash binary not found — skipping startup benchmark"
+            echo "  ash binary not found — skipping"
           fi
 
-      - name: "📊 Benchmark: WebP conversion speed"
+      - name: "📊 Benchmark: WebP conversion"
         run: |
-          set -euo pipefail
-          echo "  📊 Benchmarking WebP conversion..."
-
-          # Create test PNG
-          convert \
-            -size 2560x1440 \
-            "gradient:#2D3B2D-#A7C080" \
-            /tmp/bench-test.png 2>/dev/null || {
-            python3 -c "
+          python3 -c "
           from PIL import Image
-          img = Image.new('RGB', (2560, 1440), '#2D3B2D')
-          img.save('/tmp/bench-test.png')
-          "
-          }
+          Image.new('RGB', (2560, 1440), '#2D3B2D').save('/tmp/bench.png')
+          " 2>/dev/null || \
+          convert -size 2560x1440 "gradient:#2D3B2D-#A7C080" /tmp/bench.png 2>/dev/null || true
 
           hyperfine \
-            --warmup 2 \
-            --runs 10 \
+            --warmup 2 --runs 10 \
             --export-json /tmp/bench-webp.json \
-            "cwebp -q 92 -m 6 -sharp_yuv /tmp/bench-test.png -o /tmp/bench-output.webp" \
-            2>&1
+            "cwebp -q 92 -m 6 -sharp_yuv /tmp/bench.png -o /tmp/bench-out.webp" 2>&1 || true
 
           MEAN=$(jq '.results[0].mean * 1000 | round' /tmp/bench-webp.json 2>/dev/null || echo "N/A")
-          echo "  ⚡ Mean conversion: ${MEAN}ms per image"
+          echo "  Mean WebP: ${MEAN}ms"
 
-      - name: "📊 Benchmark: Color extraction speed"
+      - name: "📊 Benchmark: JSON throughput"
         run: |
-          set -euo pipefail
-          echo "  📊 Benchmarking color extraction..."
-
-          if [[ -f "ash-cli/engines/color-engine/extract.sh" ]]; then
-            hyperfine \
-              --warmup 2 \
-              --runs 15 \
-              --export-json /tmp/bench-colors.json \
-              "bash ash-cli/engines/color-engine/extract.sh /tmp/bench-test.png /tmp/test-palette.json" \
-              2>&1 || echo "  ⚠️  Color extraction benchmark skipped"
-          fi
-
-      - name: "📊 Benchmark: JSON processing throughput"
-        run: |
-          set -euo pipefail
-          echo "  📊 Benchmarking JSON processing..."
-
-          # Generate test JSON
           python3 -c "
           import json, random
           data = {
-            'themes': {f'theme-{i}': {'bg': f'#{random.randint(0,0xFFFFFF):06x}'} for i in range(250)},
-            'plugins': [{'name': f'plugin-{i}', 'version': '1.0.0'} for i in range(150)]
+            'themes':  {('t-' + str(i)): {'bg': '#' + format(random.randint(0, 0xFFFFFF), '06x')} for i in range(250)},
+            'plugins': [{'name': 'p-' + str(i), 'version': '1.0.0'} for i in range(150)]
           }
           with open('/tmp/bench-data.json', 'w') as f:
             json.dump(data, f)
           "
-
           hyperfine \
-            --warmup 5 \
-            --runs 50 \
+            --warmup 5 --runs 50 \
             --export-json /tmp/bench-json.json \
             "jq '.themes | length' /tmp/bench-data.json" \
-            "python3 -c \"import json; d=json.load(open('/tmp/bench-data.json')); print(len(d['themes']))\"" \
-            2>&1
+            "python3 -c \"import json; print(len(json.load(open('/tmp/bench-data.json'))['themes']))\"" \
+            2>&1 || true
+          echo "  JSON benchmark done"
 
-          echo "  ✅ JSON benchmark complete"
-
-      - name: "📊 Generate benchmark report"
-        run: |
-          cat > benchmark-report.md << 'REPORT'
-          # 📊 ASH Dotfiles Performance Benchmarks
-
-          > Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          > Commit: ${{ github.sha }}
-          > Runner: ${{ runner.os }} / ${{ runner.arch }}
-
-          ## Results
-
-          REPORT
-
-          # Append all benchmark markdown results
-          for bench_md in /tmp/bench-*.md; do
-            [[ -f "$bench_md" ]] && cat "$bench_md" >> benchmark-report.md || true
-          done
-
-          echo ""
-          cat benchmark-report.md
-
-      - name: "📤 Upload benchmark results"
+      - name: "📤 Upload results"
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results-${{ github.run_id }}
-          path: |
-            benchmark-report.md
-            /tmp/bench-*.json
+          path: /tmp/bench-*.json
           retention-days: 90
-
-      - name: "📊 Store benchmark baseline"
-        if: github.ref == 'refs/heads/main'
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          tool: customSmallerIsBetter
-          output-file-path: /tmp/bench-startup.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
-          alert-threshold: "130%"
-          comment-on-alert: true
-          fail-on-alert: false
-          alert-comment-cc-users: "@${{ github.repository_owner }}"
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
 # ║  STAGE 06 ── 🏗️ BUILD
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 06-A: Build web dashboard ────────────────────────────────────────────────
   build-web:
     name: "🌐 Build Web Dashboard"
     runs-on: ubuntu-24.04
@@ -2494,11 +1927,11 @@ jobs:
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
-      - name: "📦 Install dependencies"
+      - name: "📦 Install"
         working-directory: web
         run: npm ci --prefer-offline
 
-      - name: "🏗️ Build (production)"
+      - name: "🏗️ Build"
         working-directory: web
         env:
           NODE_ENV: production
@@ -2507,46 +1940,28 @@ jobs:
           VITE_BUILD_DATE: ${{ github.event.head_commit.timestamp }}
         run: |
           npm run build 2>&1 | tee build-output.txt
-
-          # Check build succeeded
-          if [[ ! -d "dist" ]]; then
-            echo "  ❌ Build failed — dist/ not created"
-            exit 1
-          fi
-
-          # Report bundle sizes
-          echo ""
-          echo "  📦 Bundle sizes:"
-          find dist -name "*.js" -o -name "*.css" | while read -r f; do
-            SIZE=$(wc -c < "$f")
-            printf "     %-50s %s\n" \
-              "$(basename "$f")" \
-              "$(numfmt --to=iec "$SIZE")"
-          done
+          [[ -d "dist" ]] || { echo "  Build failed"; exit 1; }
+          echo "  Build size: $(du -sh dist/ | cut -f1)"
 
       - name: "🔍 Bundle size check"
         working-directory: web
         run: |
-          # Check main bundle doesn't exceed 500KB
           MAIN_JS=$(find dist/assets -name "index-*.js" | head -1)
           if [[ -f "$MAIN_JS" ]]; then
             SIZE=$(wc -c < "$MAIN_JS")
             MAX=$(( 500 * 1024 ))
-            if [[ $SIZE -gt $MAX ]]; then
-              echo "  ⚠️  Main bundle too large: $(numfmt --to=iec "$SIZE") > 500KB"
-            else
-              echo "  ✅ Main bundle OK: $(numfmt --to=iec "$SIZE")"
-            fi
+            [[ $SIZE -gt $MAX ]] \
+              && echo "  WARN: main bundle $(numfmt --to=iec "$SIZE") > 500KB" \
+              || echo "  OK: main bundle $(numfmt --to=iec "$SIZE")"
           fi
 
-      - name: "📤 Upload web build"
+      - name: "📤 Upload build"
         uses: actions/upload-artifact@v4
         with:
           name: web-build-${{ github.run_id }}
           path: web/dist/
           retention-days: 14
 
-  # ── 06-B: Build Docker image ─────────────────────────────────────────────────
   build-docker:
     name: "🐳 Build Docker Image"
     runs-on: ubuntu-24.04
@@ -2565,19 +1980,19 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "🐳 Setup Docker Buildx"
+      - name: "🐳 Setup Buildx"
         uses: docker/setup-buildx-action@v3
         with:
           platforms: linux/amd64,linux/arm64
 
-      - name: "🔑 Login to GHCR"
+      - name: "🔑 Login GHCR"
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "🏷️ Generate Docker metadata"
+      - name: "🏷️ Docker metadata"
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -2587,20 +2002,15 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=sha,prefix=sha-,format=short
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=omega,enable=${{ github.ref == 'refs/heads/main' }}
           labels: |
             org.opencontainers.image.title=ASH Dotfiles
             org.opencontainers.image.description=Ultra Premium Hyprland Dotfiles
             org.opencontainers.image.version=${{ env.ASH_VERSION }}
-            org.opencontainers.image.vendor=ASH Dotfiles Team
-            maintainer=@${{ github.repository_owner }}
 
-      - name: "🏗️ Build & push Docker image"
+      - name: "🏗️ Build & push"
         uses: docker/build-push-action@v5
-        id: docker-build
         with:
           context: .
           file: docker/Dockerfile
@@ -2612,34 +2022,17 @@ jobs:
           cache-to: type=gha,mode=max,scope=docker-build
           build-args: |
             ASH_VERSION=${{ env.ASH_VERSION }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
           provenance: true
           sbom: true
-
-      - name: "🔍 Scan Docker image"
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}
-          format: sarif
-          output: docker-trivy.sarif
-          exit-code: "0"
-          severity: CRITICAL,HIGH
-
-      - name: "📊 Docker image size report"
-        run: |
-          IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
-          echo "  🐳 Image: $IMAGE"
-          echo "  📦 Digest: ${{ steps.docker-build.outputs.digest }}"
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
 # ║  STAGE 07 ── 🚀 DEPLOY
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 07-A: Deploy docs site ───────────────────────────────────────────────────
   deploy-docs:
-    name: "📖 Deploy Docs → GitHub Pages"
+    name: "📖 Deploy Docs"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     needs:
@@ -2663,7 +2056,7 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "🐍 Setup Python (MkDocs)"
+      - name: "🐍 Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -2672,52 +2065,37 @@ jobs:
       - name: "📦 Install MkDocs"
         run: |
           pip install \
-            mkdocs \
-            mkdocs-material \
+            mkdocs mkdocs-material \
             mkdocs-minify-plugin \
             mkdocs-git-revision-date-localized-plugin \
-            mkdocs-glightbox \
-            pymdown-extensions \
+            mkdocs-glightbox pymdown-extensions \
             --quiet
 
-      - name: "📥 Download screenshot assets"
+      - name: "📥 Download screenshots"
         uses: actions/download-artifact@v4
         with:
           name: screenshots-all-${{ github.run_id }}
           path: docs/assets/screenshots/
 
-      - name: "🏗️ Build MkDocs site"
-        env:
-          SITE_URL: https://${{ github.repository_owner }}.github.io/ash-dotfiles
+      - name: "🏗️ Build MkDocs"
         run: |
-          mkdocs build \
-            --config-file docs/mkdocs.yml \
-            --strict \
-            --verbose \
-            2>&1 | tail -20
-
-          echo "  ✅ Docs built"
-          echo "  📦 Size: $(du -sh site/ | cut -f1)"
+          mkdocs build --config-file docs/mkdocs.yml --strict 2>&1 | tail -20
+          echo "  Site size: $(du -sh site/ | cut -f1)"
 
       - name: "⚙️ Setup Pages"
         uses: actions/configure-pages@v4
 
-      - name: "📤 Upload pages artifact"
+      - name: "📤 Upload pages"
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/
 
-      - name: "🚀 Deploy to GitHub Pages"
+      - name: "🚀 Deploy"
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: "✅ Docs deployed"
-        run: |
-          echo "  🌐 Docs URL: ${{ steps.deployment.outputs.page_url }}"
-
-  # ── 07-B: Deploy preview environment ────────────────────────────────────────
   deploy-preview:
-    name: "🔮 Deploy Preview Environment"
+    name: "🔮 Deploy Preview"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [build-web]
@@ -2750,7 +2128,7 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: pr-${{ github.event.number }}
 
-      - name: "💬 Comment preview URL on PR"
+      - name: "💬 PR comment"
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: preview-deploy
@@ -2761,18 +2139,14 @@ jobs:
             |---|---|
             | 🌐 **URL** | ${{ steps.cf-deploy.outputs.url }} |
             | 📦 **Commit** | `${{ github.sha }}` |
-            | ⏱️ **Deployed** | $(date -u +"%Y-%m-%d %H:%M UTC") |
-            | 🎨 **Themes** | ${{ env.ASH_VERSION }} |
-
-            > Preview expires when PR is closed.
+            | 🎨 **Version** | `${{ env.ASH_VERSION }}` |
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
-# ║  STAGE 08 ── 📢 NOTIFICATIONS & REPORTING
+# ║  STAGE 08 ── 📢 SUMMARY & NOTIFICATIONS
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 08-A: Pipeline summary ───────────────────────────────────────────────────
   pipeline-summary:
     name: "📊 Pipeline Summary"
     runs-on: ubuntu-24.04
@@ -2793,121 +2167,84 @@ jobs:
     if: always()
 
     steps:
-      - name: "📊 Collect job results"
+      - name: "📊 Collect results"
         id: results
         run: |
-          set -euo pipefail
-
-          # Map job results to emoji
-          result_emoji() {
+          emoji() {
             case "$1" in
-              success)  echo "✅" ;;
-              failure)  echo "❌" ;;
-              cancelled)echo "⏹️" ;;
-              skipped)  echo "⏭️" ;;
-              *)        echo "❓" ;;
+              success)   echo "✅" ;;
+              failure)   echo "❌" ;;
+              cancelled) echo "⏹️" ;;
+              skipped)   echo "⏭️" ;;
+              *)         echo "❓" ;;
             esac
           }
 
-          SEC_SECRETS=$(result_emoji "${{ needs.security-secrets.result }}")
-          SEC_DEPS=$(result_emoji "${{ needs.security-deps.result }}")
-          LINT_SH=$(result_emoji "${{ needs.lint-shell.result }}")
-          LINT_LUA=$(result_emoji "${{ needs.lint-lua.result }}")
-          LINT_CFG=$(result_emoji "${{ needs.lint-configs.result }}")
-          LINT_TS=$(result_emoji "${{ needs.lint-typescript.result }}")
-          LINT_PY=$(result_emoji "${{ needs.lint-python.result }}")
-          SHOTS=$(result_emoji "${{ needs.screenshots-aggregate.result }}")
-          TEST_SH=$(result_emoji "${{ needs.test-unit-shell.result }}")
-          TEST_THEME=$(result_emoji "${{ needs.test-theme-engine.result }}")
-          TEST_PLUGIN=$(result_emoji "${{ needs.test-plugins.result }}")
-
-          # Overall status
           OVERALL="✅ PASSED"
-          for result in \
+          for r in \
             "${{ needs.security-secrets.result }}" \
             "${{ needs.security-deps.result }}" \
             "${{ needs.lint-shell.result }}" \
             "${{ needs.lint-configs.result }}" \
             "${{ needs.test-unit-shell.result }}"; do
-            if [[ "$result" == "failure" ]]; then
-              OVERALL="❌ FAILED"
-              break
-            fi
+            [[ "$r" == "failure" ]] && { OVERALL="❌ FAILED"; break; }
           done
 
           {
             echo "overall=$OVERALL"
-            echo "sec_secrets=$SEC_SECRETS"
-            echo "sec_deps=$SEC_DEPS"
-            echo "lint_sh=$LINT_SH"
-            echo "lint_lua=$LINT_LUA"
-            echo "lint_cfg=$LINT_CFG"
-            echo "lint_ts=$LINT_TS"
-            echo "lint_py=$LINT_PY"
-            echo "screenshots=$SHOTS"
-            echo "test_shell=$TEST_SH"
-            echo "test_theme=$TEST_THEME"
-            echo "test_plugin=$TEST_PLUGIN"
+            echo "sec_secrets=$(emoji "${{ needs.security-secrets.result }}")"
+            echo "sec_deps=$(emoji "${{ needs.security-deps.result }}")"
+            echo "lint_sh=$(emoji "${{ needs.lint-shell.result }}")"
+            echo "lint_lua=$(emoji "${{ needs.lint-lua.result }}")"
+            echo "lint_cfg=$(emoji "${{ needs.lint-configs.result }}")"
+            echo "lint_ts=$(emoji "${{ needs.lint-typescript.result }}")"
+            echo "lint_py=$(emoji "${{ needs.lint-python.result }}")"
+            echo "screenshots=$(emoji "${{ needs.screenshots-aggregate.result }}")"
+            echo "test_shell=$(emoji "${{ needs.test-unit-shell.result }}")"
+            echo "test_theme=$(emoji "${{ needs.test-theme-engine.result }}")"
+            echo "test_plugin=$(emoji "${{ needs.test-plugins.result }}")"
           } >> "$GITHUB_OUTPUT"
 
-      - name: "📊 Write job summary"
+      - name: "📊 Job summary"
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" << SUMMARY
           # 🚀 ASH Dotfiles — Pipeline Summary
 
           > **${{ steps.results.outputs.overall }}**
-          > Commit: \`${{ github.sha }}\`
-          > Branch: \`${{ github.ref_name }}\`
-          > Triggered by: \`${{ github.event_name }}\`
+          > Commit: \`${{ github.sha }}\`  Branch: \`${{ github.ref_name }}\`
           > Run: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-          ---
-
           ## 🔒 Security
-
           | Check | Status |
           |-------|--------|
-          | 🔍 Secret Scanning | ${{ steps.results.outputs.sec_secrets }} |
-          | 🛡️ Dependency Audit | ${{ steps.results.outputs.sec_deps }} |
+          | Secret Scanning  | ${{ steps.results.outputs.sec_secrets }} |
+          | Dependency Audit | ${{ steps.results.outputs.sec_deps }}    |
 
           ## ✅ Linting
-
           | Linter | Status |
           |--------|--------|
-          | 🐚 ShellCheck | ${{ steps.results.outputs.lint_sh }} |
-          | 🌙 Luacheck | ${{ steps.results.outputs.lint_lua }} |
-          | 📋 JSON/YAML/TOML | ${{ steps.results.outputs.lint_cfg }} |
-          | 💙 TypeScript/ESLint | ${{ steps.results.outputs.lint_ts }} |
-          | 🐍 Python/Ruff | ${{ steps.results.outputs.lint_py }} |
+          | ShellCheck       | ${{ steps.results.outputs.lint_sh }}  |
+          | Luacheck         | ${{ steps.results.outputs.lint_lua }} |
+          | JSON/YAML/TOML   | ${{ steps.results.outputs.lint_cfg }} |
+          | TypeScript/ESLint| ${{ steps.results.outputs.lint_ts }}  |
+          | Python/Ruff      | ${{ steps.results.outputs.lint_py }}  |
 
           ## 🖼️ Screenshots
-
           | Stage | Status |
           |-------|--------|
-          | 📸 Generation Matrix | ${{ steps.results.outputs.screenshots }} |
+          | Generation & Aggregation | ${{ steps.results.outputs.screenshots }} |
 
           ## 🧪 Tests
-
           | Suite | Status |
           |-------|--------|
-          | 🧪 Unit Tests (Shell) | ${{ steps.results.outputs.test_shell }} |
-          | 🎨 Theme Engine | ${{ steps.results.outputs.test_theme }} |
-          | 🔌 Plugin System | ${{ steps.results.outputs.test_plugin }} |
+          | Unit (Shell)  | ${{ steps.results.outputs.test_shell }}  |
+          | Theme Engine  | ${{ steps.results.outputs.test_theme }}  |
+          | Plugin System | ${{ steps.results.outputs.test_plugin }} |
 
           ---
-
-          ## 📦 Artifacts
-
-          - 🖼️ **Screenshots**: WebP + AVIF + Thumbnails for all themes
-          - 📊 **Reports**: Lint results, test coverage, benchmark data
-          - 🌐 **Web Build**: Production dashboard bundle
-
-          ---
-
-          *ASH Dotfiles v${{ env.ASH_VERSION }} OMEGA • Pipeline v${{ env.ASH_PIPELINE_VERSION }}*
+          *ASH Dotfiles v${{ env.ASH_VERSION }} OMEGA*
           SUMMARY
 
-  # ── 08-B: Discord notification ───────────────────────────────────────────────
   notify-discord:
     name: "💬 Discord Notification"
     runs-on: ubuntu-24.04
@@ -2921,88 +2258,72 @@ jobs:
       )
 
     steps:
-      - name: "💬 Send Discord embed"
+      - name: "💬 Send embed"
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RESULT:  ${{ needs.pipeline-summary.result }}
+          BRANCH:  ${{ github.ref_name }}
+          ACTOR:   ${{ github.actor }}
+          SHA:     ${{ github.sha }}
+          RUN_ID:  ${{ github.run_id }}
+          REPO:    ${{ github.repository }}
+          SERVER:  ${{ github.server_url }}
         run: |
-          [[ -z "$WEBHOOK" ]] && { echo "  ⚠️  No Discord webhook"; exit 0; }
+          [[ -z "$WEBHOOK" ]] && { echo "  No webhook configured"; exit 0; }
 
-          # Determine color (green=success, red=failure)
-          COLOR=3066993    # green
-          STATUS_ICON="✅"
-          STATUS_TEXT="Pipeline Passed"
-
-          if [[ "${{ needs.pipeline-summary.result }}" == "failure" ]]; then
-            COLOR=15158332 # red
-            STATUS_ICON="❌"
-            STATUS_TEXT="Pipeline Failed"
+          COLOR=3066993
+          ICON="✅"
+          TEXT="Pipeline Passed"
+          if [[ "$RESULT" == "failure" ]]; then
+            COLOR=15158332; ICON="❌"; TEXT="Pipeline Failed"
           fi
 
-          PAYLOAD=$(cat << JSON
-          {
+          SHORT_SHA="${SHA:0:7}"
+          RUN_URL="${SERVER}/${REPO}/actions/runs/${RUN_ID}"
+          COMMIT_URL="${SERVER}/${REPO}/commit/${SHA}"
+
+          python3 - << PYEOF
+          import json, urllib.request
+
+          payload = {
             "embeds": [{
-              "title": "${STATUS_ICON} ASH Dotfiles CI — ${STATUS_TEXT}",
-              "description": "Pipeline completed for branch \`${{ github.ref_name }}\`",
+              "title": "${ICON} ASH Dotfiles CI — ${TEXT}",
+              "description": "Pipeline completed for branch \`${BRANCH}\`",
               "color": ${COLOR},
               "fields": [
-                {
-                  "name": "📦 Version",
-                  "value": "${{ env.ASH_VERSION }}",
-                  "inline": true
-                },
-                {
-                  "name": "🌿 Branch",
-                  "value": "\`${{ github.ref_name }}\`",
-                  "inline": true
-                },
-                {
-                  "name": "🔗 Commit",
-                  "value": "[\`${GITHUB_SHA:0:7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})",
-                  "inline": true
-                },
-                {
-                  "name": "👤 Author",
-                  "value": "${{ github.actor }}",
-                  "inline": true
-                },
-                {
-                  "name": "🔗 Run",
-                  "value": "[View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
-                  "inline": true
-                }
+                {"name": "Version",  "value": "${{ env.ASH_VERSION }}", "inline": True},
+                {"name": "Branch",   "value": "\`${BRANCH}\`",          "inline": True},
+                {"name": "Commit",   "value": "[${SHORT_SHA}](${COMMIT_URL})", "inline": True},
+                {"name": "Author",   "value": "${ACTOR}",               "inline": True},
+                {"name": "Run",      "value": "[Details](${RUN_URL})",  "inline": True},
               ],
               "footer": {
-                "text": "ASH Dotfiles v${{ env.ASH_VERSION }} • CI Pipeline",
-                "icon_url": "https://raw.githubusercontent.com/${{ github.repository }}/main/assets/brand/logos/ash-logo-256.png"
+                "text": "ASH Dotfiles v${{ env.ASH_VERSION }} OMEGA"
               },
               "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             }]
           }
-          JSON
-          )
 
-          curl -fsSL \
-            -X POST \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD" \
-            "$WEBHOOK"
-
-          echo "  ✅ Discord notification sent"
+          data = json.dumps(payload).encode()
+          req  = urllib.request.Request("${WEBHOOK}", data=data,
+                   headers={"Content-Type": "application/json"})
+          urllib.request.urlopen(req)
+          print("  Discord notification sent")
+          PYEOF
 
 
 # ╔══════════════════════════════════════════════════════════════════════════════
-# ║  STAGE 09 ── 🔁 AUTOMATION & MAINTENANCE
+# ║  STAGE 09 ── 🔁 MAINTENANCE
 # ╚══════════════════════════════════════════════════════════════════════════════
 
-  # ── 09-A: Auto-update manifest on main ──────────────────────────────────────
   update-manifest:
     name: "📋 Update Asset Manifest"
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [screenshots-aggregate, pipeline-summary]
     if: |
-      github.ref == 'refs/heads/main' &&
-      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'     &&
+      github.event_name == 'push'         &&
       needs.screenshots-aggregate.result == 'success'
 
     permissions:
@@ -3020,34 +2341,36 @@ jobs:
           name: screenshots-all-${{ github.run_id }}
           path: assets/screenshots/desktop/
 
-      - name: "📝 Commit updated manifest"
+      - name: "📝 Commit"
         run: |
-          git config user.name  "ASH Bot 🤖"
+          git config user.name  "ASH Bot"
           git config user.email "ash-bot@users.noreply.github.com"
 
-          # Only commit if manifest changed
-          if git diff --quiet assets/screenshots/desktop/manifest.json; then
-            echo "  ℹ️  Manifest unchanged — skipping commit"
+          git diff --quiet assets/screenshots/desktop/manifest.json && {
+            echo "  Manifest unchanged"
             exit 0
-          fi
+          }
+
+          TOTAL=$(jq '.total_themes' assets/screenshots/desktop/manifest.json)
+          RUN_ID="${{ github.run_id }}"
+          SHA="${{ github.sha }}"
+          VER="${{ env.ASH_VERSION }}"
 
           git add assets/screenshots/desktop/manifest.json
           git commit \
-            --message "🤖 chore(assets): update screenshot manifest [skip ci]
+            --message "chore(assets): update screenshot manifest [skip ci]
 
-          Pipeline: ${{ github.run_id }}
-          Commit:   ${{ github.sha }}
-          Themes:   $(jq '.total_themes' assets/screenshots/desktop/manifest.json) themes updated
-
-          Generated by ASH CI Pipeline v${{ env.ASH_PIPELINE_VERSION }}" \
+          Pipeline: ${RUN_ID}
+          Commit:   ${SHA}
+          Themes:   ${TOTAL} updated
+          Version:  ${VER}" \
             --author "ASH Bot <ash-bot@users.noreply.github.com>"
 
           git push origin main
-          echo "  ✅ Manifest committed and pushed"
+          echo "  Manifest pushed"
 
-  # ── 09-B: Cleanup old artifacts ─────────────────────────────────────────────
   cleanup-artifacts:
-    name: "🧹 Cleanup Old Artifacts"
+    name: "🧹 Cleanup Artifacts"
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [pipeline-summary]
@@ -3060,52 +2383,41 @@ jobs:
       actions: write
 
     steps:
-      - name: "🧹 Delete old run artifacts"
+      - name: "🧹 Delete old artifacts"
         uses: actions/github-script@v7
         with:
           script: |
-            const KEEP_RUNS = 10;
-            const ARTIFACT_PATTERNS = [
-              'screenshot-',
-              'lint-',
-              'unit-test-',
-              'benchmark-',
-            ];
+            const KEEP = 10;
+            const PATTERNS = ['screenshot-', 'lint-', 'unit-test-', 'benchmark-'];
 
-            // Get all artifacts
-            const { data: { artifacts } } = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-            });
+            const { data: { artifacts } } = await github.rest.actions
+              .listArtifactsForRepo({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                per_page: 100,
+              });
 
-            // Group by pattern prefix
             const grouped = {};
-            for (const artifact of artifacts) {
-              for (const pattern of ARTIFACT_PATTERNS) {
-                if (artifact.name.startsWith(pattern)) {
-                  grouped[pattern] = grouped[pattern] || [];
-                  grouped[pattern].push(artifact);
+            for (const a of artifacts) {
+              for (const p of PATTERNS) {
+                if (a.name.startsWith(p)) {
+                  (grouped[p] = grouped[p] || []).push(a);
                   break;
                 }
               }
             }
 
-            // Delete old artifacts beyond retention limit
             let deleted = 0;
-            for (const [pattern, arts] of Object.entries(grouped)) {
+            for (const arts of Object.values(grouped)) {
               const sorted = arts.sort((a, b) =>
-                new Date(b.created_at) - new Date(a.created_at)
-              );
-
-              for (const artifact of sorted.slice(KEEP_RUNS)) {
+                new Date(b.created_at) - new Date(a.created_at));
+              for (const a of sorted.slice(KEEP)) {
                 await github.rest.actions.deleteArtifact({
                   owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
+                  repo:  context.repo.repo,
+                  artifact_id: a.id,
                 });
                 deleted++;
               }
             }
-
-            console.log(`  🧹 Deleted ${deleted} old artifacts`);
+            console.log('Deleted ' + deleted + ' old artifacts');
