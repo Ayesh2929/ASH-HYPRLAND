@@ -1,0 +1,1217 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🌐 ASH DOTFILES v5.0 OMEGA — API ISSUE TEMPLATE                                  ║
+# ║      Ultra-Comprehensive REST API / WebSocket / Plugin API Issue Form                 ║
+# ║      OpenAPI Validation • Auth Flows • Rate Limits • SDK • Breaking Changes           ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🌐 API Issue"
+description: >
+  Report issues with the ASH Dotfiles REST API, WebSocket API,
+  Plugin SDK API, or Shell API. Whether it's a broken endpoint,
+  authentication failure, missing feature, or breaking change —
+  this comprehensive form captures everything needed for resolution.
+title: "🌐 [API] — "
+labels:
+  - "🌐 api"
+  - "🔍 needs-triage"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ░█████╗░██████╗░██╗  ██╗░██████╗░██████╗██╗░░░██╗███████╗
+        ██╔══██╗██╔══██╗██║  ██║██╔════╝██╔════╝██║░░░██║██╔════╝
+        ███████║██████╔╝██║  ██║╚█████╗░╚█████╗░██║░░░██║█████╗░░
+        ██╔══██║██╔═══╝░██║  ██║░╚═══██╗░╚═══██╗██║░░░██║██╔══╝░░
+        ██║░░██║██║░░░░░██║  ██║██████╔╝██████╔╝╚██████╔╝███████╗
+        ╚═╝░░╚═╝╚═╝░░░░░╚═╝  ╚═╝╚═════╝░╚═════╝░░╚═════╝░╚══════╝
+
+        ██╗░██████╗░██████╗██╗░░░██╗███████╗
+        ██║██╔════╝██╔════╝██║░░░██║██╔════╝
+        ██║╚█████╗░╚█████╗░██║░░░██║█████╗░░
+        ██║░╚═══██╗░╚═══██╗██║░░░██║██╔══╝░░
+        ██║██████╔╝██████╔╝╚██████╔╝███████╗
+        ╚═╝╚═════╝░╚═════╝░░╚═════╝░╚══════╝
+        ```
+
+        # 🌐 API Issue — ASH Dotfiles v5.0 OMEGA
+
+        > *"A great API is the foundation of a great ecosystem"*
+
+        </div>
+
+        ---
+
+        > [!NOTE]
+        > **ASH Dotfiles API Surface:**
+        >
+        > | API | Base URL / Location | Version | Docs |
+        > |-----|---------------------|---------|------|
+        > | 🌐 **REST API** | `http://localhost:7070/api/v1` | v1 | [OpenAPI Spec](https://ash-dotfiles.github.io/api/openapi) |
+        > | 🔌 **WebSocket** | `ws://localhost:7070/ws/v1` | v1 | [WS Protocol](https://ash-dotfiles.github.io/api/websocket) |
+        > | 🔧 **Plugin Shell API** | `ash::plugin::*` functions | 2.0 | [Plugin SDK](https://ash-dotfiles.github.io/docs/plugin-api) |
+        > | 📋 **IPC API** | Hyprland socket + ASH socket | 1.0 | [IPC Docs](https://ash-dotfiles.github.io/docs/ipc) |
+        > | 🐟 **Fish API** | `ash_*` fish functions | 5.0 | [Fish Docs](https://ash-dotfiles.github.io/docs/fish-api) |
+
+        > [!TIP]
+        > **Quick API diagnostics:**
+        > ```bash
+        > # Check REST API health:
+        > curl -s http://localhost:7070/api/v1/health | jq
+        >
+        > # Check API server status:
+        > ash api status --verbose
+        >
+        > # Validate your request against OpenAPI spec:
+        > ash api validate --request "GET /api/v1/themes"
+        >
+        > # Check Plugin API compatibility:
+        > ash plugin compat-check --api-version 2.0
+        >
+        > # Full API diagnostic:
+        > ash doctor --api --verbose
+        > ```
+
+        ---
+
+        ### 🌐 API Issue Pre-Flight Checklist
+
+        - [ ] 📖 Read the [API Reference](https://ash-dotfiles.github.io/api/) for the affected endpoint
+        - [ ] 🔄 Tested against the **latest API version** (`ash api --version`)
+        - [ ] 🔑 Verified authentication token is **valid and not expired**
+        - [ ] 📋 Validated request against the [OpenAPI specification](https://ash-dotfiles.github.io/api/openapi)
+        - [ ] 🔍 Searched [existing API issues](https://github.com/ash-dotfiles/ash-dotfiles/issues?q=label%3A%22api%22)
+        - [ ] 💬 Checked [Discord #api-dev](https://discord.gg/ash-dotfiles) for related discussions
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — API SURFACE AFFECTED
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: api_surface
+    attributes:
+      label: "🎯 API Surface Affected"
+      description: "Which ASH API has the issue?"
+      options:
+        - "🌐 REST API — HTTP endpoints (http://localhost:7070/api/v1/...)"
+        - "🔌 WebSocket API — Real-time events (ws://localhost:7070/ws/v1)"
+        - "🔧 Plugin Shell API — ash::plugin::* bash functions"
+        - "🎨 Theme Shell API — ash::theme::* bash functions"
+        - "⚙️ Mode Shell API — ash::mode::* bash functions"
+        - "📋 Config Shell API — ash::config::* bash functions"
+        - "🔔 Notification Shell API — ash::notification::* functions"
+        - "📊 Analytics Shell API — ash::analytics::* functions"
+        - "🪝 Hook Shell API — ash::hook::* bash functions"
+        - "🔒 Secrets Shell API — ash::secrets::* bash functions"
+        - "💾 State Shell API — ash::state::* bash functions"
+        - "🐟 Fish API — ash_* fish functions"
+        - "📋 IPC API — Unix socket / Hyprland IPC"
+        - "📱 Mobile API — Mobile app REST client"
+        - "🖥️ Web Dashboard API — Dashboard → REST API"
+        - "❓ Unknown / Multiple"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — ISSUE TYPE
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: "🔍 API Issue Type"
+      description: "What kind of API problem are you experiencing?"
+      multiple: true
+      options:
+        # Correctness
+        - "❌ Wrong Response — Endpoint returns incorrect data"
+        - "❌ Wrong Status Code — Incorrect HTTP status code returned"
+        - "❌ Missing Field — Response missing documented fields"
+        - "❌ Wrong Field Type — Field type differs from spec (string vs int)"
+        - "❌ Incorrect Behavior — API does something different from docs"
+        - "❌ Race Condition — Concurrent calls produce incorrect state"
+        # Reliability
+        - "💥 Server Error — 500/503 responses on valid requests"
+        - "💥 Timeout — Endpoint hangs without responding"
+        - "💥 Memory Leak — API server memory grows without bound"
+        - "💥 Crash — API server process crashes on specific requests"
+        - "💥 Infinite Loop — Request causes server to spin"
+        # Authentication
+        - "🔑 Auth Failure — Valid token rejected (401)"
+        - "🔑 Auth Bypass — Request succeeds without authentication"
+        - "🔑 Token Expiry — Tokens expire too quickly or not at all"
+        - "🔑 CORS Error — Cross-origin requests blocked/allowed incorrectly"
+        - "🔑 Permission Error — Authorized user denied valid operation (403)"
+        # Breaking Changes
+        - "💔 Breaking Change — API changed without notice/deprecation"
+        - "💔 Removed Endpoint — Previously documented endpoint gone"
+        - "💔 Renamed Field — Field renamed in response without migration"
+        - "💔 Plugin API Breaking — Plugin SDK function signature changed"
+        # Schema & Documentation
+        - "📋 Schema Mismatch — Response doesn't match OpenAPI schema"
+        - "📋 Undocumented Behavior — API behavior not in docs"
+        - "📋 Wrong Example — OpenAPI example is incorrect"
+        - "📋 Missing Endpoint — Documented endpoint doesn't exist"
+        # Performance
+        - "⚡ Slow Response — Endpoint takes too long"
+        - "⚡ Rate Limit Issue — Rate limiting too aggressive or not working"
+        - "⚡ Pagination Bug — Pagination returns wrong data or hangs"
+        # WebSocket Specific
+        - "🔌 WS Connection Drop — WebSocket disconnects unexpectedly"
+        - "🔌 WS Missing Event — Subscribed event never received"
+        - "🔌 WS Wrong Payload — Event payload format incorrect"
+        - "🔌 WS Reconnect — Reconnection doesn't restore subscriptions"
+        # Feature
+        - "✨ Missing Endpoint — New endpoint needed"
+        - "✨ Missing Field — Additional field needed in response"
+        - "✨ Missing Filter — Filtering/sorting option needed"
+        - "✨ Missing WebSocket Event — New event type needed"
+        # Plugin API
+        - "🔧 Plugin API Function Missing — Needed function not in SDK"
+        - "🔧 Plugin API Function Broken — SDK function returns wrong result"
+        - "🔧 Plugin API Compatibility — API incompatible between versions"
+        - "❓ Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "🚨 Issue Severity"
+      options:
+        - "🔴 CRITICAL — API completely broken / security vulnerability"
+        - "🟠 HIGH — Major feature unusable / production blocker"
+        - "🟡 MEDIUM — Feature degraded / workaround exists"
+        - "🟢 LOW — Minor issue / edge case / cosmetic"
+        - "✨ ENHANCEMENT — API works but needs new capability"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — ENDPOINT DETAILS (REST API)
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: endpoint_details
+    attributes:
+      label: "📡 Endpoint Details (REST API — fill if applicable)"
+      description: >
+        For REST API issues, provide complete request/response details.
+        Use `curl -v` for full HTTP details including headers.
+      placeholder: |
+        ## 🎯 Affected Endpoint
+
+        | Property | Value |
+        |----------|-------|
+        | Method | GET / POST / PUT / PATCH / DELETE |
+        | Endpoint | `/api/v1/themes/{theme_id}/apply` |
+        | Full URL | `http://localhost:7070/api/v1/themes/catppuccin-mocha/apply` |
+        | API Version | v1 |
+        | Auth Required | Yes (Bearer token) |
+
+        ## 📤 Request
+
+        ```http
+        POST /api/v1/themes/catppuccin-mocha/apply HTTP/1.1
+        Host: localhost:7070
+        Authorization: Bearer ash_tok_xxxxxxxxxxxxxxxxxxx
+        Content-Type: application/json
+        Accept: application/json
+        X-ASH-Client: web-dashboard/1.2.0
+
+        {
+          "wallpaper": "/home/user/Pictures/my-wallpaper.jpg",
+          "transition": "smooth",
+          "reload_targets": ["waybar", "kitty", "nvim"],
+          "dry_run": false
+        }
+        ```
+
+        ## 📥 Actual Response (BROKEN)
+
+        ```http
+        HTTP/1.1 500 Internal Server Error
+        Content-Type: application/json
+        X-ASH-Request-ID: req_abc123
+        X-ASH-Version: 5.0.2
+        X-RateLimit-Limit: 60
+        X-RateLimit-Remaining: 58
+
+        {
+          "error": {
+            "code": "THEME_APPLY_FAILED",
+            "message": "Failed to apply theme: color extraction error",
+            "details": {
+              "stage": "color_extraction",
+              "wallpaper": "/home/user/Pictures/my-wallpaper.jpg",
+              "reason": "null reference in palette generator"
+            },
+            "request_id": "req_abc123",
+            "timestamp": "2024-01-15T14:32:01Z"
+          }
+        }
+        ```
+
+        ## ✅ Expected Response (per OpenAPI spec)
+
+        ```http
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+          "success": true,
+          "theme": {
+            "id": "catppuccin-mocha",
+            "name": "Catppuccin Mocha",
+            "applied_at": "2024-01-15T14:32:01Z"
+          },
+          "duration_ms": 1247,
+          "reloaded_targets": ["waybar", "kitty", "nvim"],
+          "wallpaper_applied": true
+        }
+        ```
+
+        ## 🔬 Full curl -v Output
+
+        ```bash
+        $ curl -v -X POST \
+          -H "Authorization: Bearer ash_tok_xxx" \
+          -H "Content-Type: application/json" \
+          -d '{"wallpaper":"/home/user/Pictures/my-wallpaper.jpg","transition":"smooth"}' \
+          http://localhost:7070/api/v1/themes/catppuccin-mocha/apply
+
+        *   Trying 127.0.0.1:7070...
+        * Connected to localhost (127.0.0.1) port 7070 (#0)
+        > POST /api/v1/themes/catppuccin-mocha/apply HTTP/1.1
+        > Host: localhost:7070
+        > Authorization: Bearer ash_tok_xxx
+        > Content-Type: application/json
+        > Content-Length: 75
+        >
+        < HTTP/1.1 500 Internal Server Error
+        < Content-Type: application/json
+        < X-ASH-Request-ID: req_abc123
+        <
+        {"error":{"code":"THEME_APPLY_FAILED",...}}
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — PLUGIN API DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: plugin_api_details
+    attributes:
+      label: "🔧 Plugin Shell API Details (Plugin SDK — fill if applicable)"
+      description: >
+        For Plugin SDK / Shell API issues, provide function call details
+        and exact error output.
+      placeholder: |
+        ## 🎯 Affected Plugin API Function
+
+        | Property | Value |
+        |----------|-------|
+        | Function | `ash::theme::set_accent` |
+        | API Version | 2.0 |
+        | Declared in | Plugin API 2.0 (ash >= 5.0.0) |
+        | Plugin using it | my-custom-plugin v1.2.0 |
+        | Stability | @stable (documented as stable) |
+
+        ## 📜 Code Causing the Issue
+
+        ```bash
+        #!/usr/bin/env bash
+        # my-plugin/lib/theme-integration.sh
+
+        source "${ASH_PLUGIN_API}"  # /usr/lib/ash/plugin-api.sh
+
+        # Attempt to temporarily shift accent color
+        ash::theme::set_accent "#ff5580" --duration 300
+
+        # ↑ This call returns exit code 1 with no error message
+        # The accent does NOT change, no notification sent
+        # ash::plugin::log shows nothing in debug mode either
+        ```
+
+        ## ❌ Actual Behavior
+
+        ```bash
+        # Debug trace output:
+        $ ASH_DEBUG=1 ASH_TRACE=1 bash my-plugin/lib/theme-integration.sh
+
+        [DEBUG] ash::theme::set_accent called with: "#ff5580" --duration 300
+        [DEBUG] ash::theme::_validate_hex_color: "#ff5580" → valid
+        [DEBUG] ash::theme::_get_current_accent → "#1e66f5"
+        [TRACE] Calling: hyprctl keyword general:col.active_border ...
+        [DEBUG] hyprctl exit code: 0
+        [ERROR] ash::theme::set_accent: Failed to update theme config
+        [ERROR] Exit code: 1
+
+        # But the color DID apply to Hyprland, just not to the theme config
+        # So partial application with wrong exit code and no rollback
+        ```
+
+        ## ✅ Expected Behavior (per SDK docs v2.0)
+
+        From [Plugin API docs](https://ash-dotfiles.github.io/docs/plugin-api#theme-set-accent):
+
+        > `ash::theme::set_accent <hex_color> [--duration <seconds>]`
+        > Sets the primary accent color temporarily. After `--duration` seconds,
+        > reverts to the original accent color.
+        >
+        > **Returns:** 0 on success, non-zero on failure
+        > **Side effects:** Updates all running components via hot-reload
+
+        **Expected exit code:** 0 (success)
+        **Expected behavior:** Both Hyprland AND theme config updated atomically
+
+        ## 🔬 Minimal Reproducer
+
+        ```bash
+        #!/usr/bin/env bash
+        # Minimal reproduction — no plugin boilerplate
+
+        source /usr/lib/ash/plugin-api.sh
+
+        echo "Before: $(ash::theme::get_accent)"
+        ash::theme::set_accent "#ff5580"
+        echo "Exit code: $?"
+        echo "After: $(ash::theme::get_accent)"
+
+        # Expected output:
+        # Before: #1e66f5
+        # Exit code: 0
+        # After: #ff5580
+
+        # Actual output:
+        # Before: #1e66f5
+        # Exit code: 1
+        # After: #1e66f5  ← Not changed despite Hyprland applying it
+        ```
+
+        ## 📋 Plugin API Version in Use
+
+        ```bash
+        $ ash plugin compat-check --api-version 2.0 --verbose
+        Plugin API v2.0 compatibility check:
+        ✅ Core functions: available
+        ✅ Theme functions: available
+        ⚠️  ash::theme::set_accent: available but returns wrong exit code
+        ✅ Mode functions: available
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — WEBSOCKET API DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: websocket_details
+    attributes:
+      label: "🔌 WebSocket API Details (fill if WebSocket issue)"
+      description: >
+        For WebSocket API issues, provide connection details and event traces.
+      placeholder: |
+        ## 🔌 WebSocket Connection Details
+
+        | Property | Value |
+        |----------|-------|
+        | Endpoint | `ws://localhost:7070/ws/v1` |
+        | Protocol version | v1 |
+        | Client | websocat / web dashboard / custom |
+        | Auth method | Bearer token in handshake header |
+        | Subscriptions | `theme.changed`, `mode.changed`, `plugin.status` |
+
+        ## 📡 Connection & Subscription Flow
+
+        ```bash
+        # Connect and subscribe:
+        websocat "ws://localhost:7070/ws/v1" \
+          --header "Authorization: Bearer ash_tok_xxx" \
+          --header "X-ASH-Client: my-client/1.0.0"
+
+        # Send subscription message:
+        {
+          "type": "subscribe",
+          "events": ["theme.changed", "mode.changed", "plugin.status"],
+          "id": "sub_001"
+        }
+
+        # Expected acknowledgment:
+        {
+          "type": "subscribed",
+          "id": "sub_001",
+          "events": ["theme.changed", "mode.changed", "plugin.status"],
+          "timestamp": "2024-01-15T14:32:01Z"
+        }
+        ```
+
+        ## ❌ Issue: Missing Events
+
+        ```bash
+        # Triggered on desktop:
+        ash theme apply tokyo-night  # ← This SHOULD emit theme.changed event
+
+        # What WebSocket receives: NOTHING
+        # Expected: {"type": "theme.changed", "theme_id": "tokyo-night", ...}
+
+        # However, testing with ash's own web dashboard WORKS
+        # The issue is only with external WebSocket clients
+
+        # Debug: Server shows event was emitted:
+        $ journalctl --user -u ash-ipc-server --since "1 min ago"
+        [INFO] Emitting event: theme.changed {theme_id: "tokyo-night"}
+        [INFO] Active subscribers: 2
+        [INFO] Delivered to: web-dashboard-ws-client
+        [WARN] Failed delivery to: external-client-ws-001 (disconnected?)
+        ```
+
+        ## 📋 Full WebSocket Message Trace
+
+        ```
+        → {"type":"subscribe","events":["theme.changed"],"id":"sub_001"}
+        ← {"type":"subscribed","id":"sub_001","events":["theme.changed"]}
+        ← {"type":"ping","interval":30}
+        → {"type":"pong"}
+        ← {"type":"ping","interval":30}
+        → {"type":"pong"}
+        [60 seconds of silence — theme.changed event NOT received]
+        ← {"type":"close","code":1006,"reason":"Connection timeout"}
+        [Client disconnects despite active pong exchange]
+        ```
+
+        ## 🔬 Reconnection Behavior
+
+        After disconnect, subscriptions are lost on reconnect:
+        ```bash
+        # After reconnect, must re-send subscribe message
+        # But even after re-subscribing, events still not received
+        # Suggests server-side delivery issue, not just subscription state
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — BREAKING CHANGE DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: breaking_change
+    attributes:
+      label: "💔 Breaking Change Details (fill if regression/breaking change)"
+      description: >
+        If this is a breaking change between API versions, document
+        exactly what changed and the migration impact.
+      placeholder: |
+        ## 💔 Breaking Change Analysis
+
+        ### What Changed
+        | Property | Before (v5.0.1) | After (v5.0.2) |
+        |----------|----------------|---------------|
+        | Endpoint | `POST /api/v1/theme/apply` | `POST /api/v1/themes/{id}/apply` |
+        | Request body | `{"theme": "name", ...}` | `{"transition": "...", ...}` |
+        | Response field | `"applied": true` | `"success": true` |
+        | Auth header | `X-ASH-Token: xxx` | `Authorization: Bearer xxx` |
+
+        ### Breaking Change Timeline
+        ```
+        v5.0.0: Introduced /api/v1/theme/apply (old format)
+        v5.0.1: Still working with old format
+        v5.0.2: Old endpoint returns 404 — NO DEPRECATION NOTICE
+        ```
+
+        ### Migration Impact
+        **Affected integrations:**
+        - My custom Waybar module using the old endpoint
+        - Community plugin `waybar-ash-theme` v1.x (1,200 installs)
+        - Mobile app using REST API v1 (old format)
+
+        **Migration effort:**
+        - Update endpoint URL: 5 minutes
+        - Update request body format: 30 minutes
+        - Update response parsing: 30 minutes
+        - Test all code paths: 2 hours
+
+        ### What Should Have Happened
+        Per [API Stability Policy](https://ash-dotfiles.github.io/api/stability):
+
+        > Breaking changes MUST:
+        > 1. Be announced 30 days before release
+        > 2. Include deprecation warnings for 2 minor versions
+        > 3. Provide automatic migration helpers
+        > 4. Be documented in CHANGELOG with migration guide
+
+        None of these requirements were met for this change.
+
+        ### Proposed Resolution
+        - [ ] Restore old endpoint as alias for 2 more minor versions
+        - [ ] Add deprecation header: `X-ASH-Deprecated: true; migrate-to: /api/v1/themes/{id}/apply`
+        - [ ] Document migration in CHANGELOG
+        - [ ] Add migration guide to docs
+        - [ ] Announce in Discord #api-announcements
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — REPRODUCTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Minimal Reproduction"
+      description: >
+        The most minimal, complete, standalone reproduction of the issue.
+        This is the single most important section for quick resolution.
+      placeholder: |
+        ## 🧪 Minimal Reproduction (copy-paste ready)
+
+        ```bash
+        #!/usr/bin/env bash
+        # Minimal reproduction of ASH API issue
+        # ASH Version: v5.0.2-omega
+        # Run: bash reproduce-api-issue.sh
+
+        ASH_API="http://localhost:7070/api/v1"
+        TOKEN="$(ash api token --create --name 'repro-test' --scopes 'themes:write')"
+
+        echo "=== Step 1: Verify API is running ==="
+        curl -sf "${ASH_API}/health" | jq '.status'
+        # Expected: "healthy"
+
+        echo "=== Step 2: List available themes (should work) ==="
+        curl -sf -H "Authorization: Bearer ${TOKEN}" \
+          "${ASH_API}/themes" | jq '.data | length'
+        # Expected: > 0
+        # Actual: ✅ Works
+
+        echo "=== Step 3: Apply theme (THIS IS THE BUG) ==="
+        curl -sf -X POST \
+          -H "Authorization: Bearer ${TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "wallpaper": "/home/user/Pictures/aurora.jpg",
+            "transition": "smooth"
+          }' \
+          "${ASH_API}/themes/catppuccin-mocha/apply"
+        # Expected: {"success": true, "duration_ms": 1247, ...}
+        # Actual: {"error": {"code": "THEME_APPLY_FAILED", ...}} ← BUG
+
+        echo "=== Step 4: Verify the theme was applied anyway ==="
+        ash config get theme.active
+        # Shows: catppuccin-mocha (partially applied despite 500 error)
+        ```
+
+        ## 📊 Reproduction Consistency
+
+        | Run | Result | Notes |
+        |-----|--------|-------|
+        | Run 1 | ❌ 500 error | With wallpaper path |
+        | Run 2 | ❌ 500 error | Same result |
+        | Run 3 | ✅ 200 OK | No wallpaper path provided |
+        | Run 4 | ❌ 500 error | With wallpaper path |
+        | Run 5 | ✅ 200 OK | No wallpaper path provided |
+
+        **Pattern identified:** The 500 error ONLY occurs when `wallpaper` field is included.
+        The endpoint works without the wallpaper parameter.
+
+        ## ✅ Workaround
+
+        ```bash
+        # Apply theme without wallpaper (works):
+        curl -X POST -H "Authorization: Bearer ${TOKEN}" \
+          -d '{"transition": "smooth"}' \
+          "${ASH_API}/themes/catppuccin-mocha/apply"
+
+        # Then set wallpaper separately:
+        curl -X POST -H "Authorization: Bearer ${TOKEN}" \
+          -d '{"path": "/home/user/Pictures/aurora.jpg"}' \
+          "${ASH_API}/wallpaper/set"
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — SERVER LOGS & DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: server_logs
+    attributes:
+      label: "📋 API Server Logs & Diagnostics"
+      description: >
+        Collect API server logs, performance metrics, and diagnostic output.
+      render: shell
+      placeholder: |
+        ## ASH API Server Status
+        $ ash api status --verbose
+        ╔══════════════════════════════════════════════╗
+        ║  🌐 ASH REST API Server v5.0.2 OMEGA        ║
+        ╠══════════════════════════════════════════════╣
+        ║  Status:     🟢 Running                     ║
+        ║  Port:       7070                           ║
+        ║  Uptime:     2h 34m 12s                     ║
+        ║  Requests:   1,247 total / 3 errors          ║
+        ║  Auth:       Bearer tokens (JWT)            ║
+        ║  WebSocket:  3 active connections            ║
+        ╚══════════════════════════════════════════════╝
+
+        ## API Server Error Logs (around time of issue)
+        $ journalctl --user -u ash-api-server --since "10 min ago" --no-pager
+        Jan 15 14:32:01 ash-api[1234]: INFO  POST /api/v1/themes/catppuccin-mocha/apply [req_abc123]
+        Jan 15 14:32:01 ash-api[1234]: DEBUG Authenticating request...
+        Jan 15 14:32:01 ash-api[1234]: DEBUG Token valid: user@hostname
+        Jan 15 14:32:01 ash-api[1234]: DEBUG Starting theme apply: catppuccin-mocha
+        Jan 15 14:32:01 ash-api[1234]: DEBUG Wallpaper path: /home/user/Pictures/aurora.jpg
+        Jan 15 14:32:01 ash-api[1234]: DEBUG Calling color extraction engine...
+        Jan 15 14:32:02 ash-api[1234]: ERROR Color extraction failed: NullPointerException at palette.py:147
+        Jan 15 14:32:02 ash-api[1234]: ERROR   at extract_dominant_colors()
+        Jan 15 14:32:02 ash-api[1234]: ERROR   at apply_theme_with_wallpaper()
+        Jan 15 14:32:02 ash-api[1234]: ERROR   at ThemeRouter.apply_theme()
+        Jan 15 14:32:02 ash-api[1234]: INFO  Response: 500 [req_abc123] 1.247s
+
+        ## Full Stack Trace (if available)
+        $ cat ~/.local/share/ash/logs/api-server.log | grep -A 20 "req_abc123"
+
+        ## API Performance Metrics
+        $ curl -s http://localhost:7070/api/v1/metrics | jq
+        {
+          "uptime_seconds": 9252,
+          "requests_total": 1247,
+          "requests_errors": 3,
+          "requests_rate_per_minute": 2.3,
+          "response_time_p50_ms": 45,
+          "response_time_p95_ms": 312,
+          "response_time_p99_ms": 1847,
+          "active_connections": 1,
+          "websocket_connections": 3
+        }
+
+        ## OpenAPI Schema Validation
+        $ ash api validate --request-body \
+            '{"wallpaper":"/home/user/Pictures/aurora.jpg","transition":"smooth"}' \
+            --endpoint "POST /api/v1/themes/{id}/apply"
+        ✅ Request body is valid per OpenAPI schema
+        # (Issue is server-side, not client-side validation)
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — ENVIRONMENT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: environment
+    attributes:
+      label: "💻 Environment & Version Information"
+      description: "Complete environment details for reproduction"
+      placeholder: |
+        ## ASH & API Versions
+
+        ```bash
+        $ ash --version
+        v5.0.2-omega (build 2024.01.15-abc1234)
+
+        $ ash api --version
+        ASH REST API v1.0.2
+
+        $ ash api openapi-version
+        OpenAPI Specification: 3.1.0
+        Schema version: 2024-01-10
+
+        $ python3 --version  # API server runtime
+        Python 3.12.1
+
+        $ pip show fastapi uvicorn 2>/dev/null
+        Name: fastapi, Version: 0.109.0
+        Name: uvicorn, Version: 0.27.0
+        ```
+
+        ## API Client Details
+
+        ```bash
+        # Client making the API calls:
+        - Type: [curl / web dashboard / mobile app / custom script / plugin]
+        - Client version: curl/8.5.0
+        - Language/framework: bash
+
+        # curl version:
+        $ curl --version | head -1
+        curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.2.0
+
+        # If using web dashboard:
+        $ cat ~/.local/share/ash/web/version.json
+        {"version": "1.2.0", "build": "2024-01-10"}
+        ```
+
+        ## System Context
+
+        ```bash
+        $ uname -r
+        6.7.0-arch1-1
+
+        $ cat /etc/os-release | grep PRETTY
+        PRETTY_NAME="Arch Linux"
+
+        # ASH API server config:
+        $ ash config get api
+        api.enabled = true
+        api.port = 7070
+        api.host = "127.0.0.1"
+        api.auth.enabled = true
+        api.auth.method = "bearer"
+        api.cors.enabled = true
+        api.cors.origins = ["http://localhost:5173", "http://localhost:3000"]
+        api.rate_limit.enabled = true
+        api.rate_limit.requests_per_minute = 60
+        ```
+
+        ## Authentication Token Details
+
+        ```bash
+        # Token info (without revealing the token):
+        $ ash api token list
+        TOKEN ID           SCOPE           EXPIRES        LAST USED
+        tok_abc123         themes:*        Never          5 min ago
+        tok_def456         read:*          2024-06-15     2 days ago
+
+        # Token used for reproduction:
+        # ID: tok_abc123, Scopes: themes:write themes:read, No expiry
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — OPENAPI COMPLIANCE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: openapi_compliance
+    attributes:
+      label: "📋 OpenAPI Spec Compliance Analysis"
+      description: >
+        Compare actual behavior against the OpenAPI specification.
+        This is the gold standard for API correctness assessment.
+      placeholder: |
+        ## OpenAPI Specification Reference
+
+        **Specification URL:** https://ash-dotfiles.github.io/api/openapi.yaml
+        **Spec version tested against:** 2024-01-10 (current)
+
+        ## Relevant OpenAPI Definition
+
+        ```yaml
+        # From: openapi.yaml — POST /themes/{theme_id}/apply
+        /themes/{theme_id}/apply:
+          post:
+            summary: Apply a theme
+            operationId: applyTheme
+            security:
+              - BearerAuth: ["themes:write"]
+            parameters:
+              - name: theme_id
+                in: path
+                required: true
+                schema:
+                  type: string
+            requestBody:
+              required: false
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      wallpaper:
+                        type: string
+                        description: "Path to custom wallpaper file"
+                        example: "/home/user/Pictures/bg.jpg"
+                      transition:
+                        type: string
+                        enum: [none, fade, smooth, cinematic]
+                        default: smooth
+            responses:
+              "200":
+                description: Theme applied successfully
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/ThemeApplyResult"
+              "500":
+                description: Internal server error during theme application
+        ```
+
+        ## Compliance Assessment
+
+        | Aspect | Expected (Spec) | Actual | Compliant? |
+        |--------|----------------|--------|-----------|
+        | Method | POST | POST | ✅ |
+        | Path | /api/v1/themes/{id}/apply | /api/v1/themes/catppuccin-mocha/apply | ✅ |
+        | Auth | Bearer token | Bearer token | ✅ |
+        | Request body | Optional JSON | Sent valid JSON | ✅ |
+        | `wallpaper` field | Optional string | Valid path string | ✅ |
+        | Response on success | 200 + ThemeApplyResult | 500 + error (BUG) | ❌ |
+        | Error format | ErrorResponse schema | Matches schema | ✅ |
+
+        **Conclusion:** The 500 error is NOT expected per spec when the request
+        body is valid. This is a server-side bug in the wallpaper path handling.
+
+        ## Schema Validation Results
+
+        ```bash
+        $ ash api validate --spec openapi.yaml --request \
+            --method POST \
+            --path "/api/v1/themes/catppuccin-mocha/apply" \
+            --body '{"wallpaper":"/home/user/Pictures/aurora.jpg","transition":"smooth"}'
+
+        OpenAPI Request Validation:
+        ✅ Path matches: /themes/{theme_id}/apply
+        ✅ Method: POST
+        ✅ Auth: Bearer token present
+        ✅ Content-Type: application/json
+        ✅ Body schema valid: wallpaper (string), transition (enum: smooth)
+        ✅ All required params present
+
+        Result: Request is VALID per OpenAPI spec
+        Conclusion: 500 response is a SERVER BUG — not a client error
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — ENHANCEMENT SPECIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: enhancement_spec
+    attributes:
+      label: "✨ API Enhancement Specification (for enhancement requests)"
+      description: >
+        If requesting a new API capability, provide complete specification.
+        Skip this section for bug reports.
+      placeholder: |
+        ## 🆕 Proposed New Endpoint / Feature
+
+        ### Endpoint Design
+
+        ```yaml
+        # Proposed addition to openapi.yaml
+        /themes/schedule:
+          post:
+            summary: Schedule theme changes
+            operationId: scheduleTheme
+            description: |
+              Schedule automatic theme transitions based on time or conditions.
+              Supports cron-style scheduling and event-based triggers.
+            security:
+              - BearerAuth: ["themes:write", "schedules:write"]
+            requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    required: [theme_id, trigger]
+                    properties:
+                      theme_id:
+                        type: string
+                        description: "Theme to apply when triggered"
+                      trigger:
+                        type: object
+                        oneOf:
+                          - $ref: "#/components/schemas/TimeTrigger"
+                          - $ref: "#/components/schemas/SunriseTrigger"
+                          - $ref: "#/components/schemas/SunsetTrigger"
+                      transition:
+                        type: string
+                        enum: [none, fade, smooth]
+                        default: smooth
+                      enabled:
+                        type: boolean
+                        default: true
+                  examples:
+                    sunset_schedule:
+                      value:
+                        theme_id: "nord"
+                        trigger:
+                          type: "sunset"
+                          location: "auto"
+                        transition: "smooth"
+                    fixed_time_schedule:
+                      value:
+                        theme_id: "catppuccin-latte"
+                        trigger:
+                          type: "time"
+                          time: "08:00"
+                          days: ["mon","tue","wed","thu","fri"]
+                        transition: "fade"
+            responses:
+              "201":
+                description: Schedule created
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/ThemeSchedule"
+              "422":
+                description: Invalid schedule configuration
+        ```
+
+        ### WebSocket Event (New)
+
+        ```json
+        // New event: theme.schedule.triggered
+        {
+          "type": "theme.schedule.triggered",
+          "schedule_id": "sched_abc123",
+          "theme_id": "nord",
+          "trigger": {
+            "type": "sunset",
+            "triggered_at": "2024-01-15T17:32:00Z"
+          },
+          "applied": true
+        }
+        ```
+
+        ### Plugin API Addition (New)
+
+        ```bash
+        # New Plugin Shell API functions:
+
+        # Create a schedule:
+        ash::theme::schedule::create \
+          --theme "nord" \
+          --trigger "sunset" \
+          --transition "smooth"
+        # Returns: schedule_id
+
+        # List schedules:
+        ash::theme::schedule::list
+
+        # Delete a schedule:
+        ash::theme::schedule::delete "sched_abc123"
+        ```
+
+        ## 📊 Backwards Compatibility
+
+        - [ ] ✅ Purely additive — no breaking changes to existing endpoints
+        - [ ] New endpoint only — no modification of existing responses
+        - [ ] New optional field in existing response (non-breaking)
+        - [ ] Breaking change required (justify below)
+
+        **Justification if breaking:** N/A — purely additive new endpoint
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — IMPACT & AFFECTED CLIENTS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: impact
+    attributes:
+      label: "📊 Impact & Affected API Clients"
+      description: >
+        Who and what is affected by this API issue?
+      placeholder: |
+        ## 👥 Affected Clients
+
+        | Client | Type | Impact | Users Affected |
+        |--------|------|--------|---------------|
+        | ASH Web Dashboard | Official | Full theme apply broken | All dashboard users |
+        | ASH Mobile App | Official | Theme control broken | All mobile users |
+        | `waybar-ash-theme` plugin | Community | Cannot apply via API | ~1,200 installs |
+        | My custom home automation | Personal | My setup broken | 1 (me) |
+        | `ash-raycast-extension` | Community | Theme picker broken | ~300 installs |
+
+        ## 🔢 Estimated User Impact
+
+        - **Direct impact:** ~2,000 users who use the REST API
+        - **Indirect impact:** All users who use the web dashboard or mobile app
+        - **Plugin ecosystem impact:** 3 community plugins affected
+
+        ## ⚡ Business Logic Impact
+
+        Without this API working correctly:
+        1. Web dashboard's "Apply Theme" button shows success but API returns 500
+        2. Theme IS applied (partial success) but client gets error response
+        3. Client retries → theme applied multiple times → potential flash of colors
+        4. Mobile app's theme control completely broken for wallpaper+theme combos
+
+        ## 🔄 Production Impact
+
+        - [ ] 🔴 Blocks production deployment
+        - [ ] 🟠 Degrades production experience significantly
+        - [x] 🟡 Works with workaround (apply theme and wallpaper separately)
+        - [ ] 🟢 Minor inconvenience only
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — PROPOSED FIX
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: "🔧 Proposed Fix / Implementation"
+      description: >
+        If you've identified the root cause and solution, share it here.
+      placeholder: |
+        ## 🔍 Root Cause Analysis
+
+        Based on the server logs, the error is in `api/endpoints/theme.py`:
+
+        ```python
+        # api/endpoints/theme.py — apply_theme() function
+        # Current code (BUGGY):
+
+        async def apply_theme(
+            theme_id: str,
+            body: ThemeApplyRequest,
+            auth: AuthContext = Depends(verify_token)
+        ):
+            theme = await theme_service.get_theme(theme_id)
+
+            if body.wallpaper:
+                # BUG: Path validation called with wrong argument order
+                # ash_utils.validate_path(body.wallpaper, user=auth.user)  # WRONG
+                # Should be:
+                # ash_utils.validate_path(path=body.wallpaper, user_home=auth.user.home)
+
+                validated_path = ash_utils.validate_path(body.wallpaper, auth.user)
+                # ↑ This passes auth.user (User object) where str path expected
+                # → NullPointerException when validate_path tries path.exists()
+        ```
+
+        ## ✅ Proposed Fix
+
+        ```python
+        # api/endpoints/theme.py — fixed version
+
+        async def apply_theme(
+            theme_id: str,
+            body: ThemeApplyRequest,
+            auth: AuthContext = Depends(verify_token)
+        ):
+            theme = await theme_service.get_theme(theme_id)
+
+            wallpaper_path = None
+            if body.wallpaper:
+                # FIX: Correct argument order
+                wallpaper_path = ash_utils.validate_path(
+                    path=body.wallpaper,
+                    user_home=auth.user.home_directory
+                )
+                if wallpaper_path is None:
+                    raise HTTPException(
+                        status_code=422,
+                        detail={"code": "INVALID_WALLPAPER_PATH",
+                                "message": f"Wallpaper not found: {body.wallpaper}"}
+                    )
+
+            result = await theme_service.apply_theme(
+                theme=theme,
+                wallpaper=wallpaper_path,  # Now properly validated
+                transition=body.transition,
+                reload_targets=body.reload_targets
+            )
+
+            return ThemeApplyResult(**result)
+        ```
+
+        ## 🧪 Test Cases to Add
+
+        ```python
+        # tests/test_theme_api.py
+
+        async def test_apply_theme_with_valid_wallpaper():
+            """Test that theme applies successfully with valid wallpaper path"""
+            response = await client.post(
+                "/api/v1/themes/catppuccin-mocha/apply",
+                json={"wallpaper": "/tmp/test-wallpaper.jpg", "transition": "smooth"},
+                headers={"Authorization": f"Bearer {test_token}"}
+            )
+            assert response.status_code == 200
+            assert response.json()["success"] is True
+
+        async def test_apply_theme_with_invalid_wallpaper():
+            """Test that invalid wallpaper path returns 422, not 500"""
+            response = await client.post(
+                "/api/v1/themes/catppuccin-mocha/apply",
+                json={"wallpaper": "/nonexistent/path.jpg"},
+                headers={"Authorization": f"Bearer {test_token}"}
+            )
+            assert response.status_code == 422
+            assert response.json()["error"]["code"] == "INVALID_WALLPAPER_PATH"
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ API Issue Submission Checklist"
+      options:
+        - label: >
+            🔄 I have provided a **minimal, standalone reproduction** (copy-paste ready)
+          required: true
+        - label: >
+            📡 I have included **complete request AND response** with headers
+          required: true
+        - label: >
+            📋 I have included **API server logs** from the time of the issue
+          required: true
+        - label: >
+            🔑 I have confirmed **authentication is valid** (not an auth error)
+          required: true
+        - label: >
+            📖 I have checked the **OpenAPI spec** — my request is valid per spec
+          required: true
+        - label: >
+            🔍 I have searched existing issues — **not a duplicate**
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — CLOSING
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        <div align="center">
+
+        ### 🌐 Thank You for Your API Issue Report!
+
+        #### ⏱️ API Issue Response SLAs
+
+        | Severity | Acknowledgment | Patch | Hotfix? |
+        |----------|---------------|-------|---------|
+        | 🔴 CRITICAL (security/crash) | 2 hours | 24 hours | ✅ Yes |
+        | 🟠 HIGH (major feature broken) | 24 hours | 3 days | ✅ Yes |
+        | 🟡 MEDIUM (degraded) | 48 hours | 1 week | Maybe |
+        | 🟢 LOW (minor) | 1 week | Next release | ❌ No |
+        | ✨ ENHANCEMENT | 2 weeks | Roadmap | ❌ No |
+
+        #### 📊 API Health Dashboard
+
+        Monitor the ASH API status in real-time:
+        [api-status.ash-dotfiles.github.io](https://ash-dotfiles.github.io/api-status)
+
+        #### 🔗 API Resources
+
+        | Resource | Link |
+        |----------|------|
+        | OpenAPI Spec | [openapi.yaml](https://ash-dotfiles.github.io/api/openapi.yaml) |
+        | Interactive Docs | [Swagger UI](https://ash-dotfiles.github.io/api/docs) |
+        | Changelog | [API Changelog](https://ash-dotfiles.github.io/api/changelog) |
+        | Stability Policy | [API Stability](https://ash-dotfiles.github.io/api/stability) |
+        | Discord | [#api-dev](https://discord.gg/ash-dotfiles) |
+
+        *— The ASH Dotfiles API Team* 🌐
+
+        </div>

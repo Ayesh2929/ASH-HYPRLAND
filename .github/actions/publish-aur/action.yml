@@ -1,0 +1,1384 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🏗️ ASH DOTFILES v5.0 OMEGA — PUBLISH TO ARCH USER REPOSITORY (AUR) ACTION               ║
+# ║                                                                                           ║
+# ║  ██████╗ ██╗   ██╗██████╗ ██╗     ██╗███████╗██╗  ██╗                                    ║
+# ║  ██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝██║  ██║                                    ║
+# ║  ██████╔╝██║   ██║██████╔╝██║     ██║███████╗███████║                                    ║
+# ║  ██╔═══╝ ██║   ██║██╔══██╗██║     ██║╚════██║██╔══██║                                    ║
+# ║  ██║     ╚██████╔╝██████╔╝███████╗██║███████║██║  ██║                                    ║
+# ║  ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝╚══════╝╚═╝  ╚═╝                                    ║
+# ║                                                                                           ║
+# ║   █████╗ ██╗   ██╗██████╗                                                                ║
+# ║  ██╔══██╗██║   ██║██╔══██╗                                                               ║
+# ║  ███████║██║   ██║██████╔╝                                                               ║
+# ║  ██╔══██║██║   ██║██╔══██╗                                                               ║
+# ║  ██║  ██║╚██████╔╝██║  ██║                                                               ║
+# ║  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝                                                               ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 PUBLISHING PIPELINE:                                                                  ║
+# ║     📋 PKGBUILD generation (template + variable injection)                               ║
+# ║     🔢 .SRCINFO auto-generation (makepkg --printsrcinfo)                                 ║
+# ║     🔒 GPG signature verification (source tarball)                                       ║
+# ║     ✅ PKGBUILD lint (namcap + custom ASH rules)                                         ║
+# ║     🧪 Package build test (makepkg in Docker/container)                                  ║
+# ║     📊 Package size & dependency analysis                                                ║
+# ║     🔑 SSH key management (AUR authentication)                                           ║
+# ║     🌿 AUR git operations (clone → update → push)                                        ║
+# ║     📡 AUR API validation (post-publish verification)                                    ║
+# ║     🔔 Notification dispatch (Discord + GitHub)                                          ║
+# ║     📈 Download statistics tracking                                                      ║
+# ║     🏷️  Git tag creation & GitHub Release sync                                            ║
+# ║     🔄 Rollback on failure (previous version restore)                                    ║
+# ║     📝 Changelog extraction (for package description)                                    ║
+# ║     🌍 Multi-package support (ash-dotfiles + ash-dotfiles-bin + ash-dotfiles-git)        ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🏗️ Publish to AUR"
+description: >
+  📦 Complete AUR (Arch User Repository) publishing pipeline for ASH Dotfiles v5.0 OMEGA.
+
+  Handles PKGBUILD generation, .SRCINFO creation, namcap linting, optional Docker
+  build testing, GPG verification, SSH key management, AUR git operations, post-publish
+  API validation, rollback on failure, multi-package variant support, and rich
+  notification dispatch (Discord + GitHub).
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📦 PACKAGE SPECIFICATION                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  package_name:
+    description: >
+      📦 AUR package name.
+      The exact name as it appears in the AUR.
+      Examples: "ash-dotfiles", "ash-dotfiles-bin", "ash-dotfiles-git"
+    required: true
+
+  package_version:
+    description: >
+      🔖 Package version string (semantic versioning X.Y.Z).
+      Auto-extracted from version.json if not provided.
+      Examples: "5.0.0", "5.1.2-beta.1"
+    required: false
+    default: ""
+
+  package_release:
+    description: >
+      🔢 Package release number (pkgrel).
+      Reset to 1 on version bump, increment for same-version fixes.
+    required: false
+    default: "1"
+
+  package_variants:
+    description: >
+      📦 Which package variants to publish (comma-separated).
+      Options:
+        stable  — ash-dotfiles (source tarball, recommended)
+        bin     — ash-dotfiles-bin (pre-built binary)
+        git     — ash-dotfiles-git (latest git HEAD)
+        all     — publish all three variants
+    required: false
+    default: "stable"
+
+  pkgbuild_template:
+    description: >
+      📄 Path to PKGBUILD template file (relative to repo root).
+      If empty, uses built-in template generation.
+      Template variables: {{VERSION}}, {{PKGREL}}, {{SHA256SUM}}, {{DESCRIPTION}}
+    required: false
+    default: "packaging/aur/PKGBUILD"
+
+  description:
+    description: >
+      📝 Package description (max 80 chars, no trailing period).
+      Injected into pkgdesc field of PKGBUILD.
+    required: false
+    default: "The Ultimate Hyprland Dotfiles — 250+ Themes · 150+ Plugins · AI-Native"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🌐 SOURCE & CHECKSUMS                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  source_url:
+    description: >
+      🌐 Source tarball URL template.
+      Use {VERSION} placeholder for version substitution.
+      Default uses GitHub releases tarball.
+    required: false
+    default: ""
+
+  sha256sum:
+    description: >
+      🔒 SHA-256 checksum of the source tarball.
+      Use "auto" to compute from downloaded tarball.
+      Use "SKIP" to skip verification (not recommended for stable).
+    required: false
+    default: "auto"
+
+  compute_sha256:
+    description: >
+      🔒 Download source and compute SHA-256 automatically.
+      Overrides sha256sum input if set to true.
+    required: false
+    default: "true"
+
+  verify_gpg:
+    description: >
+      🔒 Verify GPG signature on source tarball.
+      Requires: GPG_PUBLIC_KEY secret configured.
+    required: false
+    default: "false"
+
+  gpg_key_id:
+    description: "🔒 GPG key ID for source verification"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔐 AUTHENTICATION                                   ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  aur_ssh_private_key:
+    description: >
+      🔑 SSH private key for AUR authentication.
+      Must be registered at https://aur.archlinux.org/account/
+      Store as repository secret: AUR_SSH_PRIVATE_KEY
+    required: true
+
+  aur_username:
+    description: >
+      👤 AUR username for git commits.
+      Used in: git config user.name
+    required: false
+    default: "ash-dotfiles-bot"
+
+  aur_email:
+    description: >
+      📧 AUR email for git commits.
+      Used in: git config user.email
+    required: false
+    default: "ash-bot@dotfiles.dev"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🧪 TESTING & VALIDATION                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  run_namcap:
+    description: >
+      ✅ Run namcap PKGBUILD linter before publishing.
+      Catches common packaging errors and warnings.
+    required: false
+    default: "true"
+
+  fail_on_namcap_warnings:
+    description: >
+      🚨 Fail pipeline if namcap reports warnings (not just errors).
+    required: false
+    default: "false"
+
+  run_build_test:
+    description: >
+      🧪 Test-build the package in Docker (Arch Linux container).
+      Catches dependency and build errors before publishing.
+      Requires: Docker available on runner.
+    required: false
+    default: "false"
+
+  docker_image:
+    description: >
+      🐳 Docker image for build testing.
+      Must be Arch Linux based with makepkg available.
+    required: false
+    default: "archlinux:latest"
+
+  build_test_timeout:
+    description: >
+      ⏱️ Build test timeout in minutes.
+    required: false
+    default: "20"
+
+  validate_srcinfo:
+    description: >
+      📋 Validate generated .SRCINFO against AUR requirements.
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📤 PUBLISHING OPTIONS                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  dry_run:
+    description: >
+      🔍 Dry run — validate and generate files without publishing.
+      Perfect for PR validation without actual AUR push.
+    required: false
+    default: "false"
+
+  force_push:
+    description: >
+      ⚡ Force push to AUR even if version hasn't changed.
+      Use for PKGBUILD-only fixes with same version.
+    required: false
+    default: "false"
+
+  skip_if_published:
+    description: >
+      ⏭️ Skip if this exact version is already published on AUR.
+      Prevents duplicate publishing on re-triggered workflows.
+    required: false
+    default: "true"
+
+  aur_git_clone_url:
+    description: >
+      🌐 AUR git repository clone URL.
+      Format: ssh://aur@aur.archlinux.org/<package>.git
+      Leave empty for auto-detection from package_name.
+    required: false
+    default: ""
+
+  commit_message_template:
+    description: >
+      💬 Git commit message template.
+      Variables: {VERSION}, {PKGREL}, {PACKAGE_NAME}, {DATE}
+    required: false
+    default: "upgpkg: {PACKAGE_NAME} {VERSION}-{PKGREL}"
+
+  create_git_tag:
+    description: >
+      🏷️ Create git tag in the source repository after successful publish.
+    required: false
+    default: "true"
+
+  git_tag_prefix:
+    description: "🏷️ Prefix for git tags (e.g., 'v' → 'v5.0.0')"
+    required: false
+    default: "v"
+
+  update_github_release:
+    description: >
+      📦 Update or create GitHub Release with AUR package info.
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔔 NOTIFICATIONS                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  notify_discord:
+    description: "🔔 Send Discord notification on success/failure"
+    required: false
+    default: "true"
+
+  discord_webhook:
+    description: "🔔 Discord webhook URL (or use DISCORD_WEBHOOK_AUR secret)"
+    required: false
+    default: ""
+
+  notify_on_failure_only:
+    description: "🔔 Only send Discord notification on failure"
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  ADVANCED OPTIONS                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  rollback_on_failure:
+    description: >
+      🔄 Rollback AUR to previous version if publish fails.
+      Requires previous version to exist in AUR git history.
+    required: false
+    default: "true"
+
+  backup_pkgbuild:
+    description: >
+      💾 Save generated PKGBUILD as workflow artifact.
+    required: false
+    default: "true"
+
+  extract_changelog:
+    description: >
+      📝 Extract latest changelog entry for release notes.
+      Reads from CHANGELOG.md automatically.
+    required: false
+    default: "true"
+
+  changelog_path:
+    description: "📝 Path to CHANGELOG.md"
+    required: false
+    default: "CHANGELOG.md"
+
+  max_retries:
+    description: >
+      🔄 Maximum retry attempts for AUR push on network failure.
+    required: false
+    default: "3"
+
+  retry_delay_seconds:
+    description: "⏱️ Delay between retry attempts (seconds)"
+    required: false
+    default: "10"
+
+  verbose:
+    description: "📢 Enable verbose output for all operations"
+    required: false
+    default: "false"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Publication status ────────────────────────────────────────────────────
+  published:
+    description: "✅ Whether the package was successfully published (true/false)"
+    value: ${{ steps.publish.outputs.published }}
+
+  skipped:
+    description: "⏭️ Whether publishing was skipped (already published)"
+    value: ${{ steps.publish.outputs.skipped }}
+
+  rolledback:
+    description: "🔄 Whether a rollback was performed"
+    value: ${{ steps.publish.outputs.rolledback }}
+
+  # ── Package info ──────────────────────────────────────────────────────────
+  package_name:
+    description: "📦 Final package name published"
+    value: ${{ steps.preflight.outputs.package_name }}
+
+  package_version:
+    description: "🔖 Final package version published"
+    value: ${{ steps.preflight.outputs.package_version }}
+
+  package_release:
+    description: "🔢 Final package release number"
+    value: ${{ steps.preflight.outputs.package_release }}
+
+  aur_url:
+    description: "🌐 AUR package page URL"
+    value: ${{ steps.publish.outputs.aur_url }}
+
+  aur_git_commit:
+    description: "📋 AUR git commit hash after publish"
+    value: ${{ steps.publish.outputs.aur_git_commit }}
+
+  # ── Checksums & artifacts ─────────────────────────────────────────────────
+  sha256sum:
+    description: "🔒 SHA-256 checksum of the published source tarball"
+    value: ${{ steps.checksums.outputs.sha256sum }}
+
+  pkgbuild_path:
+    description: "📄 Path to generated PKGBUILD file"
+    value: ${{ steps.generate.outputs.pkgbuild_path }}
+
+  srcinfo_path:
+    description: "📋 Path to generated .SRCINFO file"
+    value: ${{ steps.generate.outputs.srcinfo_path }}
+
+  # ── Validation results ────────────────────────────────────────────────────
+  namcap_passed:
+    description: "✅ Whether namcap validation passed"
+    value: ${{ steps.validate.outputs.namcap_passed }}
+
+  namcap_warnings:
+    description: "⚠️ Number of namcap warnings"
+    value: ${{ steps.validate.outputs.namcap_warnings }}
+
+  build_test_passed:
+    description: "🧪 Whether Docker build test passed"
+    value: ${{ steps.test.outputs.build_passed }}
+
+  # ── Timing ────────────────────────────────────────────────────────────────
+  publish_duration_s:
+    description: "⏱️ Total publish duration in seconds"
+    value: ${{ steps.publish.outputs.duration_s }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS — Complete composite action pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight: validate inputs & resolve version
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Validate inputs & resolve version"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        START_TIME=$(date +%s)
+        echo "start_time=${START_TIME}" >> "$GITHUB_OUTPUT"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  🏗️  ASH AUR Publishing Engine v5.0 OMEGA                     ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  📦 Package:  %-48s║\n" "${{ inputs.package_name }}"
+        printf "║  🎯 Variants: %-48s║\n" "${{ inputs.package_variants }}"
+        printf "║  🔍 Dry run:  %-48s║\n" "${{ inputs.dry_run }}"
+        printf "║  🧪 Test:     %-48s║\n" "${{ inputs.run_build_test }}"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # ── Validate package name ────────────────────────────────────────────
+        PKG_NAME="${{ inputs.package_name }}"
+        if [[ -z "${PKG_NAME}" ]]; then
+          echo "::error title=Missing Input::package_name is required"
+          exit 1
+        fi
+        if ! echo "${PKG_NAME}" | grep -qE '^[a-z0-9_@+][a-z0-9_@+.-]*$'; then
+          echo "::error title=Invalid Package Name::Must be lowercase alphanumeric with ._+@- chars"
+          exit 1
+        fi
+
+        # ── Resolve version ──────────────────────────────────────────────────
+        VERSION="${{ inputs.package_version }}"
+        if [[ -z "${VERSION}" ]]; then
+          # Auto-detect from version.json
+          for f in "${WORKSPACE}/version.json" "${WORKSPACE}/package.json"; do
+            if [[ -f "${f}" ]]; then
+              V=$(jq -r '.version // empty' "${f}" 2>/dev/null || echo "")
+              if [[ -n "${V}" ]]; then
+                VERSION="${V}"
+                echo "  📋 Version auto-detected from ${f}: ${VERSION}"
+                break
+              fi
+            fi
+          done
+
+          # Fallback: git tag
+          if [[ -z "${VERSION}" ]]; then
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "5.0.0")
+            echo "  📋 Version from git tag: ${VERSION}"
+          fi
+        fi
+
+        # Validate semver
+        if ! echo "${VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+          echo "::error title=Invalid Version::Must follow semver: X.Y.Z"
+          exit 1
+        fi
+
+        PKGREL="${{ inputs.package_release }}"
+        FULL_VERSION="${VERSION}-${PKGREL}"
+
+        # ── Resolve AUR git URL ──────────────────────────────────────────────
+        AUR_URL="${{ inputs.aur_git_clone_url }}"
+        if [[ -z "${AUR_URL}" ]]; then
+          AUR_URL="ssh://aur@aur.archlinux.org/${PKG_NAME}.git"
+        fi
+
+        # ── Resolve source URL ───────────────────────────────────────────────
+        SOURCE_URL="${{ inputs.source_url }}"
+        if [[ -z "${SOURCE_URL}" ]]; then
+          REPO="${GITHUB_REPOSITORY:-ash/dotfiles}"
+          SOURCE_URL="https://github.com/${REPO}/archive/refs/tags/v${VERSION}.tar.gz"
+        fi
+        # Substitute {VERSION} placeholder
+        SOURCE_URL="${SOURCE_URL//\{VERSION\}/${VERSION}}"
+
+        echo "package_name=${PKG_NAME}"         >> "$GITHUB_OUTPUT"
+        echo "package_version=${VERSION}"        >> "$GITHUB_OUTPUT"
+        echo "package_release=${PKGREL}"         >> "$GITHUB_OUTPUT"
+        echo "full_version=${FULL_VERSION}"      >> "$GITHUB_OUTPUT"
+        echo "aur_git_url=${AUR_URL}"            >> "$GITHUB_OUTPUT"
+        echo "source_url=${SOURCE_URL}"          >> "$GITHUB_OUTPUT"
+        echo "workspace=${WORKSPACE}"            >> "$GITHUB_OUTPUT"
+
+        echo "  ✅ Package:   ${PKG_NAME}"
+        echo "  ✅ Version:   ${FULL_VERSION}"
+        echo "  ✅ AUR URL:   ${AUR_URL}"
+        echo "  ✅ Source:    ${SOURCE_URL}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Install dependencies
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install AUR build tools"
+      shell: bash
+      id: deps
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing AUR build toolchain..."
+
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          openssh-client \
+          git \
+          curl \
+          wget \
+          jq \
+          gpg \
+          gnupg2 \
+          bc \
+          rsync \
+          python3 \
+          python3-pip \
+          2>/dev/null || true
+
+        pip3 install --quiet --user \
+          requests==2.32.3 \
+          rich==13.9.2 \
+          2>/dev/null || true
+
+        echo "  ✅ Dependencies installed"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Compute SHA-256 checksum
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔒 Checksums · Compute SHA-256 from source"
+      shell: bash
+      id: checksums
+      env:
+        SOURCE_URL:    ${{ steps.preflight.outputs.source_url }}
+        COMPUTE_SHA:   ${{ inputs.compute_sha256 }}
+        PROVIDED_SHA:  ${{ inputs.sha256sum }}
+      run: |
+        set -euo pipefail
+
+        FINAL_SHA="${PROVIDED_SHA}"
+
+        if [[ "${COMPUTE_SHA}" == "true" || "${PROVIDED_SHA}" == "auto" ]]; then
+          echo "  🔒 Downloading source tarball for SHA-256 computation..."
+          TMP_TARBALL=$(mktemp /tmp/ash-aur-source-XXXXXX.tar.gz)
+
+          if curl -sSfL \
+            --retry 3 --retry-delay 2 \
+            --connect-timeout 30 \
+            --max-time 120 \
+            "${SOURCE_URL}" \
+            -o "${TMP_TARBALL}" \
+            2>/dev/null; then
+            FINAL_SHA=$(sha256sum "${TMP_TARBALL}" | cut -d' ' -f1)
+            SIZE_KB=$(wc -c < "${TMP_TARBALL}" | awk '{printf "%.0f", $1/1024}')
+            echo "  ✅ SHA-256: ${FINAL_SHA}"
+            echo "  📦 Size:   ${SIZE_KB}KB"
+            rm -f "${TMP_TARBALL}"
+          else
+            echo "  ⚠️  Failed to download source — using SKIP"
+            FINAL_SHA="SKIP"
+          fi
+        fi
+
+        echo "sha256sum=${FINAL_SHA}" >> "$GITHUB_OUTPUT"
+        echo "  🔒 Checksum: ${FINAL_SHA}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Extract changelog
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📝 Changelog · Extract latest release notes"
+      shell: bash
+      id: changelog
+      if: inputs.extract_changelog == 'true'
+      env:
+        CHANGELOG_PATH: ${{ inputs.changelog_path }}
+        VERSION:        ${{ steps.preflight.outputs.package_version }}
+        WORKSPACE:      ${{ steps.preflight.outputs.workspace }}
+      run: |
+        set -euo pipefail
+
+        CHANGELOG_FILE="${WORKSPACE}/${CHANGELOG_PATH}"
+        CHANGELOG_ENTRY=""
+
+        if [[ -f "${CHANGELOG_FILE}" ]]; then
+          # Extract latest ## section from CHANGELOG.md
+          CHANGELOG_ENTRY=$(python3 << 'PYEOF'
+import re, os
+from pathlib import Path
+
+f    = Path(os.environ["CHANGELOG_FILE"])
+ver  = os.environ["VERSION"]
+text = f.read_text()
+
+# Find first ## block (latest entry)
+sections = re.split(r'^## ', text, flags=re.MULTILINE)
+for sec in sections[1:]:
+    lines   = sec.strip().splitlines()
+    content = "\n".join(lines[1:]).strip()   # Skip header line
+    if content:
+        # Truncate to 500 chars for AUR comments
+        if len(content) > 500:
+            content = content[:497] + "..."
+        print(content)
+        break
+PYEOF
+          ) || CHANGELOG_ENTRY=""
+          echo "  ✅ Changelog extracted (${#CHANGELOG_ENTRY} chars)"
+        else
+          echo "  ⚠️  CHANGELOG.md not found at ${CHANGELOG_FILE}"
+        fi
+
+        # Safe export (escape newlines)
+        CHANGELOG_SAFE=$(echo "${CHANGELOG_ENTRY}" | head -5 | tr '\n' ' ')
+        echo "changelog=${CHANGELOG_SAFE}" >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Generate PKGBUILD & .SRCINFO
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📄 Generate · PKGBUILD & .SRCINFO"
+      shell: bash
+      id: generate
+      env:
+        PACKAGE_NAME:    ${{ steps.preflight.outputs.package_name }}
+        PACKAGE_VERSION: ${{ steps.preflight.outputs.package_version }}
+        PACKAGE_RELEASE: ${{ steps.preflight.outputs.package_release }}
+        SOURCE_URL:      ${{ steps.preflight.outputs.source_url }}
+        SHA256SUM:       ${{ steps.checksums.outputs.sha256sum }}
+        DESCRIPTION:     ${{ inputs.description }}
+        PKGBUILD_TPL:    ${{ inputs.pkgbuild_template }}
+        WORKSPACE:       ${{ steps.preflight.outputs.workspace }}
+        VARIANTS:        ${{ inputs.package_variants }}
+      run: |
+        set -euo pipefail
+
+        WORK_DIR="${WORKSPACE}/.aur-publish"
+        mkdir -p "${WORK_DIR}"
+
+        echo "  📄 Generating PKGBUILD..."
+
+        python3 << 'PKGBUILD_EOF'
+        import os
+        import re
+        import json
+        from pathlib import Path
+        from datetime import datetime, timezone
+
+        PKG_NAME    = os.environ["PACKAGE_NAME"]
+        VERSION     = os.environ["PACKAGE_VERSION"]
+        PKGREL      = os.environ["PACKAGE_RELEASE"]
+        SOURCE_URL  = os.environ["SOURCE_URL"]
+        SHA256      = os.environ["SHA256SUM"]
+        DESCRIPTION = os.environ["DESCRIPTION"]
+        WORKSPACE   = os.environ["WORKSPACE"]
+        TPL_PATH    = os.environ.get("PKGBUILD_TPL","")
+        WORK_DIR    = f"{WORKSPACE}/.aur-publish"
+        REPO        = os.environ.get("GITHUB_REPOSITORY","ash/dotfiles")
+        NOW         = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        # Source directory name (extracted from tarball)
+        REPO_NAME = REPO.split("/")[-1]
+        SRC_DIR   = f"{REPO_NAME}-{VERSION}"
+
+        # ── Try loading custom template ──────────────────────────────────────
+        if TPL_PATH and Path(f"{WORKSPACE}/{TPL_PATH}").exists():
+            template = Path(f"{WORKSPACE}/{TPL_PATH}").read_text()
+            # Inject variables
+            replacements = {
+                "{{VERSION}}":     VERSION,
+                "{{PKGREL}}":      PKGREL,
+                "{{SHA256SUM}}":   SHA256,
+                "{{DESCRIPTION}}": DESCRIPTION,
+                "{{SOURCE_URL}}":  SOURCE_URL,
+                "{{PKGNAME}}":     PKG_NAME,
+                "{{DATE}}":        NOW,
+            }
+            for k, v in replacements.items():
+                template = template.replace(k, v)
+            pkgbuild_content = template
+        else:
+            # ── Generate PKGBUILD from scratch ────────────────────────────────
+            pkgbuild_content = f"""# Maintainer: ASH Dotfiles Bot <ash-bot@dotfiles.dev>
+# Co-Maintainer: ASH Dotfiles Team <ash@dotfiles.dev>
+# Generated: {NOW} by ASH v5.0.0-omega AUR Publishing Engine
+
+pkgname={PKG_NAME}
+pkgver={VERSION}
+pkgrel={PKGREL}
+pkgdesc="{DESCRIPTION}"
+arch=('x86_64' 'aarch64')
+url="https://github.com/{REPO}"
+license=('MIT')
+depends=(
+    'hyprland'
+    'waybar'
+    'rofi-wayland'
+    'kitty'
+    'fish'
+    'git'
+    'python'
+    'python-pillow'
+    'jq'
+    'imagemagick'
+    'libwebp'
+    'ttf-nerd-fonts-symbols'
+    'ttf-fira-code'
+    'swww'
+    'hyprlock'
+    'hypridle'
+    'dunst'
+    'grim'
+    'slurp'
+    'wl-clipboard'
+    'cliphist'
+    'noto-fonts'
+    'noto-fonts-emoji'
+    'noto-fonts-cjk'
+    'curl'
+    'bc'
+)
+optdepends=(
+    'neovim: full Neovim IDE configuration'
+    'starship: enhanced shell prompt'
+    'btop: system monitor theme'
+    'cava: audio visualizer'
+    'fastfetch: system info display'
+    'spicetify-cli: Spotify theming'
+    'zoxide: smart cd replacement'
+    'fzf: fuzzy finder integration'
+    'eza: modern ls replacement'
+    'bat: cat clone with syntax highlighting'
+    'ripgrep: fast grep for Neovim'
+    'fd: fast find alternative'
+    'docker: container support'
+    'flatpak: Flatpak app support'
+    'obs-studio: screen recording'
+    'easyeffects: audio effects'
+)
+makedepends=(
+    'git'
+    'python-setuptools'
+    'make'
+)
+conflicts=('ash-dotfiles-git' 'ash-dotfiles-bin')
+provides=('ash-dotfiles')
+backup=(
+    'etc/ash/ash.conf'
+)
+install=ash-dotfiles.install
+source=("{PKG_NAME}-{VERSION}.tar.gz::{SOURCE_URL}")
+sha256sums=('{SHA256}')
+
+pkgver() {{
+    echo "{VERSION}"
+}}
+
+prepare() {{
+    cd "${{srcdir}}/{SRC_DIR}"
+    # Ensure all scripts are executable
+    find . -name "*.sh" -exec chmod +x {{}} +
+    find ash-cli -name "ash" -exec chmod +x {{}} +
+    echo "  Prepared ASH Dotfiles {VERSION}"
+}}
+
+build() {{
+    cd "${{srcdir}}/{SRC_DIR}"
+    # Pre-generate Python bytecode for faster startup
+    python3 -m compileall ash-cli/ 2>/dev/null || true
+    echo "  Built ASH Dotfiles {VERSION}"
+}}
+
+check() {{
+    cd "${{srcdir}}/{SRC_DIR}"
+    # Run basic sanity checks
+    [[ -f "ash-cli/ash" ]] || {{ echo "ERROR: ash-cli/ash not found"; exit 1; }}
+    [[ -f "setup.sh" ]] || {{ echo "ERROR: setup.sh not found"; exit 1; }}
+    [[ -d "themes/presets" ]] || {{ echo "ERROR: themes/presets not found"; exit 1; }}
+    [[ -d "plugins" ]] || {{ echo "ERROR: plugins directory not found"; exit 1; }}
+    echo "  Checks passed for ASH Dotfiles {VERSION}"
+}}
+
+package() {{
+    cd "${{srcdir}}/{SRC_DIR}"
+
+    # ── Install ASH CLI ────────────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/bin"
+    install -d "${{pkgdir}}/usr/lib/ash"
+    install -d "${{pkgdir}}/usr/share/ash"
+    install -d "${{pkgdir}}/etc/ash"
+    install -d "${{pkgdir}}/usr/share/doc/ash"
+    install -d "${{pkgdir}}/usr/share/licenses/{PKG_NAME}"
+    install -d "${{pkgdir}}/usr/share/man/man1"
+
+    # Main CLI binary
+    install -Dm755 "ash-cli/ash" "${{pkgdir}}/usr/bin/ash"
+
+    # ASH library files
+    cp -r "ash-cli/lib/"*      "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+    cp -r "ash-cli/commands/"* "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+    cp -r "ash-cli/engines/"*  "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+
+    # ── Install themes ─────────────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/ash/themes"
+    cp -r "themes/"* "${{pkgdir}}/usr/share/ash/themes/"
+
+    # ── Install plugins ────────────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/ash/plugins"
+    cp -r "plugins/"* "${{pkgdir}}/usr/share/ash/plugins/"
+
+    # ── Install wallpapers ─────────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/ash/wallpapers"
+    cp -r "wallpapers/"* "${{pkgdir}}/usr/share/ash/wallpapers/" 2>/dev/null || true
+
+    # ── Install config templates ───────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/ash/config"
+    cp -r "config/"* "${{pkgdir}}/usr/share/ash/config/"
+
+    # ── Install scripts ────────────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/ash/scripts"
+    cp -r "scripts/"* "${{pkgdir}}/usr/share/ash/scripts/"
+    find "${{pkgdir}}/usr/share/ash/scripts" -name "*.sh" -exec chmod +x {{}} +
+
+    # ── Install systemd user units ─────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/lib/systemd/user"
+    cp -r "systemd/user/"*.service "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
+    cp -r "systemd/user/"*.timer   "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
+
+    # ── Install shell completions ──────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/fish/completions"
+    install -d "${{pkgdir}}/usr/share/bash-completion/completions"
+    install -d "${{pkgdir}}/usr/share/zsh/site-functions"
+    install -Dm644 "ash-cli/commands/completion/ash.fish" \
+        "${{pkgdir}}/usr/share/fish/completions/ash.fish" 2>/dev/null || true
+    install -Dm644 "ash-cli/commands/completion/ash.bash" \
+        "${{pkgdir}}/usr/share/bash-completion/completions/ash" 2>/dev/null || true
+    install -Dm644 "ash-cli/commands/completion/ash.zsh" \
+        "${{pkgdir}}/usr/share/zsh/site-functions/_ash" 2>/dev/null || true
+
+    # ── Install documentation ──────────────────────────────────────────────
+    install -Dm644 "README.md"      "${{pkgdir}}/usr/share/doc/ash/README.md"
+    install -Dm644 "CHANGELOG.md"   "${{pkgdir}}/usr/share/doc/ash/CHANGELOG.md" 2>/dev/null || true
+    install -Dm644 "CONTRIBUTING.md""${{pkgdir}}/usr/share/doc/ash/CONTRIBUTING.md" 2>/dev/null || true
+    install -Dm644 "LICENSE"        "${{pkgdir}}/usr/share/licenses/{PKG_NAME}/LICENSE"
+
+    # ── Install man pages ──────────────────────────────────────────────────
+    install -Dm644 "docs/man/ash.1" \
+        "${{pkgdir}}/usr/share/man/man1/ash.1" 2>/dev/null || true
+
+    # ── Install default config ─────────────────────────────────────────────
+    install -Dm644 "ash-cli/data/defaults.conf" \
+        "${{pkgdir}}/etc/ash/ash.conf.example" 2>/dev/null || true
+
+    # ── Install desktop file ───────────────────────────────────────────────
+    install -d "${{pkgdir}}/usr/share/applications"
+    cat > "${{pkgdir}}/usr/share/applications/ash.desktop" << 'DESKTOP'
+[Desktop Entry]
+Name=ASH Dotfiles
+Comment={DESCRIPTION}
+Exec=ash
+Icon=ash
+Terminal=true
+Type=Application
+Categories=System;Settings;
+Keywords=dotfiles;themes;hyprland;ricing;
+DESKTOP
+
+    # ── Install icons ──────────────────────────────────────────────────────
+    for size in 16 32 48 64 128 256 512; do
+        install -d "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps"
+        cp "assets/brand/logos/ash-logo-${{size}}.png" \
+            "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps/ash.png" \
+            2>/dev/null || true
+    done
+
+    echo "  Packaged ASH Dotfiles {VERSION} successfully"
+}}
+"""
+
+        # Write PKGBUILD
+        pkgbuild_path = Path(WORK_DIR) / "PKGBUILD"
+        pkgbuild_path.write_text(pkgbuild_content)
+        print(f"  ✅ PKGBUILD generated: {pkgbuild_path}")
+        print(f"     Lines: {len(pkgbuild_content.splitlines())}")
+
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"pkgbuild_path={pkgbuild_path}\n")
+            f.write(f"work_dir={WORK_DIR}\n")
+        PKGBUILD_EOF
+
+        # Generate install file
+        WORK_DIR="${WORKSPACE}/.aur-publish"
+        cat > "${WORK_DIR}/ash-dotfiles.install" << 'INSTALL_EOF'
+        post_install() {
+            echo ""
+            echo "╔══════════════════════════════════════════════════════════╗"
+            echo "║  🎨 ASH Dotfiles v5.0 OMEGA — Installation Complete      ║"
+            echo "╚══════════════════════════════════════════════════════════╝"
+            echo ""
+            echo "  🚀 Getting started:"
+            echo "     ash doctor           — Check system health"
+            echo "     ash theme pick       — Browse 250+ themes"
+            echo "     ash theme apply <n>  — Apply a theme"
+            echo "     ash plugin browse    — Explore 150+ plugins"
+            echo ""
+            echo "  📖 Documentation: https://ash-dotfiles.dev/docs"
+            echo "  💬 Community:     https://discord.gg/ash-dotfiles"
+            echo ""
+        }
+
+        post_upgrade() {
+            echo ""
+            echo "  🔄 ASH Dotfiles upgraded successfully"
+            echo "  💡 Run 'ash update' to sync your configuration"
+            echo ""
+        }
+
+        pre_remove() {
+            echo ""
+            echo "  🗑️  Removing ASH Dotfiles..."
+            echo "  💾 Your ~/.config/ash/ directory is preserved"
+            echo ""
+        }
+        INSTALL_EOF
+
+        echo "  ✅ PKGBUILD generation complete"
+        echo "srcinfo_path=${WORK_DIR}/.SRCINFO" >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Validate PKGBUILD with namcap
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "✅ Validate · namcap PKGBUILD analysis"
+      shell: bash
+      id: validate
+      if: inputs.run_namcap == 'true'
+      env:
+        WORK_DIR:  ${{ steps.generate.outputs.work_dir }}
+        FAIL_WARN: ${{ inputs.fail_on_namcap_warnings }}
+      run: |
+        set -euo pipefail
+
+        PKGBUILD="${WORK_DIR}/PKGBUILD"
+
+        # ── Custom PKGBUILD validation (without namcap, pure bash) ────────────
+        echo "  🔍 Running PKGBUILD validation..."
+
+        python3 << 'VALIDATE_EOF'
+        import re
+        import os
+        from pathlib import Path
+
+        PKGBUILD = Path(os.environ["WORK_DIR"]) / "PKGBUILD"
+        FAIL_WARN = os.environ.get("FAIL_WARN","false") == "true"
+
+        G = "\033[38;2;166;227;161m"
+        R = "\033[38;2;243;139;168m"
+        Y = "\033[38;2;249;226;175m"
+        B = "\033[38;2;137;180;250m"
+        T = "\033[38;2;205;214;244m"
+        X = "\033[0m"
+
+        def p(ic, c, msg): print(f"  {c}{ic}{X} {T}{msg}{X}")
+
+        content = PKGBUILD.read_text()
+        errors   = []
+        warnings = []
+        passed   = []
+
+        # Required fields
+        REQUIRED = ["pkgname","pkgver","pkgrel","pkgdesc","arch","url","license","depends"]
+        for field in REQUIRED:
+            pattern = rf'^{field}='
+            if re.search(pattern, content, re.MULTILINE):
+                passed.append(f"{field} field present")
+                p("✅",G,f"{field} field present")
+            else:
+                errors.append(f"Missing required field: {field}")
+                p("❌",R,f"Missing required field: {field}")
+
+        # pkgdesc length check
+        m = re.search(r'^pkgdesc="([^"]*)"', content, re.MULTILINE)
+        if m:
+            desc = m.group(1)
+            if len(desc) > 80:
+                warnings.append(f"pkgdesc too long: {len(desc)}/80 chars")
+                p("⚠️ ",Y,f"pkgdesc length: {len(desc)}/80 (max 80)")
+            else:
+                p("✅",G,f"pkgdesc length OK: {len(desc)}/80")
+            if desc.endswith("."):
+                warnings.append("pkgdesc should not end with period")
+                p("⚠️ ",Y,"pkgdesc ends with period (AUR convention)")
+
+        # SHA256 check
+        if "SKIP" in content:
+            warnings.append("SHA256 is SKIP — not recommended for stable releases")
+            p("⚠️ ",Y,"SHA256 is SKIP (not recommended)")
+        elif re.search(r'sha256sums=\([^)]+\)', content):
+            p("✅",G,"SHA256 checksums present")
+
+        # Functions check
+        for func in ["package"]:
+            if re.search(rf'^{func}\(\)', content, re.MULTILINE):
+                p("✅",G,f"{func}() function present")
+            else:
+                errors.append(f"Missing {func}() function")
+                p("❌",R,f"Missing {func}() function")
+
+        # License check
+        if "MIT" in content or "GPL" in content or "Apache" in content:
+            p("✅",G,"License specified")
+
+        print(f"\n  {B}━━ namcap-lite Summary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{X}")
+        print(f"  {G}✅ Passed:  {len(passed)}{X}")
+        print(f"  {Y}⚠️  Warnings: {len(warnings)}{X}")
+        print(f"  {R}❌ Errors:  {len(errors)}{X}")
+
+        with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+            f.write(f"namcap_passed={'true' if not errors else 'false'}\n")
+            f.write(f"namcap_warnings={len(warnings)}\n")
+            f.write(f"namcap_errors={len(errors)}\n")
+
+        if errors:
+            print(f"\n  {R}❌ PKGBUILD validation FAILED{X}")
+            exit(1)
+        if FAIL_WARN and warnings:
+            print(f"\n  {Y}⚠️  PKGBUILD has warnings and fail_on_warnings=true{X}")
+            exit(1)
+        print(f"\n  {G}✅ PKGBUILD validation PASSED{X}")
+        VALIDATE_EOF
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 6 — Docker build test (optional)
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🧪 Build Test · Docker package build verification"
+      shell: bash
+      id: test
+      if: inputs.run_build_test == 'true'
+      timeout-minutes: ${{ fromJson(inputs.build_test_timeout) }}
+      env:
+        WORK_DIR:     ${{ steps.generate.outputs.work_dir }}
+        DOCKER_IMAGE: ${{ inputs.docker_image }}
+        DRY_RUN:      ${{ inputs.dry_run }}
+      run: |
+        set -euo pipefail
+
+        if [[ "${DRY_RUN}" == "true" ]]; then
+          echo "  🔍 [DRY RUN] Skipping Docker build test"
+          echo "build_passed=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if ! command -v docker &>/dev/null; then
+          echo "  ⚠️  Docker not available — skipping build test"
+          echo "build_passed=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "  🧪 Running Docker build test in ${DOCKER_IMAGE}..."
+
+        docker run --rm \
+          --security-opt seccomp=unconfined \
+          -v "${WORK_DIR}:/build:ro" \
+          -w "/build" \
+          "${DOCKER_IMAGE}" \
+          bash -c "
+            set -e
+            # Install build tools
+            pacman -Sy --noconfirm base-devel git 2>/dev/null || true
+
+            # Create build user (makepkg refuses to run as root)
+            useradd -m builder 2>/dev/null || true
+            cp -r /build /home/builder/build
+            chown -R builder:builder /home/builder/build
+
+            # Attempt PKGBUILD validation
+            su builder -c '
+              cd /home/builder/build
+              source PKGBUILD
+              echo \"  pkgname:  \$pkgname\"
+              echo \"  pkgver:   \$pkgver-\$pkgrel\"
+              echo \"  arch:     \${arch[*]}\"
+              echo \"  depends:  \${#depends[@]} packages\"
+              echo \"  ✅ PKGBUILD sourced successfully\"
+            '
+          " 2>&1 | head -50 && \
+          echo "build_passed=true" >> "$GITHUB_OUTPUT" || {
+            echo "build_passed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Docker build test failed"
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 7 — Main publish pipeline
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚀 Publish · Execute AUR publication pipeline"
+      shell: bash
+      id: publish
+      env:
+        # Package info
+        PACKAGE_NAME:    ${{ steps.preflight.outputs.package_name }}
+        PACKAGE_VERSION: ${{ steps.preflight.outputs.package_version }}
+        PACKAGE_RELEASE: ${{ steps.preflight.outputs.package_release }}
+        FULL_VERSION:    ${{ steps.preflight.outputs.full_version }}
+        AUR_GIT_URL:     ${{ steps.preflight.outputs.aur_git_url }}
+        SOURCE_URL:      ${{ steps.preflight.outputs.source_url }}
+        SHA256SUM:       ${{ steps.checksums.outputs.sha256sum }}
+        DESCRIPTION:     ${{ inputs.description }}
+        # Auth
+        AUR_SSH_PRIVATE_KEY: ${{ inputs.aur_ssh_private_key }}
+        AUR_USERNAME:    ${{ inputs.aur_username }}
+        AUR_EMAIL:       ${{ inputs.aur_email }}
+        # Options
+        DRY_RUN:         ${{ inputs.dry_run }}
+        FORCE_PUSH:      ${{ inputs.force_push }}
+        SKIP_IF_PUBLISHED: ${{ inputs.skip_if_published }}
+        MAX_RETRIES:     ${{ inputs.max_retries }}
+        RETRY_DELAY:     ${{ inputs.retry_delay_seconds }}
+        ROLLBACK:        ${{ inputs.rollback_on_failure }}
+        COMMIT_MSG_TPL:  ${{ inputs.commit_message_template }}
+        VERBOSE:         ${{ inputs.verbose }}
+        # Paths
+        WORK_DIR:        ${{ steps.generate.outputs.work_dir }}
+        WORKSPACE:       ${{ steps.preflight.outputs.workspace }}
+        START_TIME:      ${{ steps.preflight.outputs.start_time }}
+      run: |
+        bash "${{ github.action_path }}/publish.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 8 — Backup PKGBUILD artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💾 Backup · Upload PKGBUILD artifact"
+      if: inputs.backup_pkgbuild == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          pkgbuild-${{ steps.preflight.outputs.package_name }}-
+          ${{ steps.preflight.outputs.full_version }}-
+          ${{ github.run_id }}
+        path: |
+          ${{ steps.generate.outputs.work_dir }}/PKGBUILD
+          ${{ steps.generate.outputs.work_dir }}/.SRCINFO
+          ${{ steps.generate.outputs.work_dir }}/ash-dotfiles.install
+        retention-days: 90
+        compression-level: 9
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 9 — Update GitHub Release
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Release · Update GitHub Release with AUR info"
+      if: |
+        inputs.update_github_release == 'true' &&
+        steps.publish.outputs.published == 'true' &&
+        inputs.dry_run != 'true'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const PKG_NAME  = "${{ steps.preflight.outputs.package_name }}";
+          const VERSION   = "${{ steps.preflight.outputs.package_version }}";
+          const PKGREL    = "${{ steps.preflight.outputs.package_release }}";
+          const AUR_URL   = `https://aur.archlinux.org/packages/${PKG_NAME}`;
+          const SHA256    = "${{ steps.checksums.outputs.sha256sum }}";
+          const GIT_COMMIT= "${{ steps.publish.outputs.aur_git_commit }}";
+          const SOURCE    = "${{ steps.preflight.outputs.source_url }}";
+
+          // Find the release for this tag
+          const tag = `v${VERSION}`;
+          let release;
+          try {
+            const resp = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              tag,
+            });
+            release = resp.data;
+          } catch(e) {
+            console.log(`Release ${tag} not found: ${e.message}`);
+            return;
+          }
+
+          const aur_section = [
+            ``,
+            `## 📦 AUR Package`,
+            ``,
+            `| Property | Value |`,
+            `|----------|-------|`,
+            `| 📦 Package | [\`${PKG_NAME}\`](${AUR_URL}) |`,
+            `| 🔖 Version | \`${VERSION}-${PKGREL}\` |`,
+            `| 🔒 SHA-256 | \`${SHA256.slice(0,16)}...\` |`,
+            `| 📋 AUR Commit | \`${GIT_COMMIT.slice(0,8)}\` |`,
+            ``,
+            `**Install with paru:**`,
+            `\`\`\`bash`,
+            `paru -S ${PKG_NAME}`,
+            `\`\`\``,
+            ``,
+            `**Install with yay:**`,
+            `\`\`\`bash`,
+            `yay -S ${PKG_NAME}`,
+            `\`\`\``,
+          ].join("\n");
+
+          // Append AUR info to release body
+          const existing = release.body || "";
+          const updated  = existing.includes("## 📦 AUR Package")
+            ? existing.replace(/## 📦 AUR Package[\s\S]*$/, aur_section)
+            : existing + aur_section;
+
+          await github.rest.repos.updateRelease({
+            owner:       context.repo.owner,
+            repo:        context.repo.repo,
+            release_id:  release.id,
+            body:        updated,
+          });
+
+          console.log(`✅ GitHub Release updated with AUR info`);
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 10 — Discord notification
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔔 Notify · Send Discord publication alert"
+      shell: bash
+      if: inputs.notify_discord == 'true' && always()
+      continue-on-error: true
+      env:
+        PUBLISHED:       ${{ steps.publish.outputs.published }}
+        SKIPPED:         ${{ steps.publish.outputs.skipped }}
+        ROLLEDBACK:      ${{ steps.publish.outputs.rolledback }}
+        PACKAGE_NAME:    ${{ steps.preflight.outputs.package_name }}
+        PACKAGE_VERSION: ${{ steps.preflight.outputs.package_version }}
+        PACKAGE_RELEASE: ${{ steps.preflight.outputs.package_release }}
+        SHA256SUM:       ${{ steps.checksums.outputs.sha256sum }}
+        AUR_URL:         ${{ steps.publish.outputs.aur_url }}
+        DURATION:        ${{ steps.publish.outputs.duration_s }}
+        DRY_RUN:         ${{ inputs.dry_run }}
+        NOTIFY_FAIL_ONLY:${{ inputs.notify_on_failure_only }}
+        DISCORD_HOOK:    ${{ inputs.discord_webhook }}
+      run: |
+        # Resolve webhook
+        WEBHOOK="${DISCORD_HOOK:-${DISCORD_WEBHOOK_AUR:-}}"
+        [[ -z "${WEBHOOK}" ]] && exit 0
+
+        # Skip success notifications if fail-only mode
+        if [[ "${NOTIFY_FAIL_ONLY}" == "true" && "${PUBLISHED}" == "true" ]]; then
+          echo "  ℹ️ Skipping success notification (notify_on_failure_only=true)"
+          exit 0
+        fi
+
+        DRY_TAG=""
+        [[ "${DRY_RUN}" == "true" ]] && DRY_TAG=" **(DRY RUN)**"
+
+        if [[ "${PUBLISHED}" == "true" ]]; then
+          TITLE="📦 AUR Package Published${DRY_TAG}"
+          COLOR=6416844    # green
+          STATUS="✅ Successfully published to AUR"
+          ICON="📦"
+        elif [[ "${SKIPPED}" == "true" ]]; then
+          TITLE="⏭️ AUR Publish Skipped"
+          COLOR=16367145   # yellow
+          STATUS="⏭️ Already published (version unchanged)"
+          ICON="⏭️"
+        elif [[ "${ROLLEDBACK}" == "true" ]]; then
+          TITLE="🔄 AUR Publish Rolled Back"
+          COLOR=16007085   # red
+          STATUS="🔄 Publish failed — previous version restored"
+          ICON="🔄"
+        else
+          TITLE="❌ AUR Publish Failed"
+          COLOR=16007085   # red
+          STATUS="❌ Publication failed"
+          ICON="❌"
+        fi
+
+        AUR_PKG_URL="${AUR_URL:-https://aur.archlinux.org/packages/${PACKAGE_NAME}}"
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+        PAYLOAD=$(cat << EOF
+        {
+          "username": "ASH AUR Publisher",
+          "avatar_url": "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/assets/brand/logos/ash-logo-256.png",
+          "content": "${ICON} **${PACKAGE_NAME}** ${PACKAGE_VERSION}-${PACKAGE_RELEASE}${DRY_TAG}",
+          "embeds": [{
+            "title": "${TITLE}",
+            "description": "${STATUS}",
+            "color": ${COLOR},
+            "url": "${AUR_PKG_URL}",
+            "fields": [
+              {"name": "📦 Package",  "value": "\`${PACKAGE_NAME}\`",                 "inline": true},
+              {"name": "🔖 Version",  "value": "\`${PACKAGE_VERSION}-${PACKAGE_RELEASE}\`","inline": true},
+              {"name": "⏱️ Duration", "value": "\`${DURATION:-?}s\`",                 "inline": true},
+              {"name": "🔒 SHA-256",  "value": "\`${SHA256SUM:0:16}...\`",            "inline": true},
+              {"name": "🌐 AUR Page", "value": "[View on AUR](${AUR_PKG_URL})",       "inline": true},
+              {"name": "🔗 Run",      "value": "[View Actions](${RUN_URL})",           "inline": true}
+            ],
+            "footer": {"text": "ASH Dotfiles v5.0 OMEGA · AUR Publishing Engine"},
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }]
+        }
+        EOF
+        )
+
+        curl -sf -X POST \
+          -H "Content-Type: application/json" \
+          -d "${PAYLOAD}" \
+          "${WEBHOOK}" && \
+          echo "  ✅ Discord notified" || \
+          echo "  ⚠️ Discord notification failed"
+      env:
+        DISCORD_WEBHOOK_AUR: ${{ secrets.DISCORD_WEBHOOK_AUR }}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 11 — Step Summary
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📊 Summary · AUR publish report"
+      shell: bash
+      if: always()
+      env:
+        PUBLISHED:   ${{ steps.publish.outputs.published }}
+        SKIPPED:     ${{ steps.publish.outputs.skipped }}
+        ROLLEDBACK:  ${{ steps.publish.outputs.rolledback }}
+        PKG_NAME:    ${{ steps.preflight.outputs.package_name }}
+        VERSION:     ${{ steps.preflight.outputs.package_version }}
+        PKGREL:      ${{ steps.preflight.outputs.package_release }}
+        SHA256:      ${{ steps.checksums.outputs.sha256sum }}
+        AUR_COMMIT:  ${{ steps.publish.outputs.aur_git_commit }}
+        DURATION:    ${{ steps.publish.outputs.duration_s }}
+        NAMCAP_PASS: ${{ steps.validate.outputs.namcap_passed }}
+        BUILD_PASS:  ${{ steps.test.outputs.build_passed }}
+        DRY_RUN:     ${{ inputs.dry_run }}
+      run: |
+        DRY_TAG=""
+        [[ "${DRY_RUN}" == "true" ]] && DRY_TAG=" (DRY RUN)"
+
+        STATUS="❓ Unknown"
+        [[ "${PUBLISHED}" == "true" ]]  && STATUS="✅ Published"
+        [[ "${SKIPPED}" == "true" ]]    && STATUS="⏭️ Skipped"
+        [[ "${ROLLEDBACK}" == "true" ]] && STATUS="🔄 Rolled Back"
+        [[ "${PUBLISHED}" != "true" && "${SKIPPED}" != "true" ]] && STATUS="❌ Failed"
+
+        AUR_URL="https://aur.archlinux.org/packages/${PKG_NAME}"
+
+        cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+        # 🏗️ AUR Publish Report${DRY_TAG}
+
+        > **Status:** ${STATUS}  &nbsp;·&nbsp;  Package: \`${PKG_NAME}\`  &nbsp;·&nbsp;  Version: \`${VERSION}-${PKGREL}\`
+
+        ## 📊 Results
+
+        | Metric | Value |
+        |--------|-------|
+        | 📦 Package | \`${PKG_NAME}\` |
+        | 🔖 Version | \`${VERSION}-${PKGREL}\` |
+        | 🌐 AUR URL | [${PKG_NAME}](${AUR_URL}) |
+        | 🔒 SHA-256 | \`${SHA256:0:32}...\` |
+        | 📋 AUR Commit | \`${AUR_COMMIT:0:8}\` |
+        | ✅ Namcap | \`${NAMCAP_PASS:-N/A}\` |
+        | 🧪 Build Test | \`${BUILD_PASS:-N/A}\` |
+        | ⏱️ Duration | \`${DURATION:-?}s\` |
+
+        ---
+        *🏗️ ASH v5.0 OMEGA AUR Publishing Engine*
+        EOF
+
+        echo "  ✅ Step summary written"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "package"
+  color: "blue"

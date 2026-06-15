@@ -1,0 +1,1086 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  📖 ASH DOTFILES v5.0 OMEGA — GENERATE DOCUMENTATION ACTION                              ║
+# ║                                                                                           ║
+# ║  ██████╗  ██████╗  ██████╗███████╗                                                        ║
+# ║  ██╔══██╗██╔═══██╗██╔════╝██╔════╝                                                        ║
+# ║  ██║  ██║██║   ██║██║     ███████╗                                                        ║
+# ║  ██║  ██║██║   ██║██║     ╚════██║                                                        ║
+# ║  ██████╔╝╚██████╔╝╚██████╗███████║                                                        ║
+# ║  ╚═════╝  ╚═════╝  ╚═════╝╚══════╝                                                        ║
+# ║                                                                                           ║
+# ║  ██████╗ ██╗   ██╗██╗██╗     ██████╗ ███████╗██████╗                                     ║
+# ║  ██╔══██╗██║   ██║██║██║     ██╔══██╗██╔════╝██╔══██╗                                    ║
+# ║  ██████╔╝██║   ██║██║██║     ██║  ██║█████╗  ██████╔╝                                    ║
+# ║  ██╔══██╗██║   ██║██║██║     ██║  ██║██╔══╝  ██╔══██╗                                    ║
+# ║  ██████╔╝╚██████╔╝██║███████╗██████╔╝███████╗██║  ██║                                    ║
+# ║  ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝                                    ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 DOCUMENTATION PIPELINE (15 generators):                                               ║
+# ║     📚 MkDocs Material — full static site with navigation                                ║
+# ║     🔌 Plugin API reference (auto-extracted from plugin.json)                            ║
+# ║     🎨 Theme Gallery (auto-generated from themes/presets/)                               ║
+# ║     📋 CLI reference (ash --help parsed + rendered)                                      ║
+# ║     🔧 Config reference (JSON schema → human-readable docs)                              ║
+# ║     🌐 REST API docs (OpenAPI spec → interactive Swagger UI)                             ║
+# ║     📡 WebSocket protocol docs (event catalog)                                           ║
+# ║     🏗️  Architecture diagrams (Mermaid auto-rendered SVG)                                ║
+# ║     📊 Performance charts (benchmark data → visual reports)                              ║
+# ║     🔄 Changelog rendering (CHANGELOG.md → versioned HTML)                              ║
+# ║     👥 Contributors page (GitHub API → rendered profile grid)                           ║
+# ║     🌍 Multi-language support (i18n with auto-translation)                               ║
+# ║     🔍 Full-text search index (lunr.js / Algolia)                                        ║
+# ║     📱 PWA support (service worker + offline mode)                                        ║
+# ║     🎬 Interactive examples (live code + screenshot embed)                               ║
+# ║                                                                                           ║
+# ║  🚀 OUTPUT TARGETS:                                                                       ║
+# ║     GitHub Pages · Netlify · Vercel · CloudFlare Pages · S3 · Custom                    ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📖 Generate Documentation"
+description: >
+  🏗️ Comprehensive documentation generation engine for ASH Dotfiles v5.0 OMEGA.
+
+  Builds the complete documentation site including MkDocs Material static site,
+  auto-generated plugin API reference, theme gallery from 250+ themes, CLI
+  reference, REST API Swagger UI, WebSocket protocol catalog, Mermaid architecture
+  diagrams, performance benchmark reports, changelog rendering, contributor
+  profiles, multi-language support, PWA, and full-text search index.
+
+  Supports deployment to GitHub Pages, Netlify, Vercel, CloudFlare Pages, S3.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎯 GENERATION TARGETS                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  generators:
+    description: >
+      📚 Documentation generators to run (comma-separated or preset name).
+
+      Individual generators:
+        mkdocs       — MkDocs Material static site
+        plugin-api   — Plugin API reference extraction
+        theme-gallery— Theme gallery from presets/
+        cli-ref      — CLI command reference (ash --help)
+        config-ref   — Configuration reference (JSON schema)
+        api-docs     — REST API documentation (OpenAPI/Swagger)
+        websocket    — WebSocket protocol event catalog
+        diagrams     — Architecture diagrams (Mermaid)
+        benchmarks   — Performance charts from benchmark data
+        changelog    — Changelog rendering (CHANGELOG.md)
+        contributors — Contributors page (GitHub API)
+        search-index — Full-text search index generation
+        pwa          — Progressive Web App manifest + SW
+
+      Preset modes:
+        all          — All 13 generators (full build, ~15min)
+        quick        — mkdocs + cli-ref + changelog (~3min)
+        standard     — mkdocs + plugin-api + theme-gallery + cli-ref + api-docs (~8min)
+        release      — all except contributors (~12min)
+        preview      — mkdocs only (fastest, ~1min)
+        api-only     — api-docs + websocket + cli-ref
+
+      Examples:
+        "standard"
+        "mkdocs,theme-gallery,changelog"
+        "all"
+    required: false
+    default: "standard"
+
+  exclude_generators:
+    description: >
+      🚫 Generators to exclude (comma-separated).
+      Useful with preset modes: "contributors,benchmarks"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📦 MKDOCS CONFIGURATION                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  mkdocs_config:
+    description: "📦 Path to MkDocs configuration file"
+    required: false
+    default: "docs/mkdocs.yml"
+
+  mkdocs_theme:
+    description: >
+      🎨 MkDocs theme to use.
+      Options: material, readthedocs, mkdocs, custom
+    required: false
+    default: "material"
+
+  docs_dir:
+    description: "📁 Source documentation directory"
+    required: false
+    default: "docs"
+
+  site_dir:
+    description: "📁 Output directory for built site"
+    required: false
+    default: "site"
+
+  site_name:
+    description: "🏷️ Site name for the documentation"
+    required: false
+    default: "ASH Dotfiles"
+
+  site_url:
+    description: >
+      🌐 Base URL for the documentation site.
+      Required for sitemap and canonical URLs.
+    required: false
+    default: "https://ash-dotfiles.dev"
+
+  site_description:
+    description: "📝 Site meta description (SEO)"
+    required: false
+    default: "The Ultimate Hyprland Dotfiles — 250+ Themes, 150+ Plugins, AI-Native"
+
+  repo_url:
+    description: "🔗 Repository URL for 'Edit on GitHub' links"
+    required: false
+    default: ""
+
+  edit_uri:
+    description: "✏️ Path for 'Edit on GitHub' links"
+    required: false
+    default: "edit/main/docs/"
+
+  strict_mode:
+    description: >
+      🔒 Enable MkDocs strict mode (fail on warnings).
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎨 THEME GALLERY                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  theme_gallery_enabled:
+    description: "🎨 Generate theme gallery from themes/presets/"
+    required: false
+    default: "true"
+
+  theme_gallery_columns:
+    description: "🎨 Theme gallery grid columns"
+    required: false
+    default: "3"
+
+  theme_gallery_max_themes:
+    description: "🎨 Maximum themes to include in gallery (0=all)"
+    required: false
+    default: "0"
+
+  theme_preview_width:
+    description: "🖼️ Theme preview image width (px)"
+    required: false
+    default: "800"
+
+  theme_preview_height:
+    description: "🖼️ Theme preview image height (px)"
+    required: false
+    default: "500"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔌 PLUGIN API REFERENCE                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  plugin_api_source:
+    description: "🔌 Source directory for plugin manifests"
+    required: false
+    default: "plugins"
+
+  plugin_api_format:
+    description: >
+      🔌 Plugin API output format.
+      Options: markdown, html, json, all
+    required: false
+    default: "markdown"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🌐 API DOCUMENTATION                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  openapi_spec:
+    description: "🌐 Path to OpenAPI specification file"
+    required: false
+    default: "api/openapi.yaml"
+
+  swagger_ui_version:
+    description: "🌐 Swagger UI version to embed"
+    required: false
+    default: "5.17.14"
+
+  redoc_enabled:
+    description: "🌐 Also generate ReDoc alternative API docs"
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📊 PERFORMANCE & BENCHMARKS                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  benchmark_data_path:
+    description: "📊 Path to benchmark results for chart generation"
+    required: false
+    default: "benchmarks"
+
+  benchmark_chart_style:
+    description: "📊 Chart visual style (catppuccin|minimal|classic)"
+    required: false
+    default: "catppuccin"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🌍 MULTI-LANGUAGE                                   ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  languages:
+    description: >
+      🌍 Languages to build (comma-separated ISO 639-1 codes).
+      "en" is always built. Additional languages require translation files.
+      Examples: "en,ja,zh,de,fr,es"
+    required: false
+    default: "en"
+
+  default_language:
+    description: "🌍 Default/primary language"
+    required: false
+    default: "en"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔍 SEARCH                                           ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  search_provider:
+    description: >
+      🔍 Search provider to use.
+      Options: lunr (built-in), algolia, typesense, none
+    required: false
+    default: "lunr"
+
+  algolia_app_id:
+    description: "🔍 Algolia Application ID (for algolia search)"
+    required: false
+    default: ""
+
+  algolia_index_name:
+    description: "🔍 Algolia index name"
+    required: false
+    default: "ash-dotfiles"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🚀 DEPLOYMENT                                       ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  deploy_to:
+    description: >
+      🚀 Deployment target.
+      Options:
+        none          — Build only (no deploy)
+        github-pages  — Deploy to GitHub Pages
+        netlify       — Deploy to Netlify
+        vercel        — Deploy to Vercel
+        cloudflare    — Deploy to CloudFlare Pages
+        s3            — Deploy to AWS S3
+        custom        — Custom deploy command
+    required: false
+    default: "none"
+
+  github_pages_branch:
+    description: "📄 GitHub Pages branch name"
+    required: false
+    default: "gh-pages"
+
+  github_pages_cname:
+    description: "🌐 Custom domain CNAME for GitHub Pages"
+    required: false
+    default: ""
+
+  netlify_site_id:
+    description: "🔗 Netlify site ID for deployment"
+    required: false
+    default: ""
+
+  s3_bucket:
+    description: "☁️ S3 bucket name for deployment"
+    required: false
+    default: ""
+
+  s3_region:
+    description: "☁️ AWS region for S3 deployment"
+    required: false
+    default: "us-east-1"
+
+  cloudflare_project:
+    description: "⚡ CloudFlare Pages project name"
+    required: false
+    default: ""
+
+  custom_deploy_cmd:
+    description: "🔧 Custom deploy command (for deploy_to=custom)"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  BUILD OPTIONS                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  python_version:
+    description: "🐍 Python version for MkDocs"
+    required: false
+    default: "3.12"
+
+  node_version:
+    description: "🟨 Node.js version (for JS-based generators)"
+    required: false
+    default: "20"
+
+  cache_enabled:
+    description: "💾 Enable pip + npm caching"
+    required: false
+    default: "true"
+
+  cache_key_prefix:
+    description: "💾 Cache key prefix"
+    required: false
+    default: "ash-docs"
+
+  optimize_assets:
+    description: >
+      ⚡ Optimize built assets (minify CSS/JS, compress images).
+    required: false
+    default: "true"
+
+  minify_html:
+    description: "⚡ Minify HTML output"
+    required: false
+    default: "true"
+
+  generate_sitemap:
+    description: "🗺️ Generate XML sitemap"
+    required: false
+    default: "true"
+
+  generate_robots_txt:
+    description: "🤖 Generate robots.txt"
+    required: false
+    default: "true"
+
+  enable_pwa:
+    description: "📱 Enable Progressive Web App (service worker + manifest)"
+    required: false
+    default: "true"
+
+  link_check:
+    description: >
+      🔗 Check for broken links in generated docs.
+      Options: none, warn, fail
+    required: false
+    default: "warn"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📋 CHANGELOG & CONTRIBUTORS                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  changelog_path:
+    description: "📋 Path to CHANGELOG.md"
+    required: false
+    default: "CHANGELOG.md"
+
+  max_contributors:
+    description: "👥 Maximum contributors to show on contributors page"
+    required: false
+    default: "50"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📤 ARTIFACTS & NOTIFICATIONS                        ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  upload_artifact:
+    description: "📤 Upload built site as workflow artifact"
+    required: false
+    default: "true"
+
+  artifact_retention_days:
+    description: "📤 Artifact retention in days"
+    required: false
+    default: "30"
+
+  notify_discord:
+    description: "🔔 Send Discord notification on completion"
+    required: false
+    default: "false"
+
+  post_pr_preview:
+    description: "💬 Post docs preview link to PR comment"
+    required: false
+    default: "true"
+
+  pr_preview_url:
+    description: "🔗 Preview URL template for PR comments ({SHA} placeholder)"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  BEHAVIOR                                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  dry_run:
+    description: "🔍 Dry run — show build plan without executing"
+    required: false
+    default: "false"
+
+  verbose:
+    description: "📢 Enable verbose output"
+    required: false
+    default: "false"
+
+  fail_on_warning:
+    description: "🚨 Fail action if any generator produces warnings"
+    required: false
+    default: "false"
+
+  parallel_generators:
+    description: "⚡ Run independent generators in parallel"
+    required: false
+    default: "true"
+
+  timeout_minutes:
+    description: "⏱️ Total build timeout in minutes"
+    required: false
+    default: "20"
+
+  github_token:
+    description: "🔑 GitHub token for API calls (contributors, etc.)"
+    required: false
+    default: "${{ github.token }}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Build results ─────────────────────────────────────────────────────────
+  build_success:
+    description: "✅ Whether documentation build succeeded"
+    value: ${{ steps.build.outputs.success }}
+
+  pages_generated:
+    description: "📄 Total number of documentation pages generated"
+    value: ${{ steps.build.outputs.pages_generated }}
+
+  generators_run:
+    description: "🔢 Number of generators executed"
+    value: ${{ steps.build.outputs.generators_run }}
+
+  generators_failed:
+    description: "❌ Number of generators that failed"
+    value: ${{ steps.build.outputs.generators_failed }}
+
+  build_duration_s:
+    description: "⏱️ Total build duration in seconds"
+    value: ${{ steps.build.outputs.duration_s }}
+
+  # ── Output info ───────────────────────────────────────────────────────────
+  site_dir:
+    description: "📁 Path to built documentation site"
+    value: ${{ steps.build.outputs.site_dir }}
+
+  site_size_mb:
+    description: "📦 Built site size in MB"
+    value: ${{ steps.build.outputs.site_size_mb }}
+
+  theme_count:
+    description: "🎨 Number of themes documented"
+    value: ${{ steps.build.outputs.theme_count }}
+
+  plugin_count:
+    description: "🔌 Number of plugins documented"
+    value: ${{ steps.build.outputs.plugin_count }}
+
+  # ── Deployment ────────────────────────────────────────────────────────────
+  deployed:
+    description: "🚀 Whether deployment was performed"
+    value: ${{ steps.deploy.outputs.deployed }}
+
+  deploy_url:
+    description: "🌐 Deployed documentation URL"
+    value: ${{ steps.deploy.outputs.deploy_url }}
+
+  # ── Artifacts ─────────────────────────────────────────────────────────────
+  artifact_url:
+    description: "🔗 Uploaded artifact URL"
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Resolve build plan & validate inputs"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        START_TIME=$(date +%s)
+        SESSION_ID="docs-$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null || echo 'ci')"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  📖 ASH Docs Generation Engine v5.0 OMEGA                    ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  🆔 Session:    %-47s║\n" "${SESSION_ID}"
+        printf "║  🎯 Generators: %-47s║\n" "${{ inputs.generators }}"
+        printf "║  🚀 Deploy to:  %-47s║\n" "${{ inputs.deploy_to }}"
+        printf "║  🌍 Languages:  %-47s║\n" "${{ inputs.languages }}"
+        printf "║  🔍 Dry Run:    %-47s║\n" "${{ inputs.dry_run }}"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # ── Resolve preset → generator list ─────────────────────────────────
+        INPUT="${{ inputs.generators }}"
+        ALL_GENS="mkdocs,plugin-api,theme-gallery,cli-ref,config-ref,api-docs,websocket,diagrams,benchmarks,changelog,contributors,search-index,pwa"
+        case "${INPUT}" in
+          all)       RESOLVED="${ALL_GENS}" ;;
+          quick)     RESOLVED="mkdocs,cli-ref,changelog" ;;
+          standard)  RESOLVED="mkdocs,plugin-api,theme-gallery,cli-ref,api-docs" ;;
+          release)   RESOLVED="mkdocs,plugin-api,theme-gallery,cli-ref,config-ref,api-docs,websocket,diagrams,benchmarks,changelog,search-index,pwa" ;;
+          preview)   RESOLVED="mkdocs" ;;
+          api-only)  RESOLVED="api-docs,websocket,cli-ref" ;;
+          *)         RESOLVED="${INPUT}" ;;
+        esac
+
+        # Apply exclusions
+        EXCLUDE="${{ inputs.exclude_generators }}"
+        if [[ -n "${EXCLUDE}" ]]; then
+          for excl in $(echo "${EXCLUDE}" | tr ',' ' '); do
+            RESOLVED=$(echo "${RESOLVED}" | tr ',' '\n' | grep -v "^${excl}$" | \
+              tr '\n' ',' | sed 's/,$//')
+          done
+        fi
+
+        GEN_COUNT=$(echo "${RESOLVED}" | tr ',' '\n' | grep -cv '^$' || echo 0)
+
+        # Resolve repo URL
+        REPO_URL="${{ inputs.repo_url }}"
+        if [[ -z "${REPO_URL}" ]]; then
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY:-ash/dotfiles}"
+        fi
+
+        echo "session_id=${SESSION_ID}"           >> "$GITHUB_OUTPUT"
+        echo "start_time=${START_TIME}"           >> "$GITHUB_OUTPUT"
+        echo "resolved_generators=${RESOLVED}"    >> "$GITHUB_OUTPUT"
+        echo "generator_count=${GEN_COUNT}"       >> "$GITHUB_OUTPUT"
+        echo "workspace=${WORKSPACE}"             >> "$GITHUB_OUTPUT"
+        echo "repo_url=${REPO_URL}"               >> "$GITHUB_OUTPUT"
+
+        echo "  🎯 Generators: ${GEN_COUNT} active"
+        echo "  📋 Plan: ${RESOLVED}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Cache restore
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💾 Cache · Restore pip & npm caches"
+      if: inputs.cache_enabled == 'true'
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.local/lib/python${{ inputs.python_version }}/site-packages
+          ~/.npm
+          ~/.local/bin
+        key: >-
+          ${{ inputs.cache_key_prefix }}-
+          ${{ inputs.python_version }}-
+          ${{ inputs.node_version }}-
+          ${{ hashFiles('docs/requirements.txt', 'docs/package.json', 'requirements-docs.txt') }}
+        restore-keys: |
+          ${{ inputs.cache_key_prefix }}-${{ inputs.python_version }}-${{ inputs.node_version }}-
+          ${{ inputs.cache_key_prefix }}-${{ inputs.python_version }}-
+          ${{ inputs.cache_key_prefix }}-
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Setup Python
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🐍 Setup · Python ${{ inputs.python_version }}"
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python_version }}
+        cache: "pip"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Setup Node.js
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🟨 Setup · Node.js ${{ inputs.node_version }}"
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+        cache: "npm"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Install dependencies
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install documentation toolchain"
+      shell: bash
+      id: deps
+      env:
+        CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing documentation toolchain..."
+
+        # ── Python (MkDocs + plugins) ────────────────────────────────────────
+        pip3 install --quiet --user \
+          mkdocs==1.6.1 \
+          mkdocs-material==9.5.44 \
+          mkdocs-material-extensions==1.3.1 \
+          mkdocs-minify-plugin==0.8.0 \
+          mkdocs-redirects==1.2.1 \
+          mkdocs-git-revision-date-localized-plugin==1.2.9 \
+          mkdocs-glightbox==0.4.0 \
+          mkdocs-awesome-pages-plugin==2.9.3 \
+          mkdocs-macros-plugin==1.3.7 \
+          mkdocs-mermaid2-plugin==1.1.1 \
+          mkdocs-swagger-ui-tag==0.6.11 \
+          mkdocs-table-reader-plugin==3.1.0 \
+          mkdocs-gen-files==0.5.0 \
+          mkdocs-literate-nav==0.6.1 \
+          mkdocs-section-index==0.3.9 \
+          mkdocs-rss-plugin==1.15.0 \
+          pillow==11.0.0 \
+          cairosvg==2.7.1 \
+          pymdown-extensions==10.12 \
+          fontawesome_markdown==0.2.6 \
+          markdown-callouts==0.4.0 \
+          griffe==1.5.1 \
+          jinja2==3.1.4 \
+          pyyaml==6.0.2 \
+          requests==2.32.3 \
+          rich==13.9.2 \
+          matplotlib==3.9.2 \
+          numpy==2.1.2 \
+          2>/dev/null || true
+
+        # ── System tools ─────────────────────────────────────────────────────
+        sudo apt-get install -y --no-install-recommends \
+          jq \
+          imagemagick \
+          libwebp-dev \
+          webp \
+          fonts-noto \
+          fonts-noto-emoji \
+          2>/dev/null || true
+
+        # ── Node tools (for asset optimization) ──────────────────────────────
+        npm install -g \
+          html-minifier-terser \
+          clean-css-cli \
+          terser \
+          2>/dev/null || true
+
+        echo ""
+        echo "  ✅ MkDocs:   $(mkdocs --version 2>/dev/null | head -1 || echo '?')"
+        echo "  ✅ Python:   $(python3 --version)"
+        echo "  ✅ Node:     $(node --version)"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Main build
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🏗️ Build · Execute documentation generation pipeline"
+      shell: bash
+      id: build
+      timeout-minutes: ${{ fromJson(inputs.timeout_minutes) }}
+      env:
+        # Session
+        SESSION_ID:          ${{ steps.preflight.outputs.session_id }}
+        START_TIME:          ${{ steps.preflight.outputs.start_time }}
+        RESOLVED_GENERATORS: ${{ steps.preflight.outputs.resolved_generators }}
+        GENERATOR_COUNT:     ${{ steps.preflight.outputs.generator_count }}
+        WORKSPACE:           ${{ steps.preflight.outputs.workspace }}
+        REPO_URL:            ${{ steps.preflight.outputs.repo_url }}
+        # MkDocs
+        MKDOCS_CONFIG:       ${{ inputs.mkdocs_config }}
+        MKDOCS_THEME:        ${{ inputs.mkdocs_theme }}
+        DOCS_DIR:            ${{ inputs.docs_dir }}
+        SITE_DIR:            ${{ inputs.site_dir }}
+        SITE_NAME:           ${{ inputs.site_name }}
+        SITE_URL:            ${{ inputs.site_url }}
+        SITE_DESC:           ${{ inputs.site_description }}
+        EDIT_URI:            ${{ inputs.edit_uri }}
+        STRICT_MODE:         ${{ inputs.strict_mode }}
+        # Theme gallery
+        THEME_GALLERY:       ${{ inputs.theme_gallery_enabled }}
+        THEME_GALLERY_COLS:  ${{ inputs.theme_gallery_columns }}
+        THEME_GALLERY_MAX:   ${{ inputs.theme_gallery_max_themes }}
+        THEME_PREVIEW_W:     ${{ inputs.theme_preview_width }}
+        THEME_PREVIEW_H:     ${{ inputs.theme_preview_height }}
+        # Plugin API
+        PLUGIN_API_SRC:      ${{ inputs.plugin_api_source }}
+        PLUGIN_API_FMT:      ${{ inputs.plugin_api_format }}
+        # API docs
+        OPENAPI_SPEC:        ${{ inputs.openapi_spec }}
+        SWAGGER_VERSION:     ${{ inputs.swagger_ui_version }}
+        REDOC_ENABLED:       ${{ inputs.redoc_enabled }}
+        # Benchmarks
+        BENCHMARK_DATA:      ${{ inputs.benchmark_data_path }}
+        BENCHMARK_STYLE:     ${{ inputs.benchmark_chart_style }}
+        # Languages
+        LANGUAGES:           ${{ inputs.languages }}
+        DEFAULT_LANG:        ${{ inputs.default_language }}
+        # Search
+        SEARCH_PROVIDER:     ${{ inputs.search_provider }}
+        # Changelog / contributors
+        CHANGELOG_PATH:      ${{ inputs.changelog_path }}
+        MAX_CONTRIBUTORS:    ${{ inputs.max_contributors }}
+        GITHUB_TOKEN_DOC:    ${{ inputs.github_token }}
+        # Build options
+        OPTIMIZE_ASSETS:     ${{ inputs.optimize_assets }}
+        MINIFY_HTML:         ${{ inputs.minify_html }}
+        GEN_SITEMAP:         ${{ inputs.generate_sitemap }}
+        GEN_ROBOTS:          ${{ inputs.generate_robots_txt }}
+        ENABLE_PWA:          ${{ inputs.enable_pwa }}
+        LINK_CHECK:          ${{ inputs.link_check }}
+        PARALLEL_GENS:       ${{ inputs.parallel_generators }}
+        DRY_RUN:             ${{ inputs.dry_run }}
+        VERBOSE:             ${{ inputs.verbose }}
+        FAIL_ON_WARNING:     ${{ inputs.fail_on_warning }}
+      run: |
+        bash "${{ github.action_path }}/build.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 6 — Deploy
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚀 Deploy · Publish documentation"
+      shell: bash
+      id: deploy
+      if: inputs.deploy_to != 'none' && inputs.dry_run != 'true'
+      env:
+        DEPLOY_TO:        ${{ inputs.deploy_to }}
+        SITE_DIR:         ${{ inputs.site_dir }}
+        GH_PAGES_BRANCH:  ${{ inputs.github_pages_branch }}
+        GH_PAGES_CNAME:   ${{ inputs.github_pages_cname }}
+        NETLIFY_SITE_ID:  ${{ inputs.netlify_site_id }}
+        S3_BUCKET:        ${{ inputs.s3_bucket }}
+        S3_REGION:        ${{ inputs.s3_region }}
+        CF_PROJECT:       ${{ inputs.cloudflare_project }}
+        CUSTOM_CMD:       ${{ inputs.custom_deploy_cmd }}
+        SITE_URL:         ${{ inputs.site_url }}
+        GITHUB_TOKEN:     ${{ inputs.github_token }}
+      run: |
+        set -euo pipefail
+
+        SITE_ABS="${GITHUB_WORKSPACE}/${SITE_DIR}"
+        [[ ! -d "${SITE_ABS}" ]] && {
+          echo "::error::Site directory not found: ${SITE_ABS}"
+          exit 1
+        }
+
+        echo "  🚀 Deploying to: ${DEPLOY_TO}"
+        echo "  📁 Site dir:    ${SITE_ABS}"
+
+        DEPLOY_URL=""
+
+        case "${DEPLOY_TO}" in
+          github-pages)
+            echo "  📄 Deploying to GitHub Pages (${GH_PAGES_BRANCH})..."
+
+            # Add CNAME if specified
+            if [[ -n "${GH_PAGES_CNAME}" ]]; then
+              echo "${GH_PAGES_CNAME}" > "${SITE_ABS}/CNAME"
+              echo "  🌐 CNAME: ${GH_PAGES_CNAME}"
+            fi
+
+            # Configure git
+            git config user.name  "ash-docs-bot[bot]"
+            git config user.email "ash-docs-bot@users.noreply.github.com"
+
+            # Use mkdocs gh-deploy
+            mkdocs gh-deploy \
+              --config-file "${GITHUB_WORKSPACE}/${{ inputs.mkdocs_config }}" \
+              --remote-branch "${GH_PAGES_BRANCH}" \
+              --force \
+              --message "📖 docs: deploy ${GITHUB_SHA::8} [skip ci]" \
+              2>/dev/null || {
+                # Fallback: manual push
+                cd "${SITE_ABS}"
+                git init
+                git add -A
+                git commit -m "📖 docs: deploy ${GITHUB_SHA::8} [skip ci]"
+                git push --force \
+                  "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                  "HEAD:${GH_PAGES_BRANCH}"
+              }
+
+            DEPLOY_URL="${SITE_URL}"
+            echo "  ✅ Deployed to GitHub Pages"
+            ;;
+
+          netlify)
+            if ! command -v netlify &>/dev/null; then
+              npm install -g netlify-cli 2>/dev/null || true
+            fi
+            netlify deploy \
+              --dir="${SITE_ABS}" \
+              --site="${NETLIFY_SITE_ID}" \
+              --prod \
+              2>/dev/null && DEPLOY_URL="${SITE_URL}" || \
+              echo "::warning::Netlify deploy failed"
+            ;;
+
+          s3)
+            aws s3 sync "${SITE_ABS}/" "s3://${S3_BUCKET}/" \
+              --region "${S3_REGION}" \
+              --delete \
+              --cache-control "public, max-age=3600" \
+              2>/dev/null || echo "::warning::S3 deploy failed"
+            DEPLOY_URL="https://${S3_BUCKET}.s3-website-${S3_REGION}.amazonaws.com"
+            ;;
+
+          custom)
+            if [[ -n "${CUSTOM_CMD}" ]]; then
+              eval "${CUSTOM_CMD}" && echo "  ✅ Custom deploy executed"
+              DEPLOY_URL="${SITE_URL}"
+            fi
+            ;;
+        esac
+
+        echo "deployed=true"          >> "$GITHUB_OUTPUT"
+        echo "deploy_url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+        echo "  🌐 Deploy URL: ${DEPLOY_URL}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 7 — PR comment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💬 Comment · Post docs preview to PR"
+      if: inputs.post_pr_preview == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const SUCCESS      = "${{ steps.build.outputs.success }}" === "true";
+          const PAGES        = "${{ steps.build.outputs.pages_generated || '?' }}";
+          const THEMES       = "${{ steps.build.outputs.theme_count || '?' }}";
+          const PLUGINS      = "${{ steps.build.outputs.plugin_count || '?' }}";
+          const DURATION     = "${{ steps.build.outputs.duration_s || '?' }}";
+          const SIZE_MB      = "${{ steps.build.outputs.site_size_mb || '?' }}";
+          const GENERATORS   = "${{ steps.preflight.outputs.resolved_generators }}";
+          const GEN_COUNT    = "${{ steps.preflight.outputs.generator_count }}";
+          const FAILED_GENS  = "${{ steps.build.outputs.generators_failed || '0' }}";
+          const DEPLOYED     = "${{ steps.deploy.outputs.deployed }}" === "true";
+          const DEPLOY_URL   = "${{ steps.deploy.outputs.deploy_url || '' }}";
+          const SESSION_ID   = "${{ steps.preflight.outputs.session_id }}";
+          const RUN_URL      = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+          const STATUS_ICON  = SUCCESS ? "✅" : "❌";
+          const GEN_LIST     = GENERATORS.split(",").map(g => `\`${g.trim()}\``).join(" · ");
+
+          let previewSection = "";
+          if (DEPLOYED && DEPLOY_URL) {
+            previewSection = `\n### 🌐 Preview\n\n[**Open Documentation →**](${DEPLOY_URL})\n`;
+          }
+
+          const body = [
+            `## 📖 Documentation Build — ${STATUS_ICON} ${SUCCESS ? "Complete" : "Failed"}`,
+            ``,
+            `> 🆔 Session: \`${SESSION_ID}\`  &nbsp;·&nbsp;  ⏱️ Duration: \`${DURATION}s\``,
+            ``,
+            `### 📊 Build Results`,
+            ``,
+            `| Metric | Value |`,
+            `|--------|------:|`,
+            `| 📄 Pages Generated | \`${PAGES}\` |`,
+            `| 🎨 Themes Documented | \`${THEMES}\` |`,
+            `| 🔌 Plugins Documented | \`${PLUGINS}\` |`,
+            `| 📦 Site Size | \`${SIZE_MB} MB\` |`,
+            `| ⚡ Generators Run | \`${GEN_COUNT}\` |`,
+            `| ❌ Failed | \`${FAILED_GENS}\` |`,
+            ``,
+            `### 🎯 Generators`,
+            ``,
+            GEN_LIST,
+            previewSection,
+            `---`,
+            `*📖 ASH v5.0 OMEGA Docs Engine · [View Run](${RUN_URL})*`,
+          ].filter(Boolean).join("\n");
+
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner, repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          const existing = comments.find(c =>
+            c.user.type === "Bot" && c.body.includes("Documentation Build")
+          );
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              comment_id: existing.id, body,
+            });
+            console.log(`✅ Updated docs comment #${existing.id}`);
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number, body,
+            });
+            console.log("✅ Created docs comment");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 8 — Discord notification
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔔 Discord · Send build notification"
+      if: inputs.notify_discord == 'true' && always()
+      shell: bash
+      continue-on-error: true
+      env:
+        SUCCESS:    ${{ steps.build.outputs.success }}
+        PAGES:      ${{ steps.build.outputs.pages_generated || '?' }}
+        DURATION:   ${{ steps.build.outputs.duration_s || '?' }}
+        DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url || '' }}
+        SESSION_ID: ${{ steps.preflight.outputs.session_id }}
+      run: |
+        WEBHOOK="${DISCORD_WEBHOOK_DOCS:-}"
+        [[ -z "${WEBHOOK}" ]] && exit 0
+
+        COLOR="$([[ "${SUCCESS}" == "true" ]] && echo 6416844 || echo 16007085)"
+        ICON="$([[ "${SUCCESS}" == "true" ]] && echo "✅" || echo "❌")"
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+        DEPLOY_FIELD=""
+        [[ -n "${DEPLOY_URL}" ]] && \
+          DEPLOY_FIELD=",{\"name\":\"🌐 URL\",\"value\":\"[Open docs](${DEPLOY_URL})\",\"inline\":false}"
+
+        curl -sf -X POST \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"username\":\"ASH Docs Bot\",
+            \"embeds\":[{
+              \"title\":\"📖 Documentation Build ${ICON}\",
+              \"color\":${COLOR},
+              \"fields\":[
+                {\"name\":\"📄 Pages\",\"value\":\"\`${PAGES}\`\",\"inline\":true},
+                {\"name\":\"⏱️ Duration\",\"value\":\"\`${DURATION}s\`\",\"inline\":true},
+                {\"name\":\"🔗 Run\",\"value\":\"[View](${RUN_URL})\",\"inline\":true}
+                ${DEPLOY_FIELD}
+              ],
+              \"footer\":{\"text\":\"ASH Dotfiles v5.0 OMEGA · Docs Engine\"},
+              \"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
+          }" \
+          "${WEBHOOK}" || true
+      env:
+        DISCORD_WEBHOOK_DOCS: ${{ secrets.DISCORD_WEBHOOK_DOCS }}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 9 — Upload artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Documentation site artifact"
+      if: inputs.upload_artifact == 'true' && always()
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          docs-${{ steps.preflight.outputs.session_id }}-${{ github.run_id }}
+        path: |
+          ${{ inputs.site_dir }}/
+        retention-days: ${{ fromJson(inputs.artifact_retention_days) }}
+        compression-level: 6
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 10 — Step Summary
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📊 Summary · Documentation build report"
+      shell: bash
+      if: always()
+      env:
+        SUCCESS:    ${{ steps.build.outputs.success || 'false' }}
+        PAGES:      ${{ steps.build.outputs.pages_generated || '0' }}
+        THEMES:     ${{ steps.build.outputs.theme_count || '0' }}
+        PLUGINS:    ${{ steps.build.outputs.plugin_count || '0' }}
+        SIZE_MB:    ${{ steps.build.outputs.site_size_mb || '?' }}
+        DURATION:   ${{ steps.build.outputs.duration_s || '?' }}
+        GENS_RUN:   ${{ steps.build.outputs.generators_run || '0' }}
+        GENS_FAIL:  ${{ steps.build.outputs.generators_failed || '0' }}
+        DEPLOYED:   ${{ steps.deploy.outputs.deployed || 'false' }}
+        DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url || '' }}
+        SESSION_ID: ${{ steps.preflight.outputs.session_id }}
+        GENERATORS: ${{ steps.preflight.outputs.resolved_generators }}
+      run: |
+        STATUS_EMOJI="$([[ "${SUCCESS}" == "true" ]] && echo "✅" || echo "❌")"
+        DEPLOY_ROW=""
+        [[ -n "${DEPLOY_URL}" ]] && \
+          DEPLOY_ROW="| 🌐 Deploy URL | [${DEPLOY_URL}](${DEPLOY_URL}) |"
+
+        cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+        # 📖 Documentation Build Report
+
+        > ${STATUS_EMOJI} **$([[ "${SUCCESS}" == "true" ]] && echo "SUCCESS" || echo "FAILED")**  &nbsp;·&nbsp;  Session: \`${SESSION_ID}\`
+
+        ## 📊 Build Results
+
+        | Metric | Value |
+        |--------|------:|
+        | 📄 Pages Generated | \`${PAGES}\` |
+        | 🎨 Themes Documented | \`${THEMES}\` |
+        | 🔌 Plugins Documented | \`${PLUGINS}\` |
+        | 📦 Site Size | \`${SIZE_MB} MB\` |
+        | ⚡ Generators Run | \`${GENS_RUN}\` |
+        | ❌ Generators Failed | \`${GENS_FAIL}\` |
+        | 🚀 Deployed | \`${DEPLOYED}\` |
+        | ⏱️ Duration | \`${DURATION}s\` |
+        ${DEPLOY_ROW}
+
+        ---
+        *📖 ASH v5.0 OMEGA Documentation Engine · Generators: \`${GENERATORS}\`*
+        EOF
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 11 — Fail gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚨 Gate · Fail on build error"
+      shell: bash
+      if: always()
+      run: |
+        SUCCESS="${{ steps.build.outputs.success || 'false' }}"
+        GENS_FAILED="${{ steps.build.outputs.generators_failed || '0' }}"
+        FAIL_ON_WARN="${{ inputs.fail_on_warning }}"
+
+        if [[ "${SUCCESS}" != "true" ]]; then
+          echo "::error title=Docs Build Failed::Documentation build failed"
+          exit 1
+        fi
+
+        if [[ "${FAIL_ON_WARN}" == "true" && "${GENS_FAILED}" -gt 0 ]]; then
+          echo "::error title=Generators Failed::${GENS_FAILED} generator(s) failed"
+          exit 1
+        fi
+
+        echo "✅ Documentation build gate passed"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "book"
+  color: "blue"

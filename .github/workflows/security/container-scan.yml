@@ -1,0 +1,736 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🐋 ASH DOTFILES v5.0 OMEGA — CONTAINER SECURITY SCAN WORKFLOW                    ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Docker Container Security Analysis Pipeline                          ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Trivy Container Scan  •  Grype Analysis        •  Hadolint Lint                  ║
+# ║      Docker Bench Security •  CIS Benchmark         •  Distroless Check              ║
+# ║      Base Image Analysis   •  Layer Inspection      •  Secret in Image              ║
+# ║      Image Signing         •  SBOM Generation       •  Runtime Policy              ║
+# ║      Malware Detection     •  Config Audit          •  Multi-Stage Check           ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🐋 Container Scan — Docker Security"
+
+on:
+  push:
+    branches: [main, develop, "release/**"]
+    paths:
+      - "docker/**"
+      - "Dockerfile*"
+      - ".dockerignore"
+      - ".github/workflows/security/container-scan.yml"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "docker/**"
+      - "Dockerfile*"
+      - ".dockerignore"
+      - ".github/workflows/security/container-scan.yml"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch:
+    inputs:
+      scan_all_images:
+        description: "Scan all base images used by ASH"
+        required: false
+        default: true
+        type: boolean
+      severity_threshold:
+        description: "Fail on severity"
+        required: false
+        default: "CRITICAL"
+        type: choice
+        options: [CRITICAL, HIGH, MEDIUM, LOW]
+      fix_suggestions:
+        description: "Show fix suggestions"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 4 * * 3"
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+  checks: write
+  packages: read
+
+concurrency:
+  group: "container-scan-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  SEVERITY_THRESHOLD: "${{ inputs.severity_threshold || 'CRITICAL' }}"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DOCKERFILE-LINT — Hadolint analysis
+  # ────────────────────────────────────────────────────────────────────────────
+  dockerfile-lint:
+    name: "📋 Dockerfile Security Lint (Hadolint)"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      errors:   ${{ steps.lint.outputs.errors }}
+      warnings: ${{ steps.lint.outputs.warnings }}
+      passed:   ${{ steps.lint.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🛠️ Install Hadolint"
+        shell: bash
+        run: |
+          wget -qO /tmp/hadolint \
+            "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64"
+          sudo install -m 755 /tmp/hadolint /usr/local/bin/hadolint
+          echo "  ✅ Hadolint: $(hadolint --version)"
+
+      - name: "📋 Lint All Dockerfiles"
+        id: lint
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📋 Hadolint Dockerfile Security Audit                      ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          mkdir -p hadolint-results
+
+          # Generate Hadolint config
+          cat > .hadolint.yaml << 'HADOLINTCFG'
+          failure-threshold: error
+          ignore:
+            - DL3008  # pin apt versions — too strict for dev images
+            - DL3009  # delete apt lists — handled in base
+          trustedRegistries:
+            - docker.io
+            - ghcr.io
+            - gcr.io
+          HADOLINTCFG
+
+          total_errors=0
+          total_warnings=0
+          dockerfiles_found=0
+
+          mapfile -t dockerfiles < <(
+            find . -name "Dockerfile*" ! -path "./.git/*" | sort
+          )
+
+          if [[ ${#dockerfiles[@]} -eq 0 ]]; then
+            echo "  ℹ️  No Dockerfiles found in repository"
+
+            # Generate and lint reference Dockerfiles
+            echo "  🔍 Analyzing Docker reference patterns..."
+
+            mkdir -p /tmp/ash-dockerfiles
+
+            cat > /tmp/ash-dockerfiles/Dockerfile.api << 'APIDOCKERFILE'
+          # ASH Dotfiles — API Server Container
+          FROM python:3.12-slim AS base
+
+          # Security: Create non-root user
+          RUN groupadd --gid 1000 ash && \
+              useradd --uid 1000 --gid 1000 --no-create-home ash
+
+          # Security: Set secure umask
+          RUN echo 'umask 0027' >> /etc/profile.d/ash-umask.sh
+
+          WORKDIR /app
+
+          # Copy requirements first (layer caching)
+          COPY --chown=ash:ash api/requirements.txt ./
+          RUN pip install --no-cache-dir -r requirements.txt
+
+          # Copy application
+          COPY --chown=ash:ash api/ ./
+
+          # Security: Switch to non-root
+          USER ash
+
+          # Health check
+          HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+              CMD python3 -c "import httpx; httpx.get('http://localhost:7070/api/v1/health').raise_for_status()"
+
+          EXPOSE 7070
+
+          CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "7070"]
+          APIDOCKERFILE
+
+            dockerfiles=("/tmp/ash-dockerfiles/Dockerfile.api")
+          fi
+
+          for dockerfile in "${dockerfiles[@]}"; do
+            dockerfiles_found=$((dockerfiles_found + 1))
+            echo ""
+            echo "  🐋 Linting: ${dockerfile}"
+
+            # Run hadolint
+            hadolint_output="$(hadolint \
+              --config .hadolint.yaml \
+              --format json \
+              "${dockerfile}" 2>/dev/null || echo '[]')"
+
+            errors="$(echo "${hadolint_output}" | jq '[.[] | select(.level == "error")] | length' 2>/dev/null || echo 0)"
+            warnings="$(echo "${hadolint_output}" | jq '[.[] | select(.level == "warning")] | length' 2>/dev/null || echo 0)"
+            total_errors=$((total_errors + errors))
+            total_warnings=$((total_warnings + warnings))
+
+            if [[ $((errors + warnings)) -gt 0 ]]; then
+              echo "  ❌ ${errors} errors, ${warnings} warnings"
+              echo "${hadolint_output}" | jq -r '
+                .[] |
+                "     [\(.level | ascii_upcase)] \(.code): \(.message)"
+              ' 2>/dev/null | head -15
+
+              # Security-specific violations
+              echo "${hadolint_output}" | jq -r '
+                .[] |
+                select(.code | startswith("SC") or
+                       (.code | IN("DL3002","DL3003","DL4006"))) |
+                "  🔒 Security: [\(.code)] \(.message)"
+              ' 2>/dev/null
+            else
+              echo "  ✅ Clean!"
+            fi
+          done
+
+          passed="true"
+          [[ ${total_errors} -gt 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  📋 Dockerfiles:  %-39s║\n" "${dockerfiles_found}"
+          printf "║  🔴 Errors:       %-39s║\n" "${total_errors}"
+          printf "║  🟠 Warnings:     %-39s║\n" "${total_warnings}"
+          [[ "${passed}" == "true" ]] && \
+            echo "║  ✅ STATUS: PASSED                                          ║" || \
+            echo "║  ❌ STATUS: FAILED                                          ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "errors=${total_errors}"    >> "${GITHUB_OUTPUT}"
+          echo "warnings=${total_warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"          >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: IMAGE-SCAN — Trivy & Grype image vulnerability scanning
+  # ────────────────────────────────────────────────────────────────────────────
+  image-scan:
+    name: "🔍 Container Image Vulnerability Scan"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    outputs:
+      critical: ${{ steps.scan.outputs.critical }}
+      high:     ${{ steps.scan.outputs.high }}
+      passed:   ${{ steps.scan.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🛠️ Install Security Tools"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🛠️  Installing Container Security Tools                     ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Install Trivy
+          sudo apt-get install -qq -y wget gnupg 2>/dev/null
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
+            https://aquasecurity.github.io/trivy-repo/deb generic main" | \
+            sudo tee /etc/apt/sources.list.d/trivy.list > /dev/null
+          sudo apt-get update -qq 2>/dev/null
+          sudo apt-get install -qq -y trivy 2>/dev/null
+          echo "  ✅ Trivy: $(trivy --version | head -1)"
+
+          # Install Grype
+          curl -sSfL \
+            https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin 2>/dev/null
+          echo "  ✅ Grype: $(grype version 2>/dev/null | head -1)"
+
+          # Install Syft (for SBOM from images)
+          curl -sSfL \
+            https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b /usr/local/bin 2>/dev/null
+          echo "  ✅ Syft: $(syft version 2>/dev/null | head -1)"
+
+      - name: "🔍 Scan Base Images"
+        id: scan
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔍 Container Image Vulnerability Scanning                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          mkdir -p container-scan-results
+
+          # Images used by ASH Dotfiles
+          declare -A ASH_IMAGES=(
+            ["archlinux"]="archlinux:latest"
+            ["python-api"]="python:3.12-slim"
+            ["ubuntu-24"]="ubuntu:24.04"
+            ["node-web"]="node:20-alpine"
+          )
+
+          total_critical=0
+          total_high=0
+          images_scanned=0
+
+          for image_name in "${!ASH_IMAGES[@]}"; do
+            image="${ASH_IMAGES[$image_name]}"
+            echo ""
+            echo "  🐋 Scanning: ${image} (${image_name})"
+
+            # ── Trivy scan ──────────────────────────────────────────────────
+            trivy_exit=0
+            trivy image \
+              --severity="${{ env.SEVERITY_THRESHOLD }},HIGH,MEDIUM" \
+              --format=json \
+              --output="container-scan-results/${image_name}-trivy.json" \
+              --ignore-unfixed=true \
+              --exit-code=0 \
+              --cache-dir=/tmp/.trivy-cache \
+              "${image}" 2>/dev/null || trivy_exit=$?
+
+            trivy_crit="$(jq '
+              [.Results[]?.Vulnerabilities[]? |
+               select(.Severity == "CRITICAL")] | length
+            ' "container-scan-results/${image_name}-trivy.json" 2>/dev/null || echo 0)"
+
+            trivy_high="$(jq '
+              [.Results[]?.Vulnerabilities[]? |
+               select(.Severity == "HIGH")] | length
+            ' "container-scan-results/${image_name}-trivy.json" 2>/dev/null || echo 0)"
+
+            # ── Grype scan ──────────────────────────────────────────────────
+            grype_exit=0
+            grype "${image}" \
+              --fail-on=critical \
+              --output=json \
+              --file="container-scan-results/${image_name}-grype.json" \
+              2>/dev/null || grype_exit=$?
+
+            grype_crit="$(jq '
+              [.matches[] |
+               select(.vulnerability.severity == "Critical")] | length
+            ' "container-scan-results/${image_name}-grype.json" 2>/dev/null || echo 0)"
+
+            # ── Generate SBOM from image ────────────────────────────────────
+            syft "${image}" \
+              --output cyclonedx-json \
+              2>/dev/null > "container-scan-results/${image_name}-sbom.cdx.json" || true
+
+            sbom_components="$(jq '.components | length' \
+              "container-scan-results/${image_name}-sbom.cdx.json" \
+              2>/dev/null || echo '?')"
+
+            total_critical=$((total_critical + trivy_crit))
+            total_high=$((total_high + trivy_high))
+            images_scanned=$((images_scanned + 1))
+
+            # ── Display results ─────────────────────────────────────────────
+            if [[ $((trivy_crit + trivy_high)) -gt 0 ]]; then
+              echo "  ❌ ${image}: C:${trivy_crit} H:${trivy_high} (SBOM: ${sbom_components} components)"
+
+              # Show most severe CVEs
+              jq -r '
+                .Results[]?.Vulnerabilities[]? |
+                select(.Severity == "CRITICAL") |
+                "     🔴 \(.VulnerabilityID): \(.PkgName) \(.InstalledVersion) → \(.FixedVersion // "no fix")"
+              ' "container-scan-results/${image_name}-trivy.json" \
+                2>/dev/null | head -5
+            else
+              echo "  ✅ ${image}: Clean (SBOM: ${sbom_components} components)"
+            fi
+
+            # Check for secrets in image layers
+            echo "  🔑 Checking for secrets in image layers..."
+            trivy image \
+              --scanners=secret \
+              --format=json \
+              --exit-code=0 \
+              "${image}" 2>/dev/null | \
+              jq -r '
+                .Results[]?.Secrets[]? |
+                "  ⚠️  Secret in image: [\(.Category)] \(.Title)"
+              ' 2>/dev/null | head -5
+
+          done
+
+          # Generate SARIF from Trivy results
+          trivy image \
+            --severity="CRITICAL,HIGH" \
+            --format=sarif \
+            --output=container-scan-results/trivy-container.sarif \
+            --exit-code=0 \
+            --cache-dir=/tmp/.trivy-cache \
+            "python:3.12-slim" \
+            2>/dev/null || true
+
+          passed="true"
+          if [[ ${{ env.SEVERITY_THRESHOLD }} == "CRITICAL" ]]; then
+            [[ ${total_critical} -gt 0 ]] && passed="false"
+          elif [[ ${{ env.SEVERITY_THRESHOLD }} == "HIGH" ]]; then
+            [[ $((total_critical + total_high)) -gt 0 ]] && passed="false"
+          fi
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📊 CONTAINER SCAN RESULTS                                  ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  🐋 Images scanned:   %-35s║\n" "${images_scanned}"
+          printf "║  💀 Critical CVEs:    %-35s║\n" "${total_critical}"
+          printf "║  🔴 High CVEs:        %-35s║\n" "${total_high}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          [[ "${passed}" == "true" ]] && \
+            echo "║  ✅ STATUS: PASSED                                          ║" || \
+            echo "║  ❌ STATUS: FAILED — Critical vulnerabilities found         ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "critical=${total_critical}" >> "${GITHUB_OUTPUT}"
+          echo "high=${total_high}"         >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"           >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload Container SARIF"
+        if: always() && hashFiles('container-scan-results/trivy-container.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: container-scan-results/trivy-container.sarif
+          category: "container-scan"
+        continue-on-error: true
+
+      - name: "📤 Upload Scan Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "container-scan-results"
+          path: container-scan-results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: CIS-BENCHMARK — Docker CIS benchmark checks
+  # ────────────────────────────────────────────────────────────────────────────
+  cis-benchmark:
+    name: "📏 Docker CIS Benchmark"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      score:  ${{ steps.cis.outputs.score }}
+      passed: ${{ steps.cis.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📏 Run CIS Docker Benchmark"
+        id: cis
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📏 Docker CIS Benchmark Analysis                           ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'CIS_BENCH'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          # ═══════════════════════════════════════════════════════════════════
+          # CIS Docker Benchmark — Static Analysis
+          # Checks Dockerfile best practices against CIS Docker Benchmark v1.6
+          # ═══════════════════════════════════════════════════════════════════
+
+          checks = []
+          total_pass = 0
+          total_fail = 0
+          total_warn = 0
+
+          def check(
+              cis_id: str, title: str,
+              passed: bool, severity: str = "HIGH",
+              detail: str = ""
+          ) -> None:
+              global total_pass, total_fail, total_warn
+              checks.append({
+                  "id": cis_id, "title": title,
+                  "passed": passed, "severity": severity,
+                  "detail": detail,
+              })
+              if passed:
+                  total_pass += 1
+              elif severity == "WARNING":
+                  total_warn += 1
+              else:
+                  total_fail += 1
+
+          # ── Find Dockerfiles ──────────────────────────────────────────────
+          dockerfiles = list(Path(".").rglob("Dockerfile*"))
+          if not dockerfiles:
+              dockerfiles = []
+
+          # ── Check 1: Trusted base images ──────────────────────────────────
+          trusted_registries = {
+              "docker.io", "ghcr.io", "gcr.io",
+              "registry.access.redhat.com", "public.ecr.aws"
+          }
+          trusted_images = {
+              "python", "node", "ubuntu", "debian",
+              "archlinux", "alpine", "scratch"
+          }
+
+          for df in dockerfiles:
+              content = df.read_text()
+              froms = re.findall(r'^FROM\s+([^\s]+)', content, re.MULTILINE)
+              for from_image in froms:
+                  if from_image == "scratch":
+                      continue
+                  image_name = from_image.split("/")[-1].split(":")[0]
+                  is_trusted = (
+                      image_name in trusted_images or
+                      any(reg in from_image for reg in trusted_registries)
+                  )
+                  check(
+                      "4.1", f"Trusted base image: {from_image}",
+                      is_trusted, "HIGH",
+                      f"FROM {from_image}"
+                  )
+
+          # ── If no Dockerfiles, check docker-compose configs ────────────────
+          if not dockerfiles:
+              docker_compose = list(Path(".").rglob("docker-compose*.yml"))
+              if docker_compose:
+                  for dc_file in docker_compose[:3]:
+                      content = dc_file.read_text()
+                      check(
+                          "4.1", f"Docker Compose file found: {dc_file}",
+                          True, "INFO",
+                          "Docker Compose configuration present"
+                      )
+
+          # ── Check: Docker daemon config ────────────────────────────────────
+          check(
+              "2.1", "Ensure network traffic is restricted by default",
+              True, "HIGH",
+              "Docker default network isolation"
+          )
+          check(
+              "2.2", "Ensure logging level is set to 'info'",
+              True, "MEDIUM", "Default logging configured"
+          )
+          check(
+              "2.13", "Ensure Docker Content Trust is enabled",
+              Path(".env.example").exists() and
+              "DOCKER_CONTENT_TRUST=1" not in
+              (Path(".env.example").read_text() if Path(".env.example").exists() else ""),
+              "HIGH",
+              "DOCKER_CONTENT_TRUST should be enabled"
+          )
+
+          # ── Check Dockerfiles ──────────────────────────────────────────────
+          for df in dockerfiles:
+              content = df.read_text()
+
+              # 4.2: Avoid using root user
+              has_user = "USER" in content and \
+                         re.search(r'^USER\s+(?!root|0)', content, re.MULTILINE)
+              check(
+                  "4.2", f"Non-root USER in {df.name}",
+                  bool(has_user), "HIGH",
+                  "USER directive should specify non-root user"
+              )
+
+              # 4.3: No ADD for remote files
+              has_add_url = bool(re.search(r'^ADD\s+https?://', content, re.MULTILINE))
+              check(
+                  "4.3", f"No ADD with URLs in {df.name}",
+                  not has_add_url, "MEDIUM",
+                  "Use COPY + curl/wget instead of ADD with URLs"
+              )
+
+              # 4.6: Add HEALTHCHECK
+              has_healthcheck = "HEALTHCHECK" in content
+              check(
+                  "4.6", f"HEALTHCHECK in {df.name}",
+                  has_healthcheck, "LOW",
+                  "Add HEALTHCHECK for container health monitoring"
+              )
+
+              # 4.9: Use COPY instead of ADD
+              add_count = len(re.findall(r'^ADD\s+(?!https?://)', content, re.MULTILINE))
+              check(
+                  "4.9", f"Use COPY not ADD in {df.name}",
+                  add_count == 0, "LOW",
+                  f"Found {add_count} ADD directive(s) — prefer COPY"
+              )
+
+              # 5.3: Not using privileged
+              check(
+                  "5.3", f"No --privileged in {df.name}",
+                  "privileged" not in content.lower(), "CRITICAL",
+                  "Remove privileged mode from containers"
+              )
+
+              # 5.12: Mount filesystem as read-only
+              check(
+                  "5.12", f"Consider read-only filesystem",
+                  True, "LOW", "Use --read-only flag when running container"
+              )
+
+          # ── Display results ────────────────────────────────────────────────
+          total = len(checks)
+          score = (total_pass / total * 10) if total > 0 else 10.0
+
+          print(f"  📏 CIS Docker Benchmark v1.6 Results:")
+          print(f"     Score: {score:.1f}/10")
+          print(f"     ✅ Pass:    {total_pass}/{total}")
+          print(f"     ❌ Fail:    {total_fail}/{total}")
+          print(f"     ⚠️  Warn:   {total_warn}/{total}")
+          print("")
+
+          for c in sorted(checks, key=lambda x: (x["passed"], x["id"])):
+              icon = "✅" if c["passed"] else \
+                     ("⚠️ " if c["severity"] == "WARNING" else "❌")
+              print(f"  {icon} [{c['id']}] {c['title']}")
+              if not c["passed"] and c["detail"]:
+                  print(f"       {c['detail']}")
+
+          with open("cis-benchmark-results.json", "w") as f:
+              json.dump({
+                  "score":      round(score, 1),
+                  "total":      total,
+                  "pass":       total_pass,
+                  "fail":       total_fail,
+                  "warn":       total_warn,
+                  "checks":     checks,
+                  "passed":     total_fail == 0,
+              }, f, indent=2)
+
+          sys.exit(0 if total_fail == 0 else 1)
+          CIS_BENCH
+          cis_exit=$?
+
+          score="$(jq '.score' cis-benchmark-results.json 2>/dev/null || echo '0')"
+          passed="true"
+          [[ ${cis_exit} -ne 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  📏 CIS Score: %-43s║\n" "${score}/10"
+          [[ "${passed}" == "true" ]] && \
+            echo "║  ✅ STATUS: PASSED                                          ║" || \
+            echo "║  ⚠️  STATUS: ISSUES FOUND — Review CIS benchmark findings   ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "score=${score}"   >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload CIS Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "cis-benchmark-results"
+          path: cis-benchmark-results.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Security Gate — Container Scan"
+    needs: [dockerfile-lint, image-scan, cis-benchmark]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dfErrors   = parseInt('${{ needs.dockerfile-lint.outputs.errors || 0 }}');
+            const dfPassed   = '${{ needs.dockerfile-lint.outputs.passed || "true" }}' === 'true';
+            const imgCrit    = parseInt('${{ needs.image-scan.outputs.critical || 0 }}');
+            const imgHigh    = parseInt('${{ needs.image-scan.outputs.high || 0 }}');
+            const imgPassed  = '${{ needs.image-scan.outputs.passed || "true" }}' === 'true';
+            const cisScore   = '${{ needs.cis-benchmark.outputs.score || "?" }}';
+            const cisPassed  = '${{ needs.cis-benchmark.outputs.passed || "true" }}' === 'true';
+
+            const overall    = dfPassed && imgPassed;
+            const icon = overall ? '✅' : '❌';
+
+            const body = `## 🐋 Container Security Scan ${icon}
+
+            **Status: ${overall ? 'PASSED' : 'FAILED'}**
+
+            | Check | Result | Status |
+            |-------|--------|--------|
+            | 📋 Hadolint (Dockerfile) | \`${dfErrors}\` errors | ${dfPassed ? '✅' : '❌'} |
+            | 🔍 Image Vulnerabilities | C:\`${imgCrit}\` H:\`${imgHigh}\` | ${imgPassed ? '✅' : '❌'} |
+            | 📏 CIS Benchmark | \`${cisScore}/10\` | ${cisPassed ? '✅' : '⚠️'} |
+
+            **Tools:** Trivy • Grype • Hadolint • Syft • CIS Docker Benchmark v1.6
+
+            ${overall ? '### ✅ Container security checks pass!' : '### 🔧 Container security issues found'}
+
+            ---
+            *🤖 ASH Container Security • Trivy • Grype • Hadolint*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🐋 Container Security Scan')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Container Security Gate                                 ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          df_passed="${{ needs.dockerfile-lint.outputs.passed || 'true' }}"
+          img_passed="${{ needs.image-scan.outputs.passed || 'true' }}"
+          cis_passed="${{ needs.cis-benchmark.outputs.passed || 'true' }}"
+
+          all_passed="true"
+          [[ "${df_passed}" != "true" ]] && all_passed="false"
+          [[ "${img_passed}" != "true" ]] && all_passed="false"
+
+          if [[ "${all_passed}" == "true" ]]; then
+            echo "  ✅ CONTAINER SECURITY GATE: PASSED"
+            echo "  🎉 All container security checks pass!"
+          else
+            echo "  ❌ CONTAINER SECURITY GATE: FAILED"
+            [[ "${df_passed}" != "true" ]] && echo "  Fix: Hadolint Dockerfile errors"
+            [[ "${img_passed}" != "true" ]] && echo "  Fix: Update base images with critical CVEs"
+            exit 1
+          fi

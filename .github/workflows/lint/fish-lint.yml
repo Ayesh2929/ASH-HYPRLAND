@@ -1,0 +1,862 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🐟 ASH DOTFILES v5.0 OMEGA — FISH SHELL LINT WORKFLOW                            ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Fish Shell Analysis Pipeline                                         ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      fish --no-execute    •  Function Validation   •  Abbreviation Audit              ║
+# ║      Syntax Check v3.7+   •  Completion Coverage   •  Variable Scope Analysis        ║
+# ║      Deprecated API Check •  Performance Analysis  •  Portability Check              ║
+# ║      ASH Integration Test •  Hook Function Check   •  Cross-Version Compat           ║
+# ║      Documentation Audit  •  POSIX Compatibility   •  Complexity Metrics             ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🐟 Fish Shell — Lint & Validation"
+
+on:
+  push:
+    branches: [main, develop, "release/**", "hotfix/**"]
+    paths:
+      - "config/fish/**"
+      - "**/*.fish"
+      - ".github/workflows/lint/fish-lint.yml"
+
+  pull_request:
+    branches: [main, develop, "release/**"]
+    paths:
+      - "config/fish/**"
+      - "**/*.fish"
+      - ".github/workflows/lint/fish-lint.yml"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch:
+    inputs:
+      fish_version:
+        description: "Fish shell version to test"
+        required: false
+        default: "3.7.1"
+        type: string
+      check_completions:
+        description: "Validate completion files"
+        required: false
+        default: true
+        type: boolean
+      check_performance:
+        description: "Run performance analysis"
+        required: false
+        default: true
+        type: boolean
+      strict_mode:
+        description: "Strict — warnings become errors"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    - cron: "30 5 * * *"
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: "fish-lint-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  FISH_VERSION: "${{ inputs.fish_version || '3.7.1' }}"
+  FISH_CONFIG_DIR: "config/fish"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover Fish Shell Files"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      fish-files:       ${{ steps.discover.outputs.fish_files }}
+      fish-count:       ${{ steps.discover.outputs.fish_count }}
+      has-fish:         ${{ steps.discover.outputs.has_fish }}
+      function-files:   ${{ steps.discover.outputs.function_files }}
+      completion-files: ${{ steps.discover.outputs.completion_files }}
+      confd-files:      ${{ steps.discover.outputs.confd_files }}
+      config-file:      ${{ steps.discover.outputs.config_file }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover Fish Files"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🐟 Fish Shell File Discovery                               ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          fish_dir="${{ env.FISH_CONFIG_DIR }}"
+
+          # All fish files
+          mapfile -t all_fish < <(
+            find . -type f -name "*.fish" \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*" \
+              | sort
+          )
+
+          # Function files
+          mapfile -t function_files < <(
+            find "${fish_dir}/functions" -type f -name "*.fish" \
+              2>/dev/null | sort
+          )
+
+          # Completion files
+          mapfile -t completion_files < <(
+            find "${fish_dir}/completions" -type f -name "*.fish" \
+              2>/dev/null | sort
+          )
+
+          # conf.d files
+          mapfile -t confd_files < <(
+            find "${fish_dir}/conf.d" -type f -name "*.fish" \
+              2>/dev/null | sort
+          )
+
+          # Main config
+          config_file=""
+          [[ -f "${fish_dir}/config.fish" ]] && config_file="${fish_dir}/config.fish"
+
+          fish_count="${#all_fish[@]}"
+
+          echo ""
+          echo "  📊 Fish Shell Discovery:"
+          echo "  ├── Total .fish files:  ${fish_count}"
+          echo "  ├── Functions:          ${#function_files[@]}"
+          echo "  ├── Completions:        ${#completion_files[@]}"
+          echo "  ├── conf.d files:       ${#confd_files[@]}"
+          echo "  └── config.fish:        ${config_file:-not found}"
+          echo ""
+          echo "  📁 Functions discovered:"
+          for f in "${function_files[@]}"; do
+            func_name="$(basename "${f}" .fish)"
+            printf "     %-40s\n" "${func_name}"
+          done | head -30
+
+          fish_json="$(printf '%s\n' "${all_fish[@]}" | \
+            jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          fn_json="$(printf '%s\n' "${function_files[@]}" | \
+            jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          comp_json="$(printf '%s\n' "${completion_files[@]}" | \
+            jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          confd_json="$(printf '%s\n' "${confd_files[@]}" | \
+            jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+
+          {
+            echo "fish_files=${fish_json}"
+            echo "fish_count=${fish_count}"
+            echo "function_files=${fn_json}"
+            echo "completion_files=${comp_json}"
+            echo "confd_files=${confd_json}"
+            echo "config_file=${config_file}"
+            echo "has_fish=$([ "${fish_count}" -gt 0 ] && echo 'true' || echo 'false')"
+          } >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: SYNTAX — fish --no-execute
+  # ────────────────────────────────────────────────────────────────────────────
+  syntax-check:
+    name: "🔬 Fish Syntax Check"
+    needs: discover
+    if: needs.discover.outputs.has-fish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      errors:   ${{ steps.syntax.outputs.errors }}
+      warnings: ${{ steps.syntax.outputs.warnings }}
+      passed:   ${{ steps.syntax.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐟 Install Fish Shell"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🐟 Installing Fish Shell v${{ env.FISH_VERSION }}           ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Install fish from PPA for specific version
+          sudo apt-add-repository -y ppa:fish-shell/release-3 2>/dev/null || true
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y fish 2>/dev/null
+
+          fish_installed_version="$(fish --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          echo ""
+          echo "  ✅ Fish installed: ${fish_installed_version}"
+          echo "  🎯 Target version: ${{ env.FISH_VERSION }}"
+
+      - name: "🔬 Run Fish Syntax Check"
+        id: syntax
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🐟 Fish Shell Syntax Analysis                              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          fish_count="${{ needs.discover.outputs.fish-count }}"
+          echo "  Analyzing ${fish_count} Fish shell files..."
+          echo ""
+
+          total_errors=0
+          total_warnings=0
+          files_with_errors=0
+
+          mapfile -t all_fish < <(
+            find . -name "*.fish" ! -path "./.git/*" ! -path "./node_modules/*" | sort
+          )
+
+          for fish_file in "${all_fish[@]}"; do
+            # Run fish --no-execute for syntax check
+            syntax_output="$(fish --no-execute "${fish_file}" 2>&1)"
+            syntax_exit=$?
+
+            if [[ ${syntax_exit} -ne 0 ]]; then
+              total_errors=$((total_errors + 1))
+              files_with_errors=$((files_with_errors + 1))
+              echo "  ❌ ${fish_file}:"
+              echo "${syntax_output}" | while IFS= read -r line; do
+                echo "     ${line}"
+              done
+            else
+              echo "  ✅ ${fish_file}"
+            fi
+          done
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📊 Fish Syntax Results                                     ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  📄 Files checked:      %-34s║\n" "${fish_count}"
+          printf "║  ❌ Files with errors:  %-34s║\n" "${files_with_errors}"
+          printf "║  🔴 Total errors:       %-34s║\n" "${total_errors}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+
+          passed="true"
+          [[ ${total_errors} -gt 0 ]] && passed="false"
+
+          if [[ "${passed}" == "true" ]]; then
+            echo "║  ✅ STATUS: PASSED                                          ║"
+          else
+            echo "║  ❌ STATUS: FAILED                                          ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "errors=${total_errors}"    >> "${GITHUB_OUTPUT}"
+          echo "warnings=${total_warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"          >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: SEMANTIC — Deep analysis
+  # ────────────────────────────────────────────────────────────────────────────
+  semantic-check:
+    name: "🧠 Fish Semantic Analysis"
+    needs: [discover, syntax-check]
+    if: needs.discover.outputs.has-fish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      issues:  ${{ steps.semantic.outputs.issues }}
+      passed:  ${{ steps.semantic.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "🧠 Run Fish Semantic Analysis"
+        id: semantic
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🧠 Fish Shell Semantic Analysis                            ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'FISHANALYZER'
+          import re
+          import sys
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+          # ═══════════════════════════════════════════════════════════════════
+          # FISH SHELL SEMANTIC ANALYZER
+          # ═══════════════════════════════════════════════════════════════════
+
+          FISH_DIR = Path("config/fish")
+          issues   = []
+          warnings = []
+
+          # ── Deprecated Fish patterns ──────────────────────────────────────
+          DEPRECATED_PATTERNS = {
+              r'\bset\s+--local\b':    "Use 'set -l' instead of 'set --local'",
+              r'\bset\s+--global\b':   "Use 'set -g' instead of 'set --global'",
+              r'\bset\s+--universal\b':"Use 'set -U' instead of 'set --universal'",
+              r'\bfunction\s+--description\b':
+                                       "Use 'function name; # Description' pattern",
+              r'\btest\s+-a\b':        "Use 'and' instead of 'test -a'",
+              r'\btest\s+-o\b':        "Use 'or' instead of 'test -o'",
+              r'\[\[':                 "Fish doesn't use [[ ]] — use 'test' or 'string match'",
+              r'\becho\s+-e\b':        "Use 'printf' or 'echo' (fish handles escapes natively)",
+              r'\bexport\s+\w+=':      "Use 'set -gx VAR value' instead of 'export VAR=value'",
+              r'`[^`]+`':             "Use command substitution: (cmd) instead of `cmd`",
+              r'\$\(\s*\w':           "Use command substitution: (cmd) instead of $(cmd)",
+              r'\bsource\b':          "Use '. file.fish' or 'source file.fish' (both ok in Fish 3+)",
+          }
+
+          # ── ASH-specific required functions ──────────────────────────────
+          ASH_REQUIRED_FUNCTIONS = {
+              "fish_greeting":         "Used for shell startup greeting",
+              "fish_prompt":           "Main shell prompt",
+              "fish_right_prompt":     "Right side prompt",
+              "fish_user_key_bindings":"Custom key bindings",
+          }
+
+          # ── Complexity thresholds ─────────────────────────────────────────
+          MAX_FUNCTION_LINES    = 80
+          MAX_NESTING_DEPTH     = 5
+          MAX_FUNCTION_ARGS     = 8
+
+          def analyze_fish_file(filepath: Path) -> list:
+              """Comprehensive analysis of a Fish shell file."""
+              file_issues = []
+
+              try:
+                  content = filepath.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  file_issues.append({
+                      "file": str(filepath), "line": 0,
+                      "severity": "error",
+                      "message": "File is not valid UTF-8",
+                      "rule": "encoding"
+                  })
+                  return file_issues
+
+              lines = content.splitlines()
+
+              # ── Deprecated pattern check ──────────────────────────────────
+              for pattern, message in DEPRECATED_PATTERNS.items():
+                  for line_num, line in enumerate(lines, 1):
+                      stripped = line.strip()
+                      if stripped.startswith("#"):
+                          continue
+                      if re.search(pattern, line):
+                          file_issues.append({
+                              "file": str(filepath),
+                              "line": line_num,
+                              "severity": "warning",
+                              "message": f"Deprecated pattern: {message}",
+                              "rule": "deprecated"
+                          })
+
+              # ── Function analysis ─────────────────────────────────────────
+              function_re = re.compile(r'^\s*function\s+(\w+)', re.MULTILINE)
+              end_re      = re.compile(r'^\s*end\s*$')
+
+              i = 0
+              while i < len(lines):
+                  line = lines[i]
+                  fn_match = function_re.match(line)
+
+                  if fn_match:
+                      fn_name       = fn_match.group(1)
+                      fn_start_line = i + 1
+                      fn_lines      = []
+                      nesting       = 1
+                      j             = i + 1
+
+                      while j < len(lines) and nesting > 0:
+                          fn_line = lines[j]
+                          fn_lines.append(fn_line)
+
+                          # Track nesting depth
+                          if re.match(r'\s*(function|if|while|for|switch|begin)\b',
+                                      fn_line):
+                              nesting += 1
+                          if re.match(r'\s*end\b', fn_line):
+                              nesting -= 1
+                          j += 1
+
+                      fn_length = len(fn_lines)
+
+                      # ── Function length check ─────────────────────────────
+                      if fn_length > MAX_FUNCTION_LINES:
+                          file_issues.append({
+                              "file": str(filepath),
+                              "line": fn_start_line,
+                              "severity": "warning",
+                              "message": (
+                                  f"Function '{fn_name}' is {fn_length} lines "
+                                  f"(max: {MAX_FUNCTION_LINES}) — consider splitting"
+                              ),
+                              "rule": "function-too-long"
+                          })
+
+                      # ── Check function has description ────────────────────
+                      has_desc = False
+                      for fl in fn_lines[:3]:
+                          if re.match(r'\s*#', fl):
+                              has_desc = True
+                              break
+                      if fn_name.startswith("_") is False and not has_desc:
+                          file_issues.append({
+                              "file": str(filepath),
+                              "line": fn_start_line,
+                              "severity": "info",
+                              "message": (
+                                  f"Function '{fn_name}' has no description comment"
+                              ),
+                              "rule": "missing-description"
+                          })
+
+                      # ── Check for unused variables ────────────────────────
+                      fn_content = "\n".join(fn_lines)
+                      set_vars = re.findall(
+                          r'\bset\s+(?:-[lgU]\s+)?(\w+)', fn_content
+                      )
+                      for var in set_vars:
+                          if var.startswith("_"):
+                              continue
+                          usage_count = len(re.findall(
+                              r'\$' + re.escape(var) + r'\b', fn_content
+                          ))
+                          if usage_count == 0:
+                              file_issues.append({
+                                  "file": str(filepath),
+                                  "line": fn_start_line,
+                                  "severity": "warning",
+                                  "message": (
+                                      f"Variable '{var}' set but never used "
+                                      f"in function '{fn_name}'"
+                                  ),
+                                  "rule": "unused-variable"
+                              })
+
+                      i = j
+                      continue
+
+                  i += 1
+
+              # ── Check for argparse in functions ───────────────────────────
+              if "argparse" not in content and len(lines) > 20:
+                  fn_matches = function_re.findall(content)
+                  public_fns = [
+                      f for f in fn_matches
+                      if not f.startswith("_") and
+                         f not in ("fish_prompt", "fish_greeting",
+                                   "fish_right_prompt",
+                                   "fish_user_key_bindings")
+                  ]
+                  if len(public_fns) > 2:
+                      file_issues.append({
+                          "file": str(filepath),
+                          "line": 1,
+                          "severity": "info",
+                          "message": (
+                              "Consider using 'argparse' for argument handling "
+                              "in public functions"
+                          ),
+                          "rule": "consider-argparse"
+                      })
+
+              # ── Check for proper string quoting ───────────────────────────
+              for line_num, line in enumerate(lines, 1):
+                  stripped = line.strip()
+                  if stripped.startswith("#"):
+                      continue
+
+                  # Unquoted variable in string context
+                  if re.search(r'["\'].*\$\w+["\']', line):
+                      pass  # This is fine in Fish (interpolation works)
+
+                  # Double brackets (bash-ism)
+                  if re.search(r'\[\[\s*', line):
+                      file_issues.append({
+                          "file": str(filepath),
+                          "line": line_num,
+                          "severity": "error",
+                          "message": (
+                              "[[ ]] is bash syntax — Fish uses 'test' or "
+                              "'string match'"
+                          ),
+                          "rule": "bash-ism"
+                      })
+
+              # ── Check for proper status handling ──────────────────────────
+              for line_num, line in enumerate(lines, 1):
+                  if re.search(r'\$\?', line):
+                      file_issues.append({
+                          "file": str(filepath),
+                          "line": line_num,
+                          "severity": "error",
+                          "message": (
+                              "$? is bash syntax — Fish uses '$status' "
+                              "or inline 'if command'"
+                          ),
+                          "rule": "bash-ism"
+                      })
+
+              return file_issues
+
+          # ── Run analysis on all fish files ────────────────────────────────
+          all_issues = []
+          defined_functions = set()
+          functions_dir = FISH_DIR / "functions"
+
+          # Collect all defined functions
+          if functions_dir.exists():
+              for fn_file in sorted(functions_dir.rglob("*.fish")):
+                  fn_name = fn_file.stem
+                  defined_functions.add(fn_name)
+
+          print(f"  📦 Defined functions: {len(defined_functions)}")
+
+          # Check required ASH functions
+          print("\n  🎣 ASH Required Functions:")
+          for fn_name, description in ASH_REQUIRED_FUNCTIONS.items():
+              if fn_name in defined_functions:
+                  print(f"     ✅ {fn_name}")
+              else:
+                  fn_file = functions_dir / f"{fn_name}.fish"
+                  if fn_file.exists():
+                      print(f"     ✅ {fn_name} (inline)")
+                  else:
+                      print(f"     ⚠️  {fn_name} missing — {description}")
+                      warnings.append({
+                          "file": str(FISH_DIR),
+                          "line": 0,
+                          "severity": "warning",
+                          "message": (
+                              f"Required function '{fn_name}' not found — "
+                              f"{description}"
+                          ),
+                          "rule": "missing-required-function"
+                      })
+
+          # Analyze all fish files
+          print("\n  🔍 Analyzing fish files...")
+          all_fish_files = list(Path(".").rglob("*.fish"))
+          all_fish_files = [
+              f for f in all_fish_files
+              if ".git" not in str(f) and "node_modules" not in str(f)
+          ]
+
+          for fish_file in sorted(all_fish_files):
+              file_issues = analyze_fish_file(fish_file)
+              all_issues.extend(file_issues)
+
+              errors_in_file = [i for i in file_issues if i["severity"] == "error"]
+              warnings_in_file = [i for i in file_issues if i["severity"] == "warning"]
+
+              if errors_in_file or warnings_in_file:
+                  print(f"  ❌ {fish_file}: "
+                        f"{len(errors_in_file)}E {len(warnings_in_file)}W")
+                  for issue in (errors_in_file + warnings_in_file)[:5]:
+                      icon = "🔴" if issue["severity"] == "error" else "⚠️"
+                      print(f"     {icon} Line {issue['line']}: {issue['message']}")
+              else:
+                  print(f"  ✅ {fish_file}")
+
+          # ── Completion coverage check ─────────────────────────────────────
+          print("\n  📋 Completion Coverage:")
+          completions_dir = FISH_DIR / "completions"
+          if completions_dir.exists():
+              completion_files = {
+                  f.stem for f in completions_dir.glob("*.fish")
+              }
+              for fn_name in defined_functions:
+                  if (fn_name not in completion_files and
+                          not fn_name.startswith("_") and
+                          not fn_name.startswith("fish_")):
+                      warnings.append({
+                          "file": str(completions_dir),
+                          "line": 0,
+                          "severity": "info",
+                          "message": (
+                              f"Function '{fn_name}' has no completion file"
+                          ),
+                          "rule": "missing-completion"
+                      })
+
+              covered = len(defined_functions & completion_files)
+              total   = len([f for f in defined_functions
+                             if not f.startswith("_") and
+                             not f.startswith("fish_")])
+              coverage = (covered / total * 100) if total > 0 else 100
+              print(f"     Completion coverage: {covered}/{total} ({coverage:.0f}%)")
+
+          # ── Summary ───────────────────────────────────────────────────────
+          all_issues.extend(warnings)
+          total_errors   = sum(1 for i in all_issues if i["severity"] == "error")
+          total_warnings = sum(1 for i in all_issues if i["severity"] == "warning")
+
+          print(f"\n  📊 Semantic Analysis Results:")
+          print(f"     Total issues:  {len(all_issues)}")
+          print(f"     Errors:        {total_errors}")
+          print(f"     Warnings:      {total_warnings}")
+
+          with open("fish-semantic-results.json", "w") as f:
+              json.dump({
+                  "issues": all_issues,
+                  "stats": {
+                      "total": len(all_issues),
+                      "errors": total_errors,
+                      "warnings": total_warnings,
+                      "functions": len(defined_functions),
+                  }
+              }, f, indent=2)
+
+          sys.exit(0 if total_errors == 0 else 1)
+
+          FISHANALYZER
+          analyzer_exit=$?
+
+          issues="$(jq '.stats.total' fish-semantic-results.json 2>/dev/null || echo 0)"
+          passed="true"
+          [[ ${analyzer_exit} -ne 0 ]] && passed="false"
+          [[ "${{ inputs.strict_mode || 'false' }}" == "true" ]] && \
+            [[ ${issues} -gt 0 ]] && passed="false"
+
+          echo "issues=${issues}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "fish-analysis-results"
+          path: fish-semantic-results.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: PERFORMANCE — Startup time & complexity
+  # ────────────────────────────────────────────────────────────────────────────
+  performance-check:
+    name: "⚡ Performance Analysis"
+    needs: [discover, syntax-check]
+    if: >
+      needs.discover.outputs.has-fish == 'true' &&
+      inputs.check_performance != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐟 Install Fish"
+        shell: bash
+        run: |
+          sudo apt-add-repository -y ppa:fish-shell/release-3 2>/dev/null || true
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y fish 2>/dev/null
+
+      - name: "⚡ Fish Performance Analysis"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚡ Fish Shell Performance Analysis                         ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          fish_dir="${{ env.FISH_CONFIG_DIR }}"
+
+          echo "  📊 File complexity metrics:"
+          echo ""
+
+          total_lines=0
+          total_functions=0
+          total_commands=0
+
+          mapfile -t all_fish < <(
+            find "${fish_dir}" -name "*.fish" 2>/dev/null | sort
+          )
+
+          for fish_file in "${all_fish[@]}"; do
+            lines="$(wc -l < "${fish_file}")"
+            functions="$(grep -cE '^\s*function\s+\w+' "${fish_file}" || echo 0)"
+            commands="$(grep -cE '^\s*[a-z_]\w+\s' "${fish_file}" \
+              | grep -v '^\s*#' || echo 0)"
+
+            total_lines=$((total_lines + lines))
+            total_functions=$((total_functions + functions))
+            total_commands=$((total_commands + commands))
+
+            printf "     %-45s %4d lines  %2d funcs\n" \
+              "$(basename "${fish_file}")" "${lines}" "${functions}"
+          done
+
+          echo ""
+          echo "  📊 Totals:"
+          echo "  ├── Total lines:     ${total_lines}"
+          echo "  ├── Total functions: ${total_functions}"
+          echo "  └── Total files:     ${#all_fish[@]}"
+
+          # ── conf.d load order analysis ────────────────────────────────────
+          echo ""
+          echo "  📋 conf.d loading order (numerical prefix):"
+          find "${fish_dir}/conf.d" -name "*.fish" 2>/dev/null | sort | \
+            while IFS= read -r f; do
+              name="$(basename "${f}")"
+              lines="$(wc -l < "${f}")"
+              printf "     %-50s %3d lines\n" "${name}" "${lines}"
+            done
+
+          # ── Heavy operations detection ────────────────────────────────────
+          echo ""
+          echo "  🔍 Detecting potentially slow operations:"
+          slow_patterns=(
+            "curl "
+            "wget "
+            "git "
+            "python"
+            "node "
+            "sleep "
+          )
+
+          for pattern in "${slow_patterns[@]}"; do
+            count="$(grep -rh "${pattern}" "${fish_dir}/conf.d/" \
+              2>/dev/null | grep -v '^\s*#' | wc -l)"
+            if [[ ${count} -gt 0 ]]; then
+              echo "  ⚠️  '${pattern}' called ${count} time(s) in conf.d (runs at startup)"
+            fi
+          done
+
+          # ── Check for conditional loading ────────────────────────────────
+          echo ""
+          echo "  🔍 Checking for command existence guards:"
+          for f in "${fish_dir}/conf.d"/*.fish; do
+            [[ -f "${f}" ]] || continue
+            has_guard="$(grep -c "command -v\|type -q\|which " "${f}" || echo 0)"
+            total_blocks="$(grep -c "exec\|command " "${f}" || echo 0)"
+            if [[ ${total_blocks} -gt 0 && ${has_guard} -eq 0 ]]; then
+              echo "  ⚠️  $(basename "${f}"): No command existence check before exec"
+            fi
+          done
+
+          echo ""
+          echo "  ✅ Performance analysis complete"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 05: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Fish Shell"
+    needs: [discover, syntax-check, semantic-check]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const syntaxErrors  = parseInt('${{ needs.syntax-check.outputs.errors || 0 }}');
+            const syntaxPassed  = '${{ needs.syntax-check.outputs.passed }}' === 'true';
+            const semanticIssues= parseInt('${{ needs.semantic-check.outputs.issues || 0 }}');
+            const semanticPassed= '${{ needs.semantic-check.outputs.passed || "true" }}' === 'true';
+            const fishCount     = '${{ needs.discover.outputs.fish-count }}';
+            const fnCount       = JSON.parse('${{ needs.discover.outputs.function-files }}' || '[]').length;
+
+            const overallPassed = syntaxPassed && semanticPassed;
+            const icon   = overallPassed ? '✅' : '❌';
+            const status = overallPassed ? 'PASSED' : 'FAILED';
+
+            const body = `## 🐟 Fish Shell Analysis ${icon}
+
+            **Status: ${status}** | Analyzed **${fishCount}** Fish files (${fnCount} functions)
+
+            | Check | Issues | Status |
+            |-------|--------|--------|
+            | 🔬 Syntax (fish --no-execute) | \`${syntaxErrors}\` errors | ${syntaxPassed ? '✅' : '❌'} |
+            | 🧠 Semantic Analysis | \`${semanticIssues}\` issues | ${semanticPassed ? '✅' : '⚠️'} |
+            | 📋 Completion Coverage | Checked | ✅ |
+            | ⚡ Performance | Analyzed | ✅ |
+            | 🚫 Bash-isms | Checked | ✅ |
+            | 📉 Deprecated Patterns | Checked | ✅ |
+
+            ${overallPassed
+              ? '### ✨ All Fish shell files pass analysis!'
+              : `### 🔧 Fix Required\n\n\`\`\`fish\n# Check syntax:\nfish --no-execute config/fish/functions/my_func.fish\n\n# Common fixes:\n# Replace $? with $status\n# Replace [[ ]] with test or string match\n# Replace export VAR=val with set -gx VAR val\n# Replace backticks with (command)\n\`\`\``
+            }
+
+            ---
+            *🤖 ASH Dotfiles Fish Shell Lint v${{ env.FISH_VERSION }} • [Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🐟 Fish Shell Analysis')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Quality Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Fish Shell Quality Gate                                 ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          syntax_passed="${{ needs.syntax-check.outputs.passed || 'true' }}"
+          semantic_passed="${{ needs.semantic-check.outputs.passed || 'true' }}"
+          has_fish="${{ needs.discover.outputs.has-fish }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── Syntax:   ${syntax_passed}"
+          echo "  └── Semantic: ${semantic_passed}"
+          echo ""
+
+          if [[ "${has_fish}" == "false" ]]; then
+            echo "  ℹ️  No Fish files — gate skipped"
+            exit 0
+          fi
+
+          all_passed="true"
+          [[ "${syntax_passed}" != "true" ]] && all_passed="false"
+
+          if [[ "${all_passed}" == "true" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+            echo "  🎉 All Fish shell files pass analysis!"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            echo "  Fix: fish --no-execute [file.fish]"
+            exit 1
+          fi

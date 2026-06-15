@@ -1,154 +1,570 @@
-name: 🐛 Bug Report
-description: Report a bug in ASH Dotfiles
-title: "fix: [brief description of bug]"
-labels: ["bug", "needs-triage"]
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║          🔥 ASH DOTFILES v5.0 OMEGA — BUG REPORT ISSUE TEMPLATE               ║
+# ║          Ultra-Professional GitHub Issue Form with Full Validation              ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🐛 Bug Report"
+description: >
+  Found a bug in ASH Dotfiles? Help us squash it with this comprehensive
+  bug report form. The more detail you provide, the faster we can fix it.
+title: "🐛 [BUG] — "
+labels:
+  - "🐛 bug"
+  - "🔍 needs-triage"
 assignees: []
 
 body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — CRITICAL DISCLAIMER
+  # ════════════════════════════════════════════════════════════════════
   - type: markdown
     attributes:
       value: |
-        ## 🐛 Bug Report
-        Thank you for taking the time to report a bug!
-        Please fill in all sections below.
+        <div align="center">
 
-  - type: textarea
-    id: description
+        ```
+        ░█████╗░░██████╗██╗░░██╗  ██████╗░░█████╗░████████╗███████╗██╗██╗░░░░░███████╗░██████╗
+        ██╔══██╗██╔════╝██║░░██║  ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║██║░░░░░██╔════╝██╔════╝
+        ███████║╚█████╗░███████║  ██║░░██║██║░░██║░░░██║░░░█████╗░░██║██║░░░░░█████╗░░╚█████╗░
+        ██╔══██║░╚═══██╗██╔══██║  ██║░░██║██║░░██║░░░██║░░░██╔══╝░░██║██║░░░░░██╔══╝░░░╚═══██╗
+        ██║░░██║██████╔╝██║░░██║  ██████╔╝╚█████╔╝░░░██║░░░██║░░░░░██║███████╗███████╗██████╔╝
+        ╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝  ╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚══════╝╚══════╝╚═════╝░
+        ```
+
+        # 🐛 Bug Report — ASH Dotfiles v5.0 OMEGA
+
+        </div>
+
+        ---
+
+        > [!IMPORTANT]
+        > **Before submitting, please complete ALL required fields.**
+        > Incomplete reports may be closed without investigation.
+
+        > [!TIP]
+        > Run `ash doctor --full --report` first — it automatically diagnoses many common issues!
+        > If doctor output is available, paste it in the **System Information** section below.
+
+        ---
+
+        ### ⚡ Quick Checklist
+
+        Please verify these steps **before** submitting:
+
+        - [ ] 🔍 Searched [existing issues](https://github.com/ash-dotfiles/ash-dotfiles/issues) for duplicates
+        - [ ] 📦 Running the **latest version** of ASH Dotfiles (`ash --version`)
+        - [ ] 🔄 Attempted `ash update --all` to see if the bug is already fixed
+        - [ ] 🩺 Ran `ash doctor --full` and reviewed the output
+        - [ ] 📖 Checked the [Troubleshooting Guide](https://ash-dotfiles.github.io/docs/troubleshooting)
+        - [ ] 💬 Searched [Discord](https://discord.gg/ash-dotfiles) for similar reports
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — BUG SEVERITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: severity
     attributes:
-      label: 🐛 Bug Description
-      description: A clear description of what the bug is
-      placeholder: "When I run 'ash theme pick', the terminal crashes with..."
+      label: "🚨 Bug Severity"
+      description: >
+        How severely does this bug impact your workflow?
+        Choose the most accurate description.
+      options:
+        - "🔴 CRITICAL — System crash / data loss / security vulnerability"
+        - "🟠 HIGH — Major feature completely broken / significant workflow impact"
+        - "🟡 MEDIUM — Feature partially broken / workaround exists"
+        - "🟢 LOW — Minor visual glitch / cosmetic issue / edge case"
+        - "⚪ TRIVIAL — Typo / minor documentation issue"
     validations:
       required: true
 
-  - type: textarea
-    id: reproduce
-    attributes:
-      label: 🔄 Steps to Reproduce
-      description: Steps to reproduce the behavior
-      value: |
-        1. Open terminal
-        2. Run: `ash ...`
-        3. See error
-    validations:
-      required: true
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: ✅ Expected Behavior
-      description: What you expected to happen
-    validations:
-      required: true
-
-  - type: textarea
-    id: actual
-    attributes:
-      label: ❌ Actual Behavior
-      description: What actually happened
-    validations:
-      required: true
-
-  - type: textarea
-    id: logs
-    attributes:
-      label: 📋 Logs
-      description: Paste relevant log output
-      render: shell
-      placeholder: |
-        # Run these and paste output:
-        ash doctor
-        ash log 50
-        cat ~/.cache/ash-dots/logs/cli.log | tail -30
-
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — AFFECTED COMPONENT
+  # ════════════════════════════════════════════════════════════════════
   - type: dropdown
     id: component
     attributes:
-      label: 🔧 Affected Component
-      description: Which part of ASH is affected?
+      label: "🧩 Affected Component"
+      description: >
+        Which component of ASH Dotfiles is affected?
+        Select all that apply (hold Ctrl/Cmd for multi-select).
       multiple: true
       options:
-        - Theme Engine (ash theme)
-        - Wallpaper Picker
-        - Waybar
-        - Rofi Launcher
-        - Hyprlock
-        - Fish Shell
-        - Neovim
-        - Music Reactive (ash music)
-        - Health Score (ash score)
-        - Workspace Profiles (ash workspace)
-        - Smart Wallpaper (ash smart)
-        - AI Theme (ash theme ai)
-        - Analytics (ash analytics)
-        - Context Theming (ash context)
-        - ASH CLI
-        - Installation
-        - Other
+        # Core System
+        - "⚡ ASH CLI — Core command engine"
+        - "⚡ ASH CLI — Theme commands"
+        - "⚡ ASH CLI — Mode commands"
+        - "⚡ ASH CLI — Plugin commands"
+        - "⚡ ASH CLI — Snapshot commands"
+        - "⚡ ASH CLI — Doctor / diagnostics"
+        - "⚡ ASH CLI — Hardware detection"
+        - "⚡ ASH CLI — Network commands"
+        - "⚡ ASH CLI — Update system"
+        - "⚡ ASH CLI — Screenshot / recording"
+        - "⚡ ASH CLI — AI engine"
+        # Engines
+        - "🎨 Theme Engine — Color extraction"
+        - "🎨 Theme Engine — Color generation"
+        - "🎨 Theme Engine — Template rendering"
+        - "🎨 Theme Engine — Hot reload"
+        - "🖼️ Wallpaper Engine — setter"
+        - "🖼️ Wallpaper Engine — AI generation"
+        - "🖼️ Wallpaper Engine — slideshow"
+        - "✨ Animation Engine"
+        - "🤖 AI Engine — Theme suggestion"
+        - "🤖 AI Engine — Mood detection"
+        - "🤖 AI Engine — Ollama integration"
+        # Desktop Components
+        - "🪟 Hyprland — window manager config"
+        - "🪟 Hyprland — keybinds"
+        - "🪟 Hyprland — animations"
+        - "🪟 Hyprland — plugins"
+        - "📊 Waybar — configuration"
+        - "📊 Waybar — custom modules"
+        - "📊 Waybar — styling"
+        - "🚀 Rofi — launcher"
+        - "🚀 Rofi — menus"
+        - "🔔 Dunst — notifications"
+        - "🔔 SwayNC — notification center"
+        - "🔒 Hyprlock — lock screen"
+        - "💤 Hypridle — idle management"
+        - "🖼️ SWWW — wallpaper daemon"
+        - "🐟 Fish Shell — configuration"
+        - "🐟 Fish Shell — functions"
+        - "🐟 Fish Shell — completions"
+        - "⭐ Starship — prompt"
+        - "🅰️ AGS — bar/widgets"
+        # Editors
+        - "📝 Neovim — core config"
+        - "📝 Neovim — plugins"
+        - "📝 Neovim — LSP"
+        - "📝 Neovim — DAP debugging"
+        - "📝 Neovim — completion"
+        - "📝 Neovim — theme integration"
+        # Theming
+        - "🎭 GTK Theme — GTK3"
+        - "🎭 GTK Theme — GTK4"
+        - "🎭 Qt/Kvantum Theme"
+        - "🎯 Cursor Theme"
+        - "🔡 Icon Theme"
+        - "🔡 Font Installation"
+        # Plugins
+        - "🔌 Plugin System — install/remove"
+        - "🔌 Plugin System — game-mode"
+        - "🔌 Plugin System — focus-timer"
+        - "🔌 Plugin System — other core plugin"
+        - "🔌 Plugin System — integration plugin"
+        # Infrastructure
+        - "📦 Installation Script"
+        - "⏱️ Systemd Services"
+        - "🐋 Docker / Container"
+        - "❄️ Nix / NixOS module"
+        - "🌐 REST API Server"
+        - "🖥️ Web Dashboard"
+        - "📱 Mobile App"
+        - "🧩 Browser Extension"
+        # Display Manager
+        - "🖥️ SDDM Theme"
+        - "🥾 GRUB Theme"
+        - "🚀 Plymouth Boot Splash"
+        # Other
+        - "📖 Documentation"
+        - "🧪 Tests / CI"
+        - "🔒 Security"
+        - "♿ Accessibility"
+        - "❓ Unknown / Not sure"
     validations:
       required: true
 
-  - type: dropdown
-    id: gpu
-    attributes:
-      label: 🎮 GPU Type
-      options:
-        - AMD
-        - NVIDIA
-        - Intel
-        - Virtual/Other
-    validations:
-      required: true
-
-  - type: input
-    id: hyprland-version
-    attributes:
-      label: 🖥️ Hyprland Version
-      description: Run `hyprctl version`
-      placeholder: "v0.41.0"
-    validations:
-      required: true
-
-  - type: input
-    id: ash-version
-    attributes:
-      label: 📦 ASH Version
-      description: Run `ash version`
-      placeholder: "3.1.0"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: os
-    attributes:
-      label: 🐧 Operating System
-      options:
-        - Arch Linux
-        - EndeavourOS
-        - CachyOS
-        - Manjaro
-        - Garuda Linux
-        - Other Arch-based
-    validations:
-      required: true
-
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — BUG DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
   - type: textarea
-    id: system-info
+    id: description
     attributes:
-      label: 🖥️ System Information
-      description: Run `fastfetch` or `ash score quick` and paste output
-      render: text
+      label: "📋 Bug Description"
+      description: >
+        Provide a **clear and concise** description of the bug.
+        What did you expect to happen vs. what actually happened?
+      placeholder: |
+        ## What happened?
+        <!-- Describe the bug clearly and concisely -->
 
-  - type: checkboxes
-    id: checklist
+        ## What did you expect to happen?
+        <!-- Describe the expected behavior -->
+
+        ## When did this start happening?
+        <!-- "Always", "After update to v5.x", "After installing plugin X", etc. -->
+
+        ## How reproducible is this?
+        <!-- "Always", "Sometimes (% of the time)", "Rarely", "Only once" -->
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — REPRODUCTION STEPS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
     attributes:
-      label: ✅ Checklist
+      label: "🔄 Steps to Reproduce"
+      description: >
+        Provide **exact, numbered steps** to reproduce the bug.
+        The more precise, the faster we can fix it.
+      placeholder: |
+        1. Open terminal (`Super + Return`)
+        2. Run command: `ash theme apply catppuccin-mocha`
+        3. Observe that...
+        4. See error: `[paste exact error message here]`
+
+        **Minimal reproduction command (if applicable):**
+        ```bash
+        # Paste the minimal command(s) that trigger the bug
+        ash [command] [flags]
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — ERROR OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: error_output
+    attributes:
+      label: "❌ Error Output / Logs"
+      description: >
+        Paste any **error messages, stack traces, or relevant log output**.
+
+        > **Pro Tips:**
+        > - Run with `ASH_DEBUG=1 ash [command]` for verbose output
+        > - Check logs: `cat ~/.local/share/ash/logs/ash-cli.log`
+        > - Check Hyprland logs: `cat ~/.local/share/hyprland/hyprland.log`
+        > - Journald: `journalctl --user -u ash-*.service --since today`
+      render: shell
+      placeholder: |
+        # Paste error output here — it will be automatically formatted as code
+
+        [ERROR] ash theme apply: Failed to apply theme
+        ├── Component: color-engine
+        ├── Error: Cannot read wallpaper at path: /path/to/wallpaper.jpg
+        └── Stack: extract_colors() → generate_palette() → apply_theme()
+
+        # --- Relevant log entries ---
+        [2024-01-15 14:32:01] [ERROR] theme-engine: ...
+        [2024-01-15 14:32:01] [DEBUG] color-engine: ...
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — DOCTOR OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: doctor_output
+    attributes:
+      label: "🩺 ASH Doctor Output"
+      description: >
+        Run `ash doctor --full` and paste the complete output here.
+        This is **extremely helpful** for diagnosing system-specific issues.
+      render: shell
+      placeholder: |
+        # Run: ash doctor --full
+        # Then paste the complete output here
+
+        ╔══════════════════════════════════════════╗
+        ║       🩺 ASH Doctor v5.0 Report         ║
+        ╠══════════════════════════════════════════╣
+        ║  System: Arch Linux (kernel 6.x.x)      ║
+        ║  ASH: v5.0.0-omega                      ║
+        ║  Hyprland: v0.xx.x                      ║
+        ╠══════════════════════════════════════════╣
+        ║  ✅ Wayland: OK                          ║
+        ║  ✅ Hyprland: Running                    ║
+        ║  ❌ GPU Driver: Issue detected           ║
+        ╚══════════════════════════════════════════╝
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — SCREENSHOTS / RECORDINGS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: media
+    attributes:
+      label: "📸 Screenshots / Screen Recordings"
+      description: >
+        **Visual evidence dramatically speeds up bug resolution.**
+
+        - 📸 Screenshots: Drag and drop images directly into this field
+        - 🎬 Screen recordings: Upload as `.mp4`, `.webm`, or `.gif`
+        - 🔍 Use `ash shot area` to take annotated screenshots
+        - 🎥 Use `ash shot record` for quick screen recordings
+      placeholder: |
+        <!-- Drag and drop your screenshots or recordings here -->
+        <!-- Or paste image URLs if hosted externally -->
+
+        **Screenshot 1:** [Description of what's shown]
+        [drag image here]
+
+        **Screenshot 2:** [Description]
+        [drag image here]
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — SYSTEM INFORMATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: system_info
+    attributes:
+      label: "💻 System Information"
+      description: >
+        Run `ash hw full-report` or fill in manually.
+        **All fields are important for reproducing hardware-specific bugs.**
+      placeholder: |
+        ## ASH Dotfiles
+        - ASH Version: (run `ash --version`)
+        - Install method: [ ] Git clone  [ ] AUR  [ ] Flatpak  [ ] Nix flake  [ ] Docker
+
+        ## Operating System
+        - Distribution: (e.g., Arch Linux, Fedora 39, NixOS 23.11)
+        - Kernel: (run `uname -r`)
+        - Init system: [ ] systemd  [ ] OpenRC  [ ] runit  [ ] dinit
+
+        ## Display Server
+        - Compositor: (run `hyprctl version`)
+        - Wayland: (run `echo $WAYLAND_DISPLAY`)
+        - XDG Portal: (run `flatpak info org.freedesktop.portal.Desktop 2>/dev/null || echo 'not installed'`)
+
+        ## Hardware — GPU (CRITICAL for graphics bugs)
+        - GPU Model: (run `lspci | grep -E 'VGA|3D'`)
+        - GPU Driver: [ ] NVIDIA Proprietary (version: __)  [ ] NVIDIA Open  [ ] AMD (amdgpu)  [ ] Intel (i915/iris)
+        - Vulkan: (run `vulkaninfo --summary 2>/dev/null | head -5`)
+        - Multiple GPUs: [ ] Yes  [ ] No
+
+        ## Hardware — System
+        - CPU: (run `grep 'model name' /proc/cpuinfo | head -1`)
+        - RAM: (run `free -h | awk '/^Mem:/{print $2}'`)
+        - Form factor: [ ] Desktop  [ ] Laptop  [ ] Server  [ ] VM  [ ] WSL2
+
+        ## Display
+        - Monitor count: 
+        - Resolution(s): (run `hyprctl monitors | grep -E 'Monitor|res'`)
+        - Refresh rate(s):
+        - HDR: [ ] Yes  [ ] No
+
+        ## Audio
+        - Audio server: [ ] PipeWire  [ ] PulseAudio  [ ] ALSA
+        - PipeWire version: (run `pipewire --version`)
+
+        ## Shell & Terminal
+        - Shell: (run `echo $SHELL`)
+        - Terminal: (run `echo $TERM`)
+        - Fish version: (run `fish --version`)
+
+        ## Package Manager
+        - Primary: [ ] pacman  [ ] dnf  [ ] nix  [ ] zypper  [ ] xbps  [ ] apt
+        - AUR helper: [ ] paru  [ ] yay  [ ] pikaur  [ ] N/A
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — VERSION INFORMATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: ash_version
+    attributes:
+      label: "🏷️ ASH Dotfiles Version"
+      description: "Run `ash --version` and paste the output"
+      placeholder: "e.g., v5.0.0-omega (build 2024.01.15-abc1234)"
+    validations:
+      required: true
+
+  - type: input
+    id: hyprland_version
+    attributes:
+      label: "🪟 Hyprland Version"
+      description: "Run `hyprctl version` and paste the first line"
+      placeholder: "e.g., Hyprland v0.36.0 (compiled with aquamarine 0.3.0)"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — REGRESSION DETECTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: regression
+    attributes:
+      label: "📉 Is This a Regression?"
+      description: "Did this work in a previous version of ASH Dotfiles?"
       options:
-        - label: I ran `ash doctor` and checked the output
+        - "✅ Yes — worked before, broke after an update"
+        - "❌ No — never worked as far as I know"
+        - "🤷 Unknown — first time trying this feature"
+        - "🔄 Intermittent — works sometimes, fails other times"
+    validations:
+      required: true
+
+  - type: input
+    id: last_working_version
+    attributes:
+      label: "✅ Last Working Version (if regression)"
+      description: "What was the last version where this worked correctly?"
+      placeholder: "e.g., v4.2.1 or 'about 2 weeks ago on commit abc1234'"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — WORKAROUND
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: workaround
+    attributes:
+      label: "🔧 Current Workaround"
+      description: >
+        Have you found any workaround? Even partial ones help us understand
+        the issue and can help other users in the meantime.
+      placeholder: |
+        <!-- Describe any workaround you've found, e.g.: -->
+
+        Manually running `ash theme apply --force --skip-wallpaper catppuccin-mocha`
+        partially works — the colors apply but the wallpaper doesn't change.
+
+        Alternatively, after running the broken command, running:
+        `hyprctl reload && killall waybar && waybar &`
+        restores the bar.
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — ACTIVE THEME & PLUGINS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: current_config
+    attributes:
+      label: "⚙️ Active Configuration"
+      description: >
+        What theme, mode, and plugins are active when the bug occurs?
+      placeholder: |
+        ## Active Theme
+        - Theme: (run `ash config get theme.active`)
+        - Wallpaper: (run `ash config get wallpaper.current`)
+        - Bar layout: (run `ash config get bar.layout`)
+
+        ## Active Mode
+        - Mode: (run `ash mode status`)
+
+        ## Active Plugins
+        Run `ash plugin list --enabled`:
+        ```
+        [paste output here]
+        ```
+
+        ## Recent Changes
+        - [ ] Recently updated ASH Dotfiles
+        - [ ] Recently installed/removed a plugin
+        - [ ] Recently changed GPU driver
+        - [ ] Recently updated Hyprland
+        - [ ] Recently changed kernel
+        - [ ] Other: ___________
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — ADDITIONAL CONTEXT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "🔍 Additional Context"
+      description: >
+        Any other information that might help us diagnose the issue.
+        Custom configurations, unusual setups, related issues, etc.
+      placeholder: |
+        <!-- Add any other context about the problem here -->
+
+        I have a custom Hyprland plugin installed: hy3
+        I'm running ASH inside a VM (VirtualBox 7.0 with VMSVGA adapter)
+        This started after I enabled the 'game-mode' plugin
+        Related issue: #123
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — CONTRIBUTION WILLINGNESS
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: "🤝 Would You Like to Fix This?"
+      description: >
+        We welcome contributions! Would you like to submit a PR to fix this bug?
+      options:
+        - "💪 Yes — I'd like to fix this and submit a PR"
+        - "🆘 Maybe — I need guidance on where to start"
+        - "👀 No — I can test fixes but cannot code"
+        - "📝 No — Just reporting, someone else can fix it"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Final Submission Checklist"
+      description: "Please confirm all items before submitting"
+      options:
+        - label: >
+            🔍 I have searched existing issues and this is **not a duplicate**
           required: true
-        - label: I searched existing issues for duplicates
+        - label: >
+            📦 I have **provided my ASH Dotfiles version** (from `ash --version`)
           required: true
-        - label: I'm running the latest version (`ash update`)
+        - label: >
+            🔄 I have **tried `ash update --all`** to see if the bug is already fixed
           required: true
-        - label: I checked `~/.cache/ash-dots/logs/` for errors
+        - label: >
+            💻 I have **provided complete system information** including GPU details
           required: true
+        - label: >
+            🔄 I have **provided clear reproduction steps** that others can follow
+          required: true
+        - label: >
+            🧹 I **have not included** any private information (API keys, passwords, etc.)
+          required: true
+        - label: >
+            📖 I have read and agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — CLOSING BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### 🙏 Thank You for Your Bug Report!
+
+        Our team will triage this issue and respond as quickly as possible.
+
+        | Priority | Expected Response Time |
+        |----------|----------------------|
+        | 🔴 CRITICAL | Within 24 hours |
+        | 🟠 HIGH | Within 3 days |
+        | 🟡 MEDIUM | Within 1 week |
+        | 🟢 LOW | Within 2 weeks |
+
+        **While you wait:**
+        - 💬 Join our [Discord](https://discord.gg/ash-dotfiles) for community support
+        - 📖 Browse the [Documentation](https://ash-dotfiles.github.io/docs)
+        - 🌟 Consider [starring the repo](https://github.com/ash-dotfiles/ash-dotfiles) if ASH has helped you!
+
+        *— The ASH Dotfiles Team* ⚡
+
+        </div>

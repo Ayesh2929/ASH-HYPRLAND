@@ -1,0 +1,959 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║    🔗 ASH DOTFILES v5.0 OMEGA — INTEGRATION REQUEST TEMPLATE                          ║
+# ║    Ultra-Comprehensive Third-Party Integration Proposal • API Design • Auth           ║
+# ║    Webhook • OAuth • Plugin Architecture • Rate Limiting • Privacy Analysis          ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔗 Integration Request"
+description: >
+  Request integration with a third-party service, application, or platform.
+  Whether it's Discord, Spotify, Home Assistant, a cloud service, or any
+  other tool — propose it here with our comprehensive integration design form.
+title: "🔗 [INTEGRATION] — "
+labels:
+  - "🔗 integration-request"
+  - "✨ enhancement"
+  - "🔍 needs-triage"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ██╗███╗   ██╗████████╗███████╗ ██████╗ ██████╗  █████╗ ████████╗██╗ ██████╗ ███╗   ██╗
+        ██║████╗  ██║╚══██╔══╝██╔════╝██╔════╝ ██╔══██╗██╔══██╗╚══██╔══╝██║██╔═══██╗████╗  ██║
+        ██║██╔██╗ ██║   ██║   █████╗  ██║  ███╗██████╔╝███████║   ██║   ██║██║   ██║██╔██╗ ██║
+        ██║██║╚██╗██║   ██║   ██╔══╝  ██║   ██║██╔══██╗██╔══██║   ██║   ██║██║   ██║██║╚██╗██║
+        ██║██║ ╚████║   ██║   ███████╗╚██████╔╝██║  ██║██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
+        ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
+        ██████╗ ███████╗ ██████╗ ██╗   ██╗███████╗███████╗████████╗
+        ██╔══██╗██╔════╝██╔═══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝
+        ██████╔╝█████╗  ██║   ██║██║   ██║█████╗  ███████╗   ██║
+        ██╔══██╗██╔══╝  ██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║
+        ██║  ██║███████╗╚██████╔╝╚██████╔╝███████╗███████║   ██║
+        ╚═╝  ╚═╝╚══════╝ ╚══▀▀═╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝
+        ```
+
+        # 🔗 Integration Request — ASH Dotfiles v5.0 OMEGA
+
+        > *"Every great ecosystem is built on powerful integrations"*
+
+        </div>
+
+        ---
+
+        > [!NOTE]
+        > **Already integrated services (check before requesting):**
+        >
+        > | Category | Integrated | Planned |
+        > |----------|-----------|---------|
+        > | 🎵 Music | Spotify (Spicetify), MPD, MPRIS | Apple Music, Tidal |
+        > | 💬 Chat | Discord (BD/Vencord) | Telegram, Matrix, Slack |
+        > | 📊 Status | GitHub, wakatime | GitLab, Jira |
+        > | 🏠 Smart Home | Home Assistant, Philips Hue | SmartThings, Tuya |
+        > | ☁️ Cloud | Generic cloud sync | Google Drive, OneDrive |
+        > | 🎬 Streaming | OBS, Streamlabs, Stream Deck | Twitch alerts |
+        > | 💹 Finance | Crypto ticker | Stock portfolio |
+        > | 🌐 Productivity | Notion sync, Todoist, Google Calendar | Obsidian sync |
+        >
+        > Check the [full integration list](https://ash-dotfiles.github.io/plugins/integrations)
+        > before submitting!
+
+        > [!TIP]
+        > **Fastest path to getting your integration:** Build it as a plugin!
+        > ```bash
+        > ash plugin create --type integration --name "my-service-integration"
+        > ```
+        > Integration plugins can be community-published immediately without
+        > waiting for core team review. See the
+        > [Plugin Development Guide](https://ash-dotfiles.github.io/docs/plugin-development).
+
+        ---
+
+        ### 🔗 Pre-Submission Checklist
+
+        - [ ] 🔍 Checked the [full integration list](https://ash-dotfiles.github.io/plugins) — not already integrated
+        - [ ] 📋 Searched [existing requests](https://github.com/ash-dotfiles/ash-dotfiles/issues?q=label%3A%22integration-request%22) — not a duplicate
+        - [ ] 📖 Read the [Plugin Development Guide](https://ash-dotfiles.github.io/docs/plugin-development) — considered plugin approach
+        - [ ] 🔒 Reviewed the service's Terms of Service — redistribution is permitted
+        - [ ] 📊 Gathered community interest evidence (Discord votes, etc.)
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — SERVICE IDENTITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: service_name
+    attributes:
+      label: "🏷️ Service / Application Name"
+      description: "Official name of the service or application to integrate"
+      placeholder: "e.g., Obsidian, Linear, Raycast, Notion, Jellyfin, Plex"
+    validations:
+      required: true
+
+  - type: input
+    id: service_url
+    attributes:
+      label: "🌐 Service Homepage / API Docs URL"
+      description: "Official website and/or API documentation link"
+      placeholder: "https://obsidian.md | API docs: https://docs.obsidian.md/..."
+    validations:
+      required: true
+
+  - type: input
+    id: service_version
+    attributes:
+      label: "🔢 Service API Version (if known)"
+      description: "Target API version for the integration"
+      placeholder: "e.g., REST API v2, GraphQL API, WebSocket API, CLI v3.x"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — INTEGRATION CLASSIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: service_category
+    attributes:
+      label: "🗂️ Service Category"
+      description: "What type of service is this?"
+      options:
+        # Communication
+        - "💬 Communication — Instant messaging (Telegram, Signal, Matrix)"
+        - "💬 Communication — Team chat (Slack, Teams, Mattermost)"
+        - "💬 Communication — Email (Thunderbird, Mutt, Neomutt)"
+        - "💬 Communication — Video calls (Zoom, Meet, Jitsi)"
+        # Music & Media
+        - "🎵 Music — Streaming service (Tidal, Apple Music, Deezer)"
+        - "🎵 Music — Local player (Jellyfin, Plex, Navidrome)"
+        - "🎵 Music — Internet radio (Radio Browser, Last.fm)"
+        - "📺 Video — Streaming (YouTube, Twitch, Netflix)"
+        - "📺 Video — Local media server (Jellyfin, Plex, Emby)"
+        # Development
+        - "💻 Dev — Version control (GitLab, Gitea, Forgejo)"
+        - "💻 Dev — CI/CD (Jenkins, CircleCI, Travis)"
+        - "💻 Dev — Project management (Jira, Linear, YouTrack)"
+        - "💻 Dev — Code hosting (Codeberg, SourceHut)"
+        - "💻 Dev — Package registry (npm, PyPI, crates.io)"
+        - "💻 Dev — Container registry (Docker Hub, GHCR, Quay)"
+        - "💻 Dev — Cloud provider (AWS, GCP, Azure, DigitalOcean)"
+        - "💻 Dev — Kubernetes (k3s, Rancher, OpenShift)"
+        # Productivity
+        - "📋 Productivity — Note-taking (Obsidian, Logseq, Roam)"
+        - "📋 Productivity — Task manager (Things, OmniFocus, TickTick)"
+        - "📋 Productivity — Calendar (Nextcloud, CalDAV, Exchange)"
+        - "📋 Productivity — Email client (FastMail, ProtonMail)"
+        - "📋 Productivity — Document editing (Nextcloud Office)"
+        - "📋 Productivity — Time tracking (Toggl, Harvest, Clockify)"
+        - "📋 Productivity — Habit tracking (Habitica, Loop)"
+        # Smart Home & IoT
+        - "🏠 Smart Home — Hub (SmartThings, Hubitat, openHAB)"
+        - "🏠 Smart Home — Lighting (LIFX, Govee, Kasa)"
+        - "🏠 Smart Home — Audio (Sonos, Chromecast)"
+        - "🏠 Smart Home — Security (Ring, Arlo)"
+        - "🏠 IoT — Sensors & automation"
+        # Streaming & Content
+        - "🎬 Streaming — OBS plugins / scenes"
+        - "🎬 Streaming — StreamElements / Streamlabs"
+        - "🎬 Streaming — Twitch integration"
+        - "🎬 Streaming — YouTube Live"
+        # Finance & Data
+        - "💹 Finance — Portfolio tracker (delta, CoinGecko)"
+        - "💹 Finance — Banking (Firefly III, YNAB)"
+        - "📊 Data — Dashboard (Grafana, Kibana)"
+        - "📊 Data — Weather (more providers)"
+        # Social & Community
+        - "📱 Social — Mastodon / Fediverse"
+        - "📱 Social — Reddit"
+        - "📱 Social — RSS / Atom feeds"
+        # AI & ML
+        - "🤖 AI — LLM providers (Groq, Claude API, Gemini)"
+        - "🤖 AI — Image generation (ComfyUI API, Automatic1111)"
+        - "🤖 AI — Code assistant (Continue, Tabby, Copilot)"
+        # Security & Privacy
+        - "🔒 Security — Password manager (Bitwarden, KeePassXC)"
+        - "🔒 Security — VPN (Mullvad, ProtonVPN, Tailscale)"
+        - "🔒 Security — 2FA (Aegis, FreeOTP)"
+        # Hardware
+        - "🖥️ Hardware — Peripheral RGB (OpenRGB, Polychromatic)"
+        - "🖥️ Hardware — Gaming peripherals (Piper, Solaar)"
+        - "🎮 Hardware — Steam / gaming platforms"
+        - "🎮 Hardware — Game overlays (MangoHUD, GOverlay)"
+        # System
+        - "⚙️ System — Package manager integration"
+        - "⚙️ System — Backup service (Restic, Borg, Vorta)"
+        - "⚙️ System — Monitoring (Netdata, Prometheus, Zabbix)"
+        - "❓ Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integration_type
+    attributes:
+      label: "⚙️ Integration Architecture Type"
+      description: "How should ASH interact with this service?"
+      multiple: true
+      options:
+        - "🔴 Real-time — Live data displayed in Waybar / AGS widget"
+        - "📡 Polling — Periodic data fetch (configurable interval)"
+        - "🪝 Webhook — Service pushes events to ASH endpoint"
+        - "🔔 Notification — Service events trigger ASH notifications"
+        - "🎨 Theme Sync — Theme changes propagate to service"
+        - "🎮 Control — ASH controls the service (play/pause/etc.)"
+        - "📊 Status — Service status shown in desktop"
+        - "🔑 Authentication — OAuth / API key management"
+        - "💾 Data Sync — Bidirectional data synchronization"
+        - "🔌 Plugin — Best delivered as standalone ASH plugin"
+        - "🌐 REST API — ASH REST API endpoint for service"
+        - "🔗 Deep Link — System-level protocol handler"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — USE CASE & VALUE PROPOSITION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: use_case
+    attributes:
+      label: "🎯 Use Case & Value Proposition"
+      description: >
+        Articulate exactly WHY this integration would make ASH better
+        and HOW users would use it daily.
+      placeholder: |
+        ## 😤 Problem This Solves
+
+        **Current pain point:**
+        Obsidian users who use ASH Dotfiles currently have to alt-tab to Obsidian
+        to capture quick notes, breaking their workflow entirely. There's no way to:
+        - Quickly add a thought to today's daily note without switching focus
+        - See upcoming tasks from Obsidian tasks plugin in the Waybar
+        - Have ASH's focus mode sync with Obsidian's "Reading" mode
+        - Get reminders from Obsidian's reminder plugin as system notifications
+
+        ## 💡 Proposed User Experience
+
+        **Quick capture workflow:**
+        1. User presses `Super + Shift + N` (global hotkey)
+        2. Rofi opens with a quick note input field
+        3. User types note and presses Enter
+        4. Note appears instantly in Obsidian's daily note under "## Quick Captures"
+        5. Desktop notification confirms: "📝 Note added to Daily Note"
+
+        **Waybar task count widget:**
+        ```
+        ┌─────────────────────────────────┐
+        │  📝 3 tasks due today   [Obs]   │
+        └─────────────────────────────────┘
+        ```
+
+        **Focus mode sync:**
+        - `ash mode focus` → Obsidian switches to "Reading" mode automatically
+        - Obsidian enters "Reading" mode → ASH enables Focus Mode automatically
+
+        ## 📊 Daily Value Delivered
+
+        | User Action | Without Integration | With Integration |
+        |-------------|--------------------|--------------------|
+        | Quick note capture | Alt-tab → type → alt-tab (30s) | Hotkey → type → Enter (5s) |
+        | Check today's tasks | Alt-tab to Obsidian (10s) | Glance at Waybar (0s) |
+        | Focus session | Manually set both apps (20s) | One command syncs both (1s) |
+
+        **Net time saved per day (estimated):** 10-15 minutes
+
+        ## 🌟 Why This Belongs in ASH (Not Standalone)
+
+        This integration derives its value entirely from:
+        1. ASH's mode system (focus mode sync)
+        2. ASH's notification system (themed Obsidian alerts)
+        3. ASH's Rofi framework (quick capture UI)
+        4. ASH's keybind system (global hotkey registration)
+
+        Without these hooks, it would be a much weaker standalone tool.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — TECHNICAL DESIGN
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: technical_design
+    attributes:
+      label: "🔧 Technical Integration Design"
+      description: >
+        Provide detailed technical design for how the integration would work.
+        The more detailed, the better.
+      placeholder: |
+        ## 🏗️ Architecture Overview
+
+        ```
+        ┌─────────────────────────────────────────────────────────┐
+        │                   ASH Desktop                           │
+        │                                                         │
+        │  ┌──────────────┐    ┌──────────────────────────────┐  │
+        │  │ Waybar Widget│    │  Rofi Quick Capture Menu     │  │
+        │  │ 📝 3 tasks   │    │  ┌────────────────────────┐  │  │
+        │  │ due today    │    │  │ > Add quick note...    │  │  │
+        │  └──────┬───────┘    │  └────────────────────────┘  │  │
+        │         │            └────────────┬─────────────────┘  │
+        │  ┌──────▼───────────────────────▼─────────────┐        │
+        │  │        ASH Obsidian Integration Plugin       │        │
+        │  │                                              │        │
+        │  │  ┌─────────────┐  ┌──────────────────────┐  │        │
+        │  │  │ REST Client │  │  WebSocket Listener  │  │        │
+        │  │  │ (poll/push) │  │  (real-time events)  │  │        │
+        │  │  └──────┬──────┘  └──────────┬───────────┘  │        │
+        │  └─────────┼────────────────────┼──────────────┘        │
+        └────────────┼────────────────────┼─────────────────────── ┘
+                     │                    │
+                     ▼                    ▼
+        ┌────────────────────────────────────────┐
+        │        Obsidian (Local App)             │
+        │                                         │
+        │  ┌─────────────────────────────────┐   │
+        │  │  Obsidian Local REST API        │   │
+        │  │  (obsidian-local-rest-api plugin)│   │
+        │  │  Port: 27123 (configurable)     │   │
+        │  └─────────────────────────────────┘   │
+        └────────────────────────────────────────┘
+        ```
+
+        ## 📡 API Communication
+
+        ### Authentication
+        ```bash
+        # Obsidian Local REST API uses API key authentication
+        # Key stored in ASH secure store:
+        ash config set --secret "plugin.obsidian.api_key" "Bearer xxxxxxxxxxxx"
+
+        # NO external internet communication — local only!
+        # API endpoint: http://localhost:27123 (user-configurable port)
+        ```
+
+        ### Data Fetch (Polling)
+        ```bash
+        # GET today's tasks (every 60 seconds):
+        curl -s -H "Authorization: Bearer ${API_KEY}" \
+          "http://localhost:27123/search/simple/?query=task%20due%20today" \
+          | jq '.[] | select(.matches[] | .content | test("- \\[ \\]"))'
+
+        # Response format:
+        {
+          "filename": "2024-01-15.md",
+          "result": "...",
+          "score": 0.9,
+          "matches": [{"content": "- [ ] Review PR #123 📅 2024-01-15"}]
+        }
+        ```
+
+        ### Quick Note Append
+        ```bash
+        # POST note to today's daily note:
+        NOTE_CONTENT="$1"
+        TODAY=$(date +%Y-%m-%d)
+
+        curl -s -X POST \
+          -H "Authorization: Bearer ${API_KEY}" \
+          -H "Content-Type: text/markdown" \
+          "http://localhost:27123/vault/${TODAY}.md" \
+          --data "
+        ## Quick Captures
+        - $(date '+%H:%M') ${NOTE_CONTENT}" \
+          | jq '.message'
+        ```
+
+        ### WebSocket Events (Real-time)
+        ```bash
+        # Listen for Obsidian events via WebSocket:
+        # (Obsidian Local REST API supports WebSocket for push events)
+        websocat "ws://localhost:27123/ws" \
+          --header "Authorization: Bearer ${API_KEY}"
+
+        # Events received:
+        # {"event": "file:modified", "file": "2024-01-15.md"}
+        # {"event": "mode:changed", "mode": "reading"}
+        ```
+
+        ## 🔌 Plugin Structure
+
+        ```
+        ash-plugin-obsidian/
+        ├── plugin.json              ← Manifest
+        ├── init.sh                  ← Setup + API key config
+        ├── enable.sh                ← Start polling daemon
+        ├── disable.sh               ← Stop daemon
+        ├── status.sh                ← Connection status
+        ├── lib/
+        │   ├── api-client.sh        ← REST API wrapper
+        │   ├── task-fetcher.sh      ← Task polling logic
+        │   ├── note-appender.sh     ← Quick note append
+        │   ├── websocket.sh         ← Real-time event listener
+        │   └── mode-sync.sh         ← ASH mode ↔ Obsidian mode
+        ├── waybar/
+        │   ├── module.jsonc         ← Task count widget
+        │   └── style.css            ← Themed widget styles
+        └── rofi/
+            ├── quick-note.rasi      ← Quick note input UI
+            └── quick-note.sh        ← Note handler
+        ```
+
+        ## ⚙️ Configuration Schema
+
+        ```json
+        {
+          "plugin.obsidian.api_url": "http://localhost:27123",
+          "plugin.obsidian.api_key": "[stored in ASH secret store]",
+          "plugin.obsidian.vault_path": "~/Documents/Obsidian/MyVault",
+          "plugin.obsidian.daily_note_folder": "Daily Notes",
+          "plugin.obsidian.daily_note_format": "YYYY-MM-DD",
+          "plugin.obsidian.task_poll_interval": 60,
+          "plugin.obsidian.quick_note_template": "- {time} {content}",
+          "plugin.obsidian.mode_sync": true,
+          "plugin.obsidian.waybar_enabled": true,
+          "plugin.obsidian.waybar_max_tasks": 5,
+          "plugin.obsidian.notifications_enabled": true
+        }
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — API & AUTHENTICATION DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: api_details
+    attributes:
+      label: "🔑 API & Authentication Analysis"
+      description: >
+        Detailed analysis of the service's API capabilities and authentication.
+        This is critical for security review and implementation planning.
+      placeholder: |
+        ## 📋 API Overview
+
+        | Property | Details |
+        |----------|---------|
+        | API Type | REST + WebSocket |
+        | API Version | v1 (stable) |
+        | Documentation | https://codemirror.net/docs/ref/ |
+        | SDKs available | Python, Node.js (unofficial) |
+        | Rate limits | No limits (local app) |
+        | Versioning policy | Stable since 2022, no breaking changes |
+        | Pagination | Yes (offset-based) |
+        | Webhooks | Yes (WebSocket push) |
+
+        ## 🔑 Authentication
+
+        ### Method Used
+        - [ ] 🔑 API Key (Bearer token in header)
+        - [ ] 🔐 OAuth 2.0 (authorization code flow)
+        - [ ] 🔐 OAuth 2.0 (client credentials flow)
+        - [ ] 📧 Username + Password (basic auth)
+        - [ ] 🔒 mTLS (mutual TLS certificates)
+        - [ ] 🚫 No authentication (local service)
+        - [ ] 🔗 Session token / cookie
+
+        ### Authentication Flow Design
+        ```bash
+        # First-time setup:
+        ash plugin install obsidian
+
+        # Guided setup wizard:
+        ash plugin configure obsidian
+        # > Enter Obsidian Local REST API key: [hidden input]
+        # > Enter API port [27123]:
+        # > Testing connection... ✅ Connected to Obsidian v1.5.3
+
+        # Key storage (NEVER in plaintext config):
+        ash::secrets::store "plugin.obsidian.api_key" "${API_KEY}"
+
+        # Key retrieval at runtime:
+        API_KEY="$(ash::secrets::get "plugin.obsidian.api_key")"
+        ```
+
+        ### Token Scope Requirements
+        ```
+        Required scopes (minimal privilege principle):
+        - read:files     — Read vault files for task extraction
+        - write:files    — Append to daily note files
+        - read:metadata  — Access file metadata for change detection
+
+        NOT required (will NOT request):
+        - delete:files   — No deletion operations
+        - manage:plugins — No plugin management
+        - admin          — No admin operations
+        ```
+
+        ## 🌐 Network Communication
+
+        | Aspect | Details |
+        |--------|---------|
+        | Communication type | Local only (localhost) |
+        | External internet | ❌ Never |
+        | Data sent externally | ❌ None |
+        | Data sent locally | Note content, file paths |
+        | Encryption | HTTP locally (TLS optional) |
+        | Port required | 27123 (user-configurable) |
+
+        ## 📦 Required Dependencies
+
+        ```bash
+        # System dependencies:
+        - curl (already required by ASH)
+        - jq (already required by ASH)
+        - websocat (new dependency — for WebSocket support)
+
+        # Installation:
+        # Arch: pacman -S websocat
+        # Others: cargo install websocat
+
+        # The Obsidian plugin required on user side:
+        # "Local REST API" by coddingtonbear (Obsidian community plugin)
+        # Installation URL: obsidian://show-plugin?id=obsidian-local-rest-api
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — PRIVACY & SECURITY ANALYSIS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: privacy_security
+    attributes:
+      label: "🔒 Privacy & Security Analysis"
+      description: >
+        ALL integrations undergo security review. Complete this analysis
+        to help the security team evaluate your proposal quickly.
+      placeholder: |
+        ## 🌐 Data Flow Analysis
+
+        ### Data ASH Reads from Service
+        | Data | Sensitivity | Purpose | Stored? |
+        |------|-------------|---------|---------|
+        | Note content | High | Display task count | No — never stored |
+        | Task titles | Medium | Waybar widget | 60s cache only |
+        | File metadata | Low | Change detection | No |
+        | Mode status | Low | Mode sync | No |
+
+        ### Data ASH Writes to Service
+        | Data | Sensitivity | Purpose |
+        |------|-------------|---------|
+        | Quick note text | High (user content) | User explicitly types it |
+        | Timestamp | Low | Note metadata |
+
+        ### Data Sent to External Networks
+        **NONE** — This integration is entirely local (localhost only).
+        Zero external network communication.
+
+        ## 🔐 Security Controls
+
+        ### Credential Management
+        - API keys stored in ASH secure store (encrypted at rest)
+        - Keys NEVER written to config files, logs, or environment variables
+        - Keys accessed via `ash::secrets::get()` — never passed as CLI args
+        - Keys rotate-able without reinstalling the plugin
+
+        ### Input Sanitization
+        - Quick note content sanitized before API calls (no injection)
+        - File paths validated and canonicalized (no path traversal)
+        - JSON responses parsed with `jq` (no eval of responses)
+        - API response size limited to prevent memory exhaustion
+
+        ### Network Security
+        - API URL validated at configuration time (must be localhost)
+        - Rejects non-localhost URLs: `if [[ ! "${API_URL}" =~ localhost|127\. ]]`
+        - TLS supported and recommended (user enables in Obsidian settings)
+        - Connection timeout: 5 seconds (prevents hanging on unavailable service)
+
+        ## 📜 Terms of Service Compliance
+
+        ### Service ToS Review
+        - [x] Reviewed Obsidian's Terms of Service
+        - [x] Local REST API is an official community plugin (permitted use)
+        - [x] No ToS violations — purely local integration
+        - [x] No rate limit concerns (local, unlimited)
+
+        ### Data Privacy
+        - [x] No user data leaves the local machine
+        - [x] GDPR compliant (data never leaves user's device)
+        - [x] No analytics about note content
+        - [x] User can disable at any time — full data control
+
+        ## 🚨 Potential Security Concerns & Mitigations
+
+        | Concern | Mitigation |
+        |---------|-----------|
+        | API key exposure in logs | Keys filtered from all log output |
+        | SSRF via configurable URL | Strict localhost-only validation |
+        | Note content in logs | Note content never logged |
+        | Obsidian plugin malicious | User installs Obsidian plugin separately (their choice) |
+        | Port conflict | Configurable port, conflict detection on startup |
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — USER INTERFACE DESIGN
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: ui_design
+    attributes:
+      label: "🎨 User Interface & Experience Design"
+      description: >
+        Design the user-facing elements: Waybar modules, Rofi menus,
+        notifications, CLI commands, and keybinds.
+      placeholder: |
+        ## 📊 Waybar Module Design
+
+        ### Task Count Widget
+        ```
+        ┌──────────────────────────────────────────────┐
+        │  📝 3 due   ✅ 12 done   🔖 2 overdue  [Obs] │
+        └──────────────────────────────────────────────┘
+        ```
+
+        **Waybar module JSON:**
+        ```jsonc
+        // custom/obsidian-tasks
+        "custom/obsidian-tasks": {
+          "exec": "~/.local/share/ash/plugins/obsidian/waybar/module.sh",
+          "interval": 60,
+          "format": "📝 {} tasks",
+          "format-alt": "📝 {alt}",
+          "tooltip": true,
+          "tooltip-format": "Due today: {due}\nOverdue: {overdue}\nCompleted: {done}",
+          "return-type": "json",
+          "on-click": "obsidian://open",
+          "on-click-right": "bash ~/.local/share/ash/plugins/obsidian/rofi/quick-note.sh"
+        }
+        ```
+
+        **Theme-aware CSS:**
+        ```css
+        #custom-obsidian-tasks {
+          color: @accent-primary;
+          background: @surface;
+          border-radius: 8px;
+          padding: 0 12px;
+          margin: 4px 2px;
+          transition: all 200ms ease;
+        }
+
+        #custom-obsidian-tasks.overdue {
+          color: @accent-error;
+          animation: pulse 2s infinite;
+        }
+        ```
+
+        ## 🚀 Rofi Quick Capture UI
+
+        ```
+        ╔══════════════════════════════════════════════╗
+        ║  📝 Quick Note → Obsidian Daily Note         ║
+        ╠══════════════════════════════════════════════╣
+        ║  > |                                         ║
+        ╠══════════════════════════════════════════════╣
+        ║  📅 2024-01-15 Daily Note                   ║
+        ║  📁 Daily Notes/2024-01-15.md                ║
+        ║  ⌨️  Enter to append • Esc to cancel          ║
+        ╚══════════════════════════════════════════════╝
+        ```
+
+        ## 🔔 Notification Templates
+
+        ```bash
+        # Task reminder notification:
+        notify-send \
+          --app-name "Obsidian" \
+          --icon "${ASH_PLUGIN_DIR}/assets/obsidian.svg" \
+          --urgency normal \
+          --expire-time 8000 \
+          --hint string:x-ash-category:obsidian \
+          "📝 Obsidian Reminder" \
+          "3 tasks due today — Click to open Obsidian"
+
+        # Quick note confirmation:
+        notify-send \
+          --app-name "Obsidian" \
+          --urgency low \
+          "✅ Note Added" \
+          "Saved to $(date +%Y-%m-%d).md"
+        ```
+
+        ## ⚡ CLI Commands
+
+        ```bash
+        # Plugin-provided commands:
+        ash obsidian status              # Connection + task summary
+        ash obsidian note "quick text"   # Append quick note
+        ash obsidian tasks               # List today's tasks
+        ash obsidian tasks --overdue     # List overdue tasks
+        ash obsidian open                # Launch Obsidian
+        ash obsidian sync                # Force sync
+
+        # Fish abbreviations:
+        obs    → ash obsidian status
+        obsn   → ash obsidian note
+        obst   → ash obsidian tasks
+        ```
+
+        ## ⌨️ Suggested Keybinds
+
+        ```bash
+        # In hyprland keybinds (registered by plugin):
+        bind = SUPER SHIFT, N, exec, ash obsidian note --rofi
+        bind = SUPER SHIFT, O, exec, ash obsidian tasks --rofi
+        bind = SUPER SHIFT, M, exec, obsidian://open
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — IMPLEMENTATION COMPLEXITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: complexity
+    attributes:
+      label: "📊 Implementation Complexity Assessment"
+      description: >
+        Help the team understand the effort required for this integration.
+      placeholder: |
+        ## ⏱️ Estimated Implementation Effort
+
+        | Phase | Effort | Description |
+        |-------|--------|-------------|
+        | Plugin scaffold | 0.5 days | `ash plugin create --type integration` |
+        | REST API client | 1 day | Wrapper for Obsidian Local REST API |
+        | Task fetching | 0.5 days | Parse tasks from API response |
+        | Quick note append | 0.5 days | POST to daily note endpoint |
+        | WebSocket listener | 1 day | Real-time event handling |
+        | Waybar module | 0.5 days | JSON output + CSS styling |
+        | Rofi quick-note | 0.5 days | Input UI + handler |
+        | Mode sync | 1 day | Bidirectional mode state sync |
+        | Tests | 1 day | Unit + integration tests |
+        | Documentation | 0.5 days | README + guide |
+        | **Total** | **7 days** | 1-2 week sprint |
+
+        ## 🔗 External Dependencies
+
+        | Dependency | Type | Already in ASH | Risk |
+        |-----------|------|---------------|------|
+        | curl | System | ✅ Yes | None |
+        | jq | System | ✅ Yes | None |
+        | websocat | System | ❌ New dep | Low — in most repos |
+        | Obsidian Local REST API | Obsidian plugin | ❌ User installs | Low |
+
+        ## ⚠️ Implementation Risks
+
+        | Risk | Probability | Impact | Mitigation |
+        |------|-------------|--------|-----------|
+        | API breaks between Obsidian versions | Medium | High | Version lock + migration path |
+        | WebSocket connection drops | Medium | Low | Auto-reconnect with backoff |
+        | Daily note template varies by user | High | Medium | Configurable template format |
+        | Obsidian not running | High | Low | Graceful degradation (hide widget) |
+        | Large vaults slow queries | Medium | Medium | Query timeout + caching |
+
+        ## 🔄 Maintenance Burden
+
+        - **Ongoing maintenance:** Low — Obsidian API is stable
+        - **Update frequency needed:** On major Obsidian releases only
+        - **I am willing to maintain:** Yes, long-term
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — ALTERNATIVES ANALYSIS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 Alternatives Analysis"
+      description: >
+        Why is this integration needed vs existing alternatives?
+      placeholder: |
+        ## Existing Solutions Evaluated
+
+        ### Alternative 1: obsidian-cli (npm package)
+        **URL:** https://github.com/julynervoso/obsidian-cli
+        **Why insufficient:**
+        - Requires Node.js runtime (heavy dependency)
+        - Only supports note creation, not reading/tasks
+        - Not maintained (last commit 3 years ago)
+        - No Waybar/AGS widget support
+        - No ASH mode sync
+
+        ### Alternative 2: Direct file manipulation
+        **Approach:** Read Obsidian vault `.md` files directly
+        **Why insufficient:**
+        - Bypasses Obsidian's internal state (sync conflicts)
+        - Doesn't work with Obsidian Sync encrypted vaults
+        - No real-time event awareness
+        - Breaks with non-standard vault structures
+
+        ### Alternative 3: rofi-obsidian (existing community plugin)
+        **URL:** https://github.com/example/rofi-obsidian
+        **Why insufficient:**
+        - Only covers quick note capture, not task widget
+        - Not integrated with ASH's mode/hook system
+        - No theme awareness
+        - Requires manual setup, not managed by `ash plugin`
+
+        ## Why This Integration Is the Right Approach
+
+        The Obsidian Local REST API (official community plugin) is:
+        - ✅ Actively maintained by the plugin author
+        - ✅ Officially endorsed by Obsidian (in their community plugins)
+        - ✅ Stable API with version guarantees
+        - ✅ Zero configuration on Obsidian's side beyond installing the plugin
+        - ✅ Local only — perfect for privacy-conscious users
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — COMMUNITY DEMAND
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: community_demand
+    attributes:
+      label: "👥 Community Demand Evidence"
+      description: >
+        Quantify the demand for this integration with concrete evidence.
+      placeholder: |
+        ## 📊 Quantified Community Interest
+
+        | Platform | Metric | Value |
+        |----------|--------|-------|
+        | Discord #integration-requests | Votes for "Obsidian" | 89 upvotes 🔥 |
+        | Discord messages mentioning Obsidian | Last 30 days | 47 messages |
+        | GitHub discussions mentioning Obsidian | All time | 12 mentions |
+        | Community survey Q3 2024 | "Most wanted integration" rank | #3 of 50 |
+        | Reddit r/unixporn | Posts asking about Obsidian + Hyprland | 6 posts |
+
+        ## 💬 Community Quotes
+
+        > "I use Obsidian for everything and having to switch windows just to add a
+        > quick note completely breaks my flow. An ASH integration would be 🔥"
+        > — @user1 (Discord, 47 reacts)
+
+        > "Obsidian is the one app that isn't in the ASH ecosystem. Please add it!"
+        > — @user2 (GitHub Discussion #234)
+
+        > "If ASH had Obsidian integration I would switch from HyDE immediately"
+        > — @user3 (Reddit, 34 upvotes)
+
+        ## 📈 Market Analysis
+
+        - Obsidian users on Linux: ~180,000 (estimated from community forums)
+        - Hyprland + Obsidian users (overlap): ~15,000 (from surveys)
+        - Expected plugin installs in first month: ~2,000 (based on similar plugin stats)
+
+        ## 🔗 Related Issues & Discussions
+
+        - Discord discussion thread: [link] (89 reacts, 23 comments)
+        - GitHub Discussion: #XXX — "Productivity app integrations"
+        - Reddit thread: https://reddit.com/r/hyprland/... (156 upvotes)
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — CONTRIBUTION OFFER
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: "🤝 Implementation Contribution"
+      description: "Are you willing to implement this integration?"
+      options:
+        - "💻 Yes — I will build the complete integration and submit as a plugin PR"
+        - "💻 Yes — I will build it as a community plugin (immediate publication)"
+        - "🤝 Yes — I can co-implement with another developer"
+        - "🧪 Yes — I can write tests and help validate the implementation"
+        - "📖 Yes — I can write documentation for the integration"
+        - "🔄 Maybe — I need guidance on plugin development first"
+        - "💰 Sponsor — I can fund development of this integration"
+        - "👀 No — Requesting for community/core team to implement"
+    validations:
+      required: true
+
+  - type: input
+    id: implementation_timeline
+    attributes:
+      label: "⏰ Implementation Timeline (if contributing)"
+      placeholder: "e.g., First draft within 2 weeks, complete in 1 month"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Integration Request Checklist"
+      options:
+        - label: >
+            🔍 Verified this integration is **not already available**
+          required: true
+        - label: >
+            📋 This request is **not a duplicate** of existing issues
+          required: true
+        - label: >
+            📜 Reviewed the service's **Terms of Service** — integration is permitted
+          required: true
+        - label: >
+            🔒 **No user data** will be sent to external servers without explicit consent
+          required: true
+        - label: >
+            🔌 Considered whether this could be a **plugin first** (before core inclusion)
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — CLOSING
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        <div align="center">
+
+        ### 🔗 Thank You for Your Integration Request!
+
+        #### 🔄 Integration Review Pipeline
+
+        ```
+        Request → Community Vote → Technical Review → Acceptance → Implementation → Release
+           now        1 week          2 weeks           instant       varies         next ver
+        ```
+
+        #### 📊 Integration Acceptance Criteria
+
+        | Criteria | Weight |
+        |----------|--------|
+        | 🔒 Privacy & Security (clean audit) | 35% |
+        | 👥 Community demand evidence | 25% |
+        | 🔧 Technical feasibility | 20% |
+        | 📊 Maintenance burden | 10% |
+        | ✨ Unique value to ASH | 10% |
+
+        #### 🚀 Fastest Path: Build It as a Plugin!
+
+        ```bash
+        # Start building today:
+        ash plugin create --type integration --name "[service]-integration"
+        cd ash-plugin-[service]-integration
+        # Follow the template scaffolding
+        # Submit to community registry when ready!
+        ```
+
+        *— The ASH Dotfiles Integration Team* 🔗
+
+        </div>

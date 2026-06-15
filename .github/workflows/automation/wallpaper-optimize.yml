@@ -1,0 +1,1284 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🖼️ ASH DOTFILES v5.0 OMEGA — ULTRA WALLPAPER OPTIMIZATION ENGINE                         ║
+# ║                                                                                           ║
+# ║  ██╗    ██╗ █████╗ ██╗     ██╗     ██████╗  █████╗ ██████╗ ███████╗██████╗               ║
+# ║  ██║    ██║██╔══██╗██║     ██║     ██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗              ║
+# ║  ██║ █╗ ██║███████║██║     ██║     ██████╔╝███████║██████╔╝█████╗  ██████╔╝              ║
+# ║  ██║███╗██║██╔══██║██║     ██║     ██╔═══╝ ██╔══██║██╔═══╝ ██╔══╝  ██╔══██╗             ║
+# ║  ╚███╔███╔╝██║  ██║███████╗███████╗██║     ██║  ██║██║     ███████╗██║  ██║             ║
+# ║   ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝             ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 OPTIMIZATION PIPELINE:                                                                ║
+# ║     📐 Multi-resolution generation (1080p/1440p/4K/ultrawide/mobile)                     ║
+# ║     🎨 Color palette extraction (dominant colors for theme matching)                     ║
+# ║     🗜️ Lossless + lossy compression (WebP/AVIF/JPEG with quality tiers)                   ║
+# ║     🔎 Blur variant generation (for hyprlock & inactive windows)                         ║
+# ║     🌙 Dark/light automatic variants (brightness adjustment)                             ║
+# ║     📊 EXIF metadata stripping (privacy + size reduction)                                ║
+# ║     🏷️ Auto-tagging (dominant colors, category, mood)                                     ║
+# ║     ♿ Accessibility check (suitable for overlaid text)                                   ║
+# ║     📦 Manifest generation (theme-matching database)                                     ║
+# ║     🗑️ Duplicate detection (perceptual hash deduplication)                               ║
+# ║     🖼️ Thumbnail strip generation (for rofi/picker)                                      ║
+# ║     📈 Quality scoring (sharpness + composition + color harmony)                         ║
+# ║                                                                                           ║
+# ║  📊 OUTPUT FORMATS:                                                                       ║
+# ║     WebP (primary) · AVIF (cutting-edge) · JPEG (compatibility)                          ║
+# ║     Thumbnail WebP (for pickers) · Blurred WebP (for lockscreen)                         ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🖼️ Wallpaper Optimize · Ultra Processing Engine"
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "wallpapers/**"
+      - ".github/workflows/automation/wallpaper-optimize.yml"
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "wallpapers/**"
+
+  workflow_dispatch:
+    inputs:
+      category_filter:
+        description: "Category filter (empty = all changed)"
+        required: false
+        default: ""
+        type: string
+      resolutions:
+        description: "Target resolutions"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all               # 1080p + 1440p + 4k + ultrawide
+          - standard          # 1080p + 1440p only
+          - 4k-only           # 4K only
+          - mobile            # Mobile resolutions only
+          - thumbs-only       # Thumbnails only
+      quality_tier:
+        description: "Compression quality tier"
+        required: false
+        default: "production"
+        type: choice
+        options:
+          - draft       # Fast preview quality
+          - standard    # Balanced quality/size
+          - production  # High quality
+          - archival    # Maximum quality
+      generate_variants:
+        description: "Generate blur/dark/light variants"
+        required: false
+        default: true
+        type: boolean
+      extract_colors:
+        description: "Extract color palettes"
+        required: false
+        default: true
+        type: boolean
+      detect_duplicates:
+        description: "Run perceptual duplicate detection"
+        required: false
+        default: true
+        type: boolean
+      force_all:
+        description: "Process all wallpapers (ignore cache)"
+        required: false
+        default: false
+        type: boolean
+      commit_results:
+        description: "Commit optimized wallpapers"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 6 * * 0"     # Weekly Sunday 06:00 UTC
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "wallpaper-optimize-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  OPT_VERSION: "5.0.0"
+  WORK_DIR: "${{ github.workspace }}/.wallpaper-engine"
+  WALLPAPER_DIR: "${{ github.workspace }}/wallpapers"
+  OUTPUT_DIR: "${{ github.workspace }}/wallpapers/.optimized"
+
+  # ── Quality tiers (WebP quality 0-100) ────────────────────────────────────
+  QUALITY_DRAFT: "60"
+  QUALITY_STANDARD: "80"
+  QUALITY_PRODUCTION: "90"
+  QUALITY_ARCHIVAL: "100"
+
+  # ── Processing options ─────────────────────────────────────────────────────
+  QUALITY_TIER: "${{ github.event.inputs.quality_tier || 'production' }}"
+  RESOLUTIONS: "${{ github.event.inputs.resolutions || 'all' }}"
+  GEN_VARIANTS: "${{ github.event.inputs.generate_variants || 'true' }}"
+  EXTRACT_COLORS: "${{ github.event.inputs.extract_colors || 'true' }}"
+  DETECT_DUPES: "${{ github.event.inputs.detect_duplicates || 'true' }}"
+  FORCE_ALL: "${{ github.event.inputs.force_all || 'false' }}"
+  COMMIT_RESULTS: "${{ github.event.inputs.commit_results || 'true' }}"
+  CATEGORY_FILTER: "${{ github.event.inputs.category_filter || '' }}"
+
+  # ── Resolution targets ────────────────────────────────────────────────────
+  RES_1080P: "1920x1080"
+  RES_1440P: "2560x1440"
+  RES_4K: "3840x2160"
+  RES_UW: "3440x1440"
+  RES_MOBILE: "1080x1920"
+  RES_THUMB: "400x225"
+  RES_THUMB_MOBILE: "200x355"
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Detect changed wallpapers
+  # ───────────────────────────────────────────────────────────────────────────
+  detect-wallpapers:
+    name: "🔍 Detect · Changed Wallpapers"
+    runs-on: ubuntu-24.04
+    outputs:
+      wallpapers_json: ${{ steps.matrix.outputs.wallpapers }}
+      count:           ${{ steps.matrix.outputs.count }}
+      has_wallpapers:  ${{ steps.matrix.outputs.has_wallpapers }}
+      session_id:      ${{ steps.session.outputs.id }}
+      webp_quality:    ${{ steps.quality.outputs.q }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🆔 Session"
+        id: session
+        run: |
+          echo "id=wopt-$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+
+      - name: "🎚️ Quality resolution"
+        id: quality
+        run: |
+          case "${QUALITY_TIER}" in
+            draft)      Q="${QUALITY_DRAFT}"      ;;
+            standard)   Q="${QUALITY_STANDARD}"   ;;
+            production) Q="${QUALITY_PRODUCTION}" ;;
+            archival)   Q="${QUALITY_ARCHIVAL}"   ;;
+            *)          Q="${QUALITY_PRODUCTION}" ;;
+          esac
+          echo "q=${Q}" >> "$GITHUB_OUTPUT"
+          echo "  🎚️ Quality: ${QUALITY_TIER} → q${Q}"
+
+      - name: "🔍 Detect wallpapers for processing"
+        id: matrix
+        run: |
+          set -euo pipefail
+
+          SUPPORTED_EXTS=("jpg" "jpeg" "png" "webp" "bmp" "tiff" "tif")
+          ALL_WALLPAPERS=()
+          PROCESS_WALLPAPERS=()
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🔍 Scanning wallpapers directory..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          # Discover all wallpapers
+          if [[ -d "${WALLPAPER_DIR}" ]]; then
+            for ext in "${SUPPORTED_EXTS[@]}"; do
+              while IFS= read -r -d '' file; do
+                # Skip .optimized directory
+                [[ "${file}" == *"/.optimized/"* ]] && continue
+                REL_PATH="${file#${GITHUB_WORKSPACE}/}"
+                ALL_WALLPAPERS+=("${REL_PATH}")
+              done < <(find "${WALLPAPER_DIR}" \
+                -not -path "*/.optimized/*" \
+                -not -path "*/.git/*" \
+                -name "*.${ext}" -print0 2>/dev/null)
+            done
+          fi
+
+          echo "  📦 Total wallpapers found: ${#ALL_WALLPAPERS[@]}"
+
+          # Filter by category
+          if [[ -n "${CATEGORY_FILTER}" ]]; then
+            for wp in "${ALL_WALLPAPERS[@]}"; do
+              [[ "${wp}" == *"${CATEGORY_FILTER}"* ]] && \
+                PROCESS_WALLPAPERS+=("${wp}")
+            done
+            echo "  🎯 Category filter '${CATEGORY_FILTER}': ${#PROCESS_WALLPAPERS[@]}"
+          elif [[ "${FORCE_ALL}" == "true" ]]; then
+            PROCESS_WALLPAPERS=("${ALL_WALLPAPERS[@]}")
+            echo "  ⚡ Force all: ${#PROCESS_WALLPAPERS[@]}"
+          else
+            # Detect git-changed files
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | \
+              grep "^wallpapers/" | \
+              grep -v "\.optimized/" || echo "")
+
+            for wp in "${ALL_WALLPAPERS[@]}"; do
+              if echo "${CHANGED}" | grep -qF "${wp}"; then
+                PROCESS_WALLPAPERS+=("${wp}")
+              fi
+            done
+
+            # Schedule: process all; otherwise sample
+            if [[ ${#PROCESS_WALLPAPERS[@]} -eq 0 ]]; then
+              if [[ "${{ github.event_name }}" == "schedule" ]]; then
+                PROCESS_WALLPAPERS=("${ALL_WALLPAPERS[@]}")
+              else
+                PROCESS_WALLPAPERS=("${ALL_WALLPAPERS[@]:0:10}")
+              fi
+            fi
+          fi
+
+          # PR limit
+          if [[ "${{ github.event_name }}" == "pull_request" && \
+                ${#PROCESS_WALLPAPERS[@]} -gt 5 ]]; then
+            PROCESS_WALLPAPERS=("${PROCESS_WALLPAPERS[@]:0:5}")
+            echo "  ⚠️ Limited to 5 for PR"
+          fi
+
+          # Build JSON matrix
+          if [[ ${#PROCESS_WALLPAPERS[@]} -eq 0 ]]; then
+            JSON='[]'
+            HAS="false"
+          else
+            JSON="["
+            FIRST=true
+            for wp in "${PROCESS_WALLPAPERS[@]}"; do
+              FILENAME=$(basename "${wp}")
+              BASENAME="${FILENAME%.*}"
+              EXT="${FILENAME##*.}"
+              CATEGORY=$(dirname "${wp}" | xargs basename 2>/dev/null || echo "general")
+              [[ "${CATEGORY}" == "wallpapers" ]] && CATEGORY="general"
+
+              # Get file size
+              FILESIZE=$(wc -c < "${GITHUB_WORKSPACE}/${wp}" 2>/dev/null || echo "0")
+
+              [[ "${FIRST}" == "false" ]] && JSON+=","
+              JSON+="{\"path\":\"${wp}\",\"filename\":\"${FILENAME}\","
+              JSON+="\"basename\":\"${BASENAME}\",\"ext\":\"${EXT}\","
+              JSON+="\"category\":\"${CATEGORY}\",\"size\":${FILESIZE}}"
+              FIRST="false"
+            done
+            JSON+="]"
+            HAS="true"
+          fi
+
+          echo "wallpapers=${JSON}" >> "$GITHUB_OUTPUT"
+          echo "count=${#PROCESS_WALLPAPERS[@]}"  >> "$GITHUB_OUTPUT"
+          echo "has_wallpapers=${HAS}" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "  ✅ Matrix: ${#PROCESS_WALLPAPERS[@]} wallpapers to process"
+          for wp in "${PROCESS_WALLPAPERS[@]:0:8}"; do
+            echo "     • ${wp}"
+          done
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Process each wallpaper (parallel matrix)
+  # ───────────────────────────────────────────────────────────────────────────
+  optimize-wallpaper:
+    name: "⚡ Optimize · ${{ matrix.wallpaper.basename }}"
+    needs: detect-wallpapers
+    if: needs.detect-wallpapers.outputs.has_wallpapers == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        wallpaper: ${{ fromJson(needs.detect-wallpapers.outputs.wallpapers_json) }}
+
+    env:
+      WP_PATH:     ${{ matrix.wallpaper.path }}
+      WP_FILENAME: ${{ matrix.wallpaper.filename }}
+      WP_BASENAME: ${{ matrix.wallpaper.basename }}
+      WP_EXT:      ${{ matrix.wallpaper.ext }}
+      WP_CATEGORY: ${{ matrix.wallpaper.category }}
+      WEBP_Q:      ${{ needs.detect-wallpapers.outputs.webp_quality }}
+      SESSION_ID:  ${{ needs.detect-wallpapers.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install processing stack"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            python3 \
+            python3-pip \
+            imagemagick \
+            libwebp-dev \
+            webp \
+            optipng \
+            jpegoptim \
+            pngquant \
+            exiftool \
+            jq \
+            bc \
+            2>/dev/null || true
+
+          pip3 install --quiet --user \
+            Pillow==11.0.0 \
+            numpy==2.1.2 \
+            scipy==1.14.1 \
+            matplotlib==3.9.2 \
+            colorthief==0.2.1 \
+            scikit-learn==1.5.2 \
+            imagehash==4.3.1 \
+            rich==13.9.2 \
+            2>/dev/null || true
+
+          echo "  ✅ Processing stack ready"
+
+      - name: "📊 Analyze wallpaper"
+        id: analyze
+        run: |
+          set -euo pipefail
+
+          INPUT="${GITHUB_WORKSPACE}/${WP_PATH}"
+          ANALYSIS_DIR="${WORK_DIR}/analysis/${WP_BASENAME}"
+          mkdir -p "${ANALYSIS_DIR}"
+
+          python3 << 'ANALYZE_EOF'
+          import json
+          import os
+          import hashlib
+          import math
+          from pathlib import Path
+
+          try:
+              from PIL import Image, ImageStat, ImageFilter
+              import numpy as np
+              from colorthief import ColorThief
+              import imagehash
+          except ImportError as e:
+              print(f"  ⚠️ Import: {e}")
+
+          WP_PATH     = os.environ["WP_PATH"]
+          WP_BASENAME = os.environ["WP_BASENAME"]
+          WP_CATEGORY = os.environ["WP_CATEGORY"]
+          INPUT       = f"{os.environ['GITHUB_WORKSPACE']}/{WP_PATH}"
+          ANALYSIS_DIR= f"{os.environ['WORK_DIR']}/analysis/{WP_BASENAME}"
+
+          try:
+              img = Image.open(INPUT).convert("RGB")
+              orig_w, orig_h = img.size
+              orig_size = Path(INPUT).stat().st_size
+              aspect_ratio = round(orig_w / orig_h, 4)
+          except Exception as e:
+              print(f"  ❌ Cannot open: {e}")
+              exit(1)
+
+          print(f"  📊 Analyzing: {WP_BASENAME}")
+          print(f"  📐 Size: {orig_w}x{orig_h} ({orig_size//1024}KB)")
+
+          # ── Color extraction ──────────────────────────────────────
+          dominant_colors = []
+          palette_hex = []
+          try:
+              ct = ColorThief(INPUT)
+              palette = ct.get_palette(color_count=10, quality=1)
+              for r, g, b in palette:
+                  hex_val = f"#{r:02x}{g:02x}{b:02x}"
+                  palette_hex.append(hex_val)
+                  dominant_colors.append({"r":r,"g":g,"b":b,"hex":hex_val})
+          except Exception as e:
+              print(f"  ⚠️ Color extraction: {e}")
+              dominant_colors = [{"r":30,"g":30,"b":46,"hex":"#1e1e2e"}]
+              palette_hex = ["#1e1e2e"]
+
+          # ── Image statistics ──────────────────────────────────────
+          stat = ImageStat.Stat(img)
+          brightness   = round(sum(stat.mean) / 3, 1)
+          contrast_val = round(sum(stat.stddev) / 3, 1)
+          is_dark      = brightness < 128
+
+          # ── Sharpness (Laplacian variance) ────────────────────────
+          gray = img.convert("L")
+          lap  = np.array(gray.filter(ImageFilter.Kernel(
+              size=3, kernel=[-1,-1,-1,-1,8,-1,-1,-1,-1],
+              scale=1, offset=0
+          )))
+          sharpness = round(float(np.var(lap)), 1)
+
+          # ── Perceptual hash ───────────────────────────────────────
+          try:
+              phash = str(imagehash.phash(img))
+              dhash = str(imagehash.dhash(img))
+          except Exception:
+              phash = hashlib.md5(img.tobytes()[:1000]).hexdigest()[:16]
+              dhash = phash
+
+          # ── Mood detection (basic) ────────────────────────────────
+          dom_rgb = dominant_colors[0] if dominant_colors else {"r":128,"g":128,"b":128}
+          def to_hsv(r,g,b):
+              r,g,b = r/255, g/255, b/255
+              max_c = max(r,g,b); min_c = min(r,g,b)
+              d = max_c - min_c
+              h = 0
+              if d != 0:
+                  if max_c == r:   h = (g-b)/d % 6
+                  elif max_c == g: h = (b-r)/d + 2
+                  else:            h = (r-g)/d + 4
+                  h /= 6
+              s = 0 if max_c == 0 else d/max_c
+              v = max_c
+              return h*360, s*100, v*100
+
+          h_deg, s_pct, v_pct = to_hsv(dom_rgb["r"], dom_rgb["g"], dom_rgb["b"])
+
+          mood = "neutral"
+          if v_pct < 25:    mood = "dark"
+          elif v_pct > 80 and s_pct < 20: mood = "bright"
+          elif s_pct > 70:  mood = "vibrant"
+          elif s_pct < 20:  mood = "minimal"
+          elif 30 < h_deg < 70: mood = "warm"
+          elif 200 < h_deg < 260: mood = "cool"
+
+          # ── Text overlay suitability ──────────────────────────────
+          # Check if image has suitable area for overlaid text
+          text_suitable = contrast_val > 30 and (brightness < 100 or brightness > 155)
+
+          # ── Category auto-detection ────────────────────────────────
+          if WP_CATEGORY == "general":
+              if mood in ("dark","cool"):          auto_cat = "dark"
+              elif mood in ("bright","minimal"):   auto_cat = "light"
+              elif mood == "vibrant":              auto_cat = "neon"
+              else:                                auto_cat = "abstract"
+          else:
+              auto_cat = WP_CATEGORY
+
+          # ── Resolution category ────────────────────────────────────
+          if orig_w >= 3840:    res_cat = "4k"
+          elif orig_w >= 2560:  res_cat = "1440p"
+          elif orig_w >= 1920:  res_cat = "1080p"
+          else:                 res_cat = "sub-hd"
+
+          # ── Compile analysis ──────────────────────────────────────
+          analysis = {
+              "basename":       WP_BASENAME,
+              "path":           WP_PATH,
+              "original": {
+                  "width":       orig_w,
+                  "height":      orig_h,
+                  "size_bytes":  orig_size,
+                  "size_kb":     round(orig_size/1024,1),
+                  "aspect_ratio":aspect_ratio,
+                  "resolution_category": res_cat,
+              },
+              "colors": {
+                  "dominant":    dominant_colors[:10],
+                  "palette_hex": palette_hex[:10],
+                  "accent":      palette_hex[0] if palette_hex else "#888888",
+                  "background":  palette_hex[-1] if palette_hex else "#1e1e2e",
+              },
+              "quality": {
+                  "brightness":  brightness,
+                  "contrast":    contrast_val,
+                  "sharpness":   sharpness,
+                  "is_dark":     is_dark,
+                  "mood":        mood,
+                  "text_overlay_suitable": text_suitable,
+              },
+              "classification": {
+                  "category":    auto_cat,
+                  "mood":        mood,
+                  "is_dark":     is_dark,
+                  "tags":        [auto_cat, mood, res_cat, WP_CATEGORY],
+              },
+              "hashes": {
+                  "phash": phash,
+                  "dhash": dhash,
+              },
+          }
+
+          with open(f"{ANALYSIS_DIR}/analysis.json","w") as f:
+              json.dump(analysis, f, indent=2)
+
+          # GitHub outputs
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"orig_width={orig_w}\n")
+              out.write(f"orig_height={orig_h}\n")
+              out.write(f"brightness={brightness}\n")
+              out.write(f"is_dark={'true' if is_dark else 'false'}\n")
+              out.write(f"mood={mood}\n")
+              out.write(f"accent={palette_hex[0] if palette_hex else '#888888'}\n")
+              out.write(f"res_cat={res_cat}\n")
+
+          print(f"  ✅ Analysis complete")
+          print(f"  🎨 Dominant color: {palette_hex[0] if palette_hex else 'unknown'}")
+          print(f"  💡 Brightness: {brightness:.1f} ({'dark' if is_dark else 'light'})")
+          print(f"  🎭 Mood: {mood}")
+          print(f"  📐 Resolution: {orig_w}x{orig_h} ({res_cat})")
+          ANALYZE_EOF
+
+      - name: "⚡ Multi-resolution optimization"
+        id: optimize
+        run: |
+          set -euo pipefail
+
+          INPUT="${GITHUB_WORKSPACE}/${WP_PATH}"
+          ANALYSIS="${WORK_DIR}/analysis/${WP_BASENAME}/analysis.json"
+          OPT_DIR="${WORK_DIR}/optimized/${WP_BASENAME}"
+          mkdir -p "${OPT_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ Optimizing: ${WP_BASENAME}"
+          echo "  🎚️ Quality: q${WEBP_Q}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          python3 << 'OPT_EOF'
+          import json
+          import os
+          import math
+          from pathlib import Path
+
+          try:
+              from PIL import Image, ImageFilter, ImageEnhance
+              import numpy as np
+          except ImportError as e:
+              print(f"  ❌ {e}")
+              exit(1)
+
+          INPUT      = os.environ["INPUT"]
+          ANALYSIS   = os.environ["ANALYSIS"]
+          OPT_DIR    = Path(os.environ["OPT_DIR"])
+          WP_BASENAME= os.environ["WP_BASENAME"]
+          WEBP_Q     = int(os.environ["WEBP_Q"])
+          RESOLUTIONS= os.environ["RESOLUTIONS"]
+          GEN_VARIANTS=os.environ["GEN_VARIANTS"] == "true"
+
+          with open(ANALYSIS) as f:
+              analysis = json.load(f)
+
+          orig_w = analysis["original"]["width"]
+          orig_h = analysis["original"]["height"]
+          is_dark= analysis["quality"]["is_dark"]
+
+          img = Image.open(INPUT).convert("RGB")
+          print(f"  📐 Original: {orig_w}x{orig_h}")
+
+          # ── Resolution targets ────────────────────────────────────
+          RES_MAP = {
+              "1080p":    (1920, 1080),
+              "1440p":    (2560, 1440),
+              "4k":       (3840, 2160),
+              "ultrawide":(3440, 1440),
+              "mobile":   (1080, 1920),
+              "thumb":    (400,  225),
+          }
+
+          if RESOLUTIONS == "all":
+              targets = list(RES_MAP.items())
+          elif RESOLUTIONS == "standard":
+              targets = [(k,v) for k,v in RES_MAP.items() if k in ("1080p","1440p","thumb")]
+          elif RESOLUTIONS == "4k-only":
+              targets = [(k,v) for k,v in RES_MAP.items() if k in ("4k","thumb")]
+          elif RESOLUTIONS == "mobile":
+              targets = [(k,v) for k,v in RES_MAP.items() if k in ("mobile","thumb")]
+          elif RESOLUTIONS == "thumbs-only":
+              targets = [("thumb", (400,225))]
+          else:
+              targets = list(RES_MAP.items())
+
+          saved_sizes = {}
+
+          def smart_resize(img, target_w, target_h, cover=True):
+              """Resize with smart cropping (cover mode) or letterbox (contain)."""
+              img_w, img_h = img.size
+              if cover:
+                  # Scale to cover, then center crop
+                  scale = max(target_w/img_w, target_h/img_h)
+                  new_w = math.ceil(img_w * scale)
+                  new_h = math.ceil(img_h * scale)
+                  resized = img.resize((new_w, new_h), Image.LANCZOS)
+                  left   = (new_w - target_w) // 2
+                  top    = (new_h - target_h) // 2
+                  return resized.crop((left, top, left+target_w, top+target_h))
+              else:
+                  # Letterbox
+                  scale = min(target_w/img_w, target_h/img_h)
+                  new_w = int(img_w * scale)
+                  new_h = int(img_h * scale)
+                  resized = img.resize((new_w, new_h), Image.LANCZOS)
+                  result  = Image.new("RGB", (target_w, target_h),
+                                      (0,0,0))
+                  offset_x = (target_w - new_w) // 2
+                  offset_y = (target_h - new_h) // 2
+                  result.paste(resized, (offset_x, offset_y))
+                  return result
+
+          def save_webp(img_obj, path, quality):
+              img_obj.save(str(path), "WEBP",
+                           quality=quality,
+                           method=6,
+                           lossless=False)
+              return path.stat().st_size
+
+          for res_name, (tw, th) in targets:
+              is_mobile = res_name == "mobile"
+              out_path  = OPT_DIR / f"{WP_BASENAME}_{res_name}.webp"
+
+              try:
+                  # Resize
+                  resized = smart_resize(img, tw, th, cover=True)
+
+                  # Slight sharpening for downscaled images
+                  if orig_w > tw * 1.5:
+                      resized = resized.filter(ImageFilter.UnsharpMask(
+                          radius=0.8, percent=60, threshold=2
+                      ))
+
+                  size = save_webp(resized, out_path, WEBP_Q)
+                  saved_sizes[res_name] = {"path": str(out_path), "size_kb": round(size/1024,1)}
+                  print(f"  ✅ {res_name:12s} {tw}x{th}  {size//1024}KB → {out_path.name}")
+
+              except Exception as e:
+                  print(f"  ⚠️ {res_name}: {e}")
+
+          # ── Blur variants (for hyprlock) ──────────────────────────
+          if GEN_VARIANTS:
+              for blur_level in [5, 15, 30]:
+                  try:
+                      # Use 1440p as base for blur
+                      base_res = saved_sizes.get("1440p") or saved_sizes.get("1080p")
+                      if not base_res: continue
+
+                      base_img = Image.open(base_res["path"]).convert("RGB")
+                      sigma    = blur_level * 2
+
+                      # Progressive blur
+                      blurred = base_img
+                      for _ in range(3):
+                          blurred = blurred.filter(
+                              ImageFilter.GaussianBlur(radius=sigma//3)
+                          )
+
+                      # Slight darkening for lockscreen
+                      darkened = ImageEnhance.Brightness(blurred).enhance(0.7)
+
+                      blur_path = OPT_DIR / f"{WP_BASENAME}_blur{blur_level}.webp"
+                      size = save_webp(darkened, blur_path, max(WEBP_Q-10, 60))
+                      saved_sizes[f"blur{blur_level}"] = {
+                          "path": str(blur_path),
+                          "size_kb": round(size/1024,1)
+                      }
+                      print(f"  🔅 blur{blur_level:>2d}        {size//1024}KB → {blur_path.name}")
+
+                  except Exception as e:
+                      print(f"  ⚠️ Blur {blur_level}: {e}")
+
+              # ── Dark variant ──────────────────────────────────────
+              if not is_dark:
+                  try:
+                      base_res = saved_sizes.get("1440p") or saved_sizes.get("1080p")
+                      if base_res:
+                          base_img = Image.open(base_res["path"]).convert("RGB")
+                          dark_img = ImageEnhance.Brightness(base_img).enhance(0.45)
+                          dark_img = ImageEnhance.Contrast(dark_img).enhance(1.1)
+                          dark_path= OPT_DIR / f"{WP_BASENAME}_dark.webp"
+                          size = save_webp(dark_img, dark_path, WEBP_Q)
+                          saved_sizes["dark_variant"] = {
+                              "path": str(dark_path),
+                              "size_kb": round(size/1024,1)
+                          }
+                          print(f"  🌙 dark_variant          {size//1024}KB → {dark_path.name}")
+                  except Exception as e:
+                      print(f"  ⚠️ Dark variant: {e}")
+
+              # ── Light variant ─────────────────────────────────────
+              if is_dark:
+                  try:
+                      base_res = saved_sizes.get("1440p") or saved_sizes.get("1080p")
+                      if base_res:
+                          base_img = Image.open(base_res["path"]).convert("RGB")
+                          light_img= ImageEnhance.Brightness(base_img).enhance(1.8)
+                          light_img= ImageEnhance.Saturation(light_img).enhance(0.7)
+                          light_path=OPT_DIR / f"{WP_BASENAME}_light.webp"
+                          size = save_webp(light_img, light_path, WEBP_Q)
+                          saved_sizes["light_variant"] = {
+                              "path": str(light_path),
+                              "size_kb": round(size/1024,1)
+                          }
+                          print(f"  ☀️ light_variant         {size//1024}KB → {light_path.name}")
+                  except Exception as e:
+                      print(f"  ⚠️ Light variant: {e}")
+
+          # ── Write manifest ────────────────────────────────────────
+          manifest = {
+              "basename":    WP_BASENAME,
+              "resolutions": saved_sizes,
+              "total_files": len(saved_sizes),
+              "total_size_kb": round(sum(v["size_kb"] for v in saved_sizes.values()), 1),
+          }
+          with open(OPT_DIR / "manifest.json","w") as f:
+              json.dump(manifest, f, indent=2)
+
+          total_kb = sum(v["size_kb"] for v in saved_sizes.values())
+          print(f"\n  📦 Total output: {total_kb:.0f}KB in {len(saved_sizes)} files")
+          OPT_EOF
+
+      - name: "🎨 Color palette export"
+        if: env.EXTRACT_COLORS == 'true'
+        run: |
+          ANALYSIS="${WORK_DIR}/analysis/${WP_BASENAME}/analysis.json"
+          OPT_DIR="${WORK_DIR}/optimized/${WP_BASENAME}"
+
+          python3 << 'PALETTE_EOF'
+          import json
+          import os
+
+          ANALYSIS   = os.environ["ANALYSIS"]
+          OPT_DIR    = os.environ["OPT_DIR"]
+          WP_BASENAME= os.environ["WP_BASENAME"]
+
+          with open(ANALYSIS) as f:
+              analysis = json.load(f)
+
+          colors  = analysis.get("colors",{})
+          quality = analysis.get("quality",{})
+          cls     = analysis.get("classification",{})
+          palette_hex = colors.get("palette_hex",[])
+
+          # Map to ASH theme format
+          def safe_color(idx, default):
+              return palette_hex[idx] if idx < len(palette_hex) else default
+
+          ash_palette = {
+              "wallpaper":     f"wallpapers/{os.environ['WP_CATEGORY']}/{os.environ['WP_BASENAME']}.jpg",
+              "generated_at":  "auto",
+              "source":        "wallpaper-optimize",
+              "colors": {
+                  "base":      safe_color(-1, "#1e1e2e"),
+                  "surface0":  safe_color(-2, "#313244"),
+                  "surface1":  safe_color(-3, "#45475a"),
+                  "overlay0":  safe_color(4, "#6c7086"),
+                  "text":      safe_color(3, "#cdd6f4"),
+                  "accent":    safe_color(0, "#cba6f7"),
+                  "blue":      safe_color(1, "#89b4fa"),
+                  "green":     safe_color(2, "#a6e3a1"),
+                  "yellow":    safe_color(5, "#f9e2af"),
+                  "red":       safe_color(6, "#f38ba8"),
+                  "mauve":     safe_color(0, "#cba6f7"),
+                  "peach":     safe_color(7, "#fab387"),
+              },
+              "metadata": {
+                  "brightness":  quality.get("brightness",128),
+                  "is_dark":     quality.get("is_dark", True),
+                  "mood":        quality.get("mood","neutral"),
+                  "tags":        cls.get("tags",[]),
+                  "category":    cls.get("category","abstract"),
+                  "dominant_hex":palette_hex[:5],
+              }
+          }
+
+          # Write color manifest
+          with open(f"{OPT_DIR}/colors.json","w") as f:
+              json.dump(ash_palette, f, indent=2)
+
+          # Write CSS variables
+          css = ":root {\n"
+          for k, v in ash_palette["colors"].items():
+              css += f"  --ash-{k}: {v};\n"
+          css += "}\n"
+          with open(f"{OPT_DIR}/colors.css","w") as f:
+              f.write(css)
+
+          print(f"  ✅ Color palette exported: {len(ash_palette['colors'])} colors")
+          print(f"  🎨 Accent: {ash_palette['colors']['accent']}")
+          PALETTE_EOF
+
+      - name: "🔢 Generate quality report"
+        run: |
+          ANALYSIS="${WORK_DIR}/analysis/${WP_BASENAME}/analysis.json"
+          OPT_MANIFEST="${WORK_DIR}/optimized/${WP_BASENAME}/manifest.json"
+          INPUT="${GITHUB_WORKSPACE}/${WP_PATH}"
+
+          python3 << 'REPORT_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          import matplotlib.patches as patches
+          import matplotlib.gridspec as gridspec
+          import numpy as np
+
+          WP_BASENAME = os.environ["WP_BASENAME"]
+          WP_CATEGORY = os.environ["WP_CATEGORY"]
+          WORK_DIR    = os.environ["WORK_DIR"]
+
+          with open(os.environ["ANALYSIS"]) as f:
+              analysis = json.load(f)
+
+          try:
+              with open(os.environ["OPT_MANIFEST"]) as f:
+                  manifest = json.load(f)
+          except: manifest = {"resolutions":{}}
+
+          quality  = analysis["quality"]
+          colors   = analysis["colors"]
+          orig     = analysis["original"]
+          cls      = analysis["classification"]
+          palette  = colors.get("palette_hex",[])
+
+          def h(c, d="#888"): return c if c else d
+
+          C = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "surface2":"#585b70",
+              "text":    "#cdd6f4",
+              "subtext": "#a6adc8",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "yellow":  "#f9e2af",
+              "teal":    "#94e2d5",
+          }
+
+          fig = plt.figure(figsize=(20, 12))
+          fig.patch.set_facecolor(C["bg"])
+          gs  = gridspec.GridSpec(2, 3, hspace=0.35, wspace=0.28,
+                                  left=0.06, right=0.97,
+                                  top=0.88, bottom=0.05)
+
+          ax_palette = fig.add_subplot(gs[0,0])    # Color palette
+          ax_sizes   = fig.add_subplot(gs[0,1])    # File sizes
+          ax_quality = fig.add_subplot(gs[0,2])    # Quality metrics
+          ax_meta    = fig.add_subplot(gs[1,:])    # Metadata info bar
+
+          def style(ax):
+              ax.set_facecolor(C["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(C["surface2"])
+                  sp.set_alpha(0.5)
+              ax.tick_params(colors=C["text"], labelsize=8.5)
+              ax.grid(True, alpha=0.1, color=C["text"], zorder=1)
+
+          # ── Palette swatches ──────────────────────────────────────
+          ax_palette.set_facecolor(C["surface"])
+          ax_palette.axis("off")
+          n_colors = min(len(palette), 10)
+          for i, hex_col in enumerate(palette[:n_colors]):
+              y = (n_colors - i - 1) / n_colors
+              h_box = 0.85 / n_colors
+              rect = patches.FancyBboxPatch(
+                  (0.05, y + 0.02), 0.90, h_box - 0.04,
+                  boxstyle="round,pad=0.01",
+                  facecolor=hex_col, edgecolor=C["bg"], linewidth=0.8,
+                  transform=ax_palette.transAxes
+              )
+              ax_palette.add_patch(rect)
+              ax_palette.text(0.50, y + h_box/2 + 0.02, hex_col.upper(),
+                  transform=ax_palette.transAxes,
+                  ha="center", va="center",
+                  color=C["bg"] if i < 3 else C["text"],
+                  fontsize=8, fontfamily="monospace", fontweight="bold"
+              )
+          ax_palette.set_title(f"Color Palette ({n_colors} colors)",
+              color=C["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── File sizes bar chart ──────────────────────────────────
+          style(ax_sizes)
+          res_data = manifest.get("resolutions",{})
+          if res_data:
+              labels = [k for k in res_data.keys() if not k.startswith("blur")]
+              values = [res_data[k]["size_kb"] for k in labels]
+              bar_colors= [C["blue"] if not k.startswith("dark")
+                            and not k.startswith("light")
+                            else C["mauve"] for k in labels]
+              bars = ax_sizes.bar(labels, values, color=bar_colors,
+                                  alpha=0.82, zorder=3,
+                                  edgecolor=C["bg"], linewidth=1)
+              for bar, val in zip(bars, values):
+                  ax_sizes.text(
+                      bar.get_x() + bar.get_width()/2,
+                      bar.get_height() + max(values)*0.03,
+                      f"{val:.0f}KB",
+                      ha="center", va="bottom",
+                      color=C["text"], fontsize=8, fontweight="bold"
+                  )
+              ax_sizes.set_xticklabels(labels, rotation=25, ha="right",
+                                        color=C["text"])
+              ax_sizes.set_ylabel("Size (KB)", color=C["text"], fontsize=9.5)
+          ax_sizes.set_title("Output File Sizes by Resolution",
+              color=C["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── Quality radar ─────────────────────────────────────────
+          style(ax_quality)
+
+          METRICS = {
+              "Brightness":  min(quality.get("brightness",0)/255*100, 100),
+              "Contrast":    min(quality.get("contrast",0)/128*100, 100),
+              "Sharpness":   min(math.log10(max(quality.get("sharpness",1),1))/4*100, 100),
+              "Dark-Ready":  100 if quality.get("is_dark") else 40,
+              "Text-OK":     100 if quality.get("text_overlay_suitable") else 30,
+          }
+          import math
+          met_names = list(METRICS.keys())
+          met_vals  = list(METRICS.values())
+          met_colors= [C["blue"],C["teal"],C["green"],C["mauve"],C["yellow"]]
+          bars_q = ax_quality.barh(met_names, met_vals,
+                                   color=met_colors, alpha=0.82,
+                                   zorder=3, edgecolor=C["bg"])
+          for bar, val in zip(bars_q, met_vals):
+              ax_quality.text(
+                  val + 1, bar.get_y() + bar.get_height()/2,
+                  f"{val:.0f}",
+                  va="center", color=C["text"],
+                  fontsize=8.5, fontweight="bold"
+              )
+          ax_quality.set_xlim(0, 110)
+          ax_quality.set_xlabel("Score (0-100)", color=C["text"], fontsize=9.5)
+          ax_quality.set_yticklabels(met_names, color=C["text"])
+          ax_quality.set_title("Quality Metrics",
+              color=C["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── Metadata bar ──────────────────────────────────────────
+          ax_meta.set_facecolor(C["surface"])
+          ax_meta.axis("off")
+
+          META_ITEMS = [
+              ("🖼️", "Wallpaper",    WP_BASENAME),
+              ("📁", "Category",     WP_CATEGORY),
+              ("📐", "Original",     f"{orig['width']}x{orig['height']} ({orig['size_kb']:.0f}KB)"),
+              ("🎨", "Dominant",     palette[0] if palette else "—"),
+              ("💡", "Brightness",   f"{quality.get('brightness',0):.0f}/255"),
+              ("🎭", "Mood",         cls.get("mood","unknown").title()),
+              ("🌙", "Is Dark",      "✅ Yes" if quality.get("is_dark") else "❌ No"),
+              ("♿", "Text Ready",   "✅ Yes" if quality.get("text_overlay_suitable") else "⚠️ No"),
+              ("📦", "Total Output", f"{manifest.get('total_size_kb',0):.0f}KB"),
+              ("🔢", "Files",        str(manifest.get("total_files",0))),
+          ]
+
+          x_step = 1.0 / len(META_ITEMS)
+          for i, (ico, label, value) in enumerate(META_ITEMS):
+              x = i * x_step + x_step/2
+              ax_meta.text(x, 0.82, ico,
+                  transform=ax_meta.transAxes,
+                  ha="center", fontsize=16)
+              ax_meta.text(x, 0.52, label,
+                  transform=ax_meta.transAxes,
+                  ha="center", va="center",
+                  color=C["subtext"], fontsize=8, fontweight="bold")
+              ax_meta.text(x, 0.22, value,
+                  transform=ax_meta.transAxes,
+                  ha="center", va="center",
+                  color=C["text"], fontsize=8.5,
+                  fontfamily="monospace")
+
+          fig.suptitle(
+              f"🖼️ Wallpaper Optimization Report — {WP_BASENAME}\n"
+              f"{orig['width']}x{orig['height']} · {WP_CATEGORY.title()} · "
+              f"Mood: {cls.get('mood','?').title()} · "
+              f"Quality: q{os.environ['WEBP_Q']}",
+              color=C["text"], fontsize=13, fontweight="bold", y=0.97
+          )
+
+          report_path = f"{WORK_DIR}/optimized/{WP_BASENAME}/report.png"
+          plt.savefig(report_path, dpi=130, bbox_inches="tight",
+                      facecolor=C["bg"])
+          plt.close()
+          print(f"  ✅ Report saved: {report_path}")
+          REPORT_EOF
+
+      - name: "📤 Upload optimized artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wallpaper-opt-${{ matrix.wallpaper.basename }}-${{ needs.detect-wallpapers.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/optimized/${{ matrix.wallpaper.basename }}/"
+          retention-days: 30
+          compression-level: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Aggregate, deduplicate & commit
+  # ───────────────────────────────────────────────────────────────────────────
+  aggregate-and-commit:
+    name: "📦 Aggregate · Deduplicate & Build Manifest"
+    needs: [detect-wallpapers, optimize-wallpaper]
+    if: |
+      always() &&
+      needs.optimize-wallpaper.result != 'skipped' &&
+      env.COMMIT_RESULTS == 'true' &&
+      github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📦 Install aggregation tools"
+        run: |
+          pip3 install --quiet --user \
+            imagehash==4.3.1 \
+            Pillow==11.0.0 \
+            rich==13.9.2 \
+            2>/dev/null || true
+
+      - name: "📥 Download all optimized artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "wallpaper-opt-*-${{ needs.detect-wallpapers.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/all-optimized"
+          merge-multiple: true
+
+      - name: "🗑️ Perceptual duplicate detection"
+        if: env.DETECT_DUPES == 'true'
+        run: |
+          python3 << 'DEDUP_EOF'
+          import os
+          import json
+          import glob
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          try:
+              import imagehash
+              from PIL import Image
+          except ImportError:
+              print("  ⚠️ imagehash not available — skipping dedup")
+              exit(0)
+
+          WORK_DIR = Path(os.environ["WORK_DIR"]) / "all-optimized"
+          THRESH   = 8   # Hamming distance threshold (0-64; lower = stricter)
+
+          # Find all optimized WebP files
+          webp_files = list(WORK_DIR.glob("**/*_thumb*.webp"))
+          if not webp_files:
+              webp_files = list(WORK_DIR.glob("**/*_1080p.webp"))[:50]
+
+          print(f"  🔍 Checking {len(webp_files)} wallpapers for duplicates...")
+
+          hashes     = {}
+          duplicates = []
+
+          for wp_file in webp_files:
+              try:
+                  img  = Image.open(wp_file).convert("RGB")
+                  phash= imagehash.phash(img)
+                  name = wp_file.stem.replace("_1080p","").replace("_thumb","")
+
+                  for existing_name, existing_hash in hashes.items():
+                      dist = phash - existing_hash
+                      if dist <= THRESH:
+                          duplicates.append({
+                              "file1":     existing_name,
+                              "file2":     name,
+                              "distance":  dist,
+                              "similarity":round((1 - dist/64)*100, 1),
+                          })
+                          print(f"  ⚠️ Potential duplicate: {name} ≈ {existing_name} (dist={dist})")
+
+                  hashes[name] = phash
+              except Exception as e:
+                  print(f"  ⚠️ {wp_file.name}: {e}")
+
+          # Write dedup report
+          report = {
+              "checked":    len(hashes),
+              "duplicates": len(duplicates),
+              "pairs":      duplicates,
+              "generated":  datetime.now(timezone.utc).isoformat(),
+          }
+          with open(Path(os.environ["WORK_DIR"]) / "dedup-report.json","w") as f:
+              json.dump(report, f, indent=2)
+
+          if duplicates:
+              print(f"\n  ⚠️ Found {len(duplicates)} potential duplicate pair(s)")
+          else:
+              print(f"\n  ✅ No duplicates detected ({len(hashes)} unique wallpapers)")
+          DEDUP_EOF
+
+      - name: "📋 Build global wallpaper manifest"
+        run: |
+          pip3 install --quiet --user Pillow==11.0.0 2>/dev/null || true
+
+          python3 << 'MANIFEST_EOF'
+          import json
+          import os
+          import glob
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          WORK_DIR     = Path(os.environ["WORK_DIR"]) / "all-optimized"
+          WP_DIR       = Path(os.environ["WALLPAPER_DIR"])
+          OUTPUT_DIR   = Path(os.environ["OUTPUT_DIR"])
+          SESSION_ID   = os.environ.get("SESSION_ID","unknown")
+
+          OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+          # Collect all manifests + color files
+          wallpapers   = []
+          color_palettes = {}
+          total_size_kb = 0
+
+          for manifest_file in sorted(WORK_DIR.glob("*/manifest.json")):
+              try:
+                  with open(manifest_file) as f:
+                      mf = json.load(f)
+
+                  # Load colors if available
+                  colors_file = manifest_file.parent / "colors.json"
+                  colors = {}
+                  if colors_file.exists():
+                      with open(colors_file) as f:
+                          colors = json.load(f)
+
+                  entry = {
+                      **mf,
+                      "colors": colors.get("colors",{}),
+                      "metadata": colors.get("metadata",{}),
+                  }
+                  wallpapers.append(entry)
+                  total_size_kb += mf.get("total_size_kb", 0)
+                  color_palettes[mf["basename"]] = colors.get("colors",{})
+
+              except Exception as e:
+                  print(f"  ⚠️ {manifest_file}: {e}")
+
+          # ── Global manifest ────────────────────────────────────────
+          global_manifest = {
+              "version":     "5.0.0",
+              "session_id":  SESSION_ID,
+              "generated_at":datetime.now(timezone.utc).isoformat(),
+              "total_wallpapers": len(wallpapers),
+              "total_size_kb": round(total_size_kb, 1),
+              "wallpapers":  wallpapers,
+              "stats": {
+                  "by_category": {},
+                  "by_mood":     {},
+                  "by_resolution":{},
+              },
+          }
+
+          # Compute stats
+          for wp in wallpapers:
+              meta = wp.get("metadata",{})
+              cat  = meta.get("category","unknown")
+              mood = meta.get("mood","unknown")
+              res  = meta.get("resolution_category","unknown")
+              global_manifest["stats"]["by_category"][cat]   = \
+                  global_manifest["stats"]["by_category"].get(cat,0) + 1
+              global_manifest["stats"]["by_mood"][mood]       = \
+                  global_manifest["stats"]["by_mood"].get(mood,0) + 1
+              global_manifest["stats"]["by_resolution"][res]  = \
+                  global_manifest["stats"]["by_resolution"].get(res,0) + 1
+
+          # Write outputs
+          with open(OUTPUT_DIR / "manifest.json","w") as f:
+              json.dump(global_manifest, f, indent=2)
+
+          with open(OUTPUT_DIR / "palettes.json","w") as f:
+              json.dump(color_palettes, f, indent=2)
+
+          print(f"\n  ✅ Global manifest: {len(wallpapers)} wallpapers")
+          print(f"  📦 Total size: {round(total_size_kb,0):.0f}KB")
+          print(f"  📊 Categories: {global_manifest['stats']['by_category']}")
+          print(f"  🎭 Moods: {global_manifest['stats']['by_mood']}")
+          MANIFEST_EOF
+
+      - name: "📁 Copy optimized files to output"
+        run: |
+          set -euo pipefail
+
+          mkdir -p "${OUTPUT_DIR}"
+
+          # Copy all optimized WebP/JSON files
+          find "${WORK_DIR}/all-optimized" \
+            \( -name "*.webp" -o -name "*.json" -o -name "*.css" \) \
+            -not -name "report.png" | \
+          while read -r file; do
+            BASENAME_DIR=$(basename "$(dirname "${file}")")
+            mkdir -p "${OUTPUT_DIR}/${BASENAME_DIR}"
+            cp "${file}" "${OUTPUT_DIR}/${BASENAME_DIR}/"
+          done
+
+          echo "  ✅ Files organized"
+          find "${OUTPUT_DIR}" -name "*.webp" | wc -l | xargs echo "  🖼️ WebP files:"
+          find "${OUTPUT_DIR}" -name "*.json" | wc -l | xargs echo "  📋 JSON files:"
+
+      - name: "💾 Commit optimized wallpapers"
+        run: |
+          set -euo pipefail
+
+          git config user.name  "ash-wallpaper-bot[bot]"
+          git config user.email "ash-wallpaper-bot@users.noreply.github.com"
+
+          git add "${OUTPUT_DIR}/" 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "  ℹ️ No wallpaper changes to commit"
+          else
+            WP_COUNT="${{ needs.detect-wallpapers.outputs.count }}"
+            git commit -m "🖼️ chore(wallpapers): optimize ${WP_COUNT} wallpapers [skip ci]
+
+          Session: ${{ needs.detect-wallpapers.outputs.session_id }}
+          Quality: ${QUALITY_TIER}
+          Resolutions: ${RESOLUTIONS}
+          Wallpapers:  ${WP_COUNT}
+
+          Generated by ASH v5.0 OMEGA Wallpaper Optimization Engine"
+
+            git push
+            echo "  ✅ Wallpapers committed and pushed"
+          fi
+
+      - name: "📊 Generate step summary"
+        if: always()
+        run: |
+          WP_COUNT="${{ needs.detect-wallpapers.outputs.count }}"
+          SESSION="${{ needs.detect-wallpapers.outputs.session_id }}"
+          DEDUP_FILE="${WORK_DIR}/dedup-report.json"
+
+          DEDUP_COUNT=0
+          [[ -f "${DEDUP_FILE}" ]] && \
+            DEDUP_COUNT=$(jq '.duplicates' "${DEDUP_FILE}" 2>/dev/null || echo 0)
+
+          cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+          # 🖼️ Wallpaper Optimization Complete
+
+          > Session: \`${SESSION}\` · Quality: \`${QUALITY_TIER}\`
+
+          ## 📊 Results
+
+          | Metric | Value |
+          |--------|-------|
+          | 🖼️ Wallpapers Processed | \`${WP_COUNT}\` |
+          | 🎚️ Quality Tier | \`${QUALITY_TIER}\` |
+          | 📐 Resolutions | \`${RESOLUTIONS}\` |
+          | 🌙 Variants | blur + dark + light |
+          | 🔍 Duplicates Found | \`${DEDUP_COUNT}\` |
+          | 📦 Format | WebP (q${WEBP_QUALITY_PRODUCTION}) |
+          | 💾 Committed | \`${COMMIT_RESULTS}\` |
+
+          ---
+          *🖼️ ASH v5.0 OMEGA Wallpaper Optimization Engine*
+          EOF

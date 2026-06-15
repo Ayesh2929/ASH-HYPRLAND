@@ -1,0 +1,1098 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  ♿ ASH DOTFILES v5.0 OMEGA — COLOR CONTRAST CHECK ACTION                                 ║
+# ║                                                                                           ║
+# ║   ██████╗ ██████╗ ██╗      ██████╗ ██████╗                                               ║
+# ║  ██╔════╝██╔═══██╗██║     ██╔═══██╗██╔══██╗                                              ║
+# ║  ██║     ██║   ██║██║     ██║   ██║██████╔╝                                              ║
+# ║  ██║     ██║   ██║██║     ██║   ██║██╔══██╗                                              ║
+# ║  ╚██████╗╚██████╔╝███████╗╚██████╔╝██║  ██║                                              ║
+# ║   ╚═════╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝                                              ║
+# ║                                                                                           ║
+# ║   ██████╗ ██████╗ ███╗   ██╗████████╗██████╗  █████╗ ███████╗████████╗                   ║
+# ║  ██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔══██╗██╔══██╗██╔════╝╚══██╔══╝                   ║
+# ║  ██║     ██║   ██║██╔██╗ ██║   ██║   ██████╔╝███████║███████╗   ██║                      ║
+# ║  ██║     ██║   ██║██║╚██╗██║   ██║   ██╔══██╗██╔══██║╚════██║   ██║                      ║
+# ║  ╚██████╗╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║  ██║███████║   ██║                      ║
+# ║   ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝                      ║
+# ║                                                                                           ║
+# ║   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗                                                ║
+# ║  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝                                                ║
+# ║  ██║     ███████║█████╗  ██║     █████╔╝                                                  ║
+# ║  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗                                                  ║
+# ║  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗                                                 ║
+# ║   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝                                                 ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 ANALYSIS ENGINE CAPABILITIES (21 check categories):                                   ║
+# ║     ♿ WCAG 2.1 A / AA / AAA full specification compliance                                ║
+# ║     🔮 WCAG 3.0 APCA (Advanced Perceptual Contrast Algorithm) preview                   ║
+# ║     🌈 Relative luminance (IEC 61966-2-1 sRGB, linearized)                               ║
+# ║     👓 Color blindness simulation (8 types: Dalton/Brettel matrices)                      ║
+# ║     🧮 CIE Delta-E 2000 perceptual color difference                                      ║
+# ║     🔢 CIE L*a*b* color space analysis (D65 white point)                                 ║
+# ║     🎨 OKLCH perceptual uniformity (Björn Ottosson 2020)                                  ║
+# ║     📊 Color harmony classification (6 harmony types)                                    ║
+# ║     🌡️  Chromostereopsis / saturation balance detection                                   ║
+# ║     🖥️  UI component pair validation (text/bg/border/icon/link)                           ║
+# ║     📱 Multi-profile simulation (sRGB/Display-P3/rec2020)                                ║
+# ║     🔤 Typography classification (normal/large text per WCAG)                            ║
+# ║     🏆 Priority-weighted scoring (critical×4 / high×3 / medium×2 / decorative×0)        ║
+# ║     💡 Fix recommendation engine (FG/BG adjustment suggestions)                          ║
+# ║     📋 7 report formats: JSON/HTML/Markdown/CSV/JUnit/Badge/Summary                      ║
+# ║     🗺️  Matplotlib contrast heatmap (3-panel Catppuccin visualization)                    ║
+# ║     💬 PR comment injection (5 display styles, update-or-create)                         ║
+# ║     🏅 shields.io badge generation (wcag-aa/wcag-aaa/score JSON)                         ║
+# ║     📈 SQLite trend tracking (baseline comparison, regression detection)                  ║
+# ║     ⚡ Parallel pair analysis (ThreadPoolExecutor, configurable workers)                  ║
+# ║     🔒 Webhook-safe secrets masking throughout                                           ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "♿ Color Contrast Check"
+description: >
+  🎨 Ultra-comprehensive WCAG 2.1/3.0 color contrast analysis engine for
+  ASH Dotfiles v5.0 OMEGA. Performs WCAG A/AA/AAA/APCA compliance, color
+  blindness simulation (8 types via Dalton matrices), CIE Lab/OKLCH analysis,
+  Delta-E 2000 perceptual difference, harmony evaluation, saturation balance
+  detection, UI pair validation, typography classification, priority-weighted
+  scoring, fix recommendations, multi-format reporting (7 formats), heatmap
+  visualization, PR comment injection, shields.io badges, and SQLite trend
+  tracking with regression detection.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS — Ultra-complete specification (55+ inputs)
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎯 TARGET SPECIFICATION                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  theme_path:
+    description: >
+      📁 Path to theme directory, colors.json file, or glob pattern.
+
+      Accepted formats:
+        Single dir:   "themes/presets/dark/catppuccin-mocha"
+        Single file:  "themes/presets/dark/catppuccin-mocha/colors.json"
+        Glob all:     "themes/presets/**"
+        Multiple:     "themes/presets/dark/catppuccin-mocha,themes/presets/light/catppuccin-latte"
+        Category:     "themes/presets/dark"
+    required: false
+    default: "themes/presets"
+
+  colors_json:
+    description: >
+      🎨 Inline colors JSON (alternative to theme_path, takes priority).
+      Format: '{"base":"#1e1e2e","text":"#cdd6f4","accent":"#cba6f7"}'
+      Supports nested: '{"colors":{"base":"#1e1e2e",...}}'
+    required: false
+    default: ""
+
+  theme_name:
+    description: >
+      🏷️ Override theme display name in all reports.
+      Auto-detected from directory name or metadata.json when empty.
+    required: false
+    default: ""
+
+  themes_dir:
+    description: "📁 Root directory containing theme subdirectories"
+    required: false
+    default: "themes/presets"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ♿ WCAG COMPLIANCE CONFIGURATION                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  wcag_level:
+    description: >
+      ♿ WCAG compliance level to enforce.
+
+      Levels:
+        A    — Minimum: 3.0:1 normal, 1.5:1 large text
+        AA   — Standard: 4.5:1 normal, 3.0:1 large (web standard)
+        AAA  — Enhanced: 7.0:1 normal, 4.5:1 large (maximum)
+        AA+  — AA for all + AAA for critical UI pairs
+        none — Report-only mode, never fail
+
+      WCAG 2.1 Reference: https://www.w3.org/TR/WCAG21/#contrast-minimum
+    required: false
+    default: "AA"
+
+  check_apca:
+    description: >
+      🔮 Enable WCAG 3.0 APCA (Advanced Perceptual Contrast Algorithm).
+      APCA uses font weight/size/polarity for perceptual accuracy.
+      Runs alongside WCAG 2.1, supplementary not replacement.
+    required: false
+    default: "true"
+
+  apca_threshold:
+    description: >
+      🔮 Minimum APCA Lc (lightness contrast) absolute value.
+      WCAG 3.0 recommended thresholds:
+        90 Lc — Maximum legibility (small body text)
+        75 Lc — Body text minimum (≈ WCAG AA equivalent)
+        60 Lc — Large text / subheadings
+        45 Lc — UI components, icons, non-text
+        30 Lc — Decorative elements
+    required: false
+    default: "60"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎨 COLOR PAIR CONFIGURATION                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  color_pairs:
+    description: >
+      🎨 Explicit color pairs to check (JSON array).
+
+      Schema:
+      ```json
+      [
+        {
+          "fg":       "text",
+          "bg":       "base",
+          "label":    "Body text on background",
+          "size":     "normal",
+          "priority": "critical"
+        },
+        {
+          "fg": "#cdd6f4",
+          "bg": "#1e1e2e",
+          "label": "Direct hex pair"
+        }
+      ]
+      ```
+
+      Fields:
+        fg       — Key from palette or hex string
+        bg       — Key from palette or hex string
+        label    — Human-readable description
+        size     — "normal" | "large" | "ui" (default: "normal")
+        priority — "critical" | "high" | "medium" | "low" | "decorative"
+        weight   — Alias for priority
+    required: false
+    default: ""
+
+  auto_pairs:
+    description: >
+      🤖 Auto-generate color pairs from the loaded theme palette.
+      Combines with explicit color_pairs (deduplication applied).
+    required: false
+    default: "true"
+
+  auto_pairs_strategy:
+    description: >
+      🤖 Strategy for auto-generating pairs from palette.
+      Options:
+        critical    — ~15 essential text/bg/accent pairs
+        standard    — ~40 common UI pairs (recommended)
+        exhaustive  — All valid fg/bg combinations (100+ pairs, slow)
+    required: false
+    default: "standard"
+
+  required_pairs:
+    description: >
+      ⚡ Color key names that MUST pass (space or comma separated).
+      Pairs containing these keys are auto-elevated to critical priority.
+      Failure causes immediate action failure regardless of other settings.
+    required: false
+    default: "text,subtext0,subtext1,overlay2,blue,green,red,yellow,mauve"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  👓 COLOR BLINDNESS SIMULATION                       ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  check_color_blindness:
+    description: >
+      👓 Enable Dalton/Brettel color blindness matrix simulation.
+      Simulates how the theme looks to people with CVD, then checks
+      if contrast ratios remain above the color_blindness_threshold.
+    required: false
+    default: "true"
+
+  color_blindness_types:
+    description: >
+      👓 CVD types to simulate (comma-separated or "all").
+
+      Types (prevalence):
+        deuteranopia   — Red-green, green-deficient (~1% male)
+        protanopia     — Red-green, red-deficient (~1% male)
+        tritanopia     — Blue-yellow deficiency (~0.01%)
+        deuteranomaly  — Mild deuteranopia (~5% male)
+        protanomaly    — Mild protanopia (~1% male)
+        tritanomaly    — Mild tritanopia (~0.01%)
+        achromatopsia  — Complete color blindness (~0.003%)
+        achromatomaly  — Partial color blindness
+
+      Use "all" to simulate all 8 types.
+    required: false
+    default: "deuteranopia,protanopia,tritanopia"
+
+  color_blindness_threshold:
+    description: >
+      👓 Minimum contrast ratio required after CVD simulation.
+      Lower than main threshold allows for some ratio degradation.
+      Typical: 3.0 for general, 4.5 for strict accessibility.
+    required: false
+    default: "3.0"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🧮 ADVANCED COLOR SCIENCE                           ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  check_delta_e:
+    description: >
+      🧮 Compute CIE Delta-E 2000 perceptual color difference.
+      Interpretation scale:
+        ΔE < 1.0   — Imperceptible to human eye
+        ΔE 1-2     — Perceptible on close examination
+        ΔE 2-10    — Clearly perceptible at a glance
+        ΔE 10-50   — Colors look more similar than opposite
+        ΔE > 50    — Different color families
+    required: false
+    default: "true"
+
+  min_delta_e_threshold:
+    description: >
+      🧮 Minimum Delta-E 2000 value for distinguishable color pairs.
+      Pairs below this threshold may be confused by some users.
+      Recommended: 2.0 for normal vision, higher for accessibility.
+    required: false
+    default: "2.0"
+
+  check_oklch:
+    description: >
+      🔢 Analyze colors in OKLCH perceptual color space.
+      Reports L (lightness), C (chroma), H (hue) per color.
+      OKLCH is the most perceptually uniform modern color space.
+    required: false
+    default: "true"
+
+  check_harmony:
+    description: >
+      📊 Evaluate color harmony relationships in the palette.
+      Classifies: monochromatic, analogous, complementary, triadic,
+      split-complementary, and tetradic harmony types.
+      Reports hue distribution and balance metrics.
+    required: false
+    default: "true"
+
+  check_saturation_balance:
+    description: >
+      🌡️ Detect problematic saturation patterns causing visual fatigue.
+      Flags: highly saturated fg+bg (chromostereopsis risk),
+      complementary high-chroma pairs (vibration effect).
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🖥️  RENDERING CONTEXT                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  check_dark_mode:
+    description: "🌙 Include dark mode color pair analysis"
+    required: false
+    default: "true"
+
+  check_light_mode:
+    description: "☀️ Include light mode color pair analysis (if light variant exists)"
+    required: false
+    default: "true"
+
+  display_profiles:
+    description: >
+      🖥️ Display color profiles to simulate (comma-separated).
+      Options: sRGB, display-p3, rec2020, adobeRGB
+      Most web: sRGB. Modern Mac/iOS: Display-P3.
+    required: false
+    default: "sRGB,display-p3"
+
+  text_size_threshold_px:
+    description: >
+      🔤 Pixel size threshold for "large text" WCAG classification.
+      WCAG: 18pt (24px) regular or 14pt (18.67px) bold = large text.
+      Large text gets a relaxed 3.0:1 AA threshold (vs 4.5:1).
+    required: false
+    default: "18"
+
+  text_weight_bold_threshold:
+    description: >
+      🔤 Font-weight at which text qualifies as bold for large-text rule.
+    required: false
+    default: "700"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📊 SCORING & FAILURE THRESHOLDS                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  minimum_score:
+    description: >
+      📊 Minimum weighted accessibility score (0-100) required to pass.
+      Weighted: critical×4, high×3, medium×2, low×1, decorative×0.
+      Decorative pairs never affect scoring.
+    required: false
+    default: "75"
+
+  fail_on_violation:
+    description: >
+      🚨 Fail immediately if ANY critical-priority pair fails WCAG threshold.
+    required: false
+    default: "true"
+
+  fail_on_warning:
+    description: >
+      🚨 Fail if ANY high-priority pair fails WCAG threshold.
+    required: false
+    default: "false"
+
+  fail_threshold_pct:
+    description: >
+      🚨 Fail if more than N% of total checked pairs fail (0-100).
+      0 = disabled (use fail_on_violation only).
+    required: false
+    default: "20"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📋 REPORTING & OUTPUT                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  report_formats:
+    description: >
+      📋 Report formats to generate (comma-separated or "all").
+      Options: json, markdown, html, csv, junit, badge, summary
+      "all" generates every format simultaneously.
+    required: false
+    default: "json,markdown,summary"
+
+  output_dir:
+    description: "📁 Output directory for all generated report files"
+    required: false
+    default: ".contrast-reports"
+
+  report_title:
+    description: "📋 Custom title injected into all report headers"
+    required: false
+    default: "ASH Dotfiles — WCAG Contrast Analysis"
+
+  include_passing:
+    description: >
+      ✅ Include passing pairs in reports (not just failures).
+      Disable for concise failure-focused reports.
+    required: false
+    default: "true"
+
+  include_recommendations:
+    description: >
+      💡 Generate fix recommendations for failing pairs.
+      Suggests specific hex adjustments to meet WCAG threshold.
+    required: false
+    default: "true"
+
+  generate_heatmap:
+    description: >
+      🗺️ Generate 3-panel contrast heatmap (requires matplotlib).
+      Panel 1: Horizontal bar chart of ratios with threshold lines.
+      Panel 2: WCAG level distribution bar chart.
+      Panel 3: Statistical summary table.
+    required: false
+    default: "true"
+
+  heatmap_style:
+    description: >
+      🗺️ Visual style for the heatmap output.
+      Options: catppuccin, minimal, accessible, colorblind-safe
+    required: false
+    default: "catppuccin"
+
+  heatmap_max_pairs:
+    description: >
+      🗺️ Maximum pairs to show in the heatmap chart (performance).
+    required: false
+    default: "40"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  💬 PR COMMENT INTEGRATION                           ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  post_pr_comment:
+    description: "💬 Post contrast analysis results as PR comment"
+    required: false
+    default: "true"
+
+  pr_comment_style:
+    description: >
+      💬 PR comment display style.
+      Options: full, compact, table-only, failures-only, summary
+    required: false
+    default: "compact"
+
+  update_existing_comment:
+    description: "💬 Update existing bot comment rather than creating new"
+    required: false
+    default: "true"
+
+  pr_comment_emoji:
+    description: "💬 Emoji prefix for PR comment header"
+    required: false
+    default: "♿"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📈 TREND TRACKING                                   ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  track_trends:
+    description: >
+      📈 Store results in SQLite for historical trend analysis.
+      Compares score against baseline_ref for regression detection.
+    required: false
+    default: "true"
+
+  baseline_ref:
+    description: >
+      📈 Git ref to compare against for score regression detection.
+      Examples: "main", "HEAD~1", specific commit SHA.
+    required: false
+    default: "main"
+
+  trend_regression_threshold:
+    description: >
+      📈 Score drop percentage that triggers a regression warning.
+      Example: 5 = alert if score drops more than 5 points.
+    required: false
+    default: "5"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🏅 BADGE GENERATION                                 ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  generate_badges:
+    description: >
+      🏅 Generate shields.io compatible badge JSON files.
+      Files created: wcag-aa.json, wcag-aaa.json, contrast-score.json.
+      Use with: https://img.shields.io/endpoint?url=<raw_url>
+    required: false
+    default: "true"
+
+  badges_dir:
+    description: "🏅 Output directory for badge JSON files"
+    required: false
+    default: "assets/badges"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  PERFORMANCE & BEHAVIOR                           ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  parallel_workers:
+    description: >
+      ⚡ Worker threads for parallel color pair analysis.
+      Higher values speed up exhaustive strategy but use more RAM.
+    required: false
+    default: "4"
+
+  cache_computations:
+    description: >
+      💾 Cache expensive luminance/Lab/OKLCH computations per hex value.
+      Dramatically speeds up repeated analysis of same colors.
+    required: false
+    default: "true"
+
+  max_themes:
+    description: >
+      🔢 Maximum number of theme files to analyze in one run.
+      Prevents timeout on glob patterns matching many themes.
+    required: false
+    default: "20"
+
+  upload_reports:
+    description: "📤 Upload all generated reports as workflow artifact"
+    required: false
+    default: "true"
+
+  artifact_retention_days:
+    description: "📤 Days to retain the uploaded report artifact"
+    required: false
+    default: "30"
+
+  dry_run:
+    description: >
+      🔍 Dry run — analyze and report without failing the workflow.
+      Useful for informational PR checks.
+    required: false
+    default: "false"
+
+  verbose:
+    description: "📢 Enable verbose per-pair debug output"
+    required: false
+    default: "false"
+
+  github_token:
+    description: "🔑 GitHub token for PR comment and API operations"
+    required: false
+    default: "${{ github.token }}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS — Complete specification (22 outputs)
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Overall result ────────────────────────────────────────────────────────
+  passed:
+    description: "✅ Whether all required pairs pass the WCAG threshold"
+    value: ${{ steps.check.outputs.passed }}
+
+  overall_score:
+    description: "📊 Weighted accessibility score (0-100)"
+    value: ${{ steps.check.outputs.overall_score }}
+
+  grade:
+    description: "🏆 Letter grade: A+, A, A-, B+, B, B-, C+, C, D, F"
+    value: ${{ steps.check.outputs.grade }}
+
+  wcag_level_achieved:
+    description: "♿ Highest WCAG level met across all required pairs"
+    value: ${{ steps.check.outputs.wcag_level_achieved }}
+
+  # ── Pair counts ───────────────────────────────────────────────────────────
+  pairs_checked:
+    description: "🔢 Total color pairs analyzed"
+    value: ${{ steps.check.outputs.pairs_checked }}
+
+  pairs_passed:
+    description: "✅ Pairs meeting the WCAG threshold"
+    value: ${{ steps.check.outputs.pairs_passed }}
+
+  pairs_failed:
+    description: "❌ Pairs failing the WCAG threshold"
+    value: ${{ steps.check.outputs.pairs_failed }}
+
+  pairs_warned:
+    description: "⚠️ Pairs passing AA but failing AAA"
+    value: ${{ steps.check.outputs.pairs_warned }}
+
+  critical_failures:
+    description: "🚨 Critical-priority pairs that fail"
+    value: ${{ steps.check.outputs.critical_failures }}
+
+  # ── Contrast metrics ──────────────────────────────────────────────────────
+  min_contrast_ratio:
+    description: "📉 Minimum contrast ratio found"
+    value: ${{ steps.check.outputs.min_contrast_ratio }}
+
+  max_contrast_ratio:
+    description: "📈 Maximum contrast ratio found"
+    value: ${{ steps.check.outputs.max_contrast_ratio }}
+
+  avg_contrast_ratio:
+    description: "📊 Average contrast ratio across all pairs"
+    value: ${{ steps.check.outputs.avg_contrast_ratio }}
+
+  min_apca_lc:
+    description: "🔮 Minimum absolute APCA Lc value"
+    value: ${{ steps.check.outputs.min_apca_lc }}
+
+  # ── Color blindness ───────────────────────────────────────────────────────
+  colorblind_passed:
+    description: "👓 All pairs pass under color blindness simulation"
+    value: ${{ steps.check.outputs.colorblind_passed }}
+
+  colorblind_failures:
+    description: "👓 Pairs failing color blindness threshold"
+    value: ${{ steps.check.outputs.colorblind_failures }}
+
+  # ── Report artifacts ──────────────────────────────────────────────────────
+  report_json_path:
+    description: "📋 Path to generated JSON report"
+    value: ${{ steps.check.outputs.report_json_path }}
+
+  report_markdown_path:
+    description: "📋 Path to generated Markdown report"
+    value: ${{ steps.check.outputs.report_markdown_path }}
+
+  report_html_path:
+    description: "📋 Path to generated HTML report"
+    value: ${{ steps.check.outputs.report_html_path }}
+
+  heatmap_path:
+    description: "🗺️ Path to generated contrast heatmap PNG"
+    value: ${{ steps.check.outputs.heatmap_path }}
+
+  artifact_url:
+    description: "🔗 GitHub Actions artifact download URL"
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+  # ── Trend analysis ────────────────────────────────────────────────────────
+  score_delta:
+    description: "📈 Score change vs baseline (positive = improved)"
+    value: ${{ steps.check.outputs.score_delta }}
+
+  regression_detected:
+    description: "📉 Score regression exceeds trend_regression_threshold"
+    value: ${{ steps.check.outputs.regression_detected }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS — Complete 6-step composite action
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight: validate inputs, discover theme files
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Validate inputs & resolve theme targets"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        START_TIME=$(date +%s)
+        SESSION_ID="contrast-$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null || echo 'ci')"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  ♿ ASH Color Contrast Engine v5.0 OMEGA                      ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  🆔 Session:  %-49s║\n" "${SESSION_ID}"
+        printf "║  🎯 Target:   %-49s║\n" "${{ inputs.theme_path }}"
+        printf "║  ♿ WCAG:     %-49s║\n" "${{ inputs.wcag_level }}"
+        printf "║  🔮 APCA:     %-49s║\n" "${{ inputs.check_apca }}"
+        printf "║  👓 CVD Sim:  %-49s║\n" "${{ inputs.color_blindness_types }}"
+        printf "║  🔍 Dry Run:  %-49s║\n" "${{ inputs.dry_run }}"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # ── Validate WCAG level ──────────────────────────────────────────────
+        VALID_LEVELS="A AA AAA AA+ none"
+        WCAG="${{ inputs.wcag_level }}"
+        if ! echo "${VALID_LEVELS}" | grep -qw "${WCAG}"; then
+          echo "::error title=Invalid WCAG Level::wcag_level '${WCAG}' invalid. Valid: ${VALID_LEVELS}"
+          exit 1
+        fi
+
+        # ── Discover theme files ─────────────────────────────────────────────
+        COLORS_JSON="${{ inputs.colors_json }}"
+        THEME_PATH="${{ inputs.theme_path }}"
+        MAX_THEMES="${{ inputs.max_themes }}"
+        declare -a THEME_FILES=()
+
+        if [[ -n "${COLORS_JSON}" ]]; then
+          # Inline JSON — write to temp file
+          TEMP_JSON="/tmp/ash-contrast-inline-$$.json"
+          echo "${COLORS_JSON}" > "${TEMP_JSON}"
+          THEME_FILES=("${TEMP_JSON}")
+          echo "  📋 Using inline colors JSON (${#COLORS_JSON} chars)"
+
+        else
+          # Path-based discovery
+          IFS=',' read -ra PATHS <<< "${THEME_PATH}"
+          for raw_path in "${PATHS[@]}"; do
+            raw_path=$(echo "${raw_path}" | tr -d ' ')
+            abs_path="${WORKSPACE}/${raw_path}"
+
+            if [[ -f "${abs_path}" ]] && [[ "${abs_path}" == *.json ]]; then
+              THEME_FILES+=("${abs_path}")
+
+            elif [[ -d "${abs_path}" ]]; then
+              while IFS= read -r -d '' f; do
+                THEME_FILES+=("${f}")
+                [[ "${#THEME_FILES[@]}" -ge "${MAX_THEMES}" ]] && break
+              done < <(find "${abs_path}" -name "colors.json" -print0 2>/dev/null)
+
+            elif [[ "${raw_path}" == *"**"* ]]; then
+              while IFS= read -r -d '' f; do
+                THEME_FILES+=("${f}")
+                [[ "${#THEME_FILES[@]}" -ge "${MAX_THEMES}" ]] && break
+              done < <(find "${WORKSPACE}" -name "colors.json" \
+                -path "*${raw_path//\*\*/}*" -print0 2>/dev/null)
+            fi
+          done
+
+          # Fallback: generate minimal test fixture
+          if [[ "${#THEME_FILES[@]}" -eq 0 ]]; then
+            echo "  ⚠️  No theme files found — generating Catppuccin Mocha fixture"
+            FIXTURE_DIR="/tmp/ash-contrast-fixture-$$"
+            mkdir -p "${FIXTURE_DIR}"
+            cat > "${FIXTURE_DIR}/colors.json" << 'FIXTURE_EOF'
+            {
+              "base":"#1e1e2e","mantle":"#181825","crust":"#11111b",
+              "surface0":"#313244","surface1":"#45475a","surface2":"#585b70",
+              "overlay0":"#6c7086","overlay1":"#7f849c","overlay2":"#9399b2",
+              "subtext0":"#a6adc8","subtext1":"#bac2de","text":"#cdd6f4",
+              "lavender":"#b4befe","blue":"#89b4fa","sapphire":"#74c7ec",
+              "sky":"#89dceb","teal":"#94e2d5","green":"#a6e3a1",
+              "yellow":"#f9e2af","peach":"#fab387","maroon":"#eba0ac",
+              "red":"#f38ba8","mauve":"#cba6f7","pink":"#f5c2e7",
+              "flamingo":"#f2cdcd","rosewater":"#f5e0dc","accent":"#cba6f7"
+            }
+FIXTURE_EOF
+            THEME_FILES=("${FIXTURE_DIR}/colors.json")
+          fi
+        fi
+
+        # Serialize list (semicolon-delimited)
+        THEME_FILES_STR=$(IFS=';'; echo "${THEME_FILES[*]}")
+        THEME_COUNT="${#THEME_FILES[@]}"
+
+        # Setup working directory
+        WORK_DIR="${WORKSPACE}/.contrast-engine"
+        mkdir -p "${WORK_DIR}"
+
+        echo "  📁 Discovered ${THEME_COUNT} theme file(s)"
+        for f in "${THEME_FILES[@]:0:5}"; do
+          echo "     • ${f}"
+        done
+        [[ "${THEME_COUNT}" -gt 5 ]] && echo "     ... and $((THEME_COUNT - 5)) more"
+
+        {
+          echo "session_id=${SESSION_ID}"
+          echo "start_time=${START_TIME}"
+          echo "theme_files=${THEME_FILES_STR}"
+          echo "theme_count=${THEME_COUNT}"
+          echo "work_dir=${WORK_DIR}"
+          echo "workspace=${WORKSPACE}"
+        } >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Install Python color analysis stack
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install color science toolchain"
+      shell: bash
+      id: deps
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing color analysis dependencies..."
+
+        pip3 install --quiet --user \
+          colormath==3.0.0 \
+          matplotlib==3.9.2 \
+          numpy==2.1.2 \
+          scipy==1.14.1 \
+          Pillow==11.0.0 \
+          rich==13.9.2 \
+          tabulate==0.9.0 \
+          jinja2==3.1.4 \
+          2>/dev/null || true
+
+        sudo apt-get install -y --no-install-recommends \
+          jq bc sqlite3 2>/dev/null || true
+
+        echo ""
+        echo "  ✅ numpy:      $(python3 -c 'import numpy as np; print(np.__version__)' 2>/dev/null || echo 'N/A')"
+        echo "  ✅ matplotlib: $(python3 -c 'import matplotlib; print(matplotlib.__version__)' 2>/dev/null || echo 'N/A')"
+        echo "  ✅ colormath:  $(python3 -c 'import colormath; print(colormath.__version__)' 2>/dev/null || echo 'N/A')"
+        echo "  ✅ scipy:      $(python3 -c 'import scipy; print(scipy.__version__)' 2>/dev/null || echo 'N/A')"
+        echo "  ✅ Pillow:     $(python3 -c 'import PIL; print(PIL.__version__)' 2>/dev/null || echo 'N/A')"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Execute contrast analysis
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "♿ Analyze · Execute WCAG contrast analysis pipeline"
+      shell: bash
+      id: check
+      env:
+        # Session metadata
+        SESSION_ID:           ${{ steps.preflight.outputs.session_id }}
+        START_TIME:           ${{ steps.preflight.outputs.start_time }}
+        THEME_FILES:          ${{ steps.preflight.outputs.theme_files }}
+        THEME_COUNT:          ${{ steps.preflight.outputs.theme_count }}
+        WORK_DIR:             ${{ steps.preflight.outputs.work_dir }}
+        WORKSPACE:            ${{ steps.preflight.outputs.workspace }}
+        # WCAG
+        WCAG_LEVEL:           ${{ inputs.wcag_level }}
+        CHECK_APCA:           ${{ inputs.check_apca }}
+        APCA_THRESHOLD:       ${{ inputs.apca_threshold }}
+        # Color pairs
+        COLOR_PAIRS:          ${{ inputs.color_pairs }}
+        AUTO_PAIRS:           ${{ inputs.auto_pairs }}
+        AUTO_PAIRS_STRATEGY:  ${{ inputs.auto_pairs_strategy }}
+        REQUIRED_PAIRS:       ${{ inputs.required_pairs }}
+        # Color blindness
+        CHECK_CB:             ${{ inputs.check_color_blindness }}
+        CB_TYPES:             ${{ inputs.color_blindness_types }}
+        CB_THRESHOLD:         ${{ inputs.color_blindness_threshold }}
+        # Advanced analysis
+        CHECK_DELTA_E:        ${{ inputs.check_delta_e }}
+        MIN_DELTA_E:          ${{ inputs.min_delta_e_threshold }}
+        CHECK_OKLCH:          ${{ inputs.check_oklch }}
+        CHECK_HARMONY:        ${{ inputs.check_harmony }}
+        CHECK_SAT_BAL:        ${{ inputs.check_saturation_balance }}
+        # Rendering context
+        CHECK_DARK:           ${{ inputs.check_dark_mode }}
+        CHECK_LIGHT:          ${{ inputs.check_light_mode }}
+        DISPLAY_PROFILES:     ${{ inputs.display_profiles }}
+        TEXT_SIZE_THRESH:     ${{ inputs.text_size_threshold_px }}
+        TEXT_WEIGHT_BOLD:     ${{ inputs.text_weight_bold_threshold }}
+        # Scoring
+        MINIMUM_SCORE:        ${{ inputs.minimum_score }}
+        FAIL_ON_VIOLATION:    ${{ inputs.fail_on_violation }}
+        FAIL_ON_WARNING:      ${{ inputs.fail_on_warning }}
+        FAIL_THRESHOLD_PCT:   ${{ inputs.fail_threshold_pct }}
+        # Reporting
+        REPORT_FORMATS:       ${{ inputs.report_formats }}
+        OUTPUT_DIR:           ${{ inputs.output_dir }}
+        REPORT_TITLE:         ${{ inputs.report_title }}
+        INCLUDE_PASSING:      ${{ inputs.include_passing }}
+        INCLUDE_RECS:         ${{ inputs.include_recommendations }}
+        GEN_HEATMAP:          ${{ inputs.generate_heatmap }}
+        HEATMAP_STYLE:        ${{ inputs.heatmap_style }}
+        HEATMAP_MAX_PAIRS:    ${{ inputs.heatmap_max_pairs }}
+        # Trend
+        TRACK_TRENDS:         ${{ inputs.track_trends }}
+        BASELINE_REF:         ${{ inputs.baseline_ref }}
+        TREND_REGRESSION:     ${{ inputs.trend_regression_threshold }}
+        # Badges
+        GEN_BADGES:           ${{ inputs.generate_badges }}
+        BADGES_DIR:           ${{ inputs.badges_dir }}
+        # Performance
+        PARALLEL_WORKERS:     ${{ inputs.parallel_workers }}
+        CACHE_COMPUTATIONS:   ${{ inputs.cache_computations }}
+        # Behavior
+        DRY_RUN:              ${{ inputs.dry_run }}
+        VERBOSE:              ${{ inputs.verbose }}
+        THEME_NAME_OVERRIDE:  ${{ inputs.theme_name }}
+        # GitHub context
+        GITHUB_REPO:          ${{ github.repository }}
+        GITHUB_SHA_SHORT:     ${{ github.sha }}
+        GITHUB_REF_NAME:      ${{ github.ref_name }}
+        GITHUB_ACTOR:         ${{ github.actor }}
+        GITHUB_RUN_ID:        ${{ github.run_id }}
+        GITHUB_SERVER_URL:    ${{ github.server_url }}
+        GITHUB_WORKFLOW:      ${{ github.workflow }}
+      run: |
+        python3 "${{ github.action_path }}/check.py"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Post PR comment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💬 Comment · Post contrast analysis to pull request"
+      if: inputs.post_pr_comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const fs          = require("fs");
+          const WORK_DIR    = "${{ steps.preflight.outputs.work_dir }}";
+          const SESSION_ID  = "${{ steps.preflight.outputs.session_id }}";
+          const SCORE       = parseFloat("${{ steps.check.outputs.overall_score || '0' }}");
+          const GRADE       = "${{ steps.check.outputs.grade || 'F' }}";
+          const PASSED      = "${{ steps.check.outputs.passed }}" === "true";
+          const WCAG_TARGET = "${{ inputs.wcag_level }}";
+          const WCAG_ACHIEV = "${{ steps.check.outputs.wcag_level_achieved || 'none' }}";
+          const CHECKED     = "${{ steps.check.outputs.pairs_checked    || '0' }}";
+          const PAIR_PASS   = "${{ steps.check.outputs.pairs_passed     || '0' }}";
+          const PAIR_FAIL   = "${{ steps.check.outputs.pairs_failed     || '0' }}";
+          const CRIT_FAIL   = "${{ steps.check.outputs.critical_failures || '0' }}";
+          const MIN_CR      = "${{ steps.check.outputs.min_contrast_ratio || '?' }}";
+          const AVG_CR      = "${{ steps.check.outputs.avg_contrast_ratio || '?' }}";
+          const CB_PASS     = "${{ steps.check.outputs.colorblind_passed }}" === "true";
+          const CB_FAILS    = "${{ steps.check.outputs.colorblind_failures || '0' }}";
+          const SCORE_DELTA = "${{ steps.check.outputs.score_delta || '0' }}";
+          const REGRESSION  = "${{ steps.check.outputs.regression_detected }}" === "true";
+          const APCA_MIN    = "${{ steps.check.outputs.min_apca_lc || '?' }}";
+          const STYLE       = "${{ inputs.pr_comment_style }}";
+          const EMOJI       = "${{ inputs.pr_comment_emoji }}";
+          const RUN_URL     = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+          // ── Score bar ──────────────────────────────────────────────────────
+          const SCORE_INT = Math.round(SCORE);
+          const BAR_W     = 28;
+          const BAR_F     = Math.round(SCORE_INT / 100 * BAR_W);
+          const SCORE_BAR = "█".repeat(BAR_F) + "░".repeat(BAR_W - BAR_F);
+
+          // ── Grade emoji ────────────────────────────────────────────────────
+          const GRADE_EMOJI = {
+            "A+":"🏆","A":"🥇","A-":"🥇","B+":"🥈","B":"🥈","B-":"🥈",
+            "C+":"🥉","C":"🥉","C-":"🥉","D+":"📋","D":"📋","D-":"📋","F":"❌"
+          }[GRADE] || "📊";
+
+          // ── Delta display ──────────────────────────────────────────────────
+          const DELTA     = parseFloat(SCORE_DELTA) || 0;
+          const DELTA_STR = DELTA > 0 ? `📈 +${DELTA.toFixed(1)}` : DELTA < 0 ? `📉 ${DELTA.toFixed(1)}` : "➡️ 0.0";
+
+          // ── Load markdown report excerpt ───────────────────────────────────
+          let reportExcerpt = "";
+          const mdPath = `${WORK_DIR}/contrast-report.md`;
+          try {
+            if (fs.existsSync(mdPath)) {
+              reportExcerpt = fs.readFileSync(mdPath, "utf8").slice(0, 2800);
+            }
+          } catch(e) { /* silent */ }
+
+          // ── WCAG level check helpers ───────────────────────────────────────
+          const WCAG_ORDER = ["none","A","AA","AAA"];
+          const wcagAtLeast = (lvl) => WCAG_ORDER.indexOf(WCAG_ACHIEV) >= WCAG_ORDER.indexOf(lvl);
+
+          const STATUS_ICON = PASSED ? "✅" : "❌";
+          const STATUS_TEXT = PASSED ? "PASSED" : "FAILED";
+
+          // ── Build comment body ─────────────────────────────────────────────
+          const body = [
+            `## ${EMOJI} WCAG Contrast Analysis — ${STATUS_ICON} **${STATUS_TEXT}**`,
+            ``,
+            `> **Target:** \`WCAG ${WCAG_TARGET}\`  &nbsp;·&nbsp;  **Achieved:** \`${WCAG_ACHIEV}\`  &nbsp;·&nbsp;  🆔 \`${SESSION_ID}\``,
+            ``,
+            `### 📊 Accessibility Score`,
+            ``,
+            `\`\`\``,
+            `Score: [${SCORE_BAR}] ${SCORE_INT}/100   Grade: ${GRADE_EMOJI} ${GRADE}`,
+            `\`\`\``,
+            ``,
+            `### 🔍 Check Results`,
+            ``,
+            `| Check | Status | Value |`,
+            `|-------|:------:|-------|`,
+            `| ♿ WCAG ${WCAG_TARGET} | ${PASSED ? "✅" : "❌"} | Achieved: \`${WCAG_ACHIEV}\` |`,
+            `| 📊 Pairs | ${parseInt(PAIR_FAIL) === 0 ? "✅" : "❌"} | \`${PAIR_PASS}/${CHECKED}\` passing |`,
+            `| 🚨 Critical | ${parseInt(CRIT_FAIL) === 0 ? "✅" : "❌"} | \`${CRIT_FAIL}\` critical failure(s) |`,
+            `| 👓 Color Blind | ${CB_PASS ? "✅" : "⚠️"} | \`${CB_FAILS}\` CVD failure(s) |`,
+            `| 📉 Min Contrast | ${parseFloat(MIN_CR) >= 4.5 ? "✅" : parseFloat(MIN_CR) >= 3.0 ? "⚠️" : "❌"} | \`${MIN_CR}:1\` |`,
+            `| 📊 Avg Contrast | ✅ | \`${AVG_CR}:1\` |`,
+            `| 🔮 APCA Min Lc | ℹ️ | \`${APCA_MIN}\` |`,
+            `| ${DELTA_STR.split(" ")[0]} Trend | ${REGRESSION ? "⚠️" : "✅"} | \`${DELTA_STR}\` pts${REGRESSION ? " **REGRESSION**" : ""} |`,
+            ``,
+            reportExcerpt ? [
+              `<details>`,
+              `<summary>📄 Full Analysis Report (click to expand)</summary>`,
+              ``,
+              reportExcerpt,
+              ``,
+              `</details>`,
+            ].join("\n") : "",
+            `---`,
+            `*♿ ASH v5.0 OMEGA Contrast Engine  ·  [View Run](${RUN_URL})*`,
+          ].filter(Boolean).join("\n");
+
+          // ── Create or update comment ───────────────────────────────────────
+          const UPDATE = "${{ inputs.update_existing_comment }}" === "true";
+          const { data: comments } = await github.rest.issues.listComments({
+            owner:        context.repo.owner,
+            repo:         context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          const existing = UPDATE && comments.find(c =>
+            c.user.type === "Bot" && c.body.includes("WCAG Contrast Analysis")
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: existing.id,
+              body,
+            });
+            console.log(`✅ Updated PR comment #${existing.id}`);
+          } else {
+            await github.rest.issues.createComment({
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+            console.log("✅ Created PR comment");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Upload artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Contrast analysis report artifact"
+      if: inputs.upload_reports == 'true' && always()
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          contrast-reports-${{ steps.preflight.outputs.session_id }}-${{ github.run_id }}
+        path: |
+          ${{ steps.preflight.outputs.workspace }}/${{ inputs.output_dir }}/
+          ${{ steps.preflight.outputs.work_dir }}/
+        retention-days: ${{ fromJson(inputs.artifact_retention_days) }}
+        compression-level: 6
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — GitHub Step Summary & Fail Gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📊 Summary · Report & fail gate"
+      shell: bash
+      if: always()
+      env:
+        PASSED:       ${{ steps.check.outputs.passed }}
+        SCORE:        ${{ steps.check.outputs.overall_score || '0' }}
+        GRADE:        ${{ steps.check.outputs.grade || 'F' }}
+        WCAG_ACHIEV:  ${{ steps.check.outputs.wcag_level_achieved || 'none' }}
+        CHECKED:      ${{ steps.check.outputs.pairs_checked || '0' }}
+        PASS_COUNT:   ${{ steps.check.outputs.pairs_passed || '0' }}
+        FAIL_COUNT:   ${{ steps.check.outputs.pairs_failed || '0' }}
+        CRIT_FAIL:    ${{ steps.check.outputs.critical_failures || '0' }}
+        MIN_CR:       ${{ steps.check.outputs.min_contrast_ratio || '0' }}
+        AVG_CR:       ${{ steps.check.outputs.avg_contrast_ratio || '0' }}
+        CB_PASS:      ${{ steps.check.outputs.colorblind_passed || 'false' }}
+        CB_FAILS:     ${{ steps.check.outputs.colorblind_failures || '0' }}
+        SCORE_DELTA:  ${{ steps.check.outputs.score_delta || '0' }}
+        REGRESSION:   ${{ steps.check.outputs.regression_detected || 'false' }}
+        SESSION_ID:   ${{ steps.preflight.outputs.session_id }}
+        WCAG_TARGET:  ${{ inputs.wcag_level }}
+        DRY_RUN:      ${{ inputs.dry_run }}
+      run: |
+        SCORE_INT=$(printf "%.0f" "${SCORE}" 2>/dev/null || echo "0")
+        BAR_W=32
+        BAR_F=$(( SCORE_INT * BAR_W / 100 ))
+        BAR_E=$(( BAR_W - BAR_F ))
+        SCORE_BAR="$(printf '█%.0s' $(seq 1 "${BAR_F}" 2>/dev/null || true))"
+        SCORE_BAR+="$(printf '░%.0s' $(seq 1 "${BAR_E}" 2>/dev/null || true))"
+
+        STATUS_EMOJI="$([[ "${PASSED}" == "true" ]] && echo "✅" || echo "❌")"
+        DELTA_VAL=$(echo "${SCORE_DELTA}" | bc 2>/dev/null || echo "0")
+        DELTA_ICON="$([[ $(echo "${DELTA_VAL} > 0" | bc -l 2>/dev/null || echo 0) -eq 1 ]] && echo "📈" || echo "📉")"
+        CB_ICON="$([[ "${CB_PASS}" == "true" ]] && echo "✅" || echo "⚠️")"
+
+        cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+        # ♿ WCAG Color Contrast Report — ${STATUS_EMOJI} ${PASSED^^}
+
+        > Session: \`${SESSION_ID}\` &nbsp;·&nbsp; Target: \`WCAG ${WCAG_TARGET}\` &nbsp;·&nbsp; Achieved: \`${WCAG_ACHIEV}\`
+
+        \`\`\`
+        Score: [${SCORE_BAR}] ${SCORE_INT}/100   Grade: ${GRADE}
+        \`\`\`
+
+        ## 📊 Analysis Results
+
+        | Metric | Value |
+        |--------|------:|
+        | ♿ **WCAG Level** | \`${WCAG_TARGET}\` → Achieved \`${WCAG_ACHIEV}\` |
+        | 📊 **Score** | \`${SCORE_INT}/100\` (Grade: ${GRADE}) |
+        | ✅ Pairs Passed | \`${PASS_COUNT}/${CHECKED}\` |
+        | ❌ Pairs Failed | \`${FAIL_COUNT}\` |
+        | 🚨 Critical Failures | \`${CRIT_FAIL}\` |
+        | 📉 Min Contrast | \`${MIN_CR}:1\` |
+        | 📊 Avg Contrast | \`${AVG_CR}:1\` |
+        | ${CB_ICON} Color Blindness | \`${CB_FAILS}\` failure(s) |
+        | ${DELTA_ICON} Score Trend | \`${SCORE_DELTA:+}${SCORE_DELTA} pts\`${REGRESSION:+ **⚠️ REGRESSION**} |
+
+        ---
+        *♿ ASH v5.0 OMEGA Color Contrast Engine · Session \`${SESSION_ID}\`*
+        EOF
+
+        # Fail gate
+        if [[ "${PASSED}" != "true" && "${DRY_RUN}" != "true" ]]; then
+          echo "::error title=WCAG Contrast Failed::${CRIT_FAIL} critical failure(s) on WCAG ${WCAG_TARGET} check"
+          exit 1
+        fi
+
+        echo "✅ Contrast check gate: score=${SCORE_INT}/100 grade=${GRADE} passed=${PASSED}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "eye"
+  color: "purple"

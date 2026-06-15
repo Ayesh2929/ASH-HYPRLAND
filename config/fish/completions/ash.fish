@@ -1,0 +1,1 @@
+complete -c ash -f -a "(ash help | tail -n +6 | head -n -1 | awk '{print $1}')"

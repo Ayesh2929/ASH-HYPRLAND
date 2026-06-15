@@ -1,0 +1,1050 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🚀 ASH DOTFILES v5.0 OMEGA — STARTUP TIME BENCHMARK WORKFLOW               ║
+# ║  Measures shell startup, ASH CLI init, and session bootstrap performance    ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+name: "🚀 Benchmark · Startup Time Performance"
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+    paths:
+      - "ash-cli/ash"
+      - "ash-cli/lib/core.sh"
+      - "ash-cli/lib/utils.sh"
+      - "ash-cli/lib/config-parser.sh"
+      - "config/fish/**"
+      - "config/starship/**"
+      - "scripts/system/session-init.sh"
+      - ".github/workflows/performance/benchmark-startup.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "ash-cli/ash"
+      - "ash-cli/lib/**"
+      - "config/fish/**"
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: "Benchmark iterations"
+        required: false
+        default: "20"
+        type: string
+      shell_targets:
+        description: "Shell targets (comma-separated: bash,fish,zsh)"
+        required: false
+        default: "bash,fish"
+        type: string
+      regression_threshold:
+        description: "Regression threshold %"
+        required: false
+        default: "20"
+        type: string
+  schedule:
+    - cron: "30 2 * * *"   # Nightly at 02:30 UTC
+
+concurrency:
+  group: "bench-startup-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  BENCHMARK_VERSION: "5.0.0"
+  BENCHMARK_DIR: "${{ github.workspace }}/benchmark-results"
+  BASELINE_DIR: "${{ github.workspace }}/baseline-startup"
+  REPORTS_DIR: "${{ github.workspace }}/reports"
+  ITERATIONS: "${{ github.event.inputs.iterations || '20' }}"
+  REGRESSION_THRESHOLD: "${{ github.event.inputs.regression_threshold || '20' }}"
+  # Startup time thresholds (ms)
+  THRESHOLD_ASH_INIT: "150"
+  THRESHOLD_ASH_HELP: "200"
+  THRESHOLD_ASH_VERSION: "100"
+  THRESHOLD_ASH_CONFIG_READ: "80"
+  THRESHOLD_FISH_STARTUP: "300"
+  THRESHOLD_BASH_STARTUP: "150"
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1: Setup
+  # ───────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "🛠️ Setup · Startup Benchmark Environment"
+    runs-on: ubuntu-24.04
+    outputs:
+      bench_id: ${{ steps.id.outputs.bench_id }}
+      has_baseline: ${{ steps.baseline.outputs.has_baseline }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🆔 Generate ID"
+        id: id
+        run: |
+          BENCH_ID="startup-$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
+          echo "bench_id=${BENCH_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: "📦 Install tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            fish \
+            bash \
+            time \
+            jq \
+            bc \
+            procps \
+            python3 \
+            python3-pip \
+            2>/dev/null || true
+          pip3 install --quiet --user matplotlib pandas rich tabulate 2>/dev/null || true
+
+          # Install hyperfine
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb && \
+          rm /tmp/hyperfine.deb
+
+          echo ""
+          echo "  ✅ hyperfine: $(hyperfine --version)"
+          echo "  ✅ fish:      $(fish --version 2>&1 | head -1)"
+          echo "  ✅ bash:      ${BASH_VERSION}"
+          echo "  ✅ jq:        $(jq --version)"
+
+      - name: "🔍 Validate ASH CLI structure"
+        run: |
+          echo "  🔍 Checking ash-cli structure..."
+
+          declare -a REQUIRED_FILES=(
+            "ash-cli/ash"
+            "ash-cli/lib/core.sh"
+            "ash-cli/lib/utils.sh"
+            "ash-cli/lib/colors.sh"
+            "ash-cli/lib/logger.sh"
+          )
+
+          ALL_OK=true
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [[ -f "${f}" ]]; then
+              echo "  ✅ ${f}"
+            else
+              echo "  ⚠️  ${f} — not found (will use mock)"
+              ALL_OK=false
+            fi
+          done
+
+          # Create minimal mocks if needed
+          if [[ "${ALL_OK}" == "false" ]]; then
+            echo ""
+            echo "  🔧 Creating minimal mocks for missing files..."
+            mkdir -p ash-cli/lib ash-cli/commands
+
+            [[ -f "ash-cli/ash" ]] || cat > ash-cli/ash << 'MOCK_EOF'
+          #!/usr/bin/env bash
+          # ASH v5.0 CLI — benchmark mock
+          set -euo pipefail
+          ASH_VERSION="5.0.0"
+          ASH_NAME="ash"
+          case "${1:-}" in
+            --version|-v) echo "ash v${ASH_VERSION}" ;;
+            --help|-h)    echo "ash — the ultimate dotfiles manager" ;;
+            config)       echo "config: ok" ;;
+            *)            echo "ash: unknown command '${1:-}'" ;;
+          esac
+          MOCK_EOF
+            chmod +x ash-cli/ash
+
+            [[ -f "ash-cli/lib/core.sh" ]] || cat > ash-cli/lib/core.sh << 'MOCK_EOF'
+          #!/usr/bin/env bash
+          # ASH core library — benchmark mock
+          ASH_ROOT="${ASH_ROOT:-$(dirname "$(dirname "${BASH_SOURCE[0]}")")}"
+          ASH_VERSION="5.0.0"
+          MOCK_EOF
+
+            for lib in utils colors logger config-parser; do
+              [[ -f "ash-cli/lib/${lib}.sh" ]] || \
+                echo "#!/usr/bin/env bash" > "ash-cli/lib/${lib}.sh"
+            done
+          fi
+
+          echo ""
+          echo "  ✅ Environment validated"
+
+      - name: "📊 Check for baseline"
+        id: baseline
+        run: |
+          HAS_BASELINE="false"
+          if gh api \
+            "repos/${{ github.repository }}/actions/caches" \
+            --jq '.actions_caches[].key' 2>/dev/null | \
+            grep -q "bench-baseline-startup"; then
+            HAS_BASELINE="true"
+          fi
+          echo "has_baseline=${HAS_BASELINE}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📦 Cache baseline"
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-startup-${{ github.base_ref || 'main' }}"
+          restore-keys: |
+            bench-baseline-startup-main
+            bench-baseline-startup-
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2: ASH CLI startup benchmarks
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-ash-cli:
+    name: "⚡ Bench · ASH CLI Startup (${{ matrix.command.name }})"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - name: "ash-version"
+            description: "ash --version startup"
+            args: "--version"
+            threshold_env: "THRESHOLD_ASH_VERSION"
+            threshold_ms: 100
+            critical: true
+
+          - name: "ash-help"
+            description: "ash --help startup"
+            args: "--help"
+            threshold_env: "THRESHOLD_ASH_HELP"
+            threshold_ms: 200
+            critical: true
+
+          - name: "ash-init"
+            description: "ash initialization overhead"
+            args: "config list --quiet"
+            threshold_env: "THRESHOLD_ASH_INIT"
+            threshold_ms: 150
+            critical: true
+
+          - name: "ash-config-read"
+            description: "ash config read performance"
+            args: "config get theme.name"
+            threshold_env: "THRESHOLD_ASH_CONFIG_READ"
+            threshold_ms: 80
+            critical: false
+
+    env:
+      CMD_NAME: ${{ matrix.command.name }}
+      CMD_ARGS: ${{ matrix.command.args }}
+      CMD_THRESHOLD_MS: ${{ matrix.command.threshold_ms }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup environment"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends jq bc python3 2>/dev/null || true
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb && rm /tmp/hyperfine.deb || true
+
+      - name: "🏗️ Prepare ASH CLI"
+        run: |
+          # Ensure ash is executable
+          chmod +x ash-cli/ash 2>/dev/null || true
+
+          # Create minimal config for benchmarking
+          mkdir -p "${HOME}/.config/ash"
+          cat > "${HOME}/.config/ash/ash.conf" << 'EOF'
+          # ASH benchmark config
+          [core]
+          theme = catppuccin-mocha
+          mode = default
+          log_level = error
+
+          [theme]
+          name = catppuccin-mocha
+          category = dark
+          auto_apply = false
+
+          [performance]
+          cache_enabled = true
+          hot_reload = false
+          analytics = false
+          EOF
+
+          # Set ASH environment
+          echo "ASH_ROOT=${GITHUB_WORKSPACE}/ash-cli" >> "$GITHUB_ENV"
+          echo "ASH_CONFIG=${HOME}/.config/ash/ash.conf" >> "$GITHUB_ENV"
+          echo "ASH_LOG_LEVEL=error" >> "$GITHUB_ENV"
+          echo "ASH_NO_COLOR=1" >> "$GITHUB_ENV"
+
+      - name: "🔥 Warmup"
+        run: |
+          echo "  🔥 Warming up..."
+          for i in $(seq 1 3); do
+            bash ash-cli/ash ${CMD_ARGS} > /dev/null 2>&1 || true
+            sleep 0.1
+          done
+          echo "  ✅ Warmup complete"
+
+      - name: "⚡ Hyperfine benchmark — ${{ matrix.command.name }}"
+        id: bench
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/${CMD_NAME}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ Benchmarking: ${{ matrix.command.description }}"
+          echo "  📊 Command:     bash ash-cli/ash ${CMD_ARGS}"
+          echo "  🔁 Iterations:  ${ITERATIONS}"
+          echo "  ⏱️  Threshold:   ${CMD_THRESHOLD_MS}ms"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          hyperfine \
+            --runs "${ITERATIONS}" \
+            --warmup 3 \
+            --time-unit millisecond \
+            --export-json "${BENCHMARK_DIR}/${CMD_NAME}/results.json" \
+            --export-markdown "${BENCHMARK_DIR}/${CMD_NAME}/results.md" \
+            --export-csv "${BENCHMARK_DIR}/${CMD_NAME}/results.csv" \
+            --shell bash \
+            --command-name "${CMD_NAME}" \
+            "bash ash-cli/ash ${CMD_ARGS}" || {
+              echo "::warning::hyperfine failed — using manual timing"
+              # Fallback timing
+              TIMES=()
+              for i in $(seq 1 "${ITERATIONS}"); do
+                START=$(date +%s%N)
+                bash ash-cli/ash ${CMD_ARGS} > /dev/null 2>&1 || true
+                END=$(date +%s%N)
+                ELAPSED_MS=$(( (END - START) / 1000000 ))
+                TIMES+=("${ELAPSED_MS}")
+              done
+
+              # Compute stats manually
+              MEAN=0
+              for t in "${TIMES[@]}"; do MEAN=$((MEAN + t)); done
+              MEAN=$((MEAN / ${#TIMES[@]}))
+
+              # Write minimal JSON
+              cat > "${BENCHMARK_DIR}/${CMD_NAME}/results.json" << EOF
+          {
+            "results": [{
+              "command": "${CMD_NAME}",
+              "mean": ${MEAN}.0,
+              "stddev": 0.0,
+              "median": ${MEAN}.0,
+              "min": ${MEAN}.0,
+              "max": ${MEAN}.0,
+              "times": [$(IFS=,; echo "${TIMES[*]/%/.0}")]
+            }]
+          }
+          EOF
+            }
+
+          # Extract mean from results
+          MEAN_MS=$(jq '.results[0].mean * 1000' \
+            "${BENCHMARK_DIR}/${CMD_NAME}/results.json" 2>/dev/null || echo "0")
+          echo "mean_ms=${MEAN_MS}" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "  📊 Result: ${MEAN_MS}ms mean"
+
+      - name: "📊 Process results"
+        id: process
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import os
+
+          raw_file = f"${BENCHMARK_DIR}/${CMD_NAME}/results.json"
+          out_file = f"${BENCHMARK_DIR}/${CMD_NAME}/processed.json"
+
+          with open(raw_file) as f:
+              raw = json.load(f)
+
+          r = raw.get("results", [{}])[0]
+          times_s = r.get("times", [r.get("mean", 0)])
+          times_ms = [t * 1000 for t in times_s]
+          n = len(times_ms)
+
+          mean_ms   = r.get("mean", 0) * 1000
+          median_ms = sorted(times_ms)[n // 2] if n else 0
+          min_ms    = r.get("min", 0) * 1000
+          max_ms    = r.get("max", 0) * 1000
+          stddev_ms = r.get("stddev", 0) * 1000
+
+          sorted_t = sorted(times_ms)
+          p90  = sorted_t[min(int(n * 0.90), n-1)] if n else 0
+          p95  = sorted_t[min(int(n * 0.95), n-1)] if n else 0
+          p99  = sorted_t[min(int(n * 0.99), n-1)] if n else 0
+
+          threshold_ms = float("${CMD_THRESHOLD_MS}")
+          passed = mean_ms <= threshold_ms
+
+          result = {
+              "command": "${CMD_NAME}",
+              "description": "${{ matrix.command.description }}",
+              "critical": ${{ matrix.command.critical }},
+              "git_sha": "${GITHUB_SHA}",
+              "timing": {
+                  "mean_ms": round(mean_ms, 3),
+                  "median_ms": round(median_ms, 3),
+                  "min_ms": round(min_ms, 3),
+                  "max_ms": round(max_ms, 3),
+                  "stddev_ms": round(stddev_ms, 3),
+                  "p90_ms": round(p90, 3),
+                  "p95_ms": round(p95, 3),
+                  "p99_ms": round(p99, 3),
+              },
+              "threshold": {
+                  "threshold_ms": threshold_ms,
+                  "passed": passed,
+                  "overage_ms": round(max(0, mean_ms - threshold_ms), 3),
+              },
+              "iterations": n,
+              "raw_times_ms": [round(t, 3) for t in times_ms],
+          }
+
+          with open(out_file, "w") as f:
+              json.dump(result, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"mean_ms={round(mean_ms,3)}\n")
+              out.write(f"p95_ms={round(p95,3)}\n")
+              out.write(f"passed={'true' if passed else 'false'}\n")
+
+          status = "✅ PASS" if passed else "❌ FAIL"
+          print(f"  {status} — mean={round(mean_ms,2)}ms "
+                f"p95={round(p95,2)}ms threshold={threshold_ms}ms")
+          PYTHON_EOF
+
+      - name: "📈 Performance trend chart"
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.ticker as ticker
+              import numpy as np
+          except ImportError:
+              print("::warning::matplotlib unavailable")
+              sys.exit(0)
+
+          proc_file = f"${BENCHMARK_DIR}/${CMD_NAME}/processed.json"
+          with open(proc_file) as f:
+              data = json.load(f)
+
+          times  = data["raw_times_ms"]
+          mean   = data["timing"]["mean_ms"]
+          p95    = data["timing"]["p95_ms"]
+          thr    = data["threshold"]["threshold_ms"]
+          passed = data["threshold"]["passed"]
+
+          palette = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "text":    "#cdd6f4",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "yellow":  "#f9e2af",
+          }
+
+          fig, ax = plt.subplots(figsize=(12, 5))
+          fig.patch.set_facecolor(palette["bg"])
+          ax.set_facecolor(palette["surface"])
+
+          for spine in ax.spines.values():
+              spine.set_edgecolor(palette["text"])
+              spine.set_alpha(0.3)
+          ax.tick_params(colors=palette["text"], labelsize=9)
+
+          x = np.arange(1, len(times) + 1)
+          color = palette["green"] if passed else palette["red"]
+
+          # Bar chart for individual runs
+          bars = ax.bar(x, times, color=color, alpha=0.7,
+                        width=0.7, zorder=3, label='Run time')
+
+          # Reference lines
+          ax.axhline(mean, color=palette["mauve"], linewidth=2.0,
+                     linestyle="--", zorder=4,
+                     label=f"Mean: {mean:.2f}ms")
+          ax.axhline(p95, color=palette["peach"], linewidth=1.5,
+                     linestyle=":", zorder=4,
+                     label=f"p95: {p95:.2f}ms")
+          ax.axhline(thr, color=palette["red"], linewidth=2.0,
+                     linestyle="-", alpha=0.6, zorder=4,
+                     label=f"Threshold: {thr:.0f}ms")
+
+          # Threshold zone shading
+          ax.axhspan(thr, max(max(times) * 1.1, thr * 1.2),
+                     alpha=0.05, color=palette["red"], zorder=2)
+
+          ax.set_xlabel("Run #", color=palette["text"], fontsize=10)
+          ax.set_ylabel("Time (ms)", color=palette["text"], fontsize=10)
+          ax.set_xlim(0.5, len(times) + 0.5)
+          ax.set_ylim(0, max(max(times), thr) * 1.15)
+          ax.grid(True, alpha=0.1, color=palette["text"], zorder=1)
+          ax.legend(
+              facecolor=palette["bg"],
+              labelcolor=palette["text"],
+              fontsize=9,
+              framealpha=0.85,
+              loc="upper right"
+          )
+
+          status = "✅ PASSED" if passed else "❌ FAILED"
+          ax.set_title(
+              f"🚀 ASH CLI Startup — {data['description']}\n"
+              f"{status}  ·  mean={mean:.2f}ms  ·  p95={p95:.2f}ms"
+              f"  ·  threshold={thr:.0f}ms",
+              color=palette["text"],
+              fontsize=12,
+              fontweight="bold",
+              pad=14
+          )
+
+          plt.tight_layout()
+          chart_path = f"${BENCHMARK_DIR}/${CMD_NAME}/startup-chart.png"
+          plt.savefig(chart_path, dpi=150, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 Chart saved: {chart_path}")
+          PYTHON_EOF
+
+      - name: "📤 Upload artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "startup-bench-${{ matrix.command.name }}-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCHMARK_DIR }}/${{ matrix.command.name }}/"
+          retention-days: 30
+
+      - name: "❌ Fail on threshold breach"
+        if: |
+          steps.process.outputs.passed == 'false' &&
+          matrix.command.critical == true
+        run: |
+          MEAN="${{ steps.process.outputs.mean_ms }}"
+          echo "::error title=Startup Time Threshold Exceeded::"
+          echo "  ${CMD_NAME} mean=${MEAN}ms exceeds threshold=${CMD_THRESHOLD_MS}ms"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3: Shell startup benchmarks
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-shell-startup:
+    name: "🐚 Bench · Shell Startup (${{ matrix.shell.name }})"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shell:
+          - name: "fish"
+            binary: "fish"
+            init_args: "-c 'exit 0'"
+            source_config: "--init-command='source config/fish/config.fish 2>/dev/null; exit'"
+            threshold_ms: 300
+            install_cmd: "sudo apt-get install -y fish"
+            critical: true
+
+          - name: "bash-with-profile"
+            binary: "bash"
+            init_args: "--login -c 'exit 0'"
+            source_config: "--rcfile /dev/null -c 'exit 0'"
+            threshold_ms: 150
+            install_cmd: "true"   # bash is preinstalled
+            critical: false
+
+          - name: "bash-interactive"
+            binary: "bash"
+            init_args: "-i -c 'exit 0'"
+            source_config: "-i -c 'exit 0'"
+            threshold_ms: 200
+            install_cmd: "true"
+            critical: false
+
+    env:
+      SHELL_NAME: ${{ matrix.shell.name }}
+      SHELL_BINARY: ${{ matrix.shell.binary }}
+      SHELL_THRESHOLD_MS: ${{ matrix.shell.threshold_ms }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install tools"
+        run: |
+          sudo apt-get update -qq
+          ${{ matrix.shell.install_cmd }} 2>/dev/null || true
+          sudo apt-get install -y --no-install-recommends jq bc python3 2>/dev/null || true
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb && rm /tmp/hyperfine.deb || true
+
+          echo "  ✅ ${SHELL_BINARY}: $(${SHELL_BINARY} --version 2>&1 | head -1 || echo 'available')"
+          echo "  ✅ hyperfine: $(hyperfine --version 2>/dev/null || echo 'available')"
+
+      - name: "🏗️ Prepare shell configs"
+        run: |
+          set -euo pipefail
+
+          # Create minimal fish config for benchmarking
+          mkdir -p "${HOME}/.config/fish/conf.d"
+
+          # Write lightweight benchmark config
+          cat > "${HOME}/.config/fish/config.fish" << 'FISH_EOF'
+          # ASH Fish config — benchmark minimal
+          set -gx ASH_ROOT "$HOME/.config/ash"
+          set -gx fish_greeting ""
+          # Minimal path setup only
+          fish_add_path --global --move ~/.local/bin
+          FISH_EOF
+
+          # Set HOME-based config
+          echo "FISH_CONFIG_DIR=${HOME}/.config/fish" >> "$GITHUB_ENV"
+
+      - name: "🔥 Warmup runs"
+        run: |
+          echo "  🔥 Warming up ${SHELL_BINARY}..."
+          for i in $(seq 1 5); do
+            ${SHELL_BINARY} ${{ matrix.shell.init_args }} 2>/dev/null || true
+          done
+          echo "  ✅ Warmup complete"
+
+      - name: "⚡ Benchmark baseline shell startup"
+        id: bench_baseline
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/${SHELL_NAME}"
+
+          echo "  ⚡ Benchmarking ${SHELL_NAME} baseline startup..."
+
+          hyperfine \
+            --runs "${ITERATIONS}" \
+            --warmup 5 \
+            --time-unit millisecond \
+            --export-json "${BENCHMARK_DIR}/${SHELL_NAME}/baseline-results.json" \
+            --shell none \
+            --command-name "${SHELL_NAME}-baseline" \
+            "${SHELL_BINARY} ${{ matrix.shell.init_args }}" 2>/dev/null || true
+
+          # Fallback if hyperfine fails
+          if [[ ! -f "${BENCHMARK_DIR}/${SHELL_NAME}/baseline-results.json" ]]; then
+            TIMES=()
+            for i in $(seq 1 "${ITERATIONS}"); do
+              START=$(date +%s%N)
+              ${SHELL_BINARY} ${{ matrix.shell.init_args }} 2>/dev/null || true
+              END=$(date +%s%N)
+              TIMES+=("$(( (END - START) / 1000000 ))")
+            done
+            MEAN=0
+            for t in "${TIMES[@]}"; do MEAN=$((MEAN + t)); done
+            MEAN=$((MEAN / ${#TIMES[@]}))
+            cat > "${BENCHMARK_DIR}/${SHELL_NAME}/baseline-results.json" << EOF
+          {"results":[{"command":"${SHELL_NAME}-baseline","mean":${MEAN}.0,"stddev":0.0,"times":[$(IFS=,; echo "${TIMES[*]/%/.0}")]}]}
+          EOF
+          fi
+
+          MEAN=$(jq '.results[0].mean * 1000' \
+            "${BENCHMARK_DIR}/${SHELL_NAME}/baseline-results.json" 2>/dev/null || echo "0")
+          echo "baseline_mean_ms=${MEAN}" >> "$GITHUB_OUTPUT"
+          echo "  📊 Baseline: ${MEAN}ms"
+
+      - name: "⚡ Benchmark shell with ASH config"
+        id: bench_with_config
+        run: |
+          echo "  ⚡ Benchmarking ${SHELL_NAME} with ASH config..."
+
+          hyperfine \
+            --runs "${ITERATIONS}" \
+            --warmup 5 \
+            --time-unit millisecond \
+            --export-json "${BENCHMARK_DIR}/${SHELL_NAME}/config-results.json" \
+            --shell none \
+            --command-name "${SHELL_NAME}-with-config" \
+            "${SHELL_BINARY} ${{ matrix.shell.source_config }}" 2>/dev/null || true
+
+          # Fallback timing
+          if [[ ! -f "${BENCHMARK_DIR}/${SHELL_NAME}/config-results.json" ]]; then
+            TIMES=()
+            for i in $(seq 1 "${ITERATIONS}"); do
+              START=$(date +%s%N)
+              ${SHELL_BINARY} ${{ matrix.shell.source_config }} 2>/dev/null || true
+              END=$(date +%s%N)
+              TIMES+=("$(( (END - START) / 1000000 ))")
+            done
+            MEAN=0
+            for t in "${TIMES[@]}"; do MEAN=$((MEAN + t)); done
+            MEAN=$((MEAN / ${#TIMES[@]}))
+            cat > "${BENCHMARK_DIR}/${SHELL_NAME}/config-results.json" << EOF
+          {"results":[{"command":"${SHELL_NAME}-config","mean":${MEAN}.0,"stddev":0.0,"times":[$(IFS=,; echo "${TIMES[*]/%/.0}")]}]}
+          EOF
+          fi
+
+          MEAN=$(jq '.results[0].mean * 1000' \
+            "${BENCHMARK_DIR}/${SHELL_NAME}/config-results.json" 2>/dev/null || echo "0")
+          echo "config_mean_ms=${MEAN}" >> "$GITHUB_OUTPUT"
+          echo "  📊 With config: ${MEAN}ms"
+
+      - name: "📊 Analyze startup overhead"
+        id: analyze
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import os
+
+          def load_results(path):
+              try:
+                  with open(path) as f:
+                      r = json.load(f)
+                  res = r.get("results", [{}])[0]
+                  times_ms = [t * 1000 for t in res.get("times", [res.get("mean", 0)])]
+                  mean_ms = res.get("mean", 0) * 1000
+                  return mean_ms, times_ms
+              except Exception as e:
+                  print(f"  ⚠️ Failed to load {path}: {e}")
+                  return 0.0, [0.0]
+
+          baseline_mean, baseline_times = load_results(
+              "${BENCHMARK_DIR}/${SHELL_NAME}/baseline-results.json"
+          )
+          config_mean, config_times = load_results(
+              "${BENCHMARK_DIR}/${SHELL_NAME}/config-results.json"
+          )
+
+          overhead_ms = config_mean - baseline_mean
+          overhead_pct = (overhead_ms / baseline_mean * 100) if baseline_mean > 0 else 0
+          threshold_ms = float("${SHELL_THRESHOLD_MS}")
+          passed = config_mean <= threshold_ms
+
+          analysis = {
+              "shell": "${SHELL_NAME}",
+              "git_sha": "${GITHUB_SHA}",
+              "baseline_mean_ms": round(baseline_mean, 3),
+              "config_mean_ms": round(config_mean, 3),
+              "overhead_ms": round(overhead_ms, 3),
+              "overhead_percent": round(overhead_pct, 2),
+              "threshold_ms": threshold_ms,
+              "passed": passed,
+              "critical": ${{ matrix.shell.critical }},
+          }
+
+          out_path = "${BENCHMARK_DIR}/${SHELL_NAME}/analysis.json"
+          with open(out_path, "w") as f:
+              json.dump(analysis, f, indent=2)
+
+          print(json.dumps(analysis, indent=2))
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"passed={'true' if passed else 'false'}\n")
+              out.write(f"overhead_ms={round(overhead_ms,3)}\n")
+              out.write(f"config_mean_ms={round(config_mean,3)}\n")
+
+          status = "✅ PASS" if passed else "❌ FAIL"
+          print(f"\n  {status} — {config_mean:.1f}ms (overhead: +{overhead_ms:.1f}ms "
+                f"= {overhead_pct:.1f}%)")
+          PYTHON_EOF
+
+      - name: "📈 Startup comparison chart"
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          analysis_file = "${BENCHMARK_DIR}/${SHELL_NAME}/analysis.json"
+          with open(analysis_file) as f:
+              data = json.load(f)
+
+          palette = {
+              "bg": "#1e1e2e", "surface": "#313244", "text": "#cdd6f4",
+              "green": "#a6e3a1", "red": "#f38ba8", "blue": "#89b4fa",
+              "mauve": "#cba6f7", "peach": "#fab387", "surface2": "#585b70",
+          }
+
+          fig, ax = plt.subplots(figsize=(10, 5))
+          fig.patch.set_facecolor(palette["bg"])
+          ax.set_facecolor(palette["surface"])
+
+          for spine in ax.spines.values():
+              spine.set_edgecolor(palette["text"])
+              spine.set_alpha(0.3)
+          ax.tick_params(colors=palette["text"])
+
+          categories  = ["Baseline Shell", "With ASH Config"]
+          values      = [data["baseline_mean_ms"], data["config_mean_ms"]]
+          colors_bars = [palette["blue"], palette["green"] if data["passed"] else palette["red"]]
+
+          bars = ax.bar(categories, values, color=colors_bars,
+                        alpha=0.8, width=0.45, zorder=3,
+                        edgecolor=palette["bg"], linewidth=1.5)
+
+          # Value labels on bars
+          for bar, val in zip(bars, values):
+              ax.text(
+                  bar.get_x() + bar.get_width() / 2,
+                  bar.get_height() + max(values) * 0.02,
+                  f"{val:.1f}ms",
+                  ha="center", va="bottom",
+                  color=palette["text"], fontsize=11, fontweight="bold"
+              )
+
+          # Threshold line
+          ax.axhline(data["threshold_ms"], color=palette["red"], linewidth=1.8,
+                     linestyle="--", alpha=0.7,
+                     label=f"Threshold: {data['threshold_ms']:.0f}ms", zorder=4)
+
+          # Overhead annotation
+          ax.annotate(
+              f"+{data['overhead_ms']:.1f}ms\n({data['overhead_percent']:.1f}% overhead)",
+              xy=(1, data["config_mean_ms"]),
+              xytext=(0.5, max(values) * 0.8),
+              ha="center", color=palette["peach"], fontsize=10,
+              arrowprops=dict(arrowstyle="->", color=palette["peach"], lw=1.5),
+          )
+
+          ax.set_ylabel("Startup Time (ms)", color=palette["text"], fontsize=11)
+          ax.set_ylim(0, max(max(values), data["threshold_ms"]) * 1.25)
+          ax.grid(True, alpha=0.1, color=palette["text"], axis="y", zorder=1)
+          ax.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                    fontsize=9, framealpha=0.85)
+
+          status = "✅ PASSED" if data["passed"] else "❌ FAILED"
+          ax.set_title(
+              f"🐚 {data['shell']} Startup Benchmark\n"
+              f"{status}  ·  config_mean={data['config_mean_ms']:.2f}ms"
+              f"  ·  threshold={data['threshold_ms']:.0f}ms",
+              color=palette["text"], fontsize=12, fontweight="bold", pad=14
+          )
+
+          plt.tight_layout()
+          plt.savefig("${BENCHMARK_DIR}/${SHELL_NAME}/startup-comparison.png",
+                      dpi=150, bbox_inches="tight", facecolor=palette["bg"])
+          plt.close()
+          print("  📈 Comparison chart saved")
+          PYTHON_EOF
+
+      - name: "📤 Upload artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "startup-shell-${{ matrix.shell.name }}-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCHMARK_DIR }}/${{ matrix.shell.name }}/"
+          retention-days: 30
+
+      - name: "❌ Fail critical"
+        if: |
+          steps.analyze.outputs.passed == 'false' &&
+          matrix.shell.critical == true
+        run: |
+          echo "::error title=Shell Startup Threshold Exceeded::"
+          echo "  ${SHELL_NAME} startup=${steps.analyze.outputs.config_mean_ms}ms"
+          echo "  exceeds threshold=${SHELL_THRESHOLD_MS}ms"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4: Consolidated startup report
+  # ───────────────────────────────────────────────────────────────────────────
+  startup-report:
+    name: "📊 Report · Startup Benchmark Summary"
+    needs: [setup, bench-ash-cli, bench-shell-startup]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install tools"
+        run: |
+          sudo apt-get install -y --no-install-recommends jq python3 python3-pip 2>/dev/null
+          pip3 install --quiet --user matplotlib pandas rich jinja2 tabulate
+
+      - name: "📥 Download artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "startup-*-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCHMARK_DIR }}/all"
+          merge-multiple: true
+
+      - name: "📊 Generate consolidated report"
+        id: report
+        run: |
+          mkdir -p "${REPORTS_DIR}"
+
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import os
+          from datetime import datetime, timezone
+
+          bench_dir = "${BENCHMARK_DIR}/all"
+          reports_dir = "${REPORTS_DIR}"
+
+          # Collect all processed.json and analysis.json files
+          all_results = []
+          for f in glob.glob(f"{bench_dir}/**/processed.json", recursive=True) + \
+                   glob.glob(f"{bench_dir}/**/analysis.json", recursive=True):
+              try:
+                  with open(f) as fp:
+                      data = json.load(fp)
+                  all_results.append({"file": f, "data": data})
+                  print(f"  ✓ {os.path.basename(os.path.dirname(f))}")
+              except Exception as e:
+                  print(f"  ✗ {f}: {e}")
+
+          passed_all = all(
+              r["data"].get("threshold", r["data"]).get("passed", True)
+              for r in all_results
+          )
+
+          report = {
+              "bench_id": "${{ needs.setup.outputs.bench_id }}",
+              "git_sha": "${GITHUB_SHA}",
+              "timestamp": datetime.now(timezone.utc).isoformat(),
+              "overall_pass": passed_all,
+              "total": len(all_results),
+              "results": [r["data"] for r in all_results],
+          }
+
+          with open(f"{reports_dir}/startup-report.json", "w") as f:
+              json.dump(report, f, indent=2)
+
+          # Generate markdown
+          status = "✅ PASSED" if passed_all else "❌ FAILED"
+          md_lines = [
+              f"# 🚀 ASH Startup Benchmark Report",
+              f"",
+              f"> **{status}** &nbsp;·&nbsp; "
+              f"SHA `{report['git_sha'][:8]}` &nbsp;·&nbsp; "
+              f"{report['timestamp']}",
+              f"",
+              f"## Results",
+              f"",
+              f"| Target | Mean (ms) | p95 (ms) | Threshold | Status |",
+              f"|--------|-----------|----------|-----------|--------|",
+          ]
+
+          for r in report["results"]:
+              d = r.get("data", r)
+              t = d.get("timing", d)
+              thr = d.get("threshold", {})
+              icon = "✅" if thr.get("passed", d.get("passed", True)) else "❌"
+              name = d.get("command", d.get("shell", "—"))
+              mean = t.get("mean_ms", d.get("config_mean_ms", "—"))
+              p95  = t.get("p95_ms", "—")
+              thresh = thr.get("threshold_ms", d.get("threshold_ms", "—"))
+              md_lines.append(f"| `{name}` | `{mean}` | `{p95}` | `{thresh}ms` | {icon} |")
+
+          with open(f"{reports_dir}/startup-report.md", "w") as f:
+              f.write("\n".join(md_lines))
+
+          with open("$GITHUB_STEP_SUMMARY", "w") as f:
+              f.write("\n".join(md_lines))
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"overall_pass={'true' if passed_all else 'false'}\n")
+
+          print(f"\n  {status} — {len(all_results)} benchmarks processed")
+          PYTHON_EOF
+
+      - name: "💬 Post PR comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let content = '';
+            try {
+              content = fs.readFileSync('${{ env.REPORTS_DIR }}/startup-report.md', 'utf8');
+            } catch(e) {
+              content = '> Startup benchmark report unavailable.';
+            }
+
+            const overallPass = '${{ steps.report.outputs.overall_pass }}' === 'true';
+            const body = [
+              `## 🚀 Startup Time Benchmark Results`,
+              ``,
+              `${overallPass ? '✅ All startup benchmarks passed' : '❌ Some benchmarks failed'}`,
+              ``,
+              `<details><summary>📊 Full Report</summary>`,
+              ``,
+              content,
+              ``,
+              `</details>`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Startup Time Benchmark Results')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: "📤 Upload consolidated report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "startup-report-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.REPORTS_DIR }}/"
+          retention-days: 90
+
+      - name: "💾 Save baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.report.outputs.overall_pass == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-startup-main"

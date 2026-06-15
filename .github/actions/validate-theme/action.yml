@@ -1,0 +1,710 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🎨 ASH DOTFILES v5.0 OMEGA — VALIDATE THEME ACTION                                      ║
+# ║                                                                                           ║
+# ║  ██╗   ██╗ █████╗ ██╗     ██╗██████╗  █████╗ ████████╗███████╗                           ║
+# ║  ██║   ██║██╔══██╗██║     ██║██╔══██╗██╔══██╗╚══██╔══╝██╔════╝                           ║
+# ║  ██║   ██║███████║██║     ██║██║  ██║███████║   ██║   █████╗                             ║
+# ║  ╚██╗ ██╔╝██╔══██║██║     ██║██║  ██║██╔══██║   ██║   ██╔══╝                             ║
+# ║   ╚████╔╝ ██║  ██║███████╗██║██████╔╝██║  ██║   ██║   ███████╗                           ║
+# ║    ╚═══╝  ╚═╝  ╚═╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝                           ║
+# ║                                                                                           ║
+# ║  ████████╗██╗  ██╗███████╗███╗   ███╗███████╗                                            ║
+# ║  ╚══██╔══╝██║  ██║██╔════╝████╗ ████║██╔════╝                                            ║
+# ║     ██║   ███████║█████╗  ██╔████╔██║█████╗                                              ║
+# ║     ██║   ██╔══██║██╔══╝  ██║╚██╔╝██║██╔══╝                                              ║
+# ║     ██║   ██║  ██║███████╗██║ ╚═╝ ██║███████╗                                            ║
+# ║     ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝                                            ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 VALIDATION PIPELINE:                                                                  ║
+# ║     📋 JSON Schema conformance (colors.json / metadata.json / theme.conf)                ║
+# ║     🎨 Color format validation (HEX / RGB / HSL / OKLCH)                                 ║
+# ║     ♿ WCAG accessibility audit (AA / AAA contrast ratios)                                ║
+# ║     🌈 Color harmony analysis (complementary / analogous / triadic)                      ║
+# ║     🔢 Color count verification (minimum 16, maximum 32)                                  ║
+# ║     📐 Required color slots check (base/text/accent/surface/overlay)                     ║
+# ║     🏷️  Metadata completeness (name/version/author/category/tags)                         ║
+# ║     📁 File structure integrity (all required files present)                              ║
+# ║     🖼️  Preview image validation (dimensions / format / size)                             ║
+# ║     🔗 Wallpaper path resolution (relative paths / existence)                            ║
+# ║     🔤 Naming convention enforcement (kebab-case / no spaces)                            ║
+# ║     📊 Color space conversion accuracy (hex ↔ oklch ↔ hsl)                              ║
+# ║     🔒 Security scan (no embedded scripts / XSS vectors)                                 ║
+# ║     ⚡ Performance check (file sizes / asset count)                                       ║
+# ║     📈 Duplicate color detection (similar colors warning)                                 ║
+# ║     🎭 Dark/Light mode contrast verification                                              ║
+# ║     ✅ Full validation report with score (0-100)                                          ║
+# ║     🔔 PR comment with rich validation results                                            ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🎨 Validate ASH Theme"
+description: >
+  Comprehensive theme validation engine for ASH Dotfiles v5.0 OMEGA.
+  Validates JSON schema conformance, color accessibility (WCAG AA/AAA),
+  color harmony, metadata completeness, file structure integrity, preview
+  image dimensions, naming conventions, and generates a detailed
+  validation report with a 0-100 quality score.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ── Target specification ──────────────────────────────────────────────────
+  theme_path:
+    description: >
+      📁 Path to the theme directory or specific theme.conf file.
+      Accepts: relative path from repo root, or absolute path.
+      Examples: "themes/presets/dark/catppuccin-mocha"
+                "themes/presets/dark/catppuccin-mocha/theme.conf"
+    required: true
+
+  theme_name:
+    description: >
+      🏷️ Theme name override. If empty, auto-detected from theme.conf
+      or directory name. Used in reports and PR comments.
+    required: false
+    default: ""
+
+  # ── Validation depth ──────────────────────────────────────────────────────
+  validation_level:
+    description: >
+      🎯 Validation depth level.
+      • quick    — File presence + JSON parse only (fastest, ~2s)
+      • standard — Full validation without preview check (~10s)
+      • strict   — All checks + WCAG AAA + performance audit (~20s)
+      • paranoid — Everything + duplicate detection + harmony (~30s)
+    required: false
+    default: "standard"
+
+  # ── WCAG accessibility ────────────────────────────────────────────────────
+  wcag_level:
+    description: >
+      ♿ WCAG compliance level to enforce.
+      • A   — Minimum contrast 3.0:1
+      • AA  — Normal text 4.5:1, large text 3.0:1 (recommended)
+      • AAA — Enhanced 7.0:1, large text 4.5:1 (strictest)
+    required: false
+    default: "AA"
+
+  fail_on_wcag_violation:
+    description: "♿ Fail validation if WCAG check fails"
+    required: false
+    default: "true"
+
+  # ── Color validation ──────────────────────────────────────────────────────
+  min_colors:
+    description: "🎨 Minimum number of colors required in palette"
+    required: false
+    default: "16"
+
+  max_colors:
+    description: "🎨 Maximum number of colors allowed in palette"
+    required: false
+    default: "32"
+
+  required_color_keys:
+    description: >
+      🎨 Required color keys (comma-separated).
+      These MUST be present in colors.json.
+    required: false
+    default: "base,text,accent,surface0,overlay0,blue,green,red,yellow"
+
+  check_color_harmony:
+    description: "🌈 Check color harmony relationships"
+    required: false
+    default: "true"
+
+  check_duplicate_colors:
+    description: "🔍 Warn on visually similar colors (delta-E < 5)"
+    required: false
+    default: "true"
+
+  # ── Metadata validation ───────────────────────────────────────────────────
+  required_metadata_fields:
+    description: "📋 Required metadata fields (comma-separated)"
+    required: false
+    default: "name,version,author,category,description"
+
+  enforce_naming_convention:
+    description: "🔤 Enforce kebab-case naming convention"
+    required: false
+    default: "true"
+
+  # ── Preview validation ────────────────────────────────────────────────────
+  validate_preview:
+    description: "🖼️ Validate preview image (dimensions + format)"
+    required: false
+    default: "false"
+
+  min_preview_width:
+    description: "🖼️ Minimum preview image width (px)"
+    required: false
+    default: "1280"
+
+  min_preview_height:
+    description: "🖼️ Minimum preview image height (px)"
+    required: false
+    default: "720"
+
+  # ── Schema validation ─────────────────────────────────────────────────────
+  schema_file:
+    description: >
+      📐 Path to JSON schema file for validation.
+      If empty, uses the built-in ASH theme schema.
+    required: false
+    default: "themes/schema/theme-schema.json"
+
+  strict_schema:
+    description: "📐 Fail on additional unknown properties"
+    required: false
+    default: "false"
+
+  # ── Scoring ───────────────────────────────────────────────────────────────
+  minimum_score:
+    description: "📊 Minimum validation score (0-100) to pass"
+    required: false
+    default: "70"
+
+  score_weights:
+    description: >
+      📊 Scoring weights JSON (sum must equal 100).
+      Default: {"structure":20,"colors":30,"wcag":25,"metadata":15,"naming":10}
+    required: false
+    default: ""
+
+  # ── Output & reporting ────────────────────────────────────────────────────
+  post_pr_comment:
+    description: "💬 Post validation results as PR comment"
+    required: false
+    default: "true"
+
+  generate_report:
+    description: "📄 Generate detailed HTML/Markdown report artifact"
+    required: false
+    default: "true"
+
+  report_format:
+    description: "📄 Report format (markdown|json|html|all)"
+    required: false
+    default: "markdown"
+
+  update_existing_comment:
+    description: "💬 Update existing PR comment instead of creating new"
+    required: false
+    default: "true"
+
+  fail_on_error:
+    description: "🚨 Fail action if validation fails"
+    required: false
+    default: "true"
+
+  verbose:
+    description: "📢 Enable verbose output"
+    required: false
+    default: "false"
+
+  # ── Security ──────────────────────────────────────────────────────────────
+  security_scan:
+    description: "🔒 Run security scan on theme files"
+    required: false
+    default: "true"
+
+  # ── Performance ───────────────────────────────────────────────────────────
+  max_total_size_kb:
+    description: "⚡ Maximum total theme directory size (KB)"
+    required: false
+    default: "10240"
+
+  max_wallpaper_size_mb:
+    description: "⚡ Maximum wallpaper file size (MB)"
+    required: false
+    default: "20"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Overall result ────────────────────────────────────────────────────────
+  validation_passed:
+    description: "✅ Whether validation passed (true/false)"
+    value: ${{ steps.validate.outputs.validation_passed }}
+
+  validation_score:
+    description: "📊 Validation score (0-100)"
+    value: ${{ steps.validate.outputs.score }}
+
+  validation_grade:
+    description: "🏅 Letter grade (A+/A/B/C/D/F)"
+    value: ${{ steps.validate.outputs.grade }}
+
+  # ── Theme info ────────────────────────────────────────────────────────────
+  theme_name:
+    description: "🏷️ Detected theme name"
+    value: ${{ steps.validate.outputs.theme_name }}
+
+  theme_category:
+    description: "📁 Theme category (dark/light/neon/nature/etc)"
+    value: ${{ steps.validate.outputs.category }}
+
+  theme_version:
+    description: "🔖 Theme version from metadata"
+    value: ${{ steps.validate.outputs.version }}
+
+  color_count:
+    description: "🎨 Number of colors in palette"
+    value: ${{ steps.validate.outputs.color_count }}
+
+  accent_color:
+    description: "🎯 Primary accent color (hex)"
+    value: ${{ steps.validate.outputs.accent_color }}
+
+  # ── Check results ─────────────────────────────────────────────────────────
+  structure_passed:
+    description: "📁 File structure check result"
+    value: ${{ steps.validate.outputs.structure_passed }}
+
+  colors_passed:
+    description: "🎨 Color validation result"
+    value: ${{ steps.validate.outputs.colors_passed }}
+
+  wcag_passed:
+    description: "♿ WCAG accessibility check result"
+    value: ${{ steps.validate.outputs.wcag_passed }}
+
+  wcag_min_ratio:
+    description: "♿ Minimum contrast ratio found"
+    value: ${{ steps.validate.outputs.wcag_min_ratio }}
+
+  wcag_pairs_checked:
+    description: "♿ Number of color pairs checked"
+    value: ${{ steps.validate.outputs.wcag_pairs_checked }}
+
+  metadata_passed:
+    description: "📋 Metadata validation result"
+    value: ${{ steps.validate.outputs.metadata_passed }}
+
+  schema_passed:
+    description: "📐 Schema conformance result"
+    value: ${{ steps.validate.outputs.schema_passed }}
+
+  naming_passed:
+    description: "🔤 Naming convention result"
+    value: ${{ steps.validate.outputs.naming_passed }}
+
+  security_passed:
+    description: "🔒 Security scan result"
+    value: ${{ steps.validate.outputs.security_passed }}
+
+  # ── Issues ────────────────────────────────────────────────────────────────
+  error_count:
+    description: "❌ Number of validation errors"
+    value: ${{ steps.validate.outputs.error_count }}
+
+  warning_count:
+    description: "⚠️ Number of validation warnings"
+    value: ${{ steps.validate.outputs.warning_count }}
+
+  errors_json:
+    description: "❌ JSON array of error messages"
+    value: ${{ steps.validate.outputs.errors_json }}
+
+  warnings_json:
+    description: "⚠️ JSON array of warning messages"
+    value: ${{ steps.validate.outputs.warnings_json }}
+
+  # ── Artifacts ─────────────────────────────────────────────────────────────
+  report_path:
+    description: "📄 Path to generated validation report"
+    value: ${{ steps.validate.outputs.report_path }}
+
+  report_url:
+    description: "🔗 URL of uploaded report artifact"
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight checks
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Resolve theme path & validate inputs"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        THEME_PATH="${{ inputs.theme_path }}"
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  🎨 ASH Theme Validation Engine v5.0 OMEGA                   ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        echo "║  📁 Theme:  ${THEME_PATH:0:50}$(printf '%*s' $((50 - ${#THEME_PATH} > 0 ? 50 - ${#THEME_PATH} : 0)) '')║"
+        echo "║  🎯 Level:  ${{ inputs.validation_level }}$(printf '%*s' $((50 - ${#inputs.validation_level})) '')║"
+        echo "║  ♿ WCAG:   ${{ inputs.wcag_level }}$(printf '%*s' $((50 - ${#inputs.wcag_level})) '')║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # Resolve absolute theme path
+        if [[ "${THEME_PATH}" = /* ]]; then
+          ABS_THEME_PATH="${THEME_PATH}"
+        else
+          ABS_THEME_PATH="${WORKSPACE}/${THEME_PATH}"
+        fi
+
+        # If path points to theme.conf, use its directory
+        if [[ "${ABS_THEME_PATH}" == *.conf ]]; then
+          ABS_THEME_DIR=$(dirname "${ABS_THEME_PATH}")
+        else
+          ABS_THEME_DIR="${ABS_THEME_PATH}"
+        fi
+
+        # Validate theme directory exists
+        if [[ ! -d "${ABS_THEME_DIR}" ]]; then
+          echo "::error title=Theme Not Found::Theme directory not found: ${ABS_THEME_DIR}"
+          exit 1
+        fi
+
+        # Auto-detect theme name
+        THEME_NAME="${{ inputs.theme_name }}"
+        if [[ -z "${THEME_NAME}" ]]; then
+          CONF="${ABS_THEME_DIR}/theme.conf"
+          if [[ -f "${CONF}" ]]; then
+            THEME_NAME=$(grep -E "^name\s*=" "${CONF}" 2>/dev/null | \
+              head -1 | cut -d= -f2 | tr -d ' "'"'" | head -c50 || echo "")
+          fi
+          [[ -z "${THEME_NAME}" ]] && THEME_NAME=$(basename "${ABS_THEME_DIR}")
+        fi
+
+        # Validate level
+        VALID_LEVELS="quick standard strict paranoid"
+        if ! echo "${VALID_LEVELS}" | grep -qw "${{ inputs.validation_level }}"; then
+          echo "::error::Invalid validation_level '${{ inputs.validation_level }}'"
+          exit 1
+        fi
+
+        # Validate WCAG level
+        VALID_WCAG="A AA AAA"
+        if ! echo "${VALID_WCAG}" | grep -qw "${{ inputs.wcag_level }}"; then
+          echo "::error::Invalid wcag_level '${{ inputs.wcag_level }}'"
+          exit 1
+        fi
+
+        # Set up work directory
+        WORK_DIR="${WORKSPACE}/.theme-validator"
+        mkdir -p "${WORK_DIR}"
+
+        echo "abs_theme_dir=${ABS_THEME_DIR}" >> "$GITHUB_OUTPUT"
+        echo "theme_name=${THEME_NAME}"       >> "$GITHUB_OUTPUT"
+        echo "work_dir=${WORK_DIR}"           >> "$GITHUB_OUTPUT"
+
+        echo "  ✅ Pre-flight passed"
+        echo "  📁 Theme dir: ${ABS_THEME_DIR}"
+        echo "  🏷️  Theme name: ${THEME_NAME}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Install validation dependencies
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install validation toolchain"
+      shell: bash
+      id: deps
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing validation dependencies..."
+
+        # Python packages for validation
+        pip3 install --quiet --user \
+          colormath==3.0.0 \
+          jsonschema==4.23.0 \
+          Pillow==11.0.0 \
+          matplotlib==3.9.2 \
+          numpy==2.1.2 \
+          rich==13.9.2 \
+          tabulate==0.9.0 \
+          wcag-contrast-ratio==0.9 \
+          2>/dev/null || true
+
+        # System tools
+        sudo apt-get install -y --no-install-recommends \
+          jq \
+          bc \
+          imagemagick \
+          webp \
+          2>/dev/null || true
+
+        echo "  ✅ Dependencies ready"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Schema check
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📐 Schema · JSON conformance validation"
+      shell: bash
+      id: schema
+      run: |
+        bash "${{ github.action_path }}/schema-check.sh" \
+          "${{ steps.preflight.outputs.abs_theme_dir }}" \
+          "${{ steps.preflight.outputs.work_dir }}" \
+          "${{ inputs.schema_file }}" \
+          "${{ inputs.strict_schema }}" \
+          "${{ inputs.verbose }}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Main validation
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🎨 Validate · Full theme validation pipeline"
+      shell: bash
+      id: validate
+      env:
+        THEME_DIR:            ${{ steps.preflight.outputs.abs_theme_dir }}
+        THEME_NAME:           ${{ steps.preflight.outputs.theme_name }}
+        WORK_DIR:             ${{ steps.preflight.outputs.work_dir }}
+        VALIDATION_LEVEL:     ${{ inputs.validation_level }}
+        WCAG_LEVEL:           ${{ inputs.wcag_level }}
+        FAIL_ON_WCAG:         ${{ inputs.fail_on_wcag_violation }}
+        MIN_COLORS:           ${{ inputs.min_colors }}
+        MAX_COLORS:           ${{ inputs.max_colors }}
+        REQUIRED_COLOR_KEYS:  ${{ inputs.required_color_keys }}
+        CHECK_HARMONY:        ${{ inputs.check_color_harmony }}
+        CHECK_DUPLICATES:     ${{ inputs.check_duplicate_colors }}
+        REQUIRED_META:        ${{ inputs.required_metadata_fields }}
+        ENFORCE_NAMING:       ${{ inputs.enforce_naming_convention }}
+        VALIDATE_PREVIEW:     ${{ inputs.validate_preview }}
+        MIN_PREVIEW_W:        ${{ inputs.min_preview_width }}
+        MIN_PREVIEW_H:        ${{ inputs.min_preview_height }}
+        MINIMUM_SCORE:        ${{ inputs.minimum_score }}
+        SCORE_WEIGHTS:        ${{ inputs.score_weights }}
+        SECURITY_SCAN:        ${{ inputs.security_scan }}
+        MAX_SIZE_KB:          ${{ inputs.max_total_size_kb }}
+        MAX_WP_SIZE_MB:       ${{ inputs.max_wallpaper_size_mb }}
+        REPORT_FORMAT:        ${{ inputs.report_format }}
+        VERBOSE:              ${{ inputs.verbose }}
+        SCHEMA_PASSED:        ${{ steps.schema.outputs.schema_passed || 'false' }}
+        SCHEMA_ERRORS:        ${{ steps.schema.outputs.error_count || '0' }}
+      run: |
+        bash "${{ github.action_path }}/validate.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Post PR comment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💬 Comment · Post validation results to PR"
+      if: inputs.post_pr_comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const fs   = require("fs");
+          const path = require("path");
+
+          const WORK_DIR      = "${{ steps.preflight.outputs.work_dir }}";
+          const THEME_NAME    = "${{ steps.validate.outputs.theme_name || steps.preflight.outputs.theme_name }}";
+          const SCORE         = "${{ steps.validate.outputs.score || '0' }}";
+          const GRADE         = "${{ steps.validate.outputs.grade || 'F' }}";
+          const PASSED        = "${{ steps.validate.outputs.validation_passed }}" === "true";
+          const ERROR_COUNT   = parseInt("${{ steps.validate.outputs.error_count || '0' }}");
+          const WARNING_COUNT = parseInt("${{ steps.validate.outputs.warning_count || '0' }}");
+          const COLOR_COUNT   = "${{ steps.validate.outputs.color_count || '?' }}";
+          const ACCENT        = "${{ steps.validate.outputs.accent_color || '#888888' }}";
+          const WCAG_MIN      = "${{ steps.validate.outputs.wcag_min_ratio || '?' }}";
+          const WCAG_PAIRS    = "${{ steps.validate.outputs.wcag_pairs_checked || '0' }}";
+          const CATEGORY      = "${{ steps.validate.outputs.category || '?' }}";
+          const VERSION       = "${{ steps.validate.outputs.version || '?' }}";
+
+          const STATUS_ICON   = PASSED ? "✅" : "❌";
+          const STATUS_TEXT   = PASSED ? "PASSED" : "FAILED";
+          const SCORE_INT     = parseInt(SCORE);
+
+          const GRADE_EMOJI = {
+            "A+":"🏆","A":"🥇","B":"🥈","C":"🥉","D":"📋","F":"❌"
+          }[GRADE] || "📊";
+
+          const SCORE_BAR = (() => {
+            const filled = Math.round(SCORE_INT / 5);
+            const empty  = 20 - filled;
+            return "█".repeat(filled) + "░".repeat(empty);
+          })();
+
+          // Load report if available
+          let reportContent = "";
+          const reportFile = `${WORK_DIR}/validation-report.md`;
+          if (fs.existsSync(reportFile)) {
+            reportContent = fs.readFileSync(reportFile, "utf8").slice(0, 2000);
+          }
+
+          // Load errors/warnings
+          let errors   = [], warnings = [];
+          try {
+            const errFile = `${WORK_DIR}/errors.json`;
+            const wrnFile = `${WORK_DIR}/warnings.json`;
+            if (fs.existsSync(errFile))
+              errors   = JSON.parse(fs.readFileSync(errFile, "utf8"));
+            if (fs.existsSync(wrnFile))
+              warnings = JSON.parse(fs.readFileSync(wrnFile, "utf8"));
+          } catch(e) { /* ignore */ }
+
+          const errorList   = errors.slice(0,5).map(e => `- ❌ ${e}`).join("\n");
+          const warningList = warnings.slice(0,5).map(w => `- ⚠️ ${w}`).join("\n");
+
+          const body = [
+            `## 🎨 Theme Validation — ${STATUS_ICON} **${STATUS_TEXT}**`,
+            ``,
+            `> **Theme:** \`${THEME_NAME}\` &nbsp;·&nbsp; **Category:** \`${CATEGORY}\` &nbsp;·&nbsp; **Version:** \`${VERSION}\``,
+            ``,
+            `### 📊 Validation Score`,
+            ``,
+            `\`\`\``,
+            `Score: [${SCORE_BAR}] ${SCORE}/100  Grade: ${GRADE_EMOJI} ${GRADE}`,
+            `\`\`\``,
+            ``,
+            `### 🔍 Check Results`,
+            ``,
+            `| Check | Status | Details |`,
+            `|-------|:------:|---------|`,
+            `| 📁 File Structure | ${"${{ steps.validate.outputs.structure_passed }}" === "true" ? "✅" : "❌"} | Required files present |`,
+            `| 🎨 Color Validation | ${"${{ steps.validate.outputs.colors_passed }}" === "true" ? "✅" : "❌"} | \`${COLOR_COUNT}\` colors · accent: \`${ACCENT}\` |`,
+            `| ♿ WCAG ${{ inputs.wcag_level }} | ${"${{ steps.validate.outputs.wcag_passed }}" === "true" ? "✅" : "❌"} | min ratio: \`${WCAG_MIN}:1\` · \`${WCAG_PAIRS}\` pairs |`,
+            `| 📋 Metadata | ${"${{ steps.validate.outputs.metadata_passed }}" === "true" ? "✅" : "❌"} | Required fields present |`,
+            `| 📐 Schema | ${"${{ steps.validate.outputs.schema_passed }}" === "true" ? "✅" : "❌"} | JSON conformance |`,
+            `| 🔤 Naming | ${"${{ steps.validate.outputs.naming_passed }}" === "true" ? "✅" : "❌"} | kebab-case convention |`,
+            `| 🔒 Security | ${"${{ steps.validate.outputs.security_passed }}" === "true" ? "✅" : "❌"} | No embedded threats |`,
+            ``,
+            ERROR_COUNT > 0 ? [
+              `### ❌ Errors (${ERROR_COUNT})`,
+              ``,
+              errorList,
+              errors.length > 5 ? `\n_... and ${errors.length - 5} more errors_` : "",
+              ``,
+            ].filter(Boolean).join("\n") : "",
+            WARNING_COUNT > 0 ? [
+              `### ⚠️ Warnings (${WARNING_COUNT})`,
+              ``,
+              warningList,
+              warnings.length > 5 ? `\n_... and ${warnings.length - 5} more warnings_` : "",
+              ``,
+            ].filter(Boolean).join("\n") : "",
+            reportContent ? [
+              `<details>`,
+              `<summary>📄 Full Validation Report</summary>`,
+              ``,
+              reportContent,
+              ``,
+              `</details>`,
+            ].join("\n") : "",
+            ``,
+            `---`,
+            `*🎨 ASH v5.0 OMEGA Theme Validation Engine · \`${{ inputs.validation_level }}\` mode · WCAG \`${{ inputs.wcag_level }}\`*`,
+          ].filter(l => l !== undefined).join("\n");
+
+          // Find existing validation comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner:       context.repo.owner,
+            repo:        context.repo.repo,
+            issue_number:context.issue.number,
+          });
+
+          const UPDATE = "${{ inputs.update_existing_comment }}" === "true";
+          const existing = UPDATE && comments.find(c =>
+            c.user.type === "Bot" &&
+            c.body.includes("Theme Validation")
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: existing.id,
+              body,
+            });
+            console.log(`✅ Updated validation comment #${existing.id}`);
+          } else {
+            await github.rest.issues.createComment({
+              owner:       context.repo.owner,
+              repo:        context.repo.repo,
+              issue_number:context.issue.number,
+              body,
+            });
+            console.log("✅ Created validation comment");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Upload report artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Validation report artifact"
+      if: inputs.generate_report == 'true'
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          theme-validation-${{ steps.preflight.outputs.theme_name }}-${{ github.run_id }}
+        path: |
+          ${{ steps.preflight.outputs.work_dir }}/
+        retention-days: 30
+        compression-level: 9
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 6 — GitHub Check annotation
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📋 Check · Create GitHub Check annotation"
+      shell: bash
+      if: always()
+      run: |
+        PASSED="${{ steps.validate.outputs.validation_passed }}"
+        SCORE="${{ steps.validate.outputs.score || '0' }}"
+        GRADE="${{ steps.validate.outputs.grade || 'F' }}"
+        THEME="${{ steps.preflight.outputs.theme_name }}"
+        ERRORS="${{ steps.validate.outputs.error_count || '0' }}"
+        WARNINGS="${{ steps.validate.outputs.warning_count || '0' }}"
+
+        if [[ "${PASSED}" == "true" ]]; then
+          echo "::notice title=🎨 Theme Validation Passed::${THEME} — Score: ${SCORE}/100 (${GRADE}) · ${ERRORS} errors · ${WARNINGS} warnings"
+        else
+          echo "::error title=🎨 Theme Validation Failed::${THEME} — Score: ${SCORE}/100 (${GRADE}) · ${ERRORS} errors · ${WARNINGS} warnings"
+        fi
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 7 — Fail gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚨 Gate · Fail if validation failed"
+      shell: bash
+      if: inputs.fail_on_error == 'true'
+      run: |
+        PASSED="${{ steps.validate.outputs.validation_passed }}"
+        SCORE="${{ steps.validate.outputs.score || '0' }}"
+        THEME="${{ steps.preflight.outputs.theme_name }}"
+
+        if [[ "${PASSED}" != "true" ]]; then
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ❌ THEME VALIDATION FAILED                                  ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  🏷️  Theme:  %-49s║\n" "${THEME}"
+          printf "║  📊 Score:  %-49s║\n" "${SCORE}/100"
+          printf "║  ❌ Errors: %-49s║\n" "${{ steps.validate.outputs.error_count || '0' }}"
+          printf "║  ⚠️  Warns:  %-49s║\n" "${{ steps.validate.outputs.warning_count || '0' }}"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          exit 1
+        fi
+
+        echo "✅ Theme '${THEME}' validated successfully (score=${SCORE}/100)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "check-circle"
+  color: "purple"

@@ -1,35 +1,575 @@
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ASH DOTFILES v3.1.0 — DEPENDABOT CONFIGURATION                            ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🤖 ASH DOTFILES v5.0 OMEGA — DEPENDABOT CONFIGURATION                     ║
+# ║  Automated dependency updates across all package ecosystems                 ║
+# ║  Docs: https://docs.github.com/en/code-security/dependabot                 ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 
 version: 2
 
+# ── GLOBAL DEFAULTS ───────────────────────────────────────────────────────────
+# Applied to all update configurations unless overridden
+
 updates:
-  # GitHub Actions — keep up to date
-  - package-ecosystem: github-actions
-    directory: /
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🔧 GITHUB ACTIONS — CI/CD Workflow Dependencies
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "08:00"
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
       timezone: "UTC"
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🏗️ devops"
+      - "📦 dependencies"
+      - "🔄 github-actions"
+    reviewers:
+      - "ash-dotfiles/devops"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/devops"
     commit-message:
       prefix: "ci"
-      include: scope
-    labels:
-      - dependencies
-      - ci
-      - automated
-    assignees:
-      - yourusername
-    open-pull-requests-limit: 5
-    rebase-strategy: auto
+      prefix-development: "ci"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "/"
+    rebase-strategy: "auto"
+    ignore:
+      # Pin major versions of critical actions — update manually
+      - dependency-name: "actions/checkout"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/setup-node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/setup-python"
+        update-types: ["version-update:semver-major"]
     groups:
-      github-actions:
+      # Group all GitHub-owned actions together
+      github-actions-official:
         patterns:
           - "actions/*"
           - "github/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group all security-related actions
       security-actions:
         patterns:
-          - "aquasecurity/*"
-          - "ossf/*"
+          - "github/codeql-action"
+          - "aquasecurity/trivy-action"
+          - "gitleaks/gitleaks-action"
+          - "anchore/scan-action"
+        update-types:
+          - "minor"
+          - "patch"
+      # All other actions grouped by minor/patch
+      third-party-actions:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "actions/*"
+          - "github/*"
+        update-types:
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🌐 WEB DASHBOARD — npm/Node.js Dependencies (React + Vite + Tailwind)
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 15
+    target-branch: "main"
+    versioning-strategy: "increase-if-necessary"
+    labels:
+      - "🤖 dependabot"
+      - "🌐 frontend"
+      - "📦 dependencies"
+      - "⚛️ react"
+    reviewers:
+      - "ash-dotfiles/frontend-team"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/frontend-team"
+    commit-message:
+      prefix: "deps(web)"
+      include: "scope"
+    ignore:
+      # Major React updates — manual migration
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      # Major Vite updates — manual migration
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      # Major TypeScript updates — manual migration
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # React ecosystem
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+          - "@types/react*"
+          - "react-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Vite build tooling
+      vite-tooling:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vite-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Tailwind CSS ecosystem
+      tailwind-ecosystem:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "tailwind-*"
+          - "autoprefixer"
+          - "postcss"
+        update-types:
+          - "minor"
+          - "patch"
+      # TypeScript toolchain
+      typescript-toolchain:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "ts-*"
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # State management (Zustand, Jotai, etc.)
+      state-management:
+        patterns:
+          - "zustand"
+          - "jotai"
+          - "recoil"
+          - "valtio"
+        update-types:
+          - "minor"
+          - "patch"
+      # UI component libraries
+      ui-libraries:
+        patterns:
+          - "@radix-ui/*"
+          - "@headlessui/*"
+          - "lucide-react"
+          - "framer-motion"
+        update-types:
+          - "minor"
+          - "patch"
+      # Linting & formatting
+      lint-format:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "prettier"
+          - "prettier-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Security patches — always group & prioritize
+      security-patches:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+        applies-to: security-updates
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  📱 MOBILE APP — Flutter/Dart Dependencies
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "pub"
+    directory: "/mobile/flutter"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 8
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "📱 mobile"
+      - "📦 dependencies"
+      - "🐦 flutter"
+    reviewers:
+      - "ash-dotfiles/mobile-team"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/mobile-team"
+    commit-message:
+      prefix: "deps(mobile)"
+      include: "scope"
+    groups:
+      flutter-core:
+        patterns:
+          - "flutter*"
+          - "dart*"
+        update-types:
+          - "minor"
+          - "patch"
+      flutter-packages:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🧩 BROWSER EXTENSION — npm Dependencies
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "npm"
+    directory: "/browser-extension"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "07:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🧩 browser-extension"
+      - "📦 dependencies"
+    reviewers:
+      - "ash-dotfiles/browser-team"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/browser-team"
+    commit-message:
+      prefix: "deps(ext)"
+      include: "scope"
+    groups:
+      extension-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🐍 REST API — Python Dependencies (FastAPI / Uvicorn)
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "pip"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 8
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🌐 api"
+      - "📦 dependencies"
+      - "🐍 python"
+    reviewers:
+      - "ash-dotfiles/api-team"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/api-team"
+    commit-message:
+      prefix: "deps(api)"
+      include: "scope"
+    ignore:
+      # Major framework versions — manual migration path
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "uvicorn"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+    groups:
+      fastapi-ecosystem:
+        patterns:
+          - "fastapi"
+          - "uvicorn"
+          - "starlette"
+          - "pydantic"
+          - "pydantic-*"
+        update-types:
+          - "minor"
+          - "patch"
+      api-utilities:
+        patterns:
+          - "httpx"
+          - "aiohttp"
+          - "aiofiles"
+          - "python-multipart"
+          - "python-jose*"
+          - "passlib*"
+          - "bcrypt"
+        update-types:
+          - "minor"
+          - "patch"
+      # Security-critical packages — update immediately
+      security-critical:
+        patterns:
+          - "cryptography"
+          - "pyopenssl"
+          - "certifi"
+          - "urllib3"
+          - "requests"
+          - "python-jose*"
+        update-types:
+          - "minor"
+          - "patch"
+        applies-to: security-updates
+      testing:
+        patterns:
+          - "pytest*"
+          - "httpx"
+          - "coverage"
+        update-types:
+          - "minor"
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🐳 DOCKER — Base Image Updates
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🐳 docker"
+      - "📦 dependencies"
+      - "🔒 security"
+    reviewers:
+      - "ash-dotfiles/devops"
+      - "ash-dotfiles/security-team"
+    assignees:
+      - "ash-dotfiles/devops"
+    commit-message:
+      prefix: "build(docker)"
+      include: "scope"
+    groups:
+      docker-base-images:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🐳 DOCKER — API Server Image
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "docker"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "07:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🐳 docker"
+      - "🌐 api"
+      - "📦 dependencies"
+    reviewers:
+      - "ash-dotfiles/devops"
+      - "ash-dotfiles/security-team"
+      - "ash-dotfiles/api-team"
+    assignees:
+      - "ash-dotfiles/devops"
+    commit-message:
+      prefix: "build(api-docker)"
+      include: "scope"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🐳 DOCKER — Web Dashboard Image
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "docker"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🐳 docker"
+      - "🌐 frontend"
+      - "📦 dependencies"
+    reviewers:
+      - "ash-dotfiles/devops"
+      - "ash-dotfiles/frontend-team"
+    assignees:
+      - "ash-dotfiles/devops"
+    commit-message:
+      prefix: "build(web-docker)"
+      include: "scope"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  ❄️  NIX FLAKE — Nix Package Updates
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "cargo"
+    # Nix flake lock updates via cargo (Rust tools embedded in nix)
+    directory: "/nix"
+    schedule:
+      interval: "monthly"
+      day: "1"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "❄️ nix"
+      - "📦 dependencies"
+    reviewers:
+      - "ash-dotfiles/nix-team"
+      - "ash-dotfiles/core-maintainers"
+    assignees:
+      - "ash-dotfiles/nix-team"
+    commit-message:
+      prefix: "deps(nix)"
+      include: "scope"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  📋 PRE-COMMIT HOOKS — Hook Dependencies
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🪝 pre-commit"
+      - "📦 dependencies"
+      - "🏗️ devops"
+    reviewers:
+      - "ash-dotfiles/devops"
+    assignees:
+      - "ash-dotfiles/devops"
+    commit-message:
+      prefix: "ci(hooks)"
+      include: "scope"
+    groups:
+      pre-commit-hooks:
+        patterns:
+          - "pre-commit"
+          - "commitizen"
+          - "detect-secrets"
+        update-types:
+          - "minor"
+          - "patch"
+      linting-tools:
+        patterns:
+          - "shellcheck-py"
+          - "markdownlint-cli2"
+          - "yamllint"
+          - "black"
+          - "isort"
+          - "mypy"
+          - "pylint"
+        update-types:
+          - "minor"
+          - "patch"
+
+
+  # ════════════════════════════════════════════════════════════════════════════
+  #  🧰 ROOT TOOLING — Root-level npm tooling (commitlint, husky, etc.)
+  # ════════════════════════════════════════════════════════════════════════════
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "🤖 dependabot"
+      - "🧰 tooling"
+      - "📦 dependencies"
+      - "🏗️ devops"
+    reviewers:
+      - "ash-dotfiles/devops"
+      - "ash-dotfiles/core-maintainers"
+    assignees:
+      - "ash-dotfiles/devops"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    ignore:
+      - dependency-name: "@commitlint/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "husky"
+        update-types: ["version-update:semver-major"]
+    groups:
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+          - "commitlint"
+        update-types:
+          - "minor"
+          - "patch"
+      husky-lint-staged:
+        patterns:
+          - "husky"
+          - "lint-staged"
+        update-types:
+          - "minor"
+          - "patch"
+      semantic-release:
+        patterns:
+          - "semantic-release"
+          - "@semantic-release/*"
+        update-types:
+          - "minor"
+          - "patch"
+      release-please:
+        patterns:
+          - "release-please"
+          - "@google-automations/*"
+        update-types:
+          - "minor"
+          - "patch"

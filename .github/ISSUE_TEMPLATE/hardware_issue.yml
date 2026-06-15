@@ -1,0 +1,1213 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🖥️  ASH DOTFILES v5.0 OMEGA — HARDWARE ISSUE TEMPLATE                            ║
+# ║      Ultra-Comprehensive Hardware Compatibility Report • GPU • CPU • Display            ║
+# ║      Audio • Input • Thermal • Battery • Peripheral • Driver • Firmware                ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🖥️ Hardware Issue"
+description: >
+  Experiencing hardware-specific problems with ASH Dotfiles?
+  GPU rendering glitches, display issues, audio problems, input device
+  failures, thermal throttling, or peripheral incompatibilities —
+  report them here with our comprehensive hardware diagnostic form.
+title: "🖥️ [HARDWARE] — "
+labels:
+  - "🖥️ hardware"
+  - "🔍 needs-triage"
+  - "🔬 needs-hardware-info"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ██╗  ██╗ █████╗ ██████╗ ██████╗ ██╗    ██╗ █████╗ ██████╗ ███████╗
+        ██║  ██║██╔══██╗██╔══██╗██╔══██╗██║    ██║██╔══██╗██╔══██╗██╔════╝
+        ███████║███████║██████╔╝██║  ██║██║ █╗ ██║███████║██████╔╝█████╗
+        ██╔══██║██╔══██║██╔══██╗██║  ██║██║███╗██║██╔══██║██╔══██╗██╔══╝
+        ██║  ██║██║  ██║██║  ██║██████╔╝╚███╔███╔╝██║  ██║██║  ██║███████╗
+        ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+
+        ██╗███████╗███████╗██╗   ██╗███████╗
+        ██║██╔════╝██╔════╝██║   ██║██╔════╝
+        ██║███████╗███████╗██║   ██║█████╗
+        ██║╚════██║╚════██║██║   ██║██╔══╝
+        ██║███████║███████║╚██████╔╝███████╗
+        ╚═╝╚══════╝╚══════╝ ╚═════╝ ╚══════╝
+        ```
+
+        # 🖥️ Hardware Issue — ASH Dotfiles v5.0 OMEGA
+
+        > *"Every piece of hardware deserves a flawless desktop experience"*
+
+        </div>
+
+        ---
+
+        > [!IMPORTANT]
+        > **Hardware issues require detailed diagnostic data to reproduce and fix.**
+        > Please run ALL diagnostic commands listed in each section.
+        > Reports with incomplete hardware data take **3-5x longer** to resolve.
+
+        > [!TIP]
+        > **Instant hardware diagnostics:**
+        > ```bash
+        > # Full hardware report — generates everything we need:
+        > ash hw full-report --output ~/ash-hardware-report.txt
+        > cat ~/ash-hardware-report.txt
+        >
+        > # GPU-specific diagnostics:
+        > ash hw gpu --verbose
+        >
+        > # Display diagnostics:
+        > ash hw monitor --verbose
+        >
+        > # Full system doctor with hardware checks:
+        > ash doctor --full --hardware
+        > ```
+
+        ---
+
+        ### 🖥️ Hardware Issue Pre-Flight Checklist
+
+        **Before submitting — verify these first:**
+        - [ ] 🔄 Updated GPU drivers to latest stable version
+        - [ ] 🔄 Updated Hyprland to latest version (`ash update --hyprland`)
+        - [ ] 🩺 Ran `ash doctor --full --hardware` and reviewed output
+        - [ ] 🔍 Searched [existing hardware issues](https://github.com/ash-dotfiles/ash-dotfiles/issues?q=label%3A%22hardware%22)
+        - [ ] 📖 Checked [hardware-specific guides](https://ash-dotfiles.github.io/docs/guides) for your GPU brand
+        - [ ] 💬 Searched [Discord #hardware-help](https://discord.gg/ash-dotfiles) for similar reports
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — HARDWARE CATEGORY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: hardware_category
+    attributes:
+      label: "🎯 Hardware Issue Category"
+      description: "Primary hardware category affected"
+      multiple: true
+      options:
+        # GPU & Display
+        - "🎮 GPU — NVIDIA rendering / artifacts / crashes"
+        - "🎮 GPU — AMD rendering / artifacts / crashes"
+        - "🎮 GPU — Intel integrated graphics issues"
+        - "🎮 GPU — Hybrid graphics (NVIDIA Optimus / AMD MUX)"
+        - "🎮 GPU — Vulkan / OpenGL compatibility"
+        - "🎮 GPU — Hardware video acceleration (VA-API / NVENC)"
+        - "🎮 GPU — Multi-GPU configuration"
+        - "🖥️ Display — Monitor not detected"
+        - "🖥️ Display — Wrong resolution / refresh rate"
+        - "🖥️ Display — HDR / high bit depth issues"
+        - "🖥️ Display — Variable refresh rate (VRR/G-Sync/FreeSync)"
+        - "🖥️ Display — Multi-monitor layout problems"
+        - "🖥️ Display — Fractional scaling issues"
+        - "🖥️ Display — Color calibration / ICC profiles"
+        - "🖥️ Display — Overscan / underscan"
+        - "🖥️ Display — Flickering / screen tearing"
+        - "🖥️ Display — Cursor rendering issues"
+        # Audio
+        - "🔊 Audio — No sound output"
+        - "🔊 Audio — Wrong audio device selected"
+        - "🔊 Audio — Crackling / popping / distortion"
+        - "🔊 Audio — HDMI / DisplayPort audio"
+        - "🔊 Audio — Bluetooth audio issues"
+        - "🔊 Audio — Microphone not working"
+        - "🔊 Audio — USB audio device"
+        - "🔊 Audio — PipeWire / PulseAudio conflict"
+        # Input
+        - "⌨️ Input — Keyboard not working / wrong layout"
+        - "🖱️ Input — Mouse / trackpad issues"
+        - "🖱️ Input — Trackpad gestures not working"
+        - "🎮 Input — Game controller / gamepad"
+        - "✏️ Input — Drawing tablet / stylus"
+        - "👆 Input — Touchscreen"
+        - "📱 Input — Virtual keyboard"
+        # Power & Thermal
+        - "🔋 Battery — Wrong battery percentage / not detected"
+        - "🔋 Battery — Rapid discharge / power management"
+        - "🌡️ Thermal — CPU/GPU overheating"
+        - "🌡️ Thermal — Thermal throttling affecting performance"
+        - "⚡ Power — Suspend / resume issues"
+        - "⚡ Power — Hibernate not working"
+        - "⚡ Power — Power button behavior"
+        - "⚡ Power — Lid close action (laptop)"
+        # Peripherals
+        - "📷 Camera — Webcam not detected / distorted"
+        - "🖨️ Printer — Printing issues"
+        - "📡 WiFi — WiFi not connecting / slow"
+        - "🔵 Bluetooth — Bluetooth not working"
+        - "🔌 USB — USB device not recognized"
+        - "💾 Storage — NVMe / SSD issues"
+        - "💾 Storage — External drive not mounting"
+        - "📺 Dock / Hub — Docking station issues"
+        - "🖥️ eGPU — External GPU issues"
+        # Form Factor
+        - "💻 Laptop — Specific laptop model issue"
+        - "🖥️ Desktop — Specific desktop configuration"
+        - "🖥️ All-in-One — AIO specific issues"
+        - "🎮 Mini PC — Compact form factor"
+        - "🖥️ Server / Workstation — Server hardware"
+        # Other
+        - "⚙️ Firmware — BIOS/UEFI related"
+        - "⚙️ Firmware — Device firmware update needed"
+        - "❓ Unknown / Multiple categories"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — HARDWARE SEVERITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "🚨 Issue Severity"
+      description: "How severely does this hardware issue impact your ASH desktop experience?"
+      options:
+        - "🔴 CRITICAL — System crashes / data loss / hardware damage risk"
+        - "🟠 HIGH — Desktop unusable / major feature completely broken"
+        - "🟡 MEDIUM — Significant impact but workaround exists"
+        - "🟢 LOW — Minor visual artifact / edge case / occasional glitch"
+        - "💡 ENHANCEMENT — Hardware works but could be better optimized"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — GPU DEEP DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: gpu_diagnostics
+    attributes:
+      label: "🎮 GPU Diagnostics (CRITICAL — Fill Even if GPU Seems OK)"
+      description: >
+        GPU information is essential for ALL Hyprland-related issues.
+        Run `ash hw gpu --verbose` or fill manually.
+      placeholder: |
+        ## GPU Hardware Identification
+
+        ```bash
+        # Run: lspci -k | grep -A3 -E "VGA|3D|Display"
+        00:02.0 VGA compatible controller: Intel Corporation Alder Lake-P GT2 [Iris Xe Graphics] (rev 0c)
+                Subsystem: Dell Iris Xe Graphics
+                Kernel driver in use: i915
+                Kernel modules: i915
+
+        01:00.0 3D controller: NVIDIA Corporation GA107M [GeForce RTX 3050 Mobile] (rev a1)
+                Subsystem: Dell GeForce RTX 3050 Mobile
+                Kernel driver in use: nvidia
+                Kernel modules: nvidia, nouveau
+        ```
+
+        ## GPU Driver Information
+
+        ### NVIDIA (if applicable)
+        ```bash
+        # Run: nvidia-smi --query-gpu=name,driver_version,memory.total,compute_mode --format=csv
+        name, driver_version, memory.total [MiB], compute_mode
+        NVIDIA GeForce RTX 3050, 545.29.06, 4096 MiB, Default
+
+        # Driver type:
+        # [ ] nvidia (proprietary closed-source)
+        # [ ] nvidia-open (open-source kernel module)
+        # [ ] nouveau (reverse-engineered open source — NOT recommended for Hyprland)
+
+        # NVIDIA DRM kernel module loaded:
+        $ cat /sys/module/nvidia_drm/parameters/modeset
+        Y  # Must be Y for Wayland to work
+
+        # NVIDIA framebuffer:
+        $ cat /sys/module/nvidia_drm/parameters/fbdev
+        1  # Must be 1 for proper Wayland support
+        ```
+
+        ### AMD (if applicable)
+        ```bash
+        # Run: lspci -k | grep -A3 "AMD\|Radeon"
+        # AMD GPU driver info:
+        $ glxinfo | grep -E "vendor|renderer|version" | head -6
+        server glx vendor string: SGI
+        server glx version string: 1.4
+        client glx vendor string: Mesa Project and SGI
+        OpenGL vendor string: AMD
+        OpenGL renderer string: AMD Radeon RX 7900 XTX (radeonsi, navi31, LLVM 16.0.6, DRM 3.54)
+        OpenGL version string: 4.6 (Compatibility Profile) Mesa 23.3.3
+
+        # AMDGPU firmware version:
+        $ cat /sys/kernel/debug/dri/0/amdgpu_firmware_info 2>/dev/null | head -10
+
+        # ROCm (if installed):
+        $ rocminfo 2>/dev/null | grep -E "Name:|gfx" | head -5
+        ```
+
+        ### Intel (if applicable)
+        ```bash
+        # Run: glxinfo | grep -E "vendor|renderer|version" | head -6
+        OpenGL vendor string: Intel
+        OpenGL renderer string: Mesa Intel(R) Xe Graphics (TGL GT2)
+        OpenGL version string: 4.6 (Compatibility Profile) Mesa 23.3.3
+
+        # Intel GPU version:
+        $ intel_gpu_top -J -s 100 2>/dev/null | head -20
+        ```
+
+        ## Vulkan Support
+        ```bash
+        # Run: vulkaninfo --summary 2>/dev/null | head -30
+        VULKAN INFO
+        ===========
+        Vulkan Instance Version: 1.3.268
+
+        Instance Extensions: count = 23
+        Instance Layers: count = 8
+
+        Devices:
+        GPU0:
+          apiVersion         = 1.3.268
+          driverVersion      = 545.29.6.0
+          vendorID           = 0x10de
+          deviceID           = 0x25a5
+          deviceType         = PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+          deviceName         = NVIDIA GeForce RTX 3050
+          driverID           = DRIVER_ID_NVIDIA_PROPRIETARY
+          driverName         = NVIDIA
+          driverInfo         = 545.29.06
+        ```
+
+        ## OpenGL / DRM Information
+        ```bash
+        # DRM devices:
+        $ ls /dev/dri/
+        by-path  card0  card1  renderD128  renderD129
+
+        # Wayland DRM device:
+        $ echo $WLR_DRM_DEVICES
+        /dev/dri/card1  # Should point to your primary GPU
+
+        # DRM version:
+        $ cat /sys/class/drm/card*/device/driver/module/version 2>/dev/null
+        ```
+
+        ## Environment Variables Set for GPU
+        ```bash
+        $ env | grep -E "WLR_|NVIDIA|__GL|__VK|DRI|LIBVA|VDPAU|MESA|GBM" | sort
+        WLR_NO_HARDWARE_CURSORS=1
+        WLR_DRM_DEVICES=/dev/dri/card1
+        LIBVA_DRIVER_NAME=nvidia
+        __GLX_VENDOR_LIBRARY_NAME=nvidia
+        GBM_BACKEND=nvidia-drm
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — DISPLAY DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: display_diagnostics
+    attributes:
+      label: "🖥️ Display & Monitor Diagnostics"
+      description: >
+        Run `ash hw monitor --verbose` or `hyprctl monitors` for display info.
+      placeholder: |
+        ## Monitor Configuration
+
+        ```bash
+        # Run: hyprctl monitors
+        Monitor eDP-1 (ID 0):
+                2560x1600@165.00200 at 0x0
+                description: BOE 0x0996 Unknown
+                make: BOE
+                model: 0x0996
+                serial: (null)
+                active workspace: 1 (1)
+                special workspace: none
+                reserved: 0 38 0 0
+                scale: 1.50
+                transform: 0
+                focused: yes
+                dpmsStatus: 1
+                vrr: 0
+                activelyTearing: false
+
+        Monitor HDMI-A-1 (ID 1):
+                3840x2160@60.00000 at 2560x0
+                description: DELL U2720Q Unknown
+                make: DELL
+                model: U2720Q
+                scale: 2.00
+                vrr: 0
+        ```
+
+        ## Display Technology Details
+
+        | Property | Monitor 1 (Internal) | Monitor 2 (External) |
+        |----------|---------------------|---------------------|
+        | Connection | eDP | HDMI 2.1 |
+        | Resolution | 2560×1600 | 3840×2160 |
+        | Refresh Rate | 165Hz | 60Hz |
+        | Panel Type | IPS | IPS |
+        | HDR Support | No | Yes (DisplayHDR 400) |
+        | VRR/G-Sync | Yes (FreeSync) | No |
+        | Scale Factor | 1.5x | 2.0x |
+        | Color Depth | 10-bit | 10-bit |
+
+        ## Hyprland Monitor Config
+        ```bash
+        # Your monitor configuration in hyprland.conf:
+        $ cat ~/.config/hypr/monitors.conf
+        monitor=eDP-1,2560x1600@165,0x0,1.5
+        monitor=HDMI-A-1,3840x2160@60,2560x0,2.0
+
+        # Hyprland rendering info:
+        $ hyprctl version
+        Hyprland v0.36.0 (compiled with aquamarine 0.3.0)
+        Tag: v0.36.0, commits: 0
+
+        # Active rendering backend:
+        $ cat ~/.config/hypr/env.conf | grep -E "WLR_|RENDERER"
+        ```
+
+        ## Display Issue Specifics
+
+        ```bash
+        # If display not detected:
+        $ wlr-randr --list 2>/dev/null || echo "wlr-randr not available"
+
+        # EDID information:
+        $ for f in /sys/class/drm/*/edid; do
+            echo "=== $(dirname $f | xargs basename) ==="
+            edid-decode "$f" 2>/dev/null | head -20
+          done
+
+        # Current display brightness:
+        $ cat /sys/class/backlight/*/brightness 2>/dev/null
+        $ cat /sys/class/backlight/*/max_brightness 2>/dev/null
+        ```
+
+        ## Fractional Scaling & HiDPI
+        ```bash
+        # Current scale settings:
+        $ hyprctl monitors | grep scale
+
+        # Xwayland scaling (if using Xwayland apps):
+        $ echo $GDK_SCALE
+        $ echo $QT_AUTO_SCREEN_SCALE_FACTOR
+        $ echo $XCURSOR_SIZE
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — AUDIO DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: audio_diagnostics
+    attributes:
+      label: "🔊 Audio System Diagnostics (fill if audio-related)"
+      description: >
+        Run `ash hw audio --verbose` for audio diagnostics.
+        Skip this section if your issue is unrelated to audio.
+      placeholder: |
+        ## Audio Server Information
+
+        ```bash
+        # PipeWire version:
+        $ pipewire --version
+        pipewire version 1.0.2
+
+        # PipeWire-Pulse version:
+        $ pipewire-pulse --version || pactl info | head -5
+
+        # WirePlumber version:
+        $ wpctl status | head -20
+        PipeWire 'pipewire-0' [v1.0.2]
+         └─ Clients:
+            31. WirePlumber                          [pipewire-1.0.2]
+            32. WirePlumber [export]                 [pipewire-1.0.2]
+            ...
+        ```
+
+        ## Audio Devices
+
+        ```bash
+        # All audio sinks:
+        $ wpctl status | grep -A 50 "Sinks:"
+        Audio
+         ├─ Devices:
+         │   12. NVIDIA High Definition Audio       [alsa]
+         │   13. Rembrandt Radeon High Definition Audio [alsa]
+         │   14. Family 17h/19h HD Audio Controller [alsa]
+         │
+         ├─ Sinks:
+         │   15. NVIDIA High Definition Audio (HDMI)  [vol: 1.00]
+         │  *16. Rembrandt Radeon High Def (Speakers) [vol: 1.00]  ← Default
+
+        # Current default sink:
+        $ wpctl get-volume @DEFAULT_AUDIO_SINK@
+        Volume: 0.65
+
+        # PulseAudio compat:
+        $ pactl list sinks short
+        ```
+
+        ## Audio Issue Details
+
+        ```bash
+        # ALSA devices:
+        $ aplay -l
+        **** List of PLAYBACK Hardware Devices ****
+        card 0: HDMI [HDA Intel HDMI], device 3: HDMI 0 [HDMI 0]
+        card 1: PCH [HDA Intel PCH], device 0: ALC295 Analog [ALC295 Analog]
+
+        # Kernel audio modules:
+        $ lsmod | grep -E "snd|audio"
+
+        # PipeWire logs (last 50 lines):
+        $ journalctl --user -u pipewire --since "1 hour ago" --no-pager | tail -50
+        ```
+
+        ## Bluetooth Audio (if applicable)
+        ```bash
+        # Bluetooth controller:
+        $ bluetoothctl show | head -10
+
+        # Connected Bluetooth devices:
+        $ bluetoothctl devices Connected
+
+        # BlueZ version:
+        $ bluetoothd --version
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — LAPTOP-SPECIFIC DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: laptop_diagnostics
+    attributes:
+      label: "💻 Laptop-Specific Diagnostics (skip for desktops)"
+      description: >
+        For laptop-specific issues: battery, lid, trackpad, hybrid graphics.
+        Run `ash hw battery --verbose` for battery diagnostics.
+      placeholder: |
+        ## Laptop Identification
+
+        ```bash
+        # Laptop make/model:
+        $ sudo dmidecode -s system-product-name
+        Dell XPS 15 9530
+
+        $ sudo dmidecode -s system-manufacturer
+        Dell Inc.
+
+        $ sudo dmidecode -s bios-version
+        1.8.1
+        ```
+
+        ## Battery Information
+
+        ```bash
+        # Battery status:
+        $ cat /sys/class/power_supply/BAT*/uevent
+        POWER_SUPPLY_NAME=BAT0
+        POWER_SUPPLY_STATUS=Discharging
+        POWER_SUPPLY_PRESENT=1
+        POWER_SUPPLY_TECHNOLOGY=Li-ion
+        POWER_SUPPLY_CYCLE_COUNT=127
+        POWER_SUPPLY_VOLTAGE_NOW=15800000
+        POWER_SUPPLY_POWER_NOW=12500000
+        POWER_SUPPLY_ENERGY_NOW=58720000
+        POWER_SUPPLY_ENERGY_FULL=72000000
+        POWER_SUPPLY_ENERGY_FULL_DESIGN=84000000
+        POWER_SUPPLY_CAPACITY=81
+        POWER_SUPPLY_CAPACITY_LEVEL=Normal
+
+        # Battery health:
+        $ upower -i /org/freedesktop/UPower/devices/battery_BAT0
+        ```
+
+        ## Hybrid Graphics (Optimus / MUX)
+
+        ```bash
+        # GPU switching method:
+        # [ ] NVIDIA Optimus (software switching via prime-run)
+        # [ ] AMD MUX Switch (hardware switching)
+        # [ ] Intel-only mode (dGPU disabled in BIOS)
+        # [ ] dGPU-only mode (iGPU disabled)
+        # [ ] Hybrid mode (automatic switching)
+
+        # Current GPU mode:
+        $ prime-run glxinfo | grep "OpenGL renderer" 2>/dev/null
+        # OR
+        $ supergfxctl --get 2>/dev/null
+
+        # Environment for Hyprland with Optimus:
+        $ cat ~/.config/environment.d/nvidia.conf
+        WLR_DRM_DEVICES=/dev/dri/card1:/dev/dri/card0
+
+        # Which GPU renders Hyprland:
+        $ hyprctl version | grep "renderer"
+        ```
+
+        ## Trackpad & Input
+
+        ```bash
+        # Trackpad device info:
+        $ libinput list-devices | grep -A 20 "Touchpad\|TrackPad"
+        Device:          DELL08B1:00 06CB:CE44 Touchpad
+        Kernel:          /dev/input/event7
+        Group:           6
+        Seat:            seat0, default
+        Capabilities:    gesture pointer
+        Tap-to-click:    disabled
+        Tap-and-drag:    enabled
+        Tap drag lock:   disabled
+        Left-hand scrolling: disabled
+        Natural scrolling: enabled (enabled)
+        Middle emulation: disabled
+        Calibration:     n/a
+        Scroll methods:  *two-finger edge
+        Click methods:   *button-areas clickfinger
+        Disable-w-typing:enabled
+        Disable-w-trackpointing: enabled
+        Gesture detection: enabled
+
+        # Hyprland input config:
+        $ cat ~/.config/hypr/input.conf
+        ```
+
+        ## Lid & Power Button
+
+        ```bash
+        # Lid state:
+        $ cat /proc/acpi/button/lid/LID0/state 2>/dev/null
+
+        # Hypridle lid configuration:
+        $ cat ~/.config/hypr/hypridle.conf
+
+        # Power management:
+        $ systemctl status power-profiles-daemon
+        $ powerprofilesctl get
+        ```
+
+        ## Thermal Information
+
+        ```bash
+        # CPU temperatures:
+        $ sensors 2>/dev/null | grep -E "Core|Tdie|CPU|temp"
+        coretemp-isa-0000
+        Package id 0:  +67.0°C  (high = +100.0°C, crit = +100.0°C)
+        Core 0:        +64.0°C
+        Core 1:        +67.0°C
+
+        # GPU temperature:
+        $ nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader 2>/dev/null
+        $ sensors | grep -i "amdgpu\|radeon"
+
+        # Thermal throttling:
+        $ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+        $ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+
+        # Fan speeds:
+        $ sensors | grep fan
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — PROBLEM DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: "📋 Detailed Problem Description"
+      description: >
+        Describe the hardware issue with as much technical precision as possible.
+        Include what you see, what you expect, and when it occurs.
+      placeholder: |
+        ## 🔴 What Is Happening
+
+        **Summary:** On my Dell XPS 15 9530 with NVIDIA RTX 3050 + Intel Iris Xe
+        hybrid graphics, Hyprland shows severe screen tearing on the external 4K
+        HDMI monitor at 60Hz while the internal display renders perfectly.
+
+        **Visual Description:**
+        - Horizontal tearing lines appear in the bottom 1/3 of the external monitor
+        - Tearing is most visible during window animations and scrolling
+        - Tearing does NOT occur on the laptop's internal eDP display
+        - Tearing does NOT occur when running GNOME or KDE on Wayland
+
+        **When It Occurs:**
+        - [x] Constantly (every frame has artifacts)
+        - [ ] Intermittently (approximately ___% of the time)
+        - [ ] Only under specific conditions (see below)
+        - [ ] Only after system has been running for X minutes
+
+        **Specific Conditions Triggering the Issue:**
+        The tearing is worse when:
+        1. Moving windows across the HDMI monitor (animation = severe tearing)
+        2. Scrolling in Firefox on HDMI monitor (smooth scroll = tearing pattern)
+        3. Playing video fullscreen on HDMI (constantly torn frames)
+
+        ## ✅ Expected Behavior
+
+        All monitors should render tear-free under Wayland compositing.
+        Hyprland's compositor should eliminate screen tearing via vsync by design.
+        This works correctly on the internal display and on pure Intel/AMD systems.
+
+        ## 🔍 Root Cause Hypothesis
+
+        I believe the issue is with the HDMI output being routed through the NVIDIA
+        dGPU while Hyprland uses the Intel iGPU for rendering. The frame handoff
+        between the two GPUs on this hybrid Optimus laptop causes synchronization
+        issues that manifest as tearing on the HDMI output.
+
+        Supporting evidence:
+        - `WLR_DRM_DEVICES=/dev/dri/card0` (Intel) → tearing on HDMI
+        - `WLR_DRM_DEVICES=/dev/dri/card1` (NVIDIA) → HDMI works but internal screen broken
+        - No tearing in single-GPU desktop configurations
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — REPRODUCTION STEPS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Exact Reproduction Steps"
+      description: "Step-by-step instructions to reproduce the hardware issue"
+      placeholder: |
+        ## Hardware Setup Required
+        - Dell XPS 15 9530 (or similar NVIDIA Optimus laptop)
+        - External monitor connected via HDMI
+        - NVIDIA driver 545.x installed
+        - Hyprland running in hybrid GPU mode
+
+        ## Reproduction Steps
+
+        ```bash
+        # Step 1: Boot system with HDMI monitor connected
+        # Step 2: Verify NVIDIA driver is active
+        nvidia-smi  # Should show RTX 3050
+
+        # Step 3: Set environment (current config that causes tearing)
+        cat ~/.config/environment.d/nvidia.conf
+        # WLR_DRM_DEVICES=/dev/dri/card0
+        # GBM_BACKEND=nvidia-drm
+        # __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+        # Step 4: Start Hyprland
+        # (SDDM auto-starts, or: Hyprland)
+
+        # Step 5: Open any application on EXTERNAL HDMI monitor
+        # Step 6: Move the window around OR scroll inside it
+        # Step 7: Observe tearing on HDMI monitor (none on internal display)
+
+        # Additional reproduction — video tearing:
+        # Step 8: Open mpv and play any video on HDMI monitor
+        mpv --vo=gpu ~/Videos/test.mp4
+        # Result: Severe horizontal tearing on every frame
+        ```
+
+        ## Bisection Results (if applicable)
+
+        ```bash
+        # Last working configuration (no tearing):
+        # Hyprland v0.34.0 with nvidia driver 535.x
+        # (This changed in v0.35.0 or nvidia 545.x — not sure which)
+
+        # Confirmed broken on:
+        # Hyprland v0.35.0 + nvidia 545.x
+        # Hyprland v0.36.0 + nvidia 545.x
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — VISUAL EVIDENCE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: visual_evidence
+    attributes:
+      label: "📸 Visual Evidence & Recordings"
+      description: >
+        Screenshots and recordings are EXTREMELY valuable for hardware issues.
+        Use `ash shot full` for screenshots, `ash shot record` for recordings.
+      placeholder: |
+        ## 📸 Screenshots
+
+        ### Full Desktop Showing the Issue
+        <!-- ash shot full --output ~/tearing-screenshot.png -->
+        [drag screenshot here]
+
+        ### Close-up of Artifact / Glitch
+        [drag close-up screenshot here]
+
+        ### Internal Display (working correctly — for comparison)
+        [drag internal display screenshot here]
+
+        ## 🎬 Screen Recording
+
+        <!-- HIGHLY RECOMMENDED for tearing / flickering / animation issues -->
+        <!-- ash shot record --output ~/tearing-demo.mp4 -->
+        [drag screen recording here — MP4, WebM, or GIF]
+
+        ### Video Description
+        The recording shows:
+        - First 10 seconds: Moving a window on EXTERNAL HDMI monitor → visible tearing
+        - Next 10 seconds: Same action on INTERNAL display → smooth, no tearing
+        - Final 10 seconds: Scrolling in Firefox on HDMI → severe horizontal lines
+
+        ## 📊 Performance Data During Issue
+
+        ```bash
+        # GPU utilization during the issue:
+        $ nvidia-smi dmon -s u -d 1 -c 10
+        # id  pwr  gtemp  mtemp     sm    mem    enc    dec
+        #  0   23     52      -      3     12      0      0
+        #  0   24     52      -      5     14      0      0
+
+        # Hyprland frame timing:
+        $ hyprctl getoption decoration:blur:enabled
+        $ hyprctl getoption misc:vfr
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — HYPRLAND & ASH CONFIGURATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: hyprland_config
+    attributes:
+      label: "⚙️ Relevant Hyprland & ASH Configuration"
+      description: >
+        Share the configuration sections relevant to your hardware issue.
+      placeholder: |
+        ## Environment Variables
+        ```bash
+        $ cat ~/.config/environment.d/nvidia.conf
+        # NVIDIA Wayland configuration
+        WLR_NO_HARDWARE_CURSORS=1
+        WLR_DRM_DEVICES=/dev/dri/card0
+        GBM_BACKEND=nvidia-drm
+        __GLX_VENDOR_LIBRARY_NAME=nvidia
+        LIBVA_DRIVER_NAME=nvidia
+        __VK_LAYER_NV_optimus=NVIDIA_only
+        NVD_BACKEND=direct
+
+        $ env | grep -E "WLR_|GBM_|__GL|LIBVA|NVD|HYPRLAND" | sort
+        ```
+
+        ## Hyprland Render Config
+        ```bash
+        $ cat ~/.config/hypr/opengl.conf
+        opengl {
+          nvidia_anti_flicker = true
+          force_introspection = 2
+        }
+
+        $ cat ~/.config/hypr/render.conf
+        render {
+          explicit_sync = 2
+          explicit_sync_kms = 1
+          direct_scanout = false
+        }
+        ```
+
+        ## Monitor Configuration
+        ```bash
+        $ cat ~/.config/hypr/monitors.conf
+        monitor=eDP-1,2560x1600@165,0x0,1.5
+        monitor=HDMI-A-1,3840x2160@60,2560x0,2.0,bitdepth,10
+        ```
+
+        ## ASH Hardware Configuration
+        ```bash
+        $ ash config get hardware
+        hardware.gpu.vendor = "nvidia"
+        hardware.gpu.driver = "proprietary"
+        hardware.gpu.mode = "hybrid"
+        hardware.display.vrr = false
+        hardware.display.hdr = false
+        ```
+
+        ## ASH Mode Configuration
+        ```bash
+        $ ash mode status
+        Current mode: default
+
+        # Game mode config (if issue in game mode):
+        $ cat ~/.config/hypr/modes/game.conf
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — DRIVER & KERNEL INFO
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: driver_kernel
+    attributes:
+      label: "🔧 Driver & Kernel Information"
+      description: "Complete driver and kernel module information"
+      placeholder: |
+        ## Kernel Information
+        ```bash
+        $ uname -a
+        Linux hostname 6.7.0-arch1-1 #1 SMP PREEMPT_DYNAMIC
+        Fri Jan 12 14:53:34 UTC 2024 x86_64 GNU/Linux
+
+        # Kernel config relevant options:
+        $ zcat /proc/config.gz | grep -E "DRM|NVIDIA|AMDGPU|I915" 2>/dev/null | head -20
+        ```
+
+        ## Installed GPU Packages
+        ```bash
+        # Arch:
+        $ pacman -Q | grep -E "nvidia|mesa|vulkan|lib32-mesa|xf86-video"
+
+        # Fedora:
+        $ rpm -qa | grep -E "nvidia|mesa|vulkan|xorg-x11-drv"
+
+        # Package list:
+        nvidia-dkms 545.29.06-3
+        nvidia-utils 545.29.06-3
+        lib32-nvidia-utils 545.29.06-1
+        nvidia-settings 545.29.06-2
+        libva-nvidia-driver 0.0.11-1
+        mesa 23.3.3-1
+        lib32-mesa 23.3.3-1
+        vulkan-icd-loader 1.3.274-1
+        ```
+
+        ## Kernel Modules
+        ```bash
+        $ lsmod | grep -E "nvidia|amdgpu|i915|drm"
+        nvidia_drm            118784  12
+        nvidia_modeset       1245184  6 nvidia_drm
+        nvidia_uvm           3428352  0
+        nvidia              56897536  457 nvidia_uvm,nvidia_modeset
+        drm_kms_helper        311296  2 nvidia_drm
+        drm                   741376  14 drm_kms_helper,nvidia_drm
+
+        # NVIDIA DRM modeset:
+        $ cat /sys/module/nvidia_drm/parameters/modeset
+        Y
+
+        # NVIDIA preserve video memory allocations:
+        $ cat /sys/module/nvidia/parameters/NVreg_PreserveVideoMemoryAllocations 2>/dev/null
+        1  # Must be 1 for proper suspend/resume
+        ```
+
+        ## DKMS Status (NVIDIA)
+        ```bash
+        $ dkms status
+        nvidia/545.29.06, 6.7.0-arch1-1, x86_64: installed
+        ```
+
+        ## Firmware
+        ```bash
+        # GPU firmware:
+        $ ls /lib/firmware/nvidia/ 2>/dev/null | head -5
+        $ ls /lib/firmware/amdgpu/ 2>/dev/null | head -5
+
+        # General firmware info:
+        $ fwupdmgr get-devices 2>/dev/null | head -30
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — LOGS & ERROR OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📋 System Logs & Error Output"
+      description: >
+        Collect relevant logs from Hyprland, kernel, and ASH around the time of the issue.
+      render: shell
+      placeholder: |
+        ## Hyprland Log
+        $ cat ~/.local/share/hyprland/hyprland.log | grep -E "ERROR|WARN|DRM|render|GPU" | tail -50
+
+        ## Kernel Log (GPU-related)
+        $ sudo dmesg | grep -E "nvidia|drm|amdgpu|i915|error|fail" | tail -50
+
+        ## Journald (system-level)
+        $ journalctl -b 0 | grep -E "nvidia|drm|display|monitor" | tail -30
+
+        ## ASH Logs
+        $ cat ~/.local/share/ash/logs/ash-cli.log | tail -30
+        $ cat ~/.local/share/ash/logs/error.log | tail -20
+
+        ## X11 / XWayland (if applicable)
+        $ cat ~/.local/share/xorg/Xorg.0.log 2>/dev/null | grep -E "EE|WW" | tail -20
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — WORKAROUNDS ATTEMPTED
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: "🔧 Workarounds Attempted"
+      description: >
+        Document everything you've tried. This prevents duplicate suggestions
+        and often reveals important clues about the root cause.
+      placeholder: |
+        ## ✅ Partially Working Workarounds
+
+        ### Workaround 1: Force NVIDIA GPU for all rendering
+        ```bash
+        # Set WLR_DRM_DEVICES to NVIDIA card only
+        echo 'WLR_DRM_DEVICES=/dev/dri/card1' >> ~/.config/environment.d/nvidia.conf
+        # Result: HDMI tearing FIXED ✅ but internal display broken ❌
+        ```
+
+        ### Workaround 2: Disable hardware cursors
+        ```bash
+        echo 'WLR_NO_HARDWARE_CURSORS=1' >> ~/.config/environment.d/nvidia.conf
+        # Result: No change to tearing ❌ (but cursor was flickering before)
+        ```
+
+        ### Workaround 3: Force lower refresh rate
+        ```bash
+        hyprctl keyword monitor HDMI-A-1,3840x2160@30,2560x0,2.0
+        # Result: Tearing reduced significantly at 30Hz ⚠️ but unacceptable smoothness
+        ```
+
+        ## ❌ Failed Workarounds
+
+        | Attempt | Expected Result | Actual Result |
+        |---------|----------------|---------------|
+        | `explicit_sync = 1` in render.conf | Fix sync issues | No change |
+        | `nvidia_anti_flicker = true` | Reduce flickering | No change |
+        | `direct_scanout = true` | Better performance | Made tearing worse |
+        | `NVreg_UsePageAttributeTable=1` | Better memory | No change |
+        | Hyprland `--no-vt-switch` flag | Different issue | No change |
+        | Downgrade to NVIDIA 535.x | Older driver might work | Tearing still present |
+        | `vfr = false` in misc | Disable variable FR | Slightly better, not fixed |
+
+        ## 🔍 Key Observations from Testing
+
+        1. The issue ONLY occurs with dual-GPU (hybrid) + external HDMI
+        2. Single-GPU mode (one or the other) doesn't have this issue
+        3. Setting `WLR_DRM_DEVICES` to both cards creates a different issue
+        4. The problem appears to be in the frame buffer handoff between GPUs
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — HARDWARE INVENTORY
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: full_hardware
+    attributes:
+      label: "🖥️ Complete Hardware Inventory"
+      description: >
+        Run `ash hw full-report` for a complete automated hardware report.
+      placeholder: |
+        ## Full Hardware Report
+
+        ```bash
+        # Run: ash hw full-report
+        # OR fill in manually using commands below:
+        ```
+
+        ### CPU
+        ```
+        $ grep 'model name' /proc/cpuinfo | head -1
+        model name : 13th Gen Intel(R) Core(TM) i7-13700H
+
+        $ nproc && nproc --all
+        16 (logical) / 14 (physical)
+
+        $ lscpu | grep -E "Architecture|CPU|Thread|Core|Socket|Vendor"
+        Architecture:            x86_64
+        CPU(s):                  20
+        Thread(s) per core:      2
+        Core(s) per socket:      14
+        Vendor ID:               GenuineIntel
+        ```
+
+        ### RAM
+        ```
+        $ free -h
+                       total        used        free      shared  buff/cache   available
+        Mem:            31Gi        8.2Gi        16Gi       812Mi       6.4Gi        21Gi
+
+        $ sudo dmidecode -t memory | grep -E "Size|Speed|Type|Manufacturer" | grep -v "No Module"
+        Size: 16 GB
+        Speed: 4800 MT/s
+        Type: DDR5
+        Manufacturer: Samsung
+        ```
+
+        ### Storage
+        ```
+        $ lsblk -d -o NAME,MODEL,SIZE,TRAN,ROTA | grep -v loop
+        NAME   MODEL                  SIZE TRAN   ROTA
+        nvme0n1 SAMSUNG MZVL21T0HCLR 953.9G nvme      0
+
+        $ df -h /
+        Filesystem      Size  Used Avail Use% Mounted on
+        /dev/nvme0n1p2  940G  145G  748G  17% /
+        ```
+
+        ### Network
+        ```
+        $ lspci | grep -E "Network|Ethernet|Wireless|Wi-Fi"
+        00:1f.6 Ethernet controller: Intel Corporation Ethernet Connection (16) I219-LM
+        a5:00.0 Network controller: Intel Corporation Wi-Fi 6E (802.11ax) AX211
+
+        $ iwconfig 2>/dev/null | grep -E "ESSID|Frequency|Bit Rate"
+        ```
+
+        ### USB & Peripherals
+        ```
+        $ lsusb
+        Bus 002 Device 002: ID 0bda:8153 Realtek Semiconductor Corp. RTL8153 Gigabit Ethernet Adapter
+        Bus 003 Device 004: ID 04f2:b751 Chicony Electronics Co., Ltd Integrated Camera
+
+        # Input devices:
+        $ libinput list-devices | grep "Device:" | head -10
+        ```
+
+        ### BIOS/UEFI
+        ```
+        $ sudo dmidecode -t bios | grep -E "Version|Release|Vendor"
+        Vendor: Dell Inc.
+        Version: 1.8.1
+        Release Date: 12/15/2023
+
+        # Secure Boot:
+        $ mokutil --sb-state 2>/dev/null
+        SecureBoot enabled
+
+        # TPM:
+        $ tpm2_getcap properties-variable 2>/dev/null | head -5
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — ASH HARDWARE REPORT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: ash_doctor
+    attributes:
+      label: "🩺 ASH Hardware Doctor Output"
+      description: "Run `ash doctor --full --hardware` and paste complete output"
+      render: shell
+      placeholder: |
+        $ ash doctor --full --hardware
+
+        ╔══════════════════════════════════════════════════════════╗
+        ║       🩺 ASH Hardware Doctor v5.0 OMEGA                ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  System: Arch Linux — Dell XPS 15 9530                 ║
+        ║  ASH: v5.0.2-omega                                      ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  GPU Detection:                                          ║
+        ║  ✅ Intel Iris Xe (iGPU) — i915 driver                 ║
+        ║  ✅ NVIDIA RTX 3050 (dGPU) — nvidia 545.29.06          ║
+        ║  ⚠️  Hybrid mode detected — PRIME render offload        ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  Display:                                                ║
+        ║  ✅ eDP-1: 2560×1600@165Hz — Internal                  ║
+        ║  ✅ HDMI-A-1: 3840×2160@60Hz — External                ║
+        ║  ⚠️  Mixed refresh rates — may cause sync issues        ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  NVIDIA Configuration:                                   ║
+        ║  ✅ nvidia_drm modeset=1                                ║
+        ║  ✅ nvidia_drm fbdev=1                                  ║
+        ║  ✅ WLR_NO_HARDWARE_CURSORS=1                           ║
+        ║  ❌ explicit_sync not configured                        ║
+        ║  ❌ NVreg_PreserveVideoMemoryAllocations not set        ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  Audio:                                                  ║
+        ║  ✅ PipeWire 1.0.2 — running                           ║
+        ║  ✅ Default sink: PCH ALC295 Analog                    ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║  Result: ⚠️ 3 issues found — Hardware report complete  ║
+        ╚══════════════════════════════════════════════════════════╝
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Hardware Report Submission Checklist"
+      options:
+        - label: >
+            🎮 I have provided **complete GPU information** including driver version
+          required: true
+        - label: >
+            🩺 I have run and included `ash doctor --full --hardware` output
+          required: true
+        - label: >
+            🔄 I have provided **clear reproduction steps** others can follow
+          required: true
+        - label: >
+            🔧 I have documented **all workarounds attempted**
+          required: true
+        - label: >
+            📋 I have provided **system logs** from the time of the issue
+          required: true
+        - label: >
+            🔍 I have searched existing issues — **not a duplicate**
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 18 — CLOSING
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        <div align="center">
+
+        ### 🖥️ Thank You for Your Hardware Report!
+
+        #### ⏱️ Hardware Issue Response Times
+
+        | Category | Response | Resolution Target |
+        |----------|----------|------------------|
+        | 🔴 System crash / data risk | 24 hours | 72 hours |
+        | 🎮 GPU rendering broken | 48 hours | 1 week |
+        | 🖥️ Display not detected | 48 hours | 1 week |
+        | 🔊 Audio completely broken | 3 days | 2 weeks |
+        | 💻 Laptop-specific | 1 week | 2 weeks |
+        | 🟢 Minor artifact | 2 weeks | Next release |
+
+        #### 🏆 Hardware Compatibility Champions
+
+        Users who provide detailed hardware reports and help test fixes
+        are listed as **Hardware Compatibility Champions** on our website.
+
+        💬 Join [**#hardware-help**](https://discord.gg/ash-dotfiles) on Discord
+        for real-time hardware support from the community!
+
+        *— The ASH Dotfiles Hardware Team* 🖥️
+
+        </div>

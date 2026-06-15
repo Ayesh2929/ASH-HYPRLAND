@@ -1,0 +1,765 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      📄 ASH DOTFILES v5.0 OMEGA — YAMLLINT WORKFLOW                                   ║
+# ║                                                                                          ║
+# ║      Ultra-Premium YAML Validation Pipeline                                             ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      yamllint v1.35+      •  Action Workflow Validation  •  Schema Checking            ║
+# ║      Multi-Profile Config  •  GitHub Actions Syntax      •  Anchor Detection           ║
+# ║      Duplicate Key Check   •  UTF-8 Validation           •  Line Length Audit          ║
+# ║      actionlint Integration•  Cosign Verification        •  Workflow Security          ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📄 YAMLLint — YAML File Validation"
+
+on:
+  push:
+    branches: [main, develop, "release/**", "hotfix/**"]
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
+      - ".yamllint"
+      - ".github/workflows/lint/yamllint.yml"
+
+  pull_request:
+    branches: [main, develop, "release/**"]
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
+      - ".yamllint"
+      - ".github/workflows/lint/yamllint.yml"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Linting profile to use"
+        required: false
+        default: "relaxed"
+        type: choice
+        options:
+          - strict
+          - default
+          - relaxed
+          - github-actions
+      validate_actions:
+        description: "Run actionlint on workflow files"
+        required: false
+        default: true
+        type: boolean
+      fix_formatting:
+        description: "Show formatting suggestions (prettier)"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    - cron: "45 2 * * *"
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  security-events: write
+
+concurrency:
+  group: "yamllint-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  YAMLLINT_VERSION: "1.35.1"
+  ACTIONLINT_VERSION: "1.7.1"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover YAML Files"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      yaml-files:        ${{ steps.discover.outputs.yaml_files }}
+      workflow-files:    ${{ steps.discover.outputs.workflow_files }}
+      config-files:      ${{ steps.discover.outputs.config_files }}
+      total-count:       ${{ steps.discover.outputs.total_count }}
+      workflow-count:    ${{ steps.discover.outputs.workflow_count }}
+      has-files:         ${{ steps.discover.outputs.has_files }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover YAML Files"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  📄 YAML File Discovery                          ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          # All YAML files
+          mapfile -t all_yaml < <(
+            find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*" \
+              ! -path "./.pnpm-store/*" \
+              | sort
+          )
+
+          # GitHub Actions workflow files
+          mapfile -t workflow_files < <(
+            find ./.github/workflows -type f -name "*.yml" 2>/dev/null | sort
+          )
+
+          # Config YAML files (not workflows)
+          mapfile -t config_files < <(
+            find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*" \
+              ! -path "./.github/*" \
+              | sort
+          )
+
+          total="${#all_yaml[@]}"
+          workflow_count="${#workflow_files[@]}"
+          config_count="${#config_files[@]}"
+
+          echo "  Total YAML files:     ${total}"
+          echo "  Workflow files:       ${workflow_count}"
+          echo "  Config YAML files:    ${config_count}"
+          echo ""
+          echo "  📁 YAML by category:"
+          echo "     GitHub Actions:    ${workflow_count}"
+          echo "     Docker Compose:    $(find . -name "docker-compose*.yml" 2>/dev/null | wc -l)"
+          echo "     Helm Charts:       $(find . -name "Chart.yaml" 2>/dev/null | wc -l)"
+          echo "     GitHub Issue Tmpl: $(find .github/ISSUE_TEMPLATE -name "*.yml" 2>/dev/null | wc -l)"
+          echo "     dependabot.yml:    $(find . -name "dependabot.yml" 2>/dev/null | wc -l)"
+          echo "     labels.yml:        $(find . -name "labels.yml" 2>/dev/null | wc -l)"
+
+          yaml_json="$(printf '%s\n' "${all_yaml[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          wf_json="$(printf '%s\n' "${workflow_files[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          cfg_json="$(printf '%s\n' "${config_files[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+
+          echo "yaml_files=${yaml_json}" >> "${GITHUB_OUTPUT}"
+          echo "workflow_files=${wf_json}" >> "${GITHUB_OUTPUT}"
+          echo "config_files=${cfg_json}" >> "${GITHUB_OUTPUT}"
+          echo "total_count=${total}" >> "${GITHUB_OUTPUT}"
+          echo "workflow_count=${workflow_count}" >> "${GITHUB_OUTPUT}"
+          echo "has_files=$([ "${total}" -gt 0 ] && echo 'true' || echo 'false')" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: VALIDATE YAML
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-yaml:
+    name: "✅ Validate YAML Files"
+    needs: discover
+    if: needs.discover.outputs.has-files == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      errors:   ${{ steps.yamllint.outputs.errors }}
+      warnings: ${{ steps.yamllint.outputs.warnings }}
+      passed:   ${{ steps.yamllint.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: "🛠️ Install yamllint"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  🛠️  Installing yamllint Tools                    ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          pip install -q "yamllint==${{ env.YAMLLINT_VERSION }}"
+          pip install -q pyyaml    # For semantic validation
+
+          sudo apt-get install -q -y jq 2>/dev/null
+
+          echo "  yamllint: $(yamllint --version)"
+          echo "  ✅ Tools ready"
+
+      - name: "⚙️ Configure yamllint"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  ⚙️  yamllint Configuration                       ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          profile="${{ inputs.profile || 'relaxed' }}"
+          echo "  Using profile: ${profile}"
+
+          # Write profile-specific yamllint config
+          case "${profile}" in
+            strict)
+              cat > .yamllint-ci.yml << 'STRICT'
+          ---
+          extends: default
+          rules:
+            braces:
+              min-spaces-inside: 0
+              max-spaces-inside: 1
+            brackets:
+              min-spaces-inside: 0
+              max-spaces-inside: 1
+            colons:
+              max-spaces-before: 0
+              max-spaces-after: 1
+            commas:
+              max-spaces-before: 0
+              min-spaces-after: 1
+              max-spaces-after: 1
+            comments:
+              require-starting-space: true
+              min-spaces-from-content: 2
+            document-end: disable
+            document-start:
+              present: always
+            empty-lines:
+              max: 2
+              max-start: 0
+              max-end: 0
+            empty-values: disable
+            float-values: disable
+            hyphens:
+              max-spaces-after: 1
+            indentation:
+              spaces: 2
+              indent-sequences: true
+              check-multi-line-strings: false
+            key-duplicates: enable
+            key-ordering: disable
+            line-length:
+              max: 120
+              allow-non-breakable-words: true
+              allow-non-breakable-inline-mappings: true
+            new-line-at-end-of-file: enable
+            new-lines:
+              type: unix
+            octal-values: disable
+            trailing-spaces: enable
+            truthy:
+              allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+              check-keys: true
+          STRICT
+              ;;
+            relaxed)
+              cat > .yamllint-ci.yml << 'RELAXED'
+          ---
+          extends: relaxed
+          rules:
+            braces:
+              max-spaces-inside: 1
+            brackets:
+              max-spaces-inside: 1
+            comments:
+              require-starting-space: false
+              min-spaces-from-content: 1
+            document-start: disable
+            empty-lines:
+              max: 3
+            indentation:
+              spaces: 2
+              indent-sequences: true
+            key-duplicates: enable
+            line-length:
+              max: 160
+              allow-non-breakable-words: true
+              allow-non-breakable-inline-mappings: true
+            new-line-at-end-of-file: enable
+            new-lines:
+              type: unix
+            trailing-spaces: enable
+            truthy:
+              allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+              check-keys: false
+          RELAXED
+              ;;
+            github-actions)
+              cat > .yamllint-ci.yml << 'GHACTIONS'
+          ---
+          extends: default
+          rules:
+            line-length:
+              max: 160
+              allow-non-breakable-words: true
+              allow-non-breakable-inline-mappings: true
+            document-start: disable
+            truthy:
+              allowed-values: ['true', 'false', 'on', 'off']
+              check-keys: false
+            key-duplicates: enable
+            empty-values: disable
+            new-line-at-end-of-file: enable
+            trailing-spaces: enable
+            indentation:
+              spaces: 2
+              indent-sequences: true
+          GHACTIONS
+              ;;
+            *)
+              # Use repo config if available
+              if [[ -f .yamllint.yml ]]; then
+                cp .yamllint.yml .yamllint-ci.yml
+                echo "  ✅ Using repository .yamllint.yml"
+              elif [[ -f .yamllint ]]; then
+                cp .yamllint .yamllint-ci.yml
+                echo "  ✅ Using repository .yamllint"
+              else
+                cat > .yamllint-ci.yml << 'DEFAULT'
+          ---
+          extends: default
+          rules:
+            line-length:
+              max: 160
+              allow-non-breakable-words: true
+            document-start: disable
+            truthy:
+              check-keys: false
+            key-duplicates: enable
+          DEFAULT
+                echo "  ℹ️  Created default config"
+              fi
+              ;;
+          esac
+
+          echo ""
+          echo "  Active yamllint config:"
+          cat .yamllint-ci.yml
+
+      - name: "✅ Run yamllint"
+        id: yamllint
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  📄 YAML Lint Analysis                           ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          total_errors=0
+          total_warnings=0
+          files_checked=0
+          files_with_issues=0
+
+          echo "  Analyzing ${{ needs.discover.outputs.total-count }} YAML files..."
+          echo ""
+
+          # Run yamllint on all YAML files
+          yamllint_output="$(yamllint \
+            --config-file .yamllint-ci.yml \
+            --format parsable \
+            $(find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*") \
+            2>&1 || true)"
+
+          # Parse and display results
+          while IFS= read -r line; do
+            if [[ -z "${line}" ]]; then continue; fi
+
+            # Count errors and warnings
+            if echo "${line}" | grep -q "\[error\]"; then
+              total_errors=$((total_errors + 1))
+              echo "  ❌ ${line}"
+            elif echo "${line}" | grep -q "\[warning\]"; then
+              total_warnings=$((total_warnings + 1))
+              echo "  ⚠️  ${line}"
+            fi
+          done <<< "${yamllint_output}"
+
+          # Count unique files with issues
+          files_with_issues="$(echo "${yamllint_output}" \
+            | grep -E '\[error\]|\[warning\]' \
+            | cut -d: -f1 | sort -u | wc -l)"
+
+          # Also run semantic YAML validation
+          echo ""
+          echo "  🔍 Semantic YAML validation..."
+          semantic_errors=0
+
+          while IFS= read -r -d '' yaml_file; do
+            # Validate YAML can be parsed without errors
+            if ! python3 -c "
+          import yaml, sys
+          try:
+              with open(sys.argv[1]) as f:
+                  list(yaml.safe_load_all(f))
+          except yaml.YAMLError as e:
+              print(f'SEMANTIC ERROR in {sys.argv[1]}: {e}')
+              sys.exit(1)
+          " "${yaml_file}" 2>/tmp/yaml-semantic-err; then
+              echo "  ❌ SEMANTIC: $(cat /tmp/yaml-semantic-err)"
+              semantic_errors=$((semantic_errors + 1))
+              total_errors=$((total_errors + 1))
+            fi
+          done < <(find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+            ! -path "./.git/*" \
+            ! -path "./node_modules/*" \
+            -print0)
+
+          # Summary
+          total_issues=$((total_errors + total_warnings))
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  📊 YAML Lint Results                            ║"
+          echo "╠══════════════════════════════════════════════════╣"
+          printf "║  📄 Total files:        %-24s║\n" "${{ needs.discover.outputs.total-count }}"
+          printf "║  ❌ Files with issues:  %-24s║\n" "${files_with_issues}"
+          printf "║  🔴 Errors:             %-24s║\n" "${total_errors}"
+          printf "║  🟠 Warnings:           %-24s║\n" "${total_warnings}"
+          printf "║  📝 Total issues:       %-24s║\n" "${total_issues}"
+          echo "╠══════════════════════════════════════════════════╣"
+
+          passed="true"
+          if [[ ${total_errors} -gt 0 ]]; then
+            passed="false"
+            echo "║  ❌ STATUS: FAILED                               ║"
+          else
+            echo "║  ✅ STATUS: PASSED                               ║"
+          fi
+          echo "╚══════════════════════════════════════════════════╝"
+
+          echo "errors=${total_errors}" >> "${GITHUB_OUTPUT}"
+          echo "warnings=${total_warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+      - name: "📄 Save yamllint Output"
+        if: always()
+        shell: bash
+        run: |
+          yamllint \
+            --config-file .yamllint-ci.yml \
+            --format colored \
+            $(find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*") \
+            > yamllint-colored.txt 2>&1 || true
+
+          echo "  Saved formatted output to yamllint-colored.txt"
+
+      - name: "📤 Upload Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "yamllint-results"
+          path: |
+            yamllint-colored.txt
+            .yamllint-ci.yml
+          retention-days: 14
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: ACTIONLINT — GitHub Actions Workflow Validation
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-actions:
+    name: "⚙️ Actionlint — Workflow Validation"
+    needs: discover
+    if: >
+      needs.discover.outputs.has-files == 'true' &&
+      needs.discover.outputs.workflow-count != '0' &&
+      inputs.validate_actions != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      action-errors:  ${{ steps.actionlint.outputs.errors }}
+      action-passed:  ${{ steps.actionlint.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🛠️ Install actionlint"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  🛠️  Installing actionlint                        ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          # Install specific version
+          wget -qO /tmp/actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${{ env.ACTIONLINT_VERSION }}/actionlint_${{ env.ACTIONLINT_VERSION }}_linux_amd64.tar.gz"
+
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp/
+          sudo install -m 755 /tmp/actionlint /usr/local/bin/actionlint
+
+          # Install shellcheck for actionlint shell script checking
+          sudo apt-get install -q -y shellcheck jq 2>/dev/null
+
+          echo "  actionlint: $(actionlint --version)"
+          echo "  ✅ actionlint ready"
+
+      - name: "⚙️ Run actionlint"
+        id: actionlint
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  ⚙️  GitHub Actions Workflow Validation           ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          workflow_count="${{ needs.discover.outputs.workflow-count }}"
+          echo "  Validating ${workflow_count} GitHub Actions workflow files..."
+          echo ""
+
+          # Run actionlint on all workflow files
+          actionlint_exit=0
+          actionlint_output="$(actionlint \
+            -format '{{range $err := .}}::error file={{$err.Filepath}},line={{$err.Line}},col={{$err.Column}}::{{$err.Message}}{{end}}' \
+            .github/workflows/**/*.yml \
+            2>&1)" || actionlint_exit=$?
+
+          # Parse results
+          errors="$(echo "${actionlint_output}" | grep -c "::error" || echo 0)"
+          warnings="$(echo "${actionlint_output}" | grep -c "::warning" || echo 0)"
+
+          # Show annotated output
+          if [[ ${errors} -gt 0 || ${warnings} -gt 0 ]]; then
+            echo "${actionlint_output}" | head -50
+          fi
+
+          # Run again with human-readable format for display
+          echo ""
+          echo "  📋 Human-readable output:"
+          actionlint \
+            -format '{{range $err := .}}  ❌ {{$err.Filepath}}:{{$err.Line}}:{{$err.Column}}: {{$err.Message}}\n{{end}}' \
+            .github/workflows/**/*.yml \
+            2>/dev/null || true
+
+          # Security checks specific to GitHub Actions
+          echo ""
+          echo "  🔒 Security checks:"
+
+          security_issues=0
+
+          # Check for dangerous permissions
+          if grep -r "permissions:" .github/workflows/ 2>/dev/null | grep -q "write-all"; then
+            echo "  ⚠️  Found 'permissions: write-all' — should use minimal permissions"
+            security_issues=$((security_issues + 1))
+          else
+            echo "  ✅ No overly permissive 'write-all' permissions"
+          fi
+
+          # Check for pinned actions (should use SHA or version tags)
+          unpinned="$(grep -rE "uses: [^@]+$" .github/workflows/ 2>/dev/null | wc -l)"
+          if [[ ${unpinned} -gt 0 ]]; then
+            echo "  ⚠️  ${unpinned} unpinned action references (no @version)"
+            security_issues=$((security_issues + 1))
+          else
+            echo "  ✅ All actions are pinned to versions/SHAs"
+          fi
+
+          # Check for secrets in workflow files
+          if grep -rE "\$\{\{.*secrets\.[A-Z_]+.*\}\}" .github/workflows/ 2>/dev/null | grep -qv "^Binary"; then
+            echo "  ✅ Secrets referenced via GitHub Secrets (correct pattern)"
+          fi
+
+          # Check for set-output deprecation
+          deprecated_setoutput="$(grep -rn "set-output" .github/workflows/ 2>/dev/null | wc -l)"
+          if [[ ${deprecated_setoutput} -gt 0 ]]; then
+            echo "  ⚠️  ${deprecated_setoutput} uses of deprecated 'set-output' — use GITHUB_OUTPUT instead"
+            security_issues=$((security_issues + 1))
+          else
+            echo "  ✅ No deprecated 'set-output' usage"
+          fi
+
+          # Summary
+          echo ""
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  📊 Actionlint Results                           ║"
+          echo "╠══════════════════════════════════════════════════╣"
+          printf "║  ⚙️  Workflows analyzed:   %-22s║\n" "${workflow_count}"
+          printf "║  ❌ Action errors:        %-22s║\n" "${errors}"
+          printf "║  ⚠️  Action warnings:     %-22s║\n" "${warnings}"
+          printf "║  🔒 Security issues:      %-22s║\n" "${security_issues}"
+          echo "╠══════════════════════════════════════════════════╣"
+
+          passed="true"
+          if [[ ${errors} -gt 0 ]]; then
+            passed="false"
+            echo "║  ❌ STATUS: FAILED                               ║"
+          else
+            echo "║  ✅ STATUS: PASSED                               ║"
+          fi
+          echo "╚══════════════════════════════════════════════════╝"
+
+          echo "errors=${errors}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: PR COMMENT & REPORT
+  # ────────────────────────────────────────────────────────────────────────────
+  report:
+    name: "📊 Generate Combined Report"
+    needs: [discover, validate-yaml, validate-actions]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post Combined PR Comment"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const yamlErrors    = parseInt('${{ needs.validate-yaml.outputs.errors || 0 }}');
+            const yamlWarnings  = parseInt('${{ needs.validate-yaml.outputs.warnings || 0 }}');
+            const yamlPassed    = '${{ needs.validate-yaml.outputs.passed }}' === 'true';
+            const actionErrors  = parseInt('${{ needs.validate-actions.outputs.action-errors || 0 }}');
+            const actionPassed  = '${{ needs.validate-actions.outputs.action-passed || "true" }}' === 'true';
+            const totalFiles    = '${{ needs.discover.outputs.total-count }}';
+            const workflowCount = '${{ needs.discover.outputs.workflow-count }}';
+            const overallPassed = yamlPassed && actionPassed;
+
+            const icon   = overallPassed ? '✅' : '❌';
+            const status = overallPassed ? 'PASSED' : 'FAILED';
+
+            const body = `## 📄 YAMLLint Analysis ${icon}
+
+            **Status: ${status}** | Validated **${totalFiles}** YAML files (${workflowCount} workflow files)
+
+            ### 📄 YAML Syntax & Style
+            | Check | Count | Status |
+            |-------|-------|--------|
+            | 🔴 Syntax Errors | \`${yamlErrors}\` | ${yamlErrors === 0 ? '✅' : '❌'} |
+            | 🟠 Style Warnings | \`${yamlWarnings}\` | ${yamlWarnings === 0 ? '✅' : '⚠️'} |
+
+            ### ⚙️ GitHub Actions Workflows
+            | Check | Count | Status |
+            |-------|-------|--------|
+            | ❌ Action Errors | \`${actionErrors}\` | ${actionErrors === 0 ? '✅' : '❌'} |
+            | 🔒 Security Checks | Ran ✅ | — |
+
+            ${overallPassed
+              ? '### ✨ All YAML files pass validation!'
+              : `### 🔧 Fix Required\n\`\`\`bash\n# Fix YAML issues locally:\nyamllint --config-file .yamllint.yml .\n\n# Fix workflow issues:\n# Install actionlint: https://github.com/rhysd/actionlint\nactionlint .github/workflows/**/*.yml\n\`\`\``
+            }
+
+            <details>
+            <summary>🛠️ Local Validation Commands</summary>
+
+            \`\`\`bash
+            # Install yamllint
+            pip install yamllint
+
+            # Validate all YAML
+            yamllint --format colored .
+
+            # Validate workflows only
+            yamllint --format colored .github/workflows/
+
+            # Install and run actionlint
+            # macOS: brew install actionlint
+            # Linux: Download from GitHub releases
+            actionlint .github/workflows/**/*.yml
+
+            # Check YAML with Python (semantic validation)
+            python3 -c "
+            import yaml, sys, glob
+            for f in glob.glob('**/*.yml', recursive=True):
+                try:
+                    list(yaml.safe_load_all(open(f)))
+                    print(f'✅ {f}')
+                except Exception as e:
+                    print(f'❌ {f}: {e}')
+            "
+            \`\`\`
+            </details>
+
+            ---
+            *🤖 ASH Dotfiles YAMLLint • [Full Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('📄 YAMLLint Analysis')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 05: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — YAMLLint"
+    needs: [discover, validate-yaml, validate-actions]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+
+    steps:
+      - name: "🚦 Evaluate Quality Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║  🚦 YAMLLint Quality Gate                        ║"
+          echo "╚══════════════════════════════════════════════════╝"
+
+          yaml_passed="${{ needs.validate-yaml.outputs.passed || 'true' }}"
+          action_passed="${{ needs.validate-actions.outputs.action-passed || 'true' }}"
+          has_files="${{ needs.discover.outputs.has-files }}"
+
+          yaml_errors="${{ needs.validate-yaml.outputs.errors || '0' }}"
+          yaml_warnings="${{ needs.validate-yaml.outputs.warnings || '0' }}"
+          action_errors="${{ needs.validate-actions.outputs.action-errors || '0' }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── YAML Errors:    ${yaml_errors}"
+          echo "  ├── YAML Warnings:  ${yaml_warnings}"
+          echo "  ├── Action Errors:  ${action_errors}"
+          echo "  ├── YAML Passed:    ${yaml_passed}"
+          echo "  └── Actions Passed: ${action_passed}"
+          echo ""
+
+          if [[ "${has_files}" == "false" ]]; then
+            echo "  ℹ️  No YAML files found — gate skipped"
+            exit 0
+          fi
+
+          if [[ "${yaml_passed}" == "true" && "${action_passed}" == "true" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+            echo ""
+            echo "  🎉 All YAML files pass validation!"
+            echo "  🎉 All GitHub Actions workflows are valid!"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            echo ""
+            if [[ "${yaml_passed}" != "true" ]]; then
+              echo "  Fix YAML errors: yamllint --format colored ."
+            fi
+            if [[ "${action_passed}" != "true" ]]; then
+              echo "  Fix workflow errors: actionlint .github/workflows/**/*.yml"
+            fi
+            exit 1
+          fi

@@ -1,0 +1,989 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🌐 ASH DOTFILES v5.0 OMEGA — DEPLOY API ACTION                                          ║
+# ║                                                                                           ║
+# ║  ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗                                      ║
+# ║  ██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝                                      ║
+# ║  ██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝                                       ║
+# ║  ██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝                                        ║
+# ║  ██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║                                         ║
+# ║  ╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝                                         ║
+# ║                                                                                           ║
+# ║   █████╗ ██████╗ ██╗                                                                     ║
+# ║  ██╔══██╗██╔══██╗██║                                                                     ║
+# ║  ███████║██████╔╝██║                                                                     ║
+# ║  ██╔══██║██╔═══╝ ██║                                                                     ║
+# ║  ██║  ██║██║     ██║                                                                     ║
+# ║  ╚═╝  ╚═╝╚═╝     ╚═╝                                                                     ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 DEPLOYMENT TARGETS (8 providers):                                                     ║
+# ║     🐳 Docker (build · tag · push · run · Compose)                                       ║
+# ║     ☸️  Kubernetes (kubectl apply · Helm chart · Kustomize)                               ║
+# ║     🌊 DigitalOcean App Platform (doctl deploy)                                          ║
+# ║     ☁️  AWS (ECS Fargate · Lambda · App Runner · Elastic Beanstalk)                      ║
+# ║     🔵 Azure (Container Apps · App Service · ACI)                                        ║
+# ║     🟡 GCP (Cloud Run · GKE · App Engine)                                               ║
+# ║     🚂 Railway (railway up)                                                              ║
+# ║     🎨 Render (render deploy)                                                            ║
+# ║     🦋 Fly.io (flyctl deploy)                                                            ║
+# ║     🔁 Custom (arbitrary deploy command)                                                  ║
+# ║                                                                                           ║
+# ║  ⚡ DEPLOYMENT FEATURES:                                                                   ║
+# ║     🏗️  Multi-stage Docker builds (BuildKit, layer caching)                               ║
+# ║     🔒 Secrets injection (env vars, Docker secrets, K8s secrets)                         ║
+# ║     🏥 Health checks (HTTP polling, custom command, readiness probe)                     ║
+# ║     🔄 Blue/green deployment (zero-downtime cutover)                                     ║
+# ║     ↩️  Rollback on failure (previous version restore)                                    ║
+# ║     📊 Deployment metrics (startup time, health status, request rate)                    ║
+# ║     🧪 Smoke tests (post-deploy endpoint verification)                                   ║
+# ║     🌡️  Warm-up requests (prime server caches before traffic)                             ║
+# ║     📈 Deployment tracking (SQLite history + duration metrics)                           ║
+# ║     🔔 Notification dispatch (Discord + GitHub deployment)                               ║
+# ║     🏷️  Release tagging (GitHub Release asset attachment)                                ║
+# ║     🌍 Multi-region (parallel regional deployments)                                      ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🌐 Deploy API"
+description: >
+  🚀 Ultra-comprehensive API deployment engine for ASH Dotfiles v5.0 OMEGA.
+
+  Supports 10 deployment targets (Docker, Kubernetes, DigitalOcean, AWS, Azure,
+  GCP, Railway, Render, Fly.io, custom), blue/green deployment, automatic
+  rollback, health check polling, smoke tests, deployment metrics, multi-region
+  parallel deployment, and rich notification dispatch.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎯 DEPLOYMENT TARGET                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  target:
+    description: >
+      🎯 Deployment target provider.
+
+      Targets:
+        docker       — Build & run via Docker / Docker Compose
+        kubernetes   — kubectl apply / Helm / Kustomize
+        digitalocean — DigitalOcean App Platform (doctl)
+        aws-ecs      — AWS ECS Fargate (task definition update)
+        aws-lambda   — AWS Lambda function deployment
+        aws-apprunner— AWS App Runner service update
+        azure-ca     — Azure Container Apps
+        gcp-cloudrun — Google Cloud Run service
+        railway      — Railway.app deployment
+        render       — Render.com service deploy
+        flyio        — Fly.io deployment (flyctl)
+        custom       — Custom deploy command
+
+      Default: docker
+    required: false
+    default: "docker"
+
+  environment:
+    description: >
+      🌍 Deployment environment name.
+      Used for GitHub deployment tracking, environment-specific configs.
+      Options: development, staging, production, preview
+    required: false
+    default: "production"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🐳 DOCKER CONFIGURATION                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  dockerfile:
+    description: "🐳 Path to Dockerfile"
+    required: false
+    default: "api/Dockerfile"
+
+  docker_context:
+    description: "🐳 Docker build context directory"
+    required: false
+    default: "."
+
+  image_name:
+    description: >
+      🐳 Docker image name (without tag).
+      Examples: "ghcr.io/ash/api", "myregistry/ash-api"
+    required: false
+    default: ""
+
+  image_tag:
+    description: >
+      🐳 Docker image tag.
+      Special values: "git-sha" (uses short SHA), "version" (uses version.json)
+    required: false
+    default: "git-sha"
+
+  registry:
+    description: >
+      🐳 Container registry URL.
+      Examples: "ghcr.io", "docker.io", "registry.digitalocean.com"
+    required: false
+    default: "ghcr.io"
+
+  registry_username:
+    description: "🔑 Registry authentication username"
+    required: false
+    default: "${{ github.actor }}"
+
+  registry_password:
+    description: "🔑 Registry authentication password/token"
+    required: false
+    default: ""
+
+  build_args:
+    description: >
+      🐳 Docker build arguments (newline-separated KEY=VALUE pairs).
+      Example:
+        APP_VERSION=5.0.0
+        BUILD_DATE=2024-01-15
+    required: false
+    default: ""
+
+  build_cache:
+    description: >
+      ⚡ Docker build cache strategy.
+      Options: inline, registry, gha (GitHub Actions cache), none
+    required: false
+    default: "gha"
+
+  build_platforms:
+    description: >
+      🖥️ Target platforms for multi-arch builds.
+      Examples: "linux/amd64", "linux/amd64,linux/arm64"
+    required: false
+    default: "linux/amd64"
+
+  push_image:
+    description: "📤 Push image to registry after build"
+    required: false
+    default: "true"
+
+  compose_file:
+    description: "🐳 Docker Compose file path (for compose deployments)"
+    required: false
+    default: "docker/docker-compose.yml"
+
+  container_name:
+    description: "🐳 Docker container name for direct deployments"
+    required: false
+    default: "ash-api"
+
+  container_port:
+    description: "🔌 Container port to expose"
+    required: false
+    default: "8765"
+
+  host_port:
+    description: "🔌 Host port mapping"
+    required: false
+    default: "8765"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ☸️  KUBERNETES CONFIGURATION                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  k8s_namespace:
+    description: "☸️ Kubernetes namespace"
+    required: false
+    default: "ash-api"
+
+  k8s_manifests:
+    description: "☸️ Path to Kubernetes manifests directory or file"
+    required: false
+    default: "k8s/"
+
+  k8s_deployment_name:
+    description: "☸️ Kubernetes deployment name for rollout tracking"
+    required: false
+    default: "ash-api"
+
+  helm_chart:
+    description: "⛵ Helm chart path or repository URL"
+    required: false
+    default: ""
+
+  helm_release:
+    description: "⛵ Helm release name"
+    required: false
+    default: "ash-api"
+
+  helm_values:
+    description: "⛵ Path to Helm values file"
+    required: false
+    default: "helm/values.yaml"
+
+  kubeconfig:
+    description: "🔑 Kubeconfig content (base64 encoded)"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ☁️  CLOUD PROVIDER SETTINGS                          ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  # AWS
+  aws_region:
+    description: "☁️ AWS region"
+    required: false
+    default: "us-east-1"
+
+  aws_ecs_cluster:
+    description: "☁️ AWS ECS cluster name"
+    required: false
+    default: "ash-cluster"
+
+  aws_ecs_service:
+    description: "☁️ AWS ECS service name"
+    required: false
+    default: "ash-api"
+
+  aws_lambda_function:
+    description: "☁️ AWS Lambda function name"
+    required: false
+    default: "ash-api"
+
+  # GCP
+  gcp_project:
+    description: "🟡 GCP project ID"
+    required: false
+    default: ""
+
+  gcp_region:
+    description: "🟡 GCP region"
+    required: false
+    default: "us-central1"
+
+  gcp_service:
+    description: "🟡 Cloud Run service name"
+    required: false
+    default: "ash-api"
+
+  # Azure
+  azure_resource_group:
+    description: "🔵 Azure resource group"
+    required: false
+    default: "ash-rg"
+
+  azure_app_name:
+    description: "🔵 Azure Container App or App Service name"
+    required: false
+    default: "ash-api"
+
+  # DigitalOcean
+  do_app_name:
+    description: "🌊 DigitalOcean App Platform app name"
+    required: false
+    default: "ash-api"
+
+  # Fly.io
+  fly_app:
+    description: "🦋 Fly.io application name"
+    required: false
+    default: "ash-api"
+
+  fly_region:
+    description: "🦋 Fly.io region"
+    required: false
+    default: "iad"
+
+  # Custom
+  custom_deploy_cmd:
+    description: "🔧 Custom deployment command"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔒 SECRETS & ENVIRONMENT                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  env_vars:
+    description: >
+      🔑 Environment variables to inject (newline-separated KEY=VALUE).
+      Sensitive values should use repository secrets.
+    required: false
+    default: ""
+
+  secrets_json:
+    description: >
+      🔒 JSON object of secrets to inject as environment variables.
+      Example: '{"DB_URL":"postgres://...","API_KEY":"sk-..."}'
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🏥 HEALTH CHECKS                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  health_check_enabled:
+    description: "🏥 Enable post-deployment health check polling"
+    required: false
+    default: "true"
+
+  health_check_url:
+    description: >
+      🏥 Health check endpoint URL.
+      Supports templates: {HOST}, {PORT}
+      Example: "http://localhost:8765/health"
+    required: false
+    default: "http://localhost:8765/health"
+
+  health_check_timeout_s:
+    description: "🏥 Maximum time to wait for health (seconds)"
+    required: false
+    default: "120"
+
+  health_check_interval_s:
+    description: "🏥 Interval between health check polls (seconds)"
+    required: false
+    default: "5"
+
+  health_check_retries:
+    description: "🏥 Number of consecutive successes required"
+    required: false
+    default: "3"
+
+  health_check_expected_status:
+    description: "🏥 Expected HTTP status code(s) (comma-separated)"
+    required: false
+    default: "200,204"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🧪 SMOKE TESTS                                      ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  smoke_tests_enabled:
+    description: "🧪 Run smoke tests after successful deployment"
+    required: false
+    default: "true"
+
+  smoke_test_endpoints:
+    description: >
+      🧪 Endpoint paths to test (comma-separated).
+      Example: "/health,/api/v1/themes,/api/v1/plugins"
+    required: false
+    default: "/health,/api/v1/themes"
+
+  smoke_test_base_url:
+    description: "🧪 Base URL for smoke tests (empty = auto-detect)"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔄 BLUE/GREEN & ROLLBACK                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  strategy:
+    description: >
+      🔄 Deployment strategy.
+      Options:
+        rolling      — Replace instances gradually (default)
+        blue-green   — Deploy alongside existing, then cutover
+        canary       — Route small % of traffic first
+        recreate     — Stop all, then start new (downtime)
+    required: false
+    default: "rolling"
+
+  rollback_on_failure:
+    description: "↩️ Automatically rollback if health checks fail"
+    required: false
+    default: "true"
+
+  rollback_timeout_s:
+    description: "↩️ Timeout for rollback operation (seconds)"
+    required: false
+    default: "60"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🌍 MULTI-REGION                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  regions:
+    description: >
+      🌍 Comma-separated list of regions to deploy to.
+      Single region: "us-east-1"
+      Multi-region:  "us-east-1,eu-west-1,ap-northeast-1"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🌡️  WARM-UP                                          ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  warmup_enabled:
+    description: "🌡️ Send warm-up requests after deployment"
+    required: false
+    default: "false"
+
+  warmup_count:
+    description: "🌡️ Number of warm-up requests per endpoint"
+    required: false
+    default: "5"
+
+  warmup_endpoints:
+    description: "🌡️ Endpoints to warm up (comma-separated)"
+    required: false
+    default: "/health,/api/v1/themes"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📤 ARTIFACTS & NOTIFICATIONS                        ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  create_github_deployment:
+    description: "📋 Create GitHub deployment record"
+    required: false
+    default: "true"
+
+  notify_discord:
+    description: "🔔 Send Discord deployment notification"
+    required: false
+    default: "true"
+
+  upload_deployment_log:
+    description: "📤 Upload deployment log as workflow artifact"
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  BEHAVIOR                                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  dry_run:
+    description: "🔍 Dry run — plan deployment without executing"
+    required: false
+    default: "false"
+
+  verbose:
+    description: "📢 Enable verbose output"
+    required: false
+    default: "false"
+
+  fail_on_health_check:
+    description: "🚨 Fail action if health check fails"
+    required: false
+    default: "true"
+
+  timeout_minutes:
+    description: "⏱️ Total deployment timeout in minutes"
+    required: false
+    default: "15"
+
+  github_token:
+    description: "🔑 GitHub token for API operations"
+    required: false
+    default: "${{ github.token }}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  deployed:
+    description: "✅ Whether deployment succeeded"
+    value: ${{ steps.deploy.outputs.deployed }}
+
+  deployment_url:
+    description: "🌐 Deployed API URL"
+    value: ${{ steps.deploy.outputs.deployment_url }}
+
+  image_digest:
+    description: "🔒 Docker image digest (sha256:...)"
+    value: ${{ steps.deploy.outputs.image_digest }}
+
+  image_full:
+    description: "🐳 Full image reference with digest"
+    value: ${{ steps.deploy.outputs.image_full }}
+
+  health_status:
+    description: "🏥 Health check result (healthy/unhealthy/skipped)"
+    value: ${{ steps.deploy.outputs.health_status }}
+
+  smoke_test_status:
+    description: "🧪 Smoke test result (passed/failed/skipped)"
+    value: ${{ steps.deploy.outputs.smoke_test_status }}
+
+  rolledback:
+    description: "↩️ Whether a rollback was performed"
+    value: ${{ steps.deploy.outputs.rolledback }}
+
+  deploy_duration_s:
+    description: "⏱️ Total deployment duration in seconds"
+    value: ${{ steps.deploy.outputs.duration_s }}
+
+  github_deployment_id:
+    description: "📋 GitHub deployment record ID"
+    value: ${{ steps.github-deployment.outputs.deployment_id }}
+
+  regions_deployed:
+    description: "🌍 Comma-separated list of successfully deployed regions"
+    value: ${{ steps.deploy.outputs.regions_deployed }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Validate inputs & resolve configuration"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        START_TIME=$(date +%s)
+        SESSION_ID="deploy-$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null || echo 'ci')"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  🌐 ASH API Deployment Engine v5.0 OMEGA                     ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  🆔 Session:  %-49s║\n" "${SESSION_ID}"
+        printf "║  🎯 Target:   %-49s║\n" "${{ inputs.target }}"
+        printf "║  🌍 Env:      %-49s║\n" "${{ inputs.environment }}"
+        printf "║  🔄 Strategy: %-49s║\n" "${{ inputs.strategy }}"
+        printf "║  🔍 Dry Run:  %-49s║\n" "${{ inputs.dry_run }}"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # ── Validate target ──────────────────────────────────────────────────
+        VALID_TARGETS="docker kubernetes digitalocean aws-ecs aws-lambda aws-apprunner azure-ca gcp-cloudrun railway render flyio custom"
+        TARGET="${{ inputs.target }}"
+        if ! echo "${VALID_TARGETS}" | grep -qw "${TARGET}"; then
+          echo "::error title=Invalid Target::target '${TARGET}' is not valid. Options: ${VALID_TARGETS}"
+          exit 1
+        fi
+
+        # ── Resolve image tag ────────────────────────────────────────────────
+        IMAGE_TAG="${{ inputs.image_tag }}"
+        case "${IMAGE_TAG}" in
+          git-sha)
+            IMAGE_TAG=$(git rev-parse --short HEAD 2>/dev/null || echo "latest")
+            ;;
+          version)
+            IMAGE_TAG=$(jq -r '.version // "5.0.0"' \
+              "${WORKSPACE}/version.json" 2>/dev/null || echo "5.0.0")
+            ;;
+        esac
+
+        # ── Resolve image name ───────────────────────────────────────────────
+        IMAGE_NAME="${{ inputs.image_name }}"
+        if [[ -z "${IMAGE_NAME}" ]]; then
+          REPO_LOWER=$(echo "${GITHUB_REPOSITORY:-ash/dotfiles}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ inputs.registry }}/${REPO_LOWER}/api"
+        fi
+
+        FULL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
+
+        echo "session_id=${SESSION_ID}"   >> "$GITHUB_OUTPUT"
+        echo "start_time=${START_TIME}"   >> "$GITHUB_OUTPUT"
+        echo "image_tag=${IMAGE_TAG}"     >> "$GITHUB_OUTPUT"
+        echo "image_name=${IMAGE_NAME}"   >> "$GITHUB_OUTPUT"
+        echo "full_image=${FULL_IMAGE}"   >> "$GITHUB_OUTPUT"
+        echo "workspace=${WORKSPACE}"     >> "$GITHUB_OUTPUT"
+
+        echo "  ✅ Image:   ${FULL_IMAGE}"
+        echo "  ✅ Target:  ${TARGET}"
+        echo "  ✅ Session: ${SESSION_ID}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Docker registry login
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔑 Registry · Authenticate with container registry"
+      shell: bash
+      id: registry-login
+      if: |
+        (inputs.target == 'docker' || inputs.target == 'kubernetes' ||
+         inputs.target == 'aws-ecs' || inputs.target == 'gcp-cloudrun' ||
+         inputs.target == 'azure-ca') &&
+        inputs.push_image == 'true' &&
+        inputs.dry_run != 'true'
+      env:
+        REGISTRY:          ${{ inputs.registry }}
+        REGISTRY_USERNAME: ${{ inputs.registry_username }}
+        REGISTRY_PASSWORD: ${{ inputs.registry_password }}
+      run: |
+        set -euo pipefail
+
+        if [[ -z "${REGISTRY_PASSWORD}" ]]; then
+          echo "  ⚠️  No registry password — using GitHub token fallback"
+          REGISTRY_PASSWORD="${{ inputs.github_token }}"
+        fi
+
+        echo "  🔑 Logging into: ${REGISTRY}"
+        echo "${REGISTRY_PASSWORD}" | docker login "${REGISTRY}" \
+          --username "${REGISTRY_USERNAME}" \
+          --password-stdin 2>/dev/null && \
+          echo "  ✅ Registry authenticated: ${REGISTRY}" || \
+          echo "  ⚠️  Registry login failed — will use existing credentials"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Install deployment tools
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Tools · Install target-specific CLI tools"
+      shell: bash
+      id: tools
+      run: |
+        set -euo pipefail
+
+        TARGET="${{ inputs.target }}"
+
+        echo "  📦 Installing tools for: ${TARGET}"
+
+        pip3 install --quiet --user \
+          requests==2.32.3 \
+          rich==13.9.2 \
+          2>/dev/null || true
+
+        sudo apt-get install -y --no-install-recommends \
+          jq bc curl wget 2>/dev/null || true
+
+        case "${TARGET}" in
+          kubernetes)
+            # kubectl
+            if ! command -v kubectl &>/dev/null; then
+              curl -sSfL "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+                -o /usr/local/bin/kubectl 2>/dev/null && \
+                chmod +x /usr/local/bin/kubectl || true
+            fi
+            echo "  ✅ kubectl: $(kubectl version --client --short 2>/dev/null | head -1 || echo 'ok')"
+            ;;
+          flyio)
+            # flyctl
+            curl -L https://fly.io/install.sh | sh 2>/dev/null || true
+            echo "${HOME}/.fly/bin" >> "${GITHUB_PATH}"
+            ;;
+          gcp-cloudrun)
+            # gcloud already available on GH runners usually
+            echo "  ✅ gcloud: $(gcloud --version 2>/dev/null | head -1 || echo 'check runner')"
+            ;;
+        esac
+
+        echo "  ✅ Tools ready for ${TARGET}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Create GitHub deployment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📋 GitHub · Create deployment record"
+      id: github-deployment
+      if: inputs.create_github_deployment == 'true' && inputs.dry_run != 'true'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const ENVIRONMENT = "${{ inputs.environment }}";
+          const TARGET      = "${{ inputs.target }}";
+          const SHA         = context.sha;
+
+          try {
+            const deployment = await github.rest.repos.createDeployment({
+              owner:                  context.repo.owner,
+              repo:                   context.repo.repo,
+              ref:                    SHA,
+              environment:            ENVIRONMENT,
+              description:            `ASH API → ${TARGET} (${ENVIRONMENT})`,
+              auto_merge:             false,
+              required_contexts:      [],
+              production_environment: ENVIRONMENT === "production",
+              transient_environment:  ENVIRONMENT === "preview",
+            });
+
+            core.setOutput("deployment_id", String(deployment.data.id));
+            console.log(`✅ GitHub deployment created: #${deployment.data.id}`);
+
+            // Set initial status to "in_progress"
+            await github.rest.repos.createDeploymentStatus({
+              owner:         context.repo.owner,
+              repo:          context.repo.repo,
+              deployment_id: deployment.data.id,
+              state:         "in_progress",
+              description:   "Deployment in progress...",
+            });
+          } catch(e) {
+            core.warning(`GitHub deployment creation failed: ${e.message}`);
+            core.setOutput("deployment_id", "");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Main deployment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚀 Deploy · Execute deployment pipeline"
+      shell: bash
+      id: deploy
+      timeout-minutes: ${{ fromJson(inputs.timeout_minutes) }}
+      env:
+        # Session
+        SESSION_ID:        ${{ steps.preflight.outputs.session_id }}
+        START_TIME:        ${{ steps.preflight.outputs.start_time }}
+        WORKSPACE:         ${{ steps.preflight.outputs.workspace }}
+        # Target
+        TARGET:            ${{ inputs.target }}
+        ENVIRONMENT:       ${{ inputs.environment }}
+        STRATEGY:          ${{ inputs.strategy }}
+        # Docker
+        DOCKERFILE:        ${{ inputs.dockerfile }}
+        DOCKER_CONTEXT:    ${{ inputs.docker_context }}
+        IMAGE_NAME:        ${{ steps.preflight.outputs.image_name }}
+        IMAGE_TAG:         ${{ steps.preflight.outputs.image_tag }}
+        FULL_IMAGE:        ${{ steps.preflight.outputs.full_image }}
+        REGISTRY:          ${{ inputs.registry }}
+        BUILD_ARGS:        ${{ inputs.build_args }}
+        BUILD_CACHE:       ${{ inputs.build_cache }}
+        BUILD_PLATFORMS:   ${{ inputs.build_platforms }}
+        PUSH_IMAGE:        ${{ inputs.push_image }}
+        COMPOSE_FILE:      ${{ inputs.compose_file }}
+        CONTAINER_NAME:    ${{ inputs.container_name }}
+        CONTAINER_PORT:    ${{ inputs.container_port }}
+        HOST_PORT:         ${{ inputs.host_port }}
+        # Kubernetes
+        K8S_NAMESPACE:     ${{ inputs.k8s_namespace }}
+        K8S_MANIFESTS:     ${{ inputs.k8s_manifests }}
+        K8S_DEPLOYMENT:    ${{ inputs.k8s_deployment_name }}
+        HELM_CHART:        ${{ inputs.helm_chart }}
+        HELM_RELEASE:      ${{ inputs.helm_release }}
+        HELM_VALUES:       ${{ inputs.helm_values }}
+        KUBECONFIG_B64:    ${{ inputs.kubeconfig }}
+        # Cloud
+        AWS_REGION:        ${{ inputs.aws_region }}
+        AWS_ECS_CLUSTER:   ${{ inputs.aws_ecs_cluster }}
+        AWS_ECS_SERVICE:   ${{ inputs.aws_ecs_service }}
+        AWS_LAMBDA_FN:     ${{ inputs.aws_lambda_function }}
+        GCP_PROJECT:       ${{ inputs.gcp_project }}
+        GCP_REGION:        ${{ inputs.gcp_region }}
+        GCP_SERVICE:       ${{ inputs.gcp_service }}
+        AZURE_RG:          ${{ inputs.azure_resource_group }}
+        AZURE_APP:         ${{ inputs.azure_app_name }}
+        DO_APP:            ${{ inputs.do_app_name }}
+        FLY_APP:           ${{ inputs.fly_app }}
+        FLY_REGION:        ${{ inputs.fly_region }}
+        CUSTOM_CMD:        ${{ inputs.custom_deploy_cmd }}
+        # Secrets / env
+        ENV_VARS:          ${{ inputs.env_vars }}
+        SECRETS_JSON:      ${{ inputs.secrets_json }}
+        # Health check
+        HC_ENABLED:        ${{ inputs.health_check_enabled }}
+        HC_URL:            ${{ inputs.health_check_url }}
+        HC_TIMEOUT:        ${{ inputs.health_check_timeout_s }}
+        HC_INTERVAL:       ${{ inputs.health_check_interval_s }}
+        HC_RETRIES:        ${{ inputs.health_check_retries }}
+        HC_STATUS:         ${{ inputs.health_check_expected_status }}
+        # Smoke tests
+        SMOKE_ENABLED:     ${{ inputs.smoke_tests_enabled }}
+        SMOKE_ENDPOINTS:   ${{ inputs.smoke_test_endpoints }}
+        SMOKE_BASE_URL:    ${{ inputs.smoke_test_base_url }}
+        # Rollback
+        ROLLBACK_ON_FAIL:  ${{ inputs.rollback_on_failure }}
+        ROLLBACK_TIMEOUT:  ${{ inputs.rollback_timeout_s }}
+        # Warmup
+        WARMUP_ENABLED:    ${{ inputs.warmup_enabled }}
+        WARMUP_COUNT:      ${{ inputs.warmup_count }}
+        WARMUP_ENDPOINTS:  ${{ inputs.warmup_endpoints }}
+        # Multi-region
+        REGIONS:           ${{ inputs.regions }}
+        # Behavior
+        DRY_RUN:           ${{ inputs.dry_run }}
+        VERBOSE:           ${{ inputs.verbose }}
+        FAIL_ON_HC:        ${{ inputs.fail_on_health_check }}
+        # GitHub context
+        GITHUB_REPO:       ${{ github.repository }}
+        GITHUB_SHA_SHORT:  ${{ github.sha }}
+        GITHUB_REF_NAME:   ${{ github.ref_name }}
+        GITHUB_ACTOR:      ${{ github.actor }}
+        GITHUB_SERVER:     ${{ github.server_url }}
+        GITHUB_RUN_ID:     ${{ github.run_id }}
+        GITHUB_TOKEN_DEPLOY: ${{ inputs.github_token }}
+      run: |
+        bash "${{ github.action_path }}/deploy.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Update GitHub deployment status
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📋 GitHub · Update deployment status"
+      if: |
+        inputs.create_github_deployment == 'true' &&
+        inputs.dry_run != 'true' &&
+        steps.github-deployment.outputs.deployment_id != '' &&
+        always()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const DEPLOYED       = "${{ steps.deploy.outputs.deployed }}" === "true";
+          const ROLLEDBACK     = "${{ steps.deploy.outputs.rolledback }}" === "true";
+          const DEPLOY_URL     = "${{ steps.deploy.outputs.deployment_url }}";
+          const HEALTH_STATUS  = "${{ steps.deploy.outputs.health_status  || 'unknown' }}";
+          const DEPLOYMENT_ID  = "${{ steps.github-deployment.outputs.deployment_id }}";
+          const ENVIRONMENT    = "${{ inputs.environment }}";
+          const DURATION       = "${{ steps.deploy.outputs.duration_s || '?' }}";
+
+          if (!DEPLOYMENT_ID) return;
+
+          const state       = DEPLOYED ? "success" : ROLLEDBACK ? "failure" : "error";
+          const description = DEPLOYED
+            ? `Deployed to ${ENVIRONMENT} in ${DURATION}s · Health: ${HEALTH_STATUS}`
+            : `Deployment ${ROLLEDBACK ? "rolled back" : "failed"} · Health: ${HEALTH_STATUS}`;
+
+          await github.rest.repos.createDeploymentStatus({
+            owner:           context.repo.owner,
+            repo:            context.repo.repo,
+            deployment_id:   parseInt(DEPLOYMENT_ID),
+            state,
+            description:     description.slice(0, 140),
+            environment_url: DEPLOY_URL || undefined,
+            log_url:         `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            auto_inactive:   true,
+          });
+
+          console.log(`✅ Deployment status updated: ${state}`);
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 6 — Discord notification
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔔 Discord · Send deployment notification"
+      if: inputs.notify_discord == 'true' && always()
+      shell: bash
+      continue-on-error: true
+      env:
+        DEPLOYED:     ${{ steps.deploy.outputs.deployed }}
+        ROLLEDBACK:   ${{ steps.deploy.outputs.rolledback }}
+        DEPLOY_URL:   ${{ steps.deploy.outputs.deployment_url }}
+        HEALTH:       ${{ steps.deploy.outputs.health_status }}
+        SMOKE:        ${{ steps.deploy.outputs.smoke_test_status }}
+        IMAGE_FULL:   ${{ steps.deploy.outputs.image_full }}
+        DURATION:     ${{ steps.deploy.outputs.duration_s }}
+        TARGET:       ${{ inputs.target }}
+        ENVIRONMENT:  ${{ inputs.environment }}
+        SESSION_ID:   ${{ steps.preflight.outputs.session_id }}
+      run: |
+        WEBHOOK="${DISCORD_WEBHOOK_DEPLOY:-}"
+        [[ -z "${WEBHOOK}" ]] && exit 0
+
+        if [[ "${DEPLOYED}" == "true" ]]; then
+          COLOR=6416844; ICON="✅"; STATUS="Deployed"
+        elif [[ "${ROLLEDBACK}" == "true" ]]; then
+          COLOR=16367145; ICON="↩️"; STATUS="Rolled Back"
+        else
+          COLOR=16007085; ICON="❌"; STATUS="Failed"
+        fi
+
+        DEPLOY_FIELD=""
+        [[ -n "${DEPLOY_URL}" ]] && \
+          DEPLOY_FIELD=",{\"name\":\"🌐 URL\",\"value\":\"[Open API](${DEPLOY_URL})\",\"inline\":false}"
+
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+        curl -sf -X POST \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"username\":\"ASH Deploy Bot\",
+            \"avatar_url\":\"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/assets/brand/logos/ash-logo-256.png\",
+            \"embeds\":[{
+              \"title\":\"🌐 API ${STATUS} → ${ENVIRONMENT^^}\",
+              \"color\":${COLOR},
+              \"fields\":[
+                {\"name\":\"🎯 Target\",\"value\":\"\`${TARGET}\`\",\"inline\":true},
+                {\"name\":\"🌍 Env\",\"value\":\"\`${ENVIRONMENT}\`\",\"inline\":true},
+                {\"name\":\"⏱️ Duration\",\"value\":\"\`${DURATION}s\`\",\"inline\":true},
+                {\"name\":\"🏥 Health\",\"value\":\"\`${HEALTH}\`\",\"inline\":true},
+                {\"name\":\"🧪 Smoke\",\"value\":\"\`${SMOKE}\`\",\"inline\":true},
+                {\"name\":\"🐳 Image\",\"value\":\"\`${IMAGE_FULL:-unknown}\`\",\"inline\":false}
+                ${DEPLOY_FIELD}
+              ],
+              \"footer\":{\"text\":\"ASH Dotfiles v5.0 OMEGA · Deploy Engine · ${SESSION_ID}\"},
+              \"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
+          }" \
+          "${WEBHOOK}" || true
+      env:
+        DISCORD_WEBHOOK_DEPLOY: ${{ secrets.DISCORD_WEBHOOK_DEPLOY }}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 7 — Upload deployment log
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Deployment log artifact"
+      if: inputs.upload_deployment_log == 'true' && always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          deploy-log-${{ steps.preflight.outputs.session_id }}-${{ github.run_id }}
+        path: |
+          ${{ steps.preflight.outputs.workspace }}/.deploy-engine/
+        retention-days: 30
+        compression-level: 9
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 8 — Step Summary & Fail Gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📊 Summary · Deployment report & fail gate"
+      shell: bash
+      if: always()
+      env:
+        DEPLOYED:    ${{ steps.deploy.outputs.deployed }}
+        ROLLEDBACK:  ${{ steps.deploy.outputs.rolledback }}
+        DEPLOY_URL:  ${{ steps.deploy.outputs.deployment_url }}
+        HEALTH:      ${{ steps.deploy.outputs.health_status }}
+        SMOKE:       ${{ steps.deploy.outputs.smoke_test_status }}
+        IMAGE_FULL:  ${{ steps.deploy.outputs.image_full }}
+        DURATION:    ${{ steps.deploy.outputs.duration_s }}
+        SESSION_ID:  ${{ steps.preflight.outputs.session_id }}
+        TARGET:      ${{ inputs.target }}
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        STATUS="❓"
+        [[ "${DEPLOYED}" == "true" ]]    && STATUS="✅ Deployed"
+        [[ "${ROLLEDBACK}" == "true" ]]  && STATUS="↩️ Rolled Back"
+        [[ "${DEPLOYED}" != "true" && "${ROLLEDBACK}" != "true" ]] && STATUS="❌ Failed"
+
+        DEPLOY_ROW=""
+        [[ -n "${DEPLOY_URL}" ]] && DEPLOY_ROW="| 🌐 URL | [${DEPLOY_URL}](${DEPLOY_URL}) |"
+
+        cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+        # 🌐 API Deployment Report
+
+        > **${STATUS}**  &nbsp;·&nbsp;  Session: \`${SESSION_ID}\`
+
+        ## 📊 Results
+
+        | Metric | Value |
+        |--------|-------|
+        | 🎯 Target | \`${TARGET}\` |
+        | 🌍 Environment | \`${ENVIRONMENT}\` |
+        | 🐳 Image | \`${IMAGE_FULL:-N/A}\` |
+        | 🏥 Health | \`${HEALTH:-unknown}\` |
+        | 🧪 Smoke Tests | \`${SMOKE:-skipped}\` |
+        | ⏱️ Duration | \`${DURATION:-?}s\` |
+        ${DEPLOY_ROW}
+
+        ---
+        *🌐 ASH v5.0 OMEGA Deployment Engine*
+        EOF
+
+        # Fail gate
+        FAIL_ON_HC="${{ inputs.fail_on_health_check }}"
+        if [[ "${DEPLOYED}" != "true" && "${DRY_RUN:-false}" != "true" ]]; then
+          echo "::error title=Deployment Failed::API deployment to ${ENVIRONMENT} failed"
+          exit 1
+        fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "upload-cloud"
+  color: "blue"

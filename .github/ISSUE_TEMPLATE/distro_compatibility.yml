@@ -1,0 +1,1169 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║    🐧 ASH DOTFILES v5.0 OMEGA — DISTRO COMPATIBILITY ISSUE TEMPLATE                   ║
+# ║    Ultra-Comprehensive Distribution Compatibility Report • 8 Distros • Full Matrix     ║
+# ║    Package Manager Compat • Init System • Kernel • GPU • Wayland • XDG Portals        ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🐧 Distribution Compatibility Issue"
+description: >
+  Report a compatibility issue with a specific Linux distribution.
+  Help us make ASH Dotfiles work flawlessly across the entire
+  Linux ecosystem with this comprehensive compatibility report.
+title: "🐧 [DISTRO] — "
+labels:
+  - "🐧 distro-compatibility"
+  - "🔍 needs-triage"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ██████╗ ██╗███████╗████████╗██████╗  ██████╗
+        ██╔══██╗██║██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗
+        ██║  ██║██║███████╗   ██║   ██████╔╝██║   ██║
+        ██║  ██║██║╚════██║   ██║   ██╔══██╗██║   ██║
+        ██████╔╝██║███████║   ██║   ██║  ██║╚██████╔╝
+        ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝
+
+        ░█████╗░░█████╗░███╗░░░███╗██████╗░░█████╗░████████╗
+        ██╔══██╗██╔══██╗████╗░████║██╔══██╗██╔══██╗╚══██╔══╝
+        ██║░░╚═╝██║░░██║██╔████╔██║██████╔╝███████║░░░██║░░░
+        ██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██╔══██║░░░██║░░░
+        ╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░██║░░██║░░░██║░░░
+        ░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚═╝░░╚═╝░░░╚═╝░░░
+        ```
+
+        # 🐧 Distribution Compatibility Issue — ASH Dotfiles v5.0 OMEGA
+
+        > *"Linux diversity is its greatest strength — ASH embraces every distro"*
+
+        </div>
+
+        ---
+
+        > [!NOTE]
+        > ASH Dotfiles officially targets **8 distributions:**
+        >
+        > | Distribution | Status | Package Manager | Init |
+        > |-------------|--------|----------------|------|
+        > | 🏔️ **Arch Linux** | 🟢 Primary | pacman + AUR | systemd |
+        > | 🌀 **Fedora** (38, 39, 40) | 🟢 Full | dnf + COPR | systemd |
+        > | ❄️ **NixOS** (23.11, 24.05) | 🟢 Full | nix + flake | systemd |
+        > | 🦎 **openSUSE** (Tumbleweed) | 🟡 Good | zypper + OBS | systemd |
+        > | 🌀 **Void Linux** | 🟡 Good | xbps | runit |
+        > | 🐛 **Gentoo** | 🟡 Community | portage | OpenRC/systemd |
+        > | 🌀 **Debian** (12+) | 🟠 Partial | apt + backports | systemd |
+        > | 🍊 **Ubuntu** (22.04+) | 🟠 Partial | apt + PPA | systemd |
+        >
+        > **Community-supported:** EndeavourOS, Manjaro, CachyOS, Garuda,
+        > Pop!_OS, Linux Mint, Nobara, openSUSE Leap
+
+        > [!TIP]
+        > **Before filing:** Run the distro-specific diagnostic:
+        > ```bash
+        > # Full compatibility diagnostic for your distro
+        > ash doctor --full --distro-compat
+        >
+        > # Or run the distro-specific install test:
+        > bash scripts/install/deps-[your-distro].sh --dry-run --verbose
+        > ```
+
+        ---
+
+        ### 🐧 Pre-Submission Checklist
+
+        - [ ] 🔍 Searched [existing distro issues](https://github.com/ash-dotfiles/ash-dotfiles/issues?q=label%3A%22distro-compatibility%22)
+        - [ ] 📦 Verified all distro-specific dependencies are installed
+        - [ ] 🔄 Tried the distro-specific installation script: `scripts/install/deps-[distro].sh`
+        - [ ] 🩺 Ran `ash doctor --full --distro-compat` and reviewed output
+        - [ ] 📖 Checked the [distro-specific guide](https://ash-dotfiles.github.io/docs) for your distribution
+        - [ ] 💬 Searched [Discord #distro-help](https://discord.gg/ash-dotfiles) for similar reports
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — DISTRIBUTION IDENTIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: "🐧 Linux Distribution"
+      description: "Your exact Linux distribution"
+      options:
+        # Official Tier 1
+        - "🏔️ Arch Linux (Rolling)"
+        - "🏔️ EndeavourOS (Arch-based)"
+        - "🏔️ Manjaro (Arch-based)"
+        - "🏔️ CachyOS (Arch-based)"
+        - "🏔️ Garuda Linux (Arch-based)"
+        - "🏔️ Other Arch-based"
+        # Fedora Family
+        - "🌀 Fedora 40 (Latest)"
+        - "🌀 Fedora 39"
+        - "🌀 Fedora 38"
+        - "🌀 Fedora Rawhide (Bleeding edge)"
+        - "🌀 Nobara (Fedora-based)"
+        - "🌀 Other Fedora/RPM-based"
+        # NixOS
+        - "❄️ NixOS 24.05 (Uakari)"
+        - "❄️ NixOS 23.11 (Tapir)"
+        - "❄️ NixOS Unstable (nixpkgs-unstable)"
+        # openSUSE
+        - "🦎 openSUSE Tumbleweed (Rolling)"
+        - "🦎 openSUSE Leap 15.6"
+        - "🦎 openSUSE Leap 15.5"
+        - "🦎 SUSE Linux Enterprise (SLE)"
+        # Void Linux
+        - "🌀 Void Linux (glibc)"
+        - "🌀 Void Linux (musl)"
+        # Gentoo
+        - "🐛 Gentoo Linux (systemd profile)"
+        - "🐛 Gentoo Linux (OpenRC profile)"
+        - "🐛 Calculate Linux (Gentoo-based)"
+        # Debian Family
+        - "🌀 Debian 12 (Bookworm)"
+        - "🌀 Debian 11 (Bullseye)"
+        - "🌀 Debian Testing (Trixie)"
+        - "🌀 Debian Unstable (Sid)"
+        - "🍊 Ubuntu 24.04 LTS (Noble)"
+        - "🍊 Ubuntu 22.04 LTS (Jammy)"
+        - "🍊 Ubuntu 23.10 (Mantic)"
+        - "🍊 Linux Mint 21.x (Ubuntu-based)"
+        - "🍊 Pop!_OS 22.04 (Ubuntu-based)"
+        - "🍊 Zorin OS (Ubuntu-based)"
+        - "🍊 Elementary OS (Ubuntu-based)"
+        - "🍊 Other Debian/Ubuntu-based"
+        # Other
+        - "🔴 Alpine Linux"
+        - "🟡 Solus"
+        - "🟣 Slackware"
+        - "⬛ Bedrock Linux"
+        - "🔵 Other (specify below)"
+    validations:
+      required: true
+
+  - type: input
+    id: distro_version_detail
+    attributes:
+      label: "🔢 Exact Distribution Version"
+      description: "Run `cat /etc/os-release` and paste the VERSION_ID and PRETTY_NAME"
+      placeholder: |
+        e.g., PRETTY_NAME="Fedora Linux 39 (Workstation Edition)" VERSION_ID="39"
+        OR: NixOS 23.11.20240101.abc1234 (Tapir)
+        OR: Arch Linux (rolling, 2024-01-15)
+    validations:
+      required: true
+
+  - type: input
+    id: kernel_version
+    attributes:
+      label: "🐧 Kernel Version"
+      description: "Run `uname -r` and paste the result"
+      placeholder: "e.g., 6.7.0-arch1-1 / 6.6.10-200.fc39.x86_64 / 6.1.69"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — INIT SYSTEM & CORE SERVICES
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: init_system
+    attributes:
+      label: "⚙️ Init System"
+      description: "Which init system is your distribution running?"
+      options:
+        - "🔵 systemd — Standard (most distros)"
+        - "🟢 OpenRC — Gentoo, Alpine, artix"
+        - "🟡 runit — Void Linux, artix-runit"
+        - "🟠 s6 — artix-s6, 66"
+        - "🔴 dinit — artix-dinit"
+        - "⚪ SysVinit — Slackware, very old distros"
+        - "❓ Unknown"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: desktop_session
+    attributes:
+      label: "🖥️ Desktop Session Type"
+      description: "How is your Hyprland session started?"
+      options:
+        - "🖥️ SDDM (Display Manager) → Hyprland"
+        - "🖥️ GDM → Hyprland"
+        - "🖥️ LightDM → Hyprland"
+        - "🖥️ ly → Hyprland"
+        - "🖥️ greetd → Hyprland"
+        - "🖥️ TTY → startx → Hyprland"
+        - "🖥️ TTY → Hyprland (direct, no startx)"
+        - "🖥️ TTY → uwsm → Hyprland"
+        - "🖥️ NixOS home-manager → Hyprland"
+        - "❓ Other / Unknown"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — COMPATIBILITY ISSUE TYPE
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: "🎯 Compatibility Issue Type"
+      description: "What kind of compatibility problem are you experiencing?"
+      multiple: true
+      options:
+        # Installation
+        - "📦 Install — Missing package in distro's repository"
+        - "📦 Install — Package version too old (below minimum required)"
+        - "📦 Install — Package name differs from expected"
+        - "📦 Install — Dependency conflict / incompatible packages"
+        - "📦 Install — Installation script fails on this distro"
+        - "📦 Install — AUR/COPR/Flake not available for this distro"
+        # Paths & Configuration
+        - "📁 Paths — Different XDG base directories"
+        - "📁 Paths — Config files in wrong location for distro"
+        - "📁 Paths — Binary not in expected PATH"
+        - "📁 Paths — Systemd unit path differences"
+        # Init System
+        - "⚙️ Init — Non-systemd init system incompatibility"
+        - "⚙️ Init — Systemd user session not available"
+        - "⚙️ Init — Service fails to start on this distro's systemd"
+        - "⚙️ Init — D-Bus session bus not available"
+        # Runtime
+        - "🔴 Runtime — Crash or error specific to this distro"
+        - "🔴 Runtime — Feature broken on this distro"
+        - "🔴 Runtime — Wrong behavior on this distro"
+        # Wayland
+        - "🌊 Wayland — XDG portals not working"
+        - "🌊 Wayland — Screen sharing broken"
+        - "🌊 Wayland — Input method issues"
+        - "🌊 Wayland — Clipboard issues"
+        - "🌊 Wayland — DMA-BUF / hardware acceleration"
+        # GPU
+        - "🖥️ GPU — NVIDIA driver version incompatibility"
+        - "🖥️ GPU — AMD driver issues on this distro"
+        - "🖥️ GPU — Intel GPU rendering issues"
+        - "🖥️ GPU — Hybrid graphics (NVIDIA Optimus)"
+        - "🖥️ GPU — Missing Vulkan support"
+        # Shell
+        - "🐟 Shell — Fish version too old"
+        - "🐟 Shell — Shell integration broken"
+        - "🐟 Shell — PATH not set correctly"
+        # NixOS Specific
+        - "❄️ Nix — Flake evaluation error"
+        - "❄️ Nix — Home-manager module issue"
+        - "❄️ Nix — Impure operation in pure environment"
+        - "❄️ Nix — Missing nixpkgs package"
+        # Gentoo Specific
+        - "🐛 Gentoo — USE flag conflict"
+        - "🐛 Gentoo — Emerge dependency resolution failure"
+        - "🐛 Gentoo — OpenRC service script issue"
+        # Other
+        - "🔤 Locale — Character encoding / locale issues"
+        - "📅 Version — Software version too old for features"
+        - "🔒 Security — SELinux / AppArmor blocking operation"
+        - "🔒 Security — seccomp restrictions"
+        - "❓ Other / Unknown"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_severity
+    attributes:
+      label: "🚨 Compatibility Issue Severity"
+      description: "How severely does this affect your ability to use ASH Dotfiles?"
+      options:
+        - "🔴 BLOCKER — Cannot install or run ASH at all on this distro"
+        - "🟠 MAJOR — Core features broken, significant workflow impact"
+        - "🟡 MEDIUM — Some features broken, workarounds exist"
+        - "🟢 MINOR — Edge case, cosmetic issue, or rare scenario"
+        - "💡 ENHANCEMENT — Works but could be better optimized for this distro"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — PROBLEM DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: "📋 Problem Description"
+      description: >
+        Describe exactly what fails on your distribution.
+        Include specific commands, error messages, and behavior.
+      placeholder: |
+        ## 🔴 What Fails
+
+        **On Fedora 39, the ASH installation script fails at the Hyprland plugin
+        compilation step with a header file error.**
+
+        When running `./scripts/install/deps-fedora.sh`:
+
+        ```bash
+        $ ./scripts/install/deps-fedora.sh
+
+        [INFO] Installing Hyprland from COPR...
+        ✅ hyprland-0.36.0 installed
+
+        [INFO] Installing Hyprland plugins...
+        🔨 Compiling hyprspace...
+
+        /tmp/hyprspace-build/src/hyprspace.cpp:42:10:
+        fatal error: protocols/hyprland-toplevel-export-v1.h: No such file or directory
+           42 | #include <protocols/hyprland-toplevel-export-v1.h>
+              |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        compilation terminated.
+        make[1]: *** [CMakeFiles/hyprspace.dir/src/hyprspace.cpp.o] Error 1
+        make: *** [all] Error 2
+
+        [ERROR] Failed to build hyprspace plugin
+        [ERROR] Installation incomplete — 3/8 Hyprland plugins failed
+        ```
+
+        ## ✅ What Works on Fedora
+
+        - Hyprland installation via COPR: ✅
+        - Waybar, Rofi, Kitty, Fish: ✅ (via DNF)
+        - ASH CLI basic commands: ✅
+        - Theme engine (non-plugin): ✅
+
+        ## ❌ What Doesn't Work on Fedora
+
+        - Hyprland plugin compilation: ❌ (missing protocol headers)
+        - `hyprspace`, `hyprexpo`, `hyprbars`: ❌ (all fail same error)
+        - Game mode (requires Hyprland plugin): ❌
+        - `ash mode game`: ❌ (plugin dependency)
+
+        ## 🔍 Root Cause Analysis
+
+        The Hyprland COPR package for Fedora doesn't include the protocol header files
+        that are needed for plugin compilation. On Arch Linux, these are included in
+        the `hyprland` package, but on Fedora's COPR they're in a separate
+        `hyprland-devel` package that the install script doesn't install.
+
+        **Fix:** Add `hyprland-devel` to `scripts/install/deps-fedora.sh`
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — ERROR OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: error_output
+    attributes:
+      label: "❌ Complete Error Output"
+      description: >
+        Paste ALL error output — including warnings that might seem unrelated.
+        Run with verbose/debug flags for maximum detail.
+      render: shell
+      placeholder: |
+        # Run install with verbose output:
+        $ ASH_DEBUG=1 ./scripts/install/install.sh --verbose 2>&1 | tee /tmp/ash-install.log
+
+        # Or paste the relevant error section:
+        [INFO]  ══════════════════════════════════════════════════
+        [INFO]  ASH Dotfiles v5.0 OMEGA — Installation
+        [INFO]  Distribution: Fedora Linux 39
+        [INFO]  ══════════════════════════════════════════════════
+        [INFO]  Phase 3: Installing Hyprland ecosystem...
+        [INFO]  Installing from COPR: hyprland/hyprland
+        [OK]    hyprland-0.36.0-1.fc39.x86_64 installed
+        [INFO]  Compiling Hyprland plugins...
+        [INFO]  Building: hyprspace...
+        -- The C compiler identification is GNU 13.2.1
+        -- The CXX compiler identification is GNU 13.2.1
+        -- Detecting C compiler ABI info - done
+        [ERROR] /tmp/hyprspace/src/overview.cpp:8:10:
+                fatal error: protocols/hyprland-toplevel-export-v1.h: No such file
+        [ERROR] Build failed: hyprspace
+        [WARN]  Continuing with remaining plugins...
+        [ERROR] /tmp/hyprexpo/src/HyprExpo.cpp:12:10:
+                fatal error: protocols/hyprland-toplevel-export-v1.h: No such file
+        [ERROR] Build failed: hyprexpo
+        [ERROR] 3 of 8 plugins failed to compile
+        [ERROR] Run 'ash doctor --check-hyprland-plugins' for details
+
+        # Doctor output:
+        $ ash doctor --check-hyprland-plugins
+        ❌ hyprspace: NOT installed (build failed)
+        ❌ hyprexpo: NOT installed (build failed)
+        ❌ hyprbars: NOT installed (build failed)
+        ✅ hy3: installed
+        ✅ hyprscroller: installed
+        ⚠️  3/8 plugins failed — game-mode, expo-overview unavailable
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — PACKAGE COMPATIBILITY MATRIX
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: package_matrix
+    attributes:
+      label: "📦 Package Availability Matrix"
+      description: >
+        Check which packages are available on your distribution.
+        This helps us update the distro-specific dependency scripts.
+        Run: `ash doctor --full --distro-compat` for automated checking.
+      placeholder: |
+        ## Core Dependencies Status on [Your Distro]
+
+        Run: `ash doctor --check-dependencies --verbose`
+
+        ### 🔴 CRITICAL — Missing or Wrong Version
+
+        | Package | Required | Available | Source | Status |
+        |---------|----------|-----------|--------|--------|
+        | hyprland | ≥ 0.36.0 | 0.36.0 | COPR | ✅ OK |
+        | hyprland-devel | ≥ 0.36.0 | ❌ MISSING | COPR | 🔴 FAIL |
+        | waybar | ≥ 0.9.24 | 0.9.24 | DNF | ✅ OK |
+        | rofi-wayland | ≥ 1.7.5 | 1.7.5 | DNF | ✅ OK |
+        | swww | ≥ 0.8.2 | 0.8.1 | ❌ Too old | 🟡 WARN |
+        | hyprlock | any | ❌ MISSING | No Fedora pkg | 🔴 FAIL |
+        | hypridle | any | ❌ MISSING | No Fedora pkg | 🔴 FAIL |
+
+        ### 🟡 OPTIONAL — Missing but Non-Critical
+
+        | Package | Purpose | Available | Alternative |
+        |---------|---------|-----------|-------------|
+        | matugen | Color extraction | ❌ Missing | cargo install |
+        | wl-clip-persist | Clipboard | ❌ Missing | cliphist works |
+        | grimblast | Screenshot | Available | ✅ DNF |
+
+        ### ✅ Working Packages
+
+        | Package | Version | Source |
+        |---------|---------|--------|
+        | kitty | 0.32.2 | ✅ DNF |
+        | fish | 3.7.0 | ✅ DNF |
+        | neovim | 0.9.5 | ✅ DNF |
+        | btop | 1.3.2 | ✅ DNF |
+        | dunst | 1.10.0 | ✅ DNF |
+        | starship | 1.18.0 | ✅ DNF |
+        | yazi | 0.2.4 | ✅ COPR |
+        | zoxide | 0.9.4 | ✅ DNF |
+
+        ## Package Manager Commands Tested
+
+        ```bash
+        # What the install script runs vs what's needed:
+
+        # Current deps-fedora.sh (BROKEN):
+        sudo dnf install -y hyprland  # Missing: hyprland-devel
+
+        # What's needed (FIX):
+        sudo dnf install -y hyprland hyprland-devel  # Both required for plugin compilation
+
+        # For missing packages, workaround:
+        # 1. hyprlock: Build from AUR source adapted for Fedora
+        # 2. hypridle: Same as above
+        # 3. swww 0.8.2: cargo install --git https://github.com/LGFae/swww
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — DISTRO-SPECIFIC SYSTEM INFO
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: system_info
+    attributes:
+      label: "💻 Complete System Information"
+      description: >
+        Run `ash hw full-report` OR `ash doctor --full --distro-compat`
+        and paste the complete output. Include distro-specific details.
+      placeholder: |
+        ## Full System Information
+
+        ```bash
+        # Run: ash doctor --full --distro-compat 2>&1
+        # OR fill in manually:
+        ```
+
+        ### Distribution Details
+        ```
+        $ cat /etc/os-release
+        NAME="Fedora Linux"
+        VERSION="39 (Workstation Edition)"
+        ID=fedora
+        VERSION_ID=39
+        PRETTY_NAME="Fedora Linux 39 (Workstation Edition)"
+        PLATFORM_ID="platform:f39"
+        ```
+
+        ### Kernel & Architecture
+        ```
+        $ uname -a
+        Linux hostname 6.6.10-200.fc39.x86_64 #1 SMP PREEMPT_DYNAMIC
+        Wed Jan 10 14:34:04 UTC 2024 x86_64 GNU/Linux
+
+        $ uname -m
+        x86_64
+        ```
+
+        ### Package Manager & Versions
+        ```
+        $ dnf --version
+        4.18.2
+
+        $ dnf list installed | grep -E 'hyprland|waybar|rofi|kitty' | head -20
+        hyprland.x86_64           0.36.0-1.fc39          @copr:copr.fedorainfracloud.org:hyprland:hyprland
+        waybar.x86_64             0.9.24-2.fc39           @fedora
+        rofi.x86_64               1.7.5-5.fc39            @fedora
+        kitty.x86_64              0.32.2-1.fc39           @fedora
+        ```
+
+        ### GPU & Driver
+        ```
+        $ lspci | grep -E 'VGA|3D|Display'
+        00:02.0 VGA compatible controller: Intel Corporation Alder Lake-P GT2
+        01:00.0 3D controller: NVIDIA Corporation GA107M [GeForce RTX 3050 Ti]
+
+        $ nvidia-smi --query-gpu=driver_version --format=csv,noheader
+        545.29.06
+
+        $ glxinfo 2>/dev/null | grep 'OpenGL version'
+        OpenGL version string: 4.6.0 NVIDIA 545.29.06
+        ```
+
+        ### Wayland & Portals
+        ```
+        $ echo $WAYLAND_DISPLAY
+        wayland-1
+
+        $ echo $XDG_CURRENT_DESKTOP
+        Hyprland
+
+        $ flatpak info org.freedesktop.portal.Desktop 2>/dev/null | head -3
+        Flatpak portal: 1.3.3
+
+        $ systemctl --user status xdg-desktop-portal-hyprland
+        ● xdg-desktop-portal-hyprland.service - Portal service (Hyprland implementation)
+             Loaded: loaded (/usr/lib/systemd/user/xdg-desktop-portal-hyprland.service)
+             Active: active (running)
+        ```
+
+        ### Compiler & Build Tools (for Hyprland plugins)
+        ```
+        $ gcc --version | head -1
+        gcc (GCC) 13.2.1 20231205 (Red Hat 13.2.1-6)
+
+        $ cmake --version | head -1
+        cmake version 3.27.7
+
+        $ pkg-config --modversion hyprland 2>/dev/null || echo "NOT FOUND"
+        NOT FOUND  # ← This is the root cause — hyprland-devel not installed
+        ```
+
+        ### Fish Shell
+        ```
+        $ fish --version
+        fish, version 3.7.0
+
+        $ which fish
+        /usr/bin/fish
+        ```
+
+        ### Systemd
+        ```
+        $ systemctl --version | head -2
+        systemd 254 (254.9-1.fc39)
+        +PAM +AUDIT +SELINUX +APPARMOR +IMA +SMACK +SECCOMP +GCRYPT
+
+        $ systemctl --user is-active ash-theme-watcher.service
+        inactive
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — DISTRO-SPECIFIC ISSUES
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: distro_specific_issues
+    attributes:
+      label: "🔧 Distro-Specific Technical Issues"
+      description: "Select all that apply to your distribution"
+      multiple: true
+      options:
+        # Arch-specific
+        - "🏔️ Arch: AUR helper (paru/yay) not installing correctly"
+        - "🏔️ Arch: makepkg fails for a package"
+        - "🏔️ Arch: Pacman hook conflict"
+        - "🏔️ Arch: Rolling release broke something"
+        # Fedora-specific
+        - "🌀 Fedora: COPR repository unavailable or broken"
+        - "🌀 Fedora: RPM Fusion dependency conflict"
+        - "🌀 Fedora: SELinux blocking operation"
+        - "🌀 Fedora: Missing -devel package for compilation"
+        - "🌀 Fedora: Flatpak portal conflict with native packages"
+        # NixOS-specific
+        - "❄️ NixOS: Flake evaluation error"
+        - "❄️ NixOS: Home-manager conflict"
+        - "❄️ NixOS: Impure operation in nix-shell"
+        - "❄️ NixOS: Missing package in nixpkgs"
+        - "❄️ NixOS: Dynamic library loading issue"
+        - "❄️ NixOS: PATH not correctly set in session"
+        - "❄️ NixOS: Hardcoded paths fail (no /usr/bin/ on NixOS)"
+        # openSUSE-specific
+        - "🦎 openSUSE: OBS package outdated"
+        - "🦎 openSUSE: zypper conflict resolution"
+        - "🦎 openSUSE: Leap package too old"
+        # Void-specific
+        - "🌀 Void: xbps package missing"
+        - "🌀 Void: runit service script needed"
+        - "🌀 Void: musl libc incompatibility"
+        - "🌀 Void: D-Bus session not starting (non-systemd)"
+        # Gentoo-specific
+        - "🐛 Gentoo: USE flag conflict"
+        - "🐛 Gentoo: emerge dependency blocker"
+        - "🐛 Gentoo: OpenRC init script needed"
+        - "🐛 Gentoo: Compilation failure with hardening flags"
+        # Debian/Ubuntu-specific
+        - "🌀 Debian: Package version too old in stable"
+        - "🌀 Debian: Backports needed"
+        - "🍊 Ubuntu: PPA not available for version"
+        - "🍊 Ubuntu: snap/flatpak conflict"
+        - "🍊 Ubuntu: AppArmor profile blocking"
+        # General
+        - "🔤 Locale/encoding issue (non-UTF8)"
+        - "🔒 SELinux/AppArmor blocking"
+        - "🌐 Proxy/firewall blocking downloads"
+        - "🔧 Compiler too old for C++23 features"
+        - "📦 Python version mismatch"
+        - "📦 Node.js version mismatch"
+        - "❓ Other distro-specific issue"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — NON-SYSTEMD SPECIFICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: non_systemd
+    attributes:
+      label: "⚙️ Non-Systemd Init Details (Void/Gentoo/artix only)"
+      description: >
+        If you're using runit, OpenRC, s6, or dinit — provide details about
+        service management and session setup. Skip if using systemd.
+      placeholder: |
+        ## Init System: runit (Void Linux)
+
+        ### Current Session Setup
+        ```bash
+        # How my Hyprland session starts (from TTY):
+        # .bashrc / .bash_profile:
+        if [ -z "${WAYLAND_DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+          exec Hyprland
+        fi
+
+        # OR with uwsm:
+        exec uwsm start hyprland-uwsm.desktop
+        ```
+
+        ### D-Bus Session Status
+        ```bash
+        $ echo $DBUS_SESSION_BUS_ADDRESS
+        unix:path=/run/user/1000/bus  # Present ✅
+
+        # OR if missing:
+        $ echo $DBUS_SESSION_BUS_ADDRESS
+        # [empty — D-Bus session not started]
+        ```
+
+        ### Systemd User Session Replacement
+        ```bash
+        # What I'm using instead of systemd user services:
+        # Void Linux uses runit — no systemd user sessions
+
+        # Currently failing ASH services (need runit equivalents):
+        # ash-theme-watcher — no runit service script exists
+        # ash-hot-reload — no runit service script exists
+        # ash-battery-monitor — no runit service script exists
+
+        # Manual workaround (add to autostart.conf):
+        exec-once = ~/.local/share/ash/scripts/ash-theme-watcher.sh &
+        exec-once = ~/.local/share/ash/scripts/ash-battery-monitor.sh &
+        ```
+
+        ### XDG Session Bus
+        ```bash
+        # DBus launched via:
+        eval "$(dbus-launch --sh-syntax)"
+        # OR: dbus-run-session -- Hyprland
+        ```
+
+        ### Missing Systemd Features Needed
+        - `systemd --user` session: ❌ Not available
+        - `systemctl --user enable`: ❌ Not available
+        - `loginctl enable-linger`: ❌ Not available
+        - `journalctl --user`: ❌ Not available
+
+        ### Proposed runit Service Scripts
+        I've written runit service scripts for ASH — would like to contribute:
+        ```bash
+        # /etc/sv/ash-theme-watcher/run
+        #!/bin/sh
+        exec chpst -u "${USER}" \
+          /home/${USER}/.local/share/ash/scripts/ash-theme-watcher.sh
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — NIXOS SPECIFICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: nixos_specifics
+    attributes:
+      label: "❄️ NixOS-Specific Details (NixOS only)"
+      description: >
+        NixOS has unique requirements. Provide flake/module configuration
+        and nix-specific error details. Skip if not on NixOS.
+      placeholder: |
+        ## NixOS Configuration
+
+        ### Flake.nix (relevant sections)
+        ```nix
+        {
+          description = "My NixOS Configuration";
+
+          inputs = {
+            nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+            home-manager = {
+              url = "github:nix-community/home-manager/release-23.11";
+              inputs.nixpkgs.follows = "nixpkgs";
+            };
+            ash-dotfiles = {
+              url = "github:ash-dotfiles/ash-dotfiles";
+              inputs.nixpkgs.follows = "nixpkgs";
+            };
+            hyprland.url = "github:hyprwm/Hyprland";
+          };
+
+          outputs = { nixpkgs, home-manager, ash-dotfiles, hyprland, ... }@inputs: {
+            nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
+              system = "x86_64-linux";
+              modules = [
+                ./configuration.nix
+                home-manager.nixosModules.home-manager
+                ash-dotfiles.nixosModules.ash-dotfiles  # ← Fails here
+              ];
+            };
+          };
+        }
+        ```
+
+        ### Nix Evaluation Error
+        ```
+        $ nixos-rebuild switch --flake .#hostname
+
+        error: undefined variable 'ash-dotfiles'
+               at /nix/store/.../ash-dotfiles.nix:3:5
+
+        (use '--show-trace' to show detailed location information)
+        ```
+
+        ### NixOS-Specific Issues
+        ```bash
+        # Hardcoded paths fail:
+        /usr/bin/env bash → not available (NixOS uses /nix/store/...)
+
+        # Scripts needing nix compat:
+        - scripts/install/install.sh (uses /usr/bin/env bash)
+        - ash-cli/ash (uses #!/usr/bin/env bash — OK)
+        - ash-cli/lib/core.sh (references /usr/share/ash/ — wrong on NixOS)
+
+        # Correct NixOS path:
+        /nix/store/[hash]-ash-dotfiles-5.0.0/share/ash/
+        ```
+
+        ### Nixpkgs Status
+        ```bash
+        # Are required packages in nixpkgs?
+        nix search nixpkgs hyprland → ✅ 0.36.0
+        nix search nixpkgs waybar → ✅ 0.9.24
+        nix search nixpkgs matugen → ❌ Not in nixpkgs (need overlay)
+        nix search nixpkgs hyprlock → ✅ 0.3.0
+        nix search nixpkgs swww → ✅ 0.8.2
+        ```
+
+        ### Home-Manager Module Usage
+        ```nix
+        # home.nix
+        programs.ash-dotfiles = {
+          enable = true;
+          theme = "catppuccin-mocha";
+          # Error: programs.ash-dotfiles is not a recognized option
+          # → Module not properly exported from flake
+        };
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — REPRODUCTION STEPS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Exact Reproduction Steps"
+      description: "Step-by-step instructions to reproduce the compatibility issue"
+      placeholder: |
+        ## From a Fresh Minimal Installation
+
+        **Starting state:** Fresh Fedora 39 Workstation installation, Hyprland from COPR
+
+        ```bash
+        # Step 1: Ensure Hyprland is running
+        echo $HYPRLAND_INSTANCE_SIGNATURE
+        # Output: [some-hash]  ✅ Hyprland is active
+
+        # Step 2: Clone ASH Dotfiles
+        git clone https://github.com/ash-dotfiles/ash-dotfiles.git
+        cd ash-dotfiles
+
+        # Step 3: Run installation
+        chmod +x scripts/install/install.sh
+        ./scripts/install/install.sh
+
+        # Step 4: Observe the failure
+        # Output:
+        # [INFO] Phase 3: Hyprland plugins...
+        # [ERROR] Build failed: hyprspace (missing protocol headers)
+        # [ERROR] Build failed: hyprexpo (missing protocol headers)
+        # [ERROR] Build failed: hyprbars (missing protocol headers)
+
+        # Step 5: Verify which packages are missing
+        pkg-config --modversion hyprland
+        # Output: Package hyprland was not found in the pkg-config search path.
+        # Fix: sudo dnf install hyprland-devel
+        # Then re-run: ./scripts/install/deps-fedora.sh --plugins-only
+        ```
+
+        ## Minimal Reproduction (Just the Failing Step)
+
+        ```bash
+        # Install hyprland WITHOUT hyprland-devel (as current script does):
+        sudo dnf install -y hyprland
+
+        # Try to compile any Hyprland plugin:
+        git clone https://github.com/KZDKM/Hyprspace
+        cd Hyprspace
+        cmake -B build
+        # Output: -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE)
+        # OR: CMake Error: Could not find hyprland
+        ```
+
+        ## Workaround (Manual Fix)
+
+        ```bash
+        # Add the missing package:
+        sudo dnf install -y hyprland-devel
+
+        # Re-run plugin installation:
+        ash plugin install --hyprland-plugins
+
+        # Verify:
+        ash doctor --check-hyprland-plugins
+        # ✅ hyprspace: installed
+        # ✅ hyprexpo: installed
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — PROPOSED FIX
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: "🔧 Proposed Fix / Workaround"
+      description: >
+        If you've identified the fix, provide it here with enough detail
+        for us to implement and test it. PRs are warmly welcomed!
+      placeholder: |
+        ## ✅ Proposed Fix for deps-fedora.sh
+
+        ### Current (Broken)
+        ```bash
+        # scripts/install/deps-fedora.sh — current state
+        install_hyprland() {
+          log::info "Installing Hyprland from COPR..."
+          sudo dnf copr enable -y hyprland/hyprland
+          sudo dnf install -y \
+            hyprland \
+            xdg-desktop-portal-hyprland
+        }
+        ```
+
+        ### Fixed Version
+        ```bash
+        # scripts/install/deps-fedora.sh — proposed fix
+        install_hyprland() {
+          log::info "Installing Hyprland from COPR..."
+          sudo dnf copr enable -y hyprland/hyprland
+          sudo dnf install -y \
+            hyprland \
+            hyprland-devel \        # ← ADD THIS: required for plugin compilation
+            xdg-desktop-portal-hyprland
+
+          # Also install missing packages not currently in deps-fedora.sh:
+          log::info "Installing hyprlock and hypridle..."
+          # These are in the hyprland COPR but not listed in current script:
+          sudo dnf install -y \
+            hyprlock \
+            hypridle \
+            hyprpaper              # Alternative to swww if swww too old
+        }
+
+        install_optional_tools() {
+          log::info "Installing optional tools via cargo (not in DNF)..."
+          # matugen not in DNF — install via cargo:
+          if command -v cargo &>/dev/null; then
+            cargo install matugen
+          fi
+
+          # swww version in DNF (0.8.1) is below minimum (0.8.2):
+          # Install from cargo until DNF package is updated:
+          cargo install swww
+        }
+        ```
+
+        ### Additional Fixes Needed
+
+        1. **swww version:** Current Fedora DNF has 0.8.1, need 0.8.2+
+           - Fix: Install via `cargo install swww` as fallback
+           - OR: Accept 0.8.1 and update minimum version requirement
+
+        2. **matugen:** Not available in DNF or any Fedora repo
+           - Fix: Add cargo installation fallback in deps-fedora.sh
+           - OR: Add `cargo install matugen` to post-install steps
+
+        3. **hyprlock/hypridle:** Available in COPR but not in current script
+           - Fix: Add to the `install_hyprland()` function
+
+        ## 🧪 Tested Fix
+
+        I've tested these changes manually:
+        ```bash
+        # After applying the fixes:
+        ash doctor --check-dependencies
+        # ✅ All 18 required packages: PRESENT
+        # ✅ All 3 optional packages: PRESENT (via cargo)
+
+        ash doctor --check-hyprland-plugins
+        # ✅ 8/8 Hyprland plugins: compiled and installed
+        ```
+
+        ## 🔀 PR Ready?
+        - [ ] ✅ I will submit a PR with this fix
+        - [ ] 🔜 I can submit a PR but need 1-2 days
+        - [ ] 📝 I've described the fix but cannot write the PR
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — COMMUNITY IMPACT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: community_impact
+    attributes:
+      label: "👥 Community Impact Assessment"
+      description: >
+        How many users does this affect? Evidence from community discussions.
+      placeholder: |
+        ## 📊 Estimated Impact
+
+        **Distribution user base (estimated):**
+        Fedora is the 2nd most popular Linux distro (~15% of Linux desktop users)
+
+        **ASH users on this distro:**
+        - Discord #fedora-users channel: 127 members
+        - "Fedora" mentions in closed issues: 23 (last 6 months)
+        - GitHub stars from Fedora users: ~400 (estimated)
+
+        ## 💬 Community Evidence
+
+        Reports of this exact issue:
+        - Discord: "hyprspace compilation fails on Fedora" — 8 reports this month
+        - GitHub issue #234: Related report (closed as "user error" but same root cause)
+        - Reddit r/hyprland: [post](https://reddit.com/...) with 34 upvotes about Fedora plugin issues
+
+        **Community quote:**
+        > "Spent 3 hours debugging this on Fedora. Turns out you need hyprland-devel.
+        > Should be in the install script!" — @fedorauser (Discord)
+
+        ## 📈 Priority Justification
+
+        This is a BLOCKER for ~15% of the Linux user base (Fedora users).
+        The fix is a one-line change to deps-fedora.sh.
+        Risk is zero — adding hyprland-devel has no negative side effects.
+
+        Recommend: **High Priority** — simple fix, major impact.
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — ASH DOCTOR OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: doctor_output
+    attributes:
+      label: "🩺 ASH Doctor Full Output"
+      description: >
+        **REQUIRED:** Run `ash doctor --full --distro-compat` and paste complete output.
+        If ASH isn't installed yet, run the pre-install check:
+        `bash scripts/install/deps-[distro].sh --check-only`
+      render: shell
+      placeholder: |
+        $ ash doctor --full --distro-compat
+
+        ╔══════════════════════════════════════════════════════╗
+        ║       🩺 ASH Doctor v5.0 — Full Report             ║
+        ║       Distribution: Fedora Linux 39                  ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  ASH Version:      v5.0.2-omega                     ║
+        ║  Hyprland:         v0.36.0                          ║
+        ║  Kernel:           6.6.10-200.fc39.x86_64           ║
+        ║  Init System:      systemd 254                       ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  System Checks:                                       ║
+        ║  ✅ Wayland: active (wayland-1)                      ║
+        ║  ✅ Hyprland: running (pid 1234)                     ║
+        ║  ✅ XDG Portals: OK                                  ║
+        ║  ✅ D-Bus session: active                            ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  Dependency Checks:                                   ║
+        ║  ✅ waybar 0.9.24                                    ║
+        ║  ✅ rofi-wayland 1.7.5                               ║
+        ║  ✅ kitty 0.32.2                                     ║
+        ║  ✅ fish 3.7.0                                       ║
+        ║  ❌ hyprland-devel: NOT FOUND                        ║
+        ║  ❌ hyprlock: NOT FOUND                              ║
+        ║  ❌ hypridle: NOT FOUND                              ║
+        ║  ⚠️ swww: 0.8.1 (minimum: 0.8.2)                    ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  Plugin Checks:                                       ║
+        ║  ❌ hyprspace: NOT INSTALLED (build failed)          ║
+        ║  ❌ hyprexpo: NOT INSTALLED (build failed)           ║
+        ║  ❌ hyprbars: NOT INSTALLED (build failed)           ║
+        ║  ✅ hy3: installed                                   ║
+        ║  ✅ hyprscroller: installed                          ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  Result: ⚠️ 7 issues found — 3 critical             ║
+        ╚══════════════════════════════════════════════════════╝
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — CONTRIBUTION OFFER
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: "🤝 Contribution Offer"
+      description: "Can you help fix this compatibility issue?"
+      options:
+        - "💻 Yes — I'll fix the distro scripts and submit a PR"
+        - "🧪 Yes — I'll test fixes on my distro if someone else writes them"
+        - "📝 Yes — I'll write the runit/OpenRC service scripts for non-systemd"
+        - "❄️ Yes — I'll write/improve the NixOS module"
+        - "📖 Yes — I'll write/improve the distro-specific documentation"
+        - "🔄 Maybe — I need guidance on the codebase structure"
+        - "👀 No — I can test but cannot write code"
+        - "📝 No — Just reporting"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Distro Compatibility Report Checklist"
+      options:
+        - label: >
+            🔍 Searched existing issues — this specific distro+issue is **not a duplicate**
+          required: true
+        - label: >
+            📦 Verified all **distro-specific prerequisites** are installed before reporting
+          required: true
+        - label: >
+            🩺 Ran `ash doctor --full` and included **complete output**
+          required: true
+        - label: >
+            💻 Provided **exact distribution version** from `/etc/os-release`
+          required: true
+        - label: >
+            🔄 Provided **clear reproduction steps** others can follow
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 18 — CLOSING BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### 🐧 Thank You for Expanding ASH's Linux Compatibility!
+
+        #### 🗺️ Distribution Support Roadmap
+
+        ```
+        Tier 1 (Primary):    Arch ━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
+        Tier 1 (Primary):    Fedora ━━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
+        Tier 1 (Primary):    NixOS ━━━━━━━━━━━━━━━━━━━━━━━━━ 100% ✅
+        Tier 2 (Full):       openSUSE Tumbleweed ━━━━━━━━━━━  92% 🟡
+        Tier 2 (Full):       Void Linux ━━━━━━━━━━━━━━━━━━━━  88% 🟡
+        Tier 2 (Full):       Gentoo ━━━━━━━━━━━━━━━━━━━━━━━━  80% 🟡
+        Tier 3 (Partial):    Debian 12 ━━━━━━━━━━━━━━━━━━━━━  71% 🟠
+        Tier 3 (Partial):    Ubuntu 24.04 ━━━━━━━━━━━━━━━━━━  68% 🟠
+        ```
+
+        #### ⏱️ Response Times by Distro Tier
+
+        | Tier | Target Response | Target Fix |
+        |------|----------------|------------|
+        | Tier 1 (Arch/Fedora/NixOS) | 24 hours | 3 days |
+        | Tier 2 (openSUSE/Void/Gentoo) | 3 days | 1 week |
+        | Tier 3 (Debian/Ubuntu) | 1 week | 2 weeks |
+        | Community Distros | Best effort | Next release |
+
+        #### 🏆 Distro Compatibility Contributor Benefits
+
+        | Benefit | Details |
+        |---------|---------|
+        | 🏅 Compat Champion | Badge for fixing distro-specific issues |
+        | 🌍 Distro Maintainer | Named maintainer for your distribution |
+        | 💬 Discord Role | `@[distro]-maintainer` role |
+        | 📖 Docs Credit | Named in distro-specific setup guide |
+
+        #### 🤝 Become a Distro Maintainer
+
+        Help us achieve **100% compatibility** on all supported distributions!
+        Distro maintainers get direct input on compatibility decisions.
+
+        Join **[#distro-maintainers](https://discord.gg/ash-dotfiles)** on Discord
+
+        ---
+
+        *"Linux compatibility is a team sport — thank you for playing!"*
+
+        *— The ASH Dotfiles Distro Compatibility Team* 🐧
+
+        </div>

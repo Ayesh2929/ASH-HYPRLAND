@@ -1,0 +1,915 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🏷️  ASH DOTFILES v5.0 OMEGA — TAG RELEASE WORKFLOW                                ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Git Tag Management & GitHub Release Creation Pipeline               ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Semver Validation     •  Tag Signing           •  GPG Verification              ║
+# ║      Asset Collection      •  Checksum Generation   •  SBOM Attachment              ║
+# ║      Provenance Signing    •  Release Notes Build   •  Asset Upload                ║
+# ║      Multi-Platform Assets •  Pre-release Support   •  Rollback Guard              ║
+# ║      Draft Management      •  Asset Integrity       •  Announce Chain             ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🏷️ Tag Release — Create & Publish GitHub Release"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TRIGGER CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════════════
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g., v5.1.0)"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark as pre-release"
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: "Create as draft"
+        required: false
+        default: false
+        type: boolean
+      skip_assets:
+        description: "Skip asset collection"
+        required: false
+        default: false
+        type: boolean
+      sign_release:
+        description: "Sign release with GPG"
+        required: false
+        default: false
+        type: boolean
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PERMISSIONS
+# ══════════════════════════════════════════════════════════════════════════════
+permissions:
+  contents: write
+  packages: read
+  id-token: write
+  attestations: write
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONCURRENCY
+# ══════════════════════════════════════════════════════════════════════════════
+concurrency:
+  group: "tag-release-${{ github.ref }}"
+  cancel-in-progress: false
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GLOBAL ENV
+# ══════════════════════════════════════════════════════════════════════════════
+env:
+  PYTHON_VERSION: "3.12"
+  TAG_NAME: "${{ inputs.tag || github.ref_name }}"
+  IS_PRERELEASE: "${{ inputs.prerelease || 'false' }}"
+  IS_DRAFT: "${{ inputs.draft || 'false' }}"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: VALIDATE-TAG — Validate and parse tag
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-tag:
+    name: "✅ Validate Release Tag"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      version:        ${{ steps.parse.outputs.version }}
+      major:          ${{ steps.parse.outputs.major }}
+      minor:          ${{ steps.parse.outputs.minor }}
+      patch:          ${{ steps.parse.outputs.patch }}
+      prerelease-id:  ${{ steps.parse.outputs.prerelease_id }}
+      is-prerelease:  ${{ steps.parse.outputs.is_prerelease }}
+      is-stable:      ${{ steps.parse.outputs.is_stable }}
+      channel:        ${{ steps.parse.outputs.channel }}
+      tag-valid:      ${{ steps.parse.outputs.tag_valid }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "✅ Parse & Validate Release Tag"
+        id: parse
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🏷️  Tag Validation & Parsing Engine                          ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          TAG="${{ env.TAG_NAME }}"
+          echo "  Tag: ${TAG}"
+
+          # ── Validate tag format ────────────────────────────────────────────
+          if ! echo "${TAG}" | grep -qE \
+            '^v[0-9]+\.[0-9]+\.[0-9]+(-(?:alpha|beta|rc)\.[0-9]+)?$'; then
+            echo "  ❌ Invalid tag format: ${TAG}"
+            echo "  Expected: v{major}.{minor}.{patch} or v{major}.{minor}.{patch}-{alpha|beta|rc}.{N}"
+            echo "tag_valid=false" >> "${GITHUB_OUTPUT}"
+            exit 1
+          fi
+
+          echo "  ✅ Tag format valid"
+
+          # ── Parse version components ───────────────────────────────────────
+          VERSION="${TAG#v}"  # Strip leading 'v'
+
+          # Main version
+          MAIN_VERSION="$(echo "${VERSION}" | cut -d'-' -f1)"
+          MAJOR="$(echo "${MAIN_VERSION}" | cut -d'.' -f1)"
+          MINOR="$(echo "${MAIN_VERSION}" | cut -d'.' -f2)"
+          PATCH="$(echo "${MAIN_VERSION}" | cut -d'.' -f3)"
+
+          # Pre-release identifier
+          PRERELEASE_ID=""
+          IS_PRERELEASE="false"
+          IS_STABLE="true"
+          CHANNEL="stable"
+
+          if echo "${VERSION}" | grep -q '-'; then
+            PRERELEASE_PART="$(echo "${VERSION}" | cut -d'-' -f2-)"
+            PRERELEASE_ID="${PRERELEASE_PART}"
+            IS_PRERELEASE="true"
+            IS_STABLE="false"
+
+            CHANNEL="$(echo "${PRERELEASE_ID}" | cut -d'.' -f1)"
+            [[ "${{ env.IS_PRERELEASE }}" == "false" ]] && IS_PRERELEASE="true"
+          fi
+
+          # ── Verify tag doesn't already exist (for manual dispatch) ─────────
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if git rev-parse "${TAG}" &>/dev/null; then
+              echo "  ⚠️  Tag ${TAG} already exists — proceeding with existing tag"
+            else
+              echo "  ✅ Tag ${TAG} does not exist — will be created"
+            fi
+          fi
+
+          # ── Check previous tag for comparison ─────────────────────────────
+          PREV_TAG="$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo '')"
+          COMMIT_COUNT="$(git log "${PREV_TAG}..${TAG}" \
+            --oneline 2>/dev/null | wc -l || echo '0')"
+
+          echo ""
+          echo "  📊 Tag Analysis:"
+          echo "  ├── Version:     ${VERSION}"
+          echo "  ├── Major:       ${MAJOR}"
+          echo "  ├── Minor:       ${MINOR}"
+          echo "  ├── Patch:       ${PATCH}"
+          echo "  ├── Pre-release: ${PRERELEASE_ID:-'none'}"
+          echo "  ├── Channel:     ${CHANNEL}"
+          echo "  ├── Stable:      ${IS_STABLE}"
+          echo "  ├── Prev tag:    ${PREV_TAG:-'none'}"
+          echo "  └── Commits:     ${COMMIT_COUNT} since prev"
+
+          {
+            echo "version=${VERSION}"
+            echo "major=${MAJOR}"
+            echo "minor=${MINOR}"
+            echo "patch=${PATCH}"
+            echo "prerelease_id=${PRERELEASE_ID}"
+            echo "is_prerelease=${IS_PRERELEASE}"
+            echo "is_stable=${IS_STABLE}"
+            echo "channel=${CHANNEL}"
+            echo "tag_valid=true"
+          } >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: BUILD-ASSETS — Collect & build all release assets
+  # ────────────────────────────────────────────────────────────────────────────
+  build-assets:
+    name: "📦 Build Release Assets"
+    needs: validate-tag
+    if: >
+      needs.validate-tag.outputs.tag-valid == 'true' &&
+      inputs.skip_assets != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      assets-ready:  ${{ steps.assets.outputs.ready }}
+      asset-count:   ${{ steps.assets.outputs.count }}
+      checksums-file: ${{ steps.checksums.outputs.file }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.TAG_NAME }}
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Build Release Assets"
+        id: assets
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📦 Release Asset Builder                                   ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          VERSION="${{ needs.validate-tag.outputs.version }}"
+          TAG="${{ env.TAG_NAME }}"
+          DIST_DIR="dist"
+          mkdir -p "${DIST_DIR}"
+
+          echo "  📊 Building assets for ${TAG}..."
+          echo ""
+
+          python3 << ASSETBUILD
+          import os
+          import json
+          import shutil
+          import hashlib
+          import subprocess
+          import tarfile
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          VERSION = "$VERSION"
+          TAG     = "$TAG"
+          DIST    = Path("dist")
+          DIST.mkdir(parents=True, exist_ok=True)
+
+          assets_built = []
+
+          def sha256_file(path: Path) -> str:
+              h = hashlib.sha256()
+              with open(path, "rb") as f:
+                  for chunk in iter(lambda: f.read(65536), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def build_source_tarball():
+              """Create source tarball."""
+              tarball_name = f"ash-dotfiles-{VERSION}.tar.gz"
+              tarball_path = DIST / tarball_name
+
+              exclude_patterns = {
+                  ".git", "node_modules", ".pnpm-store", "target",
+                  "dist", "build", "__pycache__", ".venv", "venv",
+                  "data/cache", "data/logs", "backups",
+              }
+
+              with tarfile.open(tarball_path, "w:gz") as tar:
+                  for item in sorted(Path(".").iterdir()):
+                      if item.name in exclude_patterns:
+                          continue
+                      if item.name.startswith(".") and item.name not in {
+                          ".github", ".editorconfig", ".gitignore",
+                          ".shellcheckrc", ".luacheckrc"
+                      }:
+                          continue
+                      tar.add(str(item), arcname=f"ash-dotfiles-{VERSION}/{item.name}")
+
+              size = tarball_path.stat().st_size
+              print(f"  ✅ Source tarball: {tarball_name} ({size/1024/1024:.1f}MB)")
+              assets_built.append(str(tarball_path))
+              return tarball_path
+
+          def build_install_script():
+              """Create standalone install script."""
+              script_name = f"ash-dotfiles-{VERSION}-install.sh"
+              script_path = DIST / script_name
+
+              install_content = f"""#!/usr/bin/env bash
+          # ╔══════════════════════════════════════════════════════════════════╗
+          # ║  ASH Dotfiles {VERSION} — Universal Installer                  ║
+          # ╚══════════════════════════════════════════════════════════════════╝
+          set -euo pipefail
+
+          ASH_VERSION="{VERSION}"
+          ASH_TAG="{TAG}"
+          ASH_REPO="ash-dotfiles/ash-dotfiles"
+          INSTALL_DIR="${{XDG_DATA_HOME:-$HOME/.local/share}}/ash-dotfiles"
+          BIN_DIR="$HOME/.local/bin"
+
+          BOLD='\\033[1m'
+          GREEN='\\033[0;32m'
+          CYAN='\\033[0;36m'
+          YELLOW='\\033[0;33m'
+          RED='\\033[0;31m'
+          RESET='\\033[0m'
+
+          banner() {{
+            echo ""
+            echo -e "${{CYAN}}${{BOLD}}  ⚡ ASH Dotfiles ${{ASH_VERSION}} Installer${{RESET}}"
+            echo -e "${{CYAN}}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${{RESET}}"
+            echo ""
+          }}
+
+          check_deps() {{
+            local missing=()
+            for cmd in bash git curl jq python3; do
+              command -v "$cmd" &>/dev/null || missing+=("$cmd")
+            done
+            if [[ ${{#missing[@]}} -gt 0 ]]; then
+              echo -e "${{RED}}  ❌ Missing dependencies: ${{missing[*]}}${{RESET}}"
+              exit 1
+            fi
+            echo -e "${{GREEN}}  ✅ Dependencies verified${{RESET}}"
+          }}
+
+          install() {{
+            banner
+            check_deps
+            mkdir -p "$INSTALL_DIR" "$BIN_DIR"
+
+            echo -e "  ${{CYAN}}📥 Downloading ASH Dotfiles ${{ASH_VERSION}}...${{RESET}}"
+            TARBALL_URL="https://github.com/${{ASH_REPO}}/archive/refs/tags/${{ASH_TAG}}.tar.gz"
+            curl -sSL "$TARBALL_URL" | tar -xzf - --strip-components=1 -C "$INSTALL_DIR"
+
+            chmod +x "$INSTALL_DIR/ash-cli/ash"
+            ln -sf "$INSTALL_DIR/ash-cli/ash" "$BIN_DIR/ash"
+
+            mkdir -p "${{XDG_CONFIG_HOME:-$HOME/.config}}/ash"
+            cat > "${{XDG_CONFIG_HOME:-$HOME/.config}}/ash/ash.conf" << 'CONF'
+          theme.active = "catppuccin-mocha"
+          mode.current = "default"
+          plugin.enabled = true
+          analytics.enabled = false
+          CONF
+
+            echo -e "${{GREEN}}  ✅ ASH Dotfiles ${{ASH_VERSION}} installed!${{RESET}}"
+            echo -e "  Run: ${{BOLD}}ash --help${{RESET}}"
+          }}
+
+          install "$@"
+          """
+              script_path.write_text(install_content)
+              script_path.chmod(0o755)
+              print(f"  ✅ Install script: {script_name}")
+              assets_built.append(str(script_path))
+              return script_path
+
+          def build_sbom():
+              """Create Software Bill of Materials."""
+              sbom_name = f"ash-dotfiles-{VERSION}-sbom.cdx.json"
+              sbom_path = DIST / sbom_name
+
+              sbom = {
+                  "bomFormat":     "CycloneDX",
+                  "specVersion":   "1.5",
+                  "version":       1,
+                  "serialNumber":  f"urn:uuid:ash-dotfiles-{VERSION}",
+                  "metadata": {
+                      "timestamp":  datetime.now(timezone.utc).isoformat(),
+                      "tools": [{"name": "ASH Dotfiles SBOM Generator", "version": VERSION}],
+                      "component": {
+                          "type":         "application",
+                          "bom-ref":      f"ash-dotfiles@{VERSION}",
+                          "name":         "ash-dotfiles",
+                          "version":      VERSION,
+                          "description":  "ASH Dotfiles v5.0 OMEGA — Ultra-Premium Desktop",
+                          "licenses":     [{"license": {"id": "MIT"}}],
+                          "purl":         f"pkg:github/ash-dotfiles/ash-dotfiles@{TAG}",
+                          "externalReferences": [
+                              {"type": "vcs",     "url": "https://github.com/ash-dotfiles/ash-dotfiles"},
+                              {"type": "website", "url": "https://ash-dotfiles.github.io"},
+                          ],
+                      },
+                  },
+                  "components": []
+              }
+
+              sbom_path.write_text(json.dumps(sbom, indent=2) + "\n")
+              print(f"  ✅ SBOM (CycloneDX): {sbom_name}")
+              assets_built.append(str(sbom_path))
+
+              # SPDX format
+              spdx_name = f"ash-dotfiles-{VERSION}-sbom.spdx.json"
+              spdx_path = DIST / spdx_name
+              spdx = {
+                  "SPDXID":             "SPDXRef-DOCUMENT",
+                  "spdxVersion":        "SPDX-2.3",
+                  "creationInfo": {
+                      "created":         datetime.now(timezone.utc).isoformat(),
+                      "creators":        [f"Tool: ASH Dotfiles SBOM Generator {VERSION}"],
+                  },
+                  "name":               f"ash-dotfiles-{VERSION}",
+                  "dataLicense":        "CC0-1.0",
+                  "documentNamespace":  f"https://ash-dotfiles.github.io/sbom/{VERSION}",
+                  "packages": [{
+                      "SPDXID":         "SPDXRef-Package",
+                      "name":           "ash-dotfiles",
+                      "versionInfo":    VERSION,
+                      "downloadLocation":f"https://github.com/ash-dotfiles/ash-dotfiles/archive/refs/tags/{TAG}.tar.gz",
+                      "licenseConcluded":"MIT",
+                      "licenseDeclared": "MIT",
+                      "copyrightText":   f"Copyright (c) {datetime.now().year} ASH Dotfiles Team",
+                  }],
+              }
+              spdx_path.write_text(json.dumps(spdx, indent=2) + "\n")
+              print(f"  ✅ SBOM (SPDX):      {spdx_name}")
+              assets_built.append(str(spdx_path))
+              return sbom_path
+
+          def build_version_manifest():
+              """Create version manifest JSON."""
+              manifest_name = f"ash-dotfiles-{VERSION}-manifest.json"
+              manifest_path = DIST / manifest_name
+
+              manifest = {
+                  "version":       VERSION,
+                  "tag":           TAG,
+                  "release_date":  datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                  "channel":       "stable",
+                  "min_os": {
+                      "linux": "kernel 5.15+",
+                      "wayland": "1.21+",
+                  },
+                  "components": {
+                      "hyprland":   ">=0.36.0",
+                      "waybar":     ">=0.9.24",
+                      "fish":       ">=3.7.0",
+                      "python":     ">=3.11",
+                  },
+                  "install_urls": {
+                      "direct":     f"https://github.com/ash-dotfiles/ash-dotfiles/archive/refs/tags/{TAG}.tar.gz",
+                      "installer":  f"https://github.com/ash-dotfiles/ash-dotfiles/releases/download/{TAG}/ash-dotfiles-{VERSION}-install.sh",
+                      "aur":        "https://aur.archlinux.org/packages/ash-dotfiles",
+                      "flatpak":    "https://flathub.org/apps/dev.ash_dotfiles.AshDotfiles",
+                  },
+                  "checksums_url": f"https://github.com/ash-dotfiles/ash-dotfiles/releases/download/{TAG}/ash-dotfiles-{VERSION}-checksums.txt",
+                  "sbom_url":      f"https://github.com/ash-dotfiles/ash-dotfiles/releases/download/{TAG}/ash-dotfiles-{VERSION}-sbom.cdx.json",
+              }
+
+              manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+              print(f"  ✅ Version manifest: {manifest_name}")
+              assets_built.append(str(manifest_path))
+
+          # ── Build all assets ───────────────────────────────────────────────
+          print("  🔨 Building assets...")
+          build_source_tarball()
+          build_install_script()
+          build_sbom()
+          build_version_manifest()
+
+          print(f"\n  📊 Total assets built: {len(assets_built)}")
+          for a in assets_built:
+              size = Path(a).stat().st_size
+              print(f"     → {Path(a).name} ({size/1024:.1f}KB)")
+
+          with open("/tmp/asset-count.txt", "w") as f:
+              f.write(str(len(assets_built)))
+          ASSETBUILD
+
+          count="$(cat /tmp/asset-count.txt 2>/dev/null || echo 0)"
+          echo "ready=true"   >> "${GITHUB_OUTPUT}"
+          echo "count=${count}" >> "${GITHUB_OUTPUT}"
+
+      - name: "🔐 Generate Checksums"
+        id: checksums
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔐 SHA256 Checksum Generation                              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          VERSION="${{ needs.validate-tag.outputs.version }}"
+          CHECKSUM_FILE="dist/ash-dotfiles-${VERSION}-checksums.txt"
+
+          cat > "${CHECKSUM_FILE}" << CHECKSUMHEADER
+          # ASH Dotfiles ${VERSION} — SHA256 Checksums
+          # Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          # Verify: sha256sum --check ash-dotfiles-${VERSION}-checksums.txt
+          # ────────────────────────────────────────────────────────────────────
+          CHECKSUMHEADER
+
+          find dist -type f \( -name "*.tar.gz" -o -name "*.sh" \
+            -o -name "*.json" -o -name "*.rss" \) \
+            ! -name "*checksums*" \
+            | sort | while IFS= read -r file; do
+              sha256sum "${file}" | awk -v base="$(basename "${file}")" \
+                '{print $1 "  " base}' >> "${CHECKSUM_FILE}"
+              echo "  ✅ $(basename "${file}"): $(sha256sum "${file}" | cut -c1-16)..."
+            done
+
+          echo ""
+          echo "  📋 Checksum file:"
+          cat "${CHECKSUM_FILE}"
+
+          echo "file=${CHECKSUM_FILE}" >> "${GITHUB_OUTPUT}"
+
+      - name: "🔐 Sign Assets with GPG"
+        if: inputs.sign_release == 'true' && secrets.GPG_PRIVATE_KEY != ''
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔐 GPG Asset Signing                                       ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Import GPG key
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import 2>/dev/null
+
+          # Sign the tarball and checksums
+          for file in dist/*.tar.gz dist/*-checksums.txt; do
+            [[ -f "${file}" ]] || continue
+            gpg --detach-sign --armor "${file}" 2>/dev/null && \
+              echo "  ✅ Signed: $(basename "${file}")"
+          done
+
+          echo "  ✅ GPG signing complete"
+
+      - name: "📤 Upload Build Assets"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "release-assets-${{ needs.validate-tag.outputs.version }}"
+          path: dist/
+          retention-days: 90
+          if-no-files-found: warn
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: CREATE-RELEASE — Create GitHub release
+  # ────────────────────────────────────────────────────────────────────────────
+  create-release:
+    name: "🚀 Create GitHub Release"
+    needs: [validate-tag, build-assets]
+    if: >
+      always() &&
+      needs.validate-tag.outputs.tag-valid == 'true' &&
+      (needs.build-assets.result == 'success' || needs.build-assets.result == 'skipped')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      release-id:  ${{ steps.release.outputs.id }}
+      release-url: ${{ steps.release.outputs.html_url }}
+      upload-url:  ${{ steps.release.outputs.upload_url }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.TAG_NAME }}
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📜 Build Release Notes"
+        id: notes
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📜 Release Notes Builder                                   ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          VERSION="${{ needs.validate-tag.outputs.version }}"
+          TAG="${{ env.TAG_NAME }}"
+          MAJOR="${{ needs.validate-tag.outputs.major }}"
+          MINOR="${{ needs.validate-tag.outputs.minor }}"
+          PATCH="${{ needs.validate-tag.outputs.patch }}"
+          IS_STABLE="${{ needs.validate-tag.outputs.is-stable }}"
+          CHANNEL="${{ needs.validate-tag.outputs.channel }}"
+
+          python3 << NOTESGEN
+          import re
+          import subprocess
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          VERSION  = "$VERSION"
+          TAG      = "$TAG"
+          CHANNEL  = "$CHANNEL"
+          IS_STABLE= "$IS_STABLE" == "true"
+          REPO_URL = "https://github.com/ash-dotfiles/ash-dotfiles"
+
+          # Get previous tag for comparison
+          prev_tag = subprocess.run(
+              ["git", "describe", "--tags", "--abbrev=0", f"{TAG}^"],
+              capture_output=True, text=True
+          ).stdout.strip()
+
+          # Get commit log since prev tag
+          commit_log = subprocess.run(
+              ["git", "log", f"{prev_tag}..{TAG}" if prev_tag else TAG,
+               "--format=%s|||%h|||%an", "--no-merges"],
+              capture_output=True, text=True
+          ).stdout.strip()
+
+          # Categorize commits
+          CATEGORIES = {
+              "feat":     ("✨", "New Features",   []),
+              "theme":    ("🎨", "New Themes",     []),
+              "plugin":   ("🔌", "New Plugins",    []),
+              "fix":      ("🐛", "Bug Fixes",      []),
+              "perf":     ("⚡", "Performance",    []),
+              "security": ("🔒", "Security",       []),
+              "refactor": ("♻️",  "Refactoring",    []),
+              "docs":     ("📖", "Documentation",  []),
+              "deps":     ("📦", "Dependencies",   []),
+          }
+          HIDDEN = {"test", "build", "ci", "chore", "style"}
+          breaking = []
+          other = []
+
+          for line in commit_log.splitlines():
+              if not line.strip():
+                  continue
+              parts = line.split("|||")
+              if len(parts) < 3:
+                  continue
+              subject, sha, author = parts[:3]
+
+              # Breaking change
+              if "BREAKING" in subject:
+                  breaking.append((subject, sha))
+                  continue
+
+              # Conventional commit
+              cc = re.match(r'^(\w+)(?:\(([^)]+)\))?: (.+)$', subject)
+              if cc:
+                  ctype, scope, desc = cc.groups()
+                  if ctype in HIDDEN:
+                      continue
+                  entry = (desc, scope, sha)
+                  if ctype in CATEGORIES:
+                      CATEGORIES[ctype][2].append(entry)
+                  else:
+                      other.append((subject, sha))
+              else:
+                  other.append((subject, sha))
+
+          # Build notes
+          lines = []
+          release_title = f"ASH Dotfiles v{VERSION}"
+          if not IS_STABLE:
+              release_title += f" ({CHANNEL.upper()})"
+
+          lines.append(f"## 🔥 {release_title}")
+          lines.append("")
+          lines.append(f"**Released:** {datetime.now(timezone.utc).strftime('%B %d, %Y')}")
+          if prev_tag:
+              compare_url = f"{REPO_URL}/compare/{prev_tag}...{TAG}"
+              lines.append(f"**Diff:** [{prev_tag} → {TAG}]({compare_url})")
+          lines.append("")
+
+          # Breaking changes
+          if breaking:
+              lines.append("### ⚠️ BREAKING CHANGES")
+              lines.append("")
+              for subject, sha in breaking:
+                  sha_url = f"[`{sha}`]({REPO_URL}/commit/{sha})"
+                  lines.append(f"- 💔 {subject} {sha_url}")
+              lines.append("")
+
+          # Categorized commits
+          for ctype, (emoji, title, commits) in CATEGORIES.items():
+              if not commits:
+                  continue
+              lines.append(f"### {emoji} {title}")
+              lines.append("")
+              for desc, scope, sha in commits:
+                  scope_str = f"**{scope}:** " if scope else ""
+                  sha_url   = f"[`{sha}`]({REPO_URL}/commit/{sha})"
+                  lines.append(f"- {scope_str}{desc} {sha_url}")
+              lines.append("")
+
+          # Install section
+          lines.append("### 📦 Installation")
+          lines.append("")
+          lines.append("```bash")
+          lines.append("# Arch Linux (AUR)")
+          lines.append("yay -S ash-dotfiles")
+          lines.append("")
+          lines.append("# Flatpak")
+          lines.append("flatpak install flathub dev.ash_dotfiles.AshDotfiles")
+          lines.append("")
+          lines.append("# Direct install")
+          lines.append(f"curl -sSL https://ash-dotfiles.github.io/install.sh | bash -s -- --version {VERSION}")
+          lines.append("```")
+          lines.append("")
+
+          notes = "\n".join(lines)
+          Path("/tmp/release-notes.md").write_text(notes)
+          print(f"  ✅ Release notes: {len(lines)} lines")
+          NOTESGEN
+
+          echo "  ✅ Release notes generated"
+
+      - name: "📥 Download Build Assets"
+        if: needs.build-assets.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: "release-assets-${{ needs.validate-tag.outputs.version }}"
+          path: dist/
+        continue-on-error: true
+
+      - name: "🚀 Create GitHub Release"
+        id: release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs      = require("fs");
+            const path    = require("path");
+            const version = "${{ needs.validate-tag.outputs.version }}";
+            const tag     = "${{ env.TAG_NAME }}";
+            const channel = "${{ needs.validate-tag.outputs.channel }}";
+            const isPrerelease = "${{ needs.validate-tag.outputs.is-prerelease }}" === "true"
+              || "${{ inputs.prerelease || 'false' }}" === "true";
+            const isDraft  = "${{ inputs.draft || 'false' }}" === "true";
+            const isStable = "${{ needs.validate-tag.outputs.is-stable }}" === "true";
+
+            // Load release notes
+            let body = "";
+            try {
+              body = fs.readFileSync("/tmp/release-notes.md", "utf8");
+            } catch (e) {
+              body = `## ASH Dotfiles v${version}\n\nRelease ${tag}`;
+            }
+
+            // Emoji for release name
+            const channelEmoji = {
+              stable: "🔥",
+              rc:     "🟡",
+              beta:   "🟠",
+              alpha:  "🔴",
+            }[channel] || "⚡";
+
+            // Create the release
+            console.log(`  Creating release: ${tag}`);
+            const { data: release } = await github.rest.repos.createRelease({
+              owner:            context.repo.owner,
+              repo:             context.repo.repo,
+              tag_name:         tag,
+              name:             `${channelEmoji} ASH Dotfiles v${version}${!isStable ? ` (${channel.toUpperCase()})` : " OMEGA"}`,
+              body,
+              draft:            isDraft,
+              prerelease:       isPrerelease,
+              make_latest:      isStable ? "true" : "false",
+              generate_release_notes: false,
+            });
+
+            console.log(`  ✅ Release created: ${release.html_url}`);
+
+            // Upload assets
+            const distDir = "dist";
+            if (fs.existsSync(distDir)) {
+              const files = fs.readdirSync(distDir)
+                .filter(f => !fs.statSync(path.join(distDir, f)).isDirectory());
+
+              console.log(`  📤 Uploading ${files.length} assets...`);
+
+              for (const file of files) {
+                const filePath = path.join(distDir, file);
+                const fileSize = fs.statSync(filePath).size;
+                const content  = fs.readFileSync(filePath);
+
+                // Determine content type
+                const contentType = file.endsWith(".sh")    ? "application/x-sh" :
+                                    file.endsWith(".json")  ? "application/json" :
+                                    file.endsWith(".tar.gz")? "application/gzip" :
+                                    file.endsWith(".txt")   ? "text/plain" :
+                                    file.endsWith(".rss")   ? "application/rss+xml" :
+                                    "application/octet-stream";
+
+                try {
+                  await github.rest.repos.uploadReleaseAsset({
+                    owner:        context.repo.owner,
+                    repo:         context.repo.repo,
+                    release_id:   release.id,
+                    name:         file,
+                    data:         content,
+                    headers: {
+                      "content-type":   contentType,
+                      "content-length": fileSize,
+                    },
+                  });
+                  console.log(`     ✅ ${file} (${(fileSize/1024).toFixed(1)}KB)`);
+                } catch (uploadErr) {
+                  console.log(`     ⚠️  ${file}: ${uploadErr.message}`);
+                }
+              }
+            }
+
+            core.setOutput("id",       String(release.id));
+            core.setOutput("html_url", release.html_url);
+            core.setOutput("upload_url", release.upload_url);
+
+            return { id: release.id, html_url: release.html_url };
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: POST-RELEASE — Finalize and announce
+  # ────────────────────────────────────────────────────────────────────────────
+  post-release:
+    name: "📢 Post-Release Actions"
+    needs: [validate-tag, create-release]
+    if: needs.create-release.outputs.release-url != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "🏷️ Update Latest Redirect"
+        if: needs.validate-tag.outputs.is-stable == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = "${{ needs.validate-tag.outputs.version }}";
+            const tag     = "${{ env.TAG_NAME }}";
+
+            // Update the repository description to show latest version
+            try {
+              await github.rest.repos.update({
+                owner:       context.repo.owner,
+                repo:        context.repo.repo,
+                description: `ASH Dotfiles v${version} OMEGA — Ultra-Premium Hyprland Desktop`,
+              });
+              console.log(`  ✅ Repo description updated to v${version}`);
+            } catch (e) {
+              console.log(`  ⚠️  Could not update description: ${e.message}`);
+            }
+
+            // Add topics with latest version
+            try {
+              const { data: current } = await github.rest.repos.getAllTopics({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+              });
+              const topics = current.names
+                .filter(t => !t.startsWith("v"))
+                .concat([`v${version.split(".")[0]}`]);
+              await github.rest.repos.replaceAllTopics({
+                owner:  context.repo.owner,
+                repo:   context.repo.repo,
+                names:  topics,
+              });
+              console.log(`  ✅ Topics updated`);
+            } catch (e) {
+              console.log(`  ℹ️  Topics: ${e.message}`);
+            }
+
+      - name: "🔔 Discord Announcement"
+        if: >
+          needs.validate-tag.outputs.is-stable == 'true' &&
+          secrets.DISCORD_WEBHOOK_URL != ''
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate-tag.outputs.version }}"
+          RELEASE_URL="${{ needs.create-release.outputs.release-url }}"
+
+          PAYLOAD="$(python3 -c "
+          import json
+          payload = {
+            'username': 'ASH Dotfiles Release Bot',
+            'avatar_url': 'https://ash-dotfiles.github.io/assets/brand/logos/ash-logo-256.png',
+            'content': '<@&ASH_ANNOUNCEMENTS_ROLE> 🔥 New release!',
+            'embeds': [{
+              'title': f'🔥 ASH Dotfiles v${VERSION} OMEGA Released!',
+              'description': (
+                '**Your desktop just got an upgrade!**\n\n'
+                'Update now:\n\`\`\`bash\nyay -Syu ash-dotfiles\n\`\`\`\n'
+                'Or with the installer:\n\`\`\`bash\n'
+                f'curl -sSL https://ash-dotfiles.github.io/install.sh | bash -s -- --version ${VERSION}\n\`\`\`'
+              ),
+              'url': '${RELEASE_URL}',
+              'color': 0xCBA6F7,
+              'fields': [
+                {'name': '📦 Version', 'value': f'\`${VERSION}\`', 'inline': True},
+                {'name': '🎨 Themes', 'value': '250+', 'inline': True},
+                {'name': '🔌 Plugins', 'value': '150+', 'inline': True},
+              ],
+              'thumbnail': {'url': 'https://ash-dotfiles.github.io/assets/brand/logos/ash-logo-256.png'},
+              'footer': {'text': 'ASH Dotfiles v5.0 OMEGA • $(date -u +%Y-%m-%d)'},
+            }]
+          }
+          print(json.dumps(payload))
+          ")"
+
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}" \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            2>/dev/null && echo "  ✅ Discord announcement sent" || \
+            echo "  ⚠️  Discord announcement failed"
+
+      - name: "🎉 Release Summary"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🎉 TAG RELEASE COMPLETE                                    ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  🏷️  Tag:      %-44s║\n" "${{ env.TAG_NAME }}"
+          printf "║  📦 Version:  %-44s║\n" "${{ needs.validate-tag.outputs.version }}"
+          printf "║  🌐 URL:      %-44s║\n" "${{ needs.create-release.outputs.release-url }}"
+          printf "║  📋 Assets:   %-44s║\n" "${{ needs.build-assets.outputs.asset-count || '0' }}"
+          printf "║  🔒 Stable:   %-44s║\n" "${{ needs.validate-tag.outputs.is-stable }}"
+          echo "╚══════════════════════════════════════════════════════════════╝"

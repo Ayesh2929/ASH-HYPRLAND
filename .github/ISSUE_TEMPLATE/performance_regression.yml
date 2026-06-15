@@ -1,0 +1,598 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║    ⚡ ASH DOTFILES v5.0 OMEGA — PERFORMANCE REGRESSION ISSUE TEMPLATE          ║
+# ║    Ultra-Detailed Performance Investigation Form with Benchmark Methodology     ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+
+name: "⚡ Performance Regression"
+description: >
+  Noticed ASH Dotfiles running slower than expected? Report performance
+  regressions with this specialized form that captures all the data
+  our team needs to diagnose and fix performance issues precisely.
+title: "⚡ [PERF] — "
+labels:
+  - "⚡ performance"
+  - "📉 regression"
+  - "🔍 needs-triage"
+  - "📊 needs-benchmarks"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — INTRO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ██████╗ ███████╗██████╗ ███████╗ ██████╗ ██████╗ ███╗   ███╗
+        ██╔══██╗██╔════╝██╔══██╗██╔════╝██╔═══██╗██╔══██╗████╗ ████║
+        ██████╔╝█████╗  ██████╔╝█████╗  ██║   ██║██████╔╝██╔████╔██║
+        ██╔═══╝ ██╔══╝  ██╔══██╗██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║
+        ██║     ███████╗██║  ██║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║
+        ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝
+
+        ██████╗ ███████╗ ██████╗ ██████╗ ███████╗███████╗███████╗
+        ██╔══██╗██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝██╔════╝
+        ██████╔╝█████╗  ██║ ███╗██████╔╝█████╗  ███████╗███████╗
+        ██╔══██╗██╔══╝  ██║  ██║██╔══██╗██╔══╝  ╚════██║╚════██║
+        ██║  ██║███████╗╚██████╔╝██║  ██║███████╗███████║███████║
+        ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+        ```
+
+        # ⚡ Performance Regression — ASH Dotfiles v5.0 OMEGA
+
+        </div>
+
+        ---
+
+        > [!WARNING]
+        > **Performance regressions are treated as high-priority bugs.**
+        > Please provide **actual benchmark data** — subjective "feels slow"
+        > reports are much harder to act on than concrete measurements.
+
+        > [!TIP]
+        > **Quick benchmark commands:**
+        > ```bash
+        > # Measure theme apply time
+        > ash benchmark theme-apply --iterations 10 --theme catppuccin-mocha
+        >
+        > # Measure startup time
+        > ash benchmark startup --iterations 5
+        >
+        > # Full benchmark suite
+        > ash benchmark --full --output ~/ash-benchmark-report.json
+        >
+        > # Memory usage snapshot
+        > ash benchmark memory --duration 60
+        > ```
+
+        ---
+
+        ### ⚡ Before You Submit
+
+        - [ ] 🔢 Collected **actual timing measurements** (not just impressions)
+        - [ ] 🔄 Verified regression with **multiple runs** (not a one-time fluke)
+        - [ ] 📦 Confirmed on **latest version** (`ash update --all`)
+        - [ ] 🧹 Cleared cache and retested (`ash config reset --cache`)
+        - [ ] 🔍 Searched for [existing performance issues](https://github.com/ash-dotfiles/ash-dotfiles/labels/%E2%9A%A1%20performance)
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — PERFORMANCE AREA
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: perf_area
+    attributes:
+      label: "🎯 Performance Area Affected"
+      description: "Where is the performance regression occurring?"
+      multiple: true
+      options:
+        # Theme System
+        - "🎨 Theme apply — overall end-to-end time"
+        - "🎨 Theme apply — color extraction from wallpaper"
+        - "🎨 Theme apply — color generation / harmonization"
+        - "🎨 Theme apply — template rendering"
+        - "🎨 Theme apply — config file writing"
+        - "🎨 Theme apply — app reload / hot-reload"
+        - "🎨 Theme apply — GTK/Qt theme application"
+        - "🎨 Theme switch — transition animation"
+        # Startup
+        - "🚀 ASH CLI startup time (ash --help takes too long)"
+        - "🚀 Hyprland startup / session initialization"
+        - "🚀 Fish shell startup time"
+        - "🚀 Neovim startup time"
+        - "🚀 Waybar startup time"
+        # Runtime Performance
+        - "📊 Waybar — high CPU usage while running"
+        - "📊 Waybar — memory leak"
+        - "🪟 Hyprland — animation stuttering / frame drops"
+        - "🪟 Hyprland — window movement lag"
+        - "🪟 Hyprland — workspace switching lag"
+        - "🖼️ SWWW — wallpaper transition stuttering"
+        # Memory
+        - "💾 Memory — excessive RAM usage"
+        - "💾 Memory — memory leak over time"
+        - "💾 Memory — large cache files"
+        # Disk
+        - "💿 Disk — slow read/write operations"
+        - "💿 Disk — excessive disk usage"
+        - "💿 Disk — slow file watching"
+        # Network
+        - "🌐 Network — slow wallpaper download"
+        - "🌐 Network — slow plugin download"
+        - "🌐 Network — slow AI API calls"
+        # Plugins
+        - "🔌 Plugin — slow plugin initialization"
+        - "🔌 Plugin — plugin causing system slowdown"
+        # CLI Commands
+        - "⚡ CLI — slow doctor command"
+        - "⚡ CLI — slow snapshot operations"
+        - "⚡ CLI — slow plugin operations"
+        - "⚡ CLI — slow config operations"
+        # Other
+        - "🤖 AI Engine — slow response time"
+        - "🌐 REST API — slow endpoint response"
+        - "❓ Other / Multiple areas"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — PERFORMANCE IMPACT SEVERITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: impact_severity
+    attributes:
+      label: "📉 Performance Impact Severity"
+      description: "How severely does this performance issue impact your experience?"
+      options:
+        - "🔴 SEVERE — Feature is unusable (>10x slower, hangs, or OOM)"
+        - "🟠 MAJOR — Feature is painful to use (3-10x slower than expected)"
+        - "🟡 MODERATE — Noticeable slowdown (1.5-3x slower, slightly annoying)"
+        - "🟢 MINOR — Slight performance degradation (barely noticeable)"
+        - "📊 BENCHMARK ONLY — No user-visible impact, metrics look bad"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — BENCHMARK DATA — CURRENT (SLOW)
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: current_benchmarks
+    attributes:
+      label: "📊 Current Performance Measurements (SLOW)"
+      description: >
+        **REQUIRED:** Provide actual timing measurements from the **current (slow) version**.
+        Run the relevant benchmark commands and paste the output.
+      placeholder: |
+        ## Method Used to Measure
+        - [ ] `ash benchmark [command]` — built-in benchmark tool
+        - [ ] `time ash [command]` — shell time command
+        - [ ] `hyperfine 'ash [command]'` — hyperfine benchmark tool
+        - [ ] Manual timing with stopwatch
+        - [ ] System profiler (specify: ________________)
+
+        ## Raw Benchmark Output
+
+        ```
+        # Command run:
+        $ hyperfine --warmup 3 --runs 10 'ash theme apply catppuccin-mocha'
+
+        Benchmark 1: ash theme apply catppuccin-mocha
+          Time (mean ± σ):      8.432 s ±  0.341 s    [User: 4.123 s, System: 2.891 s]
+          Range (min … max):    8.012 s …  9.102 s    10 runs
+        ```
+
+        ## Specific Measurements
+
+        | Metric | Measured Value | Notes |
+        |--------|---------------|-------|
+        | Total theme apply time | X.Xs | Including all steps |
+        | Color extraction | X.Xs | `matugen` / `pywal` step |
+        | Template rendering | X.Xs | Writing all config files |
+        | App reload time | X.Xs | After config files written |
+        | Peak memory usage | XXX MB | Measured with `ash benchmark memory` |
+        | CPU usage during apply | XX% | Average over apply duration |
+
+        ## System Resource Usage During Issue
+
+        ```bash
+        # Output of: ash benchmark --full
+        [paste here]
+
+        # Or: top / htop snapshot showing resource usage
+        # Or: journalctl output showing timing
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — BENCHMARK DATA — PREVIOUS (FAST)
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: previous_benchmarks
+    attributes:
+      label: "✅ Previous Performance Measurements (FAST)"
+      description: >
+        If this is a regression, provide measurements from when it was **working fast**.
+        This could be from a previous version, git bisect, or your memory of expected values.
+      placeholder: |
+        ## Source of Previous Measurements
+        - [ ] I have benchmark data from a previous version
+        - [ ] I ran `git bisect` and found the regression commit
+        - [ ] I know the expected performance from documentation
+        - [ ] Based on community reports / your CI benchmarks
+        - [ ] I'm comparing to another similar tool
+
+        ## Previous Benchmark Data
+
+        ```
+        # Version when it was fast: v4.x.x or commit abc1234
+        $ hyperfine --warmup 3 --runs 10 'ash theme apply catppuccin-mocha'
+
+        Benchmark 1: ash theme apply catppuccin-mocha
+          Time (mean ± σ):      1.234 s ±  0.089 s    [User: 0.891 s, System: 0.341 s]
+          Range (min … max):    1.103 s …  1.401 s    10 runs
+        ```
+
+        ## Performance Comparison Summary
+
+        | Metric | Before (fast) | After (slow) | Regression Factor |
+        |--------|--------------|-------------|------------------|
+        | Theme apply | 1.2s | 8.4s | **7x slower** ⚠️ |
+        | Color extract | 0.3s | 4.1s | **13x slower** 🔴 |
+        | Memory usage | 45MB | 312MB | **7x more** ⚠️ |
+
+        ## Git Bisect Results (if performed)
+        ```bash
+        # First bad commit:
+        # abc1234 — "feat: add material-you color algorithm"
+
+        # git bisect log:
+        [paste if available]
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — REPRODUCTION STEPS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Steps to Reproduce the Performance Issue"
+      description: "Exact steps to trigger the performance problem."
+      placeholder: |
+        ## Minimal Reproduction
+
+        ```bash
+        # Minimal command to trigger the performance issue:
+        ash theme apply catppuccin-mocha
+
+        # With timing:
+        time ash theme apply catppuccin-mocha
+
+        # With verbose output to see where time is spent:
+        ASH_DEBUG=1 ASH_TIMING=1 ash theme apply catppuccin-mocha 2>&1 | grep -E '\[TIMING\]|\[DEBUG\]'
+        ```
+
+        ## Step-by-Step Reproduction
+
+        1. Start with a clean terminal session (ensure no background processes)
+        2. Run: `ash theme apply catppuccin-mocha`
+        3. Observe: The command takes ~8 seconds where it previously took ~1 second
+        4. The progress bar appears to hang at "Extracting colors..." for 6+ seconds
+
+        ## Conditions Required to Reproduce
+        - [ ] Always reproducible (100%)
+        - [ ] Reproducible on first run only (subsequent runs are fast — caching issue)
+        - [ ] Reproducible intermittently (X% of the time)
+        - [ ] Reproducible only on specific hardware (GPU model: _____)
+        - [ ] Reproducible only with specific wallpaper type (specify: _____)
+        - [ ] Reproducible only when > X windows are open
+        - [ ] Reproducible only after X hours of uptime
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — PROFILING DATA
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: profiling
+    attributes:
+      label: "🔬 Profiling Data (if available)"
+      description: >
+        Advanced: Paste profiling output to help identify bottlenecks.
+        Even partial profiling data is extremely helpful.
+      placeholder: |
+        ## Profiling Method Used
+        - [ ] `ASH_TIMING=1 ash [command]` — built-in timing output
+        - [ ] `strace -c ash [command]` — syscall profiling
+        - [ ] `perf stat ash [command]` — CPU performance counters
+        - [ ] `perf record + perf report` — sampling profiler
+        - [ ] `valgrind --tool=callgrind` — call graph profiler
+        - [ ] `py-spy` — Python profiling (for API server)
+        - [ ] Lua profiler (for Neovim)
+
+        ## Profiling Output
+
+        ```
+        # ASH timing output (ASH_TIMING=1):
+        [TIMING] theme-apply: start
+        [TIMING]   color-extraction: 5.891s  ← 🔴 BOTTLENECK
+        [TIMING]   template-render: 0.234s
+        [TIMING]   config-write: 0.089s
+        [TIMING]   gtk-apply: 0.312s
+        [TIMING]   reload-waybar: 0.445s
+        [TIMING]   reload-dunst: 0.156s
+        [TIMING]   reload-kitty: 0.089s
+        [TIMING] theme-apply: TOTAL 7.421s
+
+        # strace summary (strace -c ash theme apply catppuccin-mocha):
+        % time     seconds  usecs/call     calls    errors syscall
+        99.12    5.891234       12345       478       12 wait4
+         0.54    0.032012           32      1001           read
+        ...
+        ```
+
+        ## flamegraph / call graph (if generated)
+        [drag and drop flamegraph SVG or image here]
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — VERSION & REGRESSION POINT
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: current_version
+    attributes:
+      label: "🏷️ Current Version (SLOW)"
+      description: "Run `ash --version` — the slow version"
+      placeholder: "e.g., v5.0.2-omega (build 2024.02.01-def5678)"
+    validations:
+      required: true
+
+  - type: input
+    id: last_good_version
+    attributes:
+      label: "✅ Last Known Good Version (FAST)"
+      description: "The last version where performance was acceptable"
+      placeholder: "e.g., v5.0.0-omega or commit abc1234 or 'about 2 weeks ago'"
+    validations:
+      required: false
+
+  - type: input
+    id: regression_commit
+    attributes:
+      label: "🎯 Regression Commit (if known)"
+      description: "If you've run `git bisect` or checked the changelog"
+      placeholder: "e.g., abc1234def — 'feat: rewrite color extraction engine'"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — SYSTEM PERFORMANCE CONTEXT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: system_info
+    attributes:
+      label: "💻 System Performance Context"
+      description: >
+        System specs are critical for performance issues.
+        Run `ash hw full-report` or fill in manually.
+      placeholder: |
+        ## Hardware Profile
+
+        ```bash
+        # Run: ash hw full-report
+        # Or fill in manually:
+        ```
+
+        ### CPU
+        - Model: (run `grep 'model name' /proc/cpuinfo | head -1`)
+        - Cores/Threads: (run `nproc`)
+        - Current governor: (run `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`)
+        - Current frequency: (run `cat /proc/cpuinfo | grep 'cpu MHz' | head -1`)
+        - Temperature: (run `sensors | grep -i 'core\|pkg' | head -5`)
+
+        ### RAM
+        - Total: (run `free -h | awk '/^Mem:/{print $2}'`)
+        - Available during issue: (run `free -h | awk '/^Mem:/{print $7}'`)
+        - Swap used: (run `free -h | awk '/^Swap:/{print $3}'`)
+        - RAM speed: (run `sudo dmidecode -t memory | grep Speed | head -2`)
+
+        ### GPU (Critical for graphics/compositor performance)
+        - Model: (run `lspci | grep -E 'VGA|3D'`)
+        - Driver: [ ] NVIDIA proprietary  [ ] NVIDIA open  [ ] amdgpu  [ ] i915
+        - Driver version: (run `nvidia-smi --query-gpu=driver_version --format=csv,noheader` OR `glxinfo | grep 'OpenGL version'`)
+        - VRAM: 
+        - GPU utilization during issue: (run `nvidia-smi` or `radeontop`)
+
+        ### Storage
+        - Type: [ ] NVMe SSD  [ ] SATA SSD  [ ] HDD  [ ] eMMC
+        - Model: (run `lsblk -d -o NAME,MODEL,ROTA | grep -v loop`)
+        - Read speed: (run `hdparm -t /dev/nvme0n1 2>/dev/null | tail -1`)
+        - Filesystem: (run `df -T ~ | tail -1`)
+        - Available space: (run `df -h ~ | tail -1`)
+
+        ### OS State During Issue
+        - System uptime: (run `uptime -p`)
+        - Load average: (run `uptime | awk '{print $NF}'`)
+        - Open windows count: (run `hyprctl clients -j | jq length`)
+        - Background processes: (run `ps aux | wc -l`)
+        - ASH services running: (run `systemctl --user list-units 'ash-*.service' --state=active`)
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — ENVIRONMENTAL FACTORS
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: environmental_factors
+    attributes:
+      label: "🌍 Environmental Factors"
+      description: "Check all conditions present when the performance issue occurs"
+      options:
+        - label: "🔋 Running on battery power (not plugged in)"
+        - label: "🌡️ System thermal throttling (high CPU/GPU temperatures)"
+        - label: "💤 System coming out of sleep/suspend"
+        - label: "🎮 Game mode was recently active"
+        - label: "📹 Screen recording is active"
+        - label: "🐋 Docker containers are running"
+        - label: "🐍 Python/Conda environments active"
+        - label: "📡 VPN is connected"
+        - label: "🖥️ Multiple monitors connected"
+        - label: "🔊 Audio effects (EasyEffects) running"
+        - label: "🤖 Ollama AI model loaded in memory"
+        - label: "🌐 Network is slow/unreliable"
+        - label: "💾 Disk is nearly full (<10% free)"
+        - label: "🔄 Background updates were running"
+        - label: "📦 Many applications open simultaneously"
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — EXPECTED PERFORMANCE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: expected_performance
+    attributes:
+      label: "🎯 Expected Performance"
+      description: >
+        What performance should this operation achieve?
+        Reference the [Performance Benchmarks](https://ash-dotfiles.github.io/benchmarks) page.
+      placeholder: |
+        ## Expected Performance Targets
+
+        Based on the documentation / previous experience / CI benchmarks:
+
+        | Operation | Expected Time | Actual Time | Delta |
+        |-----------|--------------|-------------|-------|
+        | Full theme apply | < 2.0s | 8.4s | +6.4s 🔴 |
+        | Color extraction | < 0.5s | 5.9s | +5.4s 🔴 |
+        | Waybar reload | < 0.5s | 0.5s | ✅ OK |
+
+        ## Reference
+        - CI benchmark target: `< 2.0s` for full theme apply (from `.github/workflows/performance/benchmark-theme-apply.yml`)
+        - Previous personal measurement: `~1.2s` on my system (v4.x)
+        - Community report: "Usually under 2 seconds on modern hardware"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — POTENTIAL CAUSES
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: potential_causes
+    attributes:
+      label: "🔍 Potential Causes (Your Analysis)"
+      description: >
+        If you have any ideas about what might be causing the performance regression,
+        share your analysis here. Even educated guesses help.
+      placeholder: |
+        ## My Analysis
+
+        Based on the timing output, the bottleneck appears to be in:
+        `color-extraction` — taking 5.9s out of 8.4s total
+
+        ### Possible causes:
+
+        1. **New color extraction algorithm:** The v5.0.2 changelog mentions switching
+           from `pywal` to `matugen` for Material You colors. My system runs an older
+           GPU without hardware acceleration for image processing.
+
+        2. **Unoptimized wallpaper:** My current wallpaper is a 4K JPEG (24MB) —
+           testing with a smaller image reduced the time to 1.8s, suggesting the
+           color extraction isn't properly caching or scaling the image before processing.
+
+        3. **Missing dependency:** I notice `imagemagick` was removed from required
+           deps in v5.0.1, and `libvips` was added. I may be missing libvips and
+           falling back to a slower method.
+
+        ### Evidence:
+        ```bash
+        $ which vips
+        /usr/bin/vips  # Present but...
+
+        $ vips --version
+        vips-8.14.1  # Older version? Required: 8.15+?
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — CONTRIBUTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: "🤝 Contribution Willingness"
+      description: "Would you like to help investigate or fix this?"
+      options:
+        - "🔬 Yes — I can profile and investigate further"
+        - "💻 Yes — I can implement a fix if guided"
+        - "🧪 Yes — I can benchmark and validate fixes"
+        - "👀 No — I can test fixes but cannot profile/code"
+        - "📝 No — Just reporting"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Performance Report Checklist"
+      options:
+        - label: >
+            📊 I have provided **actual numerical benchmark data** (not just impressions)
+          required: true
+        - label: >
+            🔄 I have **reproduced this multiple times** to confirm it's consistent
+          required: true
+        - label: >
+            📦 I have confirmed this is on the **latest ASH Dotfiles version**
+          required: true
+        - label: >
+            💻 I have provided **complete hardware specifications**
+          required: true
+        - label: >
+            🔍 I have searched for **existing performance issues**
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — CLOSING
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### ⚡ Performance Issues Are Highest Priority
+
+        ASH Dotfiles maintains strict performance SLAs:
+
+        | Operation | Target | Alert Threshold |
+        |-----------|--------|----------------|
+        | 🎨 Theme Apply | < 1.5s | > 3.0s |
+        | 🎨 Color Extract | < 0.3s | > 1.0s |
+        | 🚀 CLI Startup | < 100ms | > 500ms |
+        | 🚀 Fish Startup | < 50ms | > 200ms |
+        | 💾 Snapshot Create | < 2.0s | > 5.0s |
+
+        All performance regressions exceeding **2x** the target are treated as
+        **high-priority bugs** and addressed in patch releases.
+
+        **Performance regression benchmarks run on every PR.**
+        Check our [CI Performance Dashboard](https://github.com/ash-dotfiles/ash-dotfiles/actions/workflows/performance)
+
+        *— The ASH Dotfiles Performance Team* ⚡
+
+        </div>

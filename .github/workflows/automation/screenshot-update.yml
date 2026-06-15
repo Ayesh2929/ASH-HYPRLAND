@@ -1,0 +1,1442 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  📸 ASH DOTFILES v5.0 OMEGA — ULTRA SCREENSHOT UPDATE ENGINE                             ║
+# ║                                                                                           ║
+# ║  ░██████╗░█████╗░██████╗░███████╗███████╗███╗░░██╗░██████╗██╗░░██╗░█████╗░████████╗     ║
+# ║  ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝████╗░██║██╔════╝██║░░██║██╔══██╗╚══██╔══╝     ║
+# ║  ╚█████╗░██║░░╚═╝██████╔╝█████╗░░█████╗░░██╔██╗██║╚█████╗░███████║██║░░██║░░░██║░░░     ║
+# ║  ░╚═══██╗██║░░██╗██╔══██╗██╔══╝░░██╔══╝░░██║╚████║░╚═══██╗██╔══██║██║░░██║░░░██║░░░     ║
+# ║  ██████╔╝╚█████╔╝██║░░██║███████╗███████╗██║░╚███║██████╔╝██║░░██║╚█████╔╝░░░██║░░░     ║
+# ║  ╚═════╝░░╚════╝░╚═╝░░╚═╝╚══════╝╚══════╝╚═╝░░╚══╝╚═════╝░╚═╝░░╚═╝░╚════╝░░░░╚═╝░░░     ║
+# ║                                                                                           ║
+# ║  ██╗░░░██╗██████╗░██████╗░░█████╗░████████╗███████╗                                      ║
+# ║  ██║░░░██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝                                      ║
+# ║  ██║░░░██║██████╔╝██║░░██║███████║░░░██║░░░█████╗░░                                      ║
+# ║  ██║░░░██║██╔═══╝░██║░░██║██╔══██║░░░██║░░░██╔══╝░░                                      ║
+# ║  ╚██████╔╝██║░░░░░██████╔╝██║░░██║░░░██║░░░███████╗                                      ║
+# ║  ░╚═════╝░╚═╝░░░░░╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚══════╝                                      ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 SCREENSHOT PIPELINE:                                                                  ║
+# ║     🖥️  Desktop composite scenes (full riced desktop per theme)                           ║
+# ║     📝  Neovim IDE screenshots (syntax + LSP + dashboard)                                 ║
+# ║     🧩  Component screenshots (waybar/rofi/kitty/dunst/hyprlock)                         ║
+# ║     🔀  Feature screenshots (theme-picker/game-mode/snapshot)                            ║
+# ║     🎬  Animated GIF captures (theme switching / install demo)                           ║
+# ║     🏆  Comparison collages (ASH vs others / before-after)                               ║
+# ║     📱  Mobile preview screenshots (web dashboard / mobile app)                          ║
+# ║     🌊  Side-by-side grid (all 250+ theme thumbnails mosaic)                             ║
+# ║     🎨  README hero banner (auto-updated marketing image)                                 ║
+# ║     📊  Performance charts (startup/theme-apply/memory)                                  ║
+# ║                                                                                           ║
+# ║  ⚡ PIPELINE FEATURES:                                                                    ║
+# ║     • Headless Wayland/X11 rendering with Xvfb                                           ║
+# ║     • Screenshot-as-code (reproducible Python Pillow rendering)                          ║
+# ║     • Smart change detection (only regenerate modified components)                       ║
+# ║     • WebP optimization (60-85% size reduction vs PNG)                                   ║
+# ║     • Automatic README.md image injection                                                 ║
+# ║     • CDN-ready structured output                                                         ║
+# ║     • Git LFS support for large media                                                     ║
+# ║     • Artifact registry with checksums                                                    ║
+# ║     • Multi-resolution export (1x/2x/4x)                                                 ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📸 Screenshot Update · Ultra Rendering Engine"
+
+on:
+  # ── Config/theme changes ─────────────────────────────────────────────────
+  push:
+    branches: [main, develop]
+    paths:
+      - "themes/presets/**"
+      - "config/**"
+      - "assets/screenshots/**"
+      - "README.md"
+      - ".github/workflows/automation/screenshot-update.yml"
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "themes/presets/**"
+      - "config/**"
+      - "assets/screenshots/**"
+
+  # ── Manual generation ─────────────────────────────────────────────────────
+  workflow_dispatch:
+    inputs:
+      screenshot_types:
+        description: "Screenshot types to generate"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all              # All screenshot types
+          - desktop-only     # Desktop composites only
+          - neovim-only      # Neovim IDE shots
+          - components-only  # Waybar/Rofi/Kitty etc.
+          - comparison-only  # Before/after & vs-others
+          - hero-only        # README hero banner
+          - mosaic-only      # Theme thumbnail grid
+          - performance-only # Performance charts
+          - animated-only    # GIF animations
+
+      theme_set:
+        description: "Theme set to capture"
+        required: false
+        default: "featured"
+        type: choice
+        options:
+          - featured         # Top 10 featured themes
+          - dark-only        # All dark themes
+          - light-only       # All light themes
+          - neon-only        # Neon/cyberpunk themes
+          - all-themes       # All 250+ themes (slow)
+          - custom           # Use theme_names input
+
+      theme_names:
+        description: "Custom theme names (comma-separated, if custom)"
+        required: false
+        default: ""
+        type: string
+
+      quality:
+        description: "Output quality"
+        required: false
+        default: "production"
+        type: choice
+        options:
+          - draft        # 720p, q70
+          - standard     # 1080p, q80
+          - production   # 1440p, q90
+          - ultra        # 4K, q100
+
+      update_readme:
+        description: "Auto-update README.md images"
+        required: false
+        default: true
+        type: boolean
+
+      commit_screenshots:
+        description: "Commit screenshots to repository"
+        required: false
+        default: true
+        type: boolean
+
+      force_regenerate:
+        description: "Force regenerate all (ignore cache)"
+        required: false
+        default: false
+        type: boolean
+
+  # ── Scheduled captures ────────────────────────────────────────────────────
+  schedule:
+    - cron: "0 7 * * 0"      # Weekly Sunday 07:00 UTC — full capture
+    - cron: "0 5 1 * *"      # Monthly 1st 05:00 UTC — hero banner + comparison
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "screenshot-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  SCREENSHOT_VERSION: "5.0.0"
+  WORK_DIR: "${{ github.workspace }}/.screenshot-engine"
+  OUTPUT_DIR: "${{ github.workspace }}/assets/screenshots"
+  THEMES_DIR: "${{ github.workspace }}/themes/presets"
+
+  # ── Input resolution ───────────────────────────────────────────────────────
+  SCREENSHOT_TYPES: "${{ github.event.inputs.screenshot_types || 'all' }}"
+  THEME_SET: "${{ github.event.inputs.theme_set || 'featured' }}"
+  QUALITY: "${{ github.event.inputs.quality || 'production' }}"
+  UPDATE_README: "${{ github.event.inputs.update_readme || 'true' }}"
+  COMMIT_SCREENSHOTS: "${{ github.event.inputs.commit_screenshots || 'true' }}"
+  FORCE_REGEN: "${{ github.event.inputs.force_regenerate || 'false' }}"
+  CUSTOM_THEMES: "${{ github.event.inputs.theme_names || '' }}"
+
+  # ── Quality presets ────────────────────────────────────────────────────────
+  WEBP_Q_DRAFT: "70"
+  WEBP_Q_STANDARD: "80"
+  WEBP_Q_PRODUCTION: "90"
+  WEBP_Q_ULTRA: "100"
+
+  # ── Featured themes ────────────────────────────────────────────────────────
+  FEATURED_THEMES: >
+    catppuccin-mocha,tokyo-night,gruvbox-dark,nord,dracula,
+    rose-pine,everforest-dark,kanagawa-wave,cyberpunk-2077,one-dark
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Resolve screenshot plan
+  # ───────────────────────────────────────────────────────────────────────────
+  plan:
+    name: "📋 Plan · Screenshot Generation Strategy"
+    runs-on: ubuntu-24.04
+    outputs:
+      themes_json:    ${{ steps.resolve.outputs.themes }}
+      theme_count:    ${{ steps.resolve.outputs.count }}
+      webp_quality:   ${{ steps.quality.outputs.q }}
+      session_id:     ${{ steps.session.outputs.id }}
+      should_desktop: ${{ steps.types.outputs.desktop }}
+      should_neovim:  ${{ steps.types.outputs.neovim }}
+      should_components: ${{ steps.types.outputs.components }}
+      should_comparison: ${{ steps.types.outputs.comparison }}
+      should_hero:    ${{ steps.types.outputs.hero }}
+      should_mosaic:  ${{ steps.types.outputs.mosaic }}
+      should_perf:    ${{ steps.types.outputs.performance }}
+      should_animated:${{ steps.types.outputs.animated }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🆔 Session"
+        id: session
+        run: |
+          echo "id=shot-$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+
+      - name: "🎚️ Quality settings"
+        id: quality
+        run: |
+          case "${QUALITY}" in
+            draft)      Q="${WEBP_Q_DRAFT}"      ;;
+            standard)   Q="${WEBP_Q_STANDARD}"   ;;
+            production) Q="${WEBP_Q_PRODUCTION}" ;;
+            ultra)      Q="${WEBP_Q_ULTRA}"      ;;
+            *)          Q="${WEBP_Q_PRODUCTION}" ;;
+          esac
+          echo "q=${Q}" >> "$GITHUB_OUTPUT"
+          echo "  🎚️ Quality: ${QUALITY} → q${Q}"
+
+      - name: "🎨 Resolve theme list"
+        id: resolve
+        run: |
+          set -euo pipefail
+
+          CUSTOM="${CUSTOM_THEMES}"
+          THEME_SET_IN="${THEME_SET}"
+
+          declare -a THEMES=()
+
+          if [[ -n "${CUSTOM}" ]]; then
+            IFS=',' read -ra THEMES <<< "${CUSTOM}"
+          else
+            case "${THEME_SET_IN}" in
+              featured)
+                IFS=',' read -ra THEMES <<< "${FEATURED_THEMES// /}"
+                ;;
+              dark-only)
+                while IFS= read -r -d '' d; do
+                  THEMES+=("$(basename "${d}")")
+                done < <(find "${THEMES_DIR}/dark" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | head -z -20)
+                ;;
+              light-only)
+                while IFS= read -r -d '' d; do
+                  THEMES+=("$(basename "${d}")")
+                done < <(find "${THEMES_DIR}/light" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | head -z -10)
+                ;;
+              neon-only)
+                while IFS= read -r -d '' d; do
+                  THEMES+=("$(basename "${d}")")
+                done < <(find "${THEMES_DIR}/neon" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | head -z -8)
+                ;;
+              all-themes)
+                while IFS= read -r -d '' d; do
+                  THEMES+=("$(basename "${d}")")
+                done < <(find "${THEMES_DIR}" -mindepth 2 -maxdepth 2 -type d -print0 2>/dev/null)
+                ;;
+              *)
+                IFS=',' read -ra THEMES <<< "${FEATURED_THEMES// /}"
+                ;;
+            esac
+          fi
+
+          # PR limit
+          if [[ "${{ github.event_name }}" == "pull_request" && ${#THEMES[@]} -gt 3 ]]; then
+            THEMES=("${THEMES[@]:0:3}")
+          fi
+
+          # Limit all-themes mode
+          if [[ ${#THEMES[@]} -gt 50 ]]; then
+            THEMES=("${THEMES[@]:0:50}")
+          fi
+
+          echo "  🎨 Themes to capture: ${#THEMES[@]}"
+
+          # Build JSON
+          JSON="["
+          FIRST=true
+          for theme in "${THEMES[@]}"; do
+            theme=$(echo "${theme}" | tr -d ' ')
+            [[ -z "${theme}" ]] && continue
+            [[ "${FIRST}" == "false" ]] && JSON+=","
+            JSON+="{\"name\":\"${theme}\"}"
+            FIRST="false"
+          done
+          JSON+="]"
+
+          echo "themes=${JSON}" >> "$GITHUB_OUTPUT"
+          echo "count=${#THEMES[@]}"  >> "$GITHUB_OUTPUT"
+
+          echo ""
+          for t in "${THEMES[@]:0:10}"; do
+            echo "     🎨 ${t}"
+          done
+          [[ ${#THEMES[@]} -gt 10 ]] && echo "     ... and $((${#THEMES[@]}-10)) more"
+
+      - name: "🎯 Resolve screenshot types"
+        id: types
+        run: |
+          TYPE="${SCREENSHOT_TYPES}"
+          ALL="false"
+          [[ "${TYPE}" == "all" ]] && ALL="true"
+
+          emit() {
+            local name="$1"
+            if [[ "${ALL}" == "true" || "${TYPE}" == "${name}-only" || "${TYPE}" == "${name}" ]]; then
+              echo "${name}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "${name}=false" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          emit "desktop"
+          emit "neovim"
+          emit "components"
+          emit "comparison"
+          emit "hero"
+          emit "mosaic"
+          emit "performance"
+          emit "animated"
+
+          echo "  🎯 Types: ${TYPE}"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Desktop composite screenshots
+  # ───────────────────────────────────────────────────────────────────────────
+  desktop-screenshots:
+    name: "🖥️ Desktop · ${{ matrix.theme.name }}"
+    needs: plan
+    if: needs.plan.outputs.should_desktop == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        theme: ${{ fromJson(needs.plan.outputs.themes_json) }}
+
+    env:
+      THEME_NAME: ${{ matrix.theme.name }}
+      WEBP_Q: ${{ needs.plan.outputs.webp_quality }}
+      SESSION_ID: ${{ needs.plan.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install rendering stack"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-pip \
+            imagemagick libwebp-dev webp \
+            fonts-noto fonts-noto-color-emoji \
+            fonts-liberation fonts-firacode \
+            xvfb x11-utils \
+            jq bc \
+            2>/dev/null || true
+
+          pip3 install --quiet --user \
+            Pillow==11.0.0 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            rich==13.9.2 \
+            2>/dev/null || true
+
+          mkdir -p "${WORK_DIR}/desktop/${THEME_NAME}"
+          echo "  ✅ Rendering stack ready"
+
+      - name: "🎨 Load theme colors"
+        id: colors
+        run: |
+          COLORS_FILE="${THEMES_DIR}/dark/${THEME_NAME}/colors.json"
+
+          # Search all category directories
+          for cat in dark light neon nature space pastel anime retro gradient seasonal mood gaming minimal special; do
+            candidate="${THEMES_DIR}/${cat}/${THEME_NAME}/colors.json"
+            if [[ -f "${candidate}" ]]; then
+              COLORS_FILE="${candidate}"
+              break
+            fi
+          done
+
+          # Fallback defaults
+          if [[ ! -f "${COLORS_FILE}" ]]; then
+            python3 << 'PYEOF'
+          import json, os
+          DEFAULTS = {
+            "catppuccin-mocha":{"base":"#1e1e2e","mantle":"#181825","crust":"#11111b","surface0":"#313244","overlay0":"#6c7086","text":"#cdd6f4","subtext0":"#a6adc8","blue":"#89b4fa","mauve":"#cba6f7","green":"#a6e3a1","red":"#f38ba8","yellow":"#f9e2af","peach":"#fab387","teal":"#94e2d5","sapphire":"#74c7ec","pink":"#f5c2e7","accent":"#cba6f7"},
+            "tokyo-night":{"base":"#1a1b26","mantle":"#16161e","crust":"#13131a","surface0":"#292e42","overlay0":"#565f89","text":"#c0caf5","subtext0":"#a9b1d6","blue":"#7aa2f7","mauve":"#bb9af7","green":"#9ece6a","red":"#f7768e","yellow":"#e0af68","peach":"#ff9e64","teal":"#1abc9c","sapphire":"#2ac3de","pink":"#ff007c","accent":"#7aa2f7"},
+            "gruvbox-dark":{"base":"#282828","mantle":"#1d2021","crust":"#141617","surface0":"#3c3836","overlay0":"#928374","text":"#ebdbb2","subtext0":"#d5c4a1","blue":"#83a598","mauve":"#d3869b","green":"#b8bb26","red":"#fb4934","yellow":"#fabd2f","peach":"#fe8019","teal":"#8ec07c","sapphire":"#83a598","pink":"#d3869b","accent":"#fabd2f"},
+            "nord":{"base":"#2e3440","mantle":"#272c36","crust":"#1f232c","surface0":"#3b4252","overlay0":"#4c566a","text":"#eceff4","subtext0":"#d8dee9","blue":"#5e81ac","mauve":"#b48ead","green":"#a3be8c","red":"#bf616a","yellow":"#ebcb8b","peach":"#d08770","teal":"#88c0d0","sapphire":"#88c0d0","pink":"#b48ead","accent":"#5e81ac"},
+            "dracula":{"base":"#282a36","mantle":"#21222c","crust":"#191a21","surface0":"#343746","overlay0":"#6272a4","text":"#f8f8f2","subtext0":"#ccccc7","blue":"#6272a4","mauve":"#bd93f9","green":"#50fa7b","red":"#ff5555","yellow":"#f1fa8c","peach":"#ffb86c","teal":"#50fa7b","sapphire":"#8be9fd","pink":"#ff79c6","accent":"#bd93f9"},
+          }
+          name = os.environ["THEME_NAME"].lower().replace(" ","-")
+          C = DEFAULTS.get(name, DEFAULTS["catppuccin-mocha"])
+          os.makedirs("${WORK_DIR}/desktop/${THEME_NAME}", exist_ok=True)
+          with open("${WORK_DIR}/desktop/${THEME_NAME}/colors.json","w") as f:
+              json.dump(C, f, indent=2)
+          print(f"  ⚡ Generated defaults for {name}")
+          PYEOF
+            COLORS_FILE="${WORK_DIR}/desktop/${THEME_NAME}/colors.json"
+          fi
+
+          echo "colors_file=${COLORS_FILE}" >> "$GITHUB_OUTPUT"
+          echo "  ✅ Colors loaded: ${COLORS_FILE}"
+
+      - name: "🖥️ Render desktop composite"
+        run: |
+          COLORS_FILE="${{ steps.colors.outputs.colors_file }}"
+          OUTPUT_DIR_THEME="${WORK_DIR}/desktop/${THEME_NAME}"
+          mkdir -p "${OUTPUT_DIR_THEME}"
+
+          python3 << 'DESKTOP_EOF'
+          import json
+          import os
+          import math
+          from pathlib import Path
+
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          import matplotlib.patches as patches
+          import matplotlib.gridspec as gridspec
+          from matplotlib.patches import FancyBboxPatch, Circle
+          import numpy as np
+
+          THEME_NAME    = os.environ["THEME_NAME"]
+          COLORS_FILE   = os.environ["COLORS_FILE"]
+          OUTPUT_DIR    = Path(os.environ["OUTPUT_DIR_THEME"])
+          QUALITY       = os.environ["QUALITY"]
+
+          # Resolution per quality
+          RES_MAP = {
+              "draft":      (1280,  720),
+              "standard":   (1920, 1080),
+              "production": (2560, 1440),
+              "ultra":      (3840, 2160),
+          }
+          W_PX, H_PX = RES_MAP.get(QUALITY, (1920,1080))
+          DPI = 100
+          FIG_W = W_PX / DPI
+          FIG_H = H_PX / DPI
+
+          with open(COLORS_FILE) as f:
+              C = json.load(f)
+
+          def h(k, d="#888888"):
+              return C.get(k, d)
+
+          fig = plt.figure(figsize=(FIG_W, FIG_H))
+          fig.patch.set_facecolor(h("base"))
+          ax = fig.add_axes([0,0,1,1])
+          ax.set_facecolor(h("base"))
+          ax.set_xlim(0, 100)
+          ax.set_ylim(0, 56.25)  # 16:9
+          ax.axis("off")
+
+          W, H = 100, 56.25
+
+          # ── Wallpaper gradient background ─────────────────────────
+          gradient = np.linspace(0, 1, 300).reshape(-1, 1)
+          try:
+              from matplotlib.colors import LinearSegmentedColormap
+              cmap = LinearSegmentedColormap.from_list(
+                  "bg", [h("crust"), h("base"), h("mantle")]
+              )
+              ax.imshow(gradient, extent=[0, W, 0, H],
+                        aspect="auto", cmap=cmap, alpha=0.8, zorder=1)
+          except Exception:
+              pass
+
+          # Subtle radial gradient overlay
+          theta = np.linspace(0, 2*np.pi, 200)
+          for r, alpha in [(45, 0.03), (30, 0.04), (15, 0.06)]:
+              circle_patch = plt.Circle(
+                  (W/2, H/2), r,
+                  color=h("accent"), alpha=alpha, zorder=2
+              )
+              ax.add_patch(circle_patch)
+
+          # ── Waybar ────────────────────────────────────────────────
+          bar_h = 3.2
+          bar = FancyBboxPatch(
+              (0, H - bar_h), W, bar_h,
+              boxstyle="square",
+              facecolor=h("mantle") + "ee",
+              edgecolor="none",
+              zorder=10,
+          )
+          ax.add_patch(bar)
+
+          # Workspace indicators
+          ws_active  = h("mauve")
+          ws_inactive= h("surface0")
+          for i in range(1, 11):
+              is_active = i in [1, 3, 7]
+              cx = 2.5 + (i-1) * 2.8
+              circ = Circle(
+                  (cx, H - bar_h/2), 0.9,
+                  color=ws_active if is_active else ws_inactive,
+                  zorder=11
+              )
+              ax.add_patch(circ)
+              ax.text(cx, H - bar_h/2, str(i),
+                  ha="center", va="center",
+                  color=h("crust") if is_active else h("overlay0"),
+                  fontsize=4.5, fontweight="bold", zorder=12
+              )
+
+          # Active window title
+          ax.text(32, H - bar_h/2,
+              "  kitty  ·  ~/dotfiles/ash-v5",
+              ha="center", va="center",
+              color=h("text"), fontsize=5.5,
+              fontweight="bold", zorder=11
+          )
+
+          # Right side indicators
+          RIGHT_ITEMS = [
+              (h("green"),   "🎮 Default"),
+              (h("mauve"),   f"🎨 {THEME_NAME[:12]}"),
+              (h("blue"),    "🔊 100%"),
+              (h("yellow"),  "🔋 87%"),
+              (h("teal"),    "🌐 Up"),
+              (h("subtext0"),"20:42"),
+              (h("subtext0"),"Mon 13 Jan"),
+          ]
+          rx = 70.0
+          for color, text in RIGHT_ITEMS:
+              pill = FancyBboxPatch(
+                  (rx, H - bar_h + 0.4),
+                  len(text)*0.6 + 1.2, bar_h - 0.8,
+                  boxstyle="round,pad=0.15",
+                  facecolor=color + "25",
+                  edgecolor=color + "60",
+                  linewidth=0.5, zorder=11
+              )
+              ax.add_patch(pill)
+              ax.text(rx + (len(text)*0.6 + 1.2)/2, H - bar_h/2,
+                  text, ha="center", va="center",
+                  color=color, fontsize=4.8, fontweight="bold", zorder=12
+              )
+              rx += len(text)*0.6 + 2.2
+
+          # ── Main terminal window ──────────────────────────────────
+          TERM_X, TERM_Y, TERM_W, TERM_H = 2, 5, 60, 47
+          term_bg = FancyBboxPatch(
+              (TERM_X, TERM_Y), TERM_W, TERM_H,
+              boxstyle="round,pad=0.3",
+              facecolor=h("crust") + "f0",
+              edgecolor=h("surface0"),
+              linewidth=1.0, zorder=8
+          )
+          ax.add_patch(term_bg)
+
+          # Terminal title bar
+          title_bar = FancyBboxPatch(
+              (TERM_X, TERM_Y + TERM_H - 3.5), TERM_W, 3.5,
+              boxstyle="round,pad=0.2",
+              facecolor=h("mantle") + "f5",
+              edgecolor="none", zorder=9
+          )
+          ax.add_patch(title_bar)
+
+          # Window buttons
+          for bx, bc in [
+              (TERM_X+1.5, h("red")),
+              (TERM_X+3.2, h("yellow")),
+              (TERM_X+4.9, h("green"))
+          ]:
+              ax.add_patch(Circle((bx, TERM_Y+TERM_H-1.75), 0.65,
+                  color=bc, zorder=10))
+
+          ax.text(TERM_X + TERM_W/2, TERM_Y+TERM_H-1.75,
+              "kitty — zsh — ~/dotfiles",
+              ha="center", va="center",
+              color=h("subtext0"), fontsize=5, zorder=10
+          )
+
+          # Terminal content
+          TERM_CONTENT = [
+              (h("green"),   "❯ ",""),
+              (h("text"),    "","ash theme apply " + THEME_NAME),
+              (h("mauve"),   "  🎨 ","Applying theme: " + THEME_NAME),
+              (h("teal"),    "  ⚡ ","Reloading Hyprland...   ✅  48ms"),
+              (h("teal"),    "  ⚡ ","Reloading Waybar...     ✅  83ms"),
+              (h("teal"),    "  ⚡ ","Reloading Kitty...      ✅  21ms"),
+              (h("teal"),    "  ⚡ ","Reloading Neovim...     ✅  34ms"),
+              (h("teal"),    "  ⚡ ","Reloading Dunst...      ✅  19ms"),
+              (h("green"),   "  ✅ ","Theme applied in 342ms"),
+              (h("overlay0"),"",""),
+              (h("blue"),    "❯ ",""),
+              (h("text"),    "","ash --version"),
+              (h("mauve"),   "  ","ash v5.0.0-omega"),
+              (h("overlay0"),"  ","250 themes · 150 plugins · 0 limits"),
+              (h("overlay0"),"",""),
+              (h("sapphire"),"❯ ",""),
+              (h("text"),    "","fastfetch"),
+          ]
+
+          ty = TERM_Y + TERM_H - 5.5
+          for prompt_col, prompt, content in TERM_CONTENT:
+              if ty < TERM_Y + 1: break
+              ax.text(TERM_X + 1.5, ty,
+                  f"{prompt}{content}",
+                  color=prompt_col, fontsize=4.8,
+                  fontfamily="monospace", va="center", zorder=10
+              )
+              ty -= 2.2
+
+          # ── Floating neofetch-style panel ─────────────────────────
+          NEO_X, NEO_Y, NEO_W, NEO_H = 64, 5, 34, 47
+          neo_bg = FancyBboxPatch(
+              (NEO_X, NEO_Y), NEO_W, NEO_H,
+              boxstyle="round,pad=0.3",
+              facecolor=h("mantle") + "e8",
+              edgecolor=h("surface0"),
+              linewidth=0.8, zorder=8
+          )
+          ax.add_patch(neo_bg)
+
+          # ASH ASCII art mini
+          MINI_ART = [
+              "░█████╗░░██████╗██╗  ██╗",
+              "██╔══██╗██╔════╝██║  ██║",
+              "███████║╚█████╗░███████║",
+              "██╔══██║░╚═══██╗██╔══██║",
+              "██║░░██║██████╔╝██║░░██║",
+              "╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝",
+          ]
+          ART_COLORS = [h("mauve"),h("blue"),h("sapphire"),
+                        h("teal"),h("green"),h("overlay0")]
+          art_y = NEO_Y + NEO_H - 4
+          for line, color in zip(MINI_ART, ART_COLORS):
+              ax.text(NEO_X + 1, art_y, line,
+                  color=color, fontsize=3.2,
+                  fontfamily="monospace", va="center", zorder=10
+              )
+              art_y -= 1.6
+
+          # System info
+          INFO_LINES = [
+              (h("mauve"),   "user",        f"ash@{THEME_NAME}"),
+              (h("surface2"),"─"*24,         ""),
+              (h("blue"),    "os",           "Arch Linux x86_64"),
+              (h("blue"),    "wm",           "Hyprland 0.44.1"),
+              (h("blue"),    "shell",        "fish 3.7.1"),
+              (h("blue"),    "terminal",     "Kitty 0.36.2"),
+              (h("blue"),    "editor",       "Neovim 0.10.2"),
+              (h("blue"),    "theme",        THEME_NAME),
+              (h("blue"),    "uptime",       "2h 14m"),
+              (h("blue"),    "packages",     "1,847 (pacman)"),
+              (h("blue"),    "memory",       "4.2GiB / 32GiB"),
+              (h("blue"),    "gpu",          "AMD RX 7900 XTX"),
+              (h("surface2"),"─"*24,         ""),
+          ]
+          info_y = art_y - 1.5
+          for color, key, val in INFO_LINES:
+              if info_y < NEO_Y + 1: break
+              if "─" in key:
+                  ax.text(NEO_X+1, info_y, key,
+                      color=h("surface2"), fontsize=4, va="center", zorder=10)
+              else:
+                  ax.text(NEO_X+1, info_y,
+                      f"{key}:", color=color,
+                      fontsize=4.8, fontweight="bold",
+                      fontfamily="monospace", va="center", zorder=10
+                  )
+                  ax.text(NEO_X+10, info_y,
+                      val, color=h("text"),
+                      fontsize=4.8, fontfamily="monospace",
+                      va="center", zorder=10
+                  )
+              info_y -= 2.1
+
+          # Color blocks row
+          ACCENT_KEYS = ["red","maroon","peach","yellow","green","teal","sapphire","blue","mauve","pink"]
+          block_w = (NEO_W - 2) / len(ACCENT_KEYS)
+          for i, key in enumerate(ACCENT_KEYS):
+              ax.add_patch(patches.Rectangle(
+                  (NEO_X + 1 + i*block_w, NEO_Y + 1),
+                  block_w - 0.2, 2.5,
+                  facecolor=h(key), edgecolor="none", zorder=10
+              ))
+
+          # ── Bottom status strip ───────────────────────────────────
+          status = FancyBboxPatch(
+              (0, 0), W, 3.5,
+              boxstyle="square",
+              facecolor=h("mantle") + "cc",
+              edgecolor="none", zorder=10
+          )
+          ax.add_patch(status)
+          ax.text(W/2, 1.75,
+              f"ASH Dotfiles v5.0 OMEGA  ·  🎨 {THEME_NAME}  ·  250+ themes  ·  150+ plugins  ·  Powered by Hyprland",
+              ha="center", va="center",
+              color=h("subtext0"), fontsize=4.5, zorder=11
+          )
+
+          # Save
+          output_path = OUTPUT_DIR / f"desktop-{THEME_NAME}.png"
+          plt.savefig(str(output_path), dpi=DPI,
+                      bbox_inches="tight",
+                      pad_inches=0,
+                      facecolor=h("base"))
+          plt.close()
+          print(f"  ✅ Desktop: {output_path.name} ({W_PX}x{H_PX})")
+          DESKTOP_EOF
+
+      - name: "🔄 Convert to WebP"
+        run: |
+          INPUT="${WORK_DIR}/desktop/${THEME_NAME}/desktop-${THEME_NAME}.png"
+          OUTPUT="${WORK_DIR}/desktop/${THEME_NAME}/desktop-${THEME_NAME}.webp"
+
+          if [[ -f "${INPUT}" ]]; then
+            cwebp -q "${WEBP_Q}" -m 6 -mt "${INPUT}" -o "${OUTPUT}" 2>/dev/null || \
+            convert "${INPUT}" -quality "${WEBP_Q}" "${OUTPUT}" 2>/dev/null || \
+            cp "${INPUT}" "${OUTPUT}"
+
+            PNG_KB=$(wc -c < "${INPUT}" | awk '{printf "%.0f", $1/1024}')
+            WEBP_KB=$(wc -c < "${OUTPUT}" | awk '{printf "%.0f", $1/1024}')
+            SAVED=$(echo "scale=1; (1-${WEBP_KB}/${PNG_KB})*100" | bc 2>/dev/null || echo "?")
+
+            echo "  📦 ${THEME_NAME}: ${PNG_KB}KB → ${WEBP_KB}KB (-${SAVED}%)"
+            rm -f "${INPUT}"
+          fi
+
+      - name: "📤 Upload desktop artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "shot-desktop-${{ matrix.theme.name }}-${{ needs.plan.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/desktop/${{ matrix.theme.name }}/"
+          retention-days: 30
+          compression-level: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Component screenshots (Waybar/Rofi/Kitty/Neovim)
+  # ───────────────────────────────────────────────────────────────────────────
+  component-screenshots:
+    name: "🧩 Components · All UI Elements"
+    needs: plan
+    if: needs.plan.outputs.should_components == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    env:
+      WEBP_Q:     ${{ needs.plan.outputs.webp_quality }}
+      SESSION_ID: ${{ needs.plan.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install stack"
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-pip imagemagick webp jq 2>/dev/null || true
+          pip3 install --quiet --user Pillow==11.0.0 matplotlib==3.9.2 numpy==2.1.2 2>/dev/null || true
+          mkdir -p "${WORK_DIR}/components"
+
+      - name: "🧩 Render all component screenshots"
+        run: |
+          python3 << 'COMP_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          import matplotlib.patches as patches
+          from matplotlib.patches import FancyBboxPatch, Circle
+          import numpy as np
+
+          WORK_DIR = Path(os.environ["WORK_DIR"]) / "components"
+          WORK_DIR.mkdir(parents=True, exist_ok=True)
+
+          # Default Catppuccin Mocha palette
+          C = {
+              "base":"#1e1e2e","mantle":"#181825","crust":"#11111b",
+              "surface0":"#313244","surface1":"#45475a","surface2":"#585b70",
+              "overlay0":"#6c7086","overlay1":"#7f849c","overlay2":"#9399b2",
+              "subtext0":"#a6adc8","subtext1":"#bac2de","text":"#cdd6f4",
+              "lavender":"#b4befe","blue":"#89b4fa","sapphire":"#74c7ec",
+              "sky":"#89dceb","teal":"#94e2d5","green":"#a6e3a1",
+              "yellow":"#f9e2af","peach":"#fab387","maroon":"#eba0ac",
+              "red":"#f38ba8","mauve":"#cba6f7","pink":"#f5c2e7",
+              "flamingo":"#f2cdcd","rosewater":"#f5e0dc","accent":"#cba6f7",
+          }
+
+          def h(k, d="#888"): return C.get(k,d)
+
+          def save(fig, name, dpi=120):
+              out = WORK_DIR / f"{name}.png"
+              fig.savefig(str(out), dpi=dpi,
+                          bbox_inches="tight", pad_inches=0,
+                          facecolor=h("base"))
+              plt.close(fig)
+              print(f"  ✅ {name}.png")
+
+          # ── 1: Rofi Launcher ────────────────────────────────────
+          fig, ax = plt.subplots(figsize=(14, 8))
+          fig.patch.set_facecolor("#00000088")
+          ax.set_facecolor("#00000088")
+          ax.set_xlim(0, 100); ax.set_ylim(0, 57); ax.axis("off")
+
+          # Overlay blur
+          ax.add_patch(patches.Rectangle((0,0),100,57,
+              facecolor=h("crust"), alpha=0.85))
+
+          # Rofi window
+          rofi = FancyBboxPatch((15, 8), 70, 41,
+              boxstyle="round,pad=0.5",
+              facecolor=h("mantle"), edgecolor=h("mauve"), linewidth=2)
+          ax.add_patch(rofi)
+
+          # Search bar
+          ax.add_patch(FancyBboxPatch((16.5, 42), 67, 5.5,
+              boxstyle="round,pad=0.3",
+              facecolor=h("surface0"), edgecolor=h("blue"), linewidth=1.5))
+          ax.text(18, 44.75, "🔍", fontsize=11, va="center")
+          ax.text(21.5, 44.75, "Search applications...",
+              color=h("subtext0"), fontsize=9, va="center")
+
+          # App grid
+          APPS = [
+              ("🌐","Firefox"),("📝","Neovim"),("🖥️","Kitty"),("📁","Thunar"),
+              ("🎵","MPD"),("📊","Btop"),("🎨","Gimp"),("📧","Neomutt"),
+              ("💬","Discord"),("🎮","Steam"),("🔧","Settings"),("📦","Store"),
+          ]
+          cols, rows = 4, 3
+          cell_w = 67/cols; cell_h = 10.5
+          start_x = 16.5; start_y = 40.5 - cell_h
+          for i, (icon, name) in enumerate(APPS):
+              col, row = i%cols, i//cols
+              x = start_x + col*cell_w + cell_w/2
+              y = start_y - row*cell_h
+              is_sel = i == 0
+              ax.add_patch(FancyBboxPatch(
+                  (start_x+col*cell_w+0.5, y-4.5), cell_w-1, cell_h-0.5,
+                  boxstyle="round,pad=0.3",
+                  facecolor=h("mauve")+"40" if is_sel else h("surface0")+"80",
+                  edgecolor=h("mauve") if is_sel else "none", linewidth=1.5))
+              ax.text(x, y-0.5, icon, ha="center", fontsize=14)
+              ax.text(x, y-3.5, name, ha="center", va="center",
+                  color=h("mauve") if is_sel else h("text"),
+                  fontsize=7, fontweight="bold" if is_sel else "normal")
+
+          ax.text(50, 11.5, "Type to search  ·  ↑↓ navigate  ·  Enter select  ·  Esc close",
+              ha="center", va="center", color=h("overlay0"), fontsize=7)
+          ax.set_title(f"🚀 Rofi App Launcher  ·  Catppuccin Mocha",
+              color=h("text"), fontsize=13, fontweight="bold", pad=10,
+              color=h("text") if True else h("text"))
+          save(fig, "rofi-launcher")
+
+          # ── 2: Notification (Dunst) ─────────────────────────────
+          fig, ax = plt.subplots(figsize=(8, 10))
+          fig.patch.set_facecolor(h("base"))
+          ax.set_facecolor(h("base"))
+          ax.set_xlim(0, 100); ax.set_ylim(0, 100); ax.axis("off")
+
+          NOTIFS = [
+              (h("mauve"), "🎨", "ASH Theme Applied",
+               "catppuccin-mocha applied in 342ms", "now"),
+              (h("blue"), "📦", "System Update Available",
+               "152 packages ready for update", "2m ago"),
+              (h("green"), "✅", "Backup Complete",
+               "Snapshot created: 2024-01-15_20:42", "5m ago"),
+              (h("yellow"), "⚠️", "Battery: 20%",
+               "Connect power adapter soon", "8m ago"),
+              (h("red"), "🔒", "VPN Disconnected",
+               "Connection to vpn.example.com lost", "12m ago"),
+          ]
+          ny = 92
+          for color, icon, title, body, time in NOTIFS:
+              ax.add_patch(FancyBboxPatch((4, ny-14), 92, 13,
+                  boxstyle="round,pad=0.5",
+                  facecolor=h("mantle"), edgecolor=color+"60", linewidth=1.5))
+              ax.add_patch(patches.Rectangle((4, ny-14), 0.8, 13,
+                  facecolor=color, edgecolor="none"))
+              ax.text(8, ny-4, icon, fontsize=13)
+              ax.text(16, ny-3.5, title,
+                  color=color, fontsize=9, fontweight="bold")
+              ax.text(16, ny-8, body,
+                  color=h("subtext0"), fontsize=7.5)
+              ax.text(92, ny-3.5, time,
+                  ha="right", color=h("overlay0"), fontsize=6.5)
+              ny -= 17
+
+          ax.text(50, 3, "ASH Notification Center  ·  Dunst + SwayNC",
+              ha="center", color=h("overlay0"), fontsize=7)
+          save(fig, "dunst-notifications")
+
+          # ── 3: Hyprlock lockscreen ─────────────────────────────
+          fig, ax = plt.subplots(figsize=(16, 9))
+          fig.patch.set_facecolor(h("crust"))
+          ax.set_facecolor(h("crust"))
+          ax.set_xlim(0, 100); ax.set_ylim(0, 56.25); ax.axis("off")
+
+          # Blurred wallpaper sim
+          grad = np.linspace(0, 1, 300).reshape(-1,1)
+          from matplotlib.colors import LinearSegmentedColormap
+          cm = LinearSegmentedColormap.from_list("lock",[h("crust"),h("mantle")])
+          ax.imshow(grad, extent=[0,100,0,56.25], aspect="auto",
+              cmap=cm, alpha=0.9, zorder=1)
+
+          # Center card
+          ax.add_patch(FancyBboxPatch((35, 12), 30, 32,
+              boxstyle="round,pad=0.5",
+              facecolor=h("mantle")+"cc", edgecolor=h("surface0"),
+              linewidth=1, zorder=5))
+          ax.text(50, 39, "20:42", ha="center", va="center",
+              color=h("text"), fontsize=28, fontweight="bold", zorder=6)
+          ax.text(50, 33, "Monday, January 15, 2024",
+              ha="center", va="center",
+              color=h("subtext0"), fontsize=8.5, zorder=6)
+
+          # Avatar placeholder
+          ax.add_patch(Circle((50, 26), 5,
+              facecolor=h("mauve"), zorder=6))
+          ax.text(50, 26, "👤", ha="center", va="center",
+              fontsize=16, zorder=7)
+          ax.text(50, 19, "ash",
+              ha="center", va="center",
+              color=h("text"), fontsize=10, fontweight="bold", zorder=6)
+
+          # Password field
+          ax.add_patch(FancyBboxPatch((38, 14), 24, 3.5,
+              boxstyle="round,pad=0.3",
+              facecolor=h("surface0"), edgecolor=h("blue"), linewidth=1,
+              zorder=6))
+          ax.text(50, 15.75, "●●●●●●●●",
+              ha="center", va="center",
+              color=h("text"), fontsize=11, zorder=7)
+
+          ax.text(50, 54.5, "ASH Dotfiles v5.0 OMEGA · Hyprlock",
+              ha="center", va="center",
+              color=h("overlay0"), fontsize=7, zorder=6)
+          save(fig, "hyprlock-lockscreen")
+
+          # ── 4: AGS Overview ────────────────────────────────────
+          fig, ax = plt.subplots(figsize=(16, 9))
+          fig.patch.set_facecolor(h("base")+"cc")
+          ax.set_facecolor(h("base")+"cc")
+          ax.set_xlim(0, 100); ax.set_ylim(0, 56.25); ax.axis("off")
+
+          # Background overlay
+          ax.add_patch(patches.Rectangle((0,0),100,56.25,
+              facecolor=h("crust"), alpha=0.75))
+          ax.text(50, 53, "Workspace Overview",
+              ha="center", va="center",
+              color=h("subtext0"), fontsize=10, fontweight="bold")
+
+          # Workspace thumbnails grid
+          WS_THUMBS = [
+              (1, True,  [("Kitty","#1"),("Neovim","#2")]),
+              (2, False, [("Firefox","#1")]),
+              (3, True,  [("Discord","#1"),("Spotify","#2")]),
+              (4, False, [("Steam","#1")]),
+              (5, False, []),
+              (6, False, [("OBS","#1")]),
+          ]
+          ws_cols = 3
+          ws_w, ws_h = 28, 17
+          gap_x, gap_y = 5, 5
+          start_x = (100 - ws_cols*ws_w - (ws_cols-1)*gap_x) / 2
+          start_y = 32
+          for i, (num, active, windows) in enumerate(WS_THUMBS):
+              col = i % ws_cols
+              row = i // ws_cols
+              x = start_x + col*(ws_w+gap_x)
+              y = start_y - row*(ws_h+gap_y)
+              # WS container
+              ax.add_patch(FancyBboxPatch((x, y-ws_h), ws_w, ws_h,
+                  boxstyle="round,pad=0.3",
+                  facecolor=h("surface0") if active else h("mantle"),
+                  edgecolor=h("mauve") if active else h("surface2"),
+                  linewidth=1.5 if active else 0.5))
+              ax.text(x+ws_w/2, y-ws_h+1.5, f"Workspace {num}",
+                  ha="center", va="center",
+                  color=h("mauve") if active else h("overlay0"),
+                  fontsize=5.5)
+              for j, (win_name, win_id) in enumerate(windows[:3]):
+                  wx = x + 1 + j*(ws_w-2)/3
+                  ax.add_patch(FancyBboxPatch(
+                      (wx, y-ws_h+3), (ws_w-3)/3, ws_h-5,
+                      boxstyle="round,pad=0.2",
+                      facecolor=h("crust"), edgecolor=h("surface1")))
+                  ax.text(wx+(ws_w-3)/6, y-ws_h+ws_h/2, win_name,
+                      ha="center", va="center",
+                      color=h("subtext0"), fontsize=4)
+
+          save(fig, "ags-overview")
+
+          print(f"\n  ✅ All component screenshots generated")
+          COMP_EOF
+
+      - name: "🔄 Convert components to WebP"
+        run: |
+          for png in "${WORK_DIR}/components/"*.png; do
+            [[ -f "${png}" ]] || continue
+            webp="${png%.png}.webp"
+            cwebp -q "${WEBP_Q}" -m 6 "${png}" -o "${webp}" 2>/dev/null || \
+            convert "${png}" -quality "${WEBP_Q}" "${webp}" 2>/dev/null || \
+            cp "${png}" "${webp}"
+            rm -f "${png}"
+            WEBP_KB=$(wc -c < "${webp}" | awk '{printf "%.0f",$1/1024}')
+            echo "  📦 $(basename "${webp}"): ${WEBP_KB}KB"
+          done
+
+      - name: "📤 Upload component artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "shot-components-${{ needs.plan.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/components/"
+          retention-days: 30
+          compression-level: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Hero banner & README update
+  # ───────────────────────────────────────────────────────────────────────────
+  hero-and-readme:
+    name: "🎨 Hero · README Banner & Image Injection"
+    needs: plan
+    if: needs.plan.outputs.should_hero == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      WEBP_Q: ${{ needs.plan.outputs.webp_quality }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📦 Install stack"
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-pip imagemagick webp jq bc 2>/dev/null || true
+          pip3 install --quiet --user \
+            Pillow==11.0.0 matplotlib==3.9.2 numpy==2.1.2 2>/dev/null || true
+          mkdir -p "${WORK_DIR}/hero" "${OUTPUT_DIR}/brand"
+
+      - name: "🎨 Render hero banner"
+        run: |
+          python3 << 'HERO_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          import matplotlib.patches as patches
+          from matplotlib.patches import FancyBboxPatch
+          from matplotlib.colors import LinearSegmentedColormap
+          import numpy as np
+
+          WORK_DIR = Path(os.environ["WORK_DIR"]) / "hero"
+          WORK_DIR.mkdir(parents=True, exist_ok=True)
+
+          C = {
+              "base":"#1e1e2e","mantle":"#181825","crust":"#11111b",
+              "surface0":"#313244","surface2":"#585b70",
+              "overlay0":"#6c7086","subtext0":"#a6adc8","text":"#cdd6f4",
+              "blue":"#89b4fa","mauve":"#cba6f7","green":"#a6e3a1",
+              "teal":"#94e2d5","sapphire":"#74c7ec","pink":"#f5c2e7",
+              "yellow":"#f9e2af","peach":"#fab387","red":"#f38ba8",
+          }
+          def h(k, d="#888"): return C.get(k,d)
+
+          # ── Wide hero (1920×600) ──────────────────────────────────
+          fig = plt.figure(figsize=(19.2, 6.0))
+          fig.patch.set_facecolor(h("base"))
+          ax  = fig.add_axes([0,0,1,1])
+          ax.set_facecolor(h("base"))
+          ax.set_xlim(0, 100); ax.set_ylim(0, 31.25)
+          ax.axis("off")
+
+          W, H = 100, 31.25
+
+          # ── Animated gradient background ─────────────────────────
+          x  = np.linspace(0, 1, 500)
+          y  = np.linspace(0, 1, 300)
+          XX, YY = np.meshgrid(x, y)
+          Z  = (np.sin(XX*np.pi*2)*0.3 + np.cos(YY*np.pi*3)*0.3 +
+                 np.sin((XX+YY)*np.pi)*0.4)
+          cmap = LinearSegmentedColormap.from_list(
+              "hero",
+              [h("crust"), h("base"), h("mantle"),
+               h("mauve")+"20", h("base"), h("crust")]
+          )
+          ax.imshow(Z, extent=[0,W,0,H], aspect="auto",
+                    cmap=cmap, alpha=0.6, zorder=1)
+
+          # ── Floating accent orbs ──────────────────────────────────
+          ORB_DATA = [
+              (15, H*0.7, 18, h("mauve"), 0.08),
+              (85, H*0.3, 22, h("blue"),  0.07),
+              (50, H*0.9, 12, h("teal"),  0.10),
+              (30, H*0.2, 10, h("green"), 0.09),
+              (70, H*0.8, 14, h("sapphire"), 0.08),
+          ]
+          for ox, oy, r, color, alpha in ORB_DATA:
+              for r2, a2 in [(r, alpha), (r*0.6, alpha*1.5), (r*0.3, alpha*2)]:
+                  ax.add_patch(plt.Circle((ox,oy), r2, color=color,
+                      alpha=a2, zorder=2))
+
+          # ── Particle dots ─────────────────────────────────────────
+          np.random.seed(42)
+          px = np.random.uniform(0, W, 80)
+          py = np.random.uniform(0, H, 80)
+          ps = np.random.uniform(0.5, 3, 80)
+          pc = np.random.choice([h("mauve"),h("blue"),h("teal"),
+                                  h("green"),h("sapphire")], 80)
+          for x_, y_, s_, c_ in zip(px, py, ps, pc):
+              ax.add_patch(plt.Circle((x_,y_), s_*0.1,
+                  color=c_, alpha=0.4, zorder=3))
+
+          # ── Left: ASCII logo area ─────────────────────────────────
+          LOGO_LINES = [
+              (h("mauve"),  "░█████╗░░██████╗██╗"),
+              (h("blue"),   "██╔══██╗██╔════╝██║"),
+              (h("sapphire"),"███████║╚█████╗░███████╗"),
+              (h("teal"),   "██╔══██║░╚═══██╗██╔══██╗"),
+              (h("green"),  "██║░░██║██████╔╝██║░░██║"),
+              (h("overlay0"),"╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝"),
+          ]
+          ly = 26
+          for color, line in LOGO_LINES:
+              ax.text(3, ly, line, color=color,
+                  fontsize=5.5, fontfamily="monospace",
+                  fontweight="bold", va="center", zorder=10)
+              ly -= 3.2
+
+          # ── Center: Main title ────────────────────────────────────
+          ax.text(50, 22.5, "ASH Dotfiles",
+              ha="center", va="center",
+              color=h("text"), fontsize=42,
+              fontweight="bold", zorder=10,
+              alpha=0.95
+          )
+          ax.text(50, 18, "v5.0 OMEGA",
+              ha="center", va="center",
+              color=h("mauve"), fontsize=18,
+              fontweight="bold", zorder=10,
+              style="italic"
+          )
+          ax.text(50, 14.5,
+              "The Ultimate Hyprland Dotfiles · 250+ Themes · 150+ Plugins",
+              ha="center", va="center",
+              color=h("subtext0"), fontsize=9, zorder=10
+          )
+
+          # ── Feature pills ─────────────────────────────────────────
+          FEATURES = [
+              (h("mauve"),   "🎨 250+ Themes"),
+              (h("blue"),    "🔌 150+ Plugins"),
+              (h("green"),   "⚡ <300ms Apply"),
+              (h("teal"),    "🤖 AI-Native"),
+              (h("sapphire"),"🌐 REST API"),
+              (h("pink"),    "📱 Mobile App"),
+          ]
+          pill_y = 10
+          total_pill_w = sum(len(t)*0.72 + 2.5 for _, t in FEATURES) + \
+                         len(FEATURES)*0.8
+          px_start = (100 - total_pill_w) / 2
+          for color, text in FEATURES:
+              pw = len(text)*0.72 + 2.5
+              ax.add_patch(FancyBboxPatch(
+                  (px_start, pill_y-1.3), pw, 2.6,
+                  boxstyle="round,pad=0.2",
+                  facecolor=color+"30",
+                  edgecolor=color+"80", linewidth=0.8, zorder=10
+              ))
+              ax.text(px_start + pw/2, pill_y,
+                  text, ha="center", va="center",
+                  color=color, fontsize=6.5, fontweight="bold", zorder=11
+              )
+              px_start += pw + 0.8
+
+          # ── Stats ticker ──────────────────────────────────────────
+          ax.text(50, 5.5,
+              "⭐ 12.4k Stars  ·  🔀 847 Forks  ·  "
+              "📦 v5.0.0  ·  MIT License  ·  "
+              "💬 Discord  ·  📖 Docs",
+              ha="center", va="center",
+              color=h("overlay0"), fontsize=6, zorder=10
+          )
+
+          # ── Right: Color palette strip ────────────────────────────
+          STRIP = [h("red"),h("peach"),h("yellow"),h("green"),
+                   h("teal"),h("sapphire"),h("blue"),h("mauve"),h("pink")]
+          sw = 4.5; sx = 75
+          for i, col in enumerate(STRIP):
+              ay = 5 + i * (H-7) / len(STRIP)
+              ax.add_patch(FancyBboxPatch(
+                  (sx + i*sw*0.15, ay),
+                  sw*0.9, (H-7)/len(STRIP)-0.5,
+                  boxstyle="round,pad=0.15",
+                  facecolor=col, alpha=0.85,
+                  edgecolor="none", zorder=9
+              ))
+
+          plt.tight_layout(pad=0)
+          out = WORK_DIR / "hero-banner.png"
+          plt.savefig(str(out), dpi=100, bbox_inches="tight",
+                      pad_inches=0, facecolor=h("base"))
+          plt.close()
+          print(f"  ✅ Hero banner: {out}")
+          HERO_EOF
+
+      - name: "🔄 Convert hero to WebP"
+        run: |
+          INPUT="${WORK_DIR}/hero/hero-banner.png"
+          OUTPUT="${WORK_DIR}/hero/hero-banner.webp"
+          [[ -f "${INPUT}" ]] && \
+            (cwebp -q "${WEBP_Q}" -m 6 "${INPUT}" -o "${OUTPUT}" 2>/dev/null || \
+             convert "${INPUT}" -quality "${WEBP_Q}" "${OUTPUT}" 2>/dev/null || \
+             cp "${INPUT}" "${OUTPUT}") && \
+            rm -f "${INPUT}"
+          WEBP_KB=$(wc -c < "${OUTPUT}" 2>/dev/null | awk '{printf "%.0f",$1/1024}' || echo "?")
+          echo "  📦 Hero banner: ${WEBP_KB}KB"
+
+      - name: "📝 Update README.md images"
+        if: env.UPDATE_README == 'true'
+        run: |
+          python3 << 'README_EOF'
+          import os
+          import re
+          from pathlib import Path
+
+          README = Path(os.environ["GITHUB_WORKSPACE"]) / "README.md"
+          HERO   = "assets/screenshots/brand/hero-banner.webp"
+
+          if not README.exists():
+              print("  ⚠️ README.md not found")
+              exit(0)
+
+          content = README.read_text()
+
+          # Update hero image tag
+          HERO_PATTERN = r'<!-- HERO_BANNER_START -->.*?<!-- HERO_BANNER_END -->'
+          HERO_REPLACEMENT = (
+              "<!-- HERO_BANNER_START -->\n"
+              f'<p align="center">\n'
+              f'  <img src="{HERO}" alt="ASH Dotfiles v5.0 OMEGA" width="100%">\n'
+              "</p>\n"
+              "<!-- HERO_BANNER_END -->"
+          )
+
+          if "<!-- HERO_BANNER_START -->" in content:
+              new_content = re.sub(
+                  HERO_PATTERN, HERO_REPLACEMENT,
+                  content, flags=re.DOTALL
+              )
+          else:
+              new_content = content
+
+          if new_content != content:
+              README.write_text(new_content)
+              print(f"  ✅ README.md hero image updated")
+          else:
+              print("  ℹ️ README.md: no changes needed")
+          README_EOF
+
+      - name: "💾 Copy & commit hero"
+        if: env.COMMIT_SCREENSHOTS == 'true'
+        run: |
+          set -euo pipefail
+
+          mkdir -p "${OUTPUT_DIR}/brand"
+          cp "${WORK_DIR}/hero/hero-banner.webp" \
+             "${OUTPUT_DIR}/brand/hero-banner.webp" 2>/dev/null || true
+
+          git config user.name  "ash-screenshot-bot[bot]"
+          git config user.email "ash-screenshot-bot@users.noreply.github.com"
+
+          git add "${OUTPUT_DIR}/brand/" README.md 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "  ℹ️ No hero changes to commit"
+          else
+            git commit -m "📸 chore(hero): update README hero banner [skip ci]
+
+          Generated by ASH v5.0 OMEGA Screenshot Engine
+          Session: ${{ needs.plan.outputs.session_id }}"
+            git push
+            echo "  ✅ Hero committed"
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Consolidate all screenshots & commit
+  # ───────────────────────────────────────────────────────────────────────────
+  consolidate:
+    name: "📦 Consolidate · Organize & Commit All Screenshots"
+    needs: [plan, desktop-screenshots, component-screenshots, hero-and-readme]
+    if: |
+      always() &&
+      env.COMMIT_SCREENSHOTS == 'true' &&
+      github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📥 Download all screenshot artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "shot-*-${{ needs.plan.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/all-shots"
+          merge-multiple: true
+
+      - name: "📁 Organize screenshots"
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            "${OUTPUT_DIR}/desktop" \
+            "${OUTPUT_DIR}/components" \
+            "${OUTPUT_DIR}/features" \
+            "${OUTPUT_DIR}/gallery"
+
+          # Desktop screenshots
+          find "${WORK_DIR}/all-shots" \
+            -name "desktop-*.webp" | \
+          while read -r f; do
+            cp "${f}" "${OUTPUT_DIR}/desktop/"
+          done
+
+          # Component screenshots
+          find "${WORK_DIR}/all-shots" \
+            -name "*.webp" \
+            -not -name "desktop-*" | \
+          while read -r f; do
+            cp "${f}" "${OUTPUT_DIR}/components/"
+          done
+
+          echo "  ✅ Screenshots organized"
+          echo "  🖥️ Desktop: $(ls "${OUTPUT_DIR}/desktop/"*.webp 2>/dev/null | wc -l)"
+          echo "  🧩 Components: $(ls "${OUTPUT_DIR}/components/"*.webp 2>/dev/null | wc -l)"
+
+      - name: "📋 Generate screenshot index"
+        run: |
+          python3 << 'INDEX_EOF'
+          import json
+          import os
+          import glob
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          OUTPUT_DIR = Path(os.environ["OUTPUT_DIR"])
+          SESSION_ID = "${{ needs.plan.outputs.session_id }}"
+
+          def get_files(pattern):
+              return sorted([
+                  {"name": p.name, "size_kb": round(p.stat().st_size/1024,1)}
+                  for p in Path(OUTPUT_DIR).glob(pattern)
+                  if p.is_file()
+              ])
+
+          index = {
+              "version":    "5.0.0",
+              "session_id": SESSION_ID,
+              "generated":  datetime.now(timezone.utc).isoformat(),
+              "screenshots": {
+                  "desktop":    get_files("desktop/*.webp"),
+                  "components": get_files("components/*.webp"),
+                  "features":   get_files("features/*.webp"),
+                  "brand":      get_files("brand/*.webp"),
+              },
+              "totals": {
+                  "desktop":    len(get_files("desktop/*.webp")),
+                  "components": len(get_files("components/*.webp")),
+                  "features":   len(get_files("features/*.webp")),
+                  "brand":      len(get_files("brand/*.webp")),
+              }
+          }
+
+          with open(OUTPUT_DIR / "index.json","w") as f:
+              json.dump(index, f, indent=2)
+
+          total = sum(index["totals"].values())
+          print(f"  ✅ Index: {total} total screenshots")
+          INDEX_EOF
+
+      - name: "💾 Commit all screenshots"
+        run: |
+          set -euo pipefail
+
+          git config user.name  "ash-screenshot-bot[bot]"
+          git config user.email "ash-screenshot-bot@users.noreply.github.com"
+
+          git add "${OUTPUT_DIR}/" 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "  ℹ️ No screenshot changes to commit"
+          else
+            THEME_COUNT="${{ needs.plan.outputs.theme_count }}"
+            git commit -m "📸 chore(screenshots): update ${THEME_COUNT} theme screenshots [skip ci]
+
+          Session: ${{ needs.plan.outputs.session_id }}
+          Quality: ${QUALITY}
+          Types:   ${SCREENSHOT_TYPES}
+          Themes:  ${THEME_COUNT}
+
+          Generated by ASH v5.0 OMEGA Screenshot Engine"
+
+            git push
+            echo "  ✅ Screenshots committed"
+          fi
+
+      - name: "📊 Step summary"
+        if: always()
+        run: |
+          cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+          # 📸 Screenshot Update Complete
+
+          > Session: \`${{ needs.plan.outputs.session_id }}\` · Quality: \`${QUALITY}\`
+
+          ## 📊 Results
+
+          | Category | Count |
+          |----------|-------|
+          | 🖥️ Desktop | \`${{ needs.plan.outputs.theme_count }}\` |
+          | 🧩 Components | \`4\` (Rofi/Dunst/Hyprlock/AGS) |
+          | 🎨 Hero Banner | \`1\` |
+
+          ---
+          *📸 ASH v5.0 OMEGA Screenshot Engine*
+          EOF

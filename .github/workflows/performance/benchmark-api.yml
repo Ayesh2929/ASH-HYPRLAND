@@ -1,0 +1,4208 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                       ║
+# ║  🌐 ASH DOTFILES v5.0 OMEGA — REST API BENCHMARK WORKFLOW                            ║
+# ║                                                                                       ║
+# ║  ██████╗ ███████╗███╗   ██╗ ██████╗██╗  ██╗███╗   ███╗ █████╗ ██████╗ ██╗  ██╗     ║
+# ║  ██╔══██╗██╔════╝████╗  ██║██╔════╝██║  ██║████╗ ████║██╔══██╗██╔══██╗██║ ██╔╝     ║
+# ║  ██████╔╝█████╗  ██╔██╗ ██║██║     ███████║██╔████╔██║███████║██████╔╝█████╔╝      ║
+# ║  ██╔══██╗██╔══╝  ██║╚██╗██║██║     ██╔══██║██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗      ║
+# ║  ██████╔╝███████╗██║ ╚████║╚██████╗██║  ██║██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██╗     ║
+# ║  ╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ║
+# ║                                                                                       ║
+# ║  Comprehensive REST API performance benchmarking suite                                ║
+# ║                                                                                       ║
+# ║  Measures:                                                                            ║
+# ║    ⚡ Endpoint response latency (p50/p75/p90/p95/p99)                                ║
+# ║    🔄 Requests per second throughput                                                  ║
+# ║    💪 Sustained load performance                                                      ║
+# ║    🌊 Concurrent connection handling                                                  ║
+# ║    📡 WebSocket real-time message latency                                             ║
+# ║    🔐 Authentication overhead                                                         ║
+# ║    💾 Response payload efficiency                                                     ║
+# ║    📊 Error rate under stress                                                         ║
+# ║    🔁 Rate limiting behavior                                                          ║
+# ║    🌡️ API health degradation detection                                                ║
+# ║                                                                                       ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🌐 Benchmark · REST API Performance"
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+    paths:
+      - "api/**"
+      - "api/server.py"
+      - "api/routes.py"
+      - "api/models.py"
+      - "api/auth.py"
+      - "api/websocket.py"
+      - "api/endpoints/**"
+      - ".github/workflows/performance/benchmark-api.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "api/**"
+      - ".github/workflows/performance/benchmark-api.yml"
+  workflow_dispatch:
+    inputs:
+      duration_seconds:
+        description: "Load test duration (seconds)"
+        required: false
+        default: "30"
+        type: string
+      concurrent_users:
+        description: "Concurrent virtual users"
+        required: false
+        default: "50"
+        type: string
+      rps_target:
+        description: "Target requests per second"
+        required: false
+        default: "100"
+        type: string
+      endpoint_filter:
+        description: "Endpoint filter (all|theme|plugin|snapshot|auth|ws)"
+        required: false
+        default: "all"
+        type: string
+      regression_threshold:
+        description: "Latency regression threshold %"
+        required: false
+        default: "15"
+        type: string
+      enable_spike_test:
+        description: "Enable spike load test"
+        required: false
+        default: true
+        type: boolean
+      enable_soak_test:
+        description: "Enable soak test (extended duration)"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "0 3 * * *"     # Nightly 03:00 UTC
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "bench-api-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+  actions: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  BENCHMARK_VERSION: "5.0.0"
+  BENCH_DIR: "${{ github.workspace }}/bench-api"
+  BASELINE_DIR: "${{ github.workspace }}/baseline-api"
+  REPORTS_DIR: "${{ github.workspace }}/reports-api"
+  API_HOST: "localhost"
+  API_PORT: "8765"
+  API_BASE_URL: "http://localhost:8765"
+  WS_BASE_URL: "ws://localhost:8765"
+  API_VERSION: "v1"
+
+  # ── Benchmark inputs ──────────────────────────────────────────────────────
+  DURATION_SECONDS: "${{ github.event.inputs.duration_seconds || '30' }}"
+  CONCURRENT_USERS: "${{ github.event.inputs.concurrent_users || '50' }}"
+  RPS_TARGET: "${{ github.event.inputs.rps_target || '100' }}"
+  ENDPOINT_FILTER: "${{ github.event.inputs.endpoint_filter || 'all' }}"
+  REGRESSION_THRESHOLD: "${{ github.event.inputs.regression_threshold || '15' }}"
+  ENABLE_SPIKE_TEST: "${{ github.event.inputs.enable_spike_test || 'true' }}"
+  ENABLE_SOAK_TEST: "${{ github.event.inputs.enable_soak_test || 'false' }}"
+
+  # ── Latency thresholds (ms) ───────────────────────────────────────────────
+  THRESHOLD_P50_MS: "50"
+  THRESHOLD_P90_MS: "100"
+  THRESHOLD_P95_MS: "200"
+  THRESHOLD_P99_MS: "500"
+
+  # ── Throughput thresholds ─────────────────────────────────────────────────
+  THRESHOLD_MIN_RPS: "50"
+  THRESHOLD_MIN_RPS_LOAD: "30"
+
+  # ── Error rate thresholds ─────────────────────────────────────────────────
+  THRESHOLD_MAX_ERROR_RATE_PCT: "1.0"
+  THRESHOLD_MAX_ERROR_RATE_LOAD_PCT: "5.0"
+
+  # ── Endpoint-specific thresholds (ms) ────────────────────────────────────
+  THRESHOLD_THEME_LIST_MS: "100"
+  THRESHOLD_THEME_GET_MS: "80"
+  THRESHOLD_THEME_APPLY_MS: "500"
+  THRESHOLD_PLUGIN_LIST_MS: "100"
+  THRESHOLD_PLUGIN_INSTALL_MS: "2000"
+  THRESHOLD_SNAPSHOT_CREATE_MS: "1000"
+  THRESHOLD_SNAPSHOT_LIST_MS: "150"
+  THRESHOLD_CONFIG_GET_MS: "50"
+  THRESHOLD_CONFIG_SET_MS: "100"
+  THRESHOLD_AUTH_TOKEN_MS: "200"
+  THRESHOLD_HEALTH_MS: "20"
+  THRESHOLD_WS_CONNECT_MS: "100"
+  THRESHOLD_WS_MESSAGE_MS: "50"
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Spin up API server
+  # ───────────────────────────────────────────────────────────────────────────
+  api-server:
+    name: "🚀 Server · Launch ASH API"
+    runs-on: ubuntu-24.04
+    outputs:
+      bench_id: ${{ steps.id.outputs.bench_id }}
+      server_ready: ${{ steps.health.outputs.ready }}
+      api_version: ${{ steps.version.outputs.version }}
+      has_baseline: ${{ steps.baseline_check.outputs.has_baseline }}
+
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🆔 Generate benchmark ID"
+        id: id
+        run: |
+          BENCH_ID="api-$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
+          echo "bench_id=${BENCH_ID}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=API Benchmark ID::${BENCH_ID}"
+
+      - name: "🐍 Setup Python environment"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: "📦 Install API dependencies"
+        run: |
+          set -euo pipefail
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  📦 Installing ASH API dependencies"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          # Core API framework
+          pip install --quiet --upgrade \
+            fastapi==0.115.0 \
+            uvicorn[standard]==0.32.0 \
+            websockets==13.1 \
+            pydantic==2.9.2 \
+            python-jose[cryptography]==3.3.0 \
+            passlib[bcrypt]==1.7.4 \
+            python-multipart==0.0.12 \
+            httpx==0.27.2 \
+            aiofiles==24.1.0 \
+            orjson==3.10.10 \
+            redis==5.1.1 \
+            sqlalchemy==2.0.36 \
+            aiosqlite==0.20.0 \
+            prometheus-client==0.21.0 \
+            opentelemetry-sdk==1.27.0
+
+          # Benchmark & load testing tools
+          pip install --quiet \
+            locust==2.32.0 \
+            pytest==8.3.3 \
+            pytest-asyncio==0.24.0 \
+            pytest-benchmark==4.0.0 \
+            httpx==0.27.2 \
+            aiohttp==3.11.2 \
+            websockets==13.1 \
+            rich==13.9.2 \
+            matplotlib==3.9.2 \
+            pandas==2.2.3 \
+            numpy==2.1.2 \
+            scipy==1.14.1 \
+            jinja2==3.1.4 \
+            tabulate==0.9.0 \
+            colorama==0.4.6 \
+            psutil==6.1.0 \
+            memory-profiler==0.61.0
+
+          echo ""
+          echo "  ✅ FastAPI:   $(python3 -c 'import fastapi; print(fastapi.__version__)')"
+          echo "  ✅ Uvicorn:   $(python3 -c 'import uvicorn; print(uvicorn.__version__)')"
+          echo "  ✅ Locust:    $(python3 -c 'import locust; print(locust.__version__)')"
+          echo "  ✅ Pydantic:  $(python3 -c 'import pydantic; print(pydantic.__version__)')"
+
+      - name: "🏗️ Bootstrap ASH API server"
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            api/endpoints \
+            api/schemas \
+            api/middleware \
+            api/services \
+            api/models_db \
+            "${BENCH_DIR}" \
+            "${REPORTS_DIR}"
+
+          # ── Main API server ─────────────────────────────────────────────
+          cat > api/server.py << 'SERVER_EOF'
+          """
+          ASH Dotfiles v5.0 OMEGA — REST API Server
+          ==========================================
+          Full-featured FastAPI application with:
+          • JWT authentication
+          • Rate limiting
+          • WebSocket support
+          • OpenAPI/Swagger docs
+          • Prometheus metrics
+          • Structured logging
+          • Response caching
+          • CORS support
+          """
+
+          import asyncio
+          import hashlib
+          import json
+          import os
+          import random
+          import time
+          import uuid
+          from contextlib import asynccontextmanager
+          from datetime import datetime, timedelta, timezone
+          from typing import Any, Dict, List, Optional, Union
+
+          import uvicorn
+          from fastapi import (
+              BackgroundTasks, Depends, FastAPI, HTTPException,
+              Query, Request, Response, WebSocket, WebSocketDisconnect,
+              status,
+          )
+          from fastapi.middleware.cors import CORSMiddleware
+          from fastapi.middleware.gzip import GZipMiddleware
+          from fastapi.responses import JSONResponse, StreamingResponse
+          from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+          from pydantic import BaseModel, Field, field_validator
+
+          # ── Pydantic models ─────────────────────────────────────────────
+          class ColorPalette(BaseModel):
+              base: str = "#1e1e2e"
+              mantle: str = "#181825"
+              crust: str = "#11111b"
+              text: str = "#cdd6f4"
+              subtext: str = "#a6adc8"
+              overlay: str = "#6c7086"
+              surface: str = "#313244"
+              blue: str = "#89b4fa"
+              lavender: str = "#b4befe"
+              sapphire: str = "#74c7ec"
+              sky: str = "#89dceb"
+              teal: str = "#94e2d5"
+              green: str = "#a6e3a1"
+              yellow: str = "#f9e2af"
+              peach: str = "#fab387"
+              maroon: str = "#eba0ac"
+              red: str = "#f38ba8"
+              mauve: str = "#cba6f7"
+              pink: str = "#f5c2e7"
+              flamingo: str = "#f2cdcd"
+              rosewater: str = "#f5e0dc"
+              accent: str = "#cba6f7"
+
+          class ThemeMetadata(BaseModel):
+              id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+              name: str
+              description: str = ""
+              category: str = "dark"
+              author: str = "unknown"
+              version: str = "1.0.0"
+              tags: List[str] = []
+              downloads: int = 0
+              stars: int = 0
+              created_at: str = Field(
+                  default_factory=lambda: datetime.now(timezone.utc).isoformat()
+              )
+              updated_at: str = Field(
+                  default_factory=lambda: datetime.now(timezone.utc).isoformat()
+              )
+
+          class Theme(BaseModel):
+              metadata: ThemeMetadata
+              colors: ColorPalette = ColorPalette()
+              wallpaper: Optional[str] = None
+              preview_url: Optional[str] = None
+
+          class ThemeApplyRequest(BaseModel):
+              theme_name: str
+              targets: List[str] = ["all"]
+              transition: str = "fade"
+              duration_ms: int = Field(default=300, ge=0, le=2000)
+              dry_run: bool = False
+
+          class ThemeApplyResponse(BaseModel):
+              success: bool
+              theme: str
+              applied_targets: List[str]
+              duration_ms: float
+              timestamp: str
+
+          class PluginMetadata(BaseModel):
+              id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+              name: str
+              description: str = ""
+              version: str = "1.0.0"
+              author: str = "unknown"
+              category: str = "core"
+              enabled: bool = True
+              installed: bool = False
+              size_kb: int = 0
+              dependencies: List[str] = []
+              tags: List[str] = []
+
+          class SnapshotMetadata(BaseModel):
+              id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+              name: str
+              description: str = ""
+              theme: str = "catppuccin-mocha"
+              mode: str = "default"
+              created_at: str = Field(
+                  default_factory=lambda: datetime.now(timezone.utc).isoformat()
+              )
+              size_kb: int = 0
+              pinned: bool = False
+              tags: List[str] = []
+
+          class ConfigItem(BaseModel):
+              key: str
+              value: Any
+              type: str = "string"
+              description: str = ""
+              readonly: bool = False
+
+          class AuthRequest(BaseModel):
+              username: str
+              password: str
+
+          class AuthResponse(BaseModel):
+              access_token: str
+              token_type: str = "bearer"
+              expires_in: int = 3600
+              scope: str = "full"
+
+          class APIResponse(BaseModel):
+              success: bool = True
+              data: Any = None
+              meta: Dict[str, Any] = {}
+              timestamp: str = Field(
+                  default_factory=lambda: datetime.now(timezone.utc).isoformat()
+              )
+
+          class HealthResponse(BaseModel):
+              status: str = "healthy"
+              version: str = "5.0.0"
+              uptime_seconds: float = 0
+              checks: Dict[str, str] = {}
+              timestamp: str = Field(
+                  default_factory=lambda: datetime.now(timezone.utc).isoformat()
+              )
+
+          # ── In-memory store (benchmark mock) ───────────────────────────
+          THEMES_DB: Dict[str, Theme] = {}
+          PLUGINS_DB: Dict[str, PluginMetadata] = {}
+          SNAPSHOTS_DB: Dict[str, SnapshotMetadata] = {}
+          CONFIG_DB: Dict[str, ConfigItem] = {}
+          RATE_LIMIT_STORE: Dict[str, List[float]] = {}
+          WS_CONNECTIONS: List[WebSocket] = []
+          START_TIME: float = time.time()
+          REQUEST_COUNTER: int = 0
+          ERROR_COUNTER: int = 0
+
+          # ── Seed data ───────────────────────────────────────────────────
+          THEME_NAMES = [
+              "catppuccin-mocha", "catppuccin-macchiato", "catppuccin-latte",
+              "tokyo-night", "tokyo-night-storm", "gruvbox-dark", "gruvbox-light",
+              "nord", "dracula", "one-dark", "rose-pine", "rose-pine-dawn",
+              "everforest-dark", "kanagawa-wave", "material-ocean",
+              "cyberpunk-2077", "synthwave-84", "matrix-green",
+              "forest-deep", "ocean-depth", "aurora-borealis",
+              "vaporwave", "minimal-dark", "minimal-light",
+          ]
+          PLUGIN_NAMES = [
+              "game-mode", "caffeine", "auto-wallpaper", "focus-timer",
+              "weather-display", "pomodoro-plus", "discord-rpc", "spotify-control",
+              "github-status", "blur-toggle", "night-light", "do-not-disturb",
+          ]
+          CATEGORIES = ["dark", "light", "neon", "nature", "space", "minimal"]
+          MODES = ["default", "game", "work", "focus", "cinema", "battery"]
+
+          def _seed():
+              """Populate in-memory databases with realistic mock data."""
+              for i, name in enumerate(THEME_NAMES):
+                  THEMES_DB[name] = Theme(
+                      metadata=ThemeMetadata(
+                          name=name,
+                          description=f"The {name.replace('-',' ').title()} theme for ASH",
+                          category=CATEGORIES[i % len(CATEGORIES)],
+                          author=f"ash-team" if i < 8 else f"community-{i}",
+                          version=f"1.{i}.0",
+                          tags=[CATEGORIES[i % len(CATEGORIES)], "popular" if i < 5 else ""],
+                          downloads=random.randint(100, 50000),
+                          stars=random.randint(10, 5000),
+                      ),
+                      colors=ColorPalette(),
+                  )
+              for i, name in enumerate(PLUGIN_NAMES):
+                  PLUGINS_DB[name] = PluginMetadata(
+                      name=name,
+                      description=f"ASH {name.replace('-',' ').title()} plugin",
+                      version=f"1.{i}.0",
+                      category="core" if i < 6 else "integration",
+                      enabled=i % 3 != 0,
+                      installed=i < 8,
+                      size_kb=random.randint(10, 500),
+                      tags=["core" if i < 6 else "integration"],
+                  )
+              for i in range(20):
+                  snap_id = str(uuid.uuid4())
+                  SNAPSHOTS_DB[snap_id] = SnapshotMetadata(
+                      id=snap_id,
+                      name=f"snapshot-{i:03d}",
+                      description=f"Auto snapshot #{i}",
+                      theme=THEME_NAMES[i % len(THEME_NAMES)],
+                      mode=MODES[i % len(MODES)],
+                      size_kb=random.randint(50, 2000),
+                      pinned=i < 3,
+                  )
+              CONFIG_DB.update({
+                  "theme.name": ConfigItem(key="theme.name", value="catppuccin-mocha",
+                                           type="string", description="Active theme"),
+                  "theme.auto_apply": ConfigItem(key="theme.auto_apply", value=True,
+                                                  type="boolean", description="Auto apply"),
+                  "mode.current": ConfigItem(key="mode.current", value="default",
+                                              type="string", description="Current mode"),
+                  "bar.layout": ConfigItem(key="bar.layout", value="top-bar",
+                                            type="string", description="Waybar layout"),
+                  "animation.speed": ConfigItem(key="animation.speed", value=300,
+                                                 type="integer", description="Animation speed ms"),
+                  "wallpaper.slideshow": ConfigItem(key="wallpaper.slideshow", value=False,
+                                                     type="boolean"),
+                  "plugins.auto_update": ConfigItem(key="plugins.auto_update", value=True,
+                                                     type="boolean"),
+                  "analytics.enabled": ConfigItem(key="analytics.enabled", value=False,
+                                                   type="boolean"),
+              })
+
+          # ── Middleware ──────────────────────────────────────────────────
+          security = HTTPBearer(auto_error=False)
+          SECRET_KEY = "ash-benchmark-secret-key-v5-omega"
+          ALGORITHM = "HS256"
+
+          def _create_token(username: str) -> str:
+              """Create a simple JWT-like token for benchmarking."""
+              payload = {
+                  "sub": username,
+                  "iat": int(time.time()),
+                  "exp": int(time.time()) + 3600,
+                  "scope": "full",
+              }
+              token_data = json.dumps(payload)
+              signature = hashlib.sha256(
+                  f"{token_data}{SECRET_KEY}".encode()
+              ).hexdigest()
+              import base64
+              token_b64 = base64.b64encode(token_data.encode()).decode()
+              return f"{token_b64}.{signature}"
+
+          def _verify_token(token: str) -> Optional[str]:
+              """Verify token and return username."""
+              try:
+                  import base64
+                  parts = token.split(".")
+                  if len(parts) != 2:
+                      return None
+                  payload = json.loads(base64.b64decode(parts[0]))
+                  if payload.get("exp", 0) < time.time():
+                      return None
+                  return payload.get("sub")
+              except Exception:
+                  return None
+
+          async def _get_current_user(
+              credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+          ) -> str:
+              if credentials is None:
+                  raise HTTPException(
+                      status_code=status.HTTP_401_UNAUTHORIZED,
+                      detail="Authentication required",
+                      headers={"WWW-Authenticate": "Bearer"},
+                  )
+              username = _verify_token(credentials.credentials)
+              if not username:
+                  raise HTTPException(
+                      status_code=status.HTTP_401_UNAUTHORIZED,
+                      detail="Invalid or expired token",
+                  )
+              return username
+
+          def _check_rate_limit(client_ip: str, limit: int = 1000, window: int = 60) -> bool:
+              """Token bucket rate limiter."""
+              now = time.time()
+              if client_ip not in RATE_LIMIT_STORE:
+                  RATE_LIMIT_STORE[client_ip] = []
+              requests = RATE_LIMIT_STORE[client_ip]
+              requests[:] = [r for r in requests if now - r < window]
+              if len(requests) >= limit:
+                  return False
+              requests.append(now)
+              return True
+
+          # ── App lifespan ────────────────────────────────────────────────
+          @asynccontextmanager
+          async def lifespan(app: FastAPI):
+              _seed()
+              print(f"[ASH-API] Server started · {len(THEMES_DB)} themes · "
+                    f"{len(PLUGINS_DB)} plugins · {len(SNAPSHOTS_DB)} snapshots")
+              yield
+              print("[ASH-API] Server shutting down")
+
+          # ── FastAPI app ─────────────────────────────────────────────────
+          app = FastAPI(
+              title="ASH Dotfiles REST API",
+              description="🎨 The ASH v5.0 OMEGA REST API — Theme Engine · Plugin System · Configuration",
+              version="5.0.0",
+              docs_url="/docs",
+              redoc_url="/redoc",
+              openapi_url="/openapi.json",
+              lifespan=lifespan,
+          )
+
+          # Middleware stack
+          app.add_middleware(
+              CORSMiddleware,
+              allow_origins=["*"],
+              allow_credentials=True,
+              allow_methods=["*"],
+              allow_headers=["*"],
+              expose_headers=["X-Request-ID", "X-Response-Time", "X-Rate-Limit-Remaining"],
+          )
+          app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+          @app.middleware("http")
+          async def _timing_middleware(request: Request, call_next):
+              global REQUEST_COUNTER, ERROR_COUNTER
+              request_id = str(uuid.uuid4())[:8]
+              start = time.perf_counter()
+              REQUEST_COUNTER += 1
+              client_ip = request.client.host if request.client else "unknown"
+              if not _check_rate_limit(client_ip):
+                  ERROR_COUNTER += 1
+                  return JSONResponse(
+                      status_code=429,
+                      content={"detail": "Rate limit exceeded", "retry_after": 60},
+                      headers={"Retry-After": "60", "X-Request-ID": request_id},
+                  )
+              try:
+                  response = await call_next(request)
+              except Exception:
+                  ERROR_COUNTER += 1
+                  raise
+              elapsed_ms = (time.perf_counter() - start) * 1000
+              response.headers["X-Request-ID"] = request_id
+              response.headers["X-Response-Time"] = f"{elapsed_ms:.2f}ms"
+              response.headers["X-Rate-Limit-Remaining"] = "999"
+              return response
+
+          # ─────────────────────────────────────────────────────────────
+          # ENDPOINTS
+          # ─────────────────────────────────────────────────────────────
+
+          # ── Health & Meta ──────────────────────────────────────────────
+          @app.get("/health", response_model=HealthResponse, tags=["meta"])
+          async def health():
+              """System health check — ultra-fast, no auth."""
+              return HealthResponse(
+                  status="healthy",
+                  version="5.0.0",
+                  uptime_seconds=round(time.time() - START_TIME, 2),
+                  checks={
+                      "database": "ok",
+                      "cache": "ok",
+                      "theme_engine": "ok",
+                      "plugin_system": "ok",
+                      "ipc": "ok",
+                  },
+              )
+
+          @app.get("/health/deep", tags=["meta"])
+          async def health_deep(user: str = Depends(_get_current_user)):
+              """Deep health check including all subsystems."""
+              await asyncio.sleep(0.005)  # Simulate deep checks
+              return {
+                  "status": "healthy",
+                  "version": "5.0.0",
+                  "uptime_seconds": round(time.time() - START_TIME, 2),
+                  "subsystems": {
+                      "database": {"status": "ok", "latency_ms": 1.2},
+                      "cache": {"status": "ok", "hit_rate_pct": 94.5},
+                      "theme_engine": {"status": "ok", "loaded_themes": len(THEMES_DB)},
+                      "plugin_system": {"status": "ok", "active_plugins": len(PLUGINS_DB)},
+                      "hot_reload": {"status": "ok", "watchers": 5},
+                      "ipc": {"status": "ok", "connections": len(WS_CONNECTIONS)},
+                      "ai_engine": {"status": "ok", "model": "ollama-3.2"},
+                  },
+                  "metrics": {
+                      "total_requests": REQUEST_COUNTER,
+                      "total_errors": ERROR_COUNTER,
+                      "error_rate_pct": round(
+                          ERROR_COUNTER / max(REQUEST_COUNTER, 1) * 100, 4
+                      ),
+                  },
+              }
+
+          @app.get("/metrics", tags=["meta"])
+          async def metrics():
+              """Prometheus-compatible metrics endpoint."""
+              lines = [
+                  "# HELP ash_requests_total Total API requests",
+                  "# TYPE ash_requests_total counter",
+                  f"ash_requests_total {REQUEST_COUNTER}",
+                  "# HELP ash_errors_total Total API errors",
+                  "# TYPE ash_errors_total counter",
+                  f"ash_errors_total {ERROR_COUNTER}",
+                  "# HELP ash_uptime_seconds API uptime",
+                  "# TYPE ash_uptime_seconds gauge",
+                  f"ash_uptime_seconds {round(time.time() - START_TIME, 2)}",
+                  "# HELP ash_themes_total Loaded themes",
+                  "# TYPE ash_themes_total gauge",
+                  f"ash_themes_total {len(THEMES_DB)}",
+                  "# HELP ash_plugins_total Loaded plugins",
+                  "# TYPE ash_plugins_total gauge",
+                  f"ash_plugins_total {len(PLUGINS_DB)}",
+                  "# HELP ash_ws_connections Active WebSocket connections",
+                  "# TYPE ash_ws_connections gauge",
+                  f"ash_ws_connections {len(WS_CONNECTIONS)}",
+              ]
+              return Response(
+                  content="\n".join(lines) + "\n",
+                  media_type="text/plain; version=0.0.4",
+              )
+
+          # ── Authentication ─────────────────────────────────────────────
+          @app.post("/api/v1/auth/token", response_model=AuthResponse, tags=["auth"])
+          async def auth_token(request: AuthRequest):
+              """Obtain JWT access token."""
+              await asyncio.sleep(0.010)  # bcrypt simulation
+              if request.username == "wrong" or request.password == "wrong":
+                  raise HTTPException(
+                      status_code=status.HTTP_401_UNAUTHORIZED,
+                      detail="Invalid credentials",
+                  )
+              token = _create_token(request.username)
+              return AuthResponse(
+                  access_token=token,
+                  expires_in=3600,
+              )
+
+          @app.post("/api/v1/auth/refresh", tags=["auth"])
+          async def auth_refresh(user: str = Depends(_get_current_user)):
+              """Refresh access token."""
+              await asyncio.sleep(0.005)
+              token = _create_token(user)
+              return AuthResponse(access_token=token, expires_in=3600)
+
+          @app.get("/api/v1/auth/me", tags=["auth"])
+          async def auth_me(user: str = Depends(_get_current_user)):
+              """Get current user info."""
+              return {
+                  "username": user,
+                  "role": "admin",
+                  "scopes": ["themes", "plugins", "config", "snapshots"],
+                  "authenticated_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          # ── Theme endpoints ────────────────────────────────────────────
+          @app.get("/api/v1/themes", tags=["themes"])
+          async def themes_list(
+              category: Optional[str] = None,
+              search: Optional[str] = None,
+              page: int = Query(default=1, ge=1),
+              limit: int = Query(default=20, ge=1, le=100),
+              sort: str = "name",
+              user: str = Depends(_get_current_user),
+          ):
+              """List all available themes with filtering and pagination."""
+              themes = list(THEMES_DB.values())
+              if category:
+                  themes = [t for t in themes if t.metadata.category == category]
+              if search:
+                  sl = search.lower()
+                  themes = [t for t in themes if sl in t.metadata.name.lower()
+                             or sl in t.metadata.description.lower()]
+              if sort == "downloads":
+                  themes.sort(key=lambda t: t.metadata.downloads, reverse=True)
+              elif sort == "stars":
+                  themes.sort(key=lambda t: t.metadata.stars, reverse=True)
+              else:
+                  themes.sort(key=lambda t: t.metadata.name)
+              total = len(themes)
+              start = (page - 1) * limit
+              paginated = themes[start:start + limit]
+              return {
+                  "themes": [t.model_dump() for t in paginated],
+                  "pagination": {
+                      "page": page, "limit": limit,
+                      "total": total, "pages": (total + limit - 1) // limit,
+                  },
+                  "meta": {"categories": CATEGORIES, "total_all": len(THEMES_DB)},
+              }
+
+          @app.get("/api/v1/themes/{theme_name}", tags=["themes"])
+          async def themes_get(
+              theme_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Get a specific theme by name."""
+              if theme_name not in THEMES_DB:
+                  raise HTTPException(status_code=404, detail=f"Theme '{theme_name}' not found")
+              return THEMES_DB[theme_name].model_dump()
+
+          @app.post("/api/v1/themes/apply", response_model=ThemeApplyResponse, tags=["themes"])
+          async def themes_apply(
+              request: ThemeApplyRequest,
+              background_tasks: BackgroundTasks,
+              user: str = Depends(_get_current_user),
+          ):
+              """Apply a theme to the desktop."""
+              if request.theme_name not in THEMES_DB:
+                  raise HTTPException(status_code=404, detail="Theme not found")
+              start = time.perf_counter()
+              if not request.dry_run:
+                  # Simulate hot-reload propagation
+                  targets = request.targets if request.targets != ["all"] else [
+                      "hyprland", "waybar", "kitty", "dunst", "gtk", "nvim"
+                  ]
+                  await asyncio.sleep(0.050 * len(targets) / 6)
+              elapsed_ms = (time.perf_counter() - start) * 1000
+              return ThemeApplyResponse(
+                  success=True,
+                  theme=request.theme_name,
+                  applied_targets=request.targets,
+                  duration_ms=round(elapsed_ms, 2),
+                  timestamp=datetime.now(timezone.utc).isoformat(),
+              )
+
+          @app.get("/api/v1/themes/{theme_name}/preview", tags=["themes"])
+          async def themes_preview(
+              theme_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Get theme preview metadata."""
+              if theme_name not in THEMES_DB:
+                  raise HTTPException(status_code=404, detail="Theme not found")
+              theme = THEMES_DB[theme_name]
+              return {
+                  "name": theme_name,
+                  "preview_url": f"/assets/screenshots/desktop/{theme_name}.webp",
+                  "colors": theme.colors.model_dump(),
+                  "generated_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          @app.get("/api/v1/themes/{theme_name}/colors", tags=["themes"])
+          async def themes_colors(
+              theme_name: str,
+              format: str = Query(default="hex", enum=["hex", "rgb", "hsl", "oklch"]),
+              user: str = Depends(_get_current_user),
+          ):
+              """Get theme color palette in requested format."""
+              if theme_name not in THEMES_DB:
+                  raise HTTPException(status_code=404, detail="Theme not found")
+              colors = THEMES_DB[theme_name].colors.model_dump()
+              if format == "rgb":
+                  def hex_to_rgb(h):
+                      h = h.lstrip("#")
+                      return {"r": int(h[0:2],16), "g": int(h[2:4],16), "b": int(h[4:6],16)}
+                  colors = {k: hex_to_rgb(v) for k, v in colors.items()}
+              return {"format": format, "colors": colors, "theme": theme_name}
+
+          @app.post("/api/v1/themes/{theme_name}/favorite", tags=["themes"])
+          async def themes_favorite(
+              theme_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Mark theme as favorite."""
+              if theme_name not in THEMES_DB:
+                  raise HTTPException(status_code=404, detail="Theme not found")
+              return {"favorited": True, "theme": theme_name, "user": user}
+
+          @app.get("/api/v1/themes/search/{query}", tags=["themes"])
+          async def themes_search(
+              query: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Full-text search across themes."""
+              ql = query.lower()
+              results = [
+                  t for t in THEMES_DB.values()
+                  if ql in t.metadata.name.lower()
+                  or ql in t.metadata.description.lower()
+                  or any(ql in tag.lower() for tag in t.metadata.tags)
+              ]
+              return {
+                  "query": query,
+                  "results": [t.model_dump() for t in results[:10]],
+                  "total": len(results),
+              }
+
+          # ── Plugin endpoints ───────────────────────────────────────────
+          @app.get("/api/v1/plugins", tags=["plugins"])
+          async def plugins_list(
+              category: Optional[str] = None,
+              installed: Optional[bool] = None,
+              enabled: Optional[bool] = None,
+              page: int = Query(default=1, ge=1),
+              limit: int = Query(default=20, ge=1, le=100),
+              user: str = Depends(_get_current_user),
+          ):
+              """List all plugins."""
+              plugins = list(PLUGINS_DB.values())
+              if category:
+                  plugins = [p for p in plugins if p.category == category]
+              if installed is not None:
+                  plugins = [p for p in plugins if p.installed == installed]
+              if enabled is not None:
+                  plugins = [p for p in plugins if p.enabled == enabled]
+              total = len(plugins)
+              start = (page - 1) * limit
+              return {
+                  "plugins": [p.model_dump() for p in plugins[start:start+limit]],
+                  "pagination": {
+                      "page": page, "limit": limit, "total": total,
+                  },
+              }
+
+          @app.get("/api/v1/plugins/{plugin_name}", tags=["plugins"])
+          async def plugins_get(
+              plugin_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Get plugin details."""
+              if plugin_name not in PLUGINS_DB:
+                  raise HTTPException(status_code=404, detail="Plugin not found")
+              return PLUGINS_DB[plugin_name].model_dump()
+
+          @app.post("/api/v1/plugins/{plugin_name}/install", tags=["plugins"])
+          async def plugins_install(
+              plugin_name: str,
+              background_tasks: BackgroundTasks,
+              user: str = Depends(_get_current_user),
+          ):
+              """Install a plugin."""
+              if plugin_name not in PLUGINS_DB:
+                  raise HTTPException(status_code=404, detail="Plugin not found")
+              await asyncio.sleep(0.100)  # Simulate install
+              PLUGINS_DB[plugin_name].installed = True
+              PLUGINS_DB[plugin_name].enabled = True
+              return {
+                  "success": True,
+                  "plugin": plugin_name,
+                  "action": "installed",
+                  "timestamp": datetime.now(timezone.utc).isoformat(),
+              }
+
+          @app.delete("/api/v1/plugins/{plugin_name}", tags=["plugins"])
+          async def plugins_remove(
+              plugin_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Remove a plugin."""
+              if plugin_name not in PLUGINS_DB:
+                  raise HTTPException(status_code=404, detail="Plugin not found")
+              PLUGINS_DB[plugin_name].installed = False
+              PLUGINS_DB[plugin_name].enabled = False
+              return {
+                  "success": True,
+                  "plugin": plugin_name,
+                  "action": "removed",
+              }
+
+          @app.patch("/api/v1/plugins/{plugin_name}/toggle", tags=["plugins"])
+          async def plugins_toggle(
+              plugin_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Toggle plugin enabled state."""
+              if plugin_name not in PLUGINS_DB:
+                  raise HTTPException(status_code=404, detail="Plugin not found")
+              PLUGINS_DB[plugin_name].enabled = not PLUGINS_DB[plugin_name].enabled
+              return {
+                  "plugin": plugin_name,
+                  "enabled": PLUGINS_DB[plugin_name].enabled,
+              }
+
+          # ── Snapshot endpoints ─────────────────────────────────────────
+          @app.get("/api/v1/snapshots", tags=["snapshots"])
+          async def snapshots_list(
+              page: int = Query(default=1, ge=1),
+              limit: int = Query(default=20, ge=1, le=100),
+              pinned: Optional[bool] = None,
+              user: str = Depends(_get_current_user),
+          ):
+              """List all snapshots."""
+              snaps = list(SNAPSHOTS_DB.values())
+              if pinned is not None:
+                  snaps = [s for s in snaps if s.pinned == pinned]
+              snaps.sort(key=lambda s: s.created_at, reverse=True)
+              total = len(snaps)
+              start = (page - 1) * limit
+              return {
+                  "snapshots": [s.model_dump() for s in snaps[start:start+limit]],
+                  "pagination": {"page": page, "limit": limit, "total": total},
+              }
+
+          @app.post("/api/v1/snapshots", tags=["snapshots"])
+          async def snapshots_create(
+              name: str = Query(...),
+              description: str = Query(default=""),
+              user: str = Depends(_get_current_user),
+          ):
+              """Create a new snapshot."""
+              await asyncio.sleep(0.050)  # Simulate snapshot creation
+              snap = SnapshotMetadata(
+                  name=name,
+                  description=description,
+                  theme="catppuccin-mocha",
+                  size_kb=random.randint(100, 500),
+              )
+              SNAPSHOTS_DB[snap.id] = snap
+              return snap.model_dump()
+
+          @app.get("/api/v1/snapshots/{snapshot_id}", tags=["snapshots"])
+          async def snapshots_get(
+              snapshot_id: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Get snapshot details."""
+              if snapshot_id not in SNAPSHOTS_DB:
+                  raise HTTPException(status_code=404, detail="Snapshot not found")
+              return SNAPSHOTS_DB[snapshot_id].model_dump()
+
+          @app.post("/api/v1/snapshots/{snapshot_id}/restore", tags=["snapshots"])
+          async def snapshots_restore(
+              snapshot_id: str,
+              dry_run: bool = Query(default=False),
+              user: str = Depends(_get_current_user),
+          ):
+              """Restore from a snapshot."""
+              if snapshot_id not in SNAPSHOTS_DB:
+                  raise HTTPException(status_code=404, detail="Snapshot not found")
+              await asyncio.sleep(0.075)
+              return {
+                  "success": True,
+                  "snapshot_id": snapshot_id,
+                  "dry_run": dry_run,
+                  "restored_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          @app.delete("/api/v1/snapshots/{snapshot_id}", tags=["snapshots"])
+          async def snapshots_delete(
+              snapshot_id: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Delete a snapshot."""
+              if snapshot_id not in SNAPSHOTS_DB:
+                  raise HTTPException(status_code=404, detail="Snapshot not found")
+              del SNAPSHOTS_DB[snapshot_id]
+              return {"success": True, "deleted_id": snapshot_id}
+
+          # ── Config endpoints ───────────────────────────────────────────
+          @app.get("/api/v1/config", tags=["config"])
+          async def config_list(user: str = Depends(_get_current_user)):
+              """List all configuration keys."""
+              return {
+                  "config": {k: v.model_dump() for k, v in CONFIG_DB.items()},
+                  "total": len(CONFIG_DB),
+              }
+
+          @app.get("/api/v1/config/{key:path}", tags=["config"])
+          async def config_get(
+              key: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Get a configuration value."""
+              if key not in CONFIG_DB:
+                  raise HTTPException(status_code=404, detail=f"Config key '{key}' not found")
+              return CONFIG_DB[key].model_dump()
+
+          @app.put("/api/v1/config/{key:path}", tags=["config"])
+          async def config_set(
+              key: str,
+              value: Any,
+              user: str = Depends(_get_current_user),
+          ):
+              """Set a configuration value."""
+              if key in CONFIG_DB and CONFIG_DB[key].readonly:
+                  raise HTTPException(status_code=403, detail="Config key is readonly")
+              if key not in CONFIG_DB:
+                  CONFIG_DB[key] = ConfigItem(key=key, value=value)
+              else:
+                  CONFIG_DB[key].value = value
+              return CONFIG_DB[key].model_dump()
+
+          @app.delete("/api/v1/config/{key:path}", tags=["config"])
+          async def config_delete(
+              key: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Delete a configuration key."""
+              if key not in CONFIG_DB:
+                  raise HTTPException(status_code=404, detail="Key not found")
+              del CONFIG_DB[key]
+              return {"success": True, "deleted_key": key}
+
+          # ── Wallpaper endpoints ────────────────────────────────────────
+          @app.get("/api/v1/wallpapers", tags=["wallpapers"])
+          async def wallpapers_list(
+              category: Optional[str] = None,
+              resolution: Optional[str] = None,
+              user: str = Depends(_get_current_user),
+          ):
+              """List available wallpapers."""
+              categories = ["dark","light","minimal","abstract","nature",
+                            "space","anime","cyberpunk","retro"]
+              wallpapers = [
+                  {"name": f"wallpaper-{i:03d}", "category": categories[i % len(categories)],
+                   "resolution": "1920x1080" if i % 3 == 0 else "2560x1440" if i % 3 == 1 else "3840x2160",
+                   "url": f"/wallpapers/{categories[i%len(categories)]}/wp-{i:03d}.jpg",
+                   "size_kb": random.randint(500, 5000)}
+                  for i in range(50)
+              ]
+              if category:
+                  wallpapers = [w for w in wallpapers if w["category"] == category]
+              if resolution:
+                  wallpapers = [w for w in wallpapers if w["resolution"] == resolution]
+              return {"wallpapers": wallpapers, "total": len(wallpapers)}
+
+          @app.post("/api/v1/wallpapers/set", tags=["wallpapers"])
+          async def wallpapers_set(
+              wallpaper: str = Query(...),
+              transition: str = Query(default="fade"),
+              user: str = Depends(_get_current_user),
+          ):
+              """Set active wallpaper."""
+              await asyncio.sleep(0.030)
+              return {
+                  "success": True,
+                  "wallpaper": wallpaper,
+                  "transition": transition,
+                  "applied_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          # ── Mode endpoints ─────────────────────────────────────────────
+          @app.get("/api/v1/modes", tags=["modes"])
+          async def modes_list(user: str = Depends(_get_current_user)):
+              """List available desktop modes."""
+              return {
+                  "modes": [
+                      {"name": m, "active": m == "default",
+                       "description": f"ASH {m.title()} mode",
+                       "icon": f"mode-{m}"}
+                      for m in MODES
+                  ],
+                  "current": "default",
+              }
+
+          @app.post("/api/v1/modes/{mode_name}/activate", tags=["modes"])
+          async def modes_activate(
+              mode_name: str,
+              user: str = Depends(_get_current_user),
+          ):
+              """Activate a desktop mode."""
+              if mode_name not in MODES:
+                  raise HTTPException(status_code=404, detail="Mode not found")
+              await asyncio.sleep(0.040)
+              return {
+                  "success": True,
+                  "mode": mode_name,
+                  "activated_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          # ── Analytics endpoints ────────────────────────────────────────
+          @app.get("/api/v1/analytics/themes", tags=["analytics"])
+          async def analytics_themes(user: str = Depends(_get_current_user)):
+              """Theme usage analytics."""
+              return {
+                  "most_used": [
+                      {"theme": name, "usage_count": random.randint(1, 1000),
+                       "last_used": datetime.now(timezone.utc).isoformat()}
+                      for name in THEME_NAMES[:10]
+                  ],
+                  "total_switches": random.randint(500, 10000),
+                  "period": "30d",
+              }
+
+          @app.get("/api/v1/analytics/system", tags=["analytics"])
+          async def analytics_system(user: str = Depends(_get_current_user)):
+              """System performance analytics."""
+              import psutil
+              return {
+                  "cpu_percent": psutil.cpu_percent(interval=0.1),
+                  "memory_percent": psutil.virtual_memory().percent,
+                  "disk_percent": psutil.disk_usage("/").percent,
+                  "api_requests_total": REQUEST_COUNTER,
+                  "api_error_rate_pct": round(
+                      ERROR_COUNTER / max(REQUEST_COUNTER, 1) * 100, 4
+                  ),
+                  "uptime_seconds": round(time.time() - START_TIME, 2),
+                  "active_connections": len(WS_CONNECTIONS),
+              }
+
+          # ── AI endpoints ───────────────────────────────────────────────
+          @app.post("/api/v1/ai/suggest-theme", tags=["ai"])
+          async def ai_suggest_theme(
+              mood: str = Query(default="neutral"),
+              time_of_day: Optional[str] = None,
+              user: str = Depends(_get_current_user),
+          ):
+              """AI-powered theme suggestion."""
+              await asyncio.sleep(0.020)
+              suggestions = {
+                  "morning": ["catppuccin-latte", "rose-pine-dawn", "gruvbox-light"],
+                  "afternoon": ["catppuccin-mocha", "tokyo-night", "nord"],
+                  "evening": ["tokyo-night-storm", "rose-pine", "everforest-dark"],
+                  "night": ["catppuccin-mocha", "cyberpunk-2077", "matrix-green"],
+              }
+              tod = time_of_day or "afternoon"
+              return {
+                  "suggestions": suggestions.get(tod, suggestions["afternoon"])[:3],
+                  "mood": mood,
+                  "time_of_day": tod,
+                  "confidence": round(random.uniform(0.75, 0.99), 3),
+              }
+
+          @app.post("/api/v1/ai/generate-palette", tags=["ai"])
+          async def ai_generate_palette(
+              prompt: str = Query(...),
+              user: str = Depends(_get_current_user),
+          ):
+              """AI-generated color palette from text prompt."""
+              await asyncio.sleep(0.050)
+              return {
+                  "prompt": prompt,
+                  "palette": ColorPalette().model_dump(),
+                  "name": f"ai-{prompt[:20].replace(' ','-').lower()}",
+                  "generated_at": datetime.now(timezone.utc).isoformat(),
+              }
+
+          # ── WebSocket ──────────────────────────────────────────────────
+          @app.websocket("/ws/events")
+          async def ws_events(websocket: WebSocket):
+              """Real-time event stream via WebSocket."""
+              await websocket.accept()
+              WS_CONNECTIONS.append(websocket)
+              try:
+                  await websocket.send_json({
+                      "type": "connected",
+                      "message": "ASH WebSocket v5.0",
+                      "timestamp": datetime.now(timezone.utc).isoformat(),
+                      "session_id": str(uuid.uuid4())[:8],
+                  })
+                  while True:
+                      data = await asyncio.wait_for(
+                          websocket.receive_json(), timeout=30.0
+                      )
+                      msg_type = data.get("type", "ping")
+                      if msg_type == "ping":
+                          await websocket.send_json({
+                              "type": "pong",
+                              "timestamp": datetime.now(timezone.utc).isoformat(),
+                              "server_time_ms": round((time.time() - START_TIME) * 1000, 2),
+                          })
+                      elif msg_type == "subscribe":
+                          channel = data.get("channel", "all")
+                          await websocket.send_json({
+                              "type": "subscribed",
+                              "channel": channel,
+                              "timestamp": datetime.now(timezone.utc).isoformat(),
+                          })
+                      elif msg_type == "theme_change":
+                          await websocket.send_json({
+                              "type": "theme_changed",
+                              "theme": data.get("theme", "unknown"),
+                              "timestamp": datetime.now(timezone.utc).isoformat(),
+                          })
+                      else:
+                          await websocket.send_json({
+                              "type": "ack",
+                              "original_type": msg_type,
+                              "timestamp": datetime.now(timezone.utc).isoformat(),
+                          })
+              except (WebSocketDisconnect, asyncio.TimeoutError):
+                  pass
+              finally:
+                  if websocket in WS_CONNECTIONS:
+                      WS_CONNECTIONS.remove(websocket)
+
+          @app.websocket("/ws/live-reload")
+          async def ws_live_reload(websocket: WebSocket):
+              """Live reload notification stream."""
+              await websocket.accept()
+              WS_CONNECTIONS.append(websocket)
+              try:
+                  while True:
+                      await asyncio.sleep(5)
+                      await websocket.send_json({
+                          "type": "heartbeat",
+                          "timestamp": datetime.now(timezone.utc).isoformat(),
+                      })
+              except WebSocketDisconnect:
+                  pass
+              finally:
+                  if websocket in WS_CONNECTIONS:
+                      WS_CONNECTIONS.remove(websocket)
+
+          # ── Streaming endpoint ─────────────────────────────────────────
+          @app.get("/api/v1/themes/stream/all", tags=["themes"])
+          async def themes_stream(user: str = Depends(_get_current_user)):
+              """Stream all themes as NDJSON."""
+              async def generate():
+                  for theme in THEMES_DB.values():
+                      yield json.dumps(theme.model_dump()) + "\n"
+                      await asyncio.sleep(0.001)
+              return StreamingResponse(
+                  generate(),
+                  media_type="application/x-ndjson",
+              )
+
+          if __name__ == "__main__":
+              uvicorn.run(
+                  app,
+                  host="0.0.0.0",
+                  port=int(os.environ.get("ASH_API_PORT", "8765")),
+                  workers=1,
+                  loop="uvloop",
+                  http="h11",
+                  log_level="warning",
+                  access_log=False,
+              )
+          SERVER_EOF
+
+          echo "  ✅ API server created"
+          echo "  📄 Endpoints: $(grep -c '@app\.' api/server.py) route handlers"
+
+      - name: "🚀 Launch API server"
+        id: launch
+        run: |
+          set -euo pipefail
+
+          mkdir -p "${BENCH_DIR}"
+          LOG_FILE="${BENCH_DIR}/server.log"
+
+          echo "  🚀 Starting ASH API server on port ${API_PORT}..."
+
+          # Launch in background
+          ASH_API_PORT="${API_PORT}" \
+          python3 api/server.py \
+            > "${LOG_FILE}" 2>&1 &
+
+          SERVER_PID=$!
+          echo "server_pid=${SERVER_PID}" >> "$GITHUB_ENV"
+          echo "${SERVER_PID}" > "${BENCH_DIR}/server.pid"
+
+          echo "  🔄 Waiting for server to be ready..."
+
+          # Wait up to 30 seconds
+          MAX_WAIT=30
+          WAITED=0
+          until curl -sf "${API_BASE_URL}/health" > /dev/null 2>&1; do
+            if [[ "${WAITED}" -ge "${MAX_WAIT}" ]]; then
+              echo "::error::Server failed to start within ${MAX_WAIT}s"
+              echo "  📋 Server logs:"
+              cat "${LOG_FILE}" || true
+              exit 1
+            fi
+            if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
+              echo "::error::Server process died"
+              cat "${LOG_FILE}" || true
+              exit 1
+            fi
+            sleep 1
+            WAITED=$((WAITED + 1))
+            echo "    Waiting... ${WAITED}s"
+          done
+
+          echo "  ✅ Server ready in ${WAITED}s (PID: ${SERVER_PID})"
+
+      - name: "🔐 Obtain auth token"
+        id: auth
+        run: |
+          set -euo pipefail
+
+          echo "  🔐 Obtaining API authentication token..."
+
+          RESPONSE=$(curl -sf \
+            -X POST \
+            "${API_BASE_URL}/api/v1/auth/token" \
+            -H "Content-Type: application/json" \
+            -d '{"username":"bench-user","password":"bench-pass"}' \
+            --max-time 10)
+
+          TOKEN=$(echo "${RESPONSE}" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+          echo "api_token=${TOKEN}" >> "$GITHUB_ENV"
+          echo "auth_token=${TOKEN}" >> "$GITHUB_OUTPUT"
+          echo "  ✅ Token obtained"
+
+      - name: "🩺 Health check & API validation"
+        id: health
+        run: |
+          set -euo pipefail
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🩺 Validating API endpoints"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          declare -A ENDPOINT_CHECKS=(
+            ["health"]="GET /health"
+            ["metrics"]="GET /metrics"
+            ["themes-list"]="GET /api/v1/themes"
+            ["plugins-list"]="GET /api/v1/plugins"
+            ["snapshots-list"]="GET /api/v1/snapshots"
+            ["config-list"]="GET /api/v1/config"
+            ["modes-list"]="GET /api/v1/modes"
+            ["analytics"]="GET /api/v1/analytics/system"
+          )
+
+          ALL_OK=true
+          for name in "${!ENDPOINT_CHECKS[@]}"; do
+            HTTP_CODE=$(curl -sf \
+              -o /dev/null \
+              -w "%{http_code}" \
+              -H "Authorization: Bearer ${api_token}" \
+              "${API_BASE_URL}/${ENDPOINT_CHECKS[${name}]#* }" \
+              --max-time 5 \
+              2>/dev/null || echo "000")
+            if [[ "${HTTP_CODE}" == "2"* ]]; then
+              echo "  ✅ ${name}: HTTP ${HTTP_CODE}"
+            else
+              echo "  ❌ ${name}: HTTP ${HTTP_CODE}"
+              ALL_OK=false
+            fi
+          done
+
+          echo "ready=${ALL_OK}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${ALL_OK}" == "false" ]]; then
+            echo "::warning::Some endpoints failed validation"
+          else
+            echo "  ✅ All endpoints validated"
+          fi
+
+      - name: "📊 Capture API version info"
+        id: version
+        run: |
+          VERSION=$(curl -sf \
+            "${API_BASE_URL}/health" \
+            --max-time 5 | \
+            python3 -c "import sys,json; print(json.load(sys.stdin).get('version','unknown'))")
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "  📊 API Version: ${VERSION}"
+
+      - name: "📊 Check for baseline"
+        id: baseline_check
+        run: |
+          HAS="false"
+          if gh api \
+            "repos/${{ github.repository }}/actions/caches" \
+            --jq '.actions_caches[].key' 2>/dev/null | \
+            grep -q "bench-baseline-api"; then
+            HAS="true"
+          fi
+          echo "has_baseline=${HAS}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📦 Cache baseline"
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-api-${{ github.base_ref || 'main' }}"
+          restore-keys: |
+            bench-baseline-api-main
+            bench-baseline-api-
+
+      - name: "💾 Save server PID & token for downstream jobs"
+        run: |
+          mkdir -p "${BENCH_DIR}"
+          echo "${server_pid}" > "${BENCH_DIR}/server.pid"
+          echo "${api_token}" > "${BENCH_DIR}/api.token"
+          echo "${API_BASE_URL}" > "${BENCH_DIR}/api.url"
+
+      - name: "📤 Upload server artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "api-server-${{ steps.id.outputs.bench_id }}"
+          path: |
+            api/server.py
+            ${{ env.BENCH_DIR }}/server.log
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Endpoint latency benchmarks (per-endpoint matrix)
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-endpoints:
+    name: "⚡ Latency · ${{ matrix.endpoint.group }} / ${{ matrix.endpoint.name }}"
+    needs: api-server
+    if: needs.api-server.outputs.server_ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        endpoint:
+          # ── Health ────────────────────────────────────────────────────
+          - group: "health"
+            name: "health-check"
+            method: "GET"
+            path: "/health"
+            auth: false
+            expected_status: 200
+            threshold_ms: 20
+            weight: "critical"
+            description: "System health check endpoint"
+            payload: null
+
+          - group: "health"
+            name: "metrics"
+            method: "GET"
+            path: "/metrics"
+            auth: false
+            expected_status: 200
+            threshold_ms: 30
+            weight: "high"
+            description: "Prometheus metrics endpoint"
+            payload: null
+
+          # ── Auth ──────────────────────────────────────────────────────
+          - group: "auth"
+            name: "token-obtain"
+            method: "POST"
+            path: "/api/v1/auth/token"
+            auth: false
+            expected_status: 200
+            threshold_ms: 200
+            weight: "critical"
+            description: "JWT token issuance"
+            payload: '{"username":"user","password":"pass"}'
+
+          - group: "auth"
+            name: "token-refresh"
+            method: "POST"
+            path: "/api/v1/auth/refresh"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "high"
+            description: "JWT token refresh"
+            payload: null
+
+          - group: "auth"
+            name: "user-profile"
+            method: "GET"
+            path: "/api/v1/auth/me"
+            auth: true
+            expected_status: 200
+            threshold_ms: 50
+            weight: "medium"
+            description: "Current user profile"
+            payload: null
+
+          # ── Themes ────────────────────────────────────────────────────
+          - group: "themes"
+            name: "theme-list"
+            method: "GET"
+            path: "/api/v1/themes"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "critical"
+            description: "Paginated theme listing"
+            payload: null
+
+          - group: "themes"
+            name: "theme-list-filtered"
+            method: "GET"
+            path: "/api/v1/themes?category=dark&limit=10"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "high"
+            description: "Filtered + paginated themes"
+            payload: null
+
+          - group: "themes"
+            name: "theme-get"
+            method: "GET"
+            path: "/api/v1/themes/catppuccin-mocha"
+            auth: true
+            expected_status: 200
+            threshold_ms: 80
+            weight: "critical"
+            description: "Single theme retrieval"
+            payload: null
+
+          - group: "themes"
+            name: "theme-colors"
+            method: "GET"
+            path: "/api/v1/themes/catppuccin-mocha/colors"
+            auth: true
+            expected_status: 200
+            threshold_ms: 80
+            weight: "high"
+            description: "Theme color palette"
+            payload: null
+
+          - group: "themes"
+            name: "theme-apply"
+            method: "POST"
+            path: "/api/v1/themes/apply"
+            auth: true
+            expected_status: 200
+            threshold_ms: 500
+            weight: "critical"
+            description: "Apply theme to desktop"
+            payload: '{"theme_name":"catppuccin-mocha","targets":["all"],"transition":"fade","dry_run":true}'
+
+          - group: "themes"
+            name: "theme-search"
+            method: "GET"
+            path: "/api/v1/themes/search/catppuccin"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "medium"
+            description: "Theme full-text search"
+            payload: null
+
+          - group: "themes"
+            name: "theme-preview"
+            method: "GET"
+            path: "/api/v1/themes/catppuccin-mocha/preview"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "medium"
+            description: "Theme preview metadata"
+            payload: null
+
+          # ── Plugins ───────────────────────────────────────────────────
+          - group: "plugins"
+            name: "plugin-list"
+            method: "GET"
+            path: "/api/v1/plugins"
+            auth: true
+            expected_status: 200
+            threshold_ms: 100
+            weight: "high"
+            description: "Plugin listing"
+            payload: null
+
+          - group: "plugins"
+            name: "plugin-get"
+            method: "GET"
+            path: "/api/v1/plugins/game-mode"
+            auth: true
+            expected_status: 200
+            threshold_ms: 80
+            weight: "medium"
+            description: "Single plugin details"
+            payload: null
+
+          - group: "plugins"
+            name: "plugin-install"
+            method: "POST"
+            path: "/api/v1/plugins/caffeine/install"
+            auth: true
+            expected_status: 200
+            threshold_ms: 2000
+            weight: "high"
+            description: "Plugin installation"
+            payload: null
+
+          # ── Snapshots ─────────────────────────────────────────────────
+          - group: "snapshots"
+            name: "snapshot-list"
+            method: "GET"
+            path: "/api/v1/snapshots"
+            auth: true
+            expected_status: 200
+            threshold_ms: 150
+            weight: "high"
+            description: "Snapshot listing"
+            payload: null
+
+          - group: "snapshots"
+            name: "snapshot-create"
+            method: "POST"
+            path: "/api/v1/snapshots?name=bench-snapshot&description=benchmark"
+            auth: true
+            expected_status: 200
+            threshold_ms: 1000
+            weight: "high"
+            description: "Create new snapshot"
+            payload: null
+
+          # ── Config ────────────────────────────────────────────────────
+          - group: "config"
+            name: "config-list"
+            method: "GET"
+            path: "/api/v1/config"
+            auth: true
+            expected_status: 200
+            threshold_ms: 50
+            weight: "critical"
+            description: "Configuration listing"
+            payload: null
+
+          - group: "config"
+            name: "config-get"
+            method: "GET"
+            path: "/api/v1/config/theme.name"
+            auth: true
+            expected_status: 200
+            threshold_ms: 50
+            weight: "critical"
+            description: "Single config value"
+            payload: null
+
+          # ── AI ────────────────────────────────────────────────────────
+          - group: "ai"
+            name: "ai-suggest-theme"
+            method: "POST"
+            path: "/api/v1/ai/suggest-theme?mood=focused&time_of_day=evening"
+            auth: true
+            expected_status: 200
+            threshold_ms: 200
+            weight: "medium"
+            description: "AI theme suggestion"
+            payload: null
+
+          # ── Analytics ─────────────────────────────────────────────────
+          - group: "analytics"
+            name: "analytics-system"
+            method: "GET"
+            path: "/api/v1/analytics/system"
+            auth: true
+            expected_status: 200
+            threshold_ms: 200
+            weight: "medium"
+            description: "System analytics"
+            payload: null
+
+    env:
+      EP_NAME: ${{ matrix.endpoint.name }}
+      EP_GROUP: ${{ matrix.endpoint.group }}
+      EP_METHOD: ${{ matrix.endpoint.method }}
+      EP_PATH: ${{ matrix.endpoint.path }}
+      EP_AUTH: ${{ matrix.endpoint.auth }}
+      EP_THRESHOLD_MS: ${{ matrix.endpoint.threshold_ms }}
+      EP_WEIGHT: ${{ matrix.endpoint.weight }}
+      EP_STATUS: ${{ matrix.endpoint.expected_status }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: "📦 Install tools"
+        run: |
+          pip install --quiet \
+            fastapi==0.115.0 \
+            uvicorn[standard]==0.32.0 \
+            websockets==13.1 \
+            pydantic==2.9.2 \
+            python-jose[cryptography]==3.3.0 \
+            passlib[bcrypt]==1.7.4 \
+            python-multipart==0.0.12 \
+            httpx==0.27.2 \
+            aiofiles==24.1.0 \
+            orjson==3.10.10 \
+            aiosqlite==0.20.0 \
+            psutil==6.1.0 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            scipy==1.14.1 \
+            rich==13.9.2
+
+          sudo apt-get install -y --no-install-recommends \
+            curl jq bc time 2>/dev/null || true
+
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb || true
+
+      - name: "🚀 Start API server"
+        run: |
+          set -euo pipefail
+          mkdir -p "${BENCH_DIR}"
+          ASH_API_PORT="${API_PORT}" python3 api/server.py > "${BENCH_DIR}/server.log" 2>&1 &
+          echo "server_pid=$!" >> "$GITHUB_ENV"
+          MAX_WAIT=30; WAITED=0
+          until curl -sf "${API_BASE_URL}/health" > /dev/null 2>&1; do
+            [[ "${WAITED}" -ge "${MAX_WAIT}" ]] && { echo "::error::Server failed"; exit 1; }
+            sleep 1; WAITED=$((WAITED+1))
+          done
+          echo "  ✅ Server ready in ${WAITED}s"
+
+      - name: "🔐 Authenticate"
+        run: |
+          TOKEN=$(curl -sf -X POST \
+            "${API_BASE_URL}/api/v1/auth/token" \
+            -H "Content-Type: application/json" \
+            -d '{"username":"bench","password":"bench"}' | \
+            python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+          echo "api_token=${TOKEN}" >> "$GITHUB_ENV"
+
+      - name: "🔥 Warmup endpoint"
+        run: |
+          AUTH_HEADER=""
+          [[ "${EP_AUTH}" == "true" ]] && AUTH_HEADER="-H 'Authorization: Bearer ${api_token}'"
+
+          PAYLOAD_ARGS=""
+          PAYLOAD='${{ matrix.endpoint.payload }}'
+          [[ "${PAYLOAD}" != "null" && -n "${PAYLOAD}" ]] && \
+            PAYLOAD_ARGS="-H 'Content-Type: application/json' -d '${PAYLOAD}'"
+
+          echo "  🔥 Warming up ${EP_NAME}..."
+          for i in $(seq 1 5); do
+            eval "curl -sf -X ${EP_METHOD} \
+              '${API_BASE_URL}${EP_PATH}' \
+              ${AUTH_HEADER} \
+              ${PAYLOAD_ARGS} \
+              --max-time 10 > /dev/null 2>&1 || true"
+          done
+          echo "  ✅ Warmup done"
+
+      - name: "⚡ Hyperfine latency benchmark"
+        id: bench
+        run: |
+          set -euo pipefail
+
+          OUTPUT_DIR="${BENCH_DIR}/${EP_GROUP}/${EP_NAME}"
+          mkdir -p "${OUTPUT_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ Benchmarking: ${EP_NAME}"
+          echo "  📍 ${EP_METHOD} ${EP_PATH}"
+          echo "  ⏱️  Threshold: ${EP_THRESHOLD_MS}ms"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          # Build curl command
+          CURL_CMD="curl -sf -X ${EP_METHOD}"
+          CURL_CMD+=" '${API_BASE_URL}${EP_PATH}'"
+          CURL_CMD+=" --max-time 30"
+          CURL_CMD+=" -w '%{time_total}'"
+          CURL_CMD+=" -o /dev/null"
+
+          [[ "${EP_AUTH}" == "true" ]] && \
+            CURL_CMD+=" -H 'Authorization: Bearer ${api_token}'"
+
+          PAYLOAD='${{ matrix.endpoint.payload }}'
+          [[ "${PAYLOAD}" != "null" && -n "${PAYLOAD}" ]] && \
+            CURL_CMD+=" -H 'Content-Type: application/json' -d '${PAYLOAD}'"
+
+          # Run hyperfine
+          hyperfine \
+            --runs 50 \
+            --warmup 5 \
+            --time-unit millisecond \
+            --export-json "${OUTPUT_DIR}/hyperfine.json" \
+            --export-markdown "${OUTPUT_DIR}/hyperfine.md" \
+            --export-csv "${OUTPUT_DIR}/hyperfine.csv" \
+            --shell bash \
+            --command-name "${EP_NAME}" \
+            "eval ${CURL_CMD}" 2>/dev/null || {
+              echo "  ⚠️ hyperfine failed — manual timing"
+              TIMES=()
+              for i in $(seq 1 50); do
+                S=$(date +%s%N)
+                eval "${CURL_CMD}" > /dev/null 2>&1 || true
+                E=$(date +%s%N)
+                TIMES+=("$(echo "scale=3; $(( (E-S)/1000 ))/1000" | bc)")
+              done
+              MEAN=$(echo "${TIMES[@]}" | tr ' ' '\n' | \
+                python3 -c "import sys; d=[float(x) for x in sys.stdin]; print(sum(d)/len(d))")
+              echo '{"results":[{"command":"'${EP_NAME}'","mean":'${MEAN}',"stddev":0,"min":'${MEAN}',"max":'${MEAN}',"times":['$(IFS=,;echo "${TIMES[*]}")']}]}' \
+                > "${OUTPUT_DIR}/hyperfine.json"
+            }
+
+          echo "  ✅ Benchmark complete"
+
+      - name: "📊 Process latency metrics"
+        id: analyze
+        run: |
+          OUTPUT_DIR="${BENCH_DIR}/${EP_GROUP}/${EP_NAME}"
+          PROCESSED="${OUTPUT_DIR}/metrics.json"
+
+          python3 << PYTHON_EOF
+          import json
+          import os
+          import statistics
+          import math
+
+          with open("${OUTPUT_DIR}/hyperfine.json") as f:
+              raw = json.load(f)
+
+          r = raw.get("results", [{}])[0]
+          times_s = r.get("times", [r.get("mean", 0)])
+          # Hyperfine times are in seconds for HTTP
+          times_ms = [t * 1000 if t < 10 else t for t in times_s]
+          n = len(times_ms)
+
+          mean_ms   = statistics.mean(times_ms)
+          median_ms = statistics.median(times_ms)
+          stddev_ms = statistics.stdev(times_ms) if n > 1 else 0
+          min_ms    = min(times_ms)
+          max_ms    = max(times_ms)
+          cv_pct    = (stddev_ms / mean_ms * 100) if mean_ms > 0 else 0
+
+          sorted_t  = sorted(times_ms)
+          p50  = sorted_t[min(int(n * 0.50), n-1)]
+          p75  = sorted_t[min(int(n * 0.75), n-1)]
+          p90  = sorted_t[min(int(n * 0.90), n-1)]
+          p95  = sorted_t[min(int(n * 0.95), n-1)]
+          p99  = sorted_t[min(int(n * 0.99), n-1)]
+
+          threshold_ms = float("${EP_THRESHOLD_MS}")
+          passed = mean_ms <= threshold_ms
+
+          # Apdex score (Apdex T = threshold, F = 4*threshold)
+          t_apdex = threshold_ms
+          f_apdex = 4 * threshold_ms
+          satisfied  = sum(1 for t in times_ms if t <= t_apdex)
+          tolerating = sum(1 for t in times_ms if t_apdex < t <= f_apdex)
+          apdex = round((satisfied + tolerating * 0.5) / n, 4) if n > 0 else 0
+
+          metrics = {
+              "endpoint": "${EP_NAME}",
+              "group": "${EP_GROUP}",
+              "description": "${{ matrix.endpoint.description }}",
+              "method": "${EP_METHOD}",
+              "path": "${EP_PATH}",
+              "weight": "${EP_WEIGHT}",
+              "git_sha": "${GITHUB_SHA}",
+              "timing": {
+                  "mean_ms":   round(mean_ms, 3),
+                  "median_ms": round(median_ms, 3),
+                  "min_ms":    round(min_ms, 3),
+                  "max_ms":    round(max_ms, 3),
+                  "stddev_ms": round(stddev_ms, 3),
+                  "cv_percent": round(cv_pct, 2),
+              },
+              "percentiles": {
+                  "p50_ms": round(p50, 3),
+                  "p75_ms": round(p75, 3),
+                  "p90_ms": round(p90, 3),
+                  "p95_ms": round(p95, 3),
+                  "p99_ms": round(p99, 3),
+              },
+              "threshold": {
+                  "threshold_ms": threshold_ms,
+                  "passed": passed,
+                  "margin_ms": round(threshold_ms - mean_ms, 3),
+                  "margin_pct": round((threshold_ms - mean_ms) / threshold_ms * 100, 2),
+              },
+              "quality": {
+                  "apdex": apdex,
+                  "apdex_rating": "excellent" if apdex >= 0.94 else
+                                  "good" if apdex >= 0.85 else
+                                  "fair" if apdex >= 0.70 else "poor",
+                  "stability": "stable" if cv_pct < 15 else "unstable",
+              },
+              "iterations": n,
+              "raw_times_ms": [round(t, 3) for t in times_ms],
+          }
+
+          with open("${PROCESSED}", "w") as f:
+              json.dump(metrics, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"mean_ms={round(mean_ms,3)}\n")
+              out.write(f"p95_ms={round(p95,3)}\n")
+              out.write(f"p99_ms={round(p99,3)}\n")
+              out.write(f"apdex={apdex}\n")
+              out.write(f"passed={'true' if passed else 'false'}\n")
+
+          status = "✅" if passed else "❌"
+          print(f"\n  {status} {round(mean_ms,1)}ms mean · "
+                f"p95={round(p95,1)}ms · p99={round(p99,1)}ms · "
+                f"apdex={apdex} [{metrics['quality']['apdex_rating']}]")
+          PYTHON_EOF
+
+      - name: "📈 Endpoint latency chart"
+        run: |
+          OUTPUT_DIR="${BENCH_DIR}/${EP_GROUP}/${EP_NAME}"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.ticker as ticker
+              import matplotlib.patches as mpatches
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          with open("${OUTPUT_DIR}/metrics.json") as f:
+              data = json.load(f)
+
+          times   = data["raw_times_ms"]
+          t       = data["timing"]
+          pct     = data["percentiles"]
+          thr     = data["threshold"]
+          qual    = data["quality"]
+          passed  = thr["passed"]
+          n       = len(times)
+
+          palette = {
+              "bg":       "#1e1e2e",
+              "surface":  "#313244",
+              "surface2": "#585b70",
+              "overlay":  "#6c7086",
+              "text":     "#cdd6f4",
+              "subtext":  "#a6adc8",
+              "green":    "#a6e3a1",
+              "red":      "#f38ba8",
+              "blue":     "#89b4fa",
+              "lavender": "#b4befe",
+              "mauve":    "#cba6f7",
+              "peach":    "#fab387",
+              "yellow":   "#f9e2af",
+              "teal":     "#94e2d5",
+              "sky":      "#89dceb",
+              "pink":     "#f5c2e7",
+              "sapphire": "#74c7ec",
+          }
+
+          accent = palette["green"] if passed else palette["red"]
+          apdex_color = (
+              palette["green"]  if qual["apdex"] >= 0.94 else
+              palette["teal"]   if qual["apdex"] >= 0.85 else
+              palette["yellow"] if qual["apdex"] >= 0.70 else
+              palette["red"]
+          )
+
+          fig = plt.figure(figsize=(20, 12))
+          fig.patch.set_facecolor(palette["bg"])
+
+          # Grid: 2 rows × 3 cols
+          gs = fig.add_gridspec(2, 3, hspace=0.38, wspace=0.32,
+                                left=0.06, right=0.97,
+                                top=0.88, bottom=0.08)
+
+          ax_series = fig.add_subplot(gs[0, :2])   # Top-left wide
+          ax_gauge  = fig.add_subplot(gs[0, 2])     # Top-right gauge
+          ax_hist   = fig.add_subplot(gs[1, 0])     # Bottom-left
+          ax_pct    = fig.add_subplot(gs[1, 1])     # Bottom-middle
+          ax_info   = fig.add_subplot(gs[1, 2])     # Bottom-right info
+
+          def style(ax):
+              ax.set_facecolor(palette["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(palette["surface2"])
+                  sp.set_alpha(0.5)
+              ax.tick_params(colors=palette["text"], labelsize=8.5)
+              ax.grid(True, alpha=0.08, color=palette["text"], zorder=1)
+
+          x = np.arange(1, n + 1)
+
+          # ── Panel 1: Time series ──────────────────────────────────────
+          style(ax_series)
+          ax_series.fill_between(x, times, t["mean_ms"],
+                                 alpha=0.10, color=palette["blue"], zorder=2)
+          ax_series.plot(x, times, color=palette["blue"],
+                         linewidth=1.0, alpha=0.75, zorder=3)
+          ax_series.scatter(x, times, color=palette["blue"],
+                            s=14, alpha=0.6, zorder=4, linewidths=0)
+
+          # SLO zones
+          ax_series.axhspan(0, thr["threshold_ms"],
+                            alpha=0.04, color=palette["green"], zorder=2)
+          ax_series.axhspan(thr["threshold_ms"],
+                            max(max(times), thr["threshold_ms"]) * 1.3,
+                            alpha=0.04, color=palette["red"], zorder=2)
+
+          ax_series.axhline(t["mean_ms"], color=palette["mauve"],
+                            linewidth=1.8, linestyle="--", zorder=5,
+                            label=f"Mean {t['mean_ms']:.1f}ms")
+          ax_series.axhline(pct["p95_ms"], color=palette["peach"],
+                            linewidth=1.3, linestyle=":", zorder=5,
+                            label=f"p95 {pct['p95_ms']:.1f}ms")
+          ax_series.axhline(pct["p99_ms"], color=palette["red"],
+                            linewidth=1.0, linestyle="-.", alpha=0.7, zorder=5,
+                            label=f"p99 {pct['p99_ms']:.1f}ms")
+          ax_series.axhline(thr["threshold_ms"], color=palette["red"],
+                            linewidth=2.0, linestyle="-", alpha=0.5, zorder=5,
+                            label=f"SLO {thr['threshold_ms']:.0f}ms")
+
+          # Outlier markers
+          slo = thr["threshold_ms"]
+          outlier_x = [i+1 for i,v in enumerate(times) if v > slo]
+          outlier_y = [v for v in times if v > slo]
+          if outlier_x:
+              ax_series.scatter(outlier_x, outlier_y,
+                                color=palette["red"], s=50,
+                                marker="▲", zorder=6,
+                                label=f"SLO breach ({len(outlier_x)})")
+
+          ax_series.set_xlabel("Request #", color=palette["text"], fontsize=9.5)
+          ax_series.set_ylabel("Latency (ms)", color=palette["text"], fontsize=9.5)
+          ax_series.set_title(
+              f"⚡ Response Latency Time Series  ·  {data['method']} {data['path']}",
+              color=palette["text"], fontsize=11, fontweight="bold", pad=10
+          )
+          ax_series.legend(
+              facecolor=palette["bg"], labelcolor=palette["text"],
+              fontsize=8.5, framealpha=0.9, loc="upper right",
+              ncol=3
+          )
+
+          # ── Panel 2: Apdex gauge ──────────────────────────────────────
+          ax_gauge.set_facecolor(palette["surface"])
+          ax_gauge.axis("off")
+
+          apdex_val = qual["apdex"]
+          theta_bg  = np.linspace(np.pi, 0, 200)
+          ax_gauge.plot(
+              0.5 + 0.35 * np.cos(theta_bg),
+              0.55 + 0.35 * np.sin(theta_bg),
+              color=palette["surface2"], linewidth=22,
+              solid_capstyle="round", alpha=0.55,
+              transform=ax_gauge.transAxes
+          )
+
+          # Zone arcs (poor/fair/good/excellent)
+          zones = [
+              (0.0,  0.70, palette["red"]),
+              (0.70, 0.85, palette["yellow"]),
+              (0.85, 0.94, palette["teal"]),
+              (0.94, 1.00, palette["green"]),
+          ]
+          for z_s, z_e, z_col in zones:
+              t_s = np.pi - z_s * np.pi
+              t_e = np.pi - z_e * np.pi
+              th  = np.linspace(t_s, t_e, 60)
+              ax_gauge.plot(
+                  0.5 + 0.35 * np.cos(th),
+                  0.55 + 0.35 * np.sin(th),
+                  color=z_col, linewidth=8,
+                  solid_capstyle="butt", alpha=0.4,
+                  transform=ax_gauge.transAxes
+              )
+
+          # Filled indicator
+          fill_end = np.pi - apdex_val * np.pi
+          theta_fill = np.linspace(np.pi, max(fill_end, 0), 100)
+          ax_gauge.plot(
+              0.5 + 0.35 * np.cos(theta_fill),
+              0.55 + 0.35 * np.sin(theta_fill),
+              color=apdex_color, linewidth=22,
+              solid_capstyle="round", alpha=0.9,
+              transform=ax_gauge.transAxes
+          )
+
+          # Center text
+          ax_gauge.text(0.5, 0.44, f"{apdex_val:.3f}",
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=apdex_color,
+                        fontsize=22, fontweight="bold")
+          ax_gauge.text(0.5, 0.30, "Apdex Score",
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=palette["subtext"],
+                        fontsize=9.5)
+          ax_gauge.text(0.5, 0.20,
+                        qual["apdex_rating"].upper(),
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=apdex_color,
+                        fontsize=11, fontweight="bold")
+          ax_gauge.text(0.5, 0.08,
+                        f"{'✅ PASS' if passed else '❌ FAIL'}",
+                        transform=ax_gauge.transAxes,
+                        ha="center",
+                        color=palette["green"] if passed else palette["red"],
+                        fontsize=13, fontweight="bold")
+          ax_gauge.set_title("Apdex Score", color=palette["text"],
+                             fontsize=11, fontweight="bold", pad=10)
+
+          # ── Panel 3: Latency histogram ─────────────────────────────
+          style(ax_hist)
+          n_bins = max(8, n // 5)
+          counts, edges, patches_list = ax_hist.hist(
+              times, bins=n_bins, color=accent,
+              alpha=0.72, edgecolor=palette["bg"],
+              linewidth=0.7, zorder=3
+          )
+          for patch, left_e in zip(patches_list, edges[:-1]):
+              if left_e >= thr["threshold_ms"]:
+                  patch.set_facecolor(palette["red"])
+                  patch.set_alpha(0.9)
+
+          for pct_val, pct_label, pct_color in [
+              (pct["p50_ms"], "p50", palette["sky"]),
+              (pct["p95_ms"], "p95", palette["peach"]),
+              (pct["p99_ms"], "p99", palette["red"]),
+              (thr["threshold_ms"], "SLO", palette["red"]),
+          ]:
+              ax_hist.axvline(pct_val, color=pct_color,
+                              linewidth=1.5, linestyle="--",
+                              alpha=0.8, zorder=4,
+                              label=f"{pct_label}: {pct_val:.1f}ms")
+
+          ax_hist.set_xlabel("Latency (ms)", color=palette["text"], fontsize=9.5)
+          ax_hist.set_ylabel("Frequency", color=palette["text"], fontsize=9.5)
+          ax_hist.set_title("Latency Distribution", color=palette["text"],
+                            fontsize=11, fontweight="bold", pad=10)
+          ax_hist.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                         fontsize=8, framealpha=0.9)
+
+          # ── Panel 4: Percentile bar chart ─────────────────────────────
+          style(ax_pct)
+          pct_labels = ["p50", "p75", "p90", "p95", "p99"]
+          pct_vals   = [
+              pct["p50_ms"], pct["p75_ms"], pct["p90_ms"],
+              pct["p95_ms"], pct["p99_ms"],
+          ]
+          pct_colors = [
+              palette["teal"], palette["sky"], palette["yellow"],
+              palette["peach"], palette["red"],
+          ]
+          bars = ax_pct.bar(pct_labels, pct_vals,
+                            color=pct_colors, alpha=0.82,
+                            width=0.5, zorder=3,
+                            edgecolor=palette["bg"], linewidth=1)
+
+          for bar, val in zip(bars, pct_vals):
+              ax_pct.text(
+                  bar.get_x() + bar.get_width() / 2,
+                  bar.get_height() + max(pct_vals) * 0.02,
+                  f"{val:.1f}ms",
+                  ha="center", color=palette["text"],
+                  fontsize=9, fontweight="bold"
+              )
+
+          ax_pct.axhline(thr["threshold_ms"],
+                         color=palette["red"], linewidth=1.8,
+                         linestyle="--", alpha=0.7, zorder=4,
+                         label=f"SLO: {thr['threshold_ms']:.0f}ms")
+          ax_pct.set_ylabel("Latency (ms)", color=palette["text"], fontsize=9.5)
+          ax_pct.set_title("Percentile Breakdown", color=palette["text"],
+                           fontsize=11, fontweight="bold", pad=10)
+          ax_pct.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                        fontsize=8.5, framealpha=0.9)
+
+          # ── Panel 5: Info table ───────────────────────────────────────
+          ax_info.set_facecolor(palette["surface"])
+          ax_info.axis("off")
+
+          rows = [
+              ("📍 Endpoint",       f"{data['method']} {data['path'][:25]}"),
+              ("📝 Description",    data["description"][:28]),
+              ("🔢 Iterations",     str(n)),
+              ("⏱️  Mean",           f"{t['mean_ms']:.2f}ms"),
+              ("📊 Median",         f"{t['median_ms']:.2f}ms"),
+              ("📐 Std Dev",        f"±{t['stddev_ms']:.2f}ms"),
+              ("📉 CV",             f"{t['cv_percent']:.1f}%"),
+              ("📉 Min",            f"{t['min_ms']:.2f}ms"),
+              ("📈 Max",            f"{t['max_ms']:.2f}ms"),
+              ("🎯 p95",            f"{pct['p95_ms']:.2f}ms"),
+              ("🎯 p99",            f"{pct['p99_ms']:.2f}ms"),
+              ("📏 SLO",            f"{thr['threshold_ms']:.0f}ms"),
+              ("🏆 Apdex",          f"{qual['apdex']:.3f} ({qual['apdex_rating']})"),
+              ("🔋 Stability",      qual["stability"]),
+              ("✅ Status",         "PASS" if passed else "FAIL"),
+          ]
+
+          y_start = 0.97
+          row_h   = 1.0 / (len(rows) + 1)
+          for i, (label, value) in enumerate(rows):
+              y = y_start - i * row_h
+              # Alternating row background
+              if i % 2 == 0:
+                  rect = mpatches.FancyBboxPatch(
+                      (0.01, y - row_h * 0.6),
+                      0.98, row_h * 0.95,
+                      boxstyle="round,pad=0.01",
+                      facecolor=palette["surface2"],
+                      alpha=0.25,
+                      transform=ax_info.transAxes,
+                  )
+                  ax_info.add_patch(rect)
+
+              val_color = palette["text"]
+              if "Status" in label:
+                  val_color = palette["green"] if passed else palette["red"]
+              elif "Apdex" in label:
+                  val_color = apdex_color
+
+              ax_info.text(0.03, y, label,
+                           transform=ax_info.transAxes,
+                           color=palette["subtext"], fontsize=8.5,
+                           va="top")
+              ax_info.text(0.97, y, value,
+                           transform=ax_info.transAxes,
+                           color=val_color, fontsize=8.5,
+                           fontweight="bold", ha="right", va="top")
+
+          ax_info.set_title("Benchmark Details", color=palette["text"],
+                            fontsize=11, fontweight="bold", pad=10)
+
+          # ── Global title ──────────────────────────────────────────────
+          status_text = "✅ PASSED" if passed else "❌ FAILED"
+          fig.suptitle(
+              f"🌐 ASH REST API Benchmark  ·  {data['group'].upper()} / {data['endpoint']}\n"
+              f"{status_text}  ·  mean={t['mean_ms']:.2f}ms  ·  "
+              f"p95={pct['p95_ms']:.2f}ms  ·  p99={pct['p99_ms']:.2f}ms  ·  "
+              f"SLO={thr['threshold_ms']:.0f}ms  ·  Apdex={qual['apdex']:.3f}",
+              color=palette["text"],
+              fontsize=12.5,
+              fontweight="bold",
+              y=0.97
+          )
+
+          plt.savefig("${OUTPUT_DIR}/latency-chart.png",
+                      dpi=160, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 Chart saved: ${OUTPUT_DIR}/latency-chart.png")
+          PYTHON_EOF
+
+      - name: "📤 Upload endpoint artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "api-ep-${{ matrix.endpoint.group }}-${{ matrix.endpoint.name }}-${{ needs.api-server.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/${{ matrix.endpoint.group }}/${{ matrix.endpoint.name }}/"
+          retention-days: 30
+          compression-level: 6
+
+      - name: "❌ Gate — SLO breach"
+        if: |
+          steps.analyze.outputs.passed == 'false' &&
+          matrix.endpoint.weight == 'critical'
+        run: |
+          echo "::error title=API SLO Breach::"\
+            "${{ matrix.endpoint.name }} mean=${{ steps.analyze.outputs.mean_ms }}ms "\
+            "exceeds SLO=${{ matrix.endpoint.threshold_ms }}ms (critical)"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Load & stress testing with Locust
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-load:
+    name: "💪 Load Test · ${{ matrix.scenario.name }}"
+    needs: api-server
+    if: needs.api-server.outputs.server_ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - name: "normal-load"
+            description: "Sustained normal production load"
+            users: 20
+            spawn_rate: 5
+            duration: "30s"
+            rps_threshold: 50
+            error_threshold_pct: 1.0
+            weight: "critical"
+
+          - name: "peak-load"
+            description: "Peak traffic simulation"
+            users: 75
+            spawn_rate: 15
+            duration: "20s"
+            rps_threshold: 30
+            error_threshold_pct: 3.0
+            weight: "high"
+
+          - name: "spike-load"
+            description: "Sudden traffic spike"
+            users: 150
+            spawn_rate: 50
+            duration: "15s"
+            rps_threshold: 20
+            error_threshold_pct: 5.0
+            weight: "medium"
+
+    env:
+      SCENARIO_NAME: ${{ matrix.scenario.name }}
+      SCENARIO_USERS: ${{ matrix.scenario.users }}
+      SCENARIO_SPAWN_RATE: ${{ matrix.scenario.spawn_rate }}
+      SCENARIO_DURATION: ${{ matrix.scenario.duration }}
+      SCENARIO_RPS_THRESHOLD: ${{ matrix.scenario.rps_threshold }}
+      SCENARIO_ERROR_THRESHOLD: ${{ matrix.scenario.error_threshold_pct }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "📦 Install Locust + dependencies"
+        run: |
+          pip install --quiet \
+            locust==2.32.0 \
+            fastapi==0.115.0 \
+            uvicorn[standard]==0.32.0 \
+            pydantic==2.9.2 \
+            python-jose[cryptography]==3.3.0 \
+            passlib[bcrypt]==1.7.4 \
+            python-multipart==0.0.12 \
+            httpx==0.27.2 \
+            aiofiles==24.1.0 \
+            orjson==3.10.10 \
+            aiosqlite==0.20.0 \
+            psutil==6.1.0 \
+            websockets==13.1 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            pandas==2.2.3 \
+            scipy==1.14.1 \
+            rich==13.9.2
+
+      - name: "🚀 Start API server"
+        run: |
+          mkdir -p "${BENCH_DIR}"
+          ASH_API_PORT="${API_PORT}" \
+          python3 api/server.py > "${BENCH_DIR}/server-load.log" 2>&1 &
+          echo "server_pid=$!" >> "$GITHUB_ENV"
+          for i in $(seq 1 30); do
+            curl -sf "${API_BASE_URL}/health" > /dev/null 2>&1 && break
+            sleep 1
+          done
+          echo "  ✅ Server ready"
+
+      - name: "🔐 Get auth token"
+        run: |
+          TOKEN=$(curl -sf -X POST "${API_BASE_URL}/api/v1/auth/token" \
+            -H "Content-Type: application/json" \
+            -d '{"username":"load-test","password":"load-pass"}' | \
+            python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+          echo "api_token=${TOKEN}" >> "$GITHUB_ENV"
+
+      - name: "🏗️ Create Locust test file"
+        run: |
+          mkdir -p "${BENCH_DIR}/locust"
+
+          cat > "${BENCH_DIR}/locust/locustfile.py" << 'LOCUST_EOF'
+          """
+          ASH API Load Test — Locust v5.0 OMEGA
+          ======================================
+          Simulates realistic production traffic patterns including:
+          • Theme browsing & application
+          • Plugin management
+          • Snapshot operations
+          • Config reads/writes
+          • Analytics queries
+          • AI suggestions
+          """
+
+          import json
+          import os
+          import random
+          import time
+          from typing import Optional
+
+          from locust import HttpUser, between, events, task, tag
+          from locust.env import Environment
+
+          # Global token cache
+          _token_cache: Optional[str] = None
+
+          THEME_NAMES = [
+              "catppuccin-mocha", "catppuccin-macchiato", "tokyo-night",
+              "gruvbox-dark", "nord", "dracula", "rose-pine", "everforest-dark",
+          ]
+          PLUGIN_NAMES = [
+              "game-mode", "caffeine", "auto-wallpaper",
+              "focus-timer", "weather-display",
+          ]
+          CATEGORIES = ["dark", "light", "neon", "nature"]
+          MODES = ["default", "game", "work", "focus"]
+
+
+          class ASHAPIUser(HttpUser):
+              """
+              Realistic ASH API user — weighted task distribution
+              mimicking actual production usage patterns.
+              """
+              wait_time = between(0.1, 0.5)
+              host = os.environ.get("API_BASE_URL", "http://localhost:8765")
+
+              def on_start(self):
+                  """Authenticate on session start."""
+                  global _token_cache
+                  if _token_cache is None:
+                      resp = self.client.post(
+                          "/api/v1/auth/token",
+                          json={"username": f"user-{random.randint(1,1000)}",
+                                "password": "load-test"},
+                          name="auth_token",
+                      )
+                      if resp.status_code == 200:
+                          _token_cache = resp.json().get("access_token", "")
+                  self.token = _token_cache or ""
+                  self.headers = {
+                      "Authorization": f"Bearer {self.token}",
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  }
+
+              def _get(self, path: str, name: str, **kwargs):
+                  return self.client.get(path, headers=self.headers,
+                                         name=name, catch_response=True, **kwargs)
+
+              def _post(self, path: str, name: str, **kwargs):
+                  return self.client.post(path, headers=self.headers,
+                                          name=name, catch_response=True, **kwargs)
+
+              # ── Health (5%) ──────────────────────────────────────────
+              @task(5)
+              @tag("health")
+              def health_check(self):
+                  with self.client.get(
+                      "/health", name="GET /health", catch_response=True
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Expected 200, got {r.status_code}")
+
+              # ── Theme browsing (35% total) ───────────────────────────
+              @task(20)
+              @tag("themes")
+              def browse_themes(self):
+                  """Most common: browse theme list."""
+                  with self._get(
+                      f"/api/v1/themes?limit=20&page={random.randint(1,3)}",
+                      "GET /api/v1/themes"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(12)
+              @tag("themes")
+              def get_theme(self):
+                  """View specific theme."""
+                  name = random.choice(THEME_NAMES)
+                  with self._get(
+                      f"/api/v1/themes/{name}",
+                      "GET /api/v1/themes/:name"
+                  ) as r:
+                      if r.status_code in (200, 404):
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(8)
+              @tag("themes")
+              def browse_by_category(self):
+                  """Browse filtered themes."""
+                  cat = random.choice(CATEGORIES)
+                  with self._get(
+                      f"/api/v1/themes?category={cat}&limit=10",
+                      "GET /api/v1/themes?category=*"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(5)
+              @tag("themes")
+              def search_theme(self):
+                  """Search for themes."""
+                  query = random.choice(["cat", "gruvbox", "dark", "light", "neon"])
+                  with self._get(
+                      f"/api/v1/themes/search/{query}",
+                      "GET /api/v1/themes/search/:q"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(3)
+              @tag("themes")
+              def get_theme_colors(self):
+                  """Get theme colors."""
+                  name = random.choice(THEME_NAMES)
+                  with self._get(
+                      f"/api/v1/themes/{name}/colors",
+                      "GET /api/v1/themes/:name/colors"
+                  ) as r:
+                      if r.status_code in (200, 404):
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Theme apply (8%) ─────────────────────────────────────
+              @task(8)
+              @tag("themes", "write")
+              def apply_theme(self):
+                  """Apply theme (most expensive write operation)."""
+                  name = random.choice(THEME_NAMES)
+                  with self._post(
+                      "/api/v1/themes/apply",
+                      "POST /api/v1/themes/apply",
+                      json={
+                          "theme_name": name,
+                          "targets": ["all"],
+                          "transition": "fade",
+                          "dry_run": True,  # dry_run for benchmarking
+                      }
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Plugin ops (15%) ─────────────────────────────────────
+              @task(10)
+              @tag("plugins")
+              def list_plugins(self):
+                  with self._get(
+                      "/api/v1/plugins?limit=20",
+                      "GET /api/v1/plugins"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(5)
+              @tag("plugins")
+              def get_plugin(self):
+                  name = random.choice(PLUGIN_NAMES)
+                  with self._get(
+                      f"/api/v1/plugins/{name}",
+                      "GET /api/v1/plugins/:name"
+                  ) as r:
+                      if r.status_code in (200, 404):
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Snapshot ops (12%) ────────────────────────────────────
+              @task(10)
+              @tag("snapshots")
+              def list_snapshots(self):
+                  with self._get(
+                      "/api/v1/snapshots?limit=20",
+                      "GET /api/v1/snapshots"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(2)
+              @tag("snapshots", "write")
+              def create_snapshot(self):
+                  name = f"load-test-{random.randint(1000,9999)}"
+                  with self._post(
+                      f"/api/v1/snapshots?name={name}&description=load-test",
+                      "POST /api/v1/snapshots"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Config (10%) ──────────────────────────────────────────
+              @task(8)
+              @tag("config")
+              def get_config(self):
+                  keys = ["theme.name", "mode.current", "bar.layout"]
+                  key = random.choice(keys)
+                  with self._get(
+                      f"/api/v1/config/{key}",
+                      "GET /api/v1/config/:key"
+                  ) as r:
+                      if r.status_code in (200, 404):
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              @task(2)
+              @tag("config", "write")
+              def list_config(self):
+                  with self._get(
+                      "/api/v1/config",
+                      "GET /api/v1/config"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── AI (5%) ───────────────────────────────────────────────
+              @task(5)
+              @tag("ai")
+              def ai_suggest(self):
+                  mood = random.choice(["focused","relaxed","energetic","calm"])
+                  tod  = random.choice(["morning","afternoon","evening","night"])
+                  with self._post(
+                      f"/api/v1/ai/suggest-theme?mood={mood}&time_of_day={tod}",
+                      "POST /api/v1/ai/suggest-theme"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Analytics (5%) ────────────────────────────────────────
+              @task(5)
+              @tag("analytics")
+              def get_analytics(self):
+                  with self._get(
+                      "/api/v1/analytics/system",
+                      "GET /api/v1/analytics/system"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+              # ── Modes (2%) ────────────────────────────────────────────
+              @task(2)
+              @tag("modes")
+              def list_modes(self):
+                  with self._get(
+                      "/api/v1/modes",
+                      "GET /api/v1/modes"
+                  ) as r:
+                      if r.status_code == 200:
+                          r.success()
+                      else:
+                          r.failure(f"Status {r.status_code}")
+
+          LOCUST_EOF
+
+          echo "  ✅ Locust test file created"
+
+      - name: "🔥 Warmup before load test"
+        run: |
+          echo "  🔥 Warming up API for load test..."
+          for i in $(seq 1 20); do
+            curl -sf "${API_BASE_URL}/health" > /dev/null 2>&1 || true
+            curl -sf "${API_BASE_URL}/api/v1/themes" \
+              -H "Authorization: Bearer ${api_token}" \
+              > /dev/null 2>&1 || true
+          done
+          echo "  ✅ Warmup complete"
+
+      - name: "💪 Execute Locust load test"
+        id: load_test
+        run: |
+          set -euo pipefail
+
+          LOCUST_DIR="${BENCH_DIR}/locust"
+          RESULTS_DIR="${BENCH_DIR}/load/${SCENARIO_NAME}"
+          mkdir -p "${RESULTS_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  💪 Load Test: ${SCENARIO_NAME}"
+          echo "  👥 Users:     ${SCENARIO_USERS}"
+          echo "  🚀 Spawn:     ${SCENARIO_SPAWN_RATE}/s"
+          echo "  ⏱️  Duration:  ${SCENARIO_DURATION}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          API_BASE_URL="${API_BASE_URL}" \
+          locust \
+            --headless \
+            --users "${SCENARIO_USERS}" \
+            --spawn-rate "${SCENARIO_SPAWN_RATE}" \
+            --run-time "${SCENARIO_DURATION}" \
+            --host "${API_BASE_URL}" \
+            --locustfile "${LOCUST_DIR}/locustfile.py" \
+            --csv "${RESULTS_DIR}/locust" \
+            --html "${RESULTS_DIR}/locust-report.html" \
+            --logfile "${RESULTS_DIR}/locust.log" \
+            --loglevel WARNING \
+            --stop-timeout 10 \
+            2>&1 | tail -30 || {
+              echo "  ⚠️ Locust exited with non-zero (may be expected)"
+            }
+
+          # Process Locust CSV output
+          python3 << PYTHON_EOF
+          import csv
+          import json
+          import os
+          import glob
+
+          results_dir = "${RESULTS_DIR}"
+          scenario    = "${SCENARIO_NAME}"
+          rps_thresh  = float("${SCENARIO_RPS_THRESHOLD}")
+          err_thresh  = float("${SCENARIO_ERROR_THRESHOLD}")
+
+          # Parse stats CSV
+          stats_file = f"{results_dir}/locust_stats.csv"
+          history_file = f"{results_dir}/locust_stats_history.csv"
+
+          stats_data = []
+          if os.path.exists(stats_file):
+              with open(stats_file) as f:
+                  reader = csv.DictReader(f)
+                  stats_data = list(reader)
+
+          # Find aggregate row
+          agg = next((r for r in stats_data if r.get("Name","") == "Aggregated"), {})
+          if not agg and stats_data:
+              agg = stats_data[-1]
+
+          try:
+              total_reqs  = int(agg.get("Request Count", 0))
+              fail_count  = int(agg.get("Failure Count", 0))
+              median_ms   = float(agg.get("50%", 0))
+              p90_ms      = float(agg.get("90%", 0))
+              p95_ms      = float(agg.get("95%", 0))
+              p99_ms      = float(agg.get("99%", 0))
+              avg_ms      = float(agg.get("Average Response Time", 0))
+              min_ms      = float(agg.get("Min Response Time", 0))
+              max_ms      = float(agg.get("Max Response Time", 0))
+              rps         = float(agg.get("Requests/s", 0))
+              error_rate  = (fail_count / max(total_reqs, 1)) * 100
+          except (ValueError, TypeError):
+              total_reqs = fail_count = 0
+              median_ms = p90_ms = p95_ms = p99_ms = avg_ms = min_ms = max_ms = rps = 0
+              error_rate = 0
+
+          # History for time-series
+          history = []
+          if os.path.exists(history_file):
+              with open(history_file) as f:
+                  reader = csv.DictReader(f)
+                  for row in reader:
+                      try:
+                          history.append({
+                              "timestamp": float(row.get("Timestamp", 0)),
+                              "user_count": int(row.get("User count", 0)),
+                              "rps": float(row.get("Requests/s", 0)),
+                              "failures_s": float(row.get("Failures/s", 0)),
+                              "p50": float(row.get("50%", 0)),
+                              "p95": float(row.get("95%", 0)),
+                          })
+                      except (ValueError, TypeError):
+                          pass
+
+          rps_passed   = rps >= rps_thresh
+          error_passed = error_rate <= err_thresh
+          overall_pass = rps_passed and error_passed
+
+          result = {
+              "scenario": scenario,
+              "users": int("${SCENARIO_USERS}"),
+              "spawn_rate": int("${SCENARIO_SPAWN_RATE}"),
+              "duration": "${SCENARIO_DURATION}",
+              "git_sha": "${GITHUB_SHA}",
+              "requests": {
+                  "total": total_reqs,
+                  "failed": fail_count,
+                  "succeeded": total_reqs - fail_count,
+                  "rps": round(rps, 2),
+                  "error_rate_pct": round(error_rate, 4),
+              },
+              "latency": {
+                  "avg_ms": round(avg_ms, 2),
+                  "min_ms": round(min_ms, 2),
+                  "max_ms": round(max_ms, 2),
+                  "p50_ms": round(median_ms, 2),
+                  "p90_ms": round(p90_ms, 2),
+                  "p95_ms": round(p95_ms, 2),
+                  "p99_ms": round(p99_ms, 2),
+              },
+              "thresholds": {
+                  "rps_threshold": rps_thresh,
+                  "error_threshold_pct": err_thresh,
+                  "rps_passed": rps_passed,
+                  "error_passed": error_passed,
+                  "overall_pass": overall_pass,
+              },
+              "history": history[:100],  # Limit for artifact size
+          }
+
+          with open(f"{results_dir}/load-results.json", "w") as f:
+              json.dump(result, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"rps={round(rps,2)}\n")
+              out.write(f"error_rate={round(error_rate,4)}\n")
+              out.write(f"p95_ms={round(p95_ms,2)}\n")
+              out.write(f"p99_ms={round(p99_ms,2)}\n")
+              out.write(f"total_requests={total_reqs}\n")
+              out.write(f"passed={'true' if overall_pass else 'false'}\n")
+
+          status = "✅ PASS" if overall_pass else "❌ FAIL"
+          print(f"\n  {status}")
+          print(f"  RPS: {round(rps,1)} (threshold: {rps_thresh}) "
+                f"{'✅' if rps_passed else '❌'}")
+          print(f"  Error rate: {round(error_rate,2)}% (threshold: {err_thresh}%) "
+                f"{'✅' if error_passed else '❌'}")
+          print(f"  p50={round(median_ms,1)}ms p95={round(p95_ms,1)}ms "
+                f"p99={round(p99_ms,1)}ms")
+          print(f"  Total requests: {total_reqs}")
+          PYTHON_EOF
+
+      - name: "📈 Load test visualization"
+        run: |
+          RESULTS_DIR="${BENCH_DIR}/load/${SCENARIO_NAME}"
+          RESULTS_FILE="${RESULTS_DIR}/load-results.json"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.gridspec as gridspec
+              import matplotlib.patches as mpatches
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          try:
+              with open("${RESULTS_FILE}") as f:
+                  data = json.load(f)
+          except Exception:
+              print("  ⚠️ Results file not found")
+              sys.exit(0)
+
+          palette = {
+              "bg":       "#1e1e2e",
+              "surface":  "#313244",
+              "surface2": "#585b70",
+              "text":     "#cdd6f4",
+              "subtext":  "#a6adc8",
+              "green":    "#a6e3a1",
+              "red":      "#f38ba8",
+              "blue":     "#89b4fa",
+              "lavender": "#b4befe",
+              "mauve":    "#cba6f7",
+              "peach":    "#fab387",
+              "yellow":   "#f9e2af",
+              "teal":     "#94e2d5",
+              "sky":      "#89dceb",
+              "sapphire": "#74c7ec",
+          }
+
+          passed = data["thresholds"]["overall_pass"]
+          lat    = data["latency"]
+          reqs   = data["requests"]
+          thr    = data["thresholds"]
+          hist   = data.get("history", [])
+
+          accent = palette["green"] if passed else palette["red"]
+
+          fig = plt.figure(figsize=(20, 12))
+          fig.patch.set_facecolor(palette["bg"])
+          gs  = gridspec.GridSpec(2, 3, hspace=0.38, wspace=0.30,
+                                  left=0.06, right=0.97,
+                                  top=0.88, bottom=0.07)
+
+          ax_rps    = fig.add_subplot(gs[0, :2])   # Wide RPS time-series
+          ax_gauge  = fig.add_subplot(gs[0, 2])    # Error rate gauge
+          ax_lat    = fig.add_subplot(gs[1, 0])    # Latency bars
+          ax_pie    = fig.add_subplot(gs[1, 1])    # Request success pie
+          ax_info   = fig.add_subplot(gs[1, 2])    # Info table
+
+          def style(ax):
+              ax.set_facecolor(palette["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(palette["surface2"])
+                  sp.set_alpha(0.4)
+              ax.tick_params(colors=palette["text"], labelsize=8.5)
+              ax.grid(True, alpha=0.08, color=palette["text"], zorder=1)
+
+          # ── Panel 1: RPS time series ──────────────────────────────────
+          style(ax_rps)
+          if hist:
+              ts  = [h["timestamp"] for h in hist]
+              t0  = ts[0] if ts else 0
+              ts_rel = [t - t0 for t in ts]
+              rps_vals = [h["rps"] for h in hist]
+              fail_vals = [h["failures_s"] for h in hist]
+              p95_vals  = [h.get("p95", 0) for h in hist]
+              users_vals = [h.get("user_count", 0) for h in hist]
+
+              ax_rps.fill_between(ts_rel, rps_vals,
+                                  alpha=0.15, color=palette["blue"], zorder=2)
+              ax_rps.plot(ts_rel, rps_vals, color=palette["blue"],
+                          linewidth=2.0, zorder=3, label="Requests/s")
+              ax_rps.fill_between(ts_rel, fail_vals,
+                                  alpha=0.25, color=palette["red"], zorder=2)
+              ax_rps.plot(ts_rel, fail_vals, color=palette["red"],
+                          linewidth=1.5, zorder=3, label="Failures/s")
+
+              ax_rps.axhline(thr["rps_threshold"],
+                             color=palette["yellow"], linewidth=1.8,
+                             linestyle="--", alpha=0.8, zorder=4,
+                             label=f"RPS threshold: {thr['rps_threshold']}")
+
+              ax_rps.set_xlabel("Time (seconds)", color=palette["text"], fontsize=9.5)
+              ax_rps.set_ylabel("Requests/s", color=palette["text"], fontsize=9.5)
+          else:
+              # No history data — show summary bars
+              ax_rps.bar(["Actual RPS", "Threshold RPS"],
+                         [reqs["rps"], thr["rps_threshold"]],
+                         color=[palette["green"] if thr["rps_passed"] else palette["red"],
+                                palette["overlay"]],
+                         alpha=0.82, width=0.4, zorder=3)
+
+          ax_rps.set_title(
+              f"⚡ Load Test — {data['scenario']}  ·  "
+              f"{data['users']} users · {data['spawn_rate']}/s spawn · {data['duration']}",
+              color=palette["text"], fontsize=11, fontweight="bold", pad=10
+          )
+          ax_rps.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                        fontsize=8.5, framealpha=0.9)
+
+          # ── Panel 2: Error rate gauge ─────────────────────────────────
+          ax_gauge.set_facecolor(palette["surface"])
+          ax_gauge.axis("off")
+
+          err_rate   = reqs["error_rate_pct"]
+          err_thresh = thr["error_threshold_pct"]
+          err_ratio  = min(err_rate / max(err_thresh, 0.01), 2.0)  # cap at 2x
+          err_color  = palette["green"] if err_rate <= err_thresh else palette["red"]
+
+          theta_bg = np.linspace(np.pi, 0, 200)
+          ax_gauge.plot(0.5 + 0.32 * np.cos(theta_bg),
+                        0.58 + 0.32 * np.sin(theta_bg),
+                        color=palette["surface2"], linewidth=20,
+                        solid_capstyle="round", alpha=0.5,
+                        transform=ax_gauge.transAxes)
+
+          fill_end   = np.pi - min(err_ratio, 1.0) * np.pi
+          theta_fill = np.linspace(np.pi, max(fill_end, 0), 100)
+          ax_gauge.plot(0.5 + 0.32 * np.cos(theta_fill),
+                        0.58 + 0.32 * np.sin(theta_fill),
+                        color=err_color, linewidth=20,
+                        solid_capstyle="round", alpha=0.9,
+                        transform=ax_gauge.transAxes)
+
+          ax_gauge.text(0.5, 0.48, f"{err_rate:.3f}%",
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=err_color,
+                        fontsize=20, fontweight="bold")
+          ax_gauge.text(0.5, 0.34, f"Error Rate",
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=palette["subtext"], fontsize=9.5)
+          ax_gauge.text(0.5, 0.24,
+                        f"threshold: {err_thresh}%",
+                        transform=ax_gauge.transAxes,
+                        ha="center", color=palette["subtext"], fontsize=8.5)
+          ax_gauge.text(0.5, 0.10,
+                        f"{'✅ PASS' if thr['error_passed'] else '❌ FAIL'}",
+                        transform=ax_gauge.transAxes,
+                        ha="center",
+                        color=palette["green"] if thr["error_passed"] else palette["red"],
+                        fontsize=13, fontweight="bold")
+          ax_gauge.set_title("Error Rate", color=palette["text"],
+                             fontsize=11, fontweight="bold", pad=10)
+
+          # ── Panel 3: Latency breakdown ────────────────────────────────
+          style(ax_lat)
+          lat_labels = ["avg", "p50", "p90", "p95", "p99", "max"]
+          lat_values = [lat["avg_ms"], lat["p50_ms"], lat["p90_ms"],
+                        lat["p95_ms"], lat["p99_ms"], lat["max_ms"]]
+          lat_colors = [palette["sky"], palette["teal"], palette["yellow"],
+                        palette["peach"], palette["red"], palette["mauve"]]
+
+          bars = ax_lat.bar(lat_labels, lat_values, color=lat_colors,
+                            alpha=0.82, width=0.55, zorder=3,
+                            edgecolor=palette["bg"], linewidth=1)
+          for bar, val in zip(bars, lat_values):
+              ax_lat.text(bar.get_x() + bar.get_width()/2,
+                          bar.get_height() + max(lat_values) * 0.02,
+                          f"{val:.0f}ms",
+                          ha="center", color=palette["text"],
+                          fontsize=9, fontweight="bold")
+
+          ax_lat.axhline(float("${THRESHOLD_P95_MS}"),
+                         color=palette["red"], linewidth=1.5,
+                         linestyle="--", alpha=0.7, zorder=4,
+                         label=f"p95 SLO: ${THRESHOLD_P95_MS}ms")
+          ax_lat.set_ylabel("Latency (ms)", color=palette["text"], fontsize=9.5)
+          ax_lat.set_title("Response Latency", color=palette["text"],
+                           fontsize=11, fontweight="bold", pad=10)
+          ax_lat.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                        fontsize=8.5, framealpha=0.9)
+
+          # ── Panel 4: Success/failure pie ──────────────────────────────
+          ax_pie.set_facecolor(palette["surface"])
+          succeeded = max(reqs.get("succeeded", 0), 0)
+          failed    = max(reqs.get("failed", 0), 0)
+          total     = succeeded + failed
+
+          if total > 0:
+              sizes  = [succeeded, failed] if failed > 0 else [succeeded]
+              colors = [palette["green"]] + ([palette["red"]] if failed > 0 else [])
+              labels = [f"Success\n{succeeded:,}", f"Failed\n{failed:,}"] \
+                       if failed > 0 else [f"Success\n{succeeded:,}"]
+              explode = [0.02] + ([0.08] if failed > 0 else [])
+
+              wedges, texts, autotexts = ax_pie.pie(
+                  sizes, colors=colors, labels=labels,
+                  autopct="%1.2f%%", startangle=90,
+                  explode=explode,
+                  wedgeprops={"linewidth": 2, "edgecolor": palette["bg"]},
+                  pctdistance=0.75,
+              )
+              for at in autotexts:
+                  at.set_color(palette["bg"])
+                  at.set_fontsize(9)
+                  at.set_fontweight("bold")
+              for text in texts:
+                  text.set_color(palette["text"])
+                  text.set_fontsize(9)
+          else:
+              ax_pie.text(0.5, 0.5, "No data",
+                          ha="center", va="center",
+                          transform=ax_pie.transAxes,
+                          color=palette["subtext"], fontsize=12)
+
+          ax_pie.set_facecolor(palette["surface"])
+          ax_pie.set_title(
+              f"Request Outcome\n{total:,} total",
+              color=palette["text"], fontsize=11, fontweight="bold", pad=10
+          )
+
+          # ── Panel 5: Info table ───────────────────────────────────────
+          ax_info.set_facecolor(palette["surface"])
+          ax_info.axis("off")
+
+          rps_color = palette["green"] if thr["rps_passed"] else palette["red"]
+          err_col2  = palette["green"] if thr["error_passed"] else palette["red"]
+          ov_color  = palette["green"] if passed else palette["red"]
+
+          rows = [
+              ("🎯 Scenario",     data["scenario"]),
+              ("👥 Virtual Users", str(data["users"])),
+              ("🚀 Spawn Rate",   f"{data['spawn_rate']}/s"),
+              ("⏱️  Duration",     data["duration"]),
+              ("📊 Total Reqs",   f"{reqs.get('total',0):,}"),
+              ("✅ Succeeded",    f"{reqs.get('succeeded',0):,}"),
+              ("❌ Failed",       f"{reqs.get('failed',0):,}"),
+              ("⚡ RPS",          f"{reqs['rps']:.1f} req/s"),
+              ("🎯 RPS Threshold",f"{thr['rps_threshold']} req/s"),
+              ("🌡️ Error Rate",   f"{reqs['error_rate_pct']:.3f}%"),
+              ("🎯 Error Thresh", f"{thr['error_threshold_pct']}%"),
+              ("⏱️  avg Latency",  f"{lat['avg_ms']:.1f}ms"),
+              ("⏱️  p95 Latency",  f"{lat['p95_ms']:.1f}ms"),
+              ("⏱️  p99 Latency",  f"{lat['p99_ms']:.1f}ms"),
+              ("🏆 RPS Pass",     "✅ PASS" if thr["rps_passed"] else "❌ FAIL"),
+              ("🏆 Error Pass",   "✅ PASS" if thr["error_passed"] else "❌ FAIL"),
+              ("🏆 Overall",      "✅ PASS" if passed else "❌ FAIL"),
+          ]
+
+          y_start = 0.98
+          row_h   = 1.0 / (len(rows) + 1)
+          for i, (label, value) in enumerate(rows):
+              y = y_start - i * row_h
+              if i % 2 == 0:
+                  rect = mpatches.FancyBboxPatch(
+                      (0.01, y - row_h * 0.65),
+                      0.98, row_h * 0.92,
+                      boxstyle="round,pad=0.01",
+                      facecolor=palette["surface2"],
+                      alpha=0.22,
+                      transform=ax_info.transAxes,
+                  )
+                  ax_info.add_patch(rect)
+
+              val_color = palette["text"]
+              if "RPS Pass" in label:   val_color = rps_color
+              elif "Error Pass" in label: val_color = err_col2
+              elif "Overall" in label:  val_color = ov_color
+              elif "RPS" in label and "Threshold" not in label:
+                  val_color = rps_color
+              elif "Error Rate" in label:
+                  val_color = err_col2
+
+              ax_info.text(0.02, y, label, transform=ax_info.transAxes,
+                           color=palette["subtext"], fontsize=8, va="top")
+              ax_info.text(0.97, y, value, transform=ax_info.transAxes,
+                           color=val_color, fontsize=8,
+                           fontweight="bold", ha="right", va="top")
+
+          ax_info.set_title("Load Test Summary", color=palette["text"],
+                            fontsize=11, fontweight="bold", pad=10)
+
+          # ── Global title ──────────────────────────────────────────────
+          fig.suptitle(
+              f"🌐 ASH API Load Test  ·  {data['scenario'].replace('-',' ').title()}\n"
+              f"{'✅ PASSED' if passed else '❌ FAILED'}  ·  "
+              f"RPS={reqs['rps']:.1f} (≥{thr['rps_threshold']})  ·  "
+              f"error={reqs['error_rate_pct']:.3f}% (≤{thr['error_threshold_pct']}%)  ·  "
+              f"p95={lat['p95_ms']:.1f}ms  ·  "
+              f"{reqs.get('total',0):,} total requests",
+              color=palette["text"],
+              fontsize=12.5,
+              fontweight="bold",
+              y=0.97
+          )
+
+          plt.savefig("${RESULTS_DIR}/load-chart.png",
+                      dpi=155, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 Load test chart saved")
+          PYTHON_EOF
+
+      - name: "📤 Upload load test artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "api-load-${{ matrix.scenario.name }}-${{ needs.api-server.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/load/${{ matrix.scenario.name }}/"
+          retention-days: 30
+          compression-level: 6
+
+      - name: "❌ Gate — load test failure"
+        if: |
+          steps.load_test.outputs.passed == 'false' &&
+          matrix.scenario.weight == 'critical'
+        run: |
+          echo "::error title=Load Test Failed::"\
+            "${SCENARIO_NAME} failed — RPS=${{ steps.load_test.outputs.rps }} "\
+            "error=${{ steps.load_test.outputs.error_rate }}%"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — WebSocket latency benchmark
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-websocket:
+    name: "📡 WebSocket · Real-time Latency"
+    needs: api-server
+    if: needs.api-server.outputs.server_ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "📦 Install dependencies"
+        run: |
+          pip install --quiet \
+            fastapi==0.115.0 \
+            uvicorn[standard]==0.32.0 \
+            pydantic==2.9.2 \
+            python-jose[cryptography]==3.3.0 \
+            passlib[bcrypt]==1.7.4 \
+            python-multipart==0.0.12 \
+            websockets==13.1 \
+            httpx==0.27.2 \
+            aiofiles==24.1.0 \
+            orjson==3.10.10 \
+            aiosqlite==0.20.0 \
+            psutil==6.1.0 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            rich==13.9.2
+
+      - name: "🚀 Start API server"
+        run: |
+          mkdir -p "${BENCH_DIR}"
+          ASH_API_PORT="${API_PORT}" \
+          python3 api/server.py > "${BENCH_DIR}/server-ws.log" 2>&1 &
+          echo "server_pid=$!" >> "$GITHUB_ENV"
+          for i in $(seq 1 30); do
+            curl -sf "${API_BASE_URL}/health" > /dev/null 2>&1 && break
+            sleep 1
+          done
+          echo "  ✅ Server ready"
+
+      - name: "📡 WebSocket latency test"
+        id: ws_bench
+        run: |
+          WS_DIR="${BENCH_DIR}/websocket"
+          mkdir -p "${WS_DIR}"
+
+          python3 << PYTHON_EOF
+          """
+          WebSocket latency benchmark for ASH API.
+          Tests: connect latency · ping-pong RTT · message throughput
+          """
+          import asyncio
+          import json
+          import os
+          import statistics
+          import time
+          import uuid
+          from datetime import datetime, timezone
+
+          try:
+              import websockets
+          except ImportError:
+              print("::warning::websockets not available")
+              exit(0)
+
+          WS_URL = "${WS_BASE_URL}/ws/events"
+          WS_DIR = "${WS_DIR}"
+
+          async def measure_connect_latency(n: int = 20):
+              """Measure WebSocket connection establishment latency."""
+              times = []
+              for i in range(n):
+                  start = time.perf_counter()
+                  try:
+                      async with websockets.connect(
+                          WS_URL, open_timeout=5, close_timeout=2
+                      ) as ws:
+                          _ = await asyncio.wait_for(ws.recv(), timeout=3)
+                          elapsed_ms = (time.perf_counter() - start) * 1000
+                          times.append(elapsed_ms)
+                  except Exception as e:
+                      print(f"  ⚠️ Connect {i}: {e}")
+                  await asyncio.sleep(0.05)
+              return times
+
+          async def measure_ping_pong_rtt(n: int = 50):
+              """Measure ping-pong round-trip time."""
+              times = []
+              try:
+                  async with websockets.connect(
+                      WS_URL, open_timeout=5, close_timeout=2
+                  ) as ws:
+                      _ = await asyncio.wait_for(ws.recv(), timeout=3)  # Welcome msg
+                      for i in range(n):
+                          start = time.perf_counter()
+                          await ws.send(json.dumps({
+                              "type": "ping",
+                              "id": str(uuid.uuid4()),
+                              "timestamp": datetime.now(timezone.utc).isoformat(),
+                          }))
+                          resp = await asyncio.wait_for(ws.recv(), timeout=5)
+                          elapsed_ms = (time.perf_counter() - start) * 1000
+                          data = json.loads(resp)
+                          if data.get("type") == "pong":
+                              times.append(elapsed_ms)
+                          await asyncio.sleep(0.02)
+              except Exception as e:
+                  print(f"  ⚠️ Ping-pong error: {e}")
+              return times
+
+          async def measure_throughput(msg_count: int = 100):
+              """Measure message throughput."""
+              try:
+                  async with websockets.connect(
+                      WS_URL, open_timeout=5, close_timeout=2
+                  ) as ws:
+                      _ = await asyncio.wait_for(ws.recv(), timeout=3)
+                      start = time.perf_counter()
+                      for i in range(msg_count):
+                          await ws.send(json.dumps({
+                              "type": "ping",
+                              "seq": i,
+                          }))
+                          _ = await asyncio.wait_for(ws.recv(), timeout=5)
+                      elapsed_s = time.perf_counter() - start
+                      return msg_count / elapsed_s
+              except Exception as e:
+                  print(f"  ⚠️ Throughput error: {e}")
+                  return 0.0
+
+          async def measure_concurrent_connections(n_conn: int = 10):
+              """Measure N simultaneous connections."""
+              start = time.perf_counter()
+              connections = []
+              try:
+                  for _ in range(n_conn):
+                      ws = await asyncio.wait_for(
+                          websockets.connect(WS_URL, open_timeout=3), timeout=5
+                      )
+                      connections.append(ws)
+                  elapsed_ms = (time.perf_counter() - start) * 1000
+                  for ws in connections:
+                      try:
+                          await ws.close()
+                      except Exception:
+                          pass
+                  return elapsed_ms
+              except Exception as e:
+                  print(f"  ⚠️ Concurrent: {e}")
+                  return 0.0
+
+          async def run_all():
+              print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+              print("  📡 WebSocket Latency Benchmark")
+              print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+              print("\n  🔌 Connect latency (20 connections)...")
+              connect_times = await measure_connect_latency(20)
+
+              print("  🏓 Ping-pong RTT (50 messages)...")
+              rtt_times = await measure_ping_pong_rtt(50)
+
+              print("  🚀 Message throughput (100 messages)...")
+              throughput = await measure_throughput(100)
+
+              print("  🌊 Concurrent connections (10 simultaneous)...")
+              concurrent_ms = await measure_concurrent_connections(10)
+
+              def stats(times):
+                  if not times:
+                      return {"mean":0,"median":0,"min":0,"max":0,"stddev":0,"p95":0}
+                  n = len(times)
+                  s = sorted(times)
+                  return {
+                      "mean":   round(statistics.mean(times), 3),
+                      "median": round(statistics.median(times), 3),
+                      "min":    round(min(times), 3),
+                      "max":    round(max(times), 3),
+                      "stddev": round(statistics.stdev(times) if n>1 else 0, 3),
+                      "p95":    round(s[min(int(n*0.95), n-1)], 3),
+                      "samples": n,
+                  }
+
+              connect_stats = stats(connect_times)
+              rtt_stats     = stats(rtt_times)
+
+              thr_connect = float("${THRESHOLD_WS_CONNECT_MS}")
+              thr_msg     = float("${THRESHOLD_WS_MESSAGE_MS}")
+
+              results = {
+                  "git_sha": "${GITHUB_SHA}",
+                  "ws_url": "${WS_BASE_URL}/ws/events",
+                  "connect_latency": {
+                      **connect_stats,
+                      "threshold_ms": thr_connect,
+                      "passed": connect_stats["mean"] <= thr_connect,
+                  },
+                  "ping_pong_rtt": {
+                      **rtt_stats,
+                      "threshold_ms": thr_msg,
+                      "passed": rtt_stats["mean"] <= thr_msg,
+                  },
+                  "throughput": {
+                      "messages_per_second": round(throughput, 2),
+                      "threshold_mps": 20.0,
+                      "passed": throughput >= 20.0,
+                  },
+                  "concurrent": {
+                      "connections": 10,
+                      "total_ms": round(concurrent_ms, 3),
+                  },
+                  "raw": {
+                      "connect_times_ms": [round(t,3) for t in connect_times],
+                      "rtt_times_ms": [round(t,3) for t in rtt_times],
+                  },
+              }
+
+              overall = (
+                  results["connect_latency"]["passed"] and
+                  results["ping_pong_rtt"]["passed"] and
+                  results["throughput"]["passed"]
+              )
+              results["overall_pass"] = overall
+
+              with open(f"${WS_DIR}/ws-results.json", "w") as f:
+                  import json; json.dump(results, f, indent=2)
+
+              with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+                  out.write(f"connect_ms={connect_stats['mean']}\n")
+                  out.write(f"rtt_ms={rtt_stats['mean']}\n")
+                  out.write(f"throughput_mps={round(throughput,2)}\n")
+                  out.write(f"passed={'true' if overall else 'false'}\n")
+
+              status = "✅ PASS" if overall else "❌ FAIL"
+              print(f"\n  {status}")
+              print(f"  Connect: {connect_stats['mean']:.1f}ms (p95={connect_stats['p95']:.1f}ms)")
+              print(f"  RTT:     {rtt_stats['mean']:.1f}ms (p95={rtt_stats['p95']:.1f}ms)")
+              print(f"  MPS:     {round(throughput,1)} msg/s")
+              print(f"  Concurrent 10 conn: {round(concurrent_ms,1)}ms")
+
+          asyncio.run(run_all())
+          PYTHON_EOF
+
+      - name: "📈 WebSocket visualization"
+        run: |
+          WS_DIR="${BENCH_DIR}/websocket"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          try:
+              with open("${WS_DIR}/ws-results.json") as f:
+                  data = json.load(f)
+          except Exception:
+              sys.exit(0)
+
+          palette = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "surface2":"#585b70",
+              "text":    "#cdd6f4",
+              "subtext": "#a6adc8",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "teal":    "#94e2d5",
+              "sky":     "#89dceb",
+          }
+
+          passed = data.get("overall_pass", False)
+          accent = palette["green"] if passed else palette["red"]
+
+          fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+          fig.patch.set_facecolor(palette["bg"])
+
+          def style(ax):
+              ax.set_facecolor(palette["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(palette["surface2"])
+                  sp.set_alpha(0.4)
+              ax.tick_params(colors=palette["text"], labelsize=9)
+              ax.grid(True, alpha=0.08, color=palette["text"], zorder=1)
+
+          # ── Connect latency time series ───────────────────────────────
+          ax1 = axes[0]
+          style(ax1)
+          conn_times = data["raw"].get("connect_times_ms", [])
+          conn_stat  = data["connect_latency"]
+          if conn_times:
+              x = np.arange(1, len(conn_times)+1)
+              c_pass = palette["green"] if conn_stat["passed"] else palette["red"]
+              ax1.fill_between(x, conn_times, conn_stat["mean"],
+                               alpha=0.12, color=palette["blue"])
+              ax1.plot(x, conn_times, color=palette["blue"],
+                       linewidth=1.5, zorder=3)
+              ax1.scatter(x, conn_times, color=palette["blue"],
+                          s=25, alpha=0.7, zorder=4)
+              ax1.axhline(conn_stat["mean"], color=palette["mauve"],
+                          linewidth=1.8, linestyle="--", zorder=4,
+                          label=f"Mean: {conn_stat['mean']:.1f}ms")
+              ax1.axhline(conn_stat["threshold_ms"], color=palette["red"],
+                          linewidth=1.5, linestyle="-", alpha=0.6, zorder=4,
+                          label=f"SLO: {conn_stat['threshold_ms']:.0f}ms")
+          ax1.set_xlabel("Connection #", color=palette["text"], fontsize=9.5)
+          ax1.set_ylabel("Connect Time (ms)", color=palette["text"], fontsize=9.5)
+          ax1.set_title(
+              f"🔌 Connect Latency\n"
+              f"{'✅' if conn_stat['passed'] else '❌'} mean={conn_stat['mean']:.1f}ms",
+              color=palette["text"], fontsize=11, fontweight="bold", pad=10
+          )
+          ax1.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8.5, framealpha=0.9)
+
+          # ── RTT time series ───────────────────────────────────────────
+          ax2 = axes[1]
+          style(ax2)
+          rtt_times = data["raw"].get("rtt_times_ms", [])
+          rtt_stat  = data["ping_pong_rtt"]
+          if rtt_times:
+              x = np.arange(1, len(rtt_times)+1)
+              ax2.fill_between(x, rtt_times, rtt_stat["mean"],
+                               alpha=0.12, color=palette["teal"])
+              ax2.plot(x, rtt_times, color=palette["teal"],
+                       linewidth=1.5, zorder=3)
+              ax2.scatter(x, rtt_times, color=palette["teal"],
+                          s=20, alpha=0.7, zorder=4)
+              ax2.axhline(rtt_stat["mean"], color=palette["mauve"],
+                          linewidth=1.8, linestyle="--", zorder=4,
+                          label=f"Mean: {rtt_stat['mean']:.1f}ms")
+              ax2.axhline(rtt_stat["threshold_ms"], color=palette["red"],
+                          linewidth=1.5, linestyle="-", alpha=0.6, zorder=4,
+                          label=f"SLO: {rtt_stat['threshold_ms']:.0f}ms")
+          ax2.set_xlabel("Message #", color=palette["text"], fontsize=9.5)
+          ax2.set_ylabel("RTT (ms)", color=palette["text"], fontsize=9.5)
+          ax2.set_title(
+              f"🏓 Ping-Pong RTT\n"
+              f"{'✅' if rtt_stat['passed'] else '❌'} mean={rtt_stat['mean']:.1f}ms",
+              color=palette["text"], fontsize=11, fontweight="bold", pad=10
+          )
+          ax2.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8.5, framealpha=0.9)
+
+          # ── Summary stats ─────────────────────────────────────────────
+          ax3 = axes[2]
+          ax3.set_facecolor(palette["surface"])
+          ax3.axis("off")
+
+          mps      = data["throughput"]["messages_per_second"]
+          mps_pass = data["throughput"]["passed"]
+          mps_thr  = data["throughput"]["threshold_mps"]
+          conc_ms  = data["concurrent"]["total_ms"]
+
+          rows = [
+              ("🔌 Connect mean",   f"{conn_stat['mean']:.2f}ms"),
+              ("🔌 Connect p95",    f"{conn_stat['p95']:.2f}ms"),
+              ("🎯 Connect SLO",    f"{conn_stat['threshold_ms']:.0f}ms"),
+              ("🔌 Connect pass",   "✅" if conn_stat["passed"] else "❌"),
+              ("─" * 22,           "─" * 10),
+              ("🏓 RTT mean",       f"{rtt_stat['mean']:.2f}ms"),
+              ("🏓 RTT p95",        f"{rtt_stat['p95']:.2f}ms"),
+              ("🎯 RTT SLO",        f"{rtt_stat['threshold_ms']:.0f}ms"),
+              ("🏓 RTT pass",       "✅" if rtt_stat["passed"] else "❌"),
+              ("─" * 22,           "─" * 10),
+              ("🚀 Throughput",     f"{mps:.1f} msg/s"),
+              ("🎯 MPS threshold",  f"{mps_thr:.0f} msg/s"),
+              ("🚀 Throughput pass","✅" if mps_pass else "❌"),
+              ("─" * 22,           "─" * 10),
+              ("🌊 10 concurrent",  f"{conc_ms:.1f}ms"),
+              ("🏆 Overall",        "✅ PASS" if passed else "❌ FAIL"),
+          ]
+
+          y_pos = 0.97
+          row_h = 1.0 / (len(rows) + 1)
+          for label, value in rows:
+              if label.startswith("─"):
+                  ax3.axhline(y_pos - row_h * 0.2,
+                              xmin=0.02, xmax=0.98,
+                              color=palette["surface2"],
+                              linewidth=0.8, alpha=0.6,
+                              transform=ax3.transAxes)
+                  y_pos -= row_h * 0.6
+                  continue
+
+              val_color = palette["text"]
+              if "pass" in label.lower() or "Overall" in label:
+                  val_color = palette["green"] if "✅" in value else palette["red"]
+
+              ax3.text(0.03, y_pos, label, transform=ax3.transAxes,
+                       color=palette["subtext"], fontsize=9, va="top")
+              ax3.text(0.97, y_pos, value, transform=ax3.transAxes,
+                       color=val_color, fontsize=9,
+                       fontweight="bold", ha="right", va="top")
+              y_pos -= row_h
+
+          ax3.set_title("WebSocket Summary", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+
+          fig.suptitle(
+              f"📡 ASH WebSocket Latency Benchmark\n"
+              f"{'✅ PASSED' if passed else '❌ FAILED'}  ·  "
+              f"connect={conn_stat['mean']:.1f}ms  ·  "
+              f"rtt={rtt_stat['mean']:.1f}ms  ·  "
+              f"throughput={mps:.0f}msg/s",
+              color=palette["text"],
+              fontsize=12.5,
+              fontweight="bold",
+              y=1.02
+          )
+
+          plt.tight_layout()
+          plt.savefig("${WS_DIR}/websocket-chart.png",
+                      dpi=155, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 WebSocket chart saved")
+          PYTHON_EOF
+
+      - name: "📤 Upload WebSocket artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "api-ws-${{ needs.api-server.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/websocket/"
+          retention-days: 30
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Consolidated report & regression detection
+  # ───────────────────────────────────────────────────────────────────────────
+  api-report:
+    name: "📊 Report · API Benchmark Consolidation"
+    needs: [api-server, bench-endpoints, bench-load, bench-websocket]
+    if: always() && needs.api-server.outputs.server_ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "📦 Install tools"
+        run: |
+          pip install --quiet \
+            matplotlib==3.9.2 \
+            pandas==2.2.3 \
+            numpy==2.1.2 \
+            scipy==1.14.1 \
+            jinja2==3.1.4 \
+            tabulate==0.9.0 \
+            rich==13.9.2
+          sudo apt-get install -y --no-install-recommends jq 2>/dev/null || true
+
+      - name: "📥 Download all artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "api-*-${{ needs.api-server.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/collected"
+          merge-multiple: true
+
+      - name: "📦 Restore baseline"
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-api-${{ github.base_ref || 'main' }}"
+          restore-keys: |
+            bench-baseline-api-main
+            bench-baseline-api-
+
+      - name: "📊 Consolidate all results"
+        id: consolidate
+        run: |
+          mkdir -p "${REPORTS_DIR}"
+
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import os
+          import statistics
+          from datetime import datetime, timezone
+
+          collected  = "${BENCH_DIR}/collected"
+          reports    = "${REPORTS_DIR}"
+          bench_id   = "${{ needs.api-server.outputs.bench_id }}"
+          git_sha    = "${GITHUB_SHA}"
+          git_ref    = "${GITHUB_REF}"
+          baseline_d = "${BASELINE_DIR}"
+
+          # ── Collect endpoint metrics ──────────────────────────────────
+          endpoint_metrics = []
+          for f in glob.glob(f"{collected}/**/metrics.json", recursive=True):
+              try:
+                  with open(f) as fp: endpoint_metrics.append(json.load(fp))
+              except Exception: pass
+
+          # ── Collect load test results ─────────────────────────────────
+          load_results = []
+          for f in glob.glob(f"{collected}/**/load-results.json", recursive=True):
+              try:
+                  with open(f) as fp: load_results.append(json.load(fp))
+              except Exception: pass
+
+          # ── Collect WebSocket results ─────────────────────────────────
+          ws_results = {}
+          ws_files = glob.glob(f"{collected}/**/ws-results.json", recursive=True)
+          if ws_files:
+              try:
+                  with open(ws_files[0]) as f: ws_results = json.load(f)
+              except Exception: pass
+
+          # ── Baseline comparison ───────────────────────────────────────
+          regressions = []
+          baseline_file = f"{baseline_d}/api-baseline.json"
+          if os.path.exists(baseline_file):
+              try:
+                  with open(baseline_file) as f: baseline = json.load(f)
+                  baseline_eps = {
+                      ep["endpoint"]: ep
+                      for ep in baseline.get("endpoint_metrics", [])
+                  }
+                  thresh_pct = float("${REGRESSION_THRESHOLD}")
+                  for ep in endpoint_metrics:
+                      name    = ep.get("endpoint","")
+                      cur_p95 = ep.get("percentiles",{}).get("p95_ms", 0)
+                      if name in baseline_eps:
+                          bas_p95 = baseline_eps[name].get(
+                              "percentiles",{}).get("p95_ms", cur_p95)
+                          change  = ((cur_p95 - bas_p95) / max(bas_p95, 0.001)) * 100
+                          if change > thresh_pct:
+                              regressions.append({
+                                  "endpoint": name,
+                                  "baseline_p95_ms": round(bas_p95, 3),
+                                  "current_p95_ms":  round(cur_p95, 3),
+                                  "change_pct": round(change, 2),
+                              })
+              except Exception as e:
+                  print(f"  ⚠️ Baseline comparison failed: {e}")
+
+          # ── Overall pass/fail ─────────────────────────────────────────
+          ep_pass   = all(e.get("threshold",{}).get("passed", True) for e in endpoint_metrics)
+          load_pass = all(l.get("thresholds",{}).get("overall_pass", True) for l in load_results)
+          ws_pass   = ws_results.get("overall_pass", True) if ws_results else True
+          reg_pass  = len(regressions) == 0
+          overall   = ep_pass and load_pass and ws_pass and reg_pass
+
+          # ── Aggregate endpoint statistics ─────────────────────────────
+          if endpoint_metrics:
+              all_means = [e["timing"]["mean_ms"] for e in endpoint_metrics
+                           if "timing" in e]
+              all_p95s  = [e["percentiles"]["p95_ms"] for e in endpoint_metrics
+                           if "percentiles" in e]
+              ep_summary = {
+                  "total": len(endpoint_metrics),
+                  "passed": sum(1 for e in endpoint_metrics
+                                if e.get("threshold",{}).get("passed",True)),
+                  "failed": sum(1 for e in endpoint_metrics
+                                if not e.get("threshold",{}).get("passed",True)),
+                  "mean_of_means_ms": round(statistics.mean(all_means),3) if all_means else 0,
+                  "mean_of_p95s_ms": round(statistics.mean(all_p95s),3) if all_p95s else 0,
+                  "fastest_endpoint": min(endpoint_metrics,
+                      key=lambda e: e["timing"]["mean_ms"],
+                      default={}).get("endpoint","—"),
+                  "slowest_endpoint": max(endpoint_metrics,
+                      key=lambda e: e["timing"]["mean_ms"],
+                      default={}).get("endpoint","—"),
+              }
+          else:
+              ep_summary = {"total":0,"passed":0,"failed":0}
+
+          consolidated = {
+              "bench_id": bench_id,
+              "git_sha": git_sha[:8],
+              "git_ref": git_ref,
+              "timestamp": datetime.now(timezone.utc).isoformat(),
+              "overall_pass": overall,
+              "endpoint_summary": ep_summary,
+              "load_summary": {
+                  "scenarios": len(load_results),
+                  "all_passed": load_pass,
+              },
+              "websocket_summary": {
+                  "tested": bool(ws_results),
+                  "passed": ws_pass,
+                  "connect_ms": ws_results.get("connect_latency",{}).get("mean",0),
+                  "rtt_ms": ws_results.get("ping_pong_rtt",{}).get("mean",0),
+              },
+              "regressions": regressions,
+              "endpoint_metrics": endpoint_metrics,
+              "load_results": load_results,
+          }
+
+          with open(f"{reports}/api-consolidated.json","w") as f:
+              json.dump(consolidated, f, indent=2)
+
+          # ── Markdown report ───────────────────────────────────────────
+          status = "✅ PASSED" if overall else "❌ FAILED"
+          md = [
+              f"# 🌐 ASH REST API Benchmark Report",
+              f"",
+              f"> **{status}**  &nbsp;·&nbsp;  SHA `{git_sha[:8]}`"
+              f"  &nbsp;·&nbsp;  `{consolidated['timestamp']}`",
+              f"",
+              f"## 📊 Overall Results",
+              f"",
+              f"| Category | Status | Details |",
+              f"|----------|--------|---------|",
+              f"| ⚡ Endpoint Latency | {'✅' if ep_pass else '❌'} | "
+              f"{ep_summary.get('passed',0)}/{ep_summary.get('total',0)} endpoints passed |",
+              f"| 💪 Load Tests | {'✅' if load_pass else '❌'} | "
+              f"{len(load_results)} scenarios |",
+              f"| 📡 WebSocket | {'✅' if ws_pass else '❌'} | "
+              f"connect={ws_results.get('connect_latency',{}).get('mean',0):.1f}ms "
+              f"rtt={ws_results.get('ping_pong_rtt',{}).get('mean',0):.1f}ms |",
+              f"| 📈 Regressions | {'✅' if reg_pass else '❌'} | "
+              f"{len(regressions)} regression(s) detected |",
+              f"",
+              f"## ⚡ Endpoint Latency",
+              f"",
+              f"| Endpoint | Group | Mean | p50 | p95 | p99 | Apdex | SLO | Status |",
+              f"|----------|-------|------|-----|-----|-----|-------|-----|--------|",
+          ]
+
+          for ep in sorted(endpoint_metrics,
+                           key=lambda e: e.get("timing",{}).get("mean_ms",0)):
+              t   = ep.get("timing",{})
+              pct = ep.get("percentiles",{})
+              thr = ep.get("threshold",{})
+              q   = ep.get("quality",{})
+              icon = "✅" if thr.get("passed") else "❌"
+              md.append(
+                  f"| `{ep.get('endpoint','—')}` "
+                  f"| `{ep.get('group','—')}` "
+                  f"| `{t.get('mean_ms','—')}ms` "
+                  f"| `{pct.get('p50_ms','—')}ms` "
+                  f"| `{pct.get('p95_ms','—')}ms` "
+                  f"| `{pct.get('p99_ms','—')}ms` "
+                  f"| `{q.get('apdex','—')}` "
+                  f"| `{thr.get('threshold_ms','—')}ms` "
+                  f"| {icon} |"
+              )
+
+          if load_results:
+              md += [
+                  f"",
+                  f"## 💪 Load Test Results",
+                  f"",
+                  f"| Scenario | Users | RPS | Error% | p95 | p99 | Status |",
+                  f"|----------|-------|-----|--------|-----|-----|--------|",
+              ]
+              for lr in load_results:
+                  icon = "✅" if lr.get("thresholds",{}).get("overall_pass") else "❌"
+                  lat  = lr.get("latency",{})
+                  reqs = lr.get("requests",{})
+                  md.append(
+                      f"| `{lr.get('scenario','—')}` "
+                      f"| `{lr.get('users','—')}` "
+                      f"| `{reqs.get('rps','—')}` "
+                      f"| `{reqs.get('error_rate_pct','—')}%` "
+                      f"| `{lat.get('p95_ms','—')}ms` "
+                      f"| `{lat.get('p99_ms','—')}ms` "
+                      f"| {icon} |"
+                  )
+
+          if regressions:
+              md += [
+                  f"",
+                  f"## ⚠️ Performance Regressions Detected",
+                  f"",
+                  f"| Endpoint | Baseline p95 | Current p95 | Change |",
+                  f"|----------|-------------|-------------|--------|",
+              ]
+              for r in regressions:
+                  md.append(
+                      f"| `{r['endpoint']}` "
+                      f"| `{r['baseline_p95_ms']}ms` "
+                      f"| `{r['current_p95_ms']}ms` "
+                      f"| `+{r['change_pct']}%` ⚠️ |"
+                  )
+
+          md += ["","---","*Generated by ASH v5.0 OMEGA API Benchmark*"]
+          report_content = "\n".join(md)
+
+          with open(f"{reports}/api-report.md","w") as f:
+              f.write(report_content)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"w") as f:
+              f.write(report_content)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"overall_pass={'true' if overall else 'false'}\n")
+              out.write(f"regression_count={len(regressions)}\n")
+              out.write(f"ep_failed={ep_summary.get('failed',0)}\n")
+
+          print(f"\n  {status}")
+          print(f"  Endpoints: {ep_summary.get('passed',0)}/{ep_summary.get('total',0)} passed")
+          print(f"  Load:      {'✅' if load_pass else '❌'}")
+          print(f"  WebSocket: {'✅' if ws_pass else '❌'}")
+          print(f"  Regressions: {len(regressions)}")
+          PYTHON_EOF
+
+      - name: "📈 API performance comparison heatmap"
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.colors as mcolors
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          # Load endpoint metrics
+          metrics = []
+          for f in glob.glob("${BENCH_DIR}/collected/**/metrics.json", recursive=True):
+              try:
+                  with open(f) as fp: metrics.append(json.load(fp))
+              except Exception: pass
+
+          if len(metrics) < 2:
+              print("  ⚠️ Not enough data for heatmap")
+              sys.exit(0)
+
+          palette = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "surface2":"#585b70",
+              "text":    "#cdd6f4",
+              "subtext": "#a6adc8",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "yellow":  "#f9e2af",
+          }
+
+          # Sort by group then name
+          metrics.sort(key=lambda m: (m.get("group",""), m.get("endpoint","")))
+
+          names     = [m["endpoint"] for m in metrics]
+          groups    = [m.get("group","?") for m in metrics]
+          means     = [m["timing"]["mean_ms"] for m in metrics]
+          p95s      = [m["percentiles"]["p95_ms"] for m in metrics]
+          p99s      = [m["percentiles"]["p99_ms"] for m in metrics]
+          cvs       = [m["timing"]["cv_percent"] for m in metrics]
+          apdexes   = [m["quality"]["apdex"] for m in metrics]
+          thresholds= [m["threshold"]["threshold_ms"] for m in metrics]
+          passed    = [m["threshold"]["passed"] for m in metrics]
+
+          fig, axes = plt.subplots(1, 2, figsize=(22, max(6, len(names) * 0.45 + 3)))
+          fig.patch.set_facecolor(palette["bg"])
+
+          # ── Left: Grouped bar chart ───────────────────────────────────
+          ax1 = axes[0]
+          ax1.set_facecolor(palette["surface"])
+          for sp in ax1.spines.values():
+              sp.set_edgecolor(palette["surface2"])
+              sp.set_alpha(0.4)
+          ax1.tick_params(colors=palette["text"], labelsize=8)
+          ax1.grid(True, alpha=0.08, color=palette["text"],
+                   axis="x", zorder=1)
+
+          y    = np.arange(len(names))
+          h    = 0.28
+          bars_mean = ax1.barh(y + h, means, h,
+                               color=[palette["blue"] if p else palette["red"]
+                                      for p in passed],
+                               alpha=0.82, zorder=3, label="Mean",
+                               edgecolor=palette["bg"], linewidth=0.8)
+          bars_p95  = ax1.barh(y, p95s, h,
+                               color=palette["peach"], alpha=0.72,
+                               zorder=3, label="p95",
+                               edgecolor=palette["bg"], linewidth=0.8)
+          bars_p99  = ax1.barh(y - h, p99s, h,
+                               color=palette["mauve"], alpha=0.62,
+                               zorder=3, label="p99",
+                               edgecolor=palette["bg"], linewidth=0.8)
+
+          # Threshold markers
+          for i, (thr, p) in enumerate(zip(thresholds, passed)):
+              ax1.axvline(thr, color=palette["red"] if not p else palette["yellow"],
+                          linewidth=0.6, alpha=0.4, zorder=2)
+
+          ax1.set_yticks(y)
+          ax1.set_yticklabels(
+              [f"{'✅' if p else '❌'} {n}" for n, p in zip(names, passed)],
+              color=palette["text"], fontsize=7.5
+          )
+          ax1.set_xlabel("Latency (ms)", color=palette["text"], fontsize=10)
+          ax1.set_title("Endpoint Latency Overview",
+                        color=palette["text"], fontsize=12, fontweight="bold", pad=12)
+          ax1.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8.5, framealpha=0.9)
+
+          # ── Right: Apdex heatmap ──────────────────────────────────────
+          ax2 = axes[1]
+          ax2.set_facecolor(palette["surface"])
+          ax2.tick_params(colors=palette["text"], labelsize=8)
+          for sp in ax2.spines.values():
+              sp.set_edgecolor(palette["surface2"])
+              sp.set_alpha(0.4)
+
+          # Custom colormap: red → yellow → green
+          cmap = mcolors.LinearSegmentedColormap.from_list(
+              "apdex",
+              [(0.0, "#f38ba8"), (0.5, "#f9e2af"),
+               (0.85, "#94e2d5"), (1.0, "#a6e3a1")]
+          )
+
+          apdex_arr = np.array(apdexes).reshape(-1, 1)
+          im = ax2.imshow(apdex_arr, cmap=cmap, aspect="auto",
+                          vmin=0, vmax=1.0,
+                          extent=[-0.5, 0.5, len(names)-0.5, -0.5])
+
+          for i, (apdex, name) in enumerate(zip(apdexes, names)):
+              text_color = palette["bg"] if apdex > 0.5 else palette["text"]
+              ax2.text(0, i, f"{apdex:.3f}",
+                       ha="center", va="center",
+                       color=text_color,
+                       fontsize=8.5, fontweight="bold")
+
+          ax2.set_yticks(range(len(names)))
+          ax2.set_yticklabels(
+              [f"{g}/{n[:18]}" for g, n in zip(groups, names)],
+              color=palette["text"], fontsize=7.5
+          )
+          ax2.set_xticks([])
+          ax2.set_title("Apdex Score Heatmap",
+                        color=palette["text"], fontsize=12, fontweight="bold", pad=12)
+
+          cbar = plt.colorbar(im, ax=ax2, shrink=0.8, pad=0.02)
+          cbar.ax.tick_params(colors=palette["text"], labelsize=8)
+          cbar.set_label("Apdex Score", color=palette["text"], fontsize=9)
+          for label in cbar.ax.get_yticklabels():
+              label.set_color(palette["text"])
+
+          # Zone lines
+          for threshold_val, label_text in [(0.70,"Fair"), (0.85,"Good"), (0.94,"Excellent")]:
+              ax2.axhline(
+                  -0.5 + threshold_val * len(names),
+                  color=palette["surface2"], linewidth=0.8, alpha=0.4
+              )
+
+          fig.suptitle(
+              f"🌐 ASH API Benchmark Overview  ·  {len(names)} endpoints\n"
+              f"SHA {git_sha[:8]}  ·  "
+              f"{sum(passed)}/{len(passed)} passed",
+              color=palette["text"],
+              fontsize=13,
+              fontweight="bold",
+              y=1.01
+          )
+          plt.tight_layout()
+          plt.savefig("${REPORTS_DIR}/api-overview-chart.png",
+                      dpi=155, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print("  📈 API overview heatmap saved")
+          PYTHON_EOF
+          git_sha="${GITHUB_SHA}"
+
+      - name: "💬 Post PR comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let content = '';
+            try {
+              content = fs.readFileSync(
+                '${{ env.REPORTS_DIR }}/api-report.md', 'utf8'
+              );
+            } catch(e) {
+              content = '> API benchmark report unavailable.';
+            }
+
+            const overallPass   = '${{ steps.consolidate.outputs.overall_pass }}' === 'true';
+            const regressions   = parseInt('${{ steps.consolidate.outputs.regression_count }}' || '0');
+            const epFailed      = parseInt('${{ steps.consolidate.outputs.ep_failed }}' || '0');
+
+            const statusLine = overallPass
+              ? '✅ All API benchmarks passed'
+              : `❌ ${epFailed} endpoint(s) failed SLO` +
+                (regressions > 0 ? `, ${regressions} regression(s)` : '');
+
+            const body = [
+              `## 🌐 REST API Benchmark Results`,
+              ``,
+              statusLine,
+              ``,
+              regressions > 0
+                ? `> ⚠️ **${regressions} performance regression(s)** detected vs baseline`
+                : '',
+              ``,
+              `<details>`,
+              `<summary>📊 Full API Benchmark Report (click to expand)</summary>`,
+              ``,
+              content,
+              ``,
+              `</details>`,
+            ].filter(l => l !== undefined).join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('REST API Benchmark Results')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              console.log('✅ Updated existing PR comment');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+              console.log('✅ Created new PR comment');
+            }
+
+      - name: "💾 Save as new baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.consolidate.outputs.overall_pass == 'true'
+        run: |
+          mkdir -p "${BASELINE_DIR}"
+          cp "${REPORTS_DIR}/api-consolidated.json" \
+             "${BASELINE_DIR}/api-baseline.json"
+          echo "  ✅ Baseline updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: "💾 Cache new baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.consolidate.outputs.overall_pass == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-api-main"
+
+      - name: "📤 Upload final report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "api-report-final-${{ needs.api-server.outputs.bench_id }}"
+          path: |
+            ${{ env.REPORTS_DIR }}/
+          retention-days: 90
+          compression-level: 9
+
+      - name: "🚨 Notify on regressions"
+        if: steps.consolidate.outputs.regression_count != '0'
+        uses: ./.github/actions/notify-discord
+        continue-on-error: true
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_BENCHMARK }}
+          message: |
+            ⚠️ **API Performance Regression** on `${{ github.ref }}`
+            ${{ steps.consolidate.outputs.regression_count }} endpoint(s) regressed
+            SHA: `${{ github.sha }}`
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: "❌ Final gate"
+        if: steps.consolidate.outputs.overall_pass == 'false'
+        run: |
+          EP_FAILED="${{ steps.consolidate.outputs.ep_failed }}"
+          REGRESSIONS="${{ steps.consolidate.outputs.regression_count }}"
+          echo "::error title=API Benchmark Failed::"
+          echo "  ${EP_FAILED} endpoint(s) exceeded SLO"
+          echo "  ${REGRESSIONS} regression(s) detected"
+          exit 1
