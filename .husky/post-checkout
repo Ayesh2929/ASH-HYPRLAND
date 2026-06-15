@@ -1,0 +1,535 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🪝 ASH DOTFILES v5.0 OMEGA — HUSKY POST-CHECKOUT HOOK                     ║
+# ║  Runs after git checkout/switch — syncs environment to new branch          ║
+# ║  Updates deps · configures environment · applies branch-specific settings  ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# ── ANSI PALETTE ──────────────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"   readonly B="${ESC}[1m"   readonly D="${ESC}[2m"
+readonly RED="${ESC}[31m"           readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"        readonly BLUE="${ESC}[34m"
+readonly CYAN="${ESC}[36m"          readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m"  readonly PURPLE="${ESC}[38;5;135m"
+readonly GOLD="${ESC}[38;5;220m"    readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m"    readonly PEACH="${ESC}[38;5;217m"
+readonly LIME="${ESC}[38;5;154m"    readonly TEAL="${ESC}[38;5;43m"
+readonly CORAL="${ESC}[38;5;203m"   readonly CREAM="${ESC}[38;5;230m"
+readonly SLATE="${ESC}[38;5;245m"   readonly AMBER="${ESC}[38;5;214m"
+readonly EMERALD="${ESC}[38;5;120m" readonly VIOLET="${ESC}[38;5;177m"
+readonly CRIMSON="${ESC}[38;5;161m" readonly ROSE="${ESC}[38;5;211m"
+readonly INDIGO="${ESC}[38;5;105m"  readonly SKY="${ESC}[38;5;117m"
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+readonly BG_DARK="${ESC}[48;5;235m"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+readonly HOOK_VERSION="5.0.0-omega"
+readonly PREV_HEAD="${1:-}"    # Previous HEAD ref
+readonly NEW_HEAD="${2:-}"     # New HEAD ref
+readonly IS_BRANCH_CHECKOUT="${3:-1}"  # 1 = branch checkout, 0 = file checkout
+readonly START_MS="$(date +%s%3N)"
+readonly REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+readonly TERM_WIDTH="$(tput cols 2>/dev/null || echo 80)"
+
+# ── STATE ─────────────────────────────────────────────────────────────────────
+TASKS_DONE=0
+TASKS_FAILED=0
+TASKS_SKIPPED=0
+PREV_BRANCH=""
+NEW_BRANCH=""
+NOTICES=()
+ACTIONS=()
+IS_NEW_BRANCH=false
+IS_PROTECTED=false
+DEPS_CHANGED=false
+
+now_ms()     { date +%s%3N; }
+elapsed_ms() { echo $(( $(now_ms) - START_MS )); }
+format_dur() {
+    local ms="$1"
+    [[ $ms -lt 1000 ]] && printf "%dms" "$ms" || \
+        printf "%.1fs" "$(echo "scale=1; $ms/1000" | bc 2>/dev/null || echo "$((ms/1000))")"
+}
+
+# ── RENDERING ─────────────────────────────────────────────────────────────────
+hr() {
+    local c="${1:-─}" w="${2:-$TERM_WIDTH}" col="${3:-$D$SLATE}"
+    printf "%s%s%s\n" "$col" "$(printf '%*s' "$w" '' | tr ' ' "$c")" "$R" >&2
+}
+
+box_l()   { local content="$1"; local clean; clean="$(echo "$content" | sed 's/\x1b\[[0-9;]*m//g')"; local p=$(( TERM_WIDTH-4-${#clean} )); [[ $p -lt 0 ]] && p=0; printf "%s  ║ %s%*s║  %s\n" "$BG_MIDNIGHT$GOLD" "$content" "$p" "" "$R" >&2; }
+box_t()   { printf "%s%s  ╔%s╗  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $((TERM_WIDTH-4)) '' | tr ' ' '═')" "$R" >&2; }
+box_d()   { printf "%s%s  ╠%s╣  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $((TERM_WIDTH-4)) '' | tr ' ' '═')" "$R" >&2; }
+box_td()  { printf "%s%s  ╟%s╢  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $((TERM_WIDTH-4)) '' | tr ' ' '─')" "$R" >&2; }
+box_b()   { printf "%s%s  ╚%s╝  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $((TERM_WIDTH-4)) '' | tr ' ' '═')" "$R" >&2; }
+
+section() {
+    local icon="$1" title="$2" color="${3:-$CYAN}"
+    printf "\n" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+    printf "  %s %s%s%s\n" "$icon" "${color}${B}" "$title" "$R" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+}
+
+task_done() {
+    ((TASKS_DONE++)) || true
+    ACTIONS+=("${2:-$1}")
+    printf "  %s✓%s %-54s%s%s%s\n" \
+        "${GREEN}${B}" "$R" "${B}${WHITE}$1${R}" \
+        "${D}${SLATE}" "${2:-}" "$R" >&2
+}
+task_fail() {
+    ((TASKS_FAILED++)) || true
+    printf "  %s✗%s %-54s%s%s%s\n" \
+        "${RED}${B}" "$R" "${B}${WHITE}$1${R}" \
+        "${D}${RED}" "${2:-}" "$R" >&2
+}
+task_skip() {
+    ((TASKS_SKIPPED++)) || true
+    printf "  %s↷%s %-54s%s%s%s\n" \
+        "${SLATE}${D}" "$R" "${D}${WHITE}$1${R}" \
+        "${D}${SLATE}" "${2:-}" "$R" >&2
+}
+task_warn() {
+    ((TASKS_DONE++)) || true
+    printf "  %s⚠%s %-54s%s%s%s\n" \
+        "${YELLOW}${B}" "$R" "${B}${WHITE}$1${R}" \
+        "${D}${YELLOW}" "${2:-}" "$R" >&2
+}
+notice() {
+    NOTICES+=("$1")
+    printf "  %s»%s %s%s%s\n" \
+        "${AMBER}${B}" "$R" "${D}${CREAM}" "$1" "$R" >&2
+}
+
+# ── BRANCH ANALYSIS ───────────────────────────────────────────────────────────
+analyze_checkout() {
+    # Only run for branch checkouts (not file checkouts)
+    if [[ "$IS_BRANCH_CHECKOUT" != "1" ]]; then
+        return
+    fi
+
+    PREV_BRANCH="$(git name-rev --name-only "$PREV_HEAD" 2>/dev/null | \
+        sed 's|remotes/origin/||' || echo "unknown")"
+    NEW_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+
+    # Detect new branch (no ORIG_HEAD)
+    if ! git rev-parse ORIG_HEAD &>/dev/null; then
+        IS_NEW_BRANCH=true
+    fi
+
+    # Check if protected
+    local protected_list=("main" "master" "release" "production" "staging" "develop")
+    for pb in "${protected_list[@]}"; do
+        if [[ "$NEW_BRANCH" == "$pb" ]] || \
+           [[ "$NEW_BRANCH" == ${pb}* ]]; then
+            IS_PROTECTED=true
+            break
+        fi
+    done
+
+    # Check if dep files differ between branches
+    if [[ "$PREV_HEAD" != "$NEW_HEAD" ]]; then
+        local dep_diff
+        dep_diff="$(git diff --name-only \
+            "${PREV_HEAD}..${NEW_HEAD}" 2>/dev/null | \
+            grep -E '(package\.json|requirements\.txt|pubspec\.yaml|flake\.lock)$' \
+            || true)"
+        [[ -n "$dep_diff" ]] && DEPS_CHANGED=true
+    fi
+}
+
+# ── BANNER ────────────────────────────────────────────────────────────────────
+print_banner() {
+    # Skip for file checkouts
+    if [[ "$IS_BRANCH_CHECKOUT" != "1" ]]; then
+        return
+    fi
+
+    printf "\n" >&2
+    box_t
+
+    # Dynamic branch color based on type
+    local branch_color="$LIME"
+    local branch_icon="🌿"
+
+    case "$NEW_BRANCH" in
+        main|master)            branch_color="${RED}${B}";    branch_icon="🔴" ;;
+        develop|development)    branch_color="${ORANGE}${B}"; branch_icon="🟠" ;;
+        release/*)              branch_color="${GOLD}${B}";   branch_icon="🏷️" ;;
+        feature/*)              branch_color="${CYAN}${B}";   branch_icon="✨" ;;
+        fix/*|bugfix/*)         branch_color="${CORAL}${B}";  branch_icon="🔧" ;;
+        hotfix/*)               branch_color="${CRIMSON}${B}";branch_icon="🔥" ;;
+        theme/*)                branch_color="${VIOLET}${B}"; branch_icon="🎨" ;;
+        plugin/*)               branch_color="${INDIGO}${B}"; branch_icon="🔌" ;;
+        docs/*)                 branch_color="${SKY}${B}";    branch_icon="📖" ;;
+        chore/*)                branch_color="${SLATE}${B}";  branch_icon="🔩" ;;
+        security/*)             branch_color="${RED}${B}";    branch_icon="🔒" ;;
+        wip/*)                  branch_color="${YELLOW}${B}"; branch_icon="🚧" ;;
+    esac
+
+    box_l "${B}${TEAL}  🔀 ASH DOTFILES v5.0 OMEGA — BRANCH SWITCHED${R}${BG_MIDNIGHT}${GOLD}"
+    box_l "${D}${CREAM}  Environment synchronization in progress...${R}${BG_MIDNIGHT}${GOLD}"
+    box_d
+
+    box_l "$(printf "  %s%-14s%s %s→%s  %s%-30s%s" \
+        "${D}${SLATE}" "${PREV_BRANCH:0:25}" "$R$BG_MIDNIGHT$GOLD" \
+        "${D}${WHITE}" "$R$BG_MIDNIGHT$GOLD" \
+        "${branch_color}" "${branch_icon} ${NEW_BRANCH}" "$R$BG_MIDNIGHT$GOLD")"
+
+    local checkout_type
+    [[ "$IS_NEW_BRANCH" == "true" ]] && checkout_type="${LIME}NEW branch" || \
+        checkout_type="${D}existing branch"
+    [[ "$IS_PROTECTED" == "true" ]] && \
+        checkout_type="${RED}${B}PROTECTED branch ⚠️"
+
+    box_l "$(printf "  %s%-14s%s %s%s%s   %s%-14s%s %s%s%s" \
+        "${CYAN}${B}" "Type:" "$R$BG_MIDNIGHT$GOLD" \
+        "" "$checkout_type" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}" "Deps Changed:" "$R$BG_MIDNIGHT$GOLD" \
+        "$([ "$DEPS_CHANGED" == "true" ] && echo "${AMBER}${B}YES" || echo "${D}no")" "" \
+        "$R$BG_MIDNIGHT$GOLD")"
+
+    box_b
+    printf "\n" >&2
+}
+
+# ── TASK FUNCTIONS ────────────────────────────────────────────────────────────
+
+do_npm_install() {
+    [[ "$DEPS_CHANGED" != "true" ]] && [[ "$IS_NEW_BRANCH" != "true" ]] && \
+        { task_skip "npm install" "deps unchanged"; return 0; }
+
+    command -v npm &>/dev/null || { task_skip "npm install" "npm not found"; return 0; }
+
+    local installed=()
+    for pkg_dir in web browser-extension; do
+        local pkg="${REPO_ROOT}/${pkg_dir}/package.json"
+        local nm="${REPO_ROOT}/${pkg_dir}/node_modules"
+        [[ -f "$pkg" ]] || continue
+
+        # Check if node_modules is stale
+        if [[ -d "$nm" ]] && \
+           [[ "$pkg" -ot "$nm" ]] && \
+           [[ "$IS_NEW_BRANCH" != "true" ]]; then
+            continue
+        fi
+
+        if (cd "${REPO_ROOT}/${pkg_dir}" && \
+            npm install --silent --no-audit 2>/dev/null); then
+            installed+=("$pkg_dir")
+        fi
+    done
+
+    if [[ ${#installed[@]} -gt 0 ]]; then
+        task_done "npm install" "${installed[*]} synced"
+    else
+        task_skip "npm install" "already up-to-date"
+    fi
+}
+
+do_pip_install() {
+    [[ "$DEPS_CHANGED" != "true" ]] && [[ "$IS_NEW_BRANCH" != "true" ]] && \
+        { task_skip "pip install" "deps unchanged"; return 0; }
+
+    local req="${REPO_ROOT}/api/requirements.txt"
+    [[ -f "$req" ]] || { task_skip "pip install" "no requirements.txt"; return 0; }
+    command -v pip3 &>/dev/null || command -v pip &>/dev/null || \
+        { task_skip "pip install" "pip not found"; return 0; }
+
+    local pip_cmd; command -v pip3 &>/dev/null && pip_cmd=pip3 || pip_cmd=pip
+    if $pip_cmd install -q -r "$req" 2>/dev/null; then
+        task_done "pip install" "api deps synced"
+    else
+        task_fail "pip install" "install failed"
+    fi
+}
+
+do_fix_permissions() {
+    local fixed=0
+
+    # Shell scripts
+    while IFS= read -r -d '' f; do
+        [[ -x "$f" ]] || { chmod +x "$f"; ((fixed++)) || true; }
+    done < <(find "$REPO_ROOT" \
+        -not -path '*/.git/*' \
+        -not -path '*/node_modules/*' \
+        -name "*.sh" -print0 2>/dev/null || true)
+
+    # ash-cli main binary
+    local ash="${REPO_ROOT}/ash-cli/ash"
+    [[ -f "$ash" ]] && [[ ! -x "$ash" ]] && { chmod +x "$ash"; ((fixed++)) || true; }
+
+    # husky hooks
+    while IFS= read -r -d '' hook; do
+        [[ -x "$hook" ]] || { chmod +x "$hook"; ((fixed++)) || true; }
+    done < <(find "${REPO_ROOT}/.husky" \
+        -type f -print0 2>/dev/null || true)
+
+    if [[ $fixed -gt 0 ]]; then
+        task_done "File permissions" "${fixed} files made executable"
+    else
+        task_skip "File permissions" "all correct"
+    fi
+}
+
+do_validate_environment() {
+    local issues=()
+
+    # Check git config
+    local user_email; user_email="$(git config --get user.email 2>/dev/null || true)"
+    local user_name;  user_name="$(git config --get user.name  2>/dev/null || true)"
+
+    [[ -z "$user_email" ]] && issues+=("git user.email not set")
+    [[ -z "$user_name"  ]] && issues+=("git user.name not set")
+
+    # Check critical tools
+    local critical_tools=("git" "bash" "fish" "nvim" "hyprctl")
+    local missing_tools=()
+    for tool in "${critical_tools[@]}"; do
+        command -v "$tool" &>/dev/null || missing_tools+=("$tool")
+    done
+
+    [[ ${#missing_tools[@]} -gt 0 ]] && \
+        issues+=("Missing tools: ${missing_tools[*]}")
+
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        task_warn "Environment check" "${#issues[@]} issue(s)"
+        for issue in "${issues[@]}"; do
+            printf "  %s    • %s%s%s\n" \
+                "${YELLOW}" "${D}" "$issue" "$R" >&2
+        done
+        NOTICES+=("⚙️  Fix environment issues with: ash doctor")
+    else
+        task_done "Environment check" "all tools present"
+    fi
+}
+
+do_apply_branch_profile() {
+    # Apply branch-specific ash profile if configured
+    local profiles_dir="${REPO_ROOT}/profiles"
+    [[ -d "$profiles_dir" ]] || { task_skip "Branch profile" "no profiles dir"; return 0; }
+
+    local profile=""
+    case "$NEW_BRANCH" in
+        main|master|release/*)  profile="work" ;;
+        feature/*theme*)        profile="default" ;;
+        feature/*game*|gaming*) profile="gaming" ;;
+        hotfix/*)               profile="minimal" ;;
+        wip/*)                  profile="default" ;;
+    esac
+
+    if [[ -z "$profile" ]] || [[ ! -d "${profiles_dir}/${profile}" ]]; then
+        task_skip "Branch profile" "no matching profile"
+        return 0
+    fi
+
+    NOTICES+=("👤 Suggested profile for ${NEW_BRANCH}: '${profile}'")
+    NOTICES+=("   Switch with: ash profile switch ${profile}")
+    task_done "Branch profile" "suggested: ${profile}"
+}
+
+do_set_worktree_config() {
+    # Configure git worktree-specific settings
+    if git rev-parse --is-inside-work-tree &>/dev/null && \
+       git worktree list 2>/dev/null | grep -qv "$(git rev-parse --show-toplevel)"; then
+        NOTICES+=("📂 Working in a git worktree — some ASH features may behave differently")
+        task_warn "Worktree detected" "some features may differ"
+    else
+        task_skip "Worktree check" "normal workspace"
+    fi
+}
+
+do_check_branch_freshness() {
+    # Warn if branch is significantly behind remote
+    if ! git rev-parse --verify "origin/${NEW_BRANCH}" &>/dev/null; then
+        task_skip "Branch freshness" "no remote tracking"
+        return 0
+    fi
+
+    local behind
+    behind="$(git rev-list --count \
+        "HEAD..origin/${NEW_BRANCH}" 2>/dev/null || echo "0")"
+
+    if [[ "$behind" -gt 20 ]]; then
+        task_warn "Branch freshness" "${behind} commits behind origin"
+        NOTICES+=("⬇️  Branch is ${behind} commits behind — run: git pull")
+    elif [[ "$behind" -gt 0 ]]; then
+        task_done "Branch freshness" "${behind} commits behind (minor)"
+    else
+        task_done "Branch freshness" "up to date with origin"
+    fi
+}
+
+do_set_pushurl() {
+    # Warn on protected branches about push URL safety
+    if [[ "$IS_PROTECTED" == "true" ]]; then
+        local push_url
+        push_url="$(git remote get-url --push origin 2>/dev/null || true)"
+        NOTICES+=("⚠️  On protected branch '${NEW_BRANCH}' — push requires PR")
+        task_warn "Protected branch" "direct push will be blocked"
+    else
+        task_skip "Protected branch check" "not protected"
+    fi
+}
+
+do_check_dirty_state() {
+    local dirty
+    dirty="$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+
+    if [[ "$dirty" -gt 0 ]]; then
+        task_warn "Working tree" "${dirty} uncommitted changes carried over"
+        NOTICES+=("📝 You have ${dirty} uncommitted changes from '${PREV_BRANCH}'")
+    else
+        task_done "Working tree" "clean"
+    fi
+}
+
+do_show_branch_log() {
+    # Show last 3 commits on new branch
+    section "📜" "Recent Commits on ${NEW_BRANCH}" "$LAVENDER"
+
+    local log_output
+    log_output="$(git log HEAD -5 \
+        --format="  %s%h%s %s%s%s %s%s%s" \
+        "${GOLD}${B}" "${R}" \
+        "${D}${SLATE}" "%as" "${R}" \
+        "${WHITE}" "%s" "${R}" \
+        2>/dev/null || true)"
+
+    if [[ -n "$log_output" ]]; then
+        echo "$log_output" >&2
+    else
+        printf "  %s(no commits)%s\n" "$D" "$R" >&2
+    fi
+    printf "\n" >&2
+}
+
+do_generate_branch_summary() {
+    # Generate a quick summary card for the new branch
+    section "🗂️" "Branch Summary" "$TEAL"
+
+    local ahead behind commits files
+    ahead="$(git rev-list --count \
+        "origin/${NEW_BRANCH}..HEAD" 2>/dev/null || echo "?")"
+    behind="$(git rev-list --count \
+        "HEAD..origin/${NEW_BRANCH}" 2>/dev/null || echo "?")"
+    commits="$(git rev-list --count HEAD 2>/dev/null | tr -d ' ' || echo "?")"
+
+    printf "  %s%-20s%s %s%s%s\n" \
+        "${CYAN}${B}" "Branch:" "$R" "${LIME}${B}" "$NEW_BRANCH" "$R" >&2
+    printf "  %s%-20s%s %s%s%s\n" \
+        "${CYAN}${B}" "Total Commits:" "$R" "${GOLD}" "$commits" "$R" >&2
+    printf "  %s%-20s%s %s+%s %s-%s%s\n" \
+        "${CYAN}${B}" "Sync Status:" "$R" \
+        "${GREEN}" "$ahead" "${RED}" "$behind" "$R" >&2
+
+    if [[ "$IS_NEW_BRANCH" == "true" ]]; then
+        printf "  %s%-20s%s %s%s%s\n" \
+            "${CYAN}${B}" "Branch Type:" "$R" \
+            "${LIME}${B}" "🌱 NEW branch" "$R" >&2
+        NOTICES+=("🌱 New branch detected — don't forget to set upstream:")
+        NOTICES+=("   git push -u origin ${NEW_BRANCH}")
+    fi
+}
+
+do_remind_ash_doctor() {
+    # Remind user to run ash doctor on new branches
+    if [[ "$IS_NEW_BRANCH" == "true" ]]; then
+        NOTICES+=("🩺 New branch — run: ash doctor  to verify environment")
+    fi
+}
+
+do_show_diffstat() {
+    # Show what's different from the previous branch
+    [[ "$PREV_HEAD" == "$NEW_HEAD" ]] && return 0
+
+    local stat
+    stat="$(git diff --stat \
+        "${PREV_HEAD}..${NEW_HEAD}" 2>/dev/null | \
+        tail -1 || true)"
+
+    if [[ -n "$stat" ]]; then
+        printf "  %s%sDiff from previous branch:%s %s%s%s\n\n" \
+            "$B" "$SLATE" "$R" "${D}" "$stat" "$R" >&2
+    fi
+}
+
+# ── NOTICES OUTPUT ─────────────────────────────────────────────────────────────
+print_notices() {
+    [[ ${#NOTICES[@]} -eq 0 ]] && return
+
+    section "📣" "Notices" "$AMBER"
+    for n in "${NOTICES[@]}"; do
+        printf "  %s»%s %s%s%s\n" \
+            "${AMBER}${B}" "$R" "${D}${CREAM}" "$n" "$R" >&2
+    done
+}
+
+# ── SUMMARY ───────────────────────────────────────────────────────────────────
+print_summary() {
+    local dur; dur="$(format_dur "$(elapsed_ms)")"
+
+    printf "\n" >&2
+    box_t
+    box_l "${B}${TEAL}  ✅ CHECKOUT SYNC COMPLETE — ${NEW_BRANCH}${R}${BG_MIDNIGHT}${GOLD}"
+    box_td
+    box_l "$(printf "  %s✓ %-4s%s done   %s✗ %-4s%s failed   %s↷ %-4s%s skipped   %s⏱ %s%s" \
+        "${GREEN}${B}" "$TASKS_DONE"    "$R$BG_MIDNIGHT$GOLD" \
+        "${RED}${B}"   "$TASKS_FAILED"  "$R$BG_MIDNIGHT$GOLD" \
+        "${SLATE}${D}" "$TASKS_SKIPPED" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}"  "$dur"           "$R$BG_MIDNIGHT$GOLD")"
+
+    if [[ ${#ACTIONS[@]} -gt 0 ]]; then
+        box_td
+        for a in "${ACTIONS[@]:0:5}"; do
+            box_l "  ${D}${MINT}  • ${a}${R}${BG_MIDNIGHT}${GOLD}"
+        done
+    fi
+    box_b
+    printf "\n" >&2
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN
+# ══════════════════════════════════════════════════════════════════════════════
+main() {
+    [[ "${ASH_SKIP_HOOKS:-}" == "true" ]] && exit 0
+
+    # File checkout (not branch) — minimal processing
+    if [[ "$IS_BRANCH_CHECKOUT" != "1" ]]; then
+        do_fix_permissions
+        exit 0
+    fi
+
+    analyze_checkout
+    print_banner
+    do_show_diffstat
+
+    section "🔄" "Dependency Sync" "$LIME"
+    do_npm_install
+    do_pip_install
+
+    section "🔧" "Environment Setup" "$CYAN"
+    do_fix_permissions
+    do_validate_environment
+    do_set_worktree_config
+    do_apply_branch_profile
+
+    section "🌿" "Branch Context" "$EMERALD"
+    do_check_dirty_state
+    do_check_branch_freshness
+    do_set_pushurl
+
+    do_show_branch_log
+    do_generate_branch_summary
+    do_remind_ash_doctor
+    print_notices
+    print_summary
+}
+
+main "$@"

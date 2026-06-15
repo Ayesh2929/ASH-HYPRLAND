@@ -1,0 +1,569 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🪝 ASH DOTFILES v5.0 OMEGA — HUSKY POST-MERGE HOOK                        ║
+# ║  Runs after git merge/pull — keeps environment synchronized                ║
+# ║  Auto-installs dependencies · validates config · notifies of breaking      ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# ── ANSI PALETTE ──────────────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"  readonly B="${ESC}[1m"  readonly D="${ESC}[2m"
+readonly RED="${ESC}[31m"         readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"      readonly BLUE="${ESC}[34m"
+readonly CYAN="${ESC}[36m"        readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m" readonly PURPLE="${ESC}[38;5;135m"
+readonly GOLD="${ESC}[38;5;220m"  readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m"  readonly PEACH="${ESC}[38;5;217m"
+readonly ROSE="${ESC}[38;5;211m"  readonly LIME="${ESC}[38;5;154m"
+readonly TEAL="${ESC}[38;5;43m"   readonly CORAL="${ESC}[38;5;203m"
+readonly CREAM="${ESC}[38;5;230m" readonly SLATE="${ESC}[38;5;245m"
+readonly AMBER="${ESC}[38;5;214m" readonly EMERALD="${ESC}[38;5;120m"
+readonly VIOLET="${ESC}[38;5;177m" readonly CRIMSON="${ESC}[38;5;161m"
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+readonly BG_DARK="${ESC}[48;5;235m"
+readonly BG_FOREST="${ESC}[48;5;22m"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+readonly HOOK_VERSION="5.0.0-omega"
+readonly HOOK_NAME="post-merge"
+readonly SQUASH_MERGE="${1:-0}"    # 1 = squash merge, 0 = regular merge
+readonly START_MS="$(date +%s%3N)"
+readonly REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+readonly TERM_WIDTH="$(tput cols 2>/dev/null || echo 80)"
+
+# ── STATE ─────────────────────────────────────────────────────────────────────
+TASKS_TOTAL=0
+TASKS_DONE=0
+TASKS_FAILED=0
+TASKS_SKIPPED=0
+BREAKING_CHANGES=()
+NOTICES=()
+ACTIONS_TAKEN=()
+
+now_ms()      { date +%s%3N; }
+elapsed_ms()  { echo $(( $(now_ms) - START_MS )); }
+format_dur()  {
+    local ms="$1"
+    [[ $ms -lt 1000 ]] && printf "%dms" "$ms" || printf "%.1fs" "$(echo "scale=1; $ms/1000" | bc 2>/dev/null || echo "$((ms/1000))")"
+}
+
+# ── RENDERING ─────────────────────────────────────────────────────────────────
+hr() {
+    local c="${1:-─}" w="${2:-$TERM_WIDTH}" col="${3:-$D$SLATE}"
+    printf "%s%s%s\n" "$col" "$(printf '%*s' "$w" '' | tr ' ' "$c")" "$R" >&2
+}
+
+box_wrap() {
+    local content="$1"
+    local clean; clean="$(echo "$content" | sed 's/\x1b\[[0-9;]*m//g')"
+    local pad=$(( TERM_WIDTH - 4 - ${#clean} ))
+    [[ $pad -lt 0 ]] && pad=0
+    printf "%s  ║ %s%*s║  %s\n" \
+        "$BG_MIDNIGHT$GOLD" "$content" "$pad" "" "$R" >&2
+}
+
+box_top()    { printf "%s%s  ╔%s╗  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $(( TERM_WIDTH-4 )) '' | tr ' ' '═')" "$R" >&2; }
+box_div()    { printf "%s%s  ╠%s╣  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $(( TERM_WIDTH-4 )) '' | tr ' ' '═')" "$R" >&2; }
+box_thin()   { printf "%s%s  ╟%s╢  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $(( TERM_WIDTH-4 )) '' | tr ' ' '─')" "$R" >&2; }
+box_bottom() { printf "%s%s  ╚%s╝  %s\n" "$BG_MIDNIGHT" "$GOLD" "$(printf '%*s' $(( TERM_WIDTH-4 )) '' | tr ' ' '═')" "$R" >&2; }
+
+section() {
+    local icon="$1" title="$2" color="${3:-$CYAN}"
+    printf "\n" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+    printf "  %s %s%s%s\n" "$icon" "${color}${B}" "$title" "$R" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+}
+
+task_done()   {
+    ((TASKS_DONE++))   || true; ((TASKS_TOTAL++)) || true
+    ACTIONS_TAKEN+=("${2:-$1}")
+    printf "  %s✓%s %-52s %s%s%s\n" \
+        "${GREEN}${B}" "$R" "${B}${WHITE}$1${R}" \
+        "${D}${SLATE}" "${2:-}" "$R" >&2
+}
+task_fail()   {
+    ((TASKS_FAILED++)) || true; ((TASKS_TOTAL++)) || true
+    printf "  %s✗%s %-52s %s%s%s\n" \
+        "${RED}${B}"   "$R" "${B}${WHITE}$1${R}" \
+        "${D}${RED}"   "${2:-}" "$R" >&2
+}
+task_skip()   {
+    ((TASKS_SKIPPED++)) || true; ((TASKS_TOTAL++)) || true
+    printf "  %s↷%s %-52s %s%s%s\n" \
+        "${SLATE}${D}" "$R" "${D}${WHITE}$1${R}" \
+        "${D}${SLATE}"  "${2:-}" "$R" >&2
+}
+task_warn()   {
+    ((TASKS_DONE++)) || true; ((TASKS_TOTAL++)) || true
+    printf "  %s⚠%s %-52s %s%s%s\n" \
+        "${YELLOW}${B}" "$R" "${B}${WHITE}$1${R}" \
+        "${D}${YELLOW}" "${2:-}" "$R" >&2
+}
+task_info()   {
+    printf "  %s•%s %s%s%s\n" \
+        "${CYAN}${D}" "$R" "${D}" "$1" "$R" >&2
+}
+
+# ── SPINNER ────────────────────────────────────────────────────────────────────
+spin_run() {
+    local name="$1"
+    local fn="$2"
+    local frames=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+    local frame=0
+
+    # Run in background
+    local output="" exit_code=0
+    output="$("$fn" 2>&1)" || exit_code=$?
+
+    case $exit_code in
+        0) task_done  "$name" "$output" ;;
+        2) task_warn  "$name" "$output" ;;
+        3) task_skip  "$name" "$output" ;;
+        *) task_fail  "$name" "$output" ;;
+    esac
+}
+
+# ── BANNER ────────────────────────────────────────────────────────────────────
+print_banner() {
+    local branch; branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+    local merge_type
+    [[ "$SQUASH_MERGE" == "1" ]] && merge_type="squash merge" || merge_type="regular merge"
+
+    printf "\n" >&2
+    box_top
+    box_wrap "${B}${EMERALD}  🔀 ASH DOTFILES v5.0 OMEGA — POST-MERGE SYNC${R}${BG_MIDNIGHT}${GOLD}"
+    box_wrap "${D}${CREAM}  Keeping your environment perfectly synchronized${R}${BG_MIDNIGHT}${GOLD}"
+    box_div
+    box_wrap "$(printf "  %s%-16s%s %s%-24s%s  %s%-12s%s %s%s%s" \
+        "${CYAN}${B}" "Branch:" "$R$BG_MIDNIGHT$GOLD" \
+        "${LIME}${B}" "$branch" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}" "Type:" "$R$BG_MIDNIGHT$GOLD" \
+        "${LAVENDER}" "$merge_type" "$R$BG_MIDNIGHT$GOLD")"
+    box_wrap "$(printf "  %s%-16s%s %s%s%s" \
+        "${CYAN}${B}" "Timestamp:" "$R$BG_MIDNIGHT$GOLD" \
+        "${PEACH}" "$(date '+%Y-%m-%d %H:%M:%S')" "$R$BG_MIDNIGHT$GOLD")"
+    box_bottom
+    printf "\n" >&2
+}
+
+# ── DETECT WHAT CHANGED ───────────────────────────────────────────────────────
+declare -A CHANGED=()
+
+detect_changes() {
+    section "🔍" "Detecting Changes" "$CYAN"
+
+    # Files changed in this merge
+    local changed_files
+    changed_files="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD \
+        2>/dev/null || \
+        git diff --name-only HEAD~1..HEAD 2>/dev/null || true)"
+
+    # Categorize changes
+    echo "$changed_files" | grep -qE '^web/package\.json$'        && CHANGED[npm_web]=1        || true
+    echo "$changed_files" | grep -qE '^browser-extension/package\.json$' && CHANGED[npm_ext]=1 || true
+    echo "$changed_files" | grep -qE '^api/requirements\.txt$'    && CHANGED[pip]=1             || true
+    echo "$changed_files" | grep -qE '^mobile/flutter/pubspec\.yaml$' && CHANGED[pub]=1         || true
+    echo "$changed_files" | grep -qE '^nix/flake\.lock$'           && CHANGED[nix]=1            || true
+    echo "$changed_files" | grep -qE '\.github/dependabot\.yml$'   && CHANGED[dependabot]=1     || true
+    echo "$changed_files" | grep -qE '^config/nvim/'               && CHANGED[nvim]=1           || true
+    echo "$changed_files" | grep -qE '^config/fish/'               && CHANGED[fish]=1           || true
+    echo "$changed_files" | grep -qE '^config/hypr/'               && CHANGED[hypr]=1           || true
+    echo "$changed_files" | grep -qE '^config/waybar/'             && CHANGED[waybar]=1         || true
+    echo "$changed_files" | grep -qE '^themes/schema/'             && CHANGED[theme_schema]=1   || true
+    echo "$changed_files" | grep -qE '^plugins/schema/'            && CHANGED[plugin_schema]=1  || true
+    echo "$changed_files" | grep -qE '^ash-cli/'                   && CHANGED[ash_cli]=1        || true
+    echo "$changed_files" | grep -qE '^\.husky/'                   && CHANGED[hooks]=1          || true
+    echo "$changed_files" | grep -qE '^\.editorconfig$'            && CHANGED[editorconfig]=1   || true
+    echo "$changed_files" | grep -qE '^CHANGELOG\.md$'             && CHANGED[changelog]=1      || true
+    echo "$changed_files" | grep -qE '^systemd/'                   && CHANGED[systemd]=1        || true
+    echo "$changed_files" | grep -qE '^scripts/install/'           && CHANGED[install]=1        || true
+    echo "$changed_files" | grep -qE '^version\.json$'             && CHANGED[version]=1        || true
+
+    # Detect breaking changes in merge commits
+    local breaking
+    breaking="$(git log ORIG_HEAD..HEAD \
+        --format='%h %s' 2>/dev/null | \
+        grep '!' || true)"
+    [[ -n "$breaking" ]] && {
+        while IFS= read -r line; do
+            BREAKING_CHANGES+=("$line")
+        done <<< "$breaking"
+    }
+
+    # Report what was detected
+    local detected=()
+    for key in "${!CHANGED[@]}"; do
+        detected+=("$key")
+    done
+
+    if [[ ${#detected[@]} -eq 0 ]]; then
+        task_info "No significant file changes detected"
+    else
+        task_info "Detected changes in: ${detected[*]}"
+    fi
+
+    local total_files
+    total_files="$(echo "$changed_files" | grep -c . || echo 0)"
+    task_info "Total files changed: ${total_files}"
+}
+
+# ── TASKS ──────────────────────────────────────────────────────────────────────
+
+install_npm_web() {
+    [[ -n "${CHANGED[npm_web]:-}" ]] || return 3
+    command -v npm &>/dev/null || { echo "npm not found"; return 3; }
+    [[ -d "${REPO_ROOT}/web" ]] || return 3
+
+    local output
+    if ! output="$(cd "${REPO_ROOT}/web" && npm install --silent 2>&1)"; then
+        echo "npm install failed: $output"
+        return 1
+    fi
+
+    echo "web deps installed"
+}
+
+install_npm_ext() {
+    [[ -n "${CHANGED[npm_ext]:-}" ]] || return 3
+    command -v npm &>/dev/null || return 3
+    [[ -d "${REPO_ROOT}/browser-extension" ]] || return 3
+
+    local output
+    if ! output="$(cd "${REPO_ROOT}/browser-extension" && npm install --silent 2>&1)"; then
+        echo "npm install failed"; return 1
+    fi
+    echo "extension deps installed"
+}
+
+install_pip() {
+    [[ -n "${CHANGED[pip]:-}" ]] || return 3
+    command -v pip &>/dev/null || command -v pip3 &>/dev/null || return 3
+    [[ -f "${REPO_ROOT}/api/requirements.txt" ]] || return 3
+
+    local pip_cmd; command -v pip3 &>/dev/null && pip_cmd=pip3 || pip_cmd=pip
+    local output
+    if ! output="$($pip_cmd install -q -r "${REPO_ROOT}/api/requirements.txt" 2>&1)"; then
+        echo "pip install failed"; return 1
+    fi
+    echo "python deps installed"
+}
+
+install_pub() {
+    [[ -n "${CHANGED[pub]:-}" ]] || return 3
+    command -v flutter &>/dev/null || command -v dart &>/dev/null || return 3
+    [[ -d "${REPO_ROOT}/mobile/flutter" ]] || return 3
+
+    local output
+    if ! output="$(cd "${REPO_ROOT}/mobile/flutter" && \
+        (command -v flutter &>/dev/null && flutter pub get || dart pub get) 2>&1)"; then
+        echo "pub get failed"; return 1
+    fi
+    echo "flutter deps installed"
+}
+
+update_nix_lock() {
+    [[ -n "${CHANGED[nix]:-}" ]] || return 3
+    command -v nix &>/dev/null || return 3
+
+    NOTICES+=("❄️  flake.lock changed — run: nix flake update")
+    echo "flake.lock updated — manual review may be needed"
+    return 2
+}
+
+update_husky_hooks() {
+    [[ -n "${CHANGED[hooks]:-}" ]] || return 3
+
+    # Make hooks executable
+    local hooks_updated=0
+    for hook in "${REPO_ROOT}/.husky"/*; do
+        if [[ -f "$hook" ]] && [[ ! -x "$hook" ]]; then
+            chmod +x "$hook"
+            ((hooks_updated++)) || true
+        fi
+    done
+
+    # Re-run husky install if available
+    if command -v husky &>/dev/null; then
+        husky install &>/dev/null || true
+    fi
+
+    echo "${hooks_updated} hook permissions fixed"
+}
+
+reload_fish_config() {
+    [[ -n "${CHANGED[fish]:-}" ]] || return 3
+
+    NOTICES+=("🐟 Fish config changed — restart your shell or run: source ~/.config/fish/config.fish")
+    echo "fish config changed"
+    return 2
+}
+
+validate_hypr_config() {
+    [[ -n "${CHANGED[hypr]:-}" ]] || return 3
+
+    local issues=()
+    while IFS= read -r -d '' conf; do
+        local open; open="$(grep -o '{' "$conf" | wc -l)"
+        local close; close="$(grep -o '}' "$conf" | wc -l)"
+        if [[ "$open" != "$close" ]]; then
+            issues+=("${conf##"$REPO_ROOT/"}: unmatched braces")
+        fi
+    done < <(find "${REPO_ROOT}/config/hypr" \
+        -name "*.conf" -print0 2>/dev/null || true)
+
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        printf "Hyprland config issues:\n"
+        printf "  • %s\n" "${issues[@]}"
+        return 1
+    fi
+
+    NOTICES+=("🖥️  Hyprland config changed — reload with: hyprctl reload")
+    echo "hyprland configs valid"
+    return 2
+}
+
+reload_waybar() {
+    [[ -n "${CHANGED[waybar]:-}" ]] || return 3
+    NOTICES+=("📊 Waybar config changed — reload with: pkill -SIGUSR2 waybar")
+    echo "waybar config changed"
+    return 2
+}
+
+check_theme_schema_break() {
+    [[ -n "${CHANGED[theme_schema]:-}" ]] || return 3
+
+    BREAKING_CHANGES+=("🎨 Theme schema changed — existing themes may need updating")
+    NOTICES+=("🎨 Run: ash theme validate --all  to check all themes")
+    echo "theme schema changed — validate themes"
+    return 2
+}
+
+check_plugin_schema_break() {
+    [[ -n "${CHANGED[plugin_schema]:-}" ]] || return 3
+
+    BREAKING_CHANGES+=("🔌 Plugin schema changed — existing plugins may need updating")
+    NOTICES+=("🔌 Run: ash plugin validate --all  to check all plugins")
+    echo "plugin schema changed — validate plugins"
+    return 2
+}
+
+update_ash_cli_permissions() {
+    [[ -n "${CHANGED[ash_cli]:-}" ]] || return 3
+
+    local updated=0
+    while IFS= read -r -d '' script; do
+        if [[ ! -x "$script" ]]; then
+            chmod +x "$script"
+            ((updated++)) || true
+        fi
+    done < <(find "${REPO_ROOT}/ash-cli" -name "*.sh" -print0 2>/dev/null || true)
+
+    # Main ash binary
+    local ash_bin="${REPO_ROOT}/ash-cli/ash"
+    if [[ -f "$ash_bin" ]] && [[ ! -x "$ash_bin" ]]; then
+        chmod +x "$ash_bin"
+        ((updated++)) || true
+    fi
+
+    [[ $updated -gt 0 ]] || { echo "permissions already correct"; return 0; }
+    echo "${updated} scripts made executable"
+}
+
+reload_systemd_services() {
+    [[ -n "${CHANGED[systemd]:-}" ]] || return 3
+    command -v systemctl &>/dev/null || return 3
+
+    local reloaded=()
+    local t_start; t_start="$(now_ms)"
+    systemctl --user daemon-reload 2>/dev/null && reloaded+=("daemon-reload") || true
+
+    NOTICES+=("⏱️  Systemd services changed — some may need restart")
+    echo "systemd daemon reloaded"
+}
+
+notify_version_change() {
+    [[ -n "${CHANGED[version]:-}" ]] || return 3
+    command -v jq &>/dev/null || return 3
+
+    local old_ver new_ver
+    old_ver="$(git show ORIG_HEAD:version.json 2>/dev/null | \
+        jq -r '.version // "unknown"' || echo "unknown")"
+    new_ver="$(jq -r '.version // "unknown"' \
+        "${REPO_ROOT}/version.json" 2>/dev/null || echo "unknown")"
+
+    if [[ "$old_ver" != "$new_ver" ]]; then
+        NOTICES+=("🏷️  Version: ${old_ver} → ${new_ver}")
+        echo "${old_ver} → ${new_ver}"
+    else
+        echo "version unchanged"
+        return 3
+    fi
+}
+
+show_changelog_diff() {
+    [[ -n "${CHANGED[changelog]:-}" ]] || return 3
+
+    # Show what was added to changelog
+    local new_entries
+    new_entries="$(git diff ORIG_HEAD..HEAD -- CHANGELOG.md 2>/dev/null | \
+        grep '^+' | \
+        grep -v '^+++' | \
+        grep -v '^+$' | \
+        head -10 | \
+        sed 's/^+//' || true)"
+
+    if [[ -n "$new_entries" ]]; then
+        printf "\n" >&2
+        printf "  %s%sNew changelog entries:%s\n" "$B" "$LAVENDER" "$R" >&2
+        echo "$new_entries" | while IFS= read -r line; do
+            printf "  %s│%s %s%s%s\n" \
+                "${D}${SLATE}" "$R" "${D}" "$line" "$R" >&2
+        done
+    fi
+
+    echo "changelog updated"
+}
+
+check_install_script_changes() {
+    [[ -n "${CHANGED[install]:-}" ]] || return 3
+
+    NOTICES+=("📦 Install scripts changed — new dependencies may be available")
+    NOTICES+=("   Run: bash scripts/install/install.sh --update-deps")
+    echo "install scripts changed"
+    return 2
+}
+
+generate_env_reminder() {
+    # Check if any new env vars were added to config files
+    local new_env_vars
+    new_env_vars="$(git diff ORIG_HEAD..HEAD 2>/dev/null | \
+        grep '^+' | \
+        grep -oP 'ASH_[A-Z_]+' | \
+        sort -u || true)"
+
+    if [[ -n "$new_env_vars" ]]; then
+        NOTICES+=("🔧 New env variables introduced: ${new_env_vars//$'\n'/, }")
+        echo "new env variables"
+        return 2
+    fi
+
+    return 3
+}
+
+update_git_hooks_permissions() {
+    local updated=0
+    while IFS= read -r -d '' hook; do
+        if [[ ! -x "$hook" ]]; then
+            chmod +x "$hook"
+            ((updated++)) || true
+        fi
+    done < <(find "${REPO_ROOT}/.git-hooks" \
+        -type f -print0 2>/dev/null || true)
+
+    [[ $updated -gt 0 ]] && { echo "${updated} git-hooks fixed"; return 0; }
+    return 3
+}
+
+# ── BREAKING CHANGES ALERT ────────────────────────────────────────────────────
+print_breaking_changes() {
+    [[ ${#BREAKING_CHANGES[@]} -eq 0 ]] && return
+
+    section "💥" "Breaking Changes Detected" "$CRIMSON"
+
+    printf "\n" >&2
+    printf "%s%s" "$BG_DARK" "$RED" >&2
+    printf "  ┌─────────────────────────────────────────────────────────────┐\n" >&2
+    printf "  │  %s⚠️  BREAKING CHANGES MERGED — ACTION REQUIRED%s                │\n" \
+        "${B}${RED}" "$D" >&2
+    printf "  └─────────────────────────────────────────────────────────────┘\n" >&2
+    printf "%s\n" "$R" >&2
+
+    for change in "${BREAKING_CHANGES[@]}"; do
+        printf "  %s💥%s %s%s%s\n" \
+            "${RED}${B}" "$R" "${AMBER}" "$change" "$R" >&2
+    done
+    printf "\n" >&2
+}
+
+# ── NOTICES ───────────────────────────────────────────────────────────────────
+print_notices() {
+    [[ ${#NOTICES[@]} -eq 0 ]] && return
+
+    section "📣" "Post-Merge Notices" "$AMBER"
+    for notice in "${NOTICES[@]}"; do
+        printf "  %s»%s %s%s%s\n" \
+            "${AMBER}${B}" "$R" "${D}${CREAM}" "$notice" "$R" >&2
+    done
+}
+
+# ── SUMMARY ───────────────────────────────────────────────────────────────────
+print_summary() {
+    local dur; dur="$(format_dur "$(elapsed_ms)")"
+
+    printf "\n" >&2
+    box_top
+    box_wrap "${B}${EMERALD}  ✅ POST-MERGE SYNC COMPLETE${R}${BG_MIDNIGHT}${GOLD}"
+    box_thin
+    box_wrap "$(printf "  %s✓ %-4s%s done   %s✗ %-4s%s failed   %s↷ %-4s%s skipped   %s⏱ %s%s" \
+        "${GREEN}${B}" "$TASKS_DONE"    "$R$BG_MIDNIGHT$GOLD" \
+        "${RED}${B}"   "$TASKS_FAILED"  "$R$BG_MIDNIGHT$GOLD" \
+        "${SLATE}${D}" "$TASKS_SKIPPED" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}"  "$dur"           "$R$BG_MIDNIGHT$GOLD")"
+
+    if [[ ${#ACTIONS_TAKEN[@]} -gt 0 ]]; then
+        box_thin
+        box_wrap "${D}${CREAM}  Actions performed:${R}${BG_MIDNIGHT}${GOLD}"
+        for action in "${ACTIONS_TAKEN[@]}"; do
+            box_wrap "  ${D}${MINT}  • ${action}${R}${BG_MIDNIGHT}${GOLD}"
+        done
+    fi
+
+    box_bottom
+    printf "\n" >&2
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN
+# ══════════════════════════════════════════════════════════════════════════════
+main() {
+    [[ "${ASH_SKIP_HOOKS:-}" == "true" ]] && exit 0
+
+    detect_changes
+    print_banner
+    print_breaking_changes
+
+    section "🔄" "Dependency Sync" "$LIME"
+    spin_run "npm install (web)"         install_npm_web
+    spin_run "npm install (extension)"   install_npm_ext
+    spin_run "pip install (api)"         install_pip
+    spin_run "pub get (flutter)"         install_pub
+    spin_run "nix flake.lock"            update_nix_lock
+
+    section "⚙️" "Configuration Validation" "$CYAN"
+    spin_run "hyprland config"           validate_hypr_config
+    spin_run "theme schema"              check_theme_schema_break
+    spin_run "plugin schema"             check_plugin_schema_break
+    spin_run "ASH CLI permissions"       update_ash_cli_permissions
+    spin_run "hook permissions"          update_husky_hooks
+    spin_run "git-hook permissions"      update_git_hooks_permissions
+
+    section "🔁" "Service Reload Triggers" "$PURPLE"
+    spin_run "fish shell config"         reload_fish_config
+    spin_run "waybar config"             reload_waybar
+    spin_run "systemd services"          reload_systemd_services
+
+    section "📋" "Change Awareness" "$LAVENDER"
+    spin_run "version change"            notify_version_change
+    spin_run "changelog diff"            show_changelog_diff
+    spin_run "install script changes"    check_install_script_changes
+    spin_run "new env variables"         generate_env_reminder
+
+    print_notices
+    print_summary
+}
+
+main "$@"

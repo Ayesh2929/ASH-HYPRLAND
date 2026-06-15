@@ -1,0 +1,1509 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🪝 ASH DOTFILES v5.0 OMEGA — HUSKY PRE-COMMIT HOOK                        ║
+# ║  Runs before every commit — the first line of defense                      ║
+# ║  Fast, beautiful, comprehensive quality gate                               ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+
+# ── ANSI PALETTE ──────────────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"           # Reset
+readonly B="${ESC}[1m"           # Bold
+readonly D="${ESC}[2m"           # Dim
+readonly I="${ESC}[3m"           # Italic
+readonly U="${ESC}[4m"           # Underline
+
+# Foreground colors
+readonly BLACK="${ESC}[30m"
+readonly RED="${ESC}[31m"
+readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"
+readonly BLUE="${ESC}[34m"
+readonly MAGENTA="${ESC}[35m"
+readonly CYAN="${ESC}[36m"
+readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m"
+readonly PURPLE="${ESC}[38;5;135m"
+readonly PINK="${ESC}[38;5;213m"
+readonly LIME="${ESC}[38;5;154m"
+readonly GOLD="${ESC}[38;5;220m"
+readonly SKY="${ESC}[38;5;117m"
+readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m"
+readonly PEACH="${ESC}[38;5;217m"
+readonly ROSE="${ESC}[38;5;211m"
+readonly TEAL="${ESC}[38;5;43m"
+readonly CORAL="${ESC}[38;5;203m"
+readonly CREAM="${ESC}[38;5;230m"
+
+# Background colors
+readonly BG_BLACK="${ESC}[40m"
+readonly BG_RED="${ESC}[41m"
+readonly BG_GREEN="${ESC}[42m"
+readonly BG_BLUE="${ESC}[44m"
+readonly BG_DARK="${ESC}[48;5;235m"
+readonly BG_DARKER="${ESC}[48;5;232m"
+readonly BG_NAVY="${ESC}[48;5;17m"
+readonly BG_PURPLE="${ESC}[48;5;55m"
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+readonly HOOK_VERSION="5.0.0-omega"
+readonly HOOK_NAME="pre-commit"
+readonly START_TIME_MS="$(date +%s%3N)"
+readonly REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+readonly STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null || true)"
+readonly STAGED_COUNT="$(echo "$STAGED_FILES" | grep -c . 2>/dev/null || echo 0)"
+
+# Check categories
+readonly MAX_FILE_SIZE_KB=5120   # 5MB max per file
+readonly MAX_TOTAL_SIZE_MB=50    # 50MB max total staged
+
+# ── STATE TRACKING ────────────────────────────────────────────────────────────
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_SKIPPED=0
+CHECKS_WARNED=0
+ERRORS=()
+WARNINGS=()
+CHECK_RESULTS=()
+TOTAL_CHECKS=0
+
+# ── TIMING ────────────────────────────────────────────────────────────────────
+declare -A CHECK_TIMES=()
+
+# ── TERMINAL WIDTH ────────────────────────────────────────────────────────────
+TERM_WIDTH="$(tput cols 2>/dev/null || echo 80)"
+readonly TERM_WIDTH
+
+# ── UTILITY FUNCTIONS ─────────────────────────────────────────────────────────
+hr() {
+    local char="${1:-─}"
+    local width="${2:-$TERM_WIDTH}"
+    local color="${3:-$D}"
+    printf "%s%s%s\n" "$color" "$(printf '%*s' "$width" '' | tr ' ' "$char")" "$R" >&2
+}
+
+center_text() {
+    local text="$1"
+    local width="${2:-$TERM_WIDTH}"
+    # Strip ANSI for length calculation
+    local clean_text
+    clean_text="$(echo "$text" | sed 's/\x1b\[[0-9;]*m//g')"
+    local text_len="${#clean_text}"
+    local padding=$(( (width - text_len) / 2 ))
+    printf "%*s%s%*s\n" "$padding" "" "$text" "$padding" "" >&2
+}
+
+now_ms() { date +%s%3N; }
+
+elapsed_ms() {
+    local start="$1"
+    echo $(( $(now_ms) - start ))
+}
+
+format_ms() {
+    local ms="$1"
+    if [[ $ms -lt 1000 ]]; then
+        echo "${ms}ms"
+    else
+        echo "$(( ms / 1000 )).$(( (ms % 1000) / 100 ))s"
+    fi
+}
+
+# ── BANNER ────────────────────────────────────────────────────────────────────
+print_banner() {
+    printf "\n" >&2
+    printf "%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+
+    # Top border
+    printf "  ╔" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╗  \n" >&2
+
+    # Title
+    printf "  ║" >&2
+    local title="${B}${GOLD}  🪝 ASH DOTFILES v5.0 OMEGA — PRE-COMMIT GATE${R}${BG_MIDNIGHT}${GOLD}"
+    local title_clean="  🪝 ASH DOTFILES v5.0 OMEGA — PRE-COMMIT GATE"
+    local title_pad=$(( TERM_WIDTH - 4 - ${#title_clean} - 2 ))
+    printf " %s%s%*s  " "$B" "${GOLD}🪝 ASH DOTFILES v5.0 OMEGA — PRE-COMMIT GATE" \
+        "$title_pad" "" >&2
+    printf "║  \n" >&2
+
+    # Subtitle
+    printf "  ║" >&2
+    local sub="  ${D}Quality • Security • Style — Your code guardian${R}${BG_MIDNIGHT}${GOLD}"
+    printf "  %s%-*s%s" "${D}${CREAM}" \
+        $(( TERM_WIDTH - 8 )) \
+        "Quality • Security • Style — Your code guardian" \
+        "$GOLD" >&2
+    printf "  ║  \n" >&2
+
+    # Divider
+    printf "  ╠" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╣  \n" >&2
+
+    # Stats row
+    printf "  ║  " >&2
+    printf "%s%-18s%s %s%-12s%s" \
+        "${CYAN}${B}" "Staged Files:" "$R$BG_MIDNIGHT$GOLD" \
+        "${LIME}${B}" "${STAGED_COUNT}" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf " │ " >&2
+    printf "%s%-12s%s %s%-20s%s" \
+        "${CYAN}${B}" "Repository:" "$R$BG_MIDNIGHT$GOLD" \
+        "${LAVENDER}" "$(basename "$REPO_ROOT")" "$R$BG_MIDNIGHT$GOLD" >&2
+    local stats_len=$(( 18 + 12 + 12 + 20 + 6 + 6 ))
+    printf "%*s  ║  \n" $(( TERM_WIDTH - 4 - stats_len - 4 )) "" >&2
+
+    # Branch row
+    printf "  ║  " >&2
+    local branch; branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+    local short_hash; short_hash="$(git rev-parse --short HEAD 2>/dev/null || echo "---")"
+    printf "%s%-18s%s %s%-12s%s" \
+        "${CYAN}${B}" "Branch:" "$R$BG_MIDNIGHT$GOLD" \
+        "${ROSE}${B}" "$branch" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf " │ " >&2
+    printf "%s%-12s%s %s%-20s%s" \
+        "${CYAN}${B}" "HEAD:" "$R$BG_MIDNIGHT$GOLD" \
+        "${PEACH}" "$short_hash" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf "%*s  ║  \n" $(( TERM_WIDTH - 4 - stats_len - 4 )) "" >&2
+
+    # Bottom border
+    printf "  ╚" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╝  \n" >&2
+    printf "%s\n" "$R" >&2
+}
+
+# ── CHECK RUNNER ──────────────────────────────────────────────────────────────
+run_check() {
+    local check_id="$1"
+    local check_name="$2"
+    local check_icon="$3"
+    local check_fn="$4"
+    local is_required="${5:-true}"
+
+    ((TOTAL_CHECKS++)) || true
+    local t_start; t_start="$(now_ms)"
+
+    # Print running state
+    printf "  %s %s%-40s%s %s%s%s" \
+        "${check_icon}" \
+        "${B}${WHITE}" "$check_name" "$R" \
+        "${D}${CYAN}" "running..." "$R" >&2
+    printf "\r" >&2
+
+    # Run the check function, capture output
+    local check_output=""
+    local exit_code=0
+    check_output="$($check_fn 2>&1)" || exit_code=$?
+
+    local elapsed; elapsed="$(format_ms "$(elapsed_ms "$t_start")")"
+    CHECK_TIMES["$check_id"]="$elapsed"
+
+    if [[ $exit_code -eq 0 ]]; then
+        ((CHECKS_PASSED++)) || true
+        printf "  %s %s%-40s%s %s%-10s%s %s%s%s\n" \
+            "${check_icon}" \
+            "${B}${WHITE}" "$check_name" "$R" \
+            "${GREEN}${B}" "✓ PASS" "$R" \
+            "${D}" "[$elapsed]" "$R" >&2
+        CHECK_RESULTS+=("PASS:${check_name}:${elapsed}")
+
+    elif [[ $exit_code -eq 2 ]]; then
+        # Exit code 2 = warning (non-fatal)
+        ((CHECKS_WARNED++)) || true
+        printf "  %s %s%-40s%s %s%-10s%s %s%s%s\n" \
+            "${check_icon}" \
+            "${B}${WHITE}" "$check_name" "$R" \
+            "${YELLOW}${B}" "⚠ WARN" "$R" \
+            "${D}" "[$elapsed]" "$R" >&2
+        CHECK_RESULTS+=("WARN:${check_name}:${elapsed}")
+        WARNINGS+=("${check_name}: ${check_output}")
+
+    elif [[ $exit_code -eq 3 ]]; then
+        # Exit code 3 = skipped
+        ((CHECKS_SKIPPED++)) || true
+        printf "  %s %s%-40s%s %s%-10s%s %s%s%s\n" \
+            "${check_icon}" \
+            "${B}${WHITE}" "$check_name" "$R" \
+            "${D}${WHITE}" "↷ SKIP" "$R" \
+            "${D}" "[$elapsed]" "$R" >&2
+        CHECK_RESULTS+=("SKIP:${check_name}:${elapsed}")
+
+    else
+        ((CHECKS_FAILED++)) || true
+        printf "  %s %s%-40s%s %s%-10s%s %s%s%s\n" \
+            "${check_icon}" \
+            "${B}${WHITE}" "$check_name" "$R" \
+            "${RED}${B}" "✗ FAIL" "$R" \
+            "${D}" "[$elapsed]" "$R" >&2
+        CHECK_RESULTS+=("FAIL:${check_name}:${elapsed}")
+        ERRORS+=("${check_name}: ${check_output}")
+
+        if [[ "$is_required" == "true" ]]; then
+            # Print failure detail immediately
+            if [[ -n "$check_output" ]]; then
+                printf "\n" >&2
+                echo "$check_output" | head -20 | while IFS= read -r line; do
+                    printf "     %s│%s %s%s%s\n" \
+                        "${RED}${D}" "$R" "${D}" "$line" "$R" >&2
+                done
+                printf "\n" >&2
+            fi
+        fi
+    fi
+
+    return $exit_code
+}
+
+# ── SECTION HEADER ────────────────────────────────────────────────────────────
+print_section() {
+    local icon="$1"
+    local title="$2"
+    local color="${3:-$CYAN}"
+    printf "\n" >&2
+    hr "─" "$TERM_WIDTH" "${D}"
+    printf "  %s %s%s%s%s\n" \
+        "$icon" \
+        "${color}${B}" "$title" "$R" "" >&2
+    hr "─" "$TERM_WIDTH" "${D}"
+}
+
+# ── STAGED FILE HELPERS ───────────────────────────────────────────────────────
+get_staged_by_ext() {
+    local ext="$1"
+    echo "$STAGED_FILES" | grep -E "\.${ext}$" 2>/dev/null || true
+}
+
+has_staged_ext() {
+    local ext="$1"
+    echo "$STAGED_FILES" | grep -qE "\.${ext}$" 2>/dev/null
+}
+
+has_staged_pattern() {
+    local pattern="$1"
+    echo "$STAGED_FILES" | grep -qE "$pattern" 2>/dev/null
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  CHECK FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── CHECK: No staged files ────────────────────────────────────────────────────
+check_has_staged_files() {
+    if [[ -z "$STAGED_FILES" ]] || [[ "$STAGED_COUNT" -eq 0 ]]; then
+        echo "No staged files — nothing to commit"
+        return 3  # Skip
+    fi
+}
+
+# ── CHECK: Merge conflict markers ─────────────────────────────────────────────
+check_no_conflict_markers() {
+    local conflict_files=()
+    local patterns=(
+        "^<<<<<<< "
+        "^>>>>>>> "
+        "^=======$"
+        "^||||||| "
+    )
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        # Skip binary files
+        if file "$file" 2>/dev/null | grep -q "binary"; then
+            continue
+        fi
+        for pattern in "${patterns[@]}"; do
+            if grep -qP "$pattern" "$file" 2>/dev/null; then
+                conflict_files+=("$file")
+                break
+            fi
+        done
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#conflict_files[@]} -gt 0 ]]; then
+        printf "Conflict markers found in:\n"
+        printf "  • %s\n" "${conflict_files[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: File size limits ────────────────────────────────────────────────────
+check_file_sizes() {
+    local oversized=()
+    local total_kb=0
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local size_kb
+        size_kb="$(du -k "$file" 2>/dev/null | cut -f1 || echo 0)"
+        total_kb=$(( total_kb + size_kb ))
+
+        if [[ $size_kb -gt $MAX_FILE_SIZE_KB ]]; then
+            oversized+=("${file} (${size_kb}KB > ${MAX_FILE_SIZE_KB}KB limit)")
+        fi
+    done <<< "$STAGED_FILES"
+
+    local total_mb=$(( total_kb / 1024 ))
+    if [[ $total_mb -gt $MAX_TOTAL_SIZE_MB ]]; then
+        echo "Total staged size ${total_mb}MB exceeds ${MAX_TOTAL_SIZE_MB}MB limit"
+        return 1
+    fi
+
+    if [[ ${#oversized[@]} -gt 0 ]]; then
+        printf "Files exceeding size limit:\n"
+        printf "  • %s\n" "${oversized[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: No accidental secrets ──────────────────────────────────────────────
+check_no_secrets() {
+    # Pattern-based secret detection
+    local secret_patterns=(
+        # Generic secrets
+        'password\s*=\s*["\047][^"\047]{8,}'
+        'passwd\s*=\s*["\047][^"\047]{8,}'
+        'secret\s*=\s*["\047][^"\047]{8,}'
+        'api[_-]?key\s*=\s*["\047][^"\047]{16,}'
+        'auth[_-]?token\s*=\s*["\047][^"\047]{16,}'
+        'access[_-]?token\s*=\s*["\047][^"\047]{16,}'
+        'private[_-]?key\s*=\s*["\047][^"\047]{16,}'
+
+        # Cloud providers
+        'AKIA[0-9A-Z]{16}'               # AWS access key
+        'sk-[a-zA-Z0-9]{48}'             # OpenAI key
+        'ghp_[a-zA-Z0-9]{36}'            # GitHub PAT
+        'ghs_[a-zA-Z0-9]{36}'            # GitHub app token
+        'glpat-[a-zA-Z0-9]{20}'          # GitLab PAT
+        'xox[baprs]-[0-9a-zA-Z-]+'       # Slack token
+        'AIza[0-9A-Za-z\-_]{35}'         # Google API key
+        '[0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com'  # Google OAuth
+        'ya29\.[0-9A-Za-z\-_]+'          # Google OAuth token
+        'DISCORD_TOKEN\s*=\s*["\047][A-Za-z0-9._-]{50,}'
+        'TELEGRAM_BOT_TOKEN\s*=\s*[0-9]+:[A-Za-z0-9_-]{35}'
+
+        # Private keys
+        '-----BEGIN (RSA|EC|DSA|OPENSSH|PGP) PRIVATE KEY'
+        '-----BEGIN PRIVATE KEY-----'
+
+        # Database URLs
+        'postgresql://[^:]+:[^@]+@'
+        'mysql://[^:]+:[^@]+@'
+        'mongodb\+srv://[^:]+:[^@]+@'
+        'redis://[^:]+:[^@]+'
+    )
+
+    local found_secrets=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        # Skip binary files and encrypted files
+        if file "$file" 2>/dev/null | grep -q "binary"; then continue; fi
+        if [[ "$file" == *.enc ]] || [[ "$file" == *.gpg ]] || \
+           [[ "$file" == *.asc ]]; then continue; fi
+        # Skip test fixtures — they may contain fake credentials
+        if [[ "$file" == *test/fixtures/* ]]; then continue; fi
+
+        for pattern in "${secret_patterns[@]}"; do
+            local match
+            match="$(grep -niP "$pattern" "$file" 2>/dev/null | head -1 || true)"
+            if [[ -n "$match" ]]; then
+                # Check if it's a false positive (template variable, example)
+                if echo "$match" | grep -qiE \
+                    '(example|sample|placeholder|your[-_]|<[A-Z_]+>|REPLACE|TODO|FIXME|test|dummy|fake|\$\{|\{\{)'; then
+                    continue
+                fi
+                local line_num; line_num="$(echo "$match" | cut -d: -f1)"
+                found_secrets+=("${file}:${line_num} — potential secret detected")
+                break
+            fi
+        done
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#found_secrets[@]} -gt 0 ]]; then
+        printf "⚠️  Potential secrets detected:\n"
+        printf "  • %s\n" "${found_secrets[@]}"
+        printf "\nIf these are false positives, use:\n"
+        printf "  git commit --no-verify   (bypass this hook)\n"
+        printf "  # ash-secret-ignore      (add to end of line)\n"
+        return 1
+    fi
+}
+
+# ── CHECK: No debug artifacts ─────────────────────────────────────────────────
+check_no_debug_artifacts() {
+    local debug_patterns=(
+        'console\.log('
+        'print("DEBUG'
+        'print(f"DEBUG'
+        'debugger;'
+        'var_dump('
+        'dd('
+        'die('
+        'binding\.pry'
+        'byebug'
+        'puts "DEBUG'
+        '# TODO: remove'
+        '# HACK:'
+        'TEMP_DEBUG'
+        'echo "DEBUG'
+        'printf "DEBUG'
+    )
+
+    local found=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        if file "$file" 2>/dev/null | grep -q "binary"; then continue; fi
+
+        for pattern in "${debug_patterns[@]}"; do
+            local match
+            match="$(grep -n "$pattern" "$file" 2>/dev/null | head -1 || true)"
+            if [[ -n "$match" ]]; then
+                local line_num; line_num="$(echo "$match" | cut -d: -f1)"
+                found+=("${file}:${line_num} — $(echo "$match" | cut -d: -f2- | xargs)")
+            fi
+        done
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#found[@]} -gt 0 ]]; then
+        printf "Debug artifacts found:\n"
+        printf "  • %s\n" "${found[@]}"
+        return 2  # Warning only — not blocking
+    fi
+}
+
+# ── CHECK: ShellCheck ─────────────────────────────────────────────────────────
+check_shellcheck() {
+    if ! command -v shellcheck &>/dev/null; then
+        echo "shellcheck not installed — skipping"
+        return 3
+    fi
+
+    local sh_files
+    sh_files="$(get_staged_by_ext sh)"
+
+    if [[ -z "$sh_files" ]]; then
+        return 3  # No shell files staged
+    fi
+
+    local failed=()
+    local shellcheck_opts=(
+        "--severity=warning"
+        "--format=tty"
+        "--shell=bash"
+        "--exclude=SC1091"   # Not following sourced files
+        "--exclude=SC2034"   # Unused variables (too many false positives)
+    )
+
+    # Add REPO_ROOT's .shellcheckrc if exists
+    if [[ -f "${REPO_ROOT}/.shellcheckrc" ]]; then
+        shellcheck_opts+=("--rcfile=${REPO_ROOT}/.shellcheckrc")
+    fi
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$(shellcheck "${shellcheck_opts[@]}" "$file" 2>&1)"; then
+            failed+=("$file")
+            printf "%s\n" "$output"
+        fi
+    done <<< "$sh_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "\nShellCheck failed on: %s\n" "${failed[*]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Luacheck ───────────────────────────────────────────────────────────
+check_luacheck() {
+    if ! command -v luacheck &>/dev/null; then
+        echo "luacheck not installed — skipping"
+        return 3
+    fi
+
+    local lua_files
+    lua_files="$(get_staged_by_ext lua)"
+
+    if [[ -z "$lua_files" ]]; then
+        return 3
+    fi
+
+    local luacheck_opts=(
+        "--no-color"
+        "--max-line-length=120"
+        "--ignore=212"    # Unused argument
+        "--ignore=213"    # Unused loop variable
+    )
+
+    if [[ -f "${REPO_ROOT}/.luacheckrc" ]]; then
+        luacheck_opts+=("--config=${REPO_ROOT}/.luacheckrc")
+    fi
+
+    local output
+    # shellcheck disable=SC2086
+    if ! output="$(luacheck "${luacheck_opts[@]}" $lua_files 2>&1)"; then
+        printf "%s\n" "$output"
+        return 1
+    fi
+}
+
+# ── CHECK: Fish syntax ────────────────────────────────────────────────────────
+check_fish_syntax() {
+    if ! command -v fish &>/dev/null; then
+        echo "fish not installed — skipping"
+        return 3
+    fi
+
+    local fish_files
+    fish_files="$(get_staged_by_ext fish)"
+
+    if [[ -z "$fish_files" ]]; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$(fish --no-execute "$file" 2>&1)"; then
+            failed+=("$file: $output")
+        fi
+    done <<< "$fish_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Fish syntax errors:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Python syntax & linting ───────────────────────────────────────────
+check_python() {
+    local py_files
+    py_files="$(get_staged_by_ext py)"
+
+    if [[ -z "$py_files" ]]; then
+        return 3
+    fi
+
+    local failed=()
+
+    # Syntax check with python3
+    if command -v python3 &>/dev/null; then
+        while IFS= read -r file; do
+            [[ -f "$file" ]] || continue
+            local output
+            if ! output="$(python3 -m py_compile "$file" 2>&1)"; then
+                failed+=("Syntax: $file — $output")
+            fi
+        done <<< "$py_files"
+    fi
+
+    # Ruff lint (fast Python linter)
+    if command -v ruff &>/dev/null; then
+        local ruff_output
+        # shellcheck disable=SC2086
+        if ! ruff_output="$(ruff check --no-cache $py_files 2>&1)"; then
+            failed+=("$ruff_output")
+        fi
+    fi
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Python issues:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: TypeScript / ESLint ────────────────────────────────────────────────
+check_typescript() {
+    local ts_files
+    ts_files="$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' 2>/dev/null || true)"
+
+    if [[ -z "$ts_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v eslint &>/dev/null; then
+        echo "eslint not found — skipping"
+        return 3
+    fi
+
+    local output
+    # shellcheck disable=SC2086
+    if ! output="$(eslint --no-error-on-unmatched-pattern \
+        --format=compact \
+        $ts_files 2>&1)"; then
+        printf "%s\n" "$output"
+        return 1
+    fi
+}
+
+# ── CHECK: JSON validity ──────────────────────────────────────────────────────
+check_json() {
+    local json_files
+    json_files="$(echo "$STAGED_FILES" | grep -E '\.(json|jsonc)$' 2>/dev/null || true)"
+
+    if [[ -z "$json_files" ]]; then
+        return 3
+    fi
+
+    local failed=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        # For .jsonc files, strip comments before validating
+        local content="$file"
+        if [[ "$file" == *.jsonc ]]; then
+            content="$(sed 's|//[^"]*$||g; s|/\*.*\*/||g' "$file" 2>/dev/null)"
+        fi
+
+        local output
+        if command -v jq &>/dev/null; then
+            if ! output="$(jq empty < "$file" 2>&1)"; then
+                failed+=("${file}: ${output}")
+            fi
+        elif command -v python3 &>/dev/null; then
+            if ! output="$(python3 -m json.tool "$file" > /dev/null 2>&1)"; then
+                failed+=("${file}: invalid JSON")
+            fi
+        fi
+    done <<< "$json_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Invalid JSON/JSONC:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: YAML validity ──────────────────────────────────────────────────────
+check_yaml() {
+    local yaml_files
+    yaml_files="$(echo "$STAGED_FILES" | grep -E '\.(yml|yaml)$' 2>/dev/null || true)"
+
+    if [[ -z "$yaml_files" ]]; then
+        return 3
+    fi
+
+    local failed=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        if command -v yamllint &>/dev/null; then
+            local yamllint_cfg="${REPO_ROOT}/.yamllint.yml"
+            local output
+            if [[ -f "$yamllint_cfg" ]]; then
+                output="$(yamllint -c "$yamllint_cfg" "$file" 2>&1)" || {
+                    failed+=("$file"$'\n'"$output")
+                }
+            else
+                output="$(yamllint -d relaxed "$file" 2>&1)" || {
+                    failed+=("$file"$'\n'"$output")
+                }
+            fi
+        elif command -v python3 &>/dev/null; then
+            local output
+            if ! output="$(python3 -c "import yaml,sys; yaml.safe_load(open('$file'))" 2>&1)"; then
+                failed+=("${file}: ${output}")
+            fi
+        fi
+    done <<< "$yaml_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "YAML validation failed:\n"
+        printf "  %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: TOML validity ──────────────────────────────────────────────────────
+check_toml() {
+    local toml_files
+    toml_files="$(get_staged_by_ext toml)"
+
+    if [[ -z "$toml_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v python3 &>/dev/null; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$(python3 -c "import tomllib,sys; tomllib.load(open('$file','rb'))" \
+            2>/dev/null || \
+            python3 -c "import toml,sys; toml.load('$file')" 2>&1)"; then
+            failed+=("${file}: ${output}")
+        fi
+    done <<< "$toml_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "TOML validation failed:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Markdown lint ───────────────────────────────────────────────────────
+check_markdown() {
+    local md_files
+    md_files="$(get_staged_by_ext md)"
+
+    if [[ -z "$md_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v markdownlint &>/dev/null && \
+       ! command -v markdownlint-cli2 &>/dev/null; then
+        return 3
+    fi
+
+    local failed=()
+    local md_cfg="${REPO_ROOT}/.markdownlint.yml"
+    local cmd_opts=()
+    [[ -f "$md_cfg" ]] && cmd_opts+=("--config" "$md_cfg")
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if command -v markdownlint-cli2 &>/dev/null; then
+            if ! output="$(markdownlint-cli2 "${cmd_opts[@]}" "$file" 2>&1)"; then
+                failed+=("$output")
+            fi
+        elif command -v markdownlint &>/dev/null; then
+            if ! output="$(markdownlint "${cmd_opts[@]}" "$file" 2>&1)"; then
+                failed+=("$output")
+            fi
+        fi
+    done <<< "$md_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Markdown lint failed:\n"
+        printf "  %s\n" "${failed[@]}"
+        return 2  # Warning
+    fi
+}
+
+# ── CHECK: No trailing whitespace ─────────────────────────────────────────────
+check_trailing_whitespace() {
+    local found=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        if file "$file" 2>/dev/null | grep -q "binary"; then continue; fi
+
+        local output
+        output="$(grep -nP '\s+$' "$file" 2>/dev/null | head -3 || true)"
+        if [[ -n "$output" ]]; then
+            found+=("$file")
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#found[@]} -gt 0 ]]; then
+        printf "Trailing whitespace in:\n"
+        printf "  • %s\n" "${found[@]}"
+        printf "\nAuto-fix with: sed -i 's/[[:space:]]*$//' <file>\n"
+        return 1
+    fi
+}
+
+# ── CHECK: No mixed line endings ──────────────────────────────────────────────
+check_line_endings() {
+    local found=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        if file "$file" 2>/dev/null | grep -q "binary\|CRLF"; then
+            if [[ "$file" != *.bat ]] && [[ "$file" != *.cmd ]] && \
+               [[ "$file" != *.ps1 ]]; then
+                found+=("$file (CRLF line endings)")
+            fi
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#found[@]} -gt 0 ]]; then
+        printf "CRLF line endings found:\n"
+        printf "  • %s\n" "${found[@]}"
+        printf "\nFix with: sed -i 's/\\r//' <file>\n"
+        return 1
+    fi
+}
+
+# ── CHECK: EditorConfig compliance ────────────────────────────────────────────
+check_editorconfig() {
+    if ! command -v editorconfig-checker &>/dev/null && \
+       ! command -v ec &>/dev/null; then
+        return 3
+    fi
+
+    local cmd
+    command -v editorconfig-checker &>/dev/null && cmd="editorconfig-checker" || cmd="ec"
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$($cmd "$file" 2>&1)"; then
+            failed+=("$output")
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "EditorConfig violations:\n"
+        printf "  %s\n" "${failed[@]}"
+        return 2  # Warning
+    fi
+}
+
+# ── CHECK: No large binary files ──────────────────────────────────────────────
+check_no_large_binaries() {
+    local large_bins=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        # Check if binary
+        if file "$file" 2>/dev/null | grep -q "binary\|image\|audio\|video"; then
+            local size_kb
+            size_kb="$(du -k "$file" 2>/dev/null | cut -f1 || echo 0)"
+            if [[ $size_kb -gt 1024 ]]; then  # 1MB
+                large_bins+=("${file} (${size_kb}KB)")
+            fi
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#large_bins[@]} -gt 0 ]]; then
+        printf "Large binary files staged (consider git-lfs):\n"
+        printf "  • %s\n" "${large_bins[@]}"
+        return 2  # Warning
+    fi
+}
+
+# ── CHECK: Git-crypt encrypted files ──────────────────────────────────────────
+check_encrypted_secrets() {
+    # Check if secrets/ dir is git-crypt protected
+    if ! command -v git-crypt &>/dev/null; then
+        return 3
+    fi
+
+    local unencrypted=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        # If file is in secrets/ dir but not encrypted
+        if [[ "$file" == secrets/* ]]; then
+            if ! git-crypt status "$file" 2>/dev/null | grep -q "encrypted"; then
+                unencrypted+=("$file")
+            fi
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#unencrypted[@]} -gt 0 ]]; then
+        printf "Secrets not encrypted with git-crypt:\n"
+        printf "  • %s\n" "${unencrypted[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Script permissions ─────────────────────────────────────────────────
+check_script_permissions() {
+    local wrong_perms=()
+    local needs_exec=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        # Shell scripts should be executable
+        if [[ "$file" == *.sh ]] || \
+           [[ "$file" == ash-cli/ash ]] || \
+           [[ "$file" == scripts/* ]]; then
+            if [[ ! -x "$file" ]]; then
+                needs_exec+=("$file")
+            fi
+        fi
+
+        # Config files should NOT be executable
+        if [[ "$file" == config/* ]] && \
+           [[ "$file" != *.sh ]] && \
+           [[ -x "$file" ]]; then
+            wrong_perms+=("$file (should not be executable)")
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#needs_exec[@]} -gt 0 ]]; then
+        printf "Scripts missing execute permission:\n"
+        printf "  • %s\n" "${needs_exec[@]}"
+        printf "\nFix with: chmod +x <file>\n"
+        return 2  # Warning
+    fi
+
+    if [[ ${#wrong_perms[@]} -gt 0 ]]; then
+        printf "Files with incorrect permissions:\n"
+        printf "  • %s\n" "${wrong_perms[@]}"
+        return 2
+    fi
+}
+
+# ── CHECK: Shebang lines ───────────────────────────────────────────────────────
+check_shebangs() {
+    local missing_shebang=()
+    local bad_shebang=()
+
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        [[ "$file" == *.sh ]] || continue
+
+        local first_line
+        first_line="$(head -1 "$file" 2>/dev/null || true)"
+
+        if [[ -z "$first_line" ]] || [[ "$first_line" != "#!"* ]]; then
+            missing_shebang+=("$file")
+            continue
+        fi
+
+        # Check for portable shebang
+        if echo "$first_line" | grep -qE '^#!/bin/(sh|bash|zsh)$'; then
+            : # Direct path shebangs are OK
+        elif echo "$first_line" | grep -qE '^#!/usr/bin/env (bash|sh|fish|python3|node)$'; then
+            : # env shebangs preferred
+        else
+            bad_shebang+=("${file}: ${first_line}")
+        fi
+    done <<< "$STAGED_FILES"
+
+    local issues=()
+    [[ ${#missing_shebang[@]} -gt 0 ]] && \
+        issues+=("Missing shebang: ${missing_shebang[*]}")
+    [[ ${#bad_shebang[@]} -gt 0 ]] && \
+        issues+=("Non-standard shebang: ${bad_shebang[*]}")
+
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        printf "Shebang issues:\n"
+        printf "  • %s\n" "${issues[@]}"
+        return 2
+    fi
+}
+
+# ── CHECK: Theme schema validation ────────────────────────────────────────────
+check_theme_schema() {
+    local theme_files
+    theme_files="$(echo "$STAGED_FILES" | \
+        grep -E '^themes/.*\.(json|conf)$' 2>/dev/null || true)"
+
+    if [[ -z "$theme_files" ]]; then
+        return 3
+    fi
+
+    local schema="${REPO_ROOT}/themes/schema/theme-schema.json"
+    if [[ ! -f "$schema" ]]; then
+        return 3
+    fi
+
+    # Basic validation — check required fields
+    local required_fields=(
+        '"name"'
+        '"version"'
+        '"author"'
+        '"colors"'
+    )
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        [[ "$file" == *.json ]] || continue
+
+        for field in "${required_fields[@]}"; do
+            if ! grep -q "$field" "$file" 2>/dev/null; then
+                failed+=("${file}: missing required field ${field}")
+            fi
+        done
+    done <<< "$theme_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Theme schema validation failed:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Plugin schema validation ───────────────────────────────────────────
+check_plugin_schema() {
+    local plugin_files
+    plugin_files="$(echo "$STAGED_FILES" | \
+        grep -E '^plugins/.*/plugin\.json$' 2>/dev/null || true)"
+
+    if [[ -z "$plugin_files" ]]; then
+        return 3
+    fi
+
+    local required_fields=(
+        '"name"'
+        '"version"'
+        '"author"'
+        '"description"'
+        '"entry"'
+    )
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        for field in "${required_fields[@]}"; do
+            if ! grep -q "$field" "$file" 2>/dev/null; then
+                failed+=("${file}: missing required field ${field}")
+            fi
+        done
+    done <<< "$plugin_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Plugin schema validation failed:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Hyprland config syntax ─────────────────────────────────────────────
+check_hyprland_syntax() {
+    local hypr_files
+    hypr_files="$(echo "$STAGED_FILES" | \
+        grep -E '^config/hypr/.*\.conf$' 2>/dev/null || true)"
+
+    if [[ -z "$hypr_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v hyprctl &>/dev/null; then
+        return 3
+    fi
+
+    # Basic syntax check — look for obvious errors
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        # Check for unmatched braces
+        local open_braces; open_braces="$(grep -o '{' "$file" | wc -l)"
+        local close_braces; close_braces="$(grep -o '}' "$file" | wc -l)"
+        if [[ "$open_braces" != "$close_braces" ]]; then
+            failed+=("${file}: unmatched braces ({:${open_braces} }:${close_braces})")
+        fi
+    done <<< "$hypr_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Hyprland config syntax errors:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Lua formatting (StyLua) ────────────────────────────────────────────
+check_stylua() {
+    if ! command -v stylua &>/dev/null; then
+        return 3
+    fi
+
+    local lua_files
+    lua_files="$(get_staged_by_ext lua)"
+
+    if [[ -z "$lua_files" ]]; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$(stylua --check "$file" 2>&1)"; then
+            failed+=("${file} (run: stylua $file)")
+        fi
+    done <<< "$lua_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "StyLua formatting required:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: No TODO/FIXME in critical files ─────────────────────────────────────
+check_no_todos_in_critical() {
+    local critical_patterns=(
+        "^ash-cli/lib/"
+        "^ash-cli/engines/"
+        "^ash-cli/api/"
+        "^scripts/install/"
+        "^scripts/security/"
+        "^api/"
+    )
+
+    local found=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        # Check if file matches critical pattern
+        local is_critical=false
+        for pattern in "${critical_patterns[@]}"; do
+            if echo "$file" | grep -qE "$pattern"; then
+                is_critical=true
+                break
+            fi
+        done
+        [[ "$is_critical" == "true" ]] || continue
+
+        local output
+        output="$(grep -nE '(TODO|FIXME|HACK|XXX|BUG):' "$file" 2>/dev/null | \
+            head -3 || true)"
+        if [[ -n "$output" ]]; then
+            while IFS= read -r line; do
+                found+=("${file}: $line")
+            done <<< "$output"
+        fi
+    done <<< "$STAGED_FILES"
+
+    if [[ ${#found[@]} -gt 0 ]]; then
+        printf "TODO/FIXME in critical files:\n"
+        printf "  • %s\n" "${found[@]}"
+        return 2  # Warning
+    fi
+}
+
+# ── CHECK: ASH CLI version consistency ────────────────────────────────────────
+check_version_consistency() {
+    local version_file="${REPO_ROOT}/version.json"
+    local cli_version_file="${REPO_ROOT}/ash-cli/data/version.json"
+
+    if [[ ! -f "$version_file" ]] || [[ ! -f "$cli_version_file" ]]; then
+        return 3
+    fi
+
+    # Check if either version file is staged
+    if ! echo "$STAGED_FILES" | grep -qE "version\.json$"; then
+        return 3
+    fi
+
+    if ! command -v jq &>/dev/null; then
+        return 3
+    fi
+
+    local root_ver cli_ver
+    root_ver="$(jq -r '.version // empty' "$version_file" 2>/dev/null || true)"
+    cli_ver="$(jq -r '.version // empty' "$cli_version_file" 2>/dev/null || true)"
+
+    if [[ -n "$root_ver" ]] && [[ -n "$cli_ver" ]] && \
+       [[ "$root_ver" != "$cli_ver" ]]; then
+        printf "Version mismatch:\n"
+        printf "  root version.json: %s\n" "$root_ver"
+        printf "  cli version.json:  %s\n" "$cli_ver"
+        return 1
+    fi
+}
+
+# ── CHECK: Lint-staged custom rules ───────────────────────────────────────────
+check_lint_staged() {
+    if ! command -v lint-staged &>/dev/null; then
+        return 3
+    fi
+
+    local output
+    if ! output="$(lint-staged --quiet 2>&1)"; then
+        printf "%s\n" "$output"
+        return 1
+    fi
+}
+
+# ── CHECK: No private env files ───────────────────────────────────────────────
+check_no_env_files() {
+    local env_files
+    env_files="$(echo "$STAGED_FILES" | \
+        grep -E '^\.env(\.|$)' 2>/dev/null || true)"
+
+    if [[ -n "$env_files" ]]; then
+        printf ".env files staged:\n"
+        printf "  • %s\n" "$env_files"
+        printf "\nAdd to .gitignore: echo '.env*' >> .gitignore\n"
+        return 1
+    fi
+}
+
+# ── CHECK: Dart/Flutter formatting ────────────────────────────────────────────
+check_dart_format() {
+    local dart_files
+    dart_files="$(get_staged_by_ext dart)"
+
+    if [[ -z "$dart_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v dart &>/dev/null; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if ! output="$(dart format --set-exit-if-changed --output=none "$file" 2>&1)"; then
+            failed+=("${file} (run: dart format $file)")
+        fi
+    done <<< "$dart_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Dart formatting required:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+}
+
+# ── CHECK: Nix formatting ─────────────────────────────────────────────────────
+check_nix_format() {
+    local nix_files
+    nix_files="$(get_staged_by_ext nix)"
+
+    if [[ -z "$nix_files" ]]; then
+        return 3
+    fi
+
+    if ! command -v nixfmt &>/dev/null && ! command -v alejandra &>/dev/null; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        local output
+        if command -v alejandra &>/dev/null; then
+            if ! output="$(alejandra --check "$file" 2>&1)"; then
+                failed+=("${file}")
+            fi
+        fi
+    done <<< "$nix_files"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Nix formatting required:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 2
+    fi
+}
+
+# ── FINAL SUMMARY ─────────────────────────────────────────────────────────────
+print_summary() {
+    local total_elapsed; total_elapsed="$(format_ms "$(elapsed_ms "$START_TIME_MS")")"
+    local exit_code="${1:-0}"
+
+    printf "\n" >&2
+    hr "═" "$TERM_WIDTH" "${D}" >&2
+
+    # Status determination
+    local status_icon status_color status_text status_bg
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        status_icon="✗"
+        status_color="${RED}${B}"
+        status_text="COMMIT BLOCKED"
+        status_bg="${BG_RED}"
+    elif [[ $CHECKS_WARNED -gt 0 ]]; then
+        status_icon="⚠"
+        status_color="${YELLOW}${B}"
+        status_text="COMMIT ALLOWED (WITH WARNINGS)"
+        status_bg="${BG_DARK}"
+    else
+        status_icon="✓"
+        status_color="${GREEN}${B}"
+        status_text="ALL CHECKS PASSED"
+        status_bg="${BG_DARK}"
+    fi
+
+    # Summary box
+    printf "%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+    printf "  ╔" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╗  \n" >&2
+
+    printf "  ║  %s %s  %-*s  ║  \n" \
+        "${status_color}${status_icon}${R}${BG_MIDNIGHT}${GOLD}" \
+        "${status_color}${status_text}${R}${BG_MIDNIGHT}${GOLD}" \
+        $(( TERM_WIDTH - 14 - ${#status_text} )) "" >&2
+
+    printf "  ╠" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+    printf "╣  \n" >&2
+
+    # Metrics grid
+    printf "  ║  " >&2
+    printf "%s%s%-8s%s%s%-6s%s" \
+        "${GREEN}${B}" "✓ " "$CHECKS_PASSED" "$R$BG_MIDNIGHT" \
+        "${D}" "passed" "$R$BG_MIDNIGHT" >&2
+    printf "  " >&2
+    printf "%s%s%-8s%s%s%-6s%s" \
+        "${RED}${B}" "✗ " "$CHECKS_FAILED" "$R$BG_MIDNIGHT" \
+        "${D}" "failed" "$R$BG_MIDNIGHT" >&2
+    printf "  " >&2
+    printf "%s%s%-8s%s%s%-6s%s" \
+        "${YELLOW}${B}" "⚠ " "$CHECKS_WARNED" "$R$BG_MIDNIGHT" \
+        "${D}" "warned" "$R$BG_MIDNIGHT" >&2
+    printf "  " >&2
+    printf "%s%s%-8s%s%s%-6s%s" \
+        "${D}${WHITE}" "↷ " "$CHECKS_SKIPPED" "$R$BG_MIDNIGHT" \
+        "${D}" "skipped" "$R$BG_MIDNIGHT" >&2
+    printf "  " >&2
+    printf "%s%s%-8s%s%s%-6s%s" \
+        "${CYAN}${B}" "⏱ " "$total_elapsed" "$R$BG_MIDNIGHT" \
+        "${D}" "total" "$R$BG_MIDNIGHT" >&2
+    local metrics_len=$(( 8+8+8+8+8 + 6+6+6+6+6 + 4+4+4+4 + 10 ))
+    printf "%*s  ║  \n" $(( TERM_WIDTH - 4 - metrics_len - 4 )) "" >&2
+
+    # Error details
+    if [[ ${#ERRORS[@]} -gt 0 ]]; then
+        printf "  ╠" >&2
+        printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+        printf "╣  \n" >&2
+        printf "  ║  %s%s%s\n" "${RED}${B}" "BLOCKING ERRORS:" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+        for err in "${ERRORS[@]}"; do
+            local err_short; err_short="${err:0:$(( TERM_WIDTH - 12 ))}"
+            printf "  ║    %s• %s%s%*s  ║  \n" \
+                "${RED}" "$err_short" "$R$BG_MIDNIGHT$GOLD" \
+                $(( TERM_WIDTH - 4 - 6 - ${#err_short} )) "" >&2
+        done
+    fi
+
+    # Warning details
+    if [[ ${#WARNINGS[@]} -gt 0 ]]; then
+        printf "  ╠" >&2
+        printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+        printf "╣  \n" >&2
+        printf "  ║  %s%s%s\n" \
+            "${YELLOW}${B}" "WARNINGS (non-blocking):" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+        for warn in "${WARNINGS[@]}"; do
+            local warn_short; warn_short="${warn:0:$(( TERM_WIDTH - 12 ))}"
+            printf "  ║    %s• %s%s%*s  ║  \n" \
+                "${YELLOW}" "$warn_short" "$R$BG_MIDNIGHT$GOLD" \
+                $(( TERM_WIDTH - 4 - 6 - ${#warn_short} )) "" >&2
+        done
+    fi
+
+    # Footer
+    printf "  ╠" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+    printf "╣  \n" >&2
+
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        printf "  ║  %s  Fix errors above, then re-stage and commit%s%*s  ║  \n" \
+            "${D}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 48 )) "" >&2
+        printf "  ║  %s  Skip hooks (emergency): git commit --no-verify%s%*s  ║  \n" \
+            "${D}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 52 )) "" >&2
+    else
+        printf "  ║  %s  All checks passed! Proceeding to commit...%s%*s  ║  \n" \
+            "${LIME}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 49 )) "" >&2
+    fi
+
+    printf "  ╚" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╝  \n" >&2
+    printf "%s\n\n" "$R" >&2
+}
+
+# ── SKIP CONDITION ────────────────────────────────────────────────────────────
+should_skip() {
+    # Skip in CI environments (hooks don't run in CI anyway, but just in case)
+    if [[ "${CI:-}" == "true" ]] || [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        return 0
+    fi
+
+    # Skip if ASH_SKIP_HOOKS is set
+    if [[ "${ASH_SKIP_HOOKS:-}" == "true" ]]; then
+        printf "%s⚡ ASH_SKIP_HOOKS=true — skipping all checks%s\n" \
+            "$YELLOW" "$R" >&2
+        return 0
+    fi
+
+    return 1
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN EXECUTION
+# ══════════════════════════════════════════════════════════════════════════════
+main() {
+    if should_skip; then
+        exit 0
+    fi
+
+    print_banner
+
+    # ── SECTION 1: PRE-FLIGHT ────────────────────────────────────────────────
+    print_section "🛫" "Pre-flight Checks" "$CYAN"
+    run_check "staged_files"   "Staged Files"          "📂" check_has_staged_files   "false"
+    [[ $CHECKS_SKIPPED -eq 1 ]] && {
+        printf "\n  %sNothing staged — nothing to check.%s\n\n" "$D" "$R" >&2
+        exit 0
+    }
+    run_check "env_files"      "No .env Files"         "🔐" check_no_env_files       "true"
+    run_check "file_sizes"     "File Size Limits"      "📏" check_file_sizes         "true"
+    run_check "large_binaries" "No Large Binaries"     "🗜️" check_no_large_binaries  "false"
+    run_check "line_endings"   "Line Endings (LF)"     "↩️" check_line_endings       "true"
+    run_check "whitespace"     "No Trailing Whitespace" "🔍" check_trailing_whitespace "true"
+    run_check "conflicts"      "No Conflict Markers"   "⚔️" check_no_conflict_markers "true"
+
+    # ── SECTION 2: SECURITY ──────────────────────────────────────────────────
+    print_section "🔒" "Security Checks" "$RED"
+    run_check "secrets"        "No Secrets Exposed"    "🔑" check_no_secrets          "true"
+    run_check "encrypted"      "Secrets Encrypted"     "🛡️" check_encrypted_secrets   "true"
+    run_check "permissions"    "File Permissions"      "🔏" check_script_permissions   "false"
+
+    # ── SECTION 3: SYNTAX & LINT ─────────────────────────────────────────────
+    print_section "🔬" "Syntax & Lint Checks" "$YELLOW"
+    run_check "shellcheck"     "ShellCheck"            "🐚" check_shellcheck           "true"
+    run_check "luacheck"       "LuaCheck"              "🌙" check_luacheck             "true"
+    run_check "stylua"         "StyLua Format"         "🎨" check_stylua               "true"
+    run_check "fish_syntax"    "Fish Syntax"           "🐟" check_fish_syntax          "true"
+    run_check "python"         "Python Lint"           "🐍" check_python               "true"
+    run_check "typescript"     "TypeScript/ESLint"     "⚡" check_typescript           "true"
+    run_check "dart_format"    "Dart Format"           "🎯" check_dart_format          "true"
+    run_check "shebangs"       "Shebang Lines"         "📜" check_shebangs             "false"
+
+    # ── SECTION 4: DATA FORMAT VALIDATION ────────────────────────────────────
+    print_section "📋" "Data Format Validation" "$BLUE"
+    run_check "json"           "JSON/JSONC Valid"      "📄" check_json                 "true"
+    run_check "yaml"           "YAML Valid"            "📝" check_yaml                 "true"
+    run_check "toml"           "TOML Valid"            "⚙️" check_toml                 "true"
+    run_check "markdown"       "Markdown Lint"         "📖" check_markdown             "false"
+    run_check "nix_format"     "Nix Format"            "❄️" check_nix_format           "false"
+
+    # ── SECTION 5: ASH-SPECIFIC ───────────────────────────────────────────────
+    print_section "🌊" "ASH-Specific Validation" "$PURPLE"
+    run_check "theme_schema"   "Theme Schema"          "🎨" check_theme_schema         "true"
+    run_check "plugin_schema"  "Plugin Schema"         "🔌" check_plugin_schema        "true"
+    run_check "hypr_syntax"    "Hyprland Syntax"       "🖥️" check_hyprland_syntax      "true"
+    run_check "version_sync"   "Version Consistency"   "🏷️" check_version_consistency   "true"
+
+    # ── SECTION 6: CODE QUALITY ────────────────────────────────────────────────
+    print_section "✨" "Code Quality" "$MINT"
+    run_check "debug_artifacts" "No Debug Artifacts"  "🐛" check_no_debug_artifacts    "false"
+    run_check "todos_critical"  "TODOs in Critical"   "📌" check_no_todos_in_critical   "false"
+    run_check "editorconfig"    "EditorConfig"        "⚙️" check_editorconfig           "false"
+
+    # ── PRINT SUMMARY ────────────────────────────────────────────────────────
+    print_summary "$CHECKS_FAILED"
+
+    # ── EXIT CODE ─────────────────────────────────────────────────────────────
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        exit 1
+    fi
+
+    exit 0
+}
+
+main "$@"
