@@ -1,0 +1,1180 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🪝 ASH DOTFILES v5.0 OMEGA — HUSKY PRE-PUSH HOOK                          ║
+# ║  Final guardian before code reaches the remote repository                  ║
+# ║  Comprehensive validation: tests · security · size · branch policy         ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# ── ANSI MASTER PALETTE ───────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"
+readonly B="${ESC}[1m"
+readonly D="${ESC}[2m"
+readonly I="${ESC}[3m"
+readonly U="${ESC}[4m"
+readonly BLINK="${ESC}[5m"
+
+# Foreground — full spectrum
+readonly BLACK="${ESC}[30m"
+readonly RED="${ESC}[31m"
+readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"
+readonly BLUE="${ESC}[34m"
+readonly MAGENTA="${ESC}[35m"
+readonly CYAN="${ESC}[36m"
+readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m"
+readonly PURPLE="${ESC}[38;5;135m"
+readonly PINK="${ESC}[38;5;213m"
+readonly LIME="${ESC}[38;5;154m"
+readonly GOLD="${ESC}[38;5;220m"
+readonly SKY="${ESC}[38;5;117m"
+readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m"
+readonly PEACH="${ESC}[38;5;217m"
+readonly ROSE="${ESC}[38;5;211m"
+readonly TEAL="${ESC}[38;5;43m"
+readonly CORAL="${ESC}[38;5;203m"
+readonly CREAM="${ESC}[38;5;230m"
+readonly INDIGO="${ESC}[38;5;105m"
+readonly AMBER="${ESC}[38;5;214m"
+readonly CRIMSON="${ESC}[38;5;161m"
+readonly EMERALD="${ESC}[38;5;120m"
+readonly VIOLET="${ESC}[38;5;177m"
+readonly SLATE="${ESC}[38;5;245m"
+
+# Backgrounds
+readonly BG_BLACK="${ESC}[40m"
+readonly BG_RED="${ESC}[41m"
+readonly BG_GREEN="${ESC}[42m"
+readonly BG_BLUE="${ESC}[44m"
+readonly BG_DARK="${ESC}[48;5;235m"
+readonly BG_DARKER="${ESC}[48;5;232m"
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+readonly BG_NAVY="${ESC}[48;5;17m"
+readonly BG_DEEP_PURPLE="${ESC}[48;5;54m"
+readonly BG_FOREST="${ESC}[48;5;22m"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+readonly HOOK_VERSION="5.0.0-omega"
+readonly HOOK_NAME="pre-push"
+readonly SCRIPT_START_MS="$(date +%s%3N)"
+readonly REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+readonly TERM_WIDTH="$(tput cols 2>/dev/null || echo 80)"
+
+# Push info from stdin (remote name, remote url, local ref, local sha,
+#                        remote ref, remote sha)
+readonly REMOTE_NAME="${1:-origin}"
+readonly REMOTE_URL="${2:-}"
+
+# Branch policy
+readonly PROTECTED_BRANCHES=("main" "master" "release" "production" "staging")
+readonly FORCE_PUSH_ALLOWED_BRANCHES=("feature/*" "fix/*" "chore/*" "wip/*")
+
+# Size limits
+readonly MAX_PUSH_SIZE_MB=100
+readonly MAX_SINGLE_FILE_MB=25
+readonly MAX_HISTORY_FILES=500
+
+# Test config
+readonly UNIT_TEST_TIMEOUT=120
+readonly INTEGRATION_TEST_TIMEOUT=300
+
+# ── STATE ─────────────────────────────────────────────────────────────────────
+CHECKS_TOTAL=0
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_WARNED=0
+CHECKS_SKIPPED=0
+GATE_FAILURES=()      # Hard failures — block push
+GATE_WARNINGS=()      # Soft warnings — allow push
+PUSH_COMMITS=()
+CURRENT_BRANCH=""
+IS_PROTECTED_BRANCH=false
+IS_FORCE_PUSH=false
+PUSH_STATS_COMMITS=0
+PUSH_STATS_FILES=0
+PUSH_STATS_ADDITIONS=0
+PUSH_STATS_DELETIONS=0
+
+# ── TIMING ────────────────────────────────────────────────────────────────────
+declare -A SECTION_TIMES=()
+declare -A CHECK_TIMES=()
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  RENDERING ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
+now_ms()       { date +%s%3N; }
+elapsed()      { echo $(( $(now_ms) - SCRIPT_START_MS )); }
+format_dur()   {
+    local ms="$1"
+    if   [[ $ms -lt 1000 ]];  then printf "%dms"  "$ms"
+    elif [[ $ms -lt 60000 ]]; then printf "%.1fs"  "$(echo "scale=1; $ms/1000"  | bc 2>/dev/null || echo "$((ms/1000))")"
+    else                           printf "%.1fm"  "$(echo "scale=1; $ms/60000" | bc 2>/dev/null || echo "$((ms/60000))")"
+    fi
+}
+
+hr() {
+    local c="${1:-─}" w="${2:-$TERM_WIDTH}" col="${3:-$D}"
+    printf "%s%s%s\n" "$col" "$(printf '%*s' "$w" '' | tr ' ' "$c")" "$R" >&2
+}
+
+box_line() {
+    local content="$1"
+    local content_clean; content_clean="$(echo "$content" | sed 's/\x1b\[[0-9;]*m//g')"
+    local content_len="${#content_clean}"
+    local pad=$(( TERM_WIDTH - 4 - content_len ))
+    [[ $pad -lt 0 ]] && pad=0
+    printf "%s  ║%s %s%s %*s%s║  %s\n" \
+        "$BG_MIDNIGHT$GOLD" "$R$BG_MIDNIGHT" \
+        "$content" \
+        "$GOLD$BG_MIDNIGHT" \
+        "$pad" "" \
+        "" "$R" >&2
+}
+
+box_top()    {
+    printf "%s%s  ╔%s╗  %s\n" \
+        "$BG_MIDNIGHT" "$GOLD" \
+        "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═')" \
+        "$R" >&2
+}
+box_div()    {
+    printf "%s%s  ╠%s╣  %s\n" \
+        "$BG_MIDNIGHT" "$GOLD" \
+        "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═')" \
+        "$R" >&2
+}
+box_thin_div() {
+    printf "%s%s  ╟%s╢  %s\n" \
+        "$BG_MIDNIGHT" "$GOLD" \
+        "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─')" \
+        "$R" >&2
+}
+box_bottom() {
+    printf "%s%s  ╚%s╝  %s\n" \
+        "$BG_MIDNIGHT" "$GOLD" \
+        "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═')" \
+        "$R" >&2
+}
+
+section() {
+    local icon="$1" title="$2" color="${3:-$CYAN}"
+    printf "\n" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+    printf "  %s %s%s%s\n" \
+        "$icon" "${color}${B}" "$title" "$R" >&2
+    hr "─" "$TERM_WIDTH" "${D}${SLATE}"
+}
+
+# ── CHECK RESULT RENDERER ─────────────────────────────────────────────────────
+render_check() {
+    local status="$1"   # PASS|FAIL|WARN|SKIP|RUN
+    local name="$2"
+    local detail="${3:-}"
+    local duration="${4:-}"
+
+    ((CHECKS_TOTAL++)) || true
+
+    local icon color label
+    case "$status" in
+        PASS) icon="✓" color="${GREEN}${B}"  label="PASS"  ((CHECKS_PASSED++))  || true ;;
+        FAIL) icon="✗" color="${RED}${B}"    label="FAIL"  ((CHECKS_FAILED++))  || true ;;
+        WARN) icon="⚠" color="${YELLOW}${B}" label="WARN"  ((CHECKS_WARNED++))  || true ;;
+        SKIP) icon="↷" color="${SLATE}${D}"  label="SKIP"  ((CHECKS_SKIPPED++)) || true ;;
+        RUN)  icon="◌" color="${CYAN}${D}"   label="..."   return 0 ;;
+    esac
+
+    local name_col=46
+    local label_col=6
+    local detail_col=$(( TERM_WIDTH - name_col - label_col - 14 - ${#duration} ))
+    [[ $detail_col -lt 0 ]] && detail_col=0
+
+    local detail_short="${detail:0:$detail_col}"
+    [[ ${#detail} -gt $detail_col ]] && detail_short="${detail_short}…"
+
+    printf "  %s%s%s %-*s%s %-*s%s %s%s%s\n" \
+        "${color}" "$icon " "$R" \
+        "$name_col" "${B}${WHITE}${name}${R}" \
+        "${color}${B}" \
+        "$label_col" "$label" \
+        "$R" \
+        "${D}${SLATE}" \
+        "${detail_short:+$detail_short }${duration:+[$duration]}" \
+        "$R" >&2
+}
+
+run_check() {
+    local name="$1"
+    local fn="$2"
+    local required="${3:-true}"   # true = blocks push on failure
+
+    local t_start; t_start="$(now_ms)"
+
+    # Inline "running" state
+    printf "  %s◌%s %-48s%s\r" \
+        "${CYAN}${D}" "$R" "${D}${WHITE}${name}…${R}" "$R" >&2
+
+    local output="" exit_code=0
+    output="$("$fn" 2>&1)" || exit_code=$?
+
+    local dur; dur="$(format_dur "$(( $(now_ms) - t_start ))")"
+    CHECK_TIMES["$name"]="$dur"
+
+    case $exit_code in
+        0) render_check "PASS" "$name" "$output"          "$dur" ;;
+        2) render_check "WARN" "$name" "$output"          "$dur"
+           GATE_WARNINGS+=("${name}: ${output}")          ;;
+        3) render_check "SKIP" "$name" "$output"          "$dur" ;;
+        *)
+           render_check "FAIL" "$name" "$output"          "$dur"
+           if [[ "$required" == "true" ]]; then
+               GATE_FAILURES+=("${name}: ${output}")
+               if [[ -n "$output" ]]; then
+                   printf "\n" >&2
+                   echo "$output" | head -30 | while IFS= read -r l; do
+                       printf "      %s│%s %s%s%s\n" \
+                           "${RED}${D}" "$R" "${D}" "$l" "$R" >&2
+                   done
+                   printf "\n" >&2
+               fi
+           else
+               GATE_WARNINGS+=("${name}: ${output}")
+           fi
+           ;;
+    esac
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  BANNER & PUSH ANALYSIS
+# ══════════════════════════════════════════════════════════════════════════════
+print_banner() {
+    printf "\n" >&2
+    box_top
+
+    # ASCII art title
+    box_line "${B}${GOLD}  🚀 ASH DOTFILES v5.0 OMEGA — PRE-PUSH GUARDIAN${R}${BG_MIDNIGHT}${GOLD}"
+    box_line "${D}${CREAM}  Last line of defense before your code goes public${R}${BG_MIDNIGHT}${GOLD}"
+
+    box_div
+
+    # Push metadata grid
+    local branch_color="$LIME"
+    [[ "$IS_PROTECTED_BRANCH" == "true" ]] && branch_color="${RED}${B}"
+
+    box_line "$(printf "  %s%-16s%s %s%-20s%s  %s%-16s%s %s%s%s" \
+        "${CYAN}${B}" "Branch:" "$R$BG_MIDNIGHT$GOLD" \
+        "${branch_color}" "$CURRENT_BRANCH" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}" "Remote:" "$R$BG_MIDNIGHT$GOLD" \
+        "${LAVENDER}" "$REMOTE_NAME" "$R$BG_MIDNIGHT$GOLD")"
+
+    box_line "$(printf "  %s%-16s%s %s%-20s%s  %s%-16s%s %s%s%s" \
+        "${CYAN}${B}" "Protected:" "$R$BG_MIDNIGHT$GOLD" \
+        "$([ "$IS_PROTECTED_BRANCH" == "true" ] && echo "${RED}${B}YES ⚠" || echo "${GREEN}NO")" \
+        "" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}" "Commits:" "$R$BG_MIDNIGHT$GOLD" \
+        "${GOLD}${B}" "$PUSH_STATS_COMMITS" "$R$BG_MIDNIGHT$GOLD")"
+
+    box_line "$(printf "  %s%-16s%s %s%-20s%s  %s%-16s%s %s%s%s" \
+        "${CYAN}${B}" "Files Changed:" "$R$BG_MIDNIGHT$GOLD" \
+        "${PEACH}" "$PUSH_STATS_FILES" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}" "Changes:" "$R$BG_MIDNIGHT$GOLD" \
+        "${MINT}" "+${PUSH_STATS_ADDITIONS}/${CRIMSON}-${PUSH_STATS_DELETIONS}" \
+        "$R$BG_MIDNIGHT$GOLD")"
+
+    box_bottom
+    printf "\n" >&2
+}
+
+# ── ANALYZE PUSH CONTENT ──────────────────────────────────────────────────────
+analyze_push() {
+    # Read push info from stdin
+    # Format: <local ref> <local sha1> <remote ref> <remote sha1>
+    local local_ref local_sha remote_ref remote_sha
+    while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+        [[ "$local_sha" == "0000000000000000000000000000000000000000" ]] && continue
+        PUSH_COMMITS+=("$local_sha")
+    done
+
+    # Current branch
+    CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+
+    # Check if protected
+    for protected in "${PROTECTED_BRANCHES[@]}"; do
+        if [[ "$CURRENT_BRANCH" == "$protected" ]] || \
+           [[ "$CURRENT_BRANCH" == ${protected%\*}* ]]; then
+            IS_PROTECTED_BRANCH=true
+            break
+        fi
+    done
+
+    # Get push stats
+    if [[ ${#PUSH_COMMITS[@]} -gt 0 ]]; then
+        local range
+        if git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+            range="origin/${CURRENT_BRANCH}..HEAD"
+        else
+            range="HEAD~${#PUSH_COMMITS[@]}..HEAD"
+        fi
+
+        PUSH_STATS_COMMITS="$(git rev-list --count "$range" 2>/dev/null || echo "0")"
+        PUSH_STATS_FILES="$(git diff --name-only "$range" 2>/dev/null | wc -l | tr -d ' ')"
+
+        local diff_stat
+        diff_stat="$(git diff --shortstat "$range" 2>/dev/null || true)"
+        PUSH_STATS_ADDITIONS="$(echo "$diff_stat" | grep -oP '\d+(?= insertion)' || echo "0")"
+        PUSH_STATS_DELETIONS="$(echo "$diff_stat" | grep -oP '\d+(?= deletion)' || echo "0")"
+    fi
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  CHECK FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── BRANCH POLICY ─────────────────────────────────────────────────────────────
+check_branch_policy() {
+    if [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        echo "non-protected branch"
+        return 0
+    fi
+
+    # On protected branches — verify this is not a direct push bypassing PR
+    # In CI/CD this is allowed; locally it should go through PR
+    if [[ "${CI:-}" != "true" ]] && [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
+        local allow_direct
+        allow_direct="$(git config --get ash.allowDirectPush 2>/dev/null || echo "false")"
+        if [[ "$allow_direct" != "true" ]]; then
+            echo "Direct push to '${CURRENT_BRANCH}' requires a Pull Request"
+            return 1
+        fi
+    fi
+    echo "branch policy satisfied"
+    return 0
+}
+
+# ── FORCE PUSH PROTECTION ─────────────────────────────────────────────────────
+check_force_push_protection() {
+    # Detect if this is a force push by checking if remote has commits
+    # not in local history
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        echo "new branch — no force push concern"
+        return 0
+    fi
+
+    local remote_sha
+    remote_sha="$(git rev-parse "origin/${CURRENT_BRANCH}" 2>/dev/null || true)"
+    local local_sha
+    local_sha="$(git rev-parse HEAD 2>/dev/null || true)"
+
+    # Check if remote is ancestor of local (normal push)
+    if git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        echo "normal push (fast-forward)"
+        return 0
+    fi
+
+    # This appears to be a force push
+    if [[ "$IS_PROTECTED_BRANCH" == "true" ]]; then
+        echo "force push to protected branch '${CURRENT_BRANCH}' is forbidden"
+        return 1
+    fi
+
+    # On feature branches — warn but allow
+    echo "force push detected on '${CURRENT_BRANCH}'"
+    return 2
+}
+
+# ── NO WIP COMMITS ON PROTECTED BRANCHES ─────────────────────────────────────
+check_no_wip_commits() {
+    if [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        return 3  # Only enforce on protected branches
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD"
+    fi
+
+    local wip_commits
+    wip_commits="$(git log "$range" --format='%h %s' 2>/dev/null | \
+        grep -iE '(^[a-f0-9]+ wip[: ]|🚧|DO NOT MERGE|draft:)' || true)"
+
+    if [[ -n "$wip_commits" ]]; then
+        echo "WIP commits on protected branch:"$'\n'"$wip_commits"
+        return 1
+    fi
+
+    echo "no WIP commits"
+    return 0
+}
+
+# ── COMMIT SIGNATURES ─────────────────────────────────────────────────────────
+check_commit_signatures() {
+    local require_gpg
+    require_gpg="$(git config --get commit.gpgsign 2>/dev/null || echo "false")"
+
+    if [[ "$require_gpg" != "true" ]]; then
+        return 3
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local unsigned=()
+    while IFS= read -r commit; do
+        if ! git verify-commit "$commit" &>/dev/null; then
+            local msg; msg="$(git log -1 --format='%h %s' "$commit")"
+            unsigned+=("$msg")
+        fi
+    done < <(git rev-list "$range" 2>/dev/null || true)
+
+    if [[ ${#unsigned[@]} -gt 0 ]]; then
+        printf "Unsigned commits:\n"
+        printf "  %s\n" "${unsigned[@]}"
+        return 1
+    fi
+
+    echo "all commits GPG signed"
+    return 0
+}
+
+# ── PUSH SIZE GUARD ───────────────────────────────────────────────────────────
+check_push_size() {
+    # Check total push size
+    local total_bytes=0
+    local large_files=()
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD"
+    fi
+
+    while IFS= read -r blob_hash; do
+        local size_bytes
+        size_bytes="$(git cat-file -s "$blob_hash" 2>/dev/null || echo 0)"
+        total_bytes=$(( total_bytes + size_bytes ))
+
+        local size_mb=$(( size_bytes / 1024 / 1024 ))
+        if [[ $size_mb -gt $MAX_SINGLE_FILE_MB ]]; then
+            large_files+=("${blob_hash:0:8}: ${size_mb}MB")
+        fi
+    done < <(git rev-list "$range" --objects 2>/dev/null | \
+        git cat-file --batch-check='%(objecttype) %(objectname)' 2>/dev/null | \
+        awk '$1 == "blob" {print $2}' || true)
+
+    local total_mb=$(( total_bytes / 1024 / 1024 ))
+
+    if [[ $total_mb -gt $MAX_PUSH_SIZE_MB ]]; then
+        echo "Push size ${total_mb}MB exceeds ${MAX_PUSH_SIZE_MB}MB limit"
+        return 1
+    fi
+
+    if [[ ${#large_files[@]} -gt 0 ]]; then
+        printf "Large files in push (consider git-lfs):\n"
+        printf "  • %s\n" "${large_files[@]}"
+        return 2
+    fi
+
+    echo "push size OK (${total_mb}MB)"
+    return 0
+}
+
+# ── SECRET SCAN ON COMMITS ────────────────────────────────────────────────────
+check_no_secrets_in_commits() {
+    if ! command -v gitleaks &>/dev/null; then
+        # Fallback: basic grep scan
+        local range="origin/${CURRENT_BRANCH}..HEAD"
+        if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+            range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+        fi
+
+        local secret_patterns=(
+            'AKIA[0-9A-Z]{16}'
+            'sk-[a-zA-Z0-9]{48}'
+            'ghp_[a-zA-Z0-9]{36}'
+            'ghs_[a-zA-Z0-9]{36}'
+            'glpat-[a-zA-Z0-9]{20}'
+            '-----BEGIN (RSA|EC|OPENSSH|PGP) PRIVATE KEY'
+            'xox[baprs]-[0-9a-zA-Z-]+'
+        )
+
+        local found=()
+        for pattern in "${secret_patterns[@]}"; do
+            local matches
+            matches="$(git diff "$range" 2>/dev/null | \
+                grep '^+' | \
+                grep -oP "$pattern" 2>/dev/null || true)"
+            [[ -n "$matches" ]] && found+=("$matches")
+        done
+
+        if [[ ${#found[@]} -gt 0 ]]; then
+            echo "Potential secrets found in diff"
+            return 1
+        fi
+
+        echo "no secrets detected (basic scan)"
+        return 0
+    fi
+
+    # Full gitleaks scan
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    local output
+    if ! output="$(gitleaks detect \
+        --source="$REPO_ROOT" \
+        --log-opts="$range" \
+        --no-banner \
+        --quiet 2>&1)"; then
+        echo "Secrets detected: $output"
+        return 1
+    fi
+
+    echo "no secrets (gitleaks clean)"
+    return 0
+}
+
+# ── UNIT TESTS ────────────────────────────────────────────────────────────────
+check_unit_tests() {
+    local test_runner="${REPO_ROOT}/tests/run-unit-tests.sh"
+
+    if [[ ! -f "$test_runner" ]]; then
+        return 3
+    fi
+
+    # Only run if test files changed
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local test_changed
+    test_changed="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^(tests/|ash-cli/|scripts/)' || true)"
+
+    if [[ -z "$test_changed" ]] && [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        echo "no test-related files changed"
+        return 3
+    fi
+
+    local output
+    if ! output="$(timeout "$UNIT_TEST_TIMEOUT" \
+        bash "$test_runner" 2>&1)"; then
+        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            echo "unit tests timed out after ${UNIT_TEST_TIMEOUT}s"
+        else
+            local failed_count
+            failed_count="$(echo "$output" | \
+                grep -cP '(FAIL|ERROR)' 2>/dev/null || echo "?")"
+            echo "unit tests failed (${failed_count} failures)"
+            echo "$output" | tail -10
+        fi
+        return 1
+    fi
+
+    local pass_count
+    pass_count="$(echo "$output" | grep -cP 'PASS' 2>/dev/null || echo "?")"
+    echo "${pass_count} tests passed"
+    return 0
+}
+
+# ── SHELLCHECK ON ALL CHANGED SCRIPTS ────────────────────────────────────────
+check_shellcheck_all() {
+    if ! command -v shellcheck &>/dev/null; then
+        return 3
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_scripts
+    changed_scripts="$(git diff --name-only "$range" 2>/dev/null | \
+        grep '\.sh$' | \
+        while IFS= read -r f; do [[ -f "$f" ]] && echo "$f"; done || true)"
+
+    if [[ -z "$changed_scripts" ]]; then
+        return 3
+    fi
+
+    local failed=() total=0
+    while IFS= read -r script; do
+        ((total++)) || true
+        local result
+        if ! result="$(shellcheck \
+            --severity=error \
+            --shell=bash \
+            --format=compact \
+            "$script" 2>&1)"; then
+            failed+=("$script")
+        fi
+    done <<< "$changed_scripts"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "ShellCheck errors in %d/%d scripts\n" \
+            "${#failed[@]}" "$total"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+
+    echo "${total} scripts clean"
+    return 0
+}
+
+# ── LUACHECK ON CHANGED LUA FILES ─────────────────────────────────────────────
+check_luacheck_all() {
+    if ! command -v luacheck &>/dev/null; then
+        return 3
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_lua
+    changed_lua="$(git diff --name-only "$range" 2>/dev/null | \
+        grep '\.lua$' | \
+        while IFS= read -r f; do [[ -f "$f" ]] && echo "$f"; done || true)"
+
+    if [[ -z "$changed_lua" ]]; then
+        return 3
+    fi
+
+    local output
+    # shellcheck disable=SC2086
+    if ! output="$(luacheck \
+        --no-color \
+        --codes \
+        $changed_lua 2>&1)"; then
+        local err_count
+        err_count="$(echo "$output" | grep -cP 'error' || echo "?")"
+        echo "luacheck: ${err_count} errors"
+        return 1
+    fi
+
+    local file_count; file_count="$(echo "$changed_lua" | wc -l | tr -d ' ')"
+    echo "${file_count} lua files clean"
+    return 0
+}
+
+# ── VALIDATE THEME SCHEMA ─────────────────────────────────────────────────────
+check_theme_validation() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_themes
+    changed_themes="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^themes/presets/.+/colors\.json$' || true)"
+
+    if [[ -z "$changed_themes" ]]; then
+        return 3
+    fi
+
+    local validator="${REPO_ROOT}/.github/actions/validate-theme/validate.sh"
+    if [[ ! -f "$validator" ]]; then
+        return 3
+    fi
+
+    local failed=()
+    while IFS= read -r theme_file; do
+        [[ -f "$theme_file" ]] || continue
+        local output
+        if ! output="$(bash "$validator" "$theme_file" 2>&1)"; then
+            failed+=("$theme_file")
+        fi
+    done <<< "$changed_themes"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Theme validation failed:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+
+    local count; count="$(echo "$changed_themes" | wc -l | tr -d ' ')"
+    echo "${count} theme(s) valid"
+    return 0
+}
+
+# ── VALIDATE PLUGIN SCHEMA ────────────────────────────────────────────────────
+check_plugin_validation() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_plugins
+    changed_plugins="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^plugins/.+/plugin\.json$' || true)"
+
+    if [[ -z "$changed_plugins" ]]; then
+        return 3
+    fi
+
+    local required_fields=("name" "version" "author" "description" "entry")
+    local failed=()
+
+    while IFS= read -r plugin_file; do
+        [[ -f "$plugin_file" ]] || continue
+        for field in "${required_fields[@]}"; do
+            if ! grep -q "\"$field\"" "$plugin_file" 2>/dev/null; then
+                failed+=("${plugin_file}: missing field '${field}'")
+            fi
+        done
+    done <<< "$changed_plugins"
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf "Plugin validation failed:\n"
+        printf "  • %s\n" "${failed[@]}"
+        return 1
+    fi
+
+    local count; count="$(echo "$changed_plugins" | wc -l | tr -d ' ')"
+    echo "${count} plugin(s) valid"
+    return 0
+}
+
+# ── DEPENDENCY AUDIT ──────────────────────────────────────────────────────────
+check_dependency_audit() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_deps
+    changed_deps="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '(package\.json|requirements\.txt|Cargo\.toml|go\.mod|pubspec\.yaml)$' \
+        || true)"
+
+    if [[ -z "$changed_deps" ]]; then
+        return 3
+    fi
+
+    local issues=()
+
+    # npm audit
+    if echo "$changed_deps" | grep -q "package.json"; then
+        for pkg_json in web/package.json browser-extension/package.json; do
+            if [[ -f "$pkg_json" ]] && command -v npm &>/dev/null; then
+                local npm_dir; npm_dir="$(dirname "$pkg_json")"
+                local output
+                if ! output="$(npm audit --audit-level=high \
+                    --prefix="$npm_dir" 2>&1 | \
+                    grep -E 'high|critical' || true)"; then
+                    [[ -n "$output" ]] && issues+=("npm: $output")
+                fi
+            fi
+        done
+    fi
+
+    # pip audit
+    if echo "$changed_deps" | grep -q "requirements.txt" && \
+       command -v pip &>/dev/null; then
+        local output
+        if ! output="$(pip audit -r "${REPO_ROOT}/api/requirements.txt" \
+            --format=text 2>&1 | \
+            grep -E 'CRITICAL|HIGH' || true)"; then
+            [[ -n "$output" ]] && issues+=("pip: $output")
+        fi
+    fi
+
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        printf "Dependency vulnerabilities:\n"
+        printf "  • %s\n" "${issues[@]}"
+        return 2  # Warning — don't block
+    fi
+
+    echo "dependencies audited"
+    return 0
+}
+
+# ── CI STATUS CHECK ───────────────────────────────────────────────────────────
+check_ci_status() {
+    if ! command -v gh &>/dev/null; then
+        return 3
+    fi
+
+    # Only check on protected branches
+    if [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        return 3
+    fi
+
+    local last_run_status
+    last_run_status="$(gh run list \
+        --branch="$CURRENT_BRANCH" \
+        --limit=1 \
+        --json="status,conclusion" \
+        --jq='.[0] | "\(.status) \(.conclusion)"' \
+        2>/dev/null || true)"
+
+    if [[ -z "$last_run_status" ]]; then
+        return 3
+    fi
+
+    if echo "$last_run_status" | grep -q "failure"; then
+        echo "CI is failing on '${CURRENT_BRANCH}'"
+        return 2  # Warning
+    fi
+
+    if echo "$last_run_status" | grep -q "in_progress"; then
+        echo "CI is still running on '${CURRENT_BRANCH}'"
+        return 2
+    fi
+
+    echo "CI passing"
+    return 0
+}
+
+# ── CHANGELOG CHECK ───────────────────────────────────────────────────────────
+check_changelog_updated() {
+    if [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        return 3
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        return 3
+    fi
+
+    local has_feat_fix
+    has_feat_fix="$(git log "$range" \
+        --format='%s' 2>/dev/null | \
+        grep -cE '^(feat|fix|perf|security|theme|plugin)(\([^)]+\))?[!:]' \
+        || echo 0)"
+
+    if [[ "$has_feat_fix" -eq 0 ]]; then
+        return 3
+    fi
+
+    local changelog_updated
+    changelog_updated="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E 'CHANGELOG\.md$' || true)"
+
+    if [[ -z "$changelog_updated" ]]; then
+        echo "${has_feat_fix} feat/fix commits without CHANGELOG.md update"
+        return 2
+    fi
+
+    echo "CHANGELOG.md updated"
+    return 0
+}
+
+# ── VERSION BUMP CHECK ────────────────────────────────────────────────────────
+check_version_bump() {
+    if [[ "$IS_PROTECTED_BRANCH" != "true" ]]; then
+        return 3
+    fi
+
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        return 3
+    fi
+
+    local breaking_commits
+    breaking_commits="$(git log "$range" \
+        --format='%s' 2>/dev/null | \
+        grep -cP '!' || echo 0)"
+
+    if [[ "$breaking_commits" -eq 0 ]]; then
+        return 3
+    fi
+
+    # Has breaking changes — verify version was bumped
+    local version_changed
+    version_changed="$(git diff --name-only "$range" 2>/dev/null | \
+        grep 'version.json' || true)"
+
+    if [[ -z "$version_changed" ]]; then
+        echo "${breaking_commits} breaking changes without version bump"
+        return 2
+    fi
+
+    echo "version bumped for breaking changes"
+    return 0
+}
+
+# ── COMMIT AUTHOR VALIDATION ──────────────────────────────────────────────────
+check_commit_authors() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local bot_commits=()
+    while IFS= read -r line; do
+        if echo "$line" | grep -qiE '(noreply|github-bot|dependabot|renovate)'; then
+            bot_commits+=("$line")
+        fi
+    done < <(git log "$range" --format='%h %ae' 2>/dev/null || true)
+
+    if [[ ${#bot_commits[@]} -gt 0 ]]; then
+        echo "bot commits included: ${bot_commits[*]}"
+        return 2
+    fi
+
+    local total; total="$(git rev-list --count "$range" 2>/dev/null || echo 0)"
+    echo "${total} commits — authors verified"
+    return 0
+}
+
+# ── ASH CONFIG INTEGRITY ──────────────────────────────────────────────────────
+check_ash_config_integrity() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    local changed_configs
+    changed_configs="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^(ash-cli/data/|ash-cli/lib/|ash-cli/engines/)' || true)"
+
+    if [[ -z "$changed_configs" ]]; then
+        return 3
+    fi
+
+    local issues=()
+
+    # Validate JSON data files
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        if [[ "$file" == *.json ]] && command -v jq &>/dev/null; then
+            if ! jq empty < "$file" &>/dev/null; then
+                issues+=("Invalid JSON: $file")
+            fi
+        fi
+    done <<< "$changed_configs"
+
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        printf "ASH config integrity failed:\n"
+        printf "  • %s\n" "${issues[@]}"
+        return 1
+    fi
+
+    local count; count="$(echo "$changed_configs" | wc -l | tr -d ' ')"
+    echo "${count} core config files verified"
+    return 0
+}
+
+# ── DOCUMENTATION FRESHNESS ───────────────────────────────────────────────────
+check_docs_freshness() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        return 3
+    fi
+
+    # If CLI commands changed, check if docs were updated
+    local cli_changed
+    cli_changed="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^ash-cli/commands/' | wc -l | tr -d ' ')"
+
+    local docs_changed
+    docs_changed="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^docs/reference/ash-cli' | wc -l | tr -d ' ')"
+
+    if [[ "$cli_changed" -gt 3 ]] && [[ "$docs_changed" -eq 0 ]]; then
+        echo "${cli_changed} CLI changes without docs update"
+        return 2
+    fi
+
+    return 3
+}
+
+# ── PERFORMANCE REGRESSION CHECK ──────────────────────────────────────────────
+check_no_perf_regression() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        return 3
+    fi
+
+    # Check if hot paths were touched
+    local hot_path_changed
+    hot_path_changed="$(git diff --name-only "$range" 2>/dev/null | \
+        grep -E '^ash-cli/engines/(hot-reload|color-engine)/' || true)"
+
+    if [[ -z "$hot_path_changed" ]]; then
+        return 3
+    fi
+
+    # Run quick benchmark if available
+    local bench="${REPO_ROOT}/tests/benchmark/bench-theme-apply.sh"
+    if [[ -f "$bench" ]]; then
+        local output
+        if ! output="$(timeout 30 bash "$bench" --quick 2>&1)"; then
+            echo "benchmark failed or timed out"
+            return 2
+        fi
+
+        local threshold_ms=500
+        local result_ms
+        result_ms="$(echo "$output" | grep -oP '\d+(?=ms)' | head -1 || echo 0)"
+        if [[ "$result_ms" -gt "$threshold_ms" ]]; then
+            echo "theme-apply: ${result_ms}ms > ${threshold_ms}ms threshold"
+            return 2
+        fi
+    fi
+
+    echo "hot-path files reviewed"
+    return 2  # Always warn when hot paths touched
+}
+
+# ── PRINT PUSH DIFF SUMMARY ───────────────────────────────────────────────────
+print_diff_summary() {
+    local range="origin/${CURRENT_BRANCH}..HEAD"
+    if ! git rev-parse --verify "origin/${CURRENT_BRANCH}" &>/dev/null; then
+        range="HEAD~${PUSH_STATS_COMMITS:-1}..HEAD"
+    fi
+
+    section "📊" "Push Diff Summary" "$GOLD"
+
+    # Commit log
+    printf "\n  %s%sCommits being pushed:%s\n\n" "$B" "$LAVENDER" "$R" >&2
+    git log "$range" \
+        --format="  %s%h%s %s%s%s %s%s%s" \
+        "${GOLD}${B}" "${R}" \
+        "${D}${SLATE}" "%as" "${R}" \
+        "${WHITE}" "%s" "${R}" \
+        2>/dev/null | head -20 >&2 || true
+
+    # File type breakdown
+    printf "\n  %s%sChanged files by type:%s\n\n" "$B" "$LAVENDER" "$R" >&2
+
+    local -A type_counts=()
+    while IFS= read -r file; do
+        local ext="${file##*.}"
+        [[ "$ext" == "$file" ]] && ext="(no ext)"
+        type_counts["$ext"]=$(( ${type_counts["$ext"]:-0} + 1 ))
+    done < <(git diff --name-only "$range" 2>/dev/null || true)
+
+    local sorted_types
+    sorted_types="$(for k in "${!type_counts[@]}"; do
+        echo "${type_counts[$k]} $k"
+    done | sort -rn | head -10)"
+
+    while IFS=' ' read -r count ext; do
+        local bar_len=$(( count * 20 / (PUSH_STATS_FILES + 1) ))
+        local bar; bar="$(printf '%*s' "$bar_len" '' | tr ' ' '█')"
+        printf "  %s  %-12s%s %s%-20s%s %s%s%s\n" \
+            "${CYAN}${B}" ".${ext}" "$R" \
+            "${GOLD}" "$bar" "$R" \
+            "${D}${SLATE}" "${count} file(s)" "$R" >&2
+    done <<< "$sorted_types"
+
+    printf "\n" >&2
+}
+
+# ── FINAL SUMMARY ─────────────────────────────────────────────────────────────
+print_summary() {
+    local total_elapsed; total_elapsed="$(format_dur "$(elapsed)")"
+
+    printf "\n" >&2
+    box_top
+
+    # Status determination
+    local status_icon status_msg
+    if [[ ${#GATE_FAILURES[@]} -gt 0 ]]; then
+        status_icon="🚫"
+        status_msg="${RED}${B}PUSH BLOCKED — ${#GATE_FAILURES[@]} CRITICAL FAILURE(S)${R}${BG_MIDNIGHT}${GOLD}"
+    elif [[ ${#GATE_WARNINGS[@]} -gt 0 ]]; then
+        status_icon="⚠️"
+        status_msg="${YELLOW}${B}PUSH ALLOWED — ${#GATE_WARNINGS[@]} WARNING(S)${R}${BG_MIDNIGHT}${GOLD}"
+    else
+        status_icon="🚀"
+        status_msg="${GREEN}${B}PUSH APPROVED — ALL CHECKS PASSED${R}${BG_MIDNIGHT}${GOLD}"
+    fi
+
+    box_line "${status_icon}  ${status_msg}"
+    box_thin_div
+
+    # Metrics
+    box_line "$(printf "  %s✓ %-4s%s passed   %s✗ %-4s%s failed   %s⚠ %-4s%s warned   %s↷ %-4s%s skipped   %s⏱ %s%s total" \
+        "${GREEN}${B}" "$CHECKS_PASSED" "$R$BG_MIDNIGHT$GOLD" \
+        "${RED}${B}"   "$CHECKS_FAILED" "$R$BG_MIDNIGHT$GOLD" \
+        "${YELLOW}${B}" "$CHECKS_WARNED" "$R$BG_MIDNIGHT$GOLD" \
+        "${SLATE}${D}" "$CHECKS_SKIPPED" "$R$BG_MIDNIGHT$GOLD" \
+        "${CYAN}${B}"  "$total_elapsed" "$R$BG_MIDNIGHT$GOLD")"
+
+    # Failures
+    if [[ ${#GATE_FAILURES[@]} -gt 0 ]]; then
+        box_thin_div
+        box_line "${RED}${B}  BLOCKING FAILURES:${R}${BG_MIDNIGHT}${GOLD}"
+        for f in "${GATE_FAILURES[@]}"; do
+            box_line "  ${RED}  • ${f}${R}${BG_MIDNIGHT}${GOLD}"
+        done
+        box_thin_div
+        box_line "  ${D}Fix issues above, then push again${R}${BG_MIDNIGHT}${GOLD}"
+        box_line "  ${D}Emergency bypass: ${YELLOW}${B}git push --no-verify${R}${BG_MIDNIGHT}${GOLD}"
+    fi
+
+    # Warnings
+    if [[ ${#GATE_WARNINGS[@]} -gt 0 ]]; then
+        box_thin_div
+        box_line "${YELLOW}${B}  WARNINGS:${R}${BG_MIDNIGHT}${GOLD}"
+        for w in "${GATE_WARNINGS[@]}"; do
+            box_line "  ${YELLOW}  • ${w}${R}${BG_MIDNIGHT}${GOLD}"
+        done
+    fi
+
+    box_bottom
+    printf "\n" >&2
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN
+# ══════════════════════════════════════════════════════════════════════════════
+main() {
+    # Parse stdin push info
+    analyze_push
+
+    print_banner
+    print_diff_summary
+
+    # ── SECTION 1: BRANCH & POLICY ────────────────────────────────────────────
+    section "🏛️" "Branch & Policy Checks" "$CRIMSON"
+    run_check "Branch Policy"           check_branch_policy         "true"
+    run_check "Force Push Protection"   check_force_push_protection "true"
+    run_check "No WIP Commits"          check_no_wip_commits        "true"
+    run_check "Commit Signatures"       check_commit_signatures     "false"
+    run_check "Commit Authors"          check_commit_authors        "false"
+
+    # ── SECTION 2: SECURITY ───────────────────────────────────────────────────
+    section "🔒" "Security Gate" "$RED"
+    run_check "Secret Scan"             check_no_secrets_in_commits "true"
+    run_check "Dependency Audit"        check_dependency_audit      "false"
+    run_check "Push Size Guard"         check_push_size             "true"
+
+    # ── SECTION 3: CODE QUALITY ───────────────────────────────────────────────
+    section "🔬" "Code Quality Gate" "$YELLOW"
+    run_check "ShellCheck (all)"        check_shellcheck_all        "true"
+    run_check "LuaCheck (all)"          check_luacheck_all          "true"
+
+    # ── SECTION 4: TESTS ──────────────────────────────────────────────────────
+    section "🧪" "Test Gate" "$GREEN"
+    run_check "Unit Tests"              check_unit_tests            "true"
+
+    # ── SECTION 5: ASH VALIDATION ─────────────────────────────────────────────
+    section "🌊" "ASH Validation Gate" "$PURPLE"
+    run_check "Theme Validation"        check_theme_validation      "true"
+    run_check "Plugin Validation"       check_plugin_validation     "true"
+    run_check "ASH Config Integrity"    check_ash_config_integrity  "true"
+
+    # ── SECTION 6: PROCESS COMPLIANCE ────────────────────────────────────────
+    section "📋" "Process Compliance" "$LAVENDER"
+    run_check "CI Status"               check_ci_status             "false"
+    run_check "Changelog Updated"       check_changelog_updated     "false"
+    run_check "Version Bump"            check_version_bump          "false"
+    run_check "Docs Freshness"          check_docs_freshness        "false"
+    run_check "Perf Regression"         check_no_perf_regression    "false"
+
+    print_summary
+
+    [[ ${#GATE_FAILURES[@]} -gt 0 ]] && exit 1
+    exit 0
+}
+
+main "$@"

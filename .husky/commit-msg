@@ -1,0 +1,1011 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🪝 ASH DOTFILES v5.0 OMEGA — HUSKY COMMIT-MSG HOOK                        ║
+# ║  Validates commit message against Conventional Commits specification        ║
+# ║  Enforces format, length, scope, and ASH-specific conventions              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+
+# ── ANSI PALETTE ──────────────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"
+readonly B="${ESC}[1m"
+readonly D="${ESC}[2m"
+readonly I="${ESC}[3m"
+
+readonly RED="${ESC}[31m"
+readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"
+readonly BLUE="${ESC}[34m"
+readonly MAGENTA="${ESC}[35m"
+readonly CYAN="${ESC}[36m"
+readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m"
+readonly PURPLE="${ESC}[38;5;135m"
+readonly GOLD="${ESC}[38;5;220m"
+readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m"
+readonly PEACH="${ESC}[38;5;217m"
+readonly ROSE="${ESC}[38;5;211m"
+readonly LIME="${ESC}[38;5;154m"
+readonly SKY="${ESC}[38;5;117m"
+readonly CREAM="${ESC}[38;5;230m"
+readonly CORAL="${ESC}[38;5;203m"
+readonly TEAL="${ESC}[38;5;43m"
+readonly PINK="${ESC}[38;5;213m"
+
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+readonly BG_DARK="${ESC}[48;5;235m"
+readonly BG_DARKER="${ESC}[48;5;232m"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+readonly HOOK_VERSION="5.0.0-omega"
+readonly COMMIT_MSG_FILE="${1:?'Commit message file required'}"
+readonly START_TIME_MS="$(date +%s%3N)"
+
+# Message constraints
+readonly MAX_SUBJECT_LENGTH=100
+readonly MIN_SUBJECT_LENGTH=10
+readonly MAX_BODY_LINE_LENGTH=120
+readonly MAX_FOOTER_LENGTH=500
+
+# ── TERMINAL WIDTH ────────────────────────────────────────────────────────────
+TERM_WIDTH="$(tput cols 2>/dev/null || echo 80)"
+readonly TERM_WIDTH
+
+# ── STATE ─────────────────────────────────────────────────────────────────────
+CHECKS_PASSED=0
+CHECKS_FAILED=0
+CHECKS_WARNED=0
+ERRORS=()
+WARNINGS=()
+SUGGESTIONS=()
+
+# ── CONVENTIONAL COMMITS SPEC ─────────────────────────────────────────────────
+# Types from Conventional Commits + ASH-specific extensions
+readonly -a VALID_TYPES=(
+    # Standard CC types
+    "feat"      # New feature
+    "fix"       # Bug fix
+    "docs"      # Documentation only
+    "style"     # Formatting, no logic change
+    "refactor"  # Code change, not feat or fix
+    "perf"      # Performance improvement
+    "test"      # Adding or fixing tests
+    "build"     # Build system or external deps
+    "ci"        # CI/CD configuration
+    "chore"     # Other changes (no src/test)
+    "revert"    # Revert a commit
+    "wip"       # Work in progress (not for main)
+
+    # ASH-specific types
+    "theme"     # Theme addition or modification
+    "plugin"    # Plugin addition or modification
+    "wallpaper" # Wallpaper addition
+    "config"    # Configuration file change
+    "snapshot"  # Snapshot system changes
+    "security"  # Security fix or hardening
+    "deps"      # Dependency updates (manual)
+    "release"   # Release preparation
+    "hotfix"    # Critical hotfix
+    "merge"     # Merge commits (special case)
+    "init"      # Initial commit
+)
+
+# Valid scopes — ASH component scopes
+readonly -a VALID_SCOPES=(
+    # Core components
+    "ash-cli"       "cli"
+    "theme-engine"  "theme"
+    "plugin-system" "plugin"
+    "snapshot"      "config"
+    "color-engine"  "colors"
+    "hot-reload"    "ipc"
+    "ai-engine"     "ai"
+
+    # Desktop environment
+    "hyprland"      "hypr"
+    "waybar"        "bar"
+    "rofi"          "rofi"
+    "kitty"         "terminal"
+    "fish"          "shell"
+    "neovim"        "nvim"
+    "dunst"         "swaync"
+    "hyprlock"      "lock"
+    "hypridle"      "idle"
+    "swww"          "wallpaper"
+    "ags"           "eww"
+
+    # Applications
+    "btop"          "cava"
+    "fastfetch"     "wlogout"
+    "tmux"          "wezterm"
+    "zellij"        "helix"
+    "zed"           "vscode"
+    "yazi"          "mpv"
+    "zathura"       "lazygit"
+    "bat"           "atuin"
+    "starship"      "espanso"
+
+    # System
+    "gtk"           "qt"
+    "kvantum"       "icons"
+    "cursors"       "fonts"
+    "sddm"          "grub"
+    "plymouth"      "systemd"
+    "pipewire"      "easyeffects"
+    "docker"        "podman"
+    "kubernetes"    "nix"
+    "flatpak"       "aur"
+
+    # Infrastructure
+    "api"           "web"
+    "mobile"        "flutter"
+    "browser-ext"   "extension"
+    "ci"            "cd"
+    "github"        "actions"
+    "security"      "deps"
+
+    # Docs & assets
+    "docs"          "assets"
+    "screenshots"   "icons"
+    "sounds"        "animations"
+    "brand"         "readme"
+    "wiki"          "changelog"
+
+    # Special
+    "all"           "*"
+    "global"        "misc"
+    "release"       "hotfix"
+)
+
+# ── UTILITIES ─────────────────────────────────────────────────────────────────
+hr() {
+    local char="${1:-─}"
+    local width="${2:-$TERM_WIDTH}"
+    local color="${3:-$D}"
+    printf "%s%s%s\n" "$color" "$(printf '%*s' "$width" '' | tr ' ' "$char")" "$R" >&2
+}
+
+now_ms() { date +%s%3N; }
+elapsed_ms() { echo $(( $(now_ms) - START_TIME_MS )); }
+format_ms() {
+    local ms="$1"
+    [[ $ms -lt 1000 ]] && echo "${ms}ms" || \
+        echo "$(( ms / 1000 )).$(( (ms % 1000) / 100 ))s"
+}
+
+pass() {
+    ((CHECKS_PASSED++)) || true
+    printf "  %s✓%s %-55s %s%s%s\n" \
+        "${GREEN}${B}" "$R" "$1" \
+        "${D}" "${2:-}" "$R" >&2
+}
+
+fail() {
+    ((CHECKS_FAILED++)) || true
+    ERRORS+=("$1${2:+: $2}")
+    printf "  %s✗%s %-55s %s%s%s\n" \
+        "${RED}${B}" "$R" "$1" \
+        "${D}${RED}" "${2:-}" "$R" >&2
+}
+
+warn() {
+    ((CHECKS_WARNED++)) || true
+    WARNINGS+=("$1${2:+: $2}")
+    printf "  %s⚠%s %-55s %s%s%s\n" \
+        "${YELLOW}${B}" "$R" "$1" \
+        "${D}${YELLOW}" "${2:-}" "$R" >&2
+}
+
+suggest() {
+    SUGGESTIONS+=("$1")
+    printf "  %s💡%s %s%s%s\n" \
+        "${CYAN}" "$R" "${D}" "$1" "$R" >&2
+}
+
+section() {
+    local icon="$1" title="$2" color="${3:-$CYAN}"
+    printf "\n" >&2
+    hr "─"
+    printf "  %s %s%s%s\n" "$icon" "${color}${B}" "$title" "$R" >&2
+    hr "─"
+}
+
+# ── BANNER ────────────────────────────────────────────────────────────────────
+print_banner() {
+    printf "\n" >&2
+    printf "%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+
+    printf "  ╔" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╗  \n" >&2
+
+    printf "  ║  %s%-*s%s  ║  \n" \
+        "${B}${GOLD}" \
+        $(( TERM_WIDTH - 8 )) \
+        "💬 ASH DOTFILES v5.0 OMEGA — COMMIT MESSAGE VALIDATOR" \
+        "$R$BG_MIDNIGHT$GOLD" >&2
+
+    printf "  ║  %s%-*s%s  ║  \n" \
+        "${D}${CREAM}" \
+        $(( TERM_WIDTH - 8 )) \
+        "Conventional Commits v1.0.0 + ASH Extensions" \
+        "$R$BG_MIDNIGHT$GOLD" >&2
+
+    printf "  ╚" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╝  \n" >&2
+    printf "%s\n\n" "$R" >&2
+}
+
+# ── READ & PARSE COMMIT MESSAGE ───────────────────────────────────────────────
+read_commit_message() {
+    if [[ ! -f "$COMMIT_MSG_FILE" ]]; then
+        printf "%s✗ Commit message file not found: %s%s\n" \
+            "$RED" "$COMMIT_MSG_FILE" "$R" >&2
+        exit 1
+    fi
+
+    # Read raw message
+    readonly RAW_MESSAGE="$(cat "$COMMIT_MSG_FILE")"
+
+    # Strip comments (lines starting with #)
+    readonly CLEAN_MESSAGE="$(echo "$RAW_MESSAGE" | \
+        grep -v '^#' | \
+        sed '/^$/d' | \
+        head -100)"
+
+    # Extract parts
+    readonly SUBJECT_LINE="$(echo "$CLEAN_MESSAGE" | head -1 | xargs)"
+    readonly BODY="$(echo "$CLEAN_MESSAGE" | \
+        tail -n +3 | \
+        head -n -0 || true)"
+    readonly FOOTER="$(echo "$CLEAN_MESSAGE" | \
+        grep -E '^(BREAKING CHANGE|Closes|Fixes|Refs|Co-authored-by|Signed-off-by|Reviewed-by|Acked-by):' \
+        || true)"
+
+    # Parse subject into components
+    # Pattern: type(scope)!: description
+    readonly CC_REGEX='^([a-z]+)(\(([a-z0-9/_*-]+)\))?(!)?: (.+)$'
+    if echo "$SUBJECT_LINE" | grep -qP "$CC_REGEX"; then
+        readonly CC_TYPE="$(echo "$SUBJECT_LINE" | \
+            grep -oP '^[a-z]+' 2>/dev/null || true)"
+        readonly CC_SCOPE="$(echo "$SUBJECT_LINE" | \
+            grep -oP '(?<=\()[^)]+(?=\))' 2>/dev/null || true)"
+        readonly CC_BREAKING="$(echo "$SUBJECT_LINE" | \
+            grep -oP '!' 2>/dev/null | head -1 || true)"
+        readonly CC_DESC="$(echo "$SUBJECT_LINE" | \
+            grep -oP '(?<=: ).+$' 2>/dev/null || true)"
+    else
+        readonly CC_TYPE=""
+        readonly CC_SCOPE=""
+        readonly CC_BREAKING=""
+        readonly CC_DESC=""
+    fi
+
+    # Display parsed message
+    section "📋" "Commit Message Analysis" "$CYAN"
+
+    # Message preview box
+    printf "%s%s" "$BG_DARK" >&2
+    printf "  ┌%s┐\n" "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─')" >&2
+
+    local line_num=0
+    while IFS= read -r line; do
+        ((line_num++)) || true
+        local line_color="$WHITE"
+        local line_label=""
+
+        if [[ $line_num -eq 1 ]]; then
+            line_color="${GOLD}${B}"
+            line_label="${D}← subject"
+        elif [[ $line_num -eq 2 ]]; then
+            line_color="${D}"
+            line_label="${D}← blank"
+        elif [[ -n "$line" ]]; then
+            line_color="${LAVENDER}"
+        fi
+
+        printf "  │ %s%-*s%s %s%s%s │\n" \
+            "$line_color" \
+            $(( TERM_WIDTH - 8 - ${#line_label} )) \
+            "$line" \
+            "$R$BG_DARK" \
+            "${D}" "$line_label" "$R$BG_DARK" >&2
+
+        [[ $line_num -gt 10 ]] && {
+            printf "  │ %s... (truncated)%s%*s│\n" \
+                "${D}" "$R$BG_DARK" $(( TERM_WIDTH - 22 )) "" >&2
+            break
+        }
+    done <<< "$CLEAN_MESSAGE"
+
+    printf "  └%s┘\n" "$(printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─')" >&2
+    printf "%s\n" "$R" >&2
+
+    # Display parsed components
+    if [[ -n "$CC_TYPE" ]]; then
+        printf "  %s%-18s%s %s%s%s\n" \
+            "${CYAN}${B}" "Type:" "$R" "${PEACH}${B}" "${CC_TYPE}" "$R" >&2
+    fi
+    if [[ -n "$CC_SCOPE" ]]; then
+        printf "  %s%-18s%s %s%s%s\n" \
+            "${CYAN}${B}" "Scope:" "$R" "${MINT}${B}" "${CC_SCOPE}" "$R" >&2
+    fi
+    if [[ -n "$CC_BREAKING" ]]; then
+        printf "  %s%-18s%s %s%s%s\n" \
+            "${CYAN}${B}" "Breaking Change:" "$R" "${RED}${B}" "YES !" "$R" >&2
+    fi
+    if [[ -n "$CC_DESC" ]]; then
+        printf "  %s%-18s%s %s%s%s\n" \
+            "${CYAN}${B}" "Description:" "$R" "${WHITE}" "${CC_DESC}" "$R" >&2
+    fi
+    printf "\n" >&2
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  VALIDATION CHECKS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── CHECK: Not empty ─────────────────────────────────────────────────────────
+check_not_empty() {
+    if [[ -z "$CLEAN_MESSAGE" ]] || [[ -z "$SUBJECT_LINE" ]]; then
+        fail "Commit message cannot be empty" \
+             "Use: git commit -m 'type(scope): description'"
+        return
+    fi
+    pass "Commit message is not empty"
+}
+
+# ── CHECK: Not auto-merge or fixup ───────────────────────────────────────────
+check_special_commits() {
+    # Allow merge commits
+    if echo "$SUBJECT_LINE" | grep -qE "^Merge (branch|pull request|tag)"; then
+        pass "Auto-merge commit — skipping format checks"
+        # Set a flag to skip remaining checks
+        SKIP_FORMAT_CHECKS=true
+        return
+    fi
+
+    # Allow revert commits
+    if echo "$SUBJECT_LINE" | grep -qE "^Revert \""; then
+        pass "Revert commit — relaxed format checks"
+        SKIP_FORMAT_CHECKS=false
+        return
+    fi
+
+    # Allow squash/fixup prefixes (git squash)
+    if echo "$SUBJECT_LINE" | grep -qE "^(squash|fixup)! "; then
+        pass "Squash/fixup commit — skipping format checks"
+        SKIP_FORMAT_CHECKS=true
+        return
+    fi
+
+    SKIP_FORMAT_CHECKS=false
+}
+
+# ── CHECK: Conventional Commits format ────────────────────────────────────────
+check_conventional_format() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]]; then
+        return
+    fi
+
+    # Must match: type(scope)?: description
+    # OR: type(scope)!: description (breaking)
+    local pattern='^[a-z]+(\([a-z0-9/_*-]+\))?!?: .{1,}$'
+
+    if ! echo "$SUBJECT_LINE" | grep -qP "$pattern"; then
+        fail "Invalid Conventional Commits format" \
+             "Expected: type(scope): description"
+
+        printf "\n" >&2
+        printf "  %s%sFormat Reference:%s\n" "${CYAN}" "${B}" "$R" >&2
+        printf "  %s┌─────────────────────────────────────────────────────────┐%s\n" \
+            "$D" "$R" >&2
+        printf "  %s│%s  %s%-55s%s%s│%s\n" \
+            "$D" "$R" "${GOLD}${B}" \
+            "type(scope)!: subject" \
+            "$R" "$D" "$R" >&2
+        printf "  %s│%s  %s  │      │  │     │%s%*s%s│%s\n" \
+            "$D" "$R" "${D}${CREAM}" "$R" 37 "" "$D" "$R" >&2
+        printf "  %s│%s  %s  │      │  │     └─%s description%s\n" \
+            "$D" "$R" "${D}${CREAM}" "${LIME}" "$R" >&2
+        printf "  %s│%s  %s  │      │  └─────%s ! = breaking change (optional)%s\n" \
+            "$D" "$R" "${D}${CREAM}" "${CORAL}" "$R" >&2
+        printf "  %s│%s  %s  │      └────────%s (scope) = optional%s\n" \
+            "$D" "$R" "${D}${CREAM}" "${MINT}" "$R" >&2
+        printf "  %s│%s  %s  └───────────────%s type = required%s\n" \
+            "$D" "$R" "${D}${CREAM}" "${PEACH}" "$R" >&2
+        printf "  %s└─────────────────────────────────────────────────────────┘%s\n\n" \
+            "$D" "$R" >&2
+
+        # Show examples
+        printf "  %s%sExamples:%s\n" "${CYAN}" "${B}" "$R" >&2
+        local -a examples=(
+            "feat(theme): add catppuccin-mocha preset"
+            "fix(waybar): fix clock module not updating"
+            "feat(api)!: redesign REST API endpoints"
+            "docs(wiki): update installation guide"
+            "chore(deps): update fish to 3.7.0"
+            "theme(dark): add tokyo-night-storm variant"
+            "plugin(gaming): add mangohud integration"
+            "security: patch credential exposure in sync"
+        )
+        for ex in "${examples[@]}"; do
+            printf "  %s  %s•%s %s%s%s\n" \
+                "$D" "${LIME}" "$R" "${D}${WHITE}" "$ex" "$R" >&2
+        done
+        printf "\n" >&2
+        return
+    fi
+
+    pass "Conventional Commits format" "Format is correct"
+}
+
+# ── CHECK: Valid type ─────────────────────────────────────────────────────────
+check_valid_type() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]] || [[ -z "$CC_TYPE" ]]; then
+        return
+    fi
+
+    local is_valid=false
+    for valid_type in "${VALID_TYPES[@]}"; do
+        if [[ "$CC_TYPE" == "$valid_type" ]]; then
+            is_valid=true
+            break
+        fi
+    done
+
+    if [[ "$is_valid" == "true" ]]; then
+        pass "Valid commit type" "type: ${CC_TYPE}"
+    else
+        fail "Invalid commit type: '${CC_TYPE}'" \
+             "Must be one of: ${VALID_TYPES[*]}"
+
+        # Find closest match (suggestion)
+        local closest=""
+        local min_dist=99
+        for valid_type in "${VALID_TYPES[@]}"; do
+            # Simple: check if type starts with same chars
+            if [[ "${valid_type:0:3}" == "${CC_TYPE:0:3}" ]]; then
+                closest="$valid_type"
+                break
+            fi
+        done
+
+        if [[ -n "$closest" ]]; then
+            suggest "Did you mean '${closest}'?"
+        fi
+    fi
+
+    # Warn about WIP on protected branches
+    if [[ "$CC_TYPE" == "wip" ]]; then
+        local current_branch
+        current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+        if [[ "$current_branch" == "main" ]] || \
+           [[ "$current_branch" == "master" ]] || \
+           [[ "$current_branch" =~ ^release/ ]]; then
+            warn "WIP commit on protected branch '$current_branch'" \
+                 "WIP commits are not appropriate for this branch"
+        fi
+    fi
+}
+
+# ── CHECK: Valid scope ────────────────────────────────────────────────────────
+check_valid_scope() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]] || [[ -z "$CC_SCOPE" ]]; then
+        # Scope is optional — only warn if missing for certain types
+        if [[ -n "$CC_TYPE" ]] && [[ -z "$CC_SCOPE" ]]; then
+            local scoped_types=("feat" "fix" "perf" "theme" "plugin" \
+                                "config" "security" "hotfix")
+            for t in "${scoped_types[@]}"; do
+                if [[ "$CC_TYPE" == "$t" ]]; then
+                    warn "Missing scope for '${CC_TYPE}' commit" \
+                         "Consider: ${CC_TYPE}(component): description"
+                    break
+                fi
+            done
+        fi
+        return
+    fi
+
+    local is_valid=false
+    for valid_scope in "${VALID_SCOPES[@]}"; do
+        if [[ "$CC_SCOPE" == "$valid_scope" ]]; then
+            is_valid=true
+            break
+        fi
+    done
+
+    if [[ "$is_valid" == "true" ]]; then
+        pass "Valid scope" "scope: ${CC_SCOPE}"
+    else
+        warn "Non-standard scope: '${CC_SCOPE}'" \
+             "Consider using a recognized scope from the list"
+        suggest "Common scopes: ${VALID_SCOPES[*]:0:20}..."
+    fi
+}
+
+# ── CHECK: Subject length ─────────────────────────────────────────────────────
+check_subject_length() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]]; then
+        return
+    fi
+
+    local len="${#SUBJECT_LINE}"
+
+    if [[ $len -lt $MIN_SUBJECT_LENGTH ]]; then
+        fail "Subject too short (${len} chars)" \
+             "Minimum ${MIN_SUBJECT_LENGTH} chars — be more descriptive"
+        return
+    fi
+
+    if [[ $len -gt $MAX_SUBJECT_LENGTH ]]; then
+        fail "Subject too long (${len} chars)" \
+             "Maximum ${MAX_SUBJECT_LENGTH} chars — split into subject + body"
+        suggest "Move details to the commit body (after a blank line)"
+        return
+    fi
+
+    pass "Subject length OK" "${len}/${MAX_SUBJECT_LENGTH} chars"
+}
+
+# ── CHECK: Description quality ────────────────────────────────────────────────
+check_description_quality() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]] || [[ -z "$CC_DESC" ]]; then
+        return
+    fi
+
+    # Must not start with uppercase (after the colon)
+    if echo "$CC_DESC" | grep -qP '^[A-Z]'; then
+        warn "Description starts with uppercase" \
+             "Use lowercase: '$(echo "${CC_DESC:0:1}" | tr '[:upper:]' '[:lower:]')${CC_DESC:1}'"
+    else
+        pass "Description case" "starts with lowercase ✓"
+    fi
+
+    # Must not end with period
+    if echo "$CC_DESC" | grep -qP '\.$'; then
+        warn "Description ends with a period" \
+             "Remove the trailing period"
+    else
+        pass "Description punctuation" "no trailing period ✓"
+    fi
+
+    # Must not start with 'add', 'added', 'adding' (use imperative)
+    if echo "$CC_DESC" | grep -qiP '^(added|adding|fixed|fixing|updated|updating|removed|removing|changed|changing)'; then
+        warn "Use imperative mood in description" \
+             "Not: '${CC_DESC}' → Better: '$(echo "$CC_DESC" | \
+               sed 's/^added/add/i; s/^fixed/fix/i; s/^updated/update/i; \
+                    s/^removed/remove/i; s/^changed/change/i')'"
+    else
+        pass "Description imperative mood" "imperative ✓"
+    fi
+
+    # Check for meaningful content
+    local word_count
+    word_count="$(echo "$CC_DESC" | wc -w | tr -d ' ')"
+    if [[ $word_count -lt 3 ]]; then
+        warn "Description too vague (${word_count} words)" \
+             "Be more descriptive — explain what and why"
+    else
+        pass "Description detail" "${word_count} words ✓"
+    fi
+
+    # Check for prohibited terms
+    local -a vague_terms=(
+        "^fix$" "^update$" "^changes$" "^stuff$"
+        "^wip$" "^test$" "^temp$" "^misc$"
+        "^various" "^minor" "^cleanup$" "^tweaks$"
+    )
+    for term in "${vague_terms[@]}"; do
+        if echo "$CC_DESC" | grep -qiP "$term"; then
+            warn "Vague description: '${CC_DESC}'" \
+                 "Be specific about what was changed and why"
+            break
+        fi
+    done
+}
+
+# ── CHECK: Blank line between subject and body ─────────────────────────────────
+check_blank_line() {
+    local line_count
+    line_count="$(echo "$CLEAN_MESSAGE" | grep -c . || echo 0)"
+
+    if [[ $line_count -le 1 ]]; then
+        return  # No body
+    fi
+
+    local second_line
+    second_line="$(echo "$CLEAN_MESSAGE" | sed -n '2p')"
+
+    if [[ -n "$second_line" ]]; then
+        fail "Missing blank line between subject and body" \
+             "Git convention requires blank line after subject"
+        suggest "Add an empty line between subject and body"
+    else
+        pass "Blank line after subject" "blank line present ✓"
+    fi
+}
+
+# ── CHECK: Body line length ────────────────────────────────────────────────────
+check_body_line_length() {
+    if [[ -z "$BODY" ]]; then
+        return
+    fi
+
+    local long_lines=()
+    local line_num=2
+    while IFS= read -r line; do
+        ((line_num++)) || true
+        # URLs are allowed to be long
+        if echo "$line" | grep -qE 'https?://'; then
+            continue
+        fi
+        if [[ ${#line} -gt $MAX_BODY_LINE_LENGTH ]]; then
+            long_lines+=("Line ${line_num}: ${#line} chars")
+        fi
+    done <<< "$BODY"
+
+    if [[ ${#long_lines[@]} -gt 0 ]]; then
+        warn "Body lines exceed ${MAX_BODY_LINE_LENGTH} chars:" \
+             "${long_lines[*]}"
+    else
+        pass "Body line length" "all lines ≤ ${MAX_BODY_LINE_LENGTH} chars ✓"
+    fi
+}
+
+# ── CHECK: Breaking change declaration ───────────────────────────────────────
+check_breaking_change() {
+    # If ! is in subject, body should contain BREAKING CHANGE: description
+    if [[ -n "$CC_BREAKING" ]]; then
+        if ! echo "$CLEAN_MESSAGE" | grep -qP '^BREAKING CHANGE:'; then
+            warn "Breaking change marker (!) without BREAKING CHANGE footer" \
+                 "Add: BREAKING CHANGE: <description of breaking change>"
+            suggest "Example: BREAKING CHANGE: api endpoint /themes renamed to /theme"
+        else
+            local bc_desc
+            bc_desc="$(echo "$CLEAN_MESSAGE" | \
+                grep -oP '(?<=^BREAKING CHANGE: ).+' | head -1)"
+            pass "BREAKING CHANGE footer" "described: '${bc_desc:0:40}...'"
+        fi
+    fi
+
+    # Check for BREAKING CHANGE in body without ! in subject
+    if echo "$CLEAN_MESSAGE" | grep -qP '^BREAKING CHANGE:' && \
+       [[ -z "$CC_BREAKING" ]]; then
+        warn "BREAKING CHANGE footer without ! in subject" \
+             "Add ! after type: feat(api)!: ..."
+    fi
+}
+
+# ── CHECK: Footer format ──────────────────────────────────────────────────────
+check_footer_format() {
+    if [[ -z "$FOOTER" ]]; then
+        return
+    fi
+
+    # Valid footer tokens
+    local -a valid_tokens=(
+        "BREAKING CHANGE"
+        "Closes"
+        "Fixes"
+        "Refs"
+        "Co-authored-by"
+        "Signed-off-by"
+        "Reviewed-by"
+        "Acked-by"
+        "Tested-by"
+        "Reported-by"
+        "Suggested-by"
+    )
+
+    local invalid_footers=()
+    while IFS= read -r footer_line; do
+        [[ -z "$footer_line" ]] && continue
+
+        local is_valid_token=false
+        for token in "${valid_tokens[@]}"; do
+            if echo "$footer_line" | grep -qP "^${token}[: ]"; then
+                is_valid_token=true
+                break
+            fi
+        done
+
+        if [[ "$is_valid_token" == "false" ]]; then
+            invalid_footers+=("$footer_line")
+        fi
+    done <<< "$FOOTER"
+
+    if [[ ${#invalid_footers[@]} -gt 0 ]]; then
+        warn "Non-standard footer tokens:" \
+             "${invalid_footers[*]}"
+    else
+        pass "Footer format" "valid footer tokens ✓"
+    fi
+
+    # Check issue references format
+    if echo "$FOOTER" | grep -qP '(Closes|Fixes) #[0-9]+'; then
+        pass "Issue references" "valid format ✓"
+    fi
+}
+
+# ── CHECK: No sensitive info in message ───────────────────────────────────────
+check_no_sensitive_info() {
+    local sensitive_patterns=(
+        'password'
+        'passwd'
+        'secret'
+        'token.*=.*[a-zA-Z0-9]{20,}'
+        'api.key.*=.*[a-zA-Z0-9]{20,}'
+        'AKIA[0-9A-Z]{16}'
+        'ghp_[a-zA-Z0-9]{36}'
+        '-----BEGIN.*PRIVATE KEY'
+    )
+
+    local found=false
+    for pattern in "${sensitive_patterns[@]}"; do
+        if echo "$RAW_MESSAGE" | grep -qiP "$pattern" 2>/dev/null; then
+            found=true
+            break
+        fi
+    done
+
+    if [[ "$found" == "true" ]]; then
+        fail "Sensitive information in commit message" \
+             "Remove credentials/secrets from commit message"
+    else
+        pass "No sensitive info" "message is clean ✓"
+    fi
+}
+
+# ── CHECK: Issue/PR reference for certain types ───────────────────────────────
+check_issue_reference() {
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" == "true" ]]; then
+        return
+    fi
+
+    # For bug fixes, suggest issue reference
+    if [[ "$CC_TYPE" == "fix" ]]; then
+        if ! echo "$CLEAN_MESSAGE" | grep -qP '(Closes|Fixes|Refs) #[0-9]+'; then
+            warn "Bug fix without issue reference" \
+                 "Consider adding: Closes #<issue-number>"
+        else
+            pass "Issue reference" "issue referenced ✓"
+        fi
+    fi
+}
+
+# ── CHECK: Sign-off (optional) ────────────────────────────────────────────────
+check_signoff() {
+    # Only check if DCO is required (check .gitconfig)
+    local require_signoff
+    require_signoff="$(git config --get commit.requireSignoff 2>/dev/null || echo "false")"
+
+    if [[ "$require_signoff" != "true" ]]; then
+        return
+    fi
+
+    if ! echo "$CLEAN_MESSAGE" | grep -qP '^Signed-off-by: .+ <.+@.+>$'; then
+        warn "Missing Signed-off-by (DCO required)" \
+             "Use: git commit -s"
+    else
+        local signoff
+        signoff="$(echo "$CLEAN_MESSAGE" | \
+            grep -oP '(?<=^Signed-off-by: ).+' | head -1)"
+        pass "Signed-off-by" "$signoff"
+    fi
+}
+
+# ── CHECK: Commit message encoding ────────────────────────────────────────────
+check_encoding() {
+    # Check for null bytes or control characters
+    if echo "$SUBJECT_LINE" | grep -qP '[\x00-\x08\x0b-\x0c\x0e-\x1f]'; then
+        fail "Invalid characters in commit message" \
+             "Remove control characters"
+    else
+        pass "Message encoding" "valid UTF-8 ✓"
+    fi
+}
+
+# ── CHECK: Emoji usage ────────────────────────────────────────────────────────
+check_emoji_usage() {
+    # We support gitmoji — check for consistency
+    if echo "$SUBJECT_LINE" | grep -qP '^\p{So}'; then
+        warn "Emoji at start of subject" \
+             "ASH uses Conventional Commits, not gitmoji — consider removing"
+    fi
+}
+
+# ── CHECK: Co-author format ───────────────────────────────────────────────────
+check_coauthor_format() {
+    if ! echo "$CLEAN_MESSAGE" | grep -qP '^Co-authored-by:'; then
+        return
+    fi
+
+    # Validate format: Co-authored-by: Name <email>
+    while IFS= read -r line; do
+        if echo "$line" | grep -qP '^Co-authored-by:'; then
+            if ! echo "$line" | grep -qP '^Co-authored-by: .+ <[^@]+@[^>]+>$'; then
+                warn "Invalid Co-authored-by format" \
+                     "Expected: Co-authored-by: Name <email@example.com>"
+            else
+                pass "Co-author format" "valid ✓"
+            fi
+        fi
+    done <<< "$CLEAN_MESSAGE"
+}
+
+# ── SUMMARY ───────────────────────────────────────────────────────────────────
+print_summary() {
+    local total_elapsed; total_elapsed="$(format_ms "$(elapsed_ms)")"
+
+    printf "\n" >&2
+    hr "═" "$TERM_WIDTH" "$D"
+
+    printf "%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+    printf "  ╔" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╗  \n" >&2
+
+    # Status
+    local status_icon status_color status_text
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        status_icon="✗"
+        status_color="${RED}${B}"
+        status_text="COMMIT REJECTED — Fix errors above"
+    elif [[ $CHECKS_WARNED -gt 0 ]]; then
+        status_icon="⚠"
+        status_color="${YELLOW}${B}"
+        status_text="COMMIT ACCEPTED (with warnings)"
+    else
+        status_icon="✓"
+        status_color="${GREEN}${B}"
+        status_text="PERFECT COMMIT MESSAGE"
+    fi
+
+    printf "  ║  %s%s %s%s%*s  ║  \n" \
+        "${status_color}" \
+        "$status_icon" \
+        "$status_text" \
+        "$R$BG_MIDNIGHT$GOLD" \
+        $(( TERM_WIDTH - 4 - 4 - ${#status_text} )) "" >&2
+
+    printf "  ╠" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+    printf "╣  \n" >&2
+
+    # Metrics
+    printf "  ║  " >&2
+    printf "%s%-4s%s %s%-9s%s  " \
+        "${GREEN}${B}" "✓" "$R$BG_MIDNIGHT$GOLD" \
+        "${GREEN}" "${CHECKS_PASSED} passed" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf "%s%-4s%s %s%-9s%s  " \
+        "${RED}${B}" "✗" "$R$BG_MIDNIGHT$GOLD" \
+        "${RED}" "${CHECKS_FAILED} failed" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf "%s%-4s%s %s%-12s%s  " \
+        "${YELLOW}${B}" "⚠" "$R$BG_MIDNIGHT$GOLD" \
+        "${YELLOW}" "${CHECKS_WARNED} warnings" "$R$BG_MIDNIGHT$GOLD" >&2
+    printf "%s⏱ %s%s" \
+        "${D}" "$total_elapsed" "$R$BG_MIDNIGHT$GOLD" >&2
+    local m_len=$(( 4+9+4+9+4+12+10+10 ))
+    printf "%*s  ║  \n" $(( TERM_WIDTH - 4 - m_len - 4 )) "" >&2
+
+    # Error detail
+    if [[ ${#ERRORS[@]} -gt 0 ]]; then
+        printf "  ╠" >&2
+        printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+        printf "╣  \n" >&2
+        printf "  ║  %s%sErrors:%s\n" "${RED}${B}" "" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+        for err in "${ERRORS[@]}"; do
+            printf "  ║    %s• %s%s%*s  ║  \n" \
+                "${RED}" "$err" "$R$BG_MIDNIGHT$GOLD" \
+                $(( TERM_WIDTH - 4 - 6 - ${#err} )) "" >&2
+        done
+    fi
+
+    # Suggestions
+    if [[ ${#SUGGESTIONS[@]} -gt 0 ]]; then
+        printf "  ╠" >&2
+        printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+        printf "╣  \n" >&2
+        printf "  ║  %s%s💡 Suggestions:%s\n" \
+            "${CYAN}${B}" "" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+        for sug in "${SUGGESTIONS[@]}"; do
+            printf "  ║    %s• %s%s%*s  ║  \n" \
+                "${CYAN}${D}" "$sug" "$R$BG_MIDNIGHT$GOLD" \
+                $(( TERM_WIDTH - 4 - 6 - ${#sug} )) "" >&2
+        done
+    fi
+
+    printf "  ╠" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '─' >&2
+    printf "╣  \n" >&2
+
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        printf "  ║  %s  Amend: %sgit commit --amend%s%*s  ║  \n" \
+            "$D" "${CYAN}${B}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 35 )) "" >&2
+        printf "  ║  %s  Skip:  %sgit commit --no-verify%s%*s  ║  \n" \
+            "$D" "${YELLOW}${B}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 38 )) "" >&2
+        printf "  ║  %s  Help:  %shttps://www.conventionalcommits.org%s%*s  ║  \n" \
+            "$D" "${LAVENDER}${B}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 51 )) "" >&2
+    else
+        printf "  ║  %s  ✨ Great commit message! Proceeding...%s%*s  ║  \n" \
+            "${LIME}" "$R$BG_MIDNIGHT$GOLD" \
+            $(( TERM_WIDTH - 4 - 45 )) "" >&2
+    fi
+
+    printf "  ╚" >&2
+    printf '%*s' $(( TERM_WIDTH - 4 )) '' | tr ' ' '═' >&2
+    printf "╝  \n" >&2
+    printf "%s\n\n" "$R" >&2
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN EXECUTION
+# ══════════════════════════════════════════════════════════════════════════════
+main() {
+    # Skip in CI
+    if [[ "${CI:-}" == "true" ]] || [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        exit 0
+    fi
+
+    # Skip if ASH_SKIP_HOOKS is set
+    if [[ "${ASH_SKIP_HOOKS:-}" == "true" ]]; then
+        exit 0
+    fi
+
+    print_banner
+    read_commit_message
+
+    # ── STRUCTURAL CHECKS ────────────────────────────────────────────────────
+    section "🏗️" "Structural Validation" "$CYAN"
+    check_not_empty
+    check_special_commits
+
+    if [[ "${SKIP_FORMAT_CHECKS:-false}" != "true" ]]; then
+        check_conventional_format
+        check_subject_length
+    fi
+
+    # ── TYPE & SCOPE ─────────────────────────────────────────────────────────
+    section "🏷️" "Type & Scope Validation" "$PURPLE"
+    check_valid_type
+    check_valid_scope
+
+    # ── DESCRIPTION QUALITY ───────────────────────────────────────────────────
+    section "✍️" "Description Quality" "$MINT"
+    check_description_quality
+    check_emoji_usage
+    check_encoding
+
+    # ── BODY & FOOTER ─────────────────────────────────────────────────────────
+    section "📄" "Body & Footer Validation" "$LAVENDER"
+    check_blank_line
+    check_body_line_length
+    check_breaking_change
+    check_footer_format
+    check_coauthor_format
+
+    # ── REFERENCES & SECURITY ─────────────────────────────────────────────────
+    section "🔗" "References & Security" "$CORAL"
+    check_issue_reference
+    check_signoff
+    check_no_sensitive_info
+
+    # ── FINAL SUMMARY ─────────────────────────────────────────────────────────
+    print_summary
+
+    if [[ $CHECKS_FAILED -gt 0 ]]; then
+        exit 1
+    fi
+
+    exit 0
+}
+
+main "$@"
