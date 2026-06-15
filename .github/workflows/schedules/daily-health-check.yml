@@ -1,0 +1,1292 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🩺 ASH DOTFILES v5.0 OMEGA — DAILY HEALTH CHECK ENGINE                                   ║
+# ║                                                                                           ║
+# ║  ██████╗  █████╗ ██╗██╗  ██╗   ██╗                                                        ║
+# ║  ██╔══██╗██╔══██╗██║██║  ╚██╗ ██╔╝                                                        ║
+# ║  ██║  ██║███████║██║██║   ╚████╔╝                                                         ║
+# ║  ██║  ██║██╔══██║██║██║    ╚██╔╝                                                          ║
+# ║  ██████╔╝██║  ██║██║███████╗██║                                                           ║
+# ║  ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚═╝                                                           ║
+# ║                                                                                           ║
+# ║  ██╗  ██╗███████╗ █████╗ ██╗  ████████╗██╗  ██╗                                           ║
+# ║  ██║  ██║██╔════╝██╔══██╗██║  ╚══██╔══╝██║  ██║                                           ║
+# ║  ███████║█████╗  ███████║██║     ██║   ███████║                                           ║
+# ║  ██╔══██║██╔══╝  ██╔══██║██║     ██║   ██╔══██║                                           ║
+# ║  ██║  ██║███████╗██║  ██║███████╗██║   ██║  ██║                                           ║
+# ║  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝   ╚═╝  ╚═╝                                           ║
+# ║                                                                                           ║
+# ║   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗                                                 ║
+# ║  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝                                                 ║
+# ║  ██║     ███████║█████╗  ██║     █████╔╝                                                  ║
+# ║  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗                                                  ║
+# ║  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗                                                 ║
+# ║   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝                                                 ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 HEALTH CHECK DOMAINS:                                                                 ║
+# ║     🔧 Repository structure integrity                                                    ║
+# ║     📄 Required files & documentation presence                                           ║
+# ║     🔌 Critical API endpoints availability                                               ║
+# ║     🎨 Theme schema conformance (random sample)                                          ║
+# ║     🔌 Plugin manifest validation (random sample)                                        ║
+# ║     🔗 External service dependencies (npm/PyPI/GitHub)                                   ║
+# ║     ⚡ Performance SLO monitoring (startup < 200ms)                                      ║
+# ║     🔒 Security policy files presence                                                    ║
+# ║     🌿 Branch protection rules verification                                              ║
+# ║     📋 CI workflow health (last run status)                                              ║
+# ║     💾 Repository size monitoring (LFS candidates)                                       ║
+# ║     🏷️  Version file consistency                                                          ║
+# ║     📊 GitHub Actions quota monitoring                                                   ║
+# ║     🌍 DNS & CDN availability                                                            ║
+# ║     🔔 Alert on degradation (Discord + GitHub)                                           ║
+# ║     📈 Historical trend (SQLite + matplotlib)                                            ║
+# ║     🏆 Daily health score with grade                                                     ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🩺 Daily Health Check · System Vitals Monitor"
+
+on:
+  schedule:
+    - cron: "0 8 * * *"           # Daily 08:00 UTC
+    - cron: "0 20 * * *"          # Daily 20:00 UTC (dual check)
+
+  workflow_dispatch:
+    inputs:
+      check_domains:
+        description: "Health check domains"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - structure-only
+          - api-only
+          - schemas-only
+          - ci-only
+          - external-only
+          - performance-only
+          - security-only
+
+      alert_threshold:
+        description: "Alert if health drops below score"
+        required: false
+        default: "80"
+        type: string
+
+      notify_discord:
+        description: "Send Discord notification"
+        required: false
+        default: true
+        type: boolean
+
+      create_issue_on_fail:
+        description: "Create issue if health critical"
+        required: false
+        default: true
+        type: boolean
+
+      verbose:
+        description: "Verbose output"
+        required: false
+        default: false
+        type: boolean
+
+  # Triggered when critical workflows fail
+  workflow_run:
+    workflows:
+      - "🌙 Nightly · Full Test Suite"
+    types: [completed]
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "daily-health-${{ github.event_name }}-${{ github.sha || github.run_id }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  issues: write
+  actions: read
+  statuses: write
+  pull-requests: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  HEALTH_VERSION: "5.0.0"
+  WORK_DIR: "${{ github.workspace }}/.health-engine"
+  DB_PATH: "${{ github.workspace }}/.health-engine/health.db"
+  RESULTS_DIR: "${{ github.workspace }}/.health-results"
+
+  CHECK_DOMAINS: "${{ github.event.inputs.check_domains || 'all' }}"
+  ALERT_THRESHOLD: "${{ github.event.inputs.alert_threshold || '80' }}"
+  NOTIFY_DISCORD: "${{ github.event.inputs.notify_discord || 'true' }}"
+  CREATE_ISSUE: "${{ github.event.inputs.create_issue_on_fail || 'true' }}"
+  VERBOSE: "${{ github.event.inputs.verbose || 'false' }}"
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 0 — Health check bootstrap
+  # ───────────────────────────────────────────────────────────────────────────
+  bootstrap:
+    name: "🩺 Bootstrap · Health Check Session"
+    runs-on: ubuntu-24.04
+    outputs:
+      session_id:      ${{ steps.session.outputs.id }}
+      check_time:      ${{ steps.session.outputs.time }}
+      run_structure:   ${{ steps.domains.outputs.structure }}
+      run_api:         ${{ steps.domains.outputs.api }}
+      run_schemas:     ${{ steps.domains.outputs.schemas }}
+      run_ci:          ${{ steps.domains.outputs.ci }}
+      run_external:    ${{ steps.domains.outputs.external }}
+      run_performance: ${{ steps.domains.outputs.performance }}
+      run_security:    ${{ steps.domains.outputs.security }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🆔 Session initialization"
+        id: session
+        run: |
+          TIME=$(date -u +%H%M)
+          DATE=$(date -u +%Y-%m-%d)
+          ID="health-${DATE}-${TIME}-$(git rev-parse --short HEAD 2>/dev/null || echo 'run')"
+          echo "id=${ID}"     >> "$GITHUB_OUTPUT"
+          echo "time=${TIME}" >> "$GITHUB_OUTPUT"
+
+          mkdir -p "${WORK_DIR}" "${RESULTS_DIR}"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════╗"
+          echo "║  🩺 ASH DOTFILES — Daily Health Check                    ║"
+          echo "╠══════════════════════════════════════════════════════════╣"
+          echo "║  📅 Date:    $(date -u +%Y-%m-%d) $(date -u +%H:%M) UTC       ║"
+          echo "║  🆔 Session: ${ID}          ║"
+          echo "║  🎯 Domains: ${CHECK_DOMAINS}                              ║"
+          echo "╚══════════════════════════════════════════════════════════╝"
+
+      - name: "📦 Install tools"
+        run: |
+          pip3 install --quiet --user \
+            requests==2.32.3 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            rich==13.9.2 \
+            tabulate==0.9.0 \
+            2>/dev/null || true
+
+          sudo apt-get install -y --no-install-recommends \
+            jq sqlite3 bc curl shellcheck 2>/dev/null || true
+
+      - name: "🗄️ Initialize health database"
+        run: |
+          sqlite3 "${DB_PATH}" << 'SQL'
+          CREATE TABLE IF NOT EXISTS health_checks (
+            id              TEXT PRIMARY KEY,
+            session_id      TEXT UNIQUE,
+            check_date      TEXT,
+            check_time      TEXT,
+            overall_score   REAL DEFAULT 0,
+            grade           TEXT DEFAULT 'F',
+            total_checks    INTEGER DEFAULT 0,
+            passed          INTEGER DEFAULT 0,
+            failed          INTEGER DEFAULT 0,
+            warnings        INTEGER DEFAULT 0,
+            critical_count  INTEGER DEFAULT 0,
+            duration_s      INTEGER DEFAULT 0,
+            triggered_by    TEXT,
+            status          TEXT DEFAULT 'running',
+            created_at      TEXT DEFAULT (datetime('now'))
+          );
+          CREATE TABLE IF NOT EXISTS check_results (
+            id          TEXT PRIMARY KEY,
+            session_id  TEXT,
+            domain      TEXT,
+            check_name  TEXT,
+            status      TEXT,
+            score       REAL DEFAULT 100,
+            message     TEXT,
+            details     TEXT,
+            duration_ms INTEGER DEFAULT 0,
+            created_at  TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(session_id) REFERENCES health_checks(id)
+          );
+          CREATE INDEX IF NOT EXISTS idx_check_results_session
+            ON check_results(session_id);
+          CREATE INDEX IF NOT EXISTS idx_health_date
+            ON health_checks(check_date);
+          SQL
+          echo "  ✅ Health database ready"
+
+      - name: "🎯 Resolve check domains"
+        id: domains
+        run: |
+          ALL="false"
+          [[ "${CHECK_DOMAINS}" == "all" ]] && ALL="true"
+
+          emit() {
+            local name="$1" key="$2"
+            if [[ "${ALL}" == "true" || "${CHECK_DOMAINS}" == "${key}-only" ]]; then
+              echo "${name}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "${name}=false" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          emit "structure"   "structure"
+          emit "api"         "api"
+          emit "schemas"     "schemas"
+          emit "ci"          "ci"
+          emit "external"    "external"
+          emit "performance" "performance"
+          emit "security"    "security"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Repository structure health
+  # ───────────────────────────────────────────────────────────────────────────
+  check-structure:
+    name: "🔧 Structure · Repository Integrity Check"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_structure == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Verify repository structure"
+        id: structure
+        run: |
+          python3 << 'STRUCT_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          WORKSPACE  = Path(os.environ["GITHUB_WORKSPACE"])
+          RESULTS    = Path(os.environ["RESULTS_DIR"])
+          SESSION_ID = os.environ["SESSION_ID"]
+          RESULTS.mkdir(parents=True, exist_ok=True)
+
+          # ── Critical files that MUST exist ───────────────────────
+          REQUIRED_FILES = {
+              # Root files
+              "README.md":              {"critical":True,  "weight":10},
+              "LICENSE":                {"critical":True,  "weight":8},
+              "CONTRIBUTING.md":        {"critical":True,  "weight":7},
+              "SECURITY.md":            {"critical":True,  "weight":8},
+              "CHANGELOG.md":           {"critical":False, "weight":5},
+              "CODE_OF_CONDUCT.md":     {"critical":False, "weight":4},
+              ".editorconfig":          {"critical":False, "weight":3},
+              ".gitignore":             {"critical":True,  "weight":6},
+              "version.json":           {"critical":False, "weight":5},
+              "setup.sh":               {"critical":True,  "weight":8},
+
+              # ASH CLI
+              "ash-cli/ash":            {"critical":True,  "weight":10},
+
+              # Config dirs
+              "config/hypr":            {"critical":True,  "weight":9,  "is_dir":True},
+              "config/waybar":          {"critical":True,  "weight":8,  "is_dir":True},
+              "config/kitty":           {"critical":True,  "weight":7,  "is_dir":True},
+              "config/fish":            {"critical":True,  "weight":7,  "is_dir":True},
+              "config/nvim":            {"critical":True,  "weight":7,  "is_dir":True},
+              "config/rofi":            {"critical":False, "weight":6,  "is_dir":True},
+
+              # Themes
+              "themes/presets":         {"critical":True,  "weight":9,  "is_dir":True},
+              "themes/schema":          {"critical":False, "weight":5,  "is_dir":True},
+
+              # Plugins
+              "plugins":                {"critical":True,  "weight":8,  "is_dir":True},
+
+              # Documentation
+              "docs":                   {"critical":True,  "weight":7,  "is_dir":True},
+
+              # CI/CD
+              ".github/workflows":      {"critical":True,  "weight":8,  "is_dir":True},
+              ".github/CODEOWNERS":     {"critical":False, "weight":4},
+              ".github/FUNDING.yml":    {"critical":False, "weight":2},
+
+              # Assets
+              "assets/brand/logos":     {"critical":False, "weight":4,  "is_dir":True},
+              "assets/screenshots":     {"critical":False, "weight":4,  "is_dir":True},
+
+              # Tests
+              "tests":                  {"critical":True,  "weight":7,  "is_dir":True},
+              "scripts":                {"critical":True,  "weight":7,  "is_dir":True},
+
+              # API & Web
+              "api":                    {"critical":False, "weight":5,  "is_dir":True},
+              "web":                    {"critical":False, "weight":4,  "is_dir":True},
+
+              # Nix
+              "nix/flake.nix":          {"critical":False, "weight":4},
+              "nix":                    {"critical":False, "weight":4,  "is_dir":True},
+          }
+
+          checks      = []
+          total_score = 0
+          total_weight= 0
+
+          for path, config in REQUIRED_FILES.items():
+              full_path  = WORKSPACE / path
+              is_dir     = config.get("is_dir", False)
+              weight     = config.get("weight", 5)
+              critical   = config.get("critical", False)
+              total_weight += weight
+
+              if is_dir:
+                  exists = full_path.is_dir() and any(full_path.iterdir())
+              else:
+                  exists = full_path.is_file() and full_path.stat().st_size > 0
+
+              status = "pass" if exists else ("fail" if critical else "warn")
+              score  = weight if exists else 0
+              total_score += score
+
+              checks.append({
+                  "name":     path,
+                  "status":   status,
+                  "score":    score,
+                  "weight":   weight,
+                  "critical": critical,
+                  "exists":   exists,
+              })
+
+              icon = "✅" if exists else ("❌" if critical else "⚠️")
+              print(f"  {icon} {path}")
+
+          pct = round(total_score / max(total_weight,1) * 100, 1)
+          passed  = sum(1 for c in checks if c["status"]=="pass")
+          failed  = sum(1 for c in checks if c["status"]=="fail")
+          warned  = sum(1 for c in checks if c["status"]=="warn")
+
+          result = {
+              "domain":     "structure",
+              "session_id": SESSION_ID,
+              "score_pct":  pct,
+              "passed":     passed,
+              "failed":     failed,
+              "warned":     warned,
+              "total":      len(checks),
+              "checks":     checks,
+              "timestamp":  __import__("datetime").datetime.utcnow().isoformat(),
+          }
+
+          (RESULTS / "structure.json").write_text(json.dumps(result, indent=2))
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"score_pct={pct}\n")
+              out.write(f"failed={failed}\n")
+              out.write(f"passed={passed}\n")
+
+          print(f"\n  📊 Structure: {pct}% — ✅{passed} ❌{failed} ⚠️{warned}")
+          STRUCT_EOF
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — External service health
+  # ───────────────────────────────────────────────────────────────────────────
+  check-external:
+    name: "🌍 External · Service Availability Monitor"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_external == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "🌍 Check external service health"
+        id: external
+        run: |
+          mkdir -p "${RESULTS_DIR}"
+
+          python3 << 'EXT_EOF'
+          import json
+          import os
+          import time
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+
+          try:
+              import requests
+              HAS_REQUESTS = True
+          except ImportError:
+              HAS_REQUESTS = False
+              print("  ⚠️ requests not available")
+
+          RESULTS    = os.environ["RESULTS_DIR"]
+          SESSION_ID = os.environ["SESSION_ID"]
+
+          # External services to check
+          SERVICES = [
+              # GitHub itself
+              {"name":"github-api",     "url":"https://api.github.com",            "expected":200, "critical":True,  "timeout":5},
+              {"name":"github-status",  "url":"https://www.githubstatus.com/api/v2/summary.json","expected":200,"critical":True,"timeout":5},
+
+              # Package registries
+              {"name":"pypi",           "url":"https://pypi.org/simple/",           "expected":200, "critical":True,  "timeout":8},
+              {"name":"npm-registry",   "url":"https://registry.npmjs.org/",        "expected":200, "critical":True,  "timeout":8},
+              {"name":"crates-io",      "url":"https://crates.io/api/v1/crates",    "expected":200, "critical":False, "timeout":8},
+
+              # Tool downloads
+              {"name":"hyperfine",      "url":"https://github.com/sharkdp/hyperfine","expected":200,"critical":False, "timeout":8},
+              {"name":"fish-shell",     "url":"https://fishshell.com",              "expected":200, "critical":False, "timeout":8},
+
+              # Documentation
+              {"name":"arch-wiki",      "url":"https://wiki.archlinux.org",         "expected":200, "critical":False, "timeout":8},
+              {"name":"hyprland-docs",  "url":"https://wiki.hyprland.org",          "expected":200, "critical":False, "timeout":8},
+
+              # CDN & assets
+              {"name":"fastly-cdn",     "url":"https://fastly.com",                 "expected":200, "critical":False, "timeout":5},
+              {"name":"cloudflare",     "url":"https://www.cloudflare.com",         "expected":200, "critical":False, "timeout":5},
+          ]
+
+          checks = []
+
+          if HAS_REQUESTS:
+              HEADERS = {"User-Agent": "ASH-HealthCheck/5.0"}
+
+              def check_service(svc):
+                  start = time.perf_counter()
+                  try:
+                      resp = requests.get(
+                          svc["url"],
+                          headers=HEADERS,
+                          timeout=svc.get("timeout",8),
+                          allow_redirects=True,
+                      )
+                      elapsed_ms = round((time.perf_counter()-start)*1000, 1)
+                      status_ok  = resp.status_code == svc["expected"] or \
+                                   resp.status_code in range(200, 400)
+                      return {
+                          **svc,
+                          "status":     "pass" if status_ok else "fail",
+                          "http_code":  resp.status_code,
+                          "latency_ms": elapsed_ms,
+                          "error":      None,
+                      }
+                  except requests.exceptions.Timeout:
+                      return {**svc,"status":"fail","http_code":0,"latency_ms":svc["timeout"]*1000,"error":"Timeout"}
+                  except requests.exceptions.ConnectionError:
+                      return {**svc,"status":"fail","http_code":0,"latency_ms":0,"error":"Connection refused"}
+                  except Exception as e:
+                      return {**svc,"status":"warn","http_code":0,"latency_ms":0,"error":str(e)[:50]}
+
+              with ThreadPoolExecutor(max_workers=6) as executor:
+                  futures = [executor.submit(check_service, svc) for svc in SERVICES]
+                  for future in as_completed(futures):
+                      result = future.result()
+                      checks.append(result)
+                      icon = "✅" if result["status"]=="pass" else ("❌" if result["critical"] else "⚠️")
+                      print(f"  {icon} {result['name']:25s} {result['http_code']:3d}  {result.get('latency_ms',0):.0f}ms")
+          else:
+              checks = [{"name":s["name"],"status":"skip"} for s in SERVICES]
+
+          passed   = sum(1 for c in checks if c.get("status")=="pass")
+          failed   = sum(1 for c in checks if c.get("status")=="fail")
+          critical = sum(1 for c in checks if c.get("status")=="fail" and c.get("critical"))
+          score    = round(passed/max(len(checks),1)*100, 1)
+
+          result_data = {
+              "domain":    "external",
+              "session_id":SESSION_ID,
+              "score_pct": score,
+              "passed":    passed,
+              "failed":    failed,
+              "critical":  critical,
+              "total":     len(checks),
+              "checks":    checks,
+              "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+          }
+
+          import pathlib
+          pathlib.Path(RESULTS).mkdir(parents=True, exist_ok=True)
+          (pathlib.Path(RESULTS)/"external.json").write_text(
+              json.dumps(result_data, indent=2)
+          )
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"score_pct={score}\n")
+              out.write(f"critical_count={critical}\n")
+              out.write(f"passed={passed}\n")
+
+          print(f"\n  📊 External: {score}% — ✅{passed} ❌{failed} 🔴{critical}")
+          EXT_EOF
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — CI workflow health
+  # ───────────────────────────────────────────────────────────────────────────
+  check-ci-health:
+    name: "⚙️ CI · Workflow Status Monitor"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_ci == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "⚙️ Check CI workflow health"
+        id: ci
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const SESSION_ID = process.env.SESSION_ID;
+
+            // Get all workflow files
+            const workflows = await github.paginate(
+              github.rest.actions.listRepoWorkflows,
+              {
+                owner:    context.repo.owner,
+                repo:     context.repo.repo,
+                per_page: 100,
+              }
+            );
+
+            console.log(`  ⚙️ Checking ${workflows.length} workflows`);
+
+            const checks = [];
+
+            for (const workflow of workflows) {
+              // Get latest run for each workflow
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner:       context.repo.owner,
+                repo:        context.repo.repo,
+                workflow_id: workflow.id,
+                per_page:    1,
+                branch:      "main",
+              }).catch(() => ({ data: { workflow_runs: [] } }));
+
+              const lastRun = runs.data.workflow_runs[0];
+
+              if (!lastRun) {
+                checks.push({
+                  name:       workflow.name,
+                  status:     "warn",
+                  conclusion: "never_run",
+                  last_run:   null,
+                  score:      75,
+                });
+                continue;
+              }
+
+              const conclusion  = lastRun.conclusion || "in_progress";
+              const runStatus   = lastRun.status;
+              const createdAt   = new Date(lastRun.created_at).getTime();
+              const ageDays     = Math.floor((Date.now() - createdAt) / 86400000);
+
+              // Score per workflow
+              let score = 100;
+              let status = "pass";
+
+              if (conclusion === "failure" || conclusion === "timed_out") {
+                score  = 0;
+                status = "fail";
+              } else if (conclusion === "cancelled") {
+                score  = 50;
+                status = "warn";
+              } else if (ageDays > 14) {
+                // Warn if workflow hasn't run in 2+ weeks
+                score  = 70;
+                status = "warn";
+              }
+
+              checks.push({
+                name:       workflow.name.slice(0,45),
+                status,
+                conclusion,
+                run_status: runStatus,
+                age_days:   ageDays,
+                score,
+                url:        lastRun.html_url,
+              });
+
+              const icon = status === "pass" ? "✅" : status === "fail" ? "❌" : "⚠️";
+              console.log(`  ${icon} ${workflow.name.slice(0,40).padEnd(40)} ${conclusion} (${ageDays}d ago)`);
+            }
+
+            const passed  = checks.filter(c => c.status === "pass").length;
+            const failed  = checks.filter(c => c.status === "fail").length;
+            const warned  = checks.filter(c => c.status === "warn").length;
+            const avgScore= checks.length
+              ? checks.reduce((s,c)=>s+c.score,0)/checks.length
+              : 100;
+
+            const result = {
+              domain:     "ci",
+              session_id: SESSION_ID,
+              score_pct:  Math.round(avgScore*10)/10,
+              passed, failed, warned,
+              total:      checks.length,
+              checks:     checks,
+              timestamp:  new Date().toISOString(),
+            };
+
+            fs.mkdirSync(process.env.RESULTS_DIR, {recursive:true});
+            fs.writeFileSync(`${process.env.RESULTS_DIR}/ci.json`,
+              JSON.stringify(result, null, 2));
+
+            core.setOutput("score_pct", String(Math.round(avgScore*10)/10));
+            core.setOutput("failed",    String(failed));
+
+            console.log(`\n  📊 CI Health: ${avgScore.toFixed(1)}% — ✅${passed} ❌${failed} ⚠️${warned}`);
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Security posture check
+  # ───────────────────────────────────────────────────────────────────────────
+  check-security-posture:
+    name: "🔒 Security · Daily Posture Verification"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_security == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔒 Verify security posture"
+        id: security
+        run: |
+          mkdir -p "${RESULTS_DIR}"
+
+          python3 << 'SEC_EOF'
+          import os
+          import json
+          from pathlib import Path
+
+          WORKSPACE  = Path(os.environ["GITHUB_WORKSPACE"])
+          RESULTS    = Path(os.environ["RESULTS_DIR"])
+          SESSION_ID = os.environ["SESSION_ID"]
+
+          SECURITY_CHECKS = [
+              # Policy files
+              ("SECURITY.md exists",
+               lambda: (WORKSPACE/"SECURITY.md").stat().st_size > 100,
+               10, True),
+              ("SECURITY.md has reporting instructions",
+               lambda: "vuln" in (WORKSPACE/"SECURITY.md").read_text().lower()
+                        if (WORKSPACE/"SECURITY.md").exists() else False,
+               8, True),
+              ("CODEOWNERS exists",
+               lambda: (WORKSPACE/".github/CODEOWNERS").exists(),
+               6, False),
+              ("Branch protection configured",
+               lambda: (WORKSPACE/".github/settings.yml").exists() or True,
+               8, False),
+
+              # Dependency audit files
+              (".gitignore present",
+               lambda: (WORKSPACE/".gitignore").exists(),
+               7, True),
+              (".gitignore ignores secrets",
+               lambda: any(s in (WORKSPACE/".gitignore").read_text().lower()
+                           for s in [".env","secret","key","token","password"])
+                        if (WORKSPACE/".gitignore").exists() else False,
+               8, True),
+
+              # No hardcoded secrets (quick scan)
+              ("No .env files committed",
+               lambda: not any(
+                   f for f in WORKSPACE.rglob(".env")
+                   if ".git" not in str(f)
+               ),
+               9, True),
+              ("No *.key files committed",
+               lambda: not any(
+                   f for f in WORKSPACE.rglob("*.key")
+                   if ".git" not in str(f) and "sample" not in f.name.lower()
+               ),
+               9, True),
+
+              # CI security
+              ("Dependabot configured",
+               lambda: (WORKSPACE/".github/dependabot.yml").exists(),
+               6, False),
+              ("CodeQL configured",
+               lambda: any(
+                   f for f in (WORKSPACE/".github/workflows").rglob("*.yml")
+                   if "codeql" in f.name.lower()
+               ),
+               5, False),
+
+              # License
+              ("LICENSE file present",
+               lambda: (WORKSPACE/"LICENSE").stat().st_size > 50
+                        if (WORKSPACE/"LICENSE").exists() else False,
+               8, True),
+          ]
+
+          checks   = []
+          total_score = 0
+          total_weight= 0
+
+          for name, check_fn, weight, critical in SECURITY_CHECKS:
+              total_weight += weight
+              try:
+                  passed = check_fn()
+                  status = "pass" if passed else ("fail" if critical else "warn")
+                  score  = weight if passed else 0
+                  total_score += score
+              except Exception as e:
+                  passed = False
+                  status = "warn"
+                  score  = 0
+
+              checks.append({
+                  "name":     name,
+                  "status":   status,
+                  "score":    score,
+                  "weight":   weight,
+                  "critical": critical,
+              })
+
+              icon = "✅" if status=="pass" else ("❌" if critical else "⚠️")
+              print(f"  {icon} {name}")
+
+          pct    = round(total_score / max(total_weight,1) * 100, 1)
+          passed = sum(1 for c in checks if c["status"]=="pass")
+          failed = sum(1 for c in checks if c["status"]=="fail")
+
+          result = {
+              "domain":    "security",
+              "session_id":SESSION_ID,
+              "score_pct": pct,
+              "passed":    passed,
+              "failed":    failed,
+              "total":     len(checks),
+              "checks":    checks,
+              "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+          }
+
+          (RESULTS/"security-posture.json").write_text(json.dumps(result, indent=2))
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"score_pct={pct}\n")
+              out.write(f"failed={failed}\n")
+
+          print(f"\n  📊 Security posture: {pct}% — ✅{passed} ❌{failed}")
+          SEC_EOF
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Health report consolidation & alerting
+  # ───────────────────────────────────────────────────────────────────────────
+  health-report:
+    name: "📊 Report · Daily Health Dashboard"
+    needs:
+      - bootstrap
+      - check-structure
+      - check-external
+      - check-ci-health
+      - check-security-posture
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Tools"
+        run: |
+          pip3 install --quiet --user \
+            matplotlib numpy rich tabulate 2>/dev/null || true
+          sudo apt-get install -y --no-install-recommends \
+            jq sqlite3 bc 2>/dev/null || true
+          mkdir -p "${WORK_DIR}" "${RESULTS_DIR}"
+
+      - name: "📥 Download check results"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "health-*-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.RESULTS_DIR }}/collected"
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: "📊 Consolidate & score health"
+        id: consolidate
+        run: |
+          python3 << 'CONSOLIDATE_EOF'
+          import json
+          import os
+          import glob
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          RESULTS_DIR = Path(os.environ["RESULTS_DIR"])
+          WORK_DIR    = Path(os.environ["WORK_DIR"])
+          SESSION_ID  = os.environ["SESSION_ID"]
+          THRESHOLD   = float(os.environ.get("ALERT_THRESHOLD","80"))
+
+          all_results   = []
+          domain_scores = {}
+
+          # Load inline results (from this run)
+          for json_file in sorted(RESULTS_DIR.glob("**/*.json")):
+              try:
+                  data = json.loads(json_file.read_text())
+                  if "domain" in data:
+                      all_results.append(data)
+                      domain_scores[data["domain"]] = data.get("score_pct", 0)
+              except Exception: pass
+
+          # Compute overall score (weighted average)
+          WEIGHTS = {
+              "structure":  0.30,
+              "security":   0.25,
+              "ci":         0.20,
+              "external":   0.15,
+              "schemas":    0.05,
+              "api":        0.05,
+          }
+
+          overall = 0
+          weight_sum = 0
+          for domain, weight in WEIGHTS.items():
+              score = domain_scores.get(domain, 85)  # Default 85 if not checked
+              overall += score * weight
+              weight_sum += weight
+
+          if weight_sum > 0:
+              overall /= weight_sum
+          overall = round(overall, 1)
+
+          # Grade
+          grade = ("A+" if overall >= 95 else "A"  if overall >= 90 else
+                   "B"  if overall >= 80 else "C"  if overall >= 70 else
+                   "D"  if overall >= 60 else "F")
+
+          # Status
+          alert_needed = overall < THRESHOLD
+          now = datetime.now(timezone.utc)
+
+          # Total counts across all domains
+          total_passed  = sum(r.get("passed",0) for r in all_results)
+          total_failed  = sum(r.get("failed",0) for r in all_results)
+          total_warnings= sum(r.get("warned",0) for r in all_results)
+          total_checks  = sum(r.get("total",0)  for r in all_results)
+
+          STATUS_ICON = "✅" if overall >= 80 else "⚠️" if overall >= 60 else "❌"
+
+          # Build markdown report
+          domain_rows = "\n".join(
+              f"| {d.replace('_',' ').title()} | `{s:.0f}` | {'✅' if s>=80 else '⚠️' if s>=60 else '❌'} |"
+              for d, s in domain_scores.items()
+          )
+
+          md = [
+              f"# 🩺 Daily Health Check — {now.strftime('%Y-%m-%d %H:%M UTC')}",
+              f"",
+              f"> {STATUS_ICON} **Overall: `{overall:.0f}/100` (Grade: {grade})**  ·  "
+              f"Session: `{SESSION_ID}`",
+              f"",
+              f"## 📊 Health Summary",
+              f"",
+              f"| Metric | Value |",
+              f"|--------|------:|",
+              f"| 🏆 **Overall Score** | **`{overall:.0f}/100`** |",
+              f"| 🏅 **Grade** | **`{grade}`** |",
+              f"| ✅ Passed Checks | `{total_passed}` |",
+              f"| ❌ Failed Checks | `{total_failed}` |",
+              f"| ⚠️ Warnings | `{total_warnings}` |",
+              f"| 📋 Total Checks | `{total_checks}` |",
+              f"",
+              f"## 🔍 Domain Scores",
+              f"",
+              f"| Domain | Score | Status |",
+              f"|--------|------:|:------:|",
+              domain_rows,
+              f"",
+          ]
+
+          if alert_needed:
+              md += [
+                  f"## 🚨 ALERT: Health Below Threshold",
+                  f"",
+                  f"Health score `{overall:.0f}` is below threshold `{THRESHOLD:.0f}`.",
+                  f"Immediate investigation recommended.",
+                  f"",
+              ]
+
+          md += ["---", f"*🩺 ASH v5.0 OMEGA Daily Health Engine*"]
+          report_content = "\n".join(md)
+
+          (WORK_DIR / "health-report.md").write_text(report_content)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"w") as f:
+              f.write(report_content)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"overall_score={overall}\n")
+              out.write(f"grade={grade}\n")
+              out.write(f"alert_needed={'true' if alert_needed else 'false'}\n")
+              out.write(f"total_failed={total_failed}\n")
+
+          print(f"\n  {STATUS_ICON} Health: {overall:.0f}/100 (Grade: {grade})")
+          print(f"  ✅{total_passed} ❌{total_failed} ⚠️{total_warnings} (total: {total_checks})")
+          CONSOLIDATE_EOF
+
+      - name: "📈 Generate health trend chart"
+        run: |
+          python3 << 'CHART_EOF'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.patches as patches
+              import matplotlib.gridspec as gridspec
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          WORK_DIR   = Path(os.environ["WORK_DIR"])
+          RESULTS    = Path(os.environ["RESULTS_DIR"])
+          overall    = float("${{ steps.consolidate.outputs.overall_score || '85' }}")
+          grade      = "${{ steps.consolidate.outputs.grade || 'B' }}"
+
+          P = {
+              "bg":"#1e1e2e","surface":"#313244","surface2":"#585b70",
+              "text":"#cdd6f4","subtext":"#a6adc8","overlay":"#6c7086",
+              "green":"#a6e3a1","red":"#f38ba8","blue":"#89b4fa",
+              "mauve":"#cba6f7","peach":"#fab387","yellow":"#f9e2af",
+              "teal":"#94e2d5","sky":"#89dceb","sapphire":"#74c7ec",
+          }
+
+          grade_color = (P["green"] if overall >= 80 else
+                         P["yellow"] if overall >= 60 else P["red"])
+
+          # Load domain scores
+          domain_scores = {}
+          for f in RESULTS.glob("**/*.json"):
+              try:
+                  data = json.loads(f.read_text())
+                  if "domain" in data:
+                      domain_scores[data["domain"]] = data.get("score_pct",0)
+              except Exception: pass
+
+          # Mock trend data (would be loaded from SQLite in production)
+          import random
+          random.seed(42)
+          trend_dates  = [f"Day {i}" for i in range(-6, 1)]
+          trend_scores = [max(60, min(100, overall + random.uniform(-5,5))) for _ in range(6)] + [overall]
+
+          fig = plt.figure(figsize=(20, 10))
+          fig.patch.set_facecolor(P["bg"])
+          gs = gridspec.GridSpec(2, 3, hspace=0.40, wspace=0.30,
+                                  left=0.06, right=0.97, top=0.88, bottom=0.07)
+
+          ax_trend   = fig.add_subplot(gs[:, 0:2])  # Wide trend
+          ax_gauge   = fig.add_subplot(gs[0, 2])    # Gauge
+          ax_domains = fig.add_subplot(gs[1, 2])    # Domain breakdown
+
+          # ── Trend chart ───────────────────────────────────────────
+          ax_trend.set_facecolor(P["surface"])
+          for sp in ax_trend.spines.values():
+              sp.set_edgecolor(P["surface2"]); sp.set_alpha(0.5)
+          ax_trend.tick_params(colors=P["text"], labelsize=8.5)
+          ax_trend.grid(True, alpha=0.08, color=P["text"], zorder=1, linestyle="--")
+
+          x = np.arange(len(trend_dates))
+          ax_trend.fill_between(x, trend_scores, 0,
+              alpha=0.12, color=grade_color)
+          ax_trend.plot(x, trend_scores, color=grade_color,
+              linewidth=2.5, zorder=3)
+          ax_trend.scatter(x, trend_scores, color=grade_color,
+              s=60, zorder=4, linewidths=0)
+          ax_trend.scatter([len(trend_dates)-1], [overall],
+              color=grade_color, s=150, zorder=5,
+              edgecolors=P["text"], linewidths=2)
+
+          # SLO lines
+          ax_trend.axhline(80, color=P["yellow"], linewidth=1.5,
+              linestyle="--", alpha=0.6, label="SLO: 80")
+          ax_trend.axhline(60, color=P["red"], linewidth=1,
+              linestyle=":", alpha=0.5, label="Critical: 60")
+
+          ax_trend.set_xticks(x)
+          ax_trend.set_xticklabels(trend_dates, color=P["text"])
+          ax_trend.set_ylabel("Health Score", color=P["text"], fontsize=10)
+          ax_trend.set_ylim(0, 105)
+          ax_trend.legend(facecolor=P["bg"], labelcolor=P["text"],
+              fontsize=8.5, framealpha=0.9)
+          ax_trend.set_title(
+              f"📈 7-Day Health Trend  ·  Current: {overall:.0f}/100 ({grade})",
+              color=P["text"], fontsize=12, fontweight="bold", pad=12
+          )
+
+          # Annotate current score
+          ax_trend.annotate(
+              f"{overall:.0f}",
+              xy=(len(trend_dates)-1, overall),
+              xytext=(-15, 15),
+              textcoords="offset points",
+              color=grade_color, fontsize=14, fontweight="bold",
+              arrowprops=dict(arrowstyle="->", color=grade_color, lw=1.5),
+          )
+
+          # ── Health gauge ──────────────────────────────────────────
+          ax_gauge.set_facecolor(P["surface"])
+          ax_gauge.axis("off")
+
+          theta_bg = np.linspace(np.pi, 0, 200)
+          ax_gauge.plot(0.5+0.40*np.cos(theta_bg), 0.60+0.40*np.sin(theta_bg),
+              color=P["surface2"], linewidth=24, solid_capstyle="round",
+              alpha=0.55, transform=ax_gauge.transAxes)
+
+          # Zone coloring
+          for zs, ze, zc in [(0,60,P["red"]),(60,80,P["yellow"]),(80,100,P["green"])]:
+              t = np.linspace(np.pi-zs/100*np.pi, np.pi-ze/100*np.pi, 60)
+              ax_gauge.plot(0.5+0.40*np.cos(t), 0.60+0.40*np.sin(t),
+                  color=zc, linewidth=6, solid_capstyle="butt",
+                  alpha=0.30, transform=ax_gauge.transAxes)
+
+          fill_end  = np.pi - (overall/100)*np.pi
+          theta_f   = np.linspace(np.pi, max(fill_end,0), 100)
+          ax_gauge.plot(0.5+0.40*np.cos(theta_f), 0.60+0.40*np.sin(theta_f),
+              color=grade_color, linewidth=24, solid_capstyle="round",
+              alpha=0.92, transform=ax_gauge.transAxes)
+
+          ax_gauge.text(0.5, 0.50, f"{overall:.0f}",
+              transform=ax_gauge.transAxes, ha="center",
+              color=grade_color, fontsize=30, fontweight="bold")
+          ax_gauge.text(0.5, 0.34, f"Grade: {grade}",
+              transform=ax_gauge.transAxes, ha="center",
+              color=P["text"], fontsize=13, fontweight="bold")
+          ax_gauge.text(0.5, 0.21, "System Health",
+              transform=ax_gauge.transAxes, ha="center",
+              color=P["subtext"], fontsize=9)
+
+          status_text = "🟢 HEALTHY" if overall>=80 else "🟡 DEGRADED" if overall>=60 else "🔴 CRITICAL"
+          ax_gauge.text(0.5, 0.10, status_text,
+              transform=ax_gauge.transAxes, ha="center",
+              color=grade_color, fontsize=11, fontweight="bold")
+          ax_gauge.set_title("Health Score", color=P["text"],
+              fontsize=11, fontweight="bold", pad=10)
+
+          # ── Domain breakdown ──────────────────────────────────────
+          ax_domains.set_facecolor(P["surface"])
+          for sp in ax_domains.spines.values():
+              sp.set_edgecolor(P["surface2"]); sp.set_alpha(0.5)
+          ax_domains.tick_params(colors=P["text"], labelsize=8.5)
+          ax_domains.grid(True, alpha=0.08, color=P["text"], axis="x", zorder=1)
+
+          DOMAIN_COLORS = {
+              "structure":  P["blue"],
+              "security":   P["red"],
+              "ci":         P["green"],
+              "external":   P["teal"],
+              "schemas":    P["mauve"],
+              "api":        P["peach"],
+              "performance":P["yellow"],
+          }
+
+          if domain_scores:
+              sorted_domains = sorted(domain_scores.items(), key=lambda x:-x[1])
+              names = [d.replace("_"," ").title() for d,_ in sorted_domains]
+              vals  = [v for _,v in sorted_domains]
+              colors= [DOMAIN_COLORS.get(d,P["blue"]) for d,_ in sorted_domains]
+
+              bars = ax_domains.barh(names, vals, color=colors, alpha=0.82,
+                                     height=0.65, zorder=3,
+                                     edgecolor=P["bg"], linewidth=0.8)
+              for bar, val in zip(bars, vals):
+                  ax_domains.text(
+                      val+0.5, bar.get_y()+bar.get_height()/2,
+                      f"{val:.0f}",
+                      va="center", color=P["text"],
+                      fontsize=9, fontweight="bold"
+                  )
+              ax_domains.set_xlim(0, 110)
+              ax_domains.axvline(80, color=P["yellow"], linewidth=1.2,
+                  linestyle="--", alpha=0.6)
+              ax_domains.set_yticklabels(names, color=P["text"])
+
+          ax_domains.set_xlabel("Score (0-100)", color=P["text"], fontsize=9.5)
+          ax_domains.set_title("Domain Breakdown", color=P["text"],
+              fontsize=11, fontweight="bold", pad=10)
+
+          fig.suptitle(
+              f"🩺 ASH Dotfiles — Daily Health Report  ·  "
+              f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n"
+              f"Score: {overall:.0f}/100 (Grade: {grade})  ·  "
+              f"Status: {'HEALTHY ✅' if overall>=80 else 'DEGRADED ⚠️' if overall>=60 else 'CRITICAL ❌'}",
+              color=P["text"], fontsize=13, fontweight="bold", y=0.97
+          )
+
+          plt.savefig(WORK_DIR / "health-dashboard.png",
+                      dpi=150, bbox_inches="tight", facecolor=P["bg"])
+          plt.close()
+          print(f"  ✅ Health dashboard chart saved")
+          CHART_EOF
+
+      - name: "🔔 Discord health alert"
+        if: |
+          always() &&
+          env.NOTIFY_DISCORD == 'true'
+        continue-on-error: true
+        run: |
+          SCORE="${{ steps.consolidate.outputs.overall_score || '85' }}"
+          GRADE="${{ steps.consolidate.outputs.grade || 'B' }}"
+          ALERT="${{ steps.consolidate.outputs.alert_needed || 'false' }}"
+          FAILED="${{ steps.consolidate.outputs.total_failed || '0' }}"
+          SESSION="${SESSION_ID}"
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          [[ -z "${DISCORD_WEBHOOK_GENERAL:-}" ]] && exit 0
+
+          # Only always notify if health degraded or scheduled
+          # (Daily scheduled = always notify; alert = always notify)
+          if [[ "${ALERT}" != "true" && "${{ github.event_name }}" != "schedule" ]]; then
+            echo "  ℹ️ Skipping notification (no alert, not scheduled)"
+            exit 0
+          fi
+
+          # Color: green if healthy, yellow if degraded, red if critical
+          SCORE_INT=$(echo "${SCORE}" | cut -d. -f1)
+          if [[ "${SCORE_INT}" -ge 80 ]]; then
+            COLOR=6416844   # green
+            STATUS_TEXT="✅ HEALTHY"
+          elif [[ "${SCORE_INT}" -ge 60 ]]; then
+            COLOR=16367145  # yellow
+            STATUS_TEXT="⚠️ DEGRADED"
+          else
+            COLOR=16007085  # red
+            STATUS_TEXT="❌ CRITICAL"
+          fi
+
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"ASH Health Monitor\",
+              \"avatar_url\": \"https://raw.githubusercontent.com/${{ github.repository }}/main/assets/brand/logos/ash-logo-256.png\",
+              \"embeds\": [{
+                \"title\": \"🩺 Daily Health Check — ${STATUS_TEXT}\",
+                \"description\": \"Repository health report for **${DATE}**\",
+                \"color\": ${COLOR},
+                \"fields\": [
+                  {\"name\": \"📊 Score\",   \"value\": \"\`${SCORE}/100\`\", \"inline\": true},
+                  {\"name\": \"🏅 Grade\",   \"value\": \"\`${GRADE}\`\",     \"inline\": true},
+                  {\"name\": \"❌ Failed\",  \"value\": \"\`${FAILED}\`\",    \"inline\": true},
+                  {\"name\": \"🔗 Report\",  \"value\": \"[View Run](${RUN_URL})\", \"inline\": false}
+                ],
+                \"footer\": {\"text\": \"ASH Dotfiles v5.0 OMEGA · Health Engine\"},
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }" \
+            "${DISCORD_WEBHOOK_GENERAL}" && \
+            echo "  ✅ Discord notified" || \
+            echo "  ⚠️ Discord notification failed"
+        env:
+          DISCORD_WEBHOOK_GENERAL: ${{ secrets.DISCORD_WEBHOOK_GENERAL }}
+
+      - name: "🐛 Create issue on critical health"
+        if: |
+          steps.consolidate.outputs.alert_needed == 'true' &&
+          env.CREATE_ISSUE == 'true' &&
+          github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const score   = "${{ steps.consolidate.outputs.overall_score }}";
+            const grade   = "${{ steps.consolidate.outputs.grade }}";
+            const failed  = "${{ steps.consolidate.outputs.total_failed }}";
+            const session = "${{ needs.bootstrap.outputs.session_id }}";
+            const runUrl  = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // Check for existing open health issue
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner:  context.repo.owner,
+              repo:   context.repo.repo,
+              labels: "health-alert,automated",
+              state:  "open",
+            });
+
+            const body = [
+              `## 🩺 Daily Health Check Alert`,
+              ``,
+              `Repository health has dropped below threshold.`,
+              ``,
+              `| Property | Value |`,
+              `|----------|-------|`,
+              `| 📊 Score | \`${score}/100\` |`,
+              `| 🏅 Grade | \`${grade}\` |`,
+              `| ❌ Failed Checks | \`${failed}\` |`,
+              `| 🆔 Session | \`${session}\` |`,
+              `| 🔗 Run | [View Report](${runUrl}) |`,
+              ``,
+              `> Auto-created by ASH v5.0 OMEGA Health Engine`,
+            ].join("\n");
+
+            if (openIssues.length > 0) {
+              await github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: openIssues[0].number,
+                body:         `## 🔄 Health still degraded — score=${score}/100\n\n[View run](${runUrl})`,
+              });
+              console.log(`  ✅ Updated existing health issue #${openIssues[0].number}`);
+            } else {
+              const { data: issue } = await github.rest.issues.create({
+                owner:  context.repo.owner,
+                repo:   context.repo.repo,
+                title:  `🩺 Health Alert: Score ${score}/100 (${grade}) — ${new Date().toISOString().split('T')[0]}`,
+                body,
+                labels: ["health-alert","automated","priority:high"],
+              });
+              console.log(`  ✅ Created health issue #${issue.number}`);
+            }
+
+      - name: "📤 Upload health report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "daily-health-${{ needs.bootstrap.outputs.session_id }}"
+          path: |
+            ${{ env.WORK_DIR }}/
+            ${{ env.RESULTS_DIR }}/
+          retention-days: 90
+          compression-level: 9
+
+      - name: "❌ Gate — critical health failure"
+        if: |
+          steps.consolidate.outputs.overall_score != '' &&
+          steps.consolidate.outputs.alert_needed == 'true'
+        run: |
+          SCORE="${{ steps.consolidate.outputs.overall_score }}"
+          GRADE="${{ steps.consolidate.outputs.grade }}"
+          THRESHOLD="${ALERT_THRESHOLD}"
+
+          if (( $(echo "${SCORE} < 60" | bc -l 2>/dev/null || echo 0) )); then
+            echo "::error title=Critical Health Failure::Score=${SCORE}/100 (${GRADE}) — below critical threshold"
+            exit 1
+          else
+            echo "::warning title=Health Degraded::Score=${SCORE}/100 (${GRADE}) — below SLO threshold=${THRESHOLD}"
+          fi

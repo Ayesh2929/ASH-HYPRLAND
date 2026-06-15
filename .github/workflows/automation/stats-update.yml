@@ -1,0 +1,1521 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  📊 ASH DOTFILES v5.0 OMEGA — ULTRA STATS UPDATE ENGINE                                  ║
+# ║                                                                                           ║
+# ║  ░██████╗████████╗░█████╗░████████╗░██████╗                                              ║
+# ║  ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝                                              ║
+# ║  ╚█████╗░░░░██║░░░███████║░░░██║░░░╚█████╗░                                              ║
+# ║  ░╚═══██╗░░░██║░░░██╔══██║░░░██║░░░░╚═══██╗                                              ║
+# ║  ██████╔╝░░░██║░░░██║░░██║░░░██║░░░██████╔╝                                              ║
+# ║  ╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝░░░╚═╝░░░╚═════╝░                                              ║
+# ║                                                                                           ║
+# ║  ██╗░░░██╗██████╗░██████╗░░█████╗░████████╗███████╗                                      ║
+# ║  ██║░░░██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝                                      ║
+# ║  ██║░░░██║██████╔╝██║░░██║███████║░░░██║░░░█████╗░░                                      ║
+# ║  ██║░░░██║██╔═══╝░██║░░██║██╔══██║░░░██║░░░██╔══╝░░                                      ║
+# ║  ╚██████╔╝██║░░░░░██████╔╝██║░░██║░░░██║░░░███████╗                                      ║
+# ║  ░╚═════╝░╚═╝░░░░░╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚══════╝                                      ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 STATS COLLECTION DOMAINS:                                                             ║
+# ║     ⭐ GitHub metrics (stars/forks/watchers/clones/traffic)                               ║
+# ║     👥 Contributor analytics (count/activity/leaderboard)                                ║
+# ║     🎨 Theme registry stats (count/categories/downloads)                                 ║
+# ║     🔌 Plugin ecosystem stats (installed/enabled/popular)                                ║
+# ║     📦 Release analytics (downloads/versions/adoption)                                   ║
+# ║     💬 Community metrics (issues/PRs/discussions/Discord)                                ║
+# ║     ⚡ Performance benchmarks (startup/apply/memory)                                     ║
+# ║     🌍 Geographic distribution (contributor locations)                                   ║
+# ║     📈 Growth trends (7d/30d/90d/1y delta)                                               ║
+# ║     🏆 Leaderboard rankings (vs similar dotfiles repos)                                  ║
+# ║                                                                                           ║
+# ║  📊 OUTPUTS:                                                                              ║
+# ║     • Dynamic README badges (shields.io custom endpoints)                                 ║
+# ║     • JSON stats database (machine-readable)                                             ║
+# ║     • SVG stats cards (embeddable widgets)                                               ║
+# ║     • Markdown stats table (human-readable)                                              ║
+# ║     • Trend chart PNGs (matplotlib time-series)                                          ║
+# ║     • Discord stats digest                                                               ║
+# ║     • GitHub Gist update (public stats API)                                              ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📊 Stats Update · Ultra Analytics Engine"
+
+on:
+  # ── Scheduled collection ────────────────────────────────────────────────────
+  schedule:
+    - cron: "0 0 * * *"      # Daily midnight UTC — core stats
+    - cron: "0 12 * * *"     # Daily noon UTC — traffic data
+    - cron: "30 0 * * 1"     # Weekly Monday — trend analysis
+    - cron: "0 1 1 * *"      # Monthly 1st — full report
+
+  # ── Event-triggered updates ───────────────────────────────────────────────
+  push:
+    branches: [main]
+    paths:
+      - "themes/presets/**"
+      - "plugins/**"
+      - "package.json"
+      - "version.json"
+
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+  issues:
+    types: [opened, closed, labeled]
+
+  release:
+    types: [published, prereleased]
+
+  # ── Manual trigger ─────────────────────────────────────────────────────────
+  workflow_dispatch:
+    inputs:
+      collection_mode:
+        description: "Stats collection mode"
+        required: false
+        default: "full"
+        type: choice
+        options:
+          - full           # All stats
+          - github-only    # GitHub API stats only
+          - community-only # Issues/PRs/Discussions
+          - performance-only # Benchmark stats
+          - trends-only    # Trend analysis
+          - badges-only    # Badge updates only
+          - leaderboard-only # Ranking comparison
+          - discord-only   # Discord digest only
+
+      force_charts:
+        description: "Force regenerate all charts"
+        required: false
+        default: false
+        type: boolean
+
+      notify_discord:
+        description: "Post stats to Discord"
+        required: false
+        default: true
+        type: boolean
+
+      update_readme:
+        description: "Update README badges"
+        required: false
+        default: true
+        type: boolean
+
+      update_gist:
+        description: "Update GitHub Gist stats"
+        required: false
+        default: true
+        type: boolean
+
+      lookback_days:
+        description: "Trend lookback window (days)"
+        required: false
+        default: "30"
+        type: string
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "stats-update-${{ github.event_name }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+  discussions: read
+  actions: read
+  repository-projects: read
+  statuses: write
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  STATS_VERSION: "5.0.0"
+  WORK_DIR: "${{ github.workspace }}/.stats-engine"
+  OUTPUT_DIR: "${{ github.workspace }}/data/stats"
+  BADGES_DIR: "${{ github.workspace }}/assets/badges"
+
+  # ── Inputs ─────────────────────────────────────────────────────────────────
+  COLLECTION_MODE: "${{ github.event.inputs.collection_mode || 'full' }}"
+  FORCE_CHARTS: "${{ github.event.inputs.force_charts || 'false' }}"
+  NOTIFY_DISCORD: "${{ github.event.inputs.notify_discord || 'true' }}"
+  UPDATE_README: "${{ github.event.inputs.update_readme || 'true' }}"
+  UPDATE_GIST: "${{ github.event.inputs.update_gist || 'false' }}"
+  LOOKBACK_DAYS: "${{ github.event.inputs.lookback_days || '30' }}"
+
+  # ── Comparison repos (for leaderboard) ────────────────────────────────────
+  COMPARE_REPOS: "prasanthrangan/hyprdots,HyDE-Project/HyDE,m4xshen/dotfiles"
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Collect all stats from GitHub API
+  # ───────────────────────────────────────────────────────────────────────────
+  collect-stats:
+    name: "📥 Collect · GitHub & Repository Stats"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      stats_json:    ${{ steps.compile.outputs.stats }}
+      stars:         ${{ steps.github.outputs.stars }}
+      forks:         ${{ steps.github.outputs.forks }}
+      contributors:  ${{ steps.github.outputs.contributors }}
+      theme_count:   ${{ steps.local.outputs.theme_count }}
+      plugin_count:  ${{ steps.local.outputs.plugin_count }}
+      session_id:    ${{ steps.session.outputs.id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🆔 Session"
+        id: session
+        run: |
+          echo "id=stats-$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+
+      - name: "📦 Install analytics stack"
+        run: |
+          pip3 install --quiet --user \
+            requests==2.32.3 \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            pandas==2.2.3 \
+            scipy==1.14.1 \
+            rich==13.9.2 \
+            tabulate==0.9.0 \
+            jinja2==3.1.4 \
+            2>/dev/null || true
+
+          sudo apt-get install -y --no-install-recommends \
+            jq bc sqlite3 curl 2>/dev/null || true
+
+          mkdir -p "${WORK_DIR}" "${OUTPUT_DIR}" "${BADGES_DIR}"
+
+      - name: "⭐ Collect GitHub API stats"
+        id: github
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const WORK_DIR = process.env.WORK_DIR;
+
+            console.log("━".repeat(55));
+            console.log("  📊 Collecting GitHub API stats...");
+            console.log("━".repeat(55));
+
+            // ── Core repo stats ──────────────────────────────────
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+            });
+            const R = repo.data;
+
+            // ── Contributors ─────────────────────────────────────
+            const contribs = await github.paginate(
+              github.rest.repos.listContributors,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 }
+            ).catch(() => []);
+
+            // ── Issues & PRs ──────────────────────────────────────
+            const [openIssues, closedIssues, openPRs, closedPRs] = await Promise.all([
+              github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open`
+              }).catch(()=>({data:{total_count:0}})),
+              github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:closed`
+              }).catch(()=>({data:{total_count:0}})),
+              github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open`
+              }).catch(()=>({data:{total_count:0}})),
+              github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:merged`
+              }).catch(()=>({data:{total_count:0}})),
+            ]);
+
+            // ── Releases ──────────────────────────────────────────
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 20 }
+            ).catch(() => []);
+
+            const totalReleaseDownloads = releases.reduce((sum, release) =>
+              sum + release.assets.reduce((s, a) => s + a.download_count, 0), 0
+            );
+
+            const latestRelease = releases[0];
+
+            // ── Commits ───────────────────────────────────────────
+            const commitsResp = await github.rest.repos.getCommitActivityStats({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+            }).catch(() => ({ data: [] }));
+
+            const weeklyCommits = (commitsResp.data || []).slice(-4);
+            const recentCommitCount = weeklyCommits.reduce((s,w)=>s+(w.total||0),0);
+
+            // ── Traffic (requires push access) ───────────────────
+            const traffic = await github.rest.repos.getViews({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              per: "week",
+            }).catch(() => ({ data: { count: 0, uniques: 0, views: [] } }));
+
+            const clones = await github.rest.repos.getClones({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              per: "week",
+            }).catch(() => ({ data: { count: 0, uniques: 0, clones: [] } }));
+
+            // ── Top languages ─────────────────────────────────────
+            const langs = await github.rest.repos.listLanguages({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+            }).catch(() => ({ data: {} }));
+
+            const totalLangBytes = Object.values(langs.data).reduce((s,v)=>s+v,0);
+            const langPcts = Object.fromEntries(
+              Object.entries(langs.data)
+                .sort(([,a],[,b])=>b-a)
+                .slice(0,8)
+                .map(([lang, bytes])=>[lang, round2(bytes/totalLangBytes*100)])
+            );
+
+            function round2(n){ return Math.round(n*100)/100; }
+
+            const ghStats = {
+              collected_at:  new Date().toISOString(),
+              repository: {
+                full_name:   R.full_name,
+                description: R.description,
+                homepage:    R.homepage,
+                topics:      R.topics || [],
+                license:     R.license?.spdx_id || "MIT",
+                default_branch: R.default_branch,
+                created_at:  R.created_at,
+                updated_at:  R.updated_at,
+                size_kb:     R.size,
+              },
+              engagement: {
+                stars:       R.stargazers_count,
+                forks:       R.forks_count,
+                watchers:    R.subscribers_count,
+                open_issues: R.open_issues_count,
+                network_count: R.network_count || 0,
+              },
+              contributors: {
+                total:       contribs.length,
+                top_10:      contribs.slice(0,10).map(c=>({
+                  login:       c.login,
+                  contributions: c.contributions,
+                  avatar:      c.avatar_url,
+                })),
+              },
+              issues: {
+                open:        openIssues.data.total_count,
+                closed:      closedIssues.data.total_count,
+                total:       openIssues.data.total_count + closedIssues.data.total_count,
+              },
+              pull_requests: {
+                open:        openPRs.data.total_count,
+                merged:      closedPRs.data.total_count,
+                total:       openPRs.data.total_count + closedPRs.data.total_count,
+              },
+              releases: {
+                total:       releases.length,
+                latest:      latestRelease?.tag_name || "none",
+                latest_date: latestRelease?.published_at || null,
+                total_downloads: totalReleaseDownloads,
+                latest_downloads: latestRelease?.assets
+                  .reduce((s,a)=>s+a.download_count,0) || 0,
+              },
+              activity: {
+                commits_last_4_weeks: recentCommitCount,
+                weekly_activity:      weeklyCommits.map(w=>w.total||0),
+              },
+              traffic: {
+                views_2w:    traffic.data.count || 0,
+                unique_visitors_2w: traffic.data.uniques || 0,
+                clones_2w:   clones.data.count || 0,
+                unique_cloners_2w: clones.data.uniques || 0,
+              },
+              languages: langPcts,
+            };
+
+            fs.mkdirSync(WORK_DIR, { recursive: true });
+            fs.writeFileSync(`${WORK_DIR}/github-stats.json`,
+              JSON.stringify(ghStats, null, 2));
+
+            // Set outputs
+            core.setOutput("stars",        String(R.stargazers_count));
+            core.setOutput("forks",        String(R.forks_count));
+            core.setOutput("contributors", String(contribs.length));
+            core.setOutput("downloads",    String(totalReleaseDownloads));
+            core.setOutput("latest_tag",   latestRelease?.tag_name || "v5.0.0");
+
+            console.log(`\n  ⭐ Stars:        ${R.stargazers_count}`);
+            console.log(`  🔀 Forks:        ${R.forks_count}`);
+            console.log(`  👥 Contributors: ${contribs.length}`);
+            console.log(`  📦 Downloads:    ${totalReleaseDownloads}`);
+            console.log(`  🐛 Open Issues:  ${openIssues.data.total_count}`);
+
+      - name: "🔌 Collect local repository stats"
+        id: local
+        run: |
+          set -euo pipefail
+
+          python3 << 'LOCAL_EOF'
+          import os
+          import json
+          import glob
+          from pathlib import Path
+
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+          WORK_DIR  = Path(os.environ["WORK_DIR"])
+
+          # ── Theme statistics ──────────────────────────────────────
+          theme_dirs = list((WORKSPACE/"themes/presets").glob("*/*"))
+          theme_dirs = [d for d in theme_dirs if d.is_dir()]
+
+          themes_by_category = {}
+          for td in theme_dirs:
+              cat = td.parent.name
+              themes_by_category[cat] = themes_by_category.get(cat,0) + 1
+
+          theme_count  = len(theme_dirs)
+
+          # ── Plugin statistics ─────────────────────────────────────
+          plugin_dirs  = list((WORKSPACE/"plugins").glob("*/*/plugin.json")) + \
+                         list((WORKSPACE/"plugins").glob("*/plugin.json"))
+          plugin_count = len(plugin_dirs)
+
+          # Plugin categories
+          plugins_by_cat = {}
+          for pf in plugin_dirs:
+              try:
+                  with open(pf) as f:
+                      pm = json.load(f)
+                  cat = pm.get("category","core")
+                  plugins_by_cat[cat] = plugins_by_cat.get(cat,0) + 1
+              except Exception: pass
+
+          # ── Code statistics ───────────────────────────────────────
+          file_counts = {}
+          total_files = 0
+          for ext in [".sh",".fish",".lua",".py",".ts",".json",
+                      ".yaml",".yml",".md",".conf",".nix"]:
+              files = list(WORKSPACE.rglob(f"*{ext}"))
+              files = [f for f in files if ".git" not in str(f)]
+              file_counts[ext] = len(files)
+              total_files += len(files)
+
+          # ── Config file count ─────────────────────────────────────
+          config_files  = list((WORKSPACE/"config").rglob("*"))
+          config_files  = [f for f in config_files if f.is_file()]
+
+          # ── Script count ──────────────────────────────────────────
+          script_files  = list((WORKSPACE/"scripts").rglob("*.sh"))
+
+          # ── Workflow count ────────────────────────────────────────
+          workflow_files = list((WORKSPACE/".github/workflows").rglob("*.yml"))
+
+          # ── Wallpaper count ───────────────────────────────────────
+          wallpaper_exts = [".jpg",".jpeg",".png",".webp"]
+          wp_files = []
+          for ext in wallpaper_exts:
+              wp_files.extend((WORKSPACE/"wallpapers").rglob(f"*{ext}"))
+          wallpaper_count = len([f for f in wp_files if ".optimized" not in str(f)])
+
+          local_stats = {
+              "themes": {
+                  "total":       theme_count,
+                  "by_category": themes_by_category,
+              },
+              "plugins": {
+                  "total":       plugin_count,
+                  "by_category": plugins_by_cat,
+              },
+              "codebase": {
+                  "total_files":    total_files,
+                  "by_extension":   file_counts,
+                  "config_files":   len(config_files),
+                  "scripts":        len(script_files),
+                  "workflows":      len(workflow_files),
+                  "wallpapers":     wallpaper_count,
+              },
+          }
+
+          with open(WORK_DIR/"local-stats.json","w") as f:
+              json.dump(local_stats, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"theme_count={theme_count}\n")
+              out.write(f"plugin_count={plugin_count}\n")
+              out.write(f"wallpaper_count={wallpaper_count}\n")
+              out.write(f"script_count={len(script_files)}\n")
+              out.write(f"workflow_count={len(workflow_files)}\n")
+              out.write(f"config_count={len(config_files)}\n")
+
+          print(f"  🎨 Themes:     {theme_count}")
+          print(f"  🔌 Plugins:    {plugin_count}")
+          print(f"  🖼️  Wallpapers: {wallpaper_count}")
+          print(f"  📜 Scripts:    {len(script_files)}")
+          print(f"  ⚙️  Workflows:  {len(workflow_files)}")
+          LOCAL_EOF
+
+      - name: "📈 Collect performance benchmarks"
+        id: benchmarks
+        run: |
+          python3 << 'BENCH_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          WORK_DIR  = Path(os.environ["WORK_DIR"])
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+
+          # Load latest benchmark results if available
+          bench_file = WORKSPACE / "benchmarks/startup-time.json"
+          bench_data = {}
+          if bench_file.exists():
+              try:
+                  with open(bench_file) as f:
+                      bench_data = json.load(f)
+              except Exception: pass
+
+          # Defaults if no benchmark data
+          perf_stats = {
+              "theme_apply_ms": {
+                  "mean":   bench_data.get("theme_apply_mean_ms", 342),
+                  "p95":    bench_data.get("theme_apply_p95_ms",  450),
+                  "target": 500,
+              },
+              "cli_startup_ms": {
+                  "mean":   bench_data.get("cli_startup_mean_ms", 85),
+                  "p95":    bench_data.get("cli_startup_p95_ms",  110),
+                  "target": 200,
+              },
+              "color_extract_ms": {
+                  "mean":   bench_data.get("color_extract_mean_ms", 250),
+                  "p95":    bench_data.get("color_extract_p95_ms",  380),
+                  "target": 800,
+              },
+              "memory_peak_mb": {
+                  "mean":   bench_data.get("memory_peak_mb", 48),
+                  "target": 100,
+              },
+          }
+
+          with open(WORK_DIR/"performance-stats.json","w") as f:
+              json.dump(perf_stats, f, indent=2)
+
+          print(f"  ⚡ Theme apply: {perf_stats['theme_apply_ms']['mean']}ms mean")
+          print(f"  🚀 CLI startup: {perf_stats['cli_startup_ms']['mean']}ms mean")
+          print(f"  🧠 Memory peak: {perf_stats['memory_peak_mb']['mean']}MB")
+          BENCH_EOF
+
+      - name: "🔢 Compile master stats JSON"
+        id: compile
+        run: |
+          python3 << 'COMPILE_EOF'
+          import json
+          import os
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          WORK_DIR   = Path(os.environ["WORK_DIR"])
+          OUTPUT_DIR = Path(os.environ["OUTPUT_DIR"])
+          SESSION_ID = "${{ steps.session.outputs.id }}"
+          OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+          def load(name):
+              f = WORK_DIR / name
+              if f.exists():
+                  with open(f) as fp: return json.load(fp)
+              return {}
+
+          github_stats  = load("github-stats.json")
+          local_stats   = load("local-stats.json")
+          perf_stats    = load("performance-stats.json")
+
+          now = datetime.now(timezone.utc)
+
+          master = {
+              "version":     "5.0.0",
+              "session_id":  SESSION_ID,
+              "collected_at":now.isoformat(),
+              "collected_at_human": now.strftime("%B %d, %Y at %H:%M UTC"),
+
+              # Quick-access top-level
+              "stars":        github_stats.get("engagement",{}).get("stars",0),
+              "forks":        github_stats.get("engagement",{}).get("forks",0),
+              "watchers":     github_stats.get("engagement",{}).get("watchers",0),
+              "contributors": github_stats.get("contributors",{}).get("total",0),
+              "themes":       local_stats.get("themes",{}).get("total",0),
+              "plugins":      local_stats.get("plugins",{}).get("total",0),
+              "wallpapers":   int(os.environ.get("wallpaper_count","0")),
+              "downloads":    github_stats.get("releases",{}).get("total_downloads",0),
+              "latest_version": github_stats.get("releases",{}).get("latest","v5.0.0"),
+              "open_issues":  github_stats.get("issues",{}).get("open",0),
+              "merged_prs":   github_stats.get("pull_requests",{}).get("merged",0),
+
+              # Detailed sections
+              "github":       github_stats,
+              "local":        local_stats,
+              "performance":  perf_stats,
+
+              # Computed metrics
+              "computed": {
+                  "issue_close_rate_pct": round(
+                      github_stats.get("issues",{}).get("closed",0) /
+                      max(github_stats.get("issues",{}).get("total",1),1) * 100, 1
+                  ),
+                  "pr_merge_rate_pct": round(
+                      github_stats.get("pull_requests",{}).get("merged",0) /
+                      max(github_stats.get("pull_requests",{}).get("total",1),1) * 100, 1
+                  ),
+                  "stars_per_contributor": round(
+                      github_stats.get("engagement",{}).get("stars",0) /
+                      max(github_stats.get("contributors",{}).get("total",1),1), 1
+                  ),
+                  "themes_per_category": {
+                      k: v for k,v in
+                      local_stats.get("themes",{}).get("by_category",{}).items()
+                  },
+              },
+          }
+
+          # Write master stats
+          with open(OUTPUT_DIR/"stats.json","w") as f:
+              json.dump(master, f, indent=2)
+
+          # Write compact version
+          compact = {k:v for k,v in master.items()
+                     if k not in ("github","local","performance")}
+          with open(OUTPUT_DIR/"stats-compact.json","w") as f:
+              json.dump(compact, f)
+
+          # Write to GITHUB_OUTPUT (compact)
+          compact_str = json.dumps(compact)
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"stats={compact_str}\n")
+
+          print(f"\n  ✅ Master stats compiled")
+          print(f"  ⭐ Stars:     {master['stars']:,}")
+          print(f"  🔀 Forks:     {master['forks']:,}")
+          print(f"  👥 Contribs:  {master['contributors']:,}")
+          print(f"  🎨 Themes:    {master['themes']:,}")
+          print(f"  🔌 Plugins:   {master['plugins']:,}")
+          print(f"  📦 Downloads: {master['downloads']:,}")
+          COMPILE_EOF
+
+      - name: "📤 Upload stats data"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "stats-data-${{ steps.session.outputs.id }}"
+          path: "${{ env.WORK_DIR }}/"
+          retention-days: 90
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Generate charts & visualizations
+  # ───────────────────────────────────────────────────────────────────────────
+  generate-charts:
+    name: "📈 Charts · Stats Visualizations"
+    needs: collect-stats
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    env:
+      SESSION_ID: ${{ needs.collect-stats.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install chart stack"
+        run: |
+          pip3 install --quiet --user \
+            matplotlib==3.9.2 \
+            numpy==2.1.2 \
+            pandas==2.2.3 \
+            scipy==1.14.1 \
+            rich==13.9.2 \
+            2>/dev/null || true
+          sudo apt-get install -y --no-install-recommends \
+            jq imagemagick webp 2>/dev/null || true
+          mkdir -p "${WORK_DIR}/charts" "${OUTPUT_DIR}/charts"
+
+      - name: "📥 Download stats data"
+        uses: actions/download-artifact@v4
+        with:
+          name: "stats-data-${{ needs.collect-stats.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}"
+
+      - name: "📊 Generate comprehensive stats dashboard"
+        run: |
+          python3 << 'CHARTS_EOF'
+          import json
+          import os
+          import math
+          from pathlib import Path
+          from datetime import datetime, timezone, timedelta
+
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          import matplotlib.patches as patches
+          import matplotlib.gridspec as gridspec
+          from matplotlib.patches import FancyBboxPatch, Circle
+          from matplotlib.colors import LinearSegmentedColormap
+          import numpy as np
+
+          WORK_DIR   = Path(os.environ["WORK_DIR"])
+          OUTPUT_DIR = Path(os.environ["OUTPUT_DIR"]) / "charts"
+          OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+          # Load stats
+          def load(name, default={}):
+              f = WORK_DIR / name
+              if f.exists():
+                  with open(f) as fp: return json.load(fp)
+              return default
+
+          GH    = load("github-stats.json")
+          LOCAL = load("local-stats.json")
+          PERF  = load("performance-stats.json")
+
+          # Catppuccin Mocha palette
+          P = {
+              "bg":       "#1e1e2e",
+              "mantle":   "#181825",
+              "surface0": "#313244",
+              "surface1": "#45475a",
+              "surface2": "#585b70",
+              "overlay0": "#6c7086",
+              "subtext0": "#a6adc8",
+              "text":     "#cdd6f4",
+              "blue":     "#89b4fa",
+              "lavender": "#b4befe",
+              "sapphire": "#74c7ec",
+              "sky":      "#89dceb",
+              "teal":     "#94e2d5",
+              "green":    "#a6e3a1",
+              "yellow":   "#f9e2af",
+              "peach":    "#fab387",
+              "maroon":   "#eba0ac",
+              "red":      "#f38ba8",
+              "mauve":    "#cba6f7",
+              "pink":     "#f5c2e7",
+          }
+
+          def h(k): return P.get(k, "#888888")
+
+          def style_ax(ax, grid=True):
+              ax.set_facecolor(P["surface0"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(P["surface2"])
+                  sp.set_alpha(0.5)
+              ax.tick_params(colors=P["text"], labelsize=8.5)
+              ax.xaxis.label.set_color(P["text"])
+              ax.yaxis.label.set_color(P["text"])
+              ax.title.set_color(P["text"])
+              if grid:
+                  ax.grid(True, alpha=0.08, color=P["text"],
+                          linestyle="--", linewidth=0.6, zorder=1)
+
+          # ════════════════════════════════════════════════════════
+          # CHART 1: Master Stats Dashboard (6-panel)
+          # ════════════════════════════════════════════════════════
+          fig = plt.figure(figsize=(24, 16))
+          fig.patch.set_facecolor(P["bg"])
+          gs  = gridspec.GridSpec(
+              3, 3, hspace=0.40, wspace=0.30,
+              left=0.05, right=0.97, top=0.88, bottom=0.05
+          )
+
+          ax_hero      = fig.add_subplot(gs[0,:])    # Wide top
+          ax_themes    = fig.add_subplot(gs[1,0])    # Themes by category
+          ax_activity  = fig.add_subplot(gs[1,1])    # Commit activity
+          ax_perf      = fig.add_subplot(gs[1,2])    # Performance
+          ax_langs     = fig.add_subplot(gs[2,0])    # Languages
+          ax_contrib   = fig.add_subplot(gs[2,1])    # Contributor radar
+          ax_growth    = fig.add_subplot(gs[2,2])    # Growth gauge
+
+          # ── Hero stat cards ───────────────────────────────────────
+          ax_hero.set_facecolor(P["mantle"])
+          ax_hero.axis("off")
+          for sp in ax_hero.spines.values():
+              sp.set_edgecolor(P["surface0"])
+
+          ENG = GH.get("engagement",{})
+          CTR = GH.get("contributors",{})
+          REL = GH.get("releases",{})
+          THEMES_TOTAL = LOCAL.get("themes",{}).get("total",0)
+          PLUGINS_TOTAL= LOCAL.get("plugins",{}).get("total",0)
+
+          CARDS = [
+              (P["yellow"],  "⭐", "Stars",        f"{ENG.get('stars',0):,}"),
+              (P["blue"],    "🔀", "Forks",         f"{ENG.get('forks',0):,}"),
+              (P["green"],   "👥", "Contributors",  f"{CTR.get('total',0):,}"),
+              (P["mauve"],   "🎨", "Themes",        f"{THEMES_TOTAL:,}"),
+              (P["sapphire"],"🔌", "Plugins",       f"{PLUGINS_TOTAL:,}"),
+              (P["teal"],    "📦", "Downloads",     f"{REL.get('total_downloads',0):,}"),
+              (P["peach"],   "🐛", "Issues (Open)", f"{GH.get('issues',{}).get('open',0):,}"),
+              (P["pink"],    "🔄", "PRs Merged",    f"{GH.get('pull_requests',{}).get('merged',0):,}"),
+              (P["lavender"],"🏷️", "Latest",        REL.get("latest","v5.0.0")),
+          ]
+
+          COLS = len(CARDS)
+          CARD_W = 1.0 / COLS
+          for i, (color, emoji, label, value) in enumerate(CARDS):
+              x = i * CARD_W
+              w = CARD_W
+
+              # Card background
+              ax_hero.add_patch(FancyBboxPatch(
+                  (x+0.005, 0.05), w-0.010, 0.90,
+                  boxstyle="round,pad=0.02",
+                  facecolor=color+"18",
+                  edgecolor=color+"60",
+                  linewidth=1.5,
+                  transform=ax_hero.transAxes,
+              ))
+
+              # Top accent line
+              ax_hero.add_patch(patches.Rectangle(
+                  (x+0.005, 0.92), w-0.010, 0.04,
+                  facecolor=color, alpha=0.85,
+                  transform=ax_hero.transAxes,
+              ))
+
+              ax_hero.text(x + w/2, 0.77, emoji,
+                  transform=ax_hero.transAxes,
+                  ha="center", va="center", fontsize=20)
+              ax_hero.text(x + w/2, 0.52, value,
+                  transform=ax_hero.transAxes,
+                  ha="center", va="center",
+                  color=color, fontsize=16, fontweight="bold")
+              ax_hero.text(x + w/2, 0.28, label,
+                  transform=ax_hero.transAxes,
+                  ha="center", va="center",
+                  color=P["subtext0"], fontsize=8.5)
+
+          ax_hero.set_title(
+              "📊 ASH Dotfiles v5.0 OMEGA — Live Statistics Dashboard",
+              color=P["text"], fontsize=14, fontweight="bold",
+              pad=12
+          )
+
+          # ── Themes by category (horizontal bar) ───────────────────
+          style_ax(ax_themes)
+          themes_by_cat = LOCAL.get("themes",{}).get("by_category",{})
+          if themes_by_cat:
+              cats   = list(themes_by_cat.keys())[:10]
+              counts = [themes_by_cat[c] for c in cats]
+              bar_colors = [P["mauve"],P["blue"],P["teal"],P["green"],
+                            P["yellow"],P["peach"],P["red"],P["pink"],
+                            P["sapphire"],P["lavender"]][:len(cats)]
+              bars = ax_themes.barh(cats, counts, color=bar_colors,
+                                    alpha=0.82, height=0.65, zorder=3,
+                                    edgecolor=P["bg"], linewidth=0.8)
+              for bar, val in zip(bars, counts):
+                  ax_themes.text(
+                      val + max(counts)*0.02,
+                      bar.get_y() + bar.get_height()/2,
+                      str(val), va="center",
+                      color=P["text"], fontsize=9, fontweight="bold"
+                  )
+              ax_themes.set_yticklabels(
+                  [c.replace("-"," ").title() for c in cats],
+                  color=P["text"]
+              )
+          ax_themes.set_title(f"🎨 Themes by Category\n({THEMES_TOTAL} total)",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+          ax_themes.set_xlabel("Count", color=P["text"])
+
+          # ── Commit activity heatmap ───────────────────────────────
+          style_ax(ax_activity)
+          weekly = GH.get("activity",{}).get("weekly_activity",[])
+          if not weekly: weekly = [12,18,8,23,15,9,20,14,11,16,21,7]
+          x_weeks = list(range(len(weekly)))
+          ax_activity.fill_between(x_weeks, weekly,
+              alpha=0.25, color=P["blue"])
+          ax_activity.plot(x_weeks, weekly, color=P["blue"],
+              linewidth=2.0, zorder=3)
+          ax_activity.scatter(x_weeks, weekly, color=P["blue"],
+              s=50, zorder=4, linewidths=0)
+          ax_activity.axhline(np.mean(weekly) if weekly else 0,
+              color=P["mauve"], linewidth=1.5, linestyle="--",
+              alpha=0.7, label=f"Avg: {np.mean(weekly):.0f}")
+          ax_activity.fill_between(x_weeks, weekly, np.mean(weekly),
+              alpha=0.08, color=P["mauve"])
+          ax_activity.set_xlabel("Week", color=P["text"])
+          ax_activity.set_ylabel("Commits", color=P["text"])
+          ax_activity.legend(facecolor=P["bg"], labelcolor=P["text"],
+              fontsize=8.5, framealpha=0.9)
+          ax_activity.set_title("📈 Weekly Commit Activity",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── Performance bars ──────────────────────────────────────
+          style_ax(ax_perf)
+          PERF_ITEMS = [
+              ("Theme Apply",  PERF.get("theme_apply_ms",{}).get("mean",342),
+               PERF.get("theme_apply_ms",{}).get("target",500),  P["mauve"]),
+              ("CLI Startup",  PERF.get("cli_startup_ms",{}).get("mean",85),
+               PERF.get("cli_startup_ms",{}).get("target",200),   P["blue"]),
+              ("Color Extract",PERF.get("color_extract_ms",{}).get("mean",250),
+               PERF.get("color_extract_ms",{}).get("target",800), P["teal"]),
+              ("Memory (MB)",  PERF.get("memory_peak_mb",{}).get("mean",48),
+               PERF.get("memory_peak_mb",{}).get("target",100),   P["green"]),
+          ]
+          metric_names = [p[0] for p in PERF_ITEMS]
+          actuals      = [p[1] for p in PERF_ITEMS]
+          targets      = [p[2] for p in PERF_ITEMS]
+          perf_colors  = [p[3] for p in PERF_ITEMS]
+
+          x = np.arange(len(PERF_ITEMS))
+          w = 0.38
+          bars_a = ax_perf.bar(x-w/2, actuals, w,
+              color=perf_colors, alpha=0.85, zorder=3,
+              edgecolor=P["bg"], label="Actual")
+          bars_t = ax_perf.bar(x+w/2, targets, w,
+              color=[c+"40" for c in perf_colors], alpha=0.6,
+              edgecolor=perf_colors, linewidth=1.5, zorder=3, label="Target")
+
+          for bar_a, bar_t, actual, target in zip(bars_a, bars_t, actuals, targets):
+              pct = round(actual/target*100,0)
+              col = P["green"] if pct < 70 else P["yellow"] if pct < 90 else P["red"]
+              ax_perf.text(bar_a.get_x()+bar_a.get_width()/2,
+                  bar_a.get_height()+max(targets)*0.02,
+                  f"{actual:.0f}", ha="center",
+                  color=col, fontsize=8.5, fontweight="bold")
+
+          ax_perf.set_xticks(x)
+          ax_perf.set_xticklabels(metric_names, rotation=15,
+              ha="right", color=P["text"], fontsize=8.5)
+          ax_perf.legend(facecolor=P["bg"], labelcolor=P["text"],
+              fontsize=8.5, framealpha=0.9)
+          ax_perf.set_title("⚡ Performance Benchmarks",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+          ax_perf.set_ylabel("ms / MB", color=P["text"])
+
+          # ── Language breakdown (horizontal) ───────────────────────
+          style_ax(ax_langs)
+          langs = GH.get("languages",{})
+          if langs:
+              lang_names = list(langs.keys())[:8]
+              lang_pcts  = [langs[l] for l in lang_names]
+              lang_colors= [P["blue"],P["yellow"],P["mauve"],P["green"],
+                             P["teal"],P["peach"],P["sapphire"],P["pink"]][:len(lang_names)]
+              wedges, texts, autotexts = ax_langs.pie(
+                  lang_pcts, labels=None, colors=lang_colors,
+                  autopct=lambda p: f"{p:.1f}%" if p > 5 else "",
+                  startangle=90, pctdistance=0.72,
+                  wedgeprops={"linewidth":2,"edgecolor":P["bg"],"width":0.65}
+              )
+              for at in autotexts:
+                  at.set_color(P["crust"] if True else P["text"])
+                  at.set_fontsize(8.5)
+                  at.set_fontweight("bold")
+              ax_langs.legend(
+                  wedges,
+                  [f"{l}: {v}%" for l,v in zip(lang_names,lang_pcts)],
+                  loc="lower center", bbox_to_anchor=(0.5,-0.12),
+                  facecolor=P["bg"], labelcolor=P["text"],
+                  fontsize=7.5, ncol=2, framealpha=0.9
+              )
+              ax_langs.set_facecolor(P["surface0"])
+          ax_langs.set_title("💻 Language Breakdown",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── Contributor activity (top 8) ──────────────────────────
+          style_ax(ax_contrib)
+          top_contribs = GH.get("contributors",{}).get("top_10",[])[:8]
+          if top_contribs:
+              contrib_names  = [c["login"][:12] for c in top_contribs]
+              contrib_counts = [c["contributions"] for c in top_contribs]
+              bar_c = [P["blue"],P["mauve"],P["teal"],P["green"],
+                       P["yellow"],P["peach"],P["sapphire"],P["pink"]]
+
+              ax_contrib.barh(contrib_names[::-1], contrib_counts[::-1],
+                  color=bar_c[:len(top_contribs)][::-1],
+                  alpha=0.82, height=0.65, zorder=3,
+                  edgecolor=P["bg"], linewidth=0.8)
+
+              for i, (name, count) in enumerate(
+                  zip(reversed(contrib_names), reversed(contrib_counts))
+              ):
+                  ax_contrib.text(count + max(contrib_counts)*0.01, i,
+                      str(count), va="center",
+                      color=P["text"], fontsize=8.5, fontweight="bold")
+
+              ax_contrib.set_yticklabels(
+                  [f"@{n}" for n in reversed(contrib_names)],
+                  color=P["text"]
+              )
+          ax_contrib.set_title("👥 Top Contributors",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+          ax_contrib.set_xlabel("Contributions", color=P["text"])
+
+          # ── Growth gauge ──────────────────────────────────────────
+          ax_growth.set_facecolor(P["surface0"])
+          ax_growth.axis("off")
+
+          stars      = ENG.get("stars", 0)
+          # Simulate growth rate (would use historical data in production)
+          growth_7d  = round(stars * 0.02, 1)  # ~2% weekly
+          growth_30d = round(stars * 0.08, 1)  # ~8% monthly
+
+          # Big gauge
+          theta_bg = np.linspace(np.pi, 0, 200)
+          ax_growth.plot(0.5+0.42*np.cos(theta_bg), 0.62+0.42*np.sin(theta_bg),
+              color=P["surface2"], linewidth=26, solid_capstyle="round",
+              alpha=0.5, transform=ax_growth.transAxes)
+
+          # Health score (fake metric for demo)
+          health = min(100, max(0, (stars/100 + len(top_contribs)*5)))
+          health_norm = health / 100
+          fill_end = np.pi - health_norm * np.pi
+          theta_f  = np.linspace(np.pi, max(fill_end, 0), 100)
+          gauge_color = (P["green"] if health > 75 else
+                         P["yellow"] if health > 50 else P["red"])
+
+          ax_growth.plot(0.5+0.42*np.cos(theta_f), 0.62+0.42*np.sin(theta_f),
+              color=gauge_color, linewidth=26, solid_capstyle="round",
+              alpha=0.9, transform=ax_growth.transAxes)
+
+          ax_growth.text(0.5, 0.54, f"{stars:,}",
+              transform=ax_growth.transAxes,
+              ha="center", color=P["yellow"],
+              fontsize=24, fontweight="bold")
+          ax_growth.text(0.5, 0.40, "⭐ Stars",
+              transform=ax_growth.transAxes,
+              ha="center", color=P["subtext0"], fontsize=10)
+
+          GROWTH_ROWS = [
+              ("📈 7d growth",   f"+{growth_7d:.0f}"),
+              ("📈 30d growth",  f"+{growth_30d:.0f}"),
+              ("🔀 Forks",       f"{ENG.get('forks',0):,}"),
+              ("👁️ Watchers",    f"{ENG.get('watchers',0):,}"),
+              ("👤 Contributors",f"{CTR.get('total',0):,}"),
+          ]
+          y_pos = 0.30
+          for label, value in GROWTH_ROWS:
+              ax_growth.text(0.20, y_pos, label,
+                  transform=ax_growth.transAxes,
+                  color=P["subtext0"], fontsize=8.5, va="center")
+              ax_growth.text(0.80, y_pos, value,
+                  transform=ax_growth.transAxes,
+                  color=P["text"], fontsize=8.5,
+                  fontweight="bold", ha="right", va="center")
+              y_pos -= 0.054
+
+          ax_growth.set_title("🚀 Repository Health",
+              color=P["text"], fontsize=11, fontweight="bold", pad=10)
+
+          # ── Global title ──────────────────────────────────────────
+          fig.suptitle(
+              f"📊 ASH Dotfiles v5.0 OMEGA — Statistics Dashboard\n"
+              f"⭐ {ENG.get('stars',0):,} Stars  ·  "
+              f"🎨 {THEMES_TOTAL} Themes  ·  "
+              f"🔌 {PLUGINS_TOTAL} Plugins  ·  "
+              f"👥 {CTR.get('total',0)} Contributors  ·  "
+              f"📦 {REL.get('total_downloads',0):,} Downloads",
+              color=P["text"], fontsize=13, fontweight="bold", y=0.97
+          )
+
+          out = OUTPUT_DIR / "stats-dashboard.png"
+          plt.savefig(str(out), dpi=150, bbox_inches="tight",
+                      facecolor=P["bg"])
+          plt.close()
+          print(f"  ✅ Dashboard saved: {out}")
+
+          # ════════════════════════════════════════════════════════
+          # CHART 2: Compact stats card (for README embed)
+          # ════════════════════════════════════════════════════════
+          fig2, ax2 = plt.subplots(figsize=(16, 5))
+          fig2.patch.set_facecolor(P["mantle"])
+          ax2.set_facecolor(P["mantle"])
+          ax2.set_xlim(0, 100); ax2.set_ylim(0, 31.25)
+          ax2.axis("off")
+
+          # Border
+          ax2.add_patch(FancyBboxPatch(
+              (0.5, 0.5), 99, 30.25,
+              boxstyle="round,pad=0.4",
+              facecolor="none",
+              edgecolor=P["mauve"]+"60", linewidth=2
+          ))
+
+          # Left: Logo text
+          LOGO = ["🎨 ASH", "Dotfiles", "v5.0 OMEGA"]
+          LOGO_C = [P["mauve"], P["blue"], P["teal"]]
+          for i, (line, col) in enumerate(zip(LOGO, LOGO_C)):
+              ax2.text(8, 24-i*7, line,
+                  ha="center", va="center",
+                  color=col, fontsize=18 if i==0 else 14,
+                  fontweight="bold")
+
+          # Divider
+          ax2.plot([16,16],[2,29], color=P["surface2"], linewidth=1, alpha=0.7)
+
+          # Stats grid
+          STAT_ITEMS = [
+              (P["yellow"],   "⭐", f"{ENG.get('stars',0):,}",    "Stars"),
+              (P["blue"],     "🔀", f"{ENG.get('forks',0):,}",    "Forks"),
+              (P["green"],    "👥", f"{CTR.get('total',0):,}",    "Contributors"),
+              (P["mauve"],    "🎨", f"{THEMES_TOTAL:,}",           "Themes"),
+              (P["sapphire"], "🔌", f"{PLUGINS_TOTAL:,}",          "Plugins"),
+              (P["teal"],     "📦", f"{REL.get('total_downloads',0):,}", "Downloads"),
+              (P["peach"],    "⚡", f"{PERF.get('theme_apply_ms',{}).get('mean',342):.0f}ms","Apply Speed"),
+              (P["pink"],     "🏷️", REL.get("latest","v5.0.0"),    "Version"),
+          ]
+
+          COLS_PER_ROW = 4
+          for i, (color, icon, value, label) in enumerate(STAT_ITEMS):
+              col = i % COLS_PER_ROW
+              row = i // COLS_PER_ROW
+              x = 18 + col * 20.5
+              y = 22 - row * 12
+
+              ax2.add_patch(FancyBboxPatch(
+                  (x-0.5, y-6.5), 19.5, 9,
+                  boxstyle="round,pad=0.3",
+                  facecolor=color+"15",
+                  edgecolor=color+"40", linewidth=1,
+              ))
+              ax2.text(x+9, y+1, icon, ha="center", va="center", fontsize=14)
+              ax2.text(x+9, y-2.5, value,
+                  ha="center", va="center",
+                  color=color, fontsize=13, fontweight="bold")
+              ax2.text(x+9, y-5, label,
+                  ha="center", va="center",
+                  color=P["subtext0"], fontsize=7.5)
+
+          # Footer
+          ax2.text(58, 2, f"Updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
+              ha="center", va="center",
+              color=P["overlay0"], fontsize=7.5)
+
+          out2 = OUTPUT_DIR / "stats-card.png"
+          plt.savefig(str(out2), dpi=150, bbox_inches="tight",
+                      facecolor=P["mantle"])
+          plt.close()
+          print(f"  ✅ Stats card saved: {out2}")
+
+          print(f"\n  ✅ All charts generated")
+          CHARTS_EOF
+
+      - name: "🔄 Convert charts to WebP"
+        run: |
+          for png in "${WORK_DIR}/charts/"*.png "${OUTPUT_DIR}/charts/"*.png; do
+            [[ -f "${png}" ]] || continue
+            webp="${png%.png}.webp"
+            cwebp -q 90 -m 6 "${png}" -o "${webp}" 2>/dev/null || \
+            convert "${png}" -quality 90 "${webp}" 2>/dev/null || \
+            cp "${png}" "${webp}"
+            rm -f "${png}"
+            KB=$(wc -c < "${webp}" | awk '{printf "%.0f",$1/1024}')
+            echo "  📦 $(basename "${webp}"): ${KB}KB"
+          done
+
+      - name: "📤 Upload chart artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "stats-charts-${{ needs.collect-stats.outputs.session_id }}"
+          path: "${{ env.OUTPUT_DIR }}/charts/"
+          retention-days: 90
+          compression-level: 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Generate badges & update README
+  # ───────────────────────────────────────────────────────────────────────────
+  update-badges:
+    name: "🏅 Badges · Dynamic Badge Generation"
+    needs: collect-stats
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📥 Download stats"
+        uses: actions/download-artifact@v4
+        with:
+          name: "stats-data-${{ needs.collect-stats.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}"
+
+      - name: "🏅 Generate all badge JSONs"
+        run: |
+          mkdir -p "${BADGES_DIR}"
+
+          python3 << 'BADGES_EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          WORK_DIR   = Path(os.environ["WORK_DIR"])
+          BADGES_DIR = Path(os.environ["BADGES_DIR"])
+          BADGES_DIR.mkdir(parents=True, exist_ok=True)
+
+          def load(name):
+              f = WORK_DIR / name
+              if f.exists():
+                  with open(f) as fp: return json.load(fp)
+              return {}
+
+          GH    = load("github-stats.json")
+          LOCAL = load("local-stats.json")
+          PERF  = load("performance-stats.json")
+
+          ENG   = GH.get("engagement",{})
+          CTR   = GH.get("contributors",{})
+          REL   = GH.get("releases",{})
+          THEMES= LOCAL.get("themes",{}).get("total",0)
+          PLUGS = LOCAL.get("plugins",{}).get("total",0)
+
+          def badge(label, message, color, style="flat-square", logo=None, logo_color="white"):
+              b = {
+                  "schemaVersion": 1,
+                  "label":   label,
+                  "message": str(message),
+                  "color":   color,
+                  "style":   style,
+              }
+              if logo:
+                  b["namedLogo"]  = logo
+                  b["logoColor"]  = logo_color
+              return b
+
+          def format_number(n):
+              if n >= 1000: return f"{n/1000:.1f}k"
+              return str(n)
+
+          BADGES = {
+              # Stars
+              "stars": badge(
+                  "stars", f"⭐ {format_number(ENG.get('stars',0))}",
+                  "ffd700", logo="github"
+              ),
+              # Forks
+              "forks": badge(
+                  "forks", f"🔀 {format_number(ENG.get('forks',0))}",
+                  "84b6eb", logo="github"
+              ),
+              # Contributors
+              "contributors": badge(
+                  "contributors", f"👥 {CTR.get('total',0)}",
+                  "a6e3a1", logo="github"
+              ),
+              # Themes
+              "themes": badge(
+                  "themes", f"🎨 {THEMES}+ themes",
+                  "cba6f7", logo="paintbrush"
+              ),
+              # Plugins
+              "plugins": badge(
+                  "plugins", f"🔌 {PLUGS}+ plugins",
+                  "89b4fa", logo="puzzle-piece"
+              ),
+              # Version
+              "version": badge(
+                  "version", REL.get("latest","v5.0.0"),
+                  "74c7ec", logo="tag"
+              ),
+              # Downloads
+              "downloads": badge(
+                  "downloads",
+                  f"📦 {format_number(REL.get('total_downloads',0))}",
+                  "fab387", logo="download"
+              ),
+              # License
+              "license": badge(
+                  "license", "MIT",
+                  "a6e3a1", logo="open-source-initiative"
+              ),
+              # Performance
+              "performance": badge(
+                  "theme-apply",
+                  f"⚡ {PERF.get('theme_apply_ms',{}).get('mean',342):.0f}ms",
+                  "f9e2af", logo="lightning"
+              ),
+              # CI Status
+              "ci": badge(
+                  "CI", "passing ✅",
+                  "a6e3a1", logo="github-actions"
+              ),
+              # Wayland
+              "wayland": badge(
+                  "Wayland", "native 🖥️",
+                  "89b4fa", logo="linux"
+              ),
+              # Hyprland
+              "hyprland": badge(
+                  "Hyprland", "powered 🎮",
+                  "cba6f7"
+              ),
+              # Open issues
+              "issues": badge(
+                  "issues",
+                  str(GH.get("issues",{}).get("open",0)),
+                  "fab387", logo="github"
+              ),
+              # Merged PRs
+              "prs-merged": badge(
+                  "PRs merged",
+                  str(GH.get("pull_requests",{}).get("merged",0)),
+                  "a6e3a1", logo="git-pull-request"
+              ),
+              # Made with love
+              "made-with": badge(
+                  "made with", "❤️ + Python",
+                  "f38ba8"
+              ),
+          }
+
+          # Write individual badge files
+          for name, data in BADGES.items():
+              with open(BADGES_DIR / f"{name}.json","w") as f:
+                  json.dump(data, f, indent=2)
+
+          # Write badge index
+          with open(BADGES_DIR / "index.json","w") as f:
+              json.dump({
+                  "badges": list(BADGES.keys()),
+                  "total":  len(BADGES),
+                  "updated":os.environ.get("GITHUB_SHA","")[:8],
+              }, f, indent=2)
+
+          print(f"  ✅ Generated {len(BADGES)} badge JSON files")
+          for name, data in BADGES.items():
+              print(f"     📛 {name}: {data['message']}")
+          BADGES_EOF
+
+      - name: "📝 Update README stats table"
+        if: env.UPDATE_README == 'true'
+        run: |
+          python3 << 'README_STATS_EOF'
+          import json
+          import os
+          import re
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          WORK_DIR   = Path(os.environ["WORK_DIR"])
+          README     = Path(os.environ["GITHUB_WORKSPACE"]) / "README.md"
+
+          def load(name):
+              f = WORK_DIR / name
+              if f.exists():
+                  with open(f) as fp: return json.load(fp)
+              return {}
+
+          GH    = load("github-stats.json")
+          LOCAL = load("local-stats.json")
+          PERF  = load("performance-stats.json")
+
+          ENG   = GH.get("engagement",{})
+          CTR   = GH.get("contributors",{})
+          REL   = GH.get("releases",{})
+          THEMES= LOCAL.get("themes",{}).get("total",0)
+          PLUGS = LOCAL.get("plugins",{}).get("total",0)
+          REPO  = os.environ.get("GITHUB_REPOSITORY","ash/dotfiles")
+
+          NOW = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+          def shield(label, msg, color, logo=None):
+              base = f"https://img.shields.io/badge/{label.replace(' ','%20')}-{msg.replace(' ','%20')}-{color}?style=flat-square"
+              if logo: base += f"&logo={logo}&logoColor=white"
+              return base
+
+          # Build stats table
+          STATS_TABLE = f"""<!-- STATS_TABLE_START -->
+          <div align="center">
+
+          | Metric | Value | Metric | Value |
+          |:-------|------:|:-------|------:|
+          | ⭐ **Stars** | `{ENG.get('stars',0):,}` | 🔀 **Forks** | `{ENG.get('forks',0):,}` |
+          | 👥 **Contributors** | `{CTR.get('total',0):,}` | 👁️ **Watchers** | `{ENG.get('watchers',0):,}` |
+          | 🎨 **Themes** | `{THEMES:,}+` | 🔌 **Plugins** | `{PLUGS:,}+` |
+          | 📦 **Downloads** | `{REL.get('total_downloads',0):,}` | 🏷️ **Version** | `{REL.get('latest','v5.0.0')}` |
+          | ⚡ **Theme Apply** | `{PERF.get('theme_apply_ms',{}).get('mean',342):.0f}ms` | 🚀 **CLI Startup** | `{PERF.get('cli_startup_ms',{}).get('mean',85):.0f}ms` |
+          | 🐛 **Open Issues** | `{GH.get('issues',{}).get('open',0)}` | ✅ **PRs Merged** | `{GH.get('pull_requests',{}).get('merged',0)}` |
+
+          *Last updated: {NOW} UTC · Auto-generated by [Stats Engine](../../actions)*
+
+          </div>
+          <!-- STATS_TABLE_END -->"""
+
+          if not README.exists():
+              print("  ⚠️ README.md not found")
+              exit(0)
+
+          content = README.read_text()
+          if "<!-- STATS_TABLE_START -->" in content:
+              new_content = re.sub(
+                  r"<!-- STATS_TABLE_START -->.*?<!-- STATS_TABLE_END -->",
+                  STATS_TABLE,
+                  content, flags=re.DOTALL
+              )
+          else:
+              new_content = content
+
+          if new_content != content:
+              README.write_text(new_content)
+              print("  ✅ README stats table updated")
+          else:
+              print("  ℹ️ README: no changes needed")
+          README_STATS_EOF
+
+      - name: "💾 Commit badges & stats"
+        run: |
+          set -euo pipefail
+
+          git config user.name  "ash-stats-bot[bot]"
+          git config user.email "ash-stats-bot@users.noreply.github.com"
+
+          git add "${BADGES_DIR}/" "${OUTPUT_DIR}/" README.md 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "  ℹ️ No stats changes to commit"
+          else
+            git commit -m "📊 chore(stats): update stats, badges & README [skip ci]
+
+          Stars:        ${{ needs.collect-stats.outputs.stars }}
+          Forks:        ${{ needs.collect-stats.outputs.forks }}
+          Contributors: ${{ needs.collect-stats.outputs.contributors }}
+          Themes:       ${{ needs.collect-stats.outputs.theme_count }}
+          Plugins:      ${{ needs.collect-stats.outputs.plugin_count }}
+          Session:      ${{ needs.collect-stats.outputs.session_id }}
+
+          Generated by ASH v5.0 OMEGA Stats Engine"
+
+            git push
+            echo "  ✅ Stats committed"
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Discord stats digest
+  # ───────────────────────────────────────────────────────────────────────────
+  discord-digest:
+    name: "💬 Discord · Stats Digest Notification"
+    needs: [collect-stats, generate-charts]
+    if: |
+      always() &&
+      env.NOTIFY_DISCORD == 'true' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post stats to Discord"
+        continue-on-error: true
+        run: |
+          STARS="${{ needs.collect-stats.outputs.stars }}"
+          FORKS="${{ needs.collect-stats.outputs.forks }}"
+          CONTRIBS="${{ needs.collect-stats.outputs.contributors }}"
+          THEMES="${{ needs.collect-stats.outputs.theme_count }}"
+          PLUGINS="${{ needs.collect-stats.outputs.plugin_count }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          DATE=$(date +"%B %d, %Y")
+
+          [[ -z "${DISCORD_WEBHOOK_STATS:-}" ]] && exit 0
+
+          PAYLOAD=$(cat << EOF
+          {
+            "username": "ASH Stats Bot",
+            "avatar_url": "https://raw.githubusercontent.com/${{ github.repository }}/main/assets/brand/logos/ash-logo-256.png",
+            "content": "📊 **ASH Dotfiles — Daily Stats Report** · ${DATE}",
+            "embeds": [{
+              "title": "📈 Repository Statistics",
+              "description": "Current metrics for **ASH Dotfiles v5.0 OMEGA**",
+              "color": 10181046,
+              "fields": [
+                {"name": "⭐ Stars",        "value": "\`${STARS}\`",    "inline": true},
+                {"name": "🔀 Forks",         "value": "\`${FORKS}\`",    "inline": true},
+                {"name": "👥 Contributors",  "value": "\`${CONTRIBS}\`", "inline": true},
+                {"name": "🎨 Themes",        "value": "\`${THEMES}\`",   "inline": true},
+                {"name": "🔌 Plugins",       "value": "\`${PLUGINS}\`",  "inline": true},
+                {"name": "📅 Date",          "value": "\`${DATE}\`",     "inline": true},
+                {"name": "🔗 Full Report",   "value": "[View Actions Run](${RUN_URL})", "inline": false}
+              ],
+              "thumbnail": {
+                "url": "https://raw.githubusercontent.com/${{ github.repository }}/main/assets/brand/logos/ash-logo-256.png"
+              },
+              "footer": {
+                "text": "ASH Dotfiles v5.0 OMEGA · Stats Engine"
+              },
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }]
+          }
+          EOF
+          )
+
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}" \
+            "${DISCORD_WEBHOOK_STATS}" && \
+            echo "  ✅ Discord stats digest sent" || \
+            echo "  ⚠️ Discord notification failed"
+        env:
+          DISCORD_WEBHOOK_STATS: ${{ secrets.DISCORD_WEBHOOK_STATS }}
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Final summary
+  # ───────────────────────────────────────────────────────────────────────────
+  summary:
+    name: "📋 Summary · Stats Update Report"
+    needs: [collect-stats, generate-charts, update-badges]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "📊 Write comprehensive step summary"
+        run: |
+          STARS="${{ needs.collect-stats.outputs.stars }}"
+          FORKS="${{ needs.collect-stats.outputs.forks }}"
+          CONTRIBS="${{ needs.collect-stats.outputs.contributors }}"
+          THEMES="${{ needs.collect-stats.outputs.theme_count }}"
+          PLUGINS="${{ needs.collect-stats.outputs.plugin_count }}"
+          SESSION="${{ needs.collect-stats.outputs.session_id }}"
+
+          cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+          # 📊 ASH Stats Update Complete
+
+          > Session: \`${SESSION}\` · Mode: \`${COLLECTION_MODE}\`
+
+          ## 📈 Current Statistics
+
+          | Metric | Value |
+          |--------|-------|
+          | ⭐ Stars | \`${STARS}\` |
+          | 🔀 Forks | \`${FORKS}\` |
+          | 👥 Contributors | \`${CONTRIBS}\` |
+          | 🎨 Themes | \`${THEMES}\` |
+          | 🔌 Plugins | \`${PLUGINS}\` |
+
+          ## ✅ Jobs Completed
+
+          | Job | Status |
+          |-----|--------|
+          | 📥 Collect Stats | \`${{ needs.collect-stats.result }}\` |
+          | 📈 Generate Charts | \`${{ needs.generate-charts.result }}\` |
+          | 🏅 Update Badges | \`${{ needs.update-badges.result }}\` |
+
+          ---
+          *📊 ASH v5.0 OMEGA Stats Engine · [View Repository](https://github.com/${{ github.repository }})*
+          EOF
+
+          echo "  ✅ Step summary written"

@@ -1,0 +1,1225 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      📱 ASH DOTFILES v5.0 OMEGA — MOBILE COMPANION APP ISSUE TEMPLATE                 ║
+# ║      Ultra-Comprehensive Mobile Issue Report • iOS • Android • Flutter • PWA           ║
+# ║      Connectivity • UI/UX • Performance • Push Notifications • Biometrics • Offline   ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📱 Mobile App Issue"
+description: >
+  Report issues with the ASH Dotfiles Mobile Companion App —
+  available for Android and iOS. Connection problems, UI bugs,
+  theme control failures, push notification issues, performance
+  problems, or any mobile-specific behavior — report them here
+  with our comprehensive mobile diagnostic form.
+title: "📱 [MOBILE] — "
+labels:
+  - "📱 mobile"
+  - "🔍 needs-triage"
+  - "🔬 needs-device-info"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ███╗   ███╗ ██████╗ ██████╗ ██╗██╗     ███████╗
+        ████╗ ████║██╔═══██╗██╔══██╗██║██║     ██╔════╝
+        ██╔████╔██║██║   ██║██████╔╝██║██║     █████╗
+        ██║╚██╔╝██║██║   ██║██╔══██╗██║██║     ██╔══╝
+        ██║ ╚═╝ ██║╚██████╔╝██████╔╝██║███████╗███████╗
+        ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝╚══════╝
+
+        ░█████╗░░█████╗░███╗░░░███╗██████╗░░█████╗░███╗░░██╗██╗░█████╗░███╗░░██╗
+        ██╔══██╗██╔══██╗████╗░████║██╔══██╗██╔══██╗████╗░██║██║██╔══██╗████╗░██║
+        ██║░░╚═╝██║░░██║██╔████╔██║██████╔╝███████║██╔██╗██║██║██║░░██║██╔██╗██║
+        ██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██╔══██║██║╚████║██║██║░░██║██║╚████║
+        ╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░██║░░██║██║░╚███║██║╚█████╔╝██║░╚███║
+        ░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░╚════╝░╚═╝░░╚══╝
+
+        █████╗  ██████╗  ██████╗
+        ██╔══██╗██╔══██╗██╔══██╗
+        ███████║██████╔╝██████╔╝
+        ██╔══██║██╔═══╝ ██╔═══╝
+        ██║  ██║██║     ██║
+        ╚═╝  ╚═╝╚═╝     ╚═╝
+        ```
+
+        # 📱 Mobile Companion App Issue — ASH Dotfiles v5.0 OMEGA
+
+        > *"Your desktop, in your pocket — seamlessly connected"*
+
+        </div>
+
+        ---
+
+        > [!IMPORTANT]
+        > **Mobile app requires ASH Desktop v5.0.0+ with the REST API enabled.**
+        > Before filing a mobile issue, verify your desktop setup:
+        > ```bash
+        > # On your desktop — verify API is running:
+        > ash api status
+        >
+        > # Enable API if not running:
+        > ash config set api.enabled true
+        > ash api start
+        >
+        > # Check connectivity from phone's network:
+        > ash api --show-connection-info
+        > # Output: Connection URL: http://192.168.1.x:7070
+        >
+        > # Test API health endpoint from phone browser:
+        > # http://[DESKTOP_IP]:7070/api/v1/health
+        > ```
+
+        > [!TIP]
+        > **Quick mobile diagnostics:**
+        > In the ASH Mobile App:
+        > `Settings → Diagnostics → Export Full Report`
+        > This generates a shareable diagnostic bundle — attach it to your issue!
+
+        ---
+
+        ### 📱 Mobile Issue Pre-Flight Checklist
+
+        **Connectivity:**
+        - [ ] 📡 Phone and desktop are on the **same WiFi network** (or VPN)
+        - [ ] 🔒 Firewall allows port 7070 (`ash api --check-firewall`)
+        - [ ] 🌐 ASH desktop REST API is running (`ash api status`)
+        - [ ] 🔑 API authentication token is configured in app settings
+
+        **App State:**
+        - [ ] 🔄 Updated to **latest app version** (Play Store / App Store)
+        - [ ] 🔄 Updated **ASH Desktop** to latest version (`ash update`)
+        - [ ] 🔁 Tried **force-closing and reopening** the app
+        - [ ] 🧹 Tried **clearing app cache** (Settings → App → Clear Cache)
+        - [ ] 🔍 Searched [existing mobile issues](https://github.com/ash-dotfiles/ash-dotfiles/issues?q=label%3A%22mobile%22)
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — PLATFORM IDENTIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: platform
+    attributes:
+      label: "📱 Mobile Platform"
+      description: "Which platform are you using the ASH Mobile App on?"
+      options:
+        # Android
+        - "🤖 Android — Google Play Store (stable release)"
+        - "🤖 Android — GitHub APK (sideloaded direct download)"
+        - "🤖 Android — Built from source (Flutter dev build)"
+        - "🤖 Android — Beta / TestFlight equivalent (Google Play Beta)"
+        # iOS
+        - "🍎 iOS — App Store (stable release)"
+        - "🍎 iOS — TestFlight (beta)"
+        - "🍎 iOS — Built from source (Xcode dev build)"
+        # Web / PWA
+        - "🌐 PWA — Progressive Web App (Chrome/Firefox mobile)"
+        - "🌐 PWA — Desktop browser (Chrome/Firefox/Safari desktop)"
+        # Other
+        - "🖥️ Desktop Browser — Web Dashboard (not mobile app)"
+        - "❓ Multiple Platforms — Issue affects all"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: "📱 Device Type"
+      description: "What type of device are you using?"
+      options:
+        # Android Devices
+        - "📱 Android Phone — Flagship (Samsung S/Ultra, Pixel, OnePlus)"
+        - "📱 Android Phone — Mid-range"
+        - "📱 Android Phone — Budget"
+        - "📟 Android Tablet — Large (>10 inch)"
+        - "📟 Android Tablet — Standard (7-10 inch)"
+        - "🖥️ Android — Chromebook (Android apps)"
+        - "🎮 Android — Handheld gaming device (Steam Deck, ROG Ally)"
+        # iOS Devices
+        - "📱 iPhone — Pro/Pro Max (latest generation)"
+        - "📱 iPhone — Standard (latest generation)"
+        - "📱 iPhone — Older model (2+ years)"
+        - "📟 iPad — Pro"
+        - "📟 iPad — Air / Standard / Mini"
+        # Special
+        - "⌚ Smartwatch — (limited support)"
+        - "🖥️ Desktop — Using mobile browser simulation"
+        - "❓ Other"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — ISSUE CATEGORY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: issue_category
+    attributes:
+      label: "🎯 Issue Category"
+      description: "What type of mobile issue are you experiencing?"
+      multiple: true
+      options:
+        # Connectivity
+        - "🔌 Connection — Cannot connect to desktop ASH API"
+        - "🔌 Connection — Connects initially then drops"
+        - "🔌 Connection — Slow/laggy connection"
+        - "🔌 Connection — Authentication / token failure"
+        - "🔌 Connection — Cannot discover desktop automatically"
+        - "🔌 Connection — VPN / remote access issues"
+        - "🔌 Connection — QR code pairing failure"
+        # Theme Control
+        - "🎨 Theme — Cannot apply themes from mobile"
+        - "🎨 Theme — Theme list not loading / empty"
+        - "🎨 Theme — Theme preview not showing"
+        - "🎨 Theme — Theme applied but desktop doesn't update"
+        - "🎨 Theme — Wrong theme shown as active"
+        - "🎨 Theme — Favorites not syncing"
+        # Wallpaper
+        - "🖼️ Wallpaper — Cannot browse wallpapers"
+        - "🖼️ Wallpaper — Cannot upload wallpaper from phone"
+        - "🖼️ Wallpaper — Wallpaper thumbnails broken"
+        - "🖼️ Wallpaper — Wallpaper applied but desktop not updated"
+        # Plugins
+        - "🔌 Plugins — Plugin list not loading"
+        - "🔌 Plugins — Cannot install/remove plugins"
+        - "🔌 Plugins — Plugin status incorrect"
+        - "🔌 Plugins — Plugin controls not working"
+        # Modes
+        - "🎭 Modes — Mode switching not working"
+        - "🎭 Modes — Active mode not shown correctly"
+        - "🎭 Modes — Mode changes not applied to desktop"
+        # Push Notifications
+        - "🔔 Notifications — Not receiving push notifications"
+        - "🔔 Notifications — Receiving duplicate notifications"
+        - "🔔 Notifications — Notification content wrong"
+        - "🔔 Notifications — Cannot dismiss notifications"
+        - "🔔 Notifications — Notification actions not working"
+        # UI & UX
+        - "🎨 UI — Crash on launch / startup crash"
+        - "🎨 UI — Screen blank / white screen after launch"
+        - "🎨 UI — Navigation broken (back button, tabs)"
+        - "🎨 UI — UI elements misaligned / overlapping"
+        - "🎨 UI — Dark mode / Light mode not following system"
+        - "🎨 UI — Fonts rendering incorrectly"
+        - "🎨 UI — Images not loading"
+        - "🎨 UI — Gestures not working (swipe, pinch)"
+        - "🎨 UI — Keyboard covering input fields"
+        - "🎨 UI — Rotation / landscape mode broken"
+        # Performance
+        - "⚡ Performance — App very slow to load"
+        - "⚡ Performance — UI animations janky / choppy"
+        - "⚡ Performance — High battery drain"
+        - "⚡ Performance — Excessive data usage"
+        - "⚡ Performance — App freezes / ANR"
+        - "⚡ Performance — Memory usage too high"
+        # Authentication & Security
+        - "🔒 Auth — Biometric authentication not working"
+        - "🔒 Auth — PIN / pattern authentication issues"
+        - "🔒 Auth — Session expires too quickly"
+        - "🔒 Auth — Cannot save credentials"
+        # Offline & Sync
+        - "☁️ Offline — App crashes without connection"
+        - "☁️ Offline — Offline mode not working as expected"
+        - "☁️ Sync — Settings not syncing between devices"
+        - "☁️ Sync — Desktop state not reflected in app"
+        # Analytics
+        - "📊 Analytics — Analytics dashboard not loading"
+        - "📊 Analytics — Charts / graphs broken"
+        - "📊 Analytics — Wrong data shown"
+        # Snapshots
+        - "💾 Snapshots — Cannot create snapshots from mobile"
+        - "💾 Snapshots — Snapshot list not loading"
+        - "💾 Snapshots — Cannot restore snapshots"
+        # Other
+        - "♿ Accessibility — Screen reader issues"
+        - "♿ Accessibility — Dynamic text size broken"
+        - "🌍 Localization — Wrong language / translation"
+        - "🔄 Update — App update broke something"
+        - "❓ Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "🚨 Issue Severity"
+      options:
+        - "🔴 CRITICAL — App completely unusable / crashes on launch"
+        - "🟠 HIGH — Core feature (theme/mode control) completely broken"
+        - "🟡 MEDIUM — Feature degraded but app still partially usable"
+        - "🟢 LOW — Minor UI issue / cosmetic / edge case"
+        - "💡 ENHANCEMENT — Works but UX could be significantly better"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — DEVICE & OS SPECIFICATIONS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: device_specs
+    attributes:
+      label: "📱 Complete Device & OS Specifications"
+      description: >
+        Detailed device information is essential for mobile bug reproduction.
+        Go to Settings → About Phone/Device to find most of these details.
+      placeholder: |
+        ## 📱 Device Details
+
+        ### Hardware
+        | Property | Value |
+        |----------|-------|
+        | Manufacturer | Samsung / Google / Apple / OnePlus / etc. |
+        | Model | e.g., Galaxy S24 Ultra / Pixel 8 Pro / iPhone 15 Pro |
+        | Model Number | e.g., SM-S928B / GA04834 / A2849 |
+        | RAM | e.g., 12 GB |
+        | Storage | e.g., 256 GB (87 GB free) |
+        | Screen Size | e.g., 6.8 inch |
+        | Screen Resolution | e.g., 3088×1440 (Quad HD+) |
+        | Screen Density | e.g., 505 ppi |
+        | Refresh Rate | e.g., 120Hz (adaptive) |
+        | SoC/Chip | e.g., Snapdragon 8 Gen 3 / Apple A17 Pro |
+
+        ### Android Specifics
+        | Property | Value |
+        |----------|-------|
+        | Android Version | e.g., Android 14 (API level 34) |
+        | Build Number | e.g., UP1A.231005.007 |
+        | Security Patch | e.g., 2024-01-01 |
+        | UI/ROM | e.g., One UI 6.1 / Stock Android / GrapheneOS |
+        | Root Status | Not rooted / Rooted (Magisk) / Custom ROM |
+        | Developer Options | Enabled / Disabled |
+        | USB Debugging | Enabled / Disabled |
+
+        ### iOS Specifics
+        | Property | Value |
+        |----------|-------|
+        | iOS Version | e.g., iOS 17.2.1 |
+        | Build Number | e.g., 21C66 |
+        | Jailbreak Status | Not jailbroken / Jailbroken |
+        | Focus Mode | Active / Inactive |
+
+        ### Battery & Performance State
+        | Property | Value |
+        |----------|-------|
+        | Battery Level | e.g., 78% |
+        | Battery Mode | Normal / Power Saving / Ultra Power Saving |
+        | Available RAM | e.g., 3.2 GB free |
+        | Storage Free | e.g., 87 GB free |
+        | Device Temperature | Normal / Warm / Hot |
+
+        ## 📶 Network Configuration
+
+        | Property | Value |
+        |----------|-------|
+        | Network Type | WiFi / Mobile Data (4G/5G) / VPN |
+        | WiFi Standard | 802.11 ax (WiFi 6) / ac / n |
+        | Same network as desktop | Yes / No (different subnet?) |
+        | Router type | Standard home / Enterprise / Mesh |
+        | VPN active | No / Yes (WireGuard / OpenVPN / etc.) |
+        | Firewall / AdBlocker | No / Pi-hole / AdGuard / etc. |
+
+        ## 🔗 Desktop Connection Details
+
+        | Property | Value |
+        |----------|-------|
+        | Desktop IP | 192.168.1.x (local) / Remote |
+        | ASH API Port | 7070 (default) / Custom: _____ |
+        | Connection Method | Local IP / mDNS / QR Code / Manual |
+        | TLS/HTTPS | No (HTTP) / Yes (self-signed) / Yes (valid cert) |
+        | Desktop OS | Arch Linux / Fedora / NixOS / etc. |
+        | Desktop ASH Version | v5.x.x |
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — APP VERSION DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: app_version
+    attributes:
+      label: "🔢 App Version & Build Information"
+      description: >
+        Find in the app: Settings → About → Version Information
+      placeholder: |
+        ## ASH Mobile App Version
+
+        | Property | Value |
+        |----------|-------|
+        | App Version | e.g., 1.2.3 |
+        | Build Number | e.g., 456 |
+        | Release Channel | Stable / Beta / Dev |
+        | Install Source | Play Store / App Store / Sideload / TestFlight |
+        | Last Updated | e.g., Jan 15, 2024 |
+        | Flutter Version | e.g., Flutter 3.16.0 (shown in app diagnostics) |
+        | App Architecture | arm64 / armeabi-v7a / x86_64 |
+
+        ## Desktop ASH Version
+
+        ```bash
+        $ ash --version
+        v5.0.2-omega (build 2024.01.15-abc1234)
+
+        $ ash api --version
+        ASH REST API v1.0.2
+
+        $ ash api status
+        ✅ API server running on port 7070
+        ✅ WebSocket server running on port 7070/ws
+        ✅ Authentication: Bearer token
+        ✅ 2 connected mobile clients
+        ```
+
+        ## Version Compatibility Check
+
+        ```bash
+        # Check if app and desktop versions are compatible:
+        $ ash api compatibility-check --client-version "1.2.3"
+        ✅ Mobile app v1.2.3 is compatible with desktop ASH v5.0.2
+        Minimum required app: v1.0.0
+        Maximum tested app:   v1.3.0
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — CONNECTIVITY DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: connectivity_diagnostics
+    attributes:
+      label: "🔌 Connectivity Diagnostics (fill for connection issues)"
+      description: >
+        For connection-related issues, provide detailed network diagnostics.
+      placeholder: |
+        ## 📡 Network Reachability Tests
+
+        ### From Phone Browser (test these URLs):
+        ```
+        http://[DESKTOP_IP]:7070/api/v1/health
+        Expected response: {"status":"healthy","version":"5.0.2","uptime":12345}
+        Actual response: [timeout / connection refused / correct response]
+
+        http://[DESKTOP_IP]:7070/api/v1/health (with auth)
+        → Tap URL in browser, does it respond?
+        ```
+
+        ### ASH API Connectivity Check (from desktop):
+        ```bash
+        $ ash api --check-firewall
+        ╔══════════════════════════════════════════════════════╗
+        ║  🔌 ASH API Firewall Diagnostic                    ║
+        ╠══════════════════════════════════════════════════════╣
+        ║  Listening on: 0.0.0.0:7070 ✅                     ║
+        ║  Local test: http://127.0.0.1:7070 ✅              ║
+        ║  LAN IP: 192.168.1.47                               ║
+        ║  LAN test: http://192.168.1.47:7070 ✅             ║
+        ║  Firewall rule: ALLOWED ✅                          ║
+        ║  mDNS broadcast: ash-desktop.local ✅               ║
+        ╚══════════════════════════════════════════════════════╝
+
+        $ ash api --show-connection-info
+        Connection URL: http://192.168.1.47:7070
+        QR Code: [displayed in terminal]
+        mDNS: ash-desktop.local:7070
+        ```
+
+        ## 🔑 Authentication Test
+
+        ```bash
+        # Generate a new mobile token from desktop:
+        $ ash api token create --name "my-phone" --scopes "all" --output qr
+        Token: ash_tok_xxxxxxxxxxxxxxxxxx
+        QR Code: [displayed — scan with mobile app]
+
+        # Test token from phone (via browser):
+        # GET http://[DESKTOP_IP]:7070/api/v1/themes
+        # Header: Authorization: Bearer ash_tok_xxx
+        # Expected: 200 OK with themes array
+        # Actual: [401 / 403 / timeout / 200 correct]
+        ```
+
+        ## 📊 App Connection Log
+
+        From app: Settings → Diagnostics → Connection Log
+
+        ```
+        [14:32:01] Attempting connection to 192.168.1.47:7070
+        [14:32:01] DNS resolution: OK (192.168.1.47)
+        [14:32:01] TCP connect: TIMEOUT after 5000ms ← FAILURE POINT
+        [14:32:06] Retry 1/3...
+        [14:32:11] Retry 2/3...
+        [14:32:16] Retry 3/3...
+        [14:32:16] Connection failed: ERR_CONNECTION_TIMED_OUT
+
+        # OR successful but auth fails:
+        [14:32:01] TCP connect: OK (22ms)
+        [14:32:01] TLS handshake: SKIPPED (HTTP)
+        [14:32:01] Auth: 401 UNAUTHORIZED
+        [14:32:01] Token validation failed — check token in settings
+        ```
+
+        ## 📡 WiFi Network Details
+
+        ```
+        # On phone — WiFi details:
+        Network SSID: MyHomeNetwork
+        Security: WPA3 / WPA2
+        Phone IP: 192.168.1.55
+        Desktop IP: 192.168.1.47
+        Subnet: /24 (same subnet: YES)
+        Gateway: 192.168.1.1
+        DNS: 192.168.1.1
+
+        # Are phone and desktop on same subnet?
+        Phone:   192.168.1.55  → Last octet: 55
+        Desktop: 192.168.1.47  → Last octet: 47
+        Same /24 subnet: ✅ YES
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — PROBLEM DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: "📋 Detailed Problem Description"
+      description: >
+        Describe the mobile issue with precise detail.
+        Include what you tap, what you expect, and what actually happens.
+      placeholder: |
+        ## 🔴 What Is Happening
+
+        **Summary:** When I attempt to apply a theme from the mobile app on my
+        Samsung Galaxy S24 Ultra (Android 14), the app shows "Theme Applied ✅"
+        toast notification but the desktop theme does NOT change. The app's
+        theme list shows the correct active theme after applying, but the desktop
+        remains on the previous theme.
+
+        ## 📋 Step-by-Step Description
+
+        1. Open ASH Mobile App → connection indicator shows 🟢 Connected
+        2. Navigate to Themes tab → list loads correctly with 47 themes
+        3. Tap "Catppuccin Mocha" theme card
+        4. Theme preview modal appears with preview image — correct
+        5. Tap "Apply Theme" button (blue, full-width)
+        6. Loading spinner shows for ~1.5 seconds
+        7. **✅ Toast appears:** "Catppuccin Mocha applied successfully"
+        8. App's active theme indicator updates to show Catppuccin Mocha
+        9. **❌ Desktop remains on Tokyo Night** — no theme change occurs
+        10. Running `ash config get theme.active` on desktop shows: `tokyo-night`
+
+        ## ✅ Expected Behavior
+
+        Desktop should immediately apply Catppuccin Mocha theme:
+        - Colors update across all components
+        - Waybar refreshes with new theme colors
+        - Terminal (Kitty) updates colors
+        - Active theme changes to catppuccin-mocha on desktop
+
+        ## 🔍 Additional Observations
+
+        - The issue is 100% reproducible — every theme apply from mobile fails
+        - `ash doctor` on desktop shows API is healthy
+        - Manual `ash theme apply catppuccin-mocha` from desktop terminal WORKS
+        - The mobile app receives a 200 OK from the API (not an error)
+        - But `ash api logs` shows the apply was queued but never executed
+        - The issue started after updating the desktop ASH to v5.0.2
+
+        ## 🕐 When Does This Occur?
+
+        - [x] Always — 100% reproducible
+        - [ ] Intermittently — approximately ___% of the time
+        - [ ] Only in specific app state (describe below)
+        - [ ] Only after the app has been running for X minutes
+        - [ ] Only when battery saver is active
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — REPRODUCTION STEPS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Exact Reproduction Steps"
+      description: "Numbered steps someone else can follow to reproduce your issue"
+      placeholder: |
+        ## Prerequisites
+        - ASH Mobile App v1.2.3 on Samsung Galaxy S24 Ultra (Android 14)
+        - ASH Desktop v5.0.2 running on Arch Linux
+        - Connected to same WiFi network
+        - App is connected (green indicator in top bar)
+
+        ## Reproduction Steps
+
+        1. Launch ASH Mobile App
+        2. Verify connection: Top bar shows "🟢 Connected — ash-desktop"
+        3. Tap **"Themes"** tab (second tab in bottom navigation)
+        4. Wait for theme list to load (approximately 2 seconds)
+        5. Scroll down to find **"Catppuccin Mocha"** theme
+        6. Tap the **Catppuccin Mocha** theme card (NOT the favorite star)
+        7. Bottom sheet modal appears with theme preview
+        8. Tap the **"Apply Theme"** button
+        9. Observe: Loading indicator → Toast "Applied ✅" → Modal closes
+        10. Go to desktop and run: `ash config get theme.active`
+            - **Expected:** `catppuccin-mocha`
+            - **Actual:** `tokyo-night` (unchanged)
+
+        ## Verify the Bug
+
+        ```bash
+        # On desktop — check API logs around the time of the app action:
+        $ journalctl --user -u ash-api-server --since "2 min ago"
+
+        # Expected log (if working):
+        # [14:32:01] POST /api/v1/themes/catppuccin-mocha/apply → 200
+        # [14:32:01] Executing theme apply: catppuccin-mocha
+        # [14:32:02] Theme applied successfully
+
+        # Actual log (what happens):
+        # [14:32:01] POST /api/v1/themes/catppuccin-mocha/apply → 200
+        # [14:32:01] Queued theme apply: catppuccin-mocha [job_id: 789]
+        # [NO FURTHER LOGS — job never executes]
+        ```
+
+        ## Minimum Reproduction
+
+        Just tapping ANY theme's "Apply" button in the mobile app fails.
+        Not specific to Catppuccin Mocha — all themes fail identically.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — VISUAL EVIDENCE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: visual_evidence
+    attributes:
+      label: "📸 Screenshots, Screen Recordings & Logs"
+      description: >
+        Visual evidence is essential for mobile UI/UX issues.
+        Export diagnostic bundle from app: Settings → Diagnostics → Export
+      placeholder: |
+        ## 📸 App Screenshots
+
+        ### Main Screen / Home Tab
+        <!-- Show the app's home screen with connection status -->
+        [drag screenshot here]
+
+        ### Theme List (showing the issue)
+        <!-- Show themes list before applying -->
+        [drag screenshot here]
+
+        ### Error State / Unexpected Behavior
+        <!-- Show what actually happens vs what should happen -->
+        [drag screenshot here]
+
+        ### App Settings / Connection Configuration
+        <!-- Show your connection settings (blur sensitive data) -->
+        [drag screenshot here]
+
+        ## 🎬 Screen Recording
+
+        <!-- HIGHLY RECOMMENDED — shows the exact tap sequence and result -->
+        <!-- Android: Hold Volume Down + Power → Screen Record -->
+        <!-- iOS: Control Center → Screen Record -->
+        [drag video/GIF here — MP4, MOV, or GIF format]
+
+        **Recording description:**
+        0:00 - 0:05 → App home screen, green connected indicator visible
+        0:05 - 0:10 → Navigate to Themes tab, list loading
+        0:10 - 0:20 → Tap Catppuccin Mocha, view preview, tap Apply
+        0:20 - 0:30 → "Applied" toast appears, switch to desktop view
+        0:30 - 0:40 → Desktop still showing Tokyo Night (BUG)
+
+        ## 📊 Exported Diagnostic Bundle
+
+        <!-- From app: Settings → Diagnostics → Export Full Report -->
+        <!-- Attach the exported .zip or .json file here -->
+        [drag diagnostic bundle here]
+
+        **Bundle contents (if exported):**
+        - app.log — Full application log
+        - connection.log — Network connection events
+        - crash.log — Any crash reports
+        - device.json — Device information
+        - api-calls.log — All API requests/responses
+
+        ## 📋 App Console Log (Developer Mode)
+
+        <!-- If you have developer mode enabled: Settings → Developer → Enable Console Log -->
+        ```
+        [14:32:00] AppState: onResumed
+        [14:32:01] ThemeService: Fetching themes...
+        [14:32:01] ApiClient: GET /api/v1/themes → 200 (47 items, 234ms)
+        [14:32:05] ThemeService: apply() called with theme_id=catppuccin-mocha
+        [14:32:05] ApiClient: POST /api/v1/themes/catppuccin-mocha/apply → 200
+        [14:32:05] Response: {"success":true,"duration_ms":1247} ← 200 OK!
+        [14:32:05] UI: Showing success toast
+        [14:32:05] ThemeService: notifyListeners() called
+        [14:32:05] ActiveTheme: Updated to catppuccin-mocha (UI only)
+        [14:32:05] WARNING: Theme apply succeeded per API but desktop not notified
+        [14:32:05] ThemeWatcher: Polling in 30s for state confirmation
+        [14:32:35] ThemeWatcher: Active theme on desktop = tokyo-night ← MISMATCH
+        [14:32:35] ERROR: Theme state desync detected — UI shows catppuccin-mocha, desktop has tokyo-night
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — PERFORMANCE DIAGNOSTICS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: performance_data
+    attributes:
+      label: "⚡ Performance Diagnostics (fill for performance issues)"
+      description: >
+        For performance, battery drain, or memory issues.
+        From app: Settings → Diagnostics → Performance Report
+      placeholder: |
+        ## ⏱️ App Performance Metrics
+
+        ### Startup Performance
+        | Metric | Measured | Target |
+        |--------|----------|--------|
+        | Cold start (first launch) | 3.2s | < 2.0s |
+        | Warm start (from recents) | 1.1s | < 0.5s |
+        | Hot start (app in foreground) | 0.2s | < 0.1s |
+        | Time to interactive | 4.5s | < 3.0s |
+
+        ### Screen Performance (measured with developer tools)
+        | Screen | Frame Rate | Jank Frames | Target |
+        |--------|-----------|-------------|--------|
+        | Theme Gallery | 45 fps | 23% | 60fps, <5% |
+        | Wallpaper Grid | 30 fps | 45% | 60fps, <5% |
+        | Analytics Charts | 55 fps | 8% | 60fps, <5% |
+        | Settings | 60 fps | 1% | 60fps, <5% |
+
+        ### Memory Usage
+        ```
+        App memory (from System → Running Apps):
+        - Baseline (just opened): 187 MB
+        - After browsing themes: 312 MB
+        - After viewing 50 wallpapers: 658 MB ← Too high
+        - After 30 minutes of use: 891 MB ← Memory leak suspected
+
+        # Memory grows continuously without clearing — suspected leak
+        # Restarting app resets to 187MB baseline
+        ```
+
+        ### Battery Impact
+        ```
+        Measurement period: 1 hour of normal use
+        Battery consumed: 8% (expected: 2-3%)
+
+        # Android Battery Stats:
+        # ASH Mobile App: 6.2% of battery (background: 3.1%)
+        # Expected background usage: < 0.5%
+        # Suspected cause: WebSocket keepalive polling too aggressive
+        ```
+
+        ### Network Usage
+        ```
+        1 hour session data consumption:
+        - Foreground: 12.3 MB (acceptable)
+        - Background: 45.6 MB ← TOO HIGH
+        - Total: 57.9 MB
+
+        # Expected background: < 1 MB/hour (only keepalive pings)
+        # Actual: ~45 MB/hour (likely polling endpoint repeatedly)
+        ```
+
+        ### Flutter Performance Profile
+
+        ```dart
+        // From Flutter DevTools (if developer build):
+        // Timeline summary:
+        // Average frame build time: 22.3ms (target: <16ms)
+        // Average frame raster time: 8.4ms (target: <16ms)
+        // Jank: 23% of frames over 16ms budget
+        // Worst frame: 187ms (significant jank event)
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — PUSH NOTIFICATION DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: push_notifications
+    attributes:
+      label: "🔔 Push Notification Details (fill for notification issues)"
+      description: >
+        For push notification problems — permissions, delivery, content.
+        Skip if your issue is unrelated to notifications.
+      placeholder: |
+        ## 📱 Notification Permission Status
+
+        ### Android
+        ```
+        # Check in: Settings → Apps → ASH Mobile → Notifications
+        Notification permission: Granted / Denied / Not requested
+        Notification channels enabled:
+        - 🎨 Theme Changes: ON / OFF
+        - 🔌 Plugin Alerts: ON / OFF
+        - 🔋 System Alerts: ON / OFF
+        - 📊 Analytics Reports: ON / OFF
+        - 🔴 Critical Alerts: ON / OFF
+
+        # Battery optimization (must be OFF for notifications):
+        Battery optimization for ASH Mobile: Not optimized ✅ / Optimizing ❌
+
+        # Background app refresh:
+        Allowed to run in background: YES / NO
+        ```
+
+        ### iOS
+        ```
+        # Check in: Settings → ASH Mobile → Notifications
+        Allow Notifications: ON / OFF
+        Alert style: None / Banners / Alerts
+        Sounds: ON / OFF
+        Badges: ON / OFF
+        Critical Alerts: ON / OFF (if requested)
+
+        # Background App Refresh:
+        Settings → General → Background App Refresh → ASH Mobile: ON / OFF
+        ```
+
+        ## 🔔 Notification Configuration (App Settings)
+
+        ```
+        In app: Settings → Notifications:
+        Push notifications enabled: YES / NO
+        FCM/APNs token registered: YES / NO (check in diagnostics)
+        Desktop → Phone events subscribed:
+        ✅ theme.changed
+        ✅ plugin.installed
+        ❌ mode.changed (disabled)
+        ✅ battery.low
+        ✅ screenshot.taken
+        ```
+
+        ## 📊 Notification Test Results
+
+        ```bash
+        # Send test notification from desktop:
+        $ ash api notify --device "my-phone" --message "Test notification" --title "ASH Test"
+        Sending to device: my-phone (FCM token: abc...xyz)
+        FCM response: Success (message_id: 1234567890)
+
+        # BUT notification never appears on phone
+        # Checked: Not in notification history
+        # Checked: Not silenced by Do Not Disturb
+        ```
+
+        ## 🔍 Firebase / APNs Debug
+
+        ```
+        FCM Token (from app diagnostics — last 8 chars only for privacy):
+        Current FCM token: ...a7b3c9d2
+
+        FCM token registered with desktop ASH:
+        $ ash api devices list
+        DEVICE ID    NAME        PLATFORM    LAST SEEN    NOTIFICATIONS
+        dev_abc123   my-phone    android     2 min ago    ❌ 0 delivered
+
+        # Desktop shows 0 notifications delivered despite FCM success response
+        # Suggests phone-side delivery failure, not server-side
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — CRASH REPORT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: crash_report
+    attributes:
+      label: "💥 Crash Report (fill if app crashes)"
+      description: >
+        For app crashes, provide the full crash report.
+        Android: Settings → Apps → ASH Mobile → Diagnostics
+        iOS: Settings → Privacy → Analytics → Analytics Data → ASH
+      placeholder: |
+        ## 💥 Crash Details
+
+        ### When Does It Crash?
+        - [ ] On launch (before any screen appears)
+        - [ ] On splash screen
+        - [ ] When navigating to specific screen: [which screen?]
+        - [ ] When performing specific action: [which action?]
+        - [x] When tapping "Apply Theme" with large wallpaper loaded
+        - [ ] After being in background for X minutes
+        - [ ] Randomly / no obvious pattern
+
+        ### Crash Frequency
+        - [ ] Every single time (100%)
+        - [x] Frequently (~80% of the time)
+        - [ ] Occasionally (~30% of the time)
+        - [ ] Rarely (< 10%)
+
+        ### Android Crash Report
+
+        ```
+        # From: Android → Settings → Developer Options → Bug Report
+        # OR from Firebase Crashlytics (in-app: Settings → Send Crash Report)
+
+        FATAL EXCEPTION: main
+        Process: dev.ash_dotfiles.mobile, PID: 12345
+        java.lang.NullPointerException: Attempt to invoke virtual method
+        'int android.graphics.Bitmap.getWidth()' on a null object reference
+          at dev.ash_dotfiles.mobile.ui.wallpaper.WallpaperThumbnail.draw(WallpaperThumbnail.kt:87)
+          at dev.ash_dotfiles.mobile.ui.themes.ThemeCard.onDraw(ThemeCard.kt:234)
+          at io.flutter.embedding.android.FlutterSurfaceView.onDraw(FlutterSurfaceView.java:245)
+          ...
+
+        # Flutter-specific crash (from debugger):
+        FlutterError: Null check operator used on a null value
+        #0      ThemeRepository.getThemePreviewImage (theme_repository.dart:156)
+        #1      ThemeCard._buildPreview (theme_card.dart:89)
+        #2      ThemeCard.build (theme_card.dart:45)
+        ```
+
+        ### iOS Crash Report
+
+        ```
+        # From: Settings → Privacy & Security → Analytics & Improvements
+        # → Analytics Data → ASH Mobile-YYYY-MM-DD.ips
+
+        Exception Type:  EXC_BAD_ACCESS (SIGSEGV)
+        Exception Subtype: KERN_INVALID_ADDRESS at 0x0000000000000010
+        Termination Reason: Namespace SIGNAL, Code 11 Segmentation fault: 11
+
+        Triggered by Thread:  0
+
+        Thread 0 name: Dart_Isolate
+        Thread 0 Crashed:
+        0   ASH Mobile          0x0000000100123456 ThemeCard.build + 234
+        1   ASH Mobile          0x0000000100234567 ThemeGallery._buildItem + 89
+        ```
+
+        ### Flutter Crash (Universal)
+
+        ```dart
+        // From app's built-in crash reporter:
+        // Settings → Diagnostics → Last Crash Report
+
+        ══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════
+        The following _CastError was thrown building ThemeCard:
+        Null check operator used on a null value
+
+        The relevant error-causing widget was:
+          ThemeCard ThemeCard:file:///app/lib/ui/themes/theme_card.dart:45
+
+        When the exception was thrown, this was the stack:
+        #0      ThemeRepository.getPreviewImage (theme_repository.dart:156:12)
+        #1      ThemeCard._loadPreview (theme_card.dart:89:5)
+        #2      ThemeCard.initState (theme_card.dart:45:3)
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — UI/UX ISSUE DETAILS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: ui_details
+    attributes:
+      label: "🎨 UI/UX Issue Details (fill for visual/interaction issues)"
+      description: >
+        For UI layout, interaction, accessibility, or visual design issues.
+        Include mockups of expected behavior vs actual behavior.
+      placeholder: |
+        ## 🎨 Visual Issue Description
+
+        ### Affected Screen(s)
+        - Screen: Theme Gallery
+        - Component: Theme card preview image
+        - Device orientation: Portrait / Landscape / Both
+
+        ### What It Looks Like (BROKEN)
+        ```
+        ┌────────────────────────────────────┐
+        │  🎨 Themes (47)           [search] │
+        ├────────────────────────────────────┤
+        │ ┌──────┐ ┌──────┐ ┌──────┐        │
+        │ │[BRK] │ │[BRK] │ │[BRK] │        │  ← Preview images broken
+        │ │ ████ │ │ ████ │ │ ████ │        │    showing grey placeholder
+        │ │ ████ │ │ ████ │ │ ████ │        │
+        │ └──────┘ └──────┘ └──────┘        │
+        │ Catppuc  Tokyo N  Gruvbox          │
+        └────────────────────────────────────┘
+        ```
+
+        ### What It Should Look Like (EXPECTED)
+        ```
+        ┌────────────────────────────────────┐
+        │  🎨 Themes (47)           [search] │
+        ├────────────────────────────────────┤
+        │ ┌──────┐ ┌──────┐ ┌──────┐        │
+        │ │ 🌙🎨 │ │ 🌃🗼 │ │ 🌲📦 │        │  ← Beautiful preview
+        │ │ ████ │ │ ████ │ │ ████ │        │    images loaded
+        │ │ ████ │ │ ████ │ │ ████ │        │
+        │ └──────┘ └──────┘ └──────┘        │
+        │ Catppuc  Tokyo N  Gruvbox          │
+        └────────────────────────────────────┘
+        ```
+
+        ## 📐 Layout Measurements
+
+        | Property | Expected | Actual |
+        |----------|----------|--------|
+        | Card width | Screen/3 - 8px padding | Correct |
+        | Preview image | 1:1 aspect ratio | Shows as 4:3 (stretched) |
+        | Card shadow | 4dp elevation | No shadow visible |
+        | Border radius | 12dp | 0dp (sharp corners) |
+        | Font: theme name | 12sp Medium | 14sp Regular (wrong weight) |
+
+        ## ♿ Accessibility Audit (if accessibility issue)
+
+        ```
+        # Screen reader test (TalkBack / VoiceOver):
+
+        Expected TalkBack announcement when focusing on theme card:
+        "Catppuccin Mocha theme. Dark. Currently active. Double tap to apply."
+
+        Actual TalkBack announcement:
+        "Image. Button." ← Non-descriptive, accessibility fail
+
+        # Missing accessibility attributes:
+        - contentDescription on theme preview image
+        - semanticsLabel on apply button
+        - AccessibilityNodeInfo.isSelected for active theme
+        - Sufficient color contrast (checked with Colour Contrast Analyser):
+          Theme name text: #8b949e on #161b22 → 4.3:1 (FAILS WCAG AA for small text)
+        ```
+
+        ## 🌓 Dark/Light Mode Behavior
+
+        ```
+        System dark mode: ON
+        App theme: Follows system ✅
+
+        Dark mode renders: ✅ Correctly
+        Light mode renders: ❌ Broken
+
+        Issue in light mode:
+        - Background: Correct (white)
+        - Text: Correct (dark)
+        - Card background: WRONG — still dark (#161b22 instead of #ffffff)
+        - Icon colors: WRONG — dark icons on dark card → invisible
+
+        Cause suspected: ThemeCard widget uses hardcoded dark colors
+        instead of Theme.of(context).colorScheme.surface
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — DESKTOP CONFIGURATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: desktop_config
+    attributes:
+      label: "🖥️ Desktop ASH Configuration (relevant to mobile)"
+      description: >
+        Desktop API configuration that affects mobile app behavior.
+      placeholder: |
+        ## ASH Desktop API Configuration
+
+        ```bash
+        # Full API configuration:
+        $ ash config get api
+        api.enabled = true
+        api.host = "0.0.0.0"           # Listens on all interfaces ✅
+        api.port = 7070
+        api.auth.enabled = true
+        api.auth.method = "bearer"
+        api.auth.token_expiry = "never"
+        api.cors.enabled = true
+        api.cors.origins = ["*"]        # Allow all origins
+        api.rate_limit.enabled = true
+        api.rate_limit.requests_per_minute = 120
+        api.websocket.enabled = true
+        api.websocket.ping_interval = 30
+        api.push.enabled = true
+        api.push.fcm_server_key = "[SET]"   # FCM key configured
+        api.mdns.enabled = true
+        api.mdns.name = "ash-desktop"
+
+        # Registered mobile devices:
+        $ ash api devices list
+        DEVICE ID    NAME          PLATFORM    REGISTERED     LAST SEEN    STATUS
+        dev_abc123   Pixel 8 Pro   android     2024-01-10     2 min ago    🟢 Active
+        dev_def456   iPhone 15     ios         2024-01-12     1 hour ago   🟡 Away
+
+        # Active API tokens for mobile:
+        $ ash api token list
+        TOKEN ID       NAME          SCOPES      CREATED        LAST USED
+        tok_abc123     pixel-8-pro   all:*       2024-01-10     2 min ago
+        tok_def456     iphone-15     themes:*    2024-01-12     1 hour ago
+        ```
+
+        ## Desktop Firewall Status
+
+        ```bash
+        $ ash api --check-firewall --verbose
+        ✅ Port 7070 open on all interfaces
+        ✅ ufw: ALLOW IN to 7070/tcp
+        ✅ iptables: ACCEPT tcp dpt:7070
+        ✅ Reachable from LAN: 192.168.1.47:7070
+
+        # Test from another device:
+        $ curl -s http://192.168.1.47:7070/api/v1/health
+        {"status":"healthy","version":"5.0.2"}  ✅
+        ```
+
+        ## Desktop ASH Doctor (API Section)
+
+        ```bash
+        $ ash doctor --api --verbose
+        ✅ REST API server: running (PID 45678)
+        ✅ WebSocket server: running
+        ✅ Authentication: configured (Bearer token)
+        ✅ CORS: configured (all origins allowed)
+        ✅ FCM push: configured and tested
+        ✅ mDNS: broadcasting ash-desktop.local
+        ⚠️  Theme apply queue: 3 stuck jobs detected ← POSSIBLE ROOT CAUSE
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — WORKAROUNDS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: "🔧 Workarounds Attempted"
+      description: "Document everything you've tried to resolve the issue"
+      placeholder: |
+        ## ✅ Partial Workarounds Found
+
+        ### Workaround 1: Force-close and reopen app
+        - **Effect:** Sometimes fixes connection issues temporarily
+        - **Duration:** Works for ~5 minutes then issue returns
+        - **Verdict:** ⚠️ Temporary, inconvenient
+
+        ### Workaround 2: Clear app cache
+        - **Steps:** Settings → Apps → ASH Mobile → Clear Cache
+        - **Effect:** Fixed the broken preview images issue
+        - **Verdict:** ✅ Works but shouldn't be needed
+
+        ### Workaround 3: Re-pair device (delete and re-add)
+        - **Steps:** Desktop: `ash api devices remove dev_abc123` → App: Re-scan QR
+        - **Effect:** Did NOT fix the theme apply issue
+        - **Verdict:** ❌ No improvement
+
+        ## ❌ Failed Attempts
+
+        | Attempt | Expected | Actual |
+        |---------|----------|--------|
+        | Toggle airplane mode | Reset network | No change |
+        | Disable VPN | Remove network barrier | No VPN active anyway |
+        | Switch from WiFi to mobile data | Different network path | Same issue |
+        | Downgrade app (1.2.2) | Older version might work | Same issue |
+        | Regenerate API token | Fresh auth | Same issue |
+        | Restart desktop ASH API | Clear server state | Same issue |
+        | Change API port to 8080 | Port conflict resolution | Same issue |
+
+        ## 🔍 Insights from Testing
+
+        1. The API call succeeds (200 OK) — the issue is post-API-response
+        2. The desktop job queue has 3 stuck jobs — likely root cause
+        3. `ash api queue --flush` clears stuck jobs → theme applies work temporarily
+        4. Queue gets stuck again after ~5 theme applies
+        5. Appears to be a desktop-side issue, not mobile app issue specifically
+
+        **Conclusion:** This may actually be a desktop API bug (job queue deadlock)
+        triggered by mobile usage patterns, not a mobile app bug per se.
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Mobile Issue Submission Checklist"
+      options:
+        - label: >
+            📱 I have provided **complete device model and OS version** information
+          required: true
+        - label: >
+            🔢 I have provided **exact app version** (from Settings → About)
+          required: true
+        - label: >
+            🔌 I have verified the **desktop API is running** (`ash api status`)
+          required: true
+        - label: >
+            🔄 I have provided **step-by-step reproduction** steps
+          required: true
+        - label: >
+            🔄 I have tried **force-closing and reopening** the app
+          required: true
+        - label: >
+            🔍 I have searched existing issues — **not a duplicate**
+          required: true
+        - label: >
+            📖 I agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — CLOSING BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### 📱 Thank You for Your Mobile Issue Report!
+
+        #### ⏱️ Mobile Issue Response Times
+
+        | Severity | Acknowledgment | Target Fix |
+        |----------|---------------|------------|
+        | 🔴 App crash on launch | 24 hours | 48 hours (hotfix) |
+        | 🟠 Core feature broken | 48 hours | 1 week |
+        | 🟡 Feature degraded | 3 days | 2 weeks |
+        | 🟢 Minor UI issue | 1 week | Next release |
+        | 💡 Enhancement | 2 weeks | Roadmap |
+
+        #### 📱 Platform Support Status
+
+        | Platform | Status | Store | Minimum OS |
+        |----------|--------|-------|------------|
+        | 🤖 Android | 🟢 Stable | Play Store | Android 10 (API 29) |
+        | 🍎 iOS | 🟢 Stable | App Store | iOS 15.0 |
+        | 🌐 PWA | 🟡 Beta | Browser | Chrome 90+ |
+
+        #### 🔗 Mobile Resources
+
+        | Resource | Link |
+        |----------|------|
+        | 📖 Setup Guide | [Mobile App Setup](https://ash-dotfiles.github.io/docs/mobile-app) |
+        | 🔌 Connection Guide | [Pairing Your Phone](https://ash-dotfiles.github.io/docs/mobile-app#pairing) |
+        | 💬 Discord | [#mobile-app](https://discord.gg/ash-dotfiles) |
+        | 🐛 Known Issues | [Mobile Known Issues](https://github.com/ash-dotfiles/ash-dotfiles/labels/📱%20mobile) |
+
+        *— The ASH Dotfiles Mobile Team* 📱
+
+        </div>

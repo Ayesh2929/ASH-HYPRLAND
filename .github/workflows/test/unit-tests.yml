@@ -1,0 +1,962 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🧪 ASH DOTFILES v5.0 OMEGA — UNIT TESTS WORKFLOW                                 ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Unit Test Execution Pipeline                                         ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Parallel Execution    •  Coverage Tracking    •  Test Isolation                   ║
+# ║      Color Engine Tests    •  Theme Validator      •  Snapshot System                 ║
+# ║      Plugin Lifecycle      •  Config Parser        •  Semver Engine                  ║
+# ║      Logger Subsystem      •  Cache Manager        •  Event Bus                      ║
+# ║      Hook Runner           •  Template Engine      •  Lock File System              ║
+# ║      JSON Parser           •  Validator Engine     •  Coverage Reports              ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🧪 Unit Tests — ASH Core Systems"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TRIGGER CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════════════
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "ash-cli/**"
+      - "scripts/**"
+      - "tests/unit/**"
+      - "tests/helpers/**"
+      - ".github/workflows/test/unit-tests.yml"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+      - "release/**"
+    paths:
+      - "ash-cli/**"
+      - "scripts/**"
+      - "tests/unit/**"
+      - "tests/helpers/**"
+      - ".github/workflows/test/unit-tests.yml"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: "Test suite to run"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - color-engine
+          - theme-validator
+          - snapshot-system
+          - plugin-lifecycle
+          - config-parser
+          - semver-engine
+          - logger
+          - cache-manager
+          - event-bus
+          - hook-runner
+          - template-engine
+          - lockfile
+          - json-parser
+          - validator
+      fail_fast:
+        description: "Stop on first failure"
+        required: false
+        default: false
+        type: boolean
+      verbose:
+        description: "Verbose test output"
+        required: false
+        default: false
+        type: boolean
+      coverage:
+        description: "Generate coverage report"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 2 * * *"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PERMISSIONS
+# ══════════════════════════════════════════════════════════════════════════════
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  actions: read
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONCURRENCY
+# ══════════════════════════════════════════════════════════════════════════════
+concurrency:
+  group: "unit-tests-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GLOBAL ENV
+# ══════════════════════════════════════════════════════════════════════════════
+env:
+  BASH_VERSION: "5.2"
+  TEST_TIMEOUT: "300"
+  COVERAGE_THRESHOLD: "80"
+  ASH_TEST_MODE: "1"
+  ASH_NO_COLOR: "1"
+  ASH_LOG_LEVEL: "debug"
+  BATS_VERSION: "1.11.0"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER — Find all unit test files
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover Unit Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      test-matrix:  ${{ steps.discover.outputs.test_matrix }}
+      test-count:   ${{ steps.discover.outputs.test_count }}
+      suite-count:  ${{ steps.discover.outputs.suite_count }}
+      has-tests:    ${{ steps.discover.outputs.has_tests }}
+      suites:       ${{ steps.discover.outputs.suites }}
+
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover Unit Test Files"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🧪 Unit Test Discovery Engine                              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          selected_suite="${{ inputs.test_suite || 'all' }}"
+
+          # Find all unit test files
+          mapfile -t all_tests < <(
+            find tests/unit -type f -name "test-*.sh" \
+              ! -path "*/fixtures/*" \
+              | sort
+          )
+
+          # Filter by suite if specified
+          if [[ "${selected_suite}" != "all" ]]; then
+            mapfile -t filtered_tests < <(
+              printf '%s\n' "${all_tests[@]}" | \
+                grep "test-${selected_suite}" || true
+            )
+            [[ ${#filtered_tests[@]} -gt 0 ]] && all_tests=("${filtered_tests[@]}")
+          fi
+
+          test_count="${#all_tests[@]}"
+
+          # Group tests into suites for parallel execution
+          declare -A suite_map
+          for test_file in "${all_tests[@]}"; do
+            # Extract suite name from filename (test-COLOR-engine.sh → color-engine)
+            filename="$(basename "${test_file}" .sh)"
+            suite="${filename#test-}"
+            suite_map["${suite}"]="${test_file}"
+          done
+
+          echo ""
+          echo "  📊 Discovery Results:"
+          echo "  ├── Total test files: ${test_count}"
+          echo "  └── Test suites:"
+
+          # Build matrix
+          matrix_include="[]"
+          suite_names=()
+
+          for suite in $(echo "${!suite_map[@]}" | tr ' ' '\n' | sort); do
+            test_file="${suite_map[$suite]}"
+            total_cases="$(grep -c "^@test\|^test_" "${test_file}" 2>/dev/null || echo 0)"
+            suite_names+=("${suite}")
+
+            echo "       ├── ${suite}: ${total_cases} test cases"
+
+            matrix_include="$(echo "${matrix_include}" | jq \
+              --arg suite "${suite}" \
+              --arg file "${test_file}" \
+              --arg cases "${total_cases}" \
+              '. += [{"suite": $suite, "file": $file, "cases": $cases}]')"
+          done
+
+          matrix="{\"include\": ${matrix_include}}"
+          suites_json="$(printf '%s\n' "${suite_names[@]}" | \
+            jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+
+          echo "test_matrix=${matrix}"       >> "${GITHUB_OUTPUT}"
+          echo "test_count=${test_count}"    >> "${GITHUB_OUTPUT}"
+          echo "suite_count=${#suite_names[@]}" >> "${GITHUB_OUTPUT}"
+          echo "suites=${suites_json}"       >> "${GITHUB_OUTPUT}"
+          echo "has_tests=$([ "${test_count}" -gt 0 ] && echo 'true' || echo 'false')" \
+            >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: SETUP — Install test framework and dependencies
+  # ────────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "🛠️ Setup Test Environment"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🛠️ Install Test Framework (BATS)"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🛠️  Installing BATS Test Framework v${{ env.BATS_VERSION }}  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Install BATS (Bash Automated Testing System)
+          git clone \
+            --depth=1 \
+            --branch="v${{ env.BATS_VERSION }}" \
+            https://github.com/bats-core/bats-core.git \
+            /tmp/bats-core 2>/dev/null
+
+          sudo /tmp/bats-core/install.sh /usr/local 2>/dev/null
+          echo "  bats: $(bats --version)"
+
+          # Install BATS support libraries
+          git clone \
+            --depth=1 \
+            https://github.com/bats-core/bats-support.git \
+            /usr/local/lib/bats-support 2>/dev/null
+
+          git clone \
+            --depth=1 \
+            https://github.com/bats-core/bats-assert.git \
+            /usr/local/lib/bats-assert 2>/dev/null
+
+          git clone \
+            --depth=1 \
+            https://github.com/bats-core/bats-file.git \
+            /usr/local/lib/bats-file 2>/dev/null
+
+          echo "  ✅ BATS libraries installed:"
+          echo "     bats-support"
+          echo "     bats-assert"
+          echo "     bats-file"
+
+      - name: "📦 Install System Dependencies"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📦 Installing System Dependencies                          ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y \
+            bash \
+            jq \
+            bc \
+            python3 \
+            python3-pip \
+            imagemagick \
+            curl \
+            wget \
+            git \
+            fd-find \
+            ripgrep \
+            2>/dev/null
+
+          # Install Python dependencies for color engine tests
+          pip3 install -q \
+            Pillow \
+            colorthief \
+            2>/dev/null || true
+
+          echo ""
+          echo "  📦 Installed versions:"
+          printf "     %-20s %s\n" "bash:"     "$(bash --version | head -1)"
+          printf "     %-20s %s\n" "jq:"       "$(jq --version)"
+          printf "     %-20s %s\n" "python3:"  "$(python3 --version)"
+          printf "     %-20s %s\n" "imagemagick:" "$(convert -version | head -1)"
+          printf "     %-20s %s\n" "curl:"     "$(curl --version | head -1)"
+
+          echo "  ✅ System dependencies ready"
+
+      - name: "🔧 Setup ASH Test Environment"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔧 ASH Test Environment Setup                              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Create test home directory structure
+          TEST_HOME="${RUNNER_TEMP}/ash-test-home"
+          mkdir -p \
+            "${TEST_HOME}/.config/ash" \
+            "${TEST_HOME}/.config/ash/themes" \
+            "${TEST_HOME}/.local/share/ash/plugins" \
+            "${TEST_HOME}/.local/share/ash/state" \
+            "${TEST_HOME}/.local/share/ash/cache" \
+            "${TEST_HOME}/.local/share/ash/logs" \
+            "${TEST_HOME}/.local/share/ash/data"
+
+          # Install ASH CLI for testing
+          mkdir -p "${TEST_HOME}/bin"
+          cp -r ash-cli/. "${TEST_HOME}/.local/share/ash-cli/"
+          ln -sf \
+            "${TEST_HOME}/.local/share/ash-cli/ash" \
+            "${TEST_HOME}/bin/ash"
+          chmod +x "${TEST_HOME}/bin/ash"
+
+          # Create mock executables for isolated testing
+          mkdir -p "${TEST_HOME}/mock-bin"
+
+          # Mock hyprctl
+          cat > "${TEST_HOME}/mock-bin/hyprctl" << 'MOCKSCRIPT'
+          #!/usr/bin/env bash
+          echo '{"version":"0.36.0","flags":["AQ_USE_DRM_DEVICE"]}'
+          MOCKSCRIPT
+          chmod +x "${TEST_HOME}/mock-bin/hyprctl"
+
+          # Mock notify-send
+          cat > "${TEST_HOME}/mock-bin/notify-send" << 'MOCKSCRIPT'
+          #!/usr/bin/env bash
+          echo "NOTIFICATION: $*" >> "${TEST_HOME}/notifications.log"
+          MOCKSCRIPT
+          chmod +x "${TEST_HOME}/mock-bin/notify-send"
+
+          # Mock swww
+          cat > "${TEST_HOME}/mock-bin/swww" << 'MOCKSCRIPT'
+          #!/usr/bin/env bash
+          echo "SWWW: $*" >> "${TEST_HOME}/swww.log"
+          MOCKSCRIPT
+          chmod +x "${TEST_HOME}/mock-bin/swww"
+
+          # Write test config
+          cat > "${TEST_HOME}/.config/ash/ash.conf" << 'ASHCONF'
+          theme.active = "catppuccin-mocha"
+          theme.auto = false
+          wallpaper.current = "~/Pictures/wallpaper.jpg"
+          plugin.enabled = true
+          analytics.enabled = false
+          ASHCONF
+
+          echo "TEST_HOME=${TEST_HOME}" >> "${GITHUB_ENV}"
+          echo "PATH=${TEST_HOME}/mock-bin:${TEST_HOME}/bin:${PATH}" >> "${GITHUB_ENV}"
+
+          echo "  ✅ Test environment ready at: ${TEST_HOME}"
+
+      - name: "📤 Cache Test Environment"
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            /usr/local/bin/bats
+            /usr/local/lib/bats-*
+            /usr/local/lib/bats-support
+            /usr/local/lib/bats-assert
+            /usr/local/lib/bats-file
+          key: "bats-${{ env.BATS_VERSION }}-${{ runner.os }}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: RUN-TESTS — Execute in parallel by suite
+  # ────────────────────────────────────────────────────────────────────────────
+  run-tests:
+    name: "🧪 ${{ matrix.suite }}"
+    needs: [discover, setup]
+    if: needs.discover.outputs.has-tests == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: ${{ inputs.fail_fast == 'true' }}
+      matrix: ${{ fromJson(needs.discover.outputs.test-matrix) }}
+
+    outputs:
+      results: ${{ steps.run.outputs.results }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📥 Restore BATS Cache"
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            /usr/local/bin/bats
+            /usr/local/lib/bats-*
+          key: "bats-${{ env.BATS_VERSION }}-${{ runner.os }}"
+          restore-keys: "bats-"
+
+      - name: "📦 Install Dependencies"
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y \
+            jq bc python3 imagemagick curl wget \
+            2>/dev/null
+
+          # Install BATS if cache miss
+          if ! command -v bats &>/dev/null; then
+            git clone --depth=1 \
+              --branch="v${{ env.BATS_VERSION }}" \
+              https://github.com/bats-core/bats-core.git /tmp/bats 2>/dev/null
+            sudo /tmp/bats/install.sh /usr/local 2>/dev/null
+          fi
+
+          pip3 install -q Pillow colorthief 2>/dev/null || true
+
+      - name: "🔧 Setup ASH Test Environment"
+        shell: bash
+        run: |
+          TEST_HOME="${RUNNER_TEMP}/ash-test-home"
+          mkdir -p \
+            "${TEST_HOME}/.config/ash/themes" \
+            "${TEST_HOME}/.local/share/ash/plugins" \
+            "${TEST_HOME}/.local/share/ash/state" \
+            "${TEST_HOME}/.local/share/ash/cache" \
+            "${TEST_HOME}/.local/share/ash/logs"
+
+          mkdir -p "${TEST_HOME}/mock-bin"
+
+          # Create all mock executables
+          for mock_cmd in hyprctl notify-send swww waybar dunst kitty; do
+            cat > "${TEST_HOME}/mock-bin/${mock_cmd}" << MOCKEOF
+          #!/usr/bin/env bash
+          echo "MOCK[${mock_cmd}]: \$*" >> "${TEST_HOME}/mock-calls.log"
+          exit 0
+          MOCKEOF
+            chmod +x "${TEST_HOME}/mock-bin/${mock_cmd}"
+          done
+
+          # Copy ASH CLI
+          mkdir -p "${TEST_HOME}/.local/share/ash-cli"
+          [[ -d ash-cli ]] && cp -r ash-cli/. "${TEST_HOME}/.local/share/ash-cli/"
+
+          cat > "${TEST_HOME}/.config/ash/ash.conf" << 'ASHCONF'
+          theme.active = "catppuccin-mocha"
+          theme.auto = false
+          plugin.enabled = true
+          analytics.enabled = false
+          ASHCONF
+
+          echo "TEST_HOME=${TEST_HOME}" >> "${GITHUB_ENV}"
+          echo "PATH=${TEST_HOME}/mock-bin:${TEST_HOME}/bin:${PATH}" >> "${GITHUB_ENV}"
+          echo "ASH_CONFIG_HOME=${TEST_HOME}/.config/ash" >> "${GITHUB_ENV}"
+          echo "ASH_DATA_HOME=${TEST_HOME}/.local/share/ash" >> "${GITHUB_ENV}"
+          echo "ASH_TEST_MODE=1" >> "${GITHUB_ENV}"
+          echo "ASH_NO_COLOR=1" >> "${GITHUB_ENV}"
+
+      - name: "🧪 Run Test Suite: ${{ matrix.suite }}"
+        id: run
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🧪 Running: ${{ matrix.suite }}                             ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          test_file="${{ matrix.file }}"
+          suite="${{ matrix.suite }}"
+          verbose_flag=""
+          [[ "${{ inputs.verbose || 'false' }}" == "true" ]] && verbose_flag="--verbose"
+
+          echo "  Test file:   ${test_file}"
+          echo "  Expected:    ${{ matrix.cases }} test cases"
+          echo ""
+
+          # Create results directory
+          mkdir -p test-results
+
+          # Run BATS with TAP output for processing
+          bats_exit=0
+          bats_output="$(
+            timeout "${{ env.TEST_TIMEOUT }}" \
+            bats \
+              --tap \
+              --timing \
+              ${verbose_flag} \
+              --no-tempdir-cleanup \
+              "${test_file}" \
+            2>&1
+          )" || bats_exit=$?
+
+          echo "${bats_output}"
+
+          # Parse TAP output
+          passed="$(echo "${bats_output}" | grep -c "^ok " || echo 0)"
+          failed="$(echo "${bats_output}" | grep -c "^not ok " || echo 0)"
+          skipped="$(echo "${bats_output}" | grep -c "# skip" || echo 0)"
+          total=$((passed + failed))
+
+          # Extract test names and status
+          echo "${bats_output}" | while IFS= read -r line; do
+            if [[ "${line}" =~ ^ok\ ([0-9]+)\ (.+)$ ]]; then
+              echo "  ✅ ${BASH_REMATCH[2]}"
+            elif [[ "${line}" =~ ^not\ ok\ ([0-9]+)\ (.+)$ ]]; then
+              echo "  ❌ ${BASH_REMATCH[2]}"
+            fi
+          done
+
+          # Write JUnit XML for GitHub test reporter
+          python3 << JUNIT
+          import re
+          import html
+          import sys
+
+          tap_output = """${bats_output}"""
+          suite_name = "${suite}"
+          passed = ${passed}
+          failed = ${failed}
+          skipped = ${skipped}
+          total = ${total}
+
+          test_cases = []
+          current_test = None
+          failure_msg = []
+          in_failure = False
+
+          for line in tap_output.split('\n'):
+              ok_match = re.match(r'^ok (\d+) (.+?)(?:\s+#.+)?$', line)
+              fail_match = re.match(r'^not ok (\d+) (.+?)(?:\s+#.+)?$', line)
+              skip_match = re.match(r'^ok (\d+) (.+) # skip(.*)$', line)
+
+              if skip_match:
+                  test_cases.append({
+                      'name': skip_match.group(2).strip(),
+                      'status': 'skipped',
+                      'message': skip_match.group(3).strip()
+                  })
+              elif ok_match:
+                  test_cases.append({
+                      'name': ok_match.group(2).strip(),
+                      'status': 'passed',
+                      'message': ''
+                  })
+              elif fail_match:
+                  if current_test:
+                      test_cases.append(current_test)
+                  current_test = {
+                      'name': fail_match.group(2).strip(),
+                      'status': 'failed',
+                      'message': []
+                  }
+                  in_failure = True
+              elif in_failure and line.startswith('#'):
+                  if current_test:
+                      current_test['message'].append(line[2:])
+
+          if current_test:
+              if isinstance(current_test.get('message'), list):
+                  current_test['message'] = '\n'.join(current_test['message'])
+              test_cases.append(current_test)
+
+          xml_lines = [
+              '<?xml version="1.0" encoding="UTF-8"?>',
+              f'<testsuite name="unit-{suite_name}" '
+              f'tests="{total}" failures="{failed}" '
+              f'skipped="{skipped}" errors="0">',
+          ]
+
+          for tc in test_cases:
+              name = html.escape(tc['name'])
+              if tc['status'] == 'passed':
+                  xml_lines.append(
+                      f'  <testcase name="{name}" classname="unit.{suite_name}"/>'
+                  )
+              elif tc['status'] == 'skipped':
+                  msg = html.escape(str(tc.get('message', '')))
+                  xml_lines.append(
+                      f'  <testcase name="{name}" classname="unit.{suite_name}">'
+                      f'<skipped message="{msg}"/></testcase>'
+                  )
+              elif tc['status'] == 'failed':
+                  msg = html.escape(str(tc.get('message', 'Test failed')))
+                  xml_lines.append(
+                      f'  <testcase name="{name}" classname="unit.{suite_name}">'
+                      f'<failure message="{msg}"></failure></testcase>'
+                  )
+
+          xml_lines.append('</testsuite>')
+
+          with open(f'test-results/unit-{suite_name}.xml', 'w') as f:
+              f.write('\n'.join(xml_lines))
+
+          print(f"  ✅ JUnit XML written: test-results/unit-{suite_name}.xml")
+          JUNIT
+
+          # Summary
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  🧪 Suite: %-49s║\n" "${{ matrix.suite }}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  ✅ Passed:   %-44s║\n" "${passed}"
+          printf "║  ❌ Failed:   %-44s║\n" "${failed}"
+          printf "║  ⏭️  Skipped:  %-44s║\n" "${skipped}"
+          printf "║  📊 Total:    %-44s║\n" "${total}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+
+          status="passed"
+          if [[ ${failed} -gt 0 ]]; then
+            status="failed"
+            echo "║  ❌ STATUS: FAILED                                          ║"
+          else
+            echo "║  ✅ STATUS: PASSED                                          ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          results_json="$(jq -n \
+            --arg suite "${suite}" \
+            --arg status "${status}" \
+            --argjson passed "${passed}" \
+            --argjson failed "${failed}" \
+            --argjson total "${total}" \
+            '{suite: $suite, status: $status, passed: $passed, failed: $failed, total: $total}')"
+
+          echo "results=${results_json}" >> "${GITHUB_OUTPUT}"
+
+          [[ "${status}" == "failed" ]] && exit 1 || exit 0
+
+      - name: "📤 Upload Test Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "unit-test-results-${{ matrix.suite }}"
+          path: test-results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: COVERAGE — Generate coverage report
+  # ────────────────────────────────────────────────────────────────────────────
+  coverage:
+    name: "📊 Coverage Analysis"
+    needs: [discover, run-tests]
+    if: >
+      always() &&
+      needs.discover.outputs.has-tests == 'true' &&
+      inputs.coverage != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📥 Download All Test Results"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "unit-test-results-*"
+          merge-multiple: true
+          path: ./all-test-results/
+
+      - name: "📊 Generate Coverage Report"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📊 Coverage Analysis                                       ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'COVERAGE'
+          import os
+          import re
+          import glob
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          from collections import defaultdict
+
+          # ── Parse all JUnit XML results ───────────────────────────────────
+          all_results = []
+          total_passed  = 0
+          total_failed  = 0
+          total_skipped = 0
+          total_tests   = 0
+          suite_results = {}
+
+          for xml_file in sorted(glob.glob("all-test-results/**/*.xml",
+                                            recursive=True)):
+              try:
+                  tree = ET.parse(xml_file)
+                  root = tree.getroot()
+                  suite_name = root.get("name", "unknown")
+                  tests    = int(root.get("tests", 0))
+                  failures = int(root.get("failures", 0))
+                  skipped  = int(root.get("skipped", 0))
+                  passed   = tests - failures - skipped
+
+                  total_tests   += tests
+                  total_passed  += passed
+                  total_failed  += failures
+                  total_skipped += skipped
+
+                  suite_results[suite_name] = {
+                      "tests": tests,
+                      "passed": passed,
+                      "failed": failures,
+                      "skipped": skipped,
+                      "pass_rate": (passed / tests * 100) if tests > 0 else 0
+                  }
+              except Exception as e:
+                  print(f"  ⚠️  Could not parse {xml_file}: {e}")
+
+          # ── Code coverage analysis via bash source tracing ────────────────
+          # Analyze which ASH CLI functions are covered by tests
+          ash_functions  = set()
+          tested_functions = set()
+
+          # Find all function definitions in ASH CLI
+          ash_cli_dir = Path("ash-cli")
+          if ash_cli_dir.exists():
+              for sh_file in sorted(ash_cli_dir.rglob("*.sh")):
+                  try:
+                      content = sh_file.read_text()
+                      fns = re.findall(r'^([a-z_][a-z_0-9:]+)\s*\(\)', content,
+                                       re.MULTILINE)
+                      fns += re.findall(r'^function\s+([a-z_][a-z_0-9:]+)',
+                                        content, re.MULTILINE)
+                      for fn in fns:
+                          ash_functions.add(fn)
+                  except Exception:
+                      pass
+
+          # Find tested functions in test files
+          tests_dir = Path("tests/unit")
+          if tests_dir.exists():
+              for test_file in sorted(tests_dir.rglob("*.sh")):
+                  try:
+                      content = test_file.read_text()
+                      calls = re.findall(r'\b([a-z_][a-z_0-9:]+)\s*["\']',
+                                         content)
+                      calls += re.findall(r'run\s+([a-z_][a-z_0-9:]+)',
+                                          content)
+                      for call in calls:
+                          if call in ash_functions:
+                              tested_functions.add(call)
+                  except Exception:
+                      pass
+
+          coverage_pct = (
+              len(tested_functions) / len(ash_functions) * 100
+              if ash_functions else 0
+          )
+
+          # ── Print results ──────────────────────────────────────────────────
+          print("")
+          print("  📊 Unit Test Summary by Suite:")
+          print("")
+
+          for suite, data in sorted(suite_results.items()):
+              rate    = data["pass_rate"]
+              bar_len = int(rate / 5)
+              bar     = "█" * bar_len + "░" * (20 - bar_len)
+              status  = "✅" if data["failed"] == 0 else "❌"
+              print(f"  {status} {suite:<30} │{bar}│ "
+                    f"{data['passed']}/{data['tests']} "
+                    f"({rate:.0f}%)")
+
+          print("")
+          print("  📈 Overall Results:")
+          print(f"     Total test cases:  {total_tests}")
+          print(f"     Passed:            {total_passed}")
+          print(f"     Failed:            {total_failed}")
+          print(f"     Skipped:           {total_skipped}")
+
+          if total_tests > 0:
+              overall_rate = total_passed / total_tests * 100
+              print(f"     Pass rate:         {overall_rate:.1f}%")
+
+          print("")
+          print(f"  🎯 Code Coverage:")
+          print(f"     ASH functions:     {len(ash_functions)}")
+          print(f"     Tested functions:  {len(tested_functions)}")
+          print(f"     Coverage:          {coverage_pct:.1f}%")
+
+          threshold = int(os.environ.get("COVERAGE_THRESHOLD", "80"))
+          if coverage_pct >= threshold:
+              print(f"     ✅ Above threshold ({threshold}%)")
+          else:
+              print(f"     ⚠️  Below threshold ({threshold}%)")
+
+          # ── Save report ────────────────────────────────────────────────────
+          report = {
+              "summary": {
+                  "total": total_tests,
+                  "passed": total_passed,
+                  "failed": total_failed,
+                  "skipped": total_skipped,
+                  "pass_rate": (total_passed / total_tests * 100)
+                               if total_tests > 0 else 0,
+              },
+              "coverage": {
+                  "functions_total": len(ash_functions),
+                  "functions_tested": len(tested_functions),
+                  "percentage": coverage_pct,
+                  "threshold": threshold,
+                  "passed": coverage_pct >= threshold,
+              },
+              "suites": suite_results,
+          }
+
+          with open("coverage-report.json", "w") as f:
+              json.dump(report, f, indent=2)
+
+          print("\n  ✅ Coverage report: coverage-report.json")
+          COVERAGE
+
+      - name: "📤 Upload Coverage Report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "unit-test-coverage"
+          path: coverage-report.json
+          retention-days: 30
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 05: GATE — Aggregate results
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Unit Tests"
+    needs: [discover, run-tests, coverage]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "📥 Download Coverage"
+        uses: actions/download-artifact@v4
+        with:
+          name: "unit-test-coverage"
+          path: ./coverage/
+        continue-on-error: true
+
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let report = { summary: {}, coverage: {}, suites: {} };
+            try {
+              report = JSON.parse(fs.readFileSync('coverage/coverage-report.json', 'utf8'));
+            } catch (e) {}
+
+            const summary  = report.summary  || {};
+            const coverage = report.coverage || {};
+            const suites   = report.suites   || {};
+
+            const total   = summary.total   || 0;
+            const passed  = summary.passed  || 0;
+            const failed  = summary.failed  || 0;
+            const rate    = summary.pass_rate || 0;
+            const covPct  = coverage.percentage || 0;
+            const covPass = coverage.passed !== false;
+
+            const overallPassed = failed === 0 && covPass;
+            const icon   = overallPassed ? '✅' : '❌';
+            const status = overallPassed ? 'PASSED' : 'FAILED';
+
+            const filled = Math.round(rate / 10);
+            const rateBar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+
+            const covFilled = Math.round(covPct / 10);
+            const covBar = '█'.repeat(covFilled) + '░'.repeat(10 - covFilled);
+
+            const suitesTable = Object.entries(suites)
+              .map(([name, data]) => {
+                const icon = data.failed === 0 ? '✅' : '❌';
+                const pct = data.pass_rate ? data.pass_rate.toFixed(0) : 0;
+                return `| ${icon} \`${name}\` | ${data.passed} | ${data.failed} | ${pct}% |`;
+              })
+              .join('\n');
+
+            const body = `## 🧪 Unit Tests ${icon}
+
+            **Status: ${status}** | **${passed}/${total}** tests passed
+
+            ### 📊 Results
+
+            \`${rateBar}\` **${rate.toFixed(1)}%** pass rate
+            \`${covBar}\` **${covPct.toFixed(1)}%** code coverage
+
+            ### 🗂️ Suite Breakdown
+
+            | Suite | Passed | Failed | Rate |
+            |-------|--------|--------|------|
+            ${suitesTable}
+
+            ${overallPassed
+              ? '### ✨ All unit tests pass!'
+              : `### 🔧 Fix Required\n\nReview failing test suites above.\n\`\`\`bash\n# Run locally:\nbash tests/run-unit-tests.sh\n# Run specific suite:\nbats tests/unit/test-color-engine.sh\n\`\`\``
+            }
+
+            ---
+            *🤖 ASH Dotfiles Unit Tests • BATS v${{ env.BATS_VERSION }} • [Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🧪 Unit Tests')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Quality Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Unit Test Quality Gate                                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          has_tests="${{ needs.discover.outputs.has-tests }}"
+          run_result="${{ needs.run-tests.result }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── Has tests:    ${has_tests}"
+          echo "  └── Test result:  ${run_result}"
+          echo ""
+
+          if [[ "${has_tests}" == "false" ]]; then
+            echo "  ℹ️  No unit tests found — gate skipped"
+            exit 0
+          fi
+
+          if [[ "${run_result}" == "success" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+            echo "  🎉 All unit tests pass!"
+          elif [[ "${run_result}" == "skipped" ]]; then
+            echo "  ℹ️  Tests were skipped"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            echo "  Fix failing unit tests before merging."
+            exit 1
+          fi

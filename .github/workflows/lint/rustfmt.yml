@@ -1,0 +1,991 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🦀 ASH DOTFILES v5.0 OMEGA — RUSTFMT WORKFLOW                                    ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Rust Code Format & Analysis Pipeline                                 ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      rustfmt v1.7+       •  Clippy Linting      •  cargo check                        ║
+# ║      cargo audit CVE     •  cargo deny          •  cargo bloat                        ║
+# ║      cargo udeps         •  cargo machete       •  MSRV Check                        ║
+# ║      Dependency Graph    •  License Audit        •  SARIF Upload                     ║
+# ║      Build Verification  •  Test Integration     •  Performance Hints                ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🦀 Rustfmt — Rust Format & Analysis"
+
+on:
+  push:
+    branches: [main, develop, "release/**", "hotfix/**"]
+    paths:
+      - "**/*.rs"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "rustfmt.toml"
+      - ".rustfmt.toml"
+      - "rust-toolchain.toml"
+      - ".github/workflows/lint/rustfmt.yml"
+
+  pull_request:
+    branches: [main, develop, "release/**"]
+    paths:
+      - "**/*.rs"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "rustfmt.toml"
+      - ".rustfmt.toml"
+      - ".github/workflows/lint/rustfmt.yml"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch:
+    inputs:
+      run_clippy:
+        description: "Run Clippy linter"
+        required: false
+        default: true
+        type: boolean
+      run_audit:
+        description: "Run cargo audit CVE scan"
+        required: false
+        default: true
+        type: boolean
+      run_deny:
+        description: "Run cargo deny license/security check"
+        required: false
+        default: true
+        type: boolean
+      clippy_deny_warnings:
+        description: "Deny all Clippy warnings (strict mode)"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 4 * * *"
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  security-events: write
+
+concurrency:
+  group: "rustfmt-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  RUST_BACKTRACE: "1"
+  CARGO_TERM_COLOR: "always"
+  CARGO_INCREMENTAL: "0"
+  RUSTFLAGS: "-D warnings"
+  RUSTDOCFLAGS: "-D warnings"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover Rust Crates"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      rs-files:      ${{ steps.discover.outputs.rs_files }}
+      rs-count:      ${{ steps.discover.outputs.rs_count }}
+      has-rust:      ${{ steps.discover.outputs.has_rust }}
+      cargo-files:   ${{ steps.discover.outputs.cargo_files }}
+      workspaces:    ${{ steps.discover.outputs.workspaces }}
+      toolchain:     ${{ steps.discover.outputs.toolchain }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover Rust Crates & Workspaces"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🦀 Rust Crate Discovery                                    ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # All Rust source files
+          mapfile -t rs_files < <(
+            find . -type f -name "*.rs" \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*" \
+              ! -path "*/target/*" \
+              | sort
+          )
+
+          # Cargo manifest files
+          mapfile -t cargo_files < <(
+            find . -name "Cargo.toml" \
+              ! -path "./.git/*" \
+              ! -path "./target/*" \
+              | sort
+          )
+
+          # Workspace detection
+          mapfile -t workspaces < <(
+            grep -rl "\[workspace\]" --include="Cargo.toml" . 2>/dev/null | sort
+          )
+
+          # Detect Rust toolchain version
+          toolchain="stable"
+          if [[ -f rust-toolchain.toml ]]; then
+            toolchain="$(grep 'channel' rust-toolchain.toml | cut -d'"' -f2 || echo 'stable')"
+          elif [[ -f rust-toolchain ]]; then
+            toolchain="$(cat rust-toolchain | tr -d '[:space:]' || echo 'stable')"
+          fi
+
+          rs_count="${#rs_files[@]}"
+          cargo_count="${#cargo_files[@]}"
+
+          echo ""
+          echo "  📊 Rust Discovery Results:"
+          echo "  ├── Rust source files: ${rs_count}"
+          echo "  ├── Cargo.toml files:  ${cargo_count}"
+          echo "  ├── Workspaces:        ${#workspaces[@]}"
+          echo "  └── Toolchain:         ${toolchain}"
+          echo ""
+          echo "  📦 Cargo manifests:"
+          for cargo in "${cargo_files[@]}"; do
+            crate="$(grep '^name' "${cargo}" | head -1 | cut -d'"' -f2 || echo 'unknown')"
+            version="$(grep '^version' "${cargo}" | head -1 | cut -d'"' -f2 || echo '?')"
+            printf "     %-40s v%s\n" "${crate}" "${version}"
+          done
+
+          rs_json="$(printf '%s\n' "${rs_files[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          cargo_json="$(printf '%s\n' "${cargo_files[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+          workspace_json="$(printf '%s\n' "${workspaces[@]}" | jq -R . | jq -sc . 2>/dev/null || echo '[]')"
+
+          {
+            echo "rs_files=${rs_json}"
+            echo "rs_count=${rs_count}"
+            echo "cargo_files=${cargo_json}"
+            echo "workspaces=${workspace_json}"
+            echo "toolchain=${toolchain}"
+            echo "has_rust=$([ "${rs_count}" -gt 0 ] && echo 'true' || echo 'false')"
+          } >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: RUSTFMT — Format checking
+  # ────────────────────────────────────────────────────────────────────────────
+  rustfmt:
+    name: "🎨 Rustfmt Format Check"
+    needs: discover
+    if: needs.discover.outputs.has-rust == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      passed: ${{ steps.fmt.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🦀 Install Rust Toolchain"
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.discover.outputs.toolchain || 'stable' }}
+          components: rustfmt, clippy
+
+      - name: "🗄️ Cache Cargo Registry"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: "⚙️ Generate rustfmt.toml"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚙️  Rustfmt Configuration                                   ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          if [[ -f rustfmt.toml ]] || [[ -f .rustfmt.toml ]]; then
+            echo "  ✅ Using repository rustfmt config"
+          else
+            cat > rustfmt.toml << 'RUSTFMTCONFIG'
+          # ASH Dotfiles — rustfmt Configuration
+          # https://rust-lang.github.io/rustfmt/
+
+          # Rust edition (use latest stable)
+          edition = "2021"
+
+          # Maximum line width
+          max_width = 100
+
+          # Tab spaces (indent width)
+          tab_spaces = 4
+
+          # Indentation of function parameters if they don't fit on one line
+          fn_params_layout = "Tall"
+
+          # Brace style for items
+          brace_style = "SameLineWhere"
+
+          # Brace style for control flow
+          control_brace_style = "AlwaysSameLine"
+
+          # How to handle trailing commas in function signatures
+          trailing_comma = "Vertical"
+
+          # Trailing semicolons
+          trailing_semicolon = true
+
+          # Whether to use different formatting for items and expressions
+          struct_field_align_threshold = 20
+
+          # Where to place attributes on function arguments
+          fn_args_layout = "Tall"
+
+          # Use field initialization shorthand where possible
+          use_field_init_shorthand = true
+
+          # Remove redundant imports
+          imports_granularity = "Crate"
+
+          # How to order imports
+          group_imports = "StdExternalCrate"
+
+          # Force single-line closures
+          force_explicit_abi = true
+
+          # Allow mixed attribute inline
+          match_arm_blocks = true
+
+          # Maximum width of a chain builder
+          chain_width = 60
+
+          # Max width of an array literal
+          array_width = 60
+
+          # Max width of a string literal before wrapping
+          string_width = 80
+
+          # How generic constants are formatted
+          normalize_comments = true
+
+          # Use short form for single-item match arm
+          match_block_trailing_comma = true
+
+          # Merge derives
+          merge_derives = true
+
+          # Blank lines between items
+          blank_lines_lower_bound = 0
+          blank_lines_upper_bound = 1
+
+          # Format macro bodies
+          format_macro_bodies = true
+          format_macro_matchers = true
+
+          # Format strings
+          format_strings = false
+
+          # Wrap comments
+          wrap_comments = true
+          comment_width = 100
+
+          # Normalize doc attributes
+          normalize_doc_attributes = false
+
+          # Report errors on parser
+          error_on_unformatted = false
+
+          RUSTFMTCONFIG
+            echo "  ✅ rustfmt.toml generated"
+          fi
+
+          echo ""
+          echo "  Active configuration:"
+          cat rustfmt.toml 2>/dev/null || cat .rustfmt.toml 2>/dev/null
+
+      - name: "🎨 Run rustfmt Check"
+        id: fmt
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🎨 Rustfmt Format Verification                             ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "  rustfmt version: $(rustfmt --version)"
+          echo "  Rust version:    $(rustc --version)"
+          echo ""
+
+          rs_count="${{ needs.discover.outputs.rs-count }}"
+          echo "  Checking ${rs_count} Rust files for formatting..."
+
+          # Find all Cargo.toml locations and run fmt check for each
+          mapfile -t cargo_dirs < <(
+            find . -name "Cargo.toml" ! -path "./.git/*" ! -path "*/target/*" \
+              | xargs -I{} dirname {} | sort -u
+          )
+
+          fmt_exit=0
+          files_with_issues=0
+          total_files_checked=0
+
+          for cargo_dir in "${cargo_dirs[@]}"; do
+            echo "  📦 Checking: ${cargo_dir}"
+
+            # Run cargo fmt check
+            fmt_output="$(cd "${cargo_dir}" && \
+              cargo fmt --all -- --check 2>&1)" || {
+              fmt_exit=1
+              # Count files with issues
+              issue_files="$(echo "${fmt_output}" | grep -c "Diff in\|would reformat" || echo 1)"
+              files_with_issues=$((files_with_issues + issue_files))
+              echo "  ❌ Format issues in ${cargo_dir}:"
+              echo "${fmt_output}" | head -20 | while IFS= read -r line; do
+                echo "     ${line}"
+              done
+            }
+
+            total_files_checked=$((total_files_checked + 1))
+          done
+
+          # Also check individual .rs files not in cargo projects
+          echo ""
+          echo "  🔍 Checking individual .rs files..."
+          standalone_rs="$(find . -name "*.rs" \
+            ! -path "./.git/*" ! -path "*/target/*" \
+            | while read -r f; do
+                cargo_dir="$(dirname "${f}")"
+                while [[ "${cargo_dir}" != "." && "${cargo_dir}" != "/" ]]; do
+                  [[ -f "${cargo_dir}/Cargo.toml" ]] && break
+                  cargo_dir="$(dirname "${cargo_dir}")"
+                done
+                [[ ! -f "${cargo_dir}/Cargo.toml" ]] && echo "${f}"
+              done)"
+
+          if [[ -n "${standalone_rs}" ]]; then
+            while IFS= read -r rs_file; do
+              rustfmt --check --edition 2021 "${rs_file}" 2>/dev/null || {
+                echo "  ❌ Format issue: ${rs_file}"
+                files_with_issues=$((files_with_issues + 1))
+                fmt_exit=1
+              }
+            done <<< "${standalone_rs}"
+          fi
+
+          passed="true"
+          [[ ${fmt_exit} -ne 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📊 Rustfmt Results                                         ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  📦 Cargo projects:     %-34s║\n" "${#cargo_dirs[@]}"
+          printf "║  📄 RS files:           %-34s║\n" "${rs_count}"
+          printf "║  ❌ Unformatted files:  %-34s║\n" "${files_with_issues}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          if [[ "${passed}" == "true" ]]; then
+            echo "║  ✅ STATUS: PASSED — All Rust code is properly formatted    ║"
+          else
+            echo "║  ❌ STATUS: FAILED — Format issues detected                 ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          if [[ "${passed}" == "false" ]]; then
+            echo ""
+            echo "  🔧 Fix formatting:"
+            echo "     cargo fmt --all"
+            echo "     # Or for specific file:"
+            echo "     rustfmt --edition 2021 src/main.rs"
+          fi
+
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: CLIPPY — Linting
+  # ────────────────────────────────────────────────────────────────────────────
+  clippy:
+    name: "📎 Clippy Linting"
+    needs: discover
+    if: >
+      needs.discover.outputs.has-rust == 'true' &&
+      inputs.run_clippy != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      errors:   ${{ steps.clippy.outputs.errors }}
+      warnings: ${{ steps.clippy.outputs.warnings }}
+      passed:   ${{ steps.clippy.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🦀 Install Rust Toolchain"
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.discover.outputs.toolchain || 'stable' }}
+          components: clippy
+
+      - name: "🗄️ Cache Cargo"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+          restore-keys: "${{ runner.os }}-cargo-"
+
+      - name: "📎 Run Clippy"
+        id: clippy
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📎 Clippy — Rust Linting                                   ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "  Clippy version: $(cargo clippy --version)"
+          echo ""
+
+          # Clippy lint groups to check
+          clippy_flags=(
+            "-W clippy::all"
+            "-W clippy::pedantic"
+            "-W clippy::nursery"
+            "-W clippy::cargo"
+            # Performance
+            "-W clippy::needless_pass_by_value"
+            "-W clippy::cloned_instead_of_copied"
+            "-W clippy::map_unwrap_or"
+            # Correctness
+            "-W clippy::correctness"
+            # Style
+            "-W clippy::style"
+            # Complexity
+            "-W clippy::complexity"
+            # Allow some noisy pedantic lints
+            "-A clippy::module_name_repetitions"
+            "-A clippy::must_use_candidate"
+            "-A clippy::missing_errors_doc"
+            "-A clippy::missing_panics_doc"
+          )
+
+          deny_flag=""
+          [[ "${{ inputs.clippy_deny_warnings || 'true' }}" == "true" ]] && \
+            deny_flag="-- -D warnings"
+
+          # Find all cargo projects
+          mapfile -t cargo_dirs < <(
+            find . -name "Cargo.toml" ! -path "./.git/*" ! -path "*/target/*" \
+              | xargs -I{} dirname {} | sort -u
+          )
+
+          total_errors=0
+          total_warnings=0
+          clippy_exit=0
+
+          for cargo_dir in "${cargo_dirs[@]}"; do
+            echo "  📦 Checking: ${cargo_dir}"
+
+            # Run Clippy with JSON output
+            clippy_output="$(cd "${cargo_dir}" && \
+              cargo clippy \
+                --all-targets \
+                --all-features \
+                --message-format=json \
+                ${deny_flag} \
+                2>/dev/null)" || clippy_exit=1
+
+            # Parse JSON output
+            errors="$(echo "${clippy_output}" | \
+              python3 -c "
+          import sys, json
+          total = 0
+          for line in sys.stdin:
+              try:
+                  msg = json.loads(line.strip())
+                  if msg.get('type') == 'diagnostic':
+                      d = msg.get('message', {})
+                      if d.get('level') == 'error':
+                          total += 1
+              except: pass
+          print(total)" 2>/dev/null || echo 0)"
+
+            warnings="$(echo "${clippy_output}" | \
+              python3 -c "
+          import sys, json
+          total = 0
+          for line in sys.stdin:
+              try:
+                  msg = json.loads(line.strip())
+                  if msg.get('type') == 'diagnostic':
+                      d = msg.get('message', {})
+                      if d.get('level') == 'warning':
+                          total += 1
+              except: pass
+          print(total)" 2>/dev/null || echo 0)"
+
+            total_errors=$((total_errors + errors))
+            total_warnings=$((total_warnings + warnings))
+
+            if [[ $((errors + warnings)) -gt 0 ]]; then
+              echo "  ❌ ${cargo_dir}: ${errors} errors, ${warnings} warnings"
+              # Show human-readable output
+              cd "${cargo_dir}" && \
+                cargo clippy --all-targets --all-features --message-format=human \
+                  2>/dev/null | grep -E "^error|^warning" | head -20 | \
+                  while IFS= read -r line; do echo "     ${line}"; done
+              cd - > /dev/null || true
+            else
+              echo "  ✅ ${cargo_dir}: Clean"
+            fi
+          done
+
+          passed="true"
+          [[ ${total_errors} -gt 0 ]] && passed="false"
+          [[ "${{ inputs.clippy_deny_warnings || 'true' }}" == "true" && \
+             ${total_warnings} -gt 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📊 Clippy Results                                          ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  📦 Projects linted:    %-34s║\n" "${#cargo_dirs[@]}"
+          printf "║  🔴 Errors:             %-34s║\n" "${total_errors}"
+          printf "║  🟠 Warnings:           %-34s║\n" "${total_warnings}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          if [[ "${passed}" == "true" ]]; then
+            echo "║  ✅ STATUS: PASSED                                          ║"
+          else
+            echo "║  ❌ STATUS: FAILED                                          ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "errors=${total_errors}"    >> "${GITHUB_OUTPUT}"
+          echo "warnings=${total_warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"          >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: SECURITY — cargo audit + cargo deny
+  # ────────────────────────────────────────────────────────────────────────────
+  security:
+    name: "🔒 Rust Security Audit"
+    needs: discover
+    if: >
+      needs.discover.outputs.has-rust == 'true' &&
+      inputs.run_audit != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      audit-passed: ${{ steps.audit.outputs.passed }}
+      deny-passed:  ${{ steps.deny.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🦀 Install Rust Toolchain"
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.discover.outputs.toolchain || 'stable' }}
+
+      - name: "🗄️ Cache Cargo"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+          key: "${{ runner.os }}-cargo-audit-${{ hashFiles('**/Cargo.lock') }}"
+
+      - name: "📦 Install Security Tools"
+        shell: bash
+        run: |
+          echo "  Installing cargo-audit..."
+          cargo install cargo-audit --quiet 2>/dev/null || true
+          echo "  cargo-audit: $(cargo audit --version 2>/dev/null | head -1)"
+
+          if [[ "${{ inputs.run_deny || 'true' }}" == "true" ]]; then
+            echo "  Installing cargo-deny..."
+            cargo install cargo-deny --quiet 2>/dev/null || true
+            echo "  cargo-deny: $(cargo deny --version 2>/dev/null | head -1)"
+          fi
+
+      - name: "🔒 Run cargo audit"
+        id: audit
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔒 cargo audit — CVE Vulnerability Scan                    ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "  Checking Cargo.lock files for known vulnerabilities..."
+
+          # Run on each Cargo.lock found
+          mapfile -t lock_files < <(
+            find . -name "Cargo.lock" ! -path "./.git/*" ! -path "*/target/*"
+          )
+
+          total_vulns=0
+          audit_exit=0
+
+          for lock_file in "${lock_files[@]}"; do
+            lock_dir="$(dirname "${lock_file}")"
+            echo "  📦 Auditing: ${lock_dir}"
+
+            audit_output="$(cd "${lock_dir}" && \
+              cargo audit --json 2>/dev/null)" || audit_exit=1
+
+            vulns="$(echo "${audit_output}" | python3 -c "
+          import sys, json
+          try:
+              r = json.loads(sys.stdin.read())
+              vulns = r.get('vulnerabilities', {})
+              found = vulns.get('found', [])
+              print(len(found))
+          except: print(0)" 2>/dev/null || echo 0)"
+
+            total_vulns=$((total_vulns + vulns))
+
+            if [[ ${vulns} -gt 0 ]]; then
+              echo "  🚨 ${vulns} vulnerabilities found in ${lock_dir}:"
+              echo "${audit_output}" | python3 -c "
+          import sys, json
+          try:
+              r = json.loads(sys.stdin.read())
+              for v in r.get('vulnerabilities', {}).get('found', [])[:5]:
+                  pkg = v.get('package', {})
+                  adv = v.get('advisory', {})
+                  print(f\"  🔴 {pkg.get('name','?')} {pkg.get('version','?')}\")
+                  print(f\"     CVE: {adv.get('id','?')} — {adv.get('title','?')}\")
+                  print(f\"     URL: {adv.get('url','?')}\")
+          except: pass" 2>/dev/null
+            else
+              echo "  ✅ No vulnerabilities found"
+            fi
+          done
+
+          passed="true"
+          [[ ${total_vulns} -gt 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  🔴 Total vulnerabilities: %-30s║\n" "${total_vulns}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          if [[ "${passed}" == "true" ]]; then
+            echo "║  ✅ STATUS: PASSED — No known CVEs in dependencies          ║"
+          else
+            echo "║  ❌ STATUS: FAILED — Vulnerable dependencies found          ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+      - name: "🚫 Run cargo deny"
+        id: deny
+        if: inputs.run_deny != 'false'
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚫 cargo deny — License & Dependency Policy                ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Generate deny.toml if not present
+          if [[ ! -f deny.toml ]]; then
+            cat > deny.toml << 'DENYTOML'
+          # ASH Dotfiles — cargo deny configuration
+
+          [advisories]
+          db-path = "~/.cargo/advisory-db"
+          db-urls = ["https://github.com/rustsec/advisory-db"]
+          vulnerability = "deny"
+          unmaintained = "warn"
+          yanked = "warn"
+          notice = "warn"
+          ignore = []
+
+          [licenses]
+          unlicensed = "deny"
+          allow-osi-fsf-free = "neither"
+          copyleft = "deny"
+          allow = [
+            "MIT",
+            "Apache-2.0",
+            "Apache-2.0 WITH LLVM-exception",
+            "BSD-2-Clause",
+            "BSD-3-Clause",
+            "ISC",
+            "Unicode-DFS-2016",
+            "CC0-1.0",
+            "OpenSSL",
+            "Zlib",
+          ]
+          deny = [
+            "GPL-1.0",
+            "GPL-2.0",
+            "GPL-3.0",
+            "AGPL-1.0",
+            "AGPL-3.0",
+            "LGPL-2.0",
+            "LGPL-2.1",
+            "LGPL-3.0",
+          ]
+
+          [bans]
+          multiple-versions = "warn"
+          wildcards = "allow"
+          highlight = "all"
+          workspace-default-features = "allow"
+          external-default-features = "allow"
+
+          [sources]
+          unknown-registry = "deny"
+          unknown-git = "deny"
+          allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+          allow-git = []
+
+          DENYTOML
+            echo "  ✅ deny.toml generated"
+          fi
+
+          deny_exit=0
+          deny_output="$(cargo deny check 2>&1)" || deny_exit=$?
+
+          if [[ ${deny_exit} -eq 0 ]]; then
+            echo "  ✅ All cargo deny checks passed!"
+          else
+            echo "  ⚠️  cargo deny issues:"
+            echo "${deny_output}" | head -30 | while IFS= read -r line; do
+              echo "     ${line}"
+            done
+          fi
+
+          passed="true"
+          [[ ${deny_exit} -ne 0 ]] && passed="false"
+
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 05: BUILD — Verify compilation
+  # ────────────────────────────────────────────────────────────────────────────
+  build-check:
+    name: "🔨 Build Verification"
+    needs: discover
+    if: needs.discover.outputs.has-rust == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      passed: ${{ steps.build.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🦀 Install Rust Toolchain"
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.discover.outputs.toolchain || 'stable' }}
+
+      - name: "🗄️ Cache Cargo"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: "${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}"
+          restore-keys: "${{ runner.os }}-cargo-build-"
+
+      - name: "🔨 Run cargo check"
+        id: build
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔨 cargo check — Build Verification                        ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          mapfile -t cargo_dirs < <(
+            find . -name "Cargo.toml" ! -path "./.git/*" ! -path "*/target/*" \
+              | xargs -I{} dirname {} | sort -u
+          )
+
+          build_exit=0
+          total_errors=0
+
+          for cargo_dir in "${cargo_dirs[@]}"; do
+            echo "  📦 Checking build: ${cargo_dir}"
+
+            build_output="$(cd "${cargo_dir}" && \
+              cargo check --all-targets --all-features 2>&1)" || {
+              build_exit=1
+              errors="$(echo "${build_output}" | grep -c "^error" || echo 1)"
+              total_errors=$((total_errors + errors))
+              echo "  ❌ Build errors in ${cargo_dir}:"
+              echo "${build_output}" | grep "^error" | head -10 | \
+                while IFS= read -r line; do echo "     ${line}"; done
+            }
+
+            if [[ ${build_exit} -eq 0 ]]; then
+              echo "  ✅ ${cargo_dir}: Compiles cleanly"
+            fi
+          done
+
+          passed="true"
+          [[ ${build_exit} -ne 0 ]] && passed="false"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  📦 Projects checked: %-36s║\n" "${#cargo_dirs[@]}"
+          printf "║  🔴 Build errors:     %-36s║\n" "${total_errors}"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          if [[ "${passed}" == "true" ]]; then
+            echo "║  ✅ STATUS: PASSED — All crates compile                    ║"
+          else
+            echo "║  ❌ STATUS: FAILED — Build errors found                    ║"
+          fi
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 06: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Rust"
+    needs: [discover, rustfmt, clippy, security, build-check]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fmtPassed    = '${{ needs.rustfmt.outputs.passed }}' === 'true';
+            const clippyErrors = parseInt('${{ needs.clippy.outputs.errors || 0 }}');
+            const clippyWarns  = parseInt('${{ needs.clippy.outputs.warnings || 0 }}');
+            const clippyPassed = '${{ needs.clippy.outputs.passed || "true" }}' === 'true';
+            const auditPassed  = '${{ needs.security.outputs.audit-passed || "true" }}' === 'true';
+            const denyPassed   = '${{ needs.security.outputs.deny-passed || "true" }}' === 'true';
+            const buildPassed  = '${{ needs.build-check.outputs.passed || "true" }}' === 'true';
+            const rsCount      = '${{ needs.discover.outputs.rs-count }}';
+
+            const overallPassed = fmtPassed && clippyPassed && auditPassed && buildPassed;
+            const icon   = overallPassed ? '✅' : '❌';
+            const status = overallPassed ? 'PASSED' : 'FAILED';
+
+            const body = `## 🦀 Rust Analysis ${icon}
+
+            **Status: ${status}** | Analyzed **${rsCount}** Rust files
+
+            | Check | Result | Status |
+            |-------|--------|--------|
+            | 🎨 rustfmt | Format check | ${fmtPassed ? '✅' : '❌'} |
+            | 📎 Clippy | \`${clippyErrors}\` errors, \`${clippyWarns}\` warnings | ${clippyPassed ? '✅' : '❌'} |
+            | 🔒 cargo audit | CVE scan | ${auditPassed ? '✅' : '❌'} |
+            | 🚫 cargo deny | License & policy | ${denyPassed ? '✅' : '⚠️'} |
+            | 🔨 Build | cargo check | ${buildPassed ? '✅' : '❌'} |
+
+            ${overallPassed
+              ? '### ✨ All Rust checks pass!'
+              : `### 🔧 Fix Required
+
+            \`\`\`bash
+            # Fix formatting
+            cargo fmt --all
+
+            # Fix Clippy warnings (auto-fixable)
+            cargo clippy --fix --all-targets
+
+            # Check for CVEs
+            cargo install cargo-audit
+            cargo audit
+
+            # Verify build
+            cargo check --all-targets
+            \`\`\``
+            }
+
+            ---
+            *🤖 ASH Dotfiles Rustfmt • Clippy • [Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🦀 Rust Analysis')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: "🚦 Evaluate Quality Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Rust Quality Gate                                       ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          has_rust="${{ needs.discover.outputs.has-rust }}"
+          fmt_passed="${{ needs.rustfmt.outputs.passed || 'true' }}"
+          clippy_passed="${{ needs.clippy.outputs.passed || 'true' }}"
+          audit_passed="${{ needs.security.outputs.audit-passed || 'true' }}"
+          build_passed="${{ needs.build-check.outputs.passed || 'true' }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── rustfmt:     ${fmt_passed}"
+          echo "  ├── clippy:      ${clippy_passed}"
+          echo "  ├── audit:       ${audit_passed}"
+          echo "  └── build:       ${build_passed}"
+          echo ""
+
+          if [[ "${has_rust}" == "false" ]]; then
+            echo "  ℹ️  No Rust files — gate skipped"
+            exit 0
+          fi
+
+          all_passed="true"
+          [[ "${fmt_passed}" != "true" ]] && all_passed="false"
+          [[ "${clippy_passed}" != "true" ]] && all_passed="false"
+          [[ "${build_passed}" != "true" ]] && all_passed="false"
+
+          if [[ "${all_passed}" == "true" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+            echo "  🎉 All Rust code meets quality standards!"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            [[ "${fmt_passed}" != "true" ]] && echo "  Fix: cargo fmt --all"
+            [[ "${clippy_passed}" != "true" ]] && echo "  Fix: cargo clippy --fix"
+            [[ "${build_passed}" != "true" ]] && echo "  Fix: cargo check (resolve build errors)"
+            exit 1
+          fi

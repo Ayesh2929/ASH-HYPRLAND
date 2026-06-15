@@ -1,0 +1,701 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🔖 ASH DOTFILES v5.0 OMEGA — SEMANTIC RELEASE WORKFLOW                           ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Semantic Versioning & Automated Release Pipeline                    ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Semantic Release v23   •  Conventional Commits  •  Auto Versioning              ║
+# ║      Multi-Channel Release  •  GitHub Release        •  npm Publishing              ║
+# ║      Commit Analysis        •  Release Train         •  Plugin System              ║
+# ║      Asset Upload           •  Pre-release Channels  •  Dry Run Mode              ║
+# ║      Monorepo Support       •  Squash Detection      •  CI Skip                  ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔖 Semantic Release — Version & Publish"
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/+"
+      - "next"
+      - "next-major"
+      - "beta"
+      - "alpha"
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (analyze commits, no publish)"
+        required: false
+        default: true
+        type: boolean
+      branch:
+        description: "Branch to release from"
+        required: false
+        default: "main"
+        type: string
+      debug:
+        description: "Enable debug output"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: "semantic-release-${{ github.ref }}"
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+  GIT_AUTHOR_NAME: "ASH Release Bot"
+  GIT_AUTHOR_EMAIL: "release@ash-dotfiles.dev"
+  GIT_COMMITTER_NAME: "ASH Release Bot"
+  GIT_COMMITTER_EMAIL: "release@ash-dotfiles.dev"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: SETUP — Install semantic-release and plugins
+  # ────────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "🛠️ Setup Semantic Release"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      config-hash: ${{ steps.config.outputs.hash }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: "🟢 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "📦 Setup pnpm"
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: "⚙️ Generate Semantic Release Configuration"
+        id: config
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔖 Semantic Release Configuration Generator                ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # ── Generate .releaserc.yml ────────────────────────────────────────
+          if [[ ! -f ".releaserc.yml" ]]; then
+            cat > .releaserc.yml << 'RELEASERC'
+          # ╔══════════════════════════════════════════════════════════════════╗
+          # ║  ASH Dotfiles v5.0 OMEGA — Semantic Release Configuration       ║
+          # ╚══════════════════════════════════════════════════════════════════╝
+
+          # Release branches configuration
+          branches:
+            - name: main
+              channel: latest
+            - name: develop
+              channel: next
+              prerelease: true
+            - name: "release/+"
+              channel: release
+            - name: next
+              channel: next
+              prerelease: next
+            - name: next-major
+              channel: next-major
+              prerelease: next-major
+            - name: beta
+              channel: beta
+              prerelease: beta
+            - name: alpha
+              channel: alpha
+              prerelease: alpha
+
+          # Tag format
+          tagFormat: "v${version}"
+
+          # Plugin configuration
+          plugins:
+            # ── Commit analysis ────────────────────────────────────────────────
+            - - "@semantic-release/commit-analyzer"
+              - preset: conventionalcommits
+                releaseRules:
+                  # Major version bumps
+                  - { breaking: true,       release: major }
+                  - { type: feat,  scope: "!",   release: major }
+
+                  # Minor version bumps
+                  - { type: feat,     release: minor }
+                  - { type: theme,    release: minor }
+                  - { type: plugin,   release: minor }
+
+                  # Patch version bumps
+                  - { type: fix,      release: patch }
+                  - { type: perf,     release: patch }
+                  - { type: security, release: patch }
+                  - { type: revert,   release: patch }
+                  - { type: refactor, release: patch }
+
+                  # No release (but still logged)
+                  - { type: docs,     release: false }
+                  - { type: style,    release: false }
+                  - { type: test,     release: false }
+                  - { type: build,    release: false }
+                  - { type: ci,       release: false }
+                  - { type: chore,    release: false }
+
+                parserOpts:
+                  noteKeywords:
+                    - BREAKING CHANGE
+                    - BREAKING CHANGES
+                    - BREAKING
+
+            # ── Release notes generation ───────────────────────────────────────
+            - - "@semantic-release/release-notes-generator"
+              - preset: conventionalcommits
+                presetConfig:
+                  types:
+                    - { type: feat,     section: "✨ New Features",   hidden: false }
+                    - { type: fix,      section: "🐛 Bug Fixes",      hidden: false }
+                    - { type: perf,     section: "⚡ Performance",    hidden: false }
+                    - { type: security, section: "🔒 Security",       hidden: false }
+                    - { type: theme,    section: "🎨 New Themes",     hidden: false }
+                    - { type: plugin,   section: "🔌 New Plugins",    hidden: false }
+                    - { type: refactor, section: "♻️  Refactoring",    hidden: false }
+                    - { type: docs,     section: "📖 Documentation",  hidden: false }
+                    - { type: deps,     section: "📦 Dependencies",   hidden: false }
+                    - { type: build,    section: "🏗️  Build",          hidden: true  }
+                    - { type: test,     section: "🧪 Tests",          hidden: true  }
+                    - { type: ci,       section: "⚙️  CI/CD",          hidden: true  }
+                    - { type: chore,    section: "🔧 Maintenance",    hidden: true  }
+                    - { type: style,    section: "🎨 Style",          hidden: true  }
+                writerOpts:
+                  groupBy: type
+                  commitGroupsSort: type
+                  commitsSort:
+                    - scope
+                    - subject
+
+            # ── Changelog generation ───────────────────────────────────────────
+            - - "@semantic-release/changelog"
+              - changelogFile: CHANGELOG.md
+                changelogTitle: |
+                  # 📜 ASH Dotfiles — Changelog
+
+                  All notable changes to ASH Dotfiles are documented here.
+                  This changelog follows [Conventional Commits](https://www.conventionalcommits.org/).
+
+            # ── Version file updates ───────────────────────────────────────────
+            - - "@semantic-release/exec"
+              - prepareCmd: |
+                  python3 .github/scripts/update-versions.py ${nextRelease.version}
+                publishCmd: |
+                  echo "Published version ${nextRelease.version}"
+
+            # ── Git commit ────────────────────────────────────────────────────
+            - - "@semantic-release/git"
+              - assets:
+                  - CHANGELOG.md
+                  - version.json
+                  - ash-cli/data/version.json
+                  - packaging/aur/ash-dotfiles/PKGBUILD
+                  - mobile/flutter/pubspec.yaml
+                  - browser-extension/manifest.json
+                  - web/package.json
+                message: |
+                  chore(release): ${nextRelease.version} [skip ci]
+
+                  ${nextRelease.notes}
+
+            # ── GitHub Release ────────────────────────────────────────────────
+            - - "@semantic-release/github"
+              - assets:
+                  - path: "dist/*.AppImage"
+                    label: "AppImage (Linux)"
+                  - path: "dist/*.pkg.tar.zst"
+                    label: "Arch Package"
+                  - path: "dist/*.flatpak"
+                    label: "Flatpak Bundle"
+                  - path: "dist/*.apk"
+                    label: "Android APK"
+                  - path: "dist/*.zip"
+                    label: "Browser Extension"
+                  - path: "dist/checksums.txt"
+                    label: "SHA256 Checksums"
+                  - path: "dist/*.cdx.json"
+                    label: "SBOM (CycloneDX)"
+                  - path: "dist/*.spdx.json"
+                    label: "SBOM (SPDX)"
+                successComment: |
+                  🎉 This issue/PR was resolved in version `${nextRelease.version}`.
+                  Download: [${nextRelease.gitTag}](${releases.filter(r => !r.private)[0].url})
+                failTitle: "❌ Release failed"
+                failComment: |
+                  The release from branch `${branch.name}` failed.
+                  Please check the [CI logs](${ciUrl}) for details.
+                releasedLabels:
+                  - released
+                  - "released:${nextRelease.gitTag}"
+                addReleases: bottom
+                discussionCategoryName: "Announcements"
+          RELEASERC
+            echo "  ✅ .releaserc.yml generated"
+          fi
+
+          # ── Generate version update script ─────────────────────────────────
+          mkdir -p .github/scripts
+          cat > .github/scripts/update-versions.py << 'PYUPDATE'
+          #!/usr/bin/env python3
+          """ASH Dotfiles — Version Update Script for Semantic Release"""
+
+          import json
+          import re
+          import sys
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          NEW_VERSION = sys.argv[1] if len(sys.argv) > 1 else "5.0.0"
+          BUILD_DATE  = datetime.now(timezone.utc).isoformat()
+
+          def update_json_version(path: str, key: str = "version") -> bool:
+              p = Path(path)
+              if not p.exists(): return False
+              try:
+                  data = json.loads(p.read_text())
+                  data[key] = NEW_VERSION
+                  p.write_text(json.dumps(data, indent=2) + "\n")
+                  print(f"  ✅ {path}: {NEW_VERSION}")
+                  return True
+              except Exception as e:
+                  print(f"  ⚠️  {path}: {e}")
+                  return False
+
+          def update_regex_version(path: str, pattern: str, replacement: str) -> bool:
+              p = Path(path)
+              if not p.exists(): return False
+              try:
+                  content = p.read_text()
+                  updated = re.sub(pattern, replacement, content, flags=re.M)
+                  p.write_text(updated)
+                  print(f"  ✅ {path}: {NEW_VERSION}")
+                  return True
+              except Exception as e:
+                  print(f"  ⚠️  {path}: {e}")
+                  return False
+
+          print(f"\n  Updating all version files to {NEW_VERSION}...")
+
+          # version.json
+          version_data = {
+              "version":    NEW_VERSION,
+              "build_date": BUILD_DATE,
+              "channel":    "stable",
+              "codename":   "OMEGA",
+          }
+          Path("version.json").write_text(json.dumps(version_data, indent=2) + "\n")
+          print(f"  ✅ version.json")
+
+          # ash-cli/data/version.json
+          cli_dir = Path("ash-cli/data")
+          cli_dir.mkdir(parents=True, exist_ok=True)
+          (cli_dir / "version.json").write_text(json.dumps(version_data, indent=2) + "\n")
+          print(f"  ✅ ash-cli/data/version.json")
+
+          # PKGBUILD
+          update_regex_version(
+              "packaging/aur/ash-dotfiles/PKGBUILD",
+              r"^pkgver=.*$", f"pkgver={NEW_VERSION}"
+          )
+
+          # pubspec.yaml
+          p = Path("mobile/flutter/pubspec.yaml")
+          if p.exists():
+              content = p.read_text()
+              m = re.search(r"^version:\s*[\d.]+\+(\d+)", content, re.M)
+              build = int(m.group(1)) + 1 if m else 1
+              p.write_text(re.sub(r"^version:.*$", f"version: {NEW_VERSION}+{build}", content, flags=re.M))
+              print(f"  ✅ mobile/flutter/pubspec.yaml")
+
+          # browser-extension/manifest.json
+          update_json_version("browser-extension/manifest.json")
+
+          # web/package.json
+          update_json_version("web/package.json")
+
+          print(f"\n  ✅ All version files updated to {NEW_VERSION}")
+          PYUPDATE
+          chmod +x .github/scripts/update-versions.py
+          echo "  ✅ Version update script generated"
+
+          # ── Install semantic-release packages ─────────────────────────────
+          cat > /tmp/sr-package.json << 'SRPKG'
+          {
+            "name": "ash-dotfiles-semantic-release",
+            "version": "1.0.0",
+            "private": true,
+            "devDependencies": {
+              "semantic-release": "^23.1.1",
+              "@semantic-release/changelog": "^6.0.3",
+              "@semantic-release/commit-analyzer": "^12.0.0",
+              "@semantic-release/exec": "^6.0.3",
+              "@semantic-release/git": "^10.0.1",
+              "@semantic-release/github": "^10.3.5",
+              "@semantic-release/release-notes-generator": "^13.0.0",
+              "conventional-changelog-conventionalcommits": "^8.0.0"
+            }
+          }
+          SRPKG
+
+          cp /tmp/sr-package.json /tmp/sr-install/package.json 2>/dev/null || {
+            mkdir -p /tmp/sr-install
+            cp /tmp/sr-package.json /tmp/sr-install/package.json
+          }
+
+          cd /tmp/sr-install && npm install --silent 2>/dev/null
+          echo "  ✅ Semantic release packages installed"
+
+          config_hash="$(md5sum .releaserc.yml 2>/dev/null | cut -c1-8 || echo 'nohash')"
+          echo "hash=${config_hash}" >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Cache Semantic Release"
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            /tmp/sr-install/node_modules
+            .releaserc.yml
+            .github/scripts/update-versions.py
+          key: "semantic-release-${{ steps.config.outputs.hash }}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: ANALYZE — Analyze commits without releasing
+  # ────────────────────────────────────────────────────────────────────────────
+  analyze:
+    name: "🔍 Commit Analysis"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      next-version:    ${{ steps.analyze.outputs.next_version }}
+      release-type:    ${{ steps.analyze.outputs.release_type }}
+      will-release:    ${{ steps.analyze.outputs.will_release }}
+      commit-count:    ${{ steps.analyze.outputs.commit_count }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🟢 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "📥 Restore Cache"
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            /tmp/sr-install/node_modules
+            .releaserc.yml
+            .github/scripts/update-versions.py
+          key: "semantic-release-${{ needs.setup.outputs.config-hash }}"
+          restore-keys: "semantic-release-"
+
+      - name: "🔍 Analyze Commits"
+        id: analyze
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔍 Semantic Commit Analysis                                 ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Count commits since last tag
+          LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo 'none')"
+          if [[ "${LAST_TAG}" != "none" ]]; then
+            commit_count="$(git log "${LAST_TAG}..HEAD" --oneline | wc -l)"
+          else
+            commit_count="$(git log --oneline | wc -l)"
+          fi
+
+          echo "  📊 Since last tag (${LAST_TAG}):"
+          echo "  ├── Commits: ${commit_count}"
+
+          # Analyze commit types
+          declare -A type_counts
+          while IFS= read -r line; do
+            type="$(echo "${line}" | grep -oE '^[a-z]+(\([^)]+\))?' | \
+              cut -d'(' -f1 || echo 'other')"
+            type_counts["${type}"]=$((${type_counts["${type}"]:-0} + 1))
+          done < <(git log "${LAST_TAG}..HEAD" --format="%s" 2>/dev/null || true)
+
+          echo "  └── By type:"
+          for type in feat fix perf security theme plugin refactor docs chore; do
+            count="${type_counts[$type]:-0}"
+            [[ ${count} -gt 0 ]] && printf "       %-12s %d commit(s)\n" "${type}:" "${count}"
+          done
+
+          # Determine release type
+          will_release="false"
+          release_type="none"
+          next_version=""
+
+          # Check for breaking changes
+          if git log "${LAST_TAG}..HEAD" --format="%B" 2>/dev/null | \
+             grep -q "BREAKING CHANGE"; then
+            release_type="major"
+            will_release="true"
+          elif [[ ${type_counts["feat"]:-0} -gt 0 ]] || \
+               [[ ${type_counts["theme"]:-0} -gt 0 ]] || \
+               [[ ${type_counts["plugin"]:-0} -gt 0 ]]; then
+            release_type="minor"
+            will_release="true"
+          elif [[ ${type_counts["fix"]:-0} -gt 0 ]] || \
+               [[ ${type_counts["perf"]:-0} -gt 0 ]] || \
+               [[ ${type_counts["security"]:-0} -gt 0 ]] || \
+               [[ ${type_counts["refactor"]:-0} -gt 0 ]]; then
+            release_type="patch"
+            will_release="true"
+          fi
+
+          # Calculate next version
+          if [[ "${will_release}" == "true" && "${LAST_TAG}" != "none" ]]; then
+            current="${LAST_TAG#v}"
+            IFS='.' read -r major minor patch <<< "${current}"
+            case "${release_type}" in
+              major) next_version="$((major + 1)).0.0" ;;
+              minor) next_version="${major}.$((minor + 1)).0" ;;
+              patch) next_version="${major}.${minor}.$((patch + 1))" ;;
+            esac
+          fi
+
+          echo ""
+          echo "  📊 Analysis Results:"
+          echo "  ├── Will release: ${will_release}"
+          echo "  ├── Release type: ${release_type}"
+          echo "  ├── Next version: ${next_version:-'N/A'}"
+          echo "  └── Commit count: ${commit_count}"
+
+          {
+            echo "next_version=${next_version}"
+            echo "release_type=${release_type}"
+            echo "will_release=${will_release}"
+            echo "commit_count=${commit_count}"
+          } >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: RELEASE — Run semantic-release
+  # ────────────────────────────────────────────────────────────────────────────
+  release:
+    name: "🔖 Execute Semantic Release"
+    needs: [setup, analyze]
+    if: >
+      needs.analyze.outputs.will-release == 'true' ||
+      inputs.dry_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      released:      ${{ steps.release.outputs.released }}
+      version:       ${{ steps.release.outputs.version }}
+      channel:       ${{ steps.release.outputs.channel }}
+      release-url:   ${{ steps.release.outputs.release_url }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: "🟢 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "📥 Restore Cache"
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            /tmp/sr-install/node_modules
+            .releaserc.yml
+            .github/scripts/update-versions.py
+          key: "semantic-release-${{ needs.setup.outputs.config-hash }}"
+          restore-keys: "semantic-release-"
+
+      - name: "🔖 Run Semantic Release"
+        id: release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN || 'none' }}
+          GIT_AUTHOR_NAME: ${{ env.GIT_AUTHOR_NAME }}
+          GIT_AUTHOR_EMAIL: ${{ env.GIT_AUTHOR_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ env.GIT_COMMITTER_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ env.GIT_COMMITTER_EMAIL }}
+          DEBUG: ${{ inputs.debug == 'true' && 'semantic-release:*' || '' }}
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔖 Semantic Release Execution                              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          DRY_RUN="${{ inputs.dry_run || 'false' }}"
+          BRANCH="${{ inputs.branch || github.ref_name }}"
+
+          echo "  📊 Release Configuration:"
+          echo "  ├── Dry run:  ${DRY_RUN}"
+          echo "  ├── Branch:   ${BRANCH}"
+          echo "  ├── Analysis: ${{ needs.analyze.outputs.release-type }} release"
+          echo "  └── Version:  ${{ needs.analyze.outputs.next-version }}"
+          echo ""
+
+          # Add semantic-release to PATH
+          export PATH="/tmp/sr-install/node_modules/.bin:${PATH}"
+
+          # Configure git
+          git config user.name  "${GIT_AUTHOR_NAME}"
+          git config user.email "${GIT_AUTHOR_EMAIL}"
+
+          if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "  🔍 DRY RUN MODE — analyzing only, no commits"
+            echo ""
+
+            semantic-release \
+              --dry-run \
+              --branches="${BRANCH}" \
+              --config=.releaserc.yml \
+              2>&1 | tee /tmp/semantic-release-output.txt || true
+
+            # Parse dry run output
+            version="$(grep -oP 'The next release version is \K[\d.]+' \
+              /tmp/semantic-release-output.txt 2>/dev/null || echo '')"
+            channel="$(grep -oP 'channel \K\w+' \
+              /tmp/semantic-release-output.txt | head -1 2>/dev/null || echo 'latest')"
+
+            echo ""
+            echo "  📊 Dry Run Results:"
+            echo "  ├── Would release: ${version:-'no release'}"
+            echo "  └── Channel:       ${channel}"
+
+            echo "released=false"          >> "${GITHUB_OUTPUT}"
+            echo "version=${version}"      >> "${GITHUB_OUTPUT}"
+            echo "channel=${channel}"      >> "${GITHUB_OUTPUT}"
+            echo "release_url="            >> "${GITHUB_OUTPUT}"
+          else
+            echo "  🚀 PRODUCTION RELEASE MODE"
+            echo ""
+
+            release_output="$(semantic-release \
+              --branches="${BRANCH}" \
+              --config=.releaserc.yml \
+              2>&1 | tee /tmp/semantic-release-output.txt)"
+
+            sr_exit=$?
+
+            # Parse output
+            version="$(grep -oP 'Published release \K[\d.]+' \
+              /tmp/semantic-release-output.txt 2>/dev/null || \
+              grep -oP 'The next release version is \K[\d.]+' \
+              /tmp/semantic-release-output.txt 2>/dev/null || echo '')"
+
+            released="false"
+            [[ -n "${version}" ]] && released="true"
+
+            release_url=""
+            if [[ "${released}" == "true" ]]; then
+              release_url="https://github.com/${{ github.repository }}/releases/tag/v${version}"
+            fi
+
+            echo ""
+            echo "╔══════════════════════════════════════════════════════════════╗"
+            printf "║  📦 Released: %-44s║\n" "${released}"
+            printf "║  🔖 Version:  %-44s║\n" "${version:-'N/A'}"
+            printf "║  🌐 URL:      %-44s║\n" "${release_url:-'N/A'}"
+            [[ ${sr_exit} -eq 0 ]] && \
+              echo "║  ✅ STATUS: SUCCESS                                         ║" || \
+              echo "║  ❌ STATUS: FAILED                                          ║"
+            echo "╚══════════════════════════════════════════════════════════════╝"
+
+            {
+              echo "released=${released}"
+              echo "version=${version}"
+              echo "channel=latest"
+              echo "release_url=${release_url}"
+            } >> "${GITHUB_OUTPUT}"
+
+            [[ ${sr_exit} -ne 0 ]] && exit 1 || true
+          fi
+
+      - name: "📤 Upload Release Log"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "semantic-release-log"
+          path: /tmp/semantic-release-output.txt
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Semantic Release"
+    needs: [analyze, release]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "🚦 Evaluate Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Semantic Release Quality Gate                           ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          will_release="${{ needs.analyze.outputs.will-release }}"
+          released="${{ needs.release.outputs.released || 'false' }}"
+          version="${{ needs.release.outputs.version }}"
+          dry_run="${{ inputs.dry_run || 'false' }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── Will release: ${will_release}"
+          echo "  ├── Released:     ${released}"
+          echo "  ├── Version:      ${version:-'N/A'}"
+          echo "  └── Dry run:      ${dry_run}"
+          echo ""
+
+          release_result="${{ needs.release.result }}"
+
+          if [[ "${release_result}" == "success" ]] || \
+             [[ "${release_result}" == "skipped" ]]; then
+            echo "  ✅ SEMANTIC RELEASE GATE: PASSED"
+            if [[ "${released}" == "true" ]]; then
+              echo "  🎉 Version ${version} published successfully!"
+            elif [[ "${dry_run}" == "true" ]]; then
+              echo "  🔍 Dry run completed — no release published"
+            else
+              echo "  ℹ️  No releasable commits detected"
+            fi
+          else
+            echo "  ❌ SEMANTIC RELEASE GATE: FAILED"
+            exit 1
+          fi

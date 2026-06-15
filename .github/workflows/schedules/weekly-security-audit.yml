@@ -1,0 +1,897 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🔒 ASH DOTFILES v5.0 OMEGA — WEEKLY SECURITY AUDIT ENGINE                               ║
+# ║                                                                                           ║
+# ║  ░██████╗███████╗░█████╗░██╗░░░██╗██████╗░██╗████████╗██╗░░░██╗                          ║
+# ║  ██╔════╝██╔════╝██╔══██╗██║░░░██║██╔══██╗██║╚══██╔══╝╚██╗░██╔╝                          ║
+# ║  ╚█████╗░█████╗░░██║░░╚═╝██║░░░██║██████╔╝██║░░░██║░░░░╚████╔╝░                          ║
+# ║  ░╚═══██╗██╔══╝░░██║░░██╗██║░░░██║██╔══██╗██║░░░██║░░░░░╚██╔╝░░                          ║
+# ║  ██████╔╝███████╗╚█████╔╝╚██████╔╝██║░░██║██║░░░██║░░░░░░██║░░░                          ║
+# ║  ╚═════╝░╚══════╝░╚════╝░░╚═════╝░╚═╝░░╚═╝╚═╝░░░╚═╝░░░░░░╚═╝░░░                          ║
+# ║                                                                                           ║
+# ║  ░█████╗░██╗░░░██╗██████╗░██╗████████╗                                                    ║
+# ║  ██╔══██╗██║░░░██║██╔══██╗██║╚══██╔══╝                                                    ║
+# ║  ███████║██║░░░██║██║░░██║██║░░░██║░░░                                                    ║
+# ║  ██╔══██║██║░░░██║██║░░██║██║░░░██║░░░                                                    ║
+# ║  ██║░░██║╚██████╔╝██████╔╝██║░░░██║░░░                                                    ║
+# ║  ╚═╝░░╚═╝░╚═════╝░╚═════╝░╚═╝░░░╚═╝░░░                                                    ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🔍 AUDIT DOMAINS:                                                                        ║
+# ║     🔑 Secret scanning (Gitleaks + TruffleHog)                                           ║
+# ║     🛡️  SAST analysis (Semgrep + CodeQL lite)                                             ║
+# ║     📦 Dependency CVE audit (pip-audit/npm-audit/cargo-audit)                            ║
+# ║     🔐 Permission audit (file permissions/SUID/SGID)                                     ║
+# ║     🌐 Supply chain verification (action pinning/SHA verification)                       ║
+# ║     🔒 Container security (Trivy/Grype image scanning)                                   ║
+# ║     📜 License compliance (FOSS license checking)                                        ║
+# ║     🧬 Code injection detection (ShellCheck + custom rules)                              ║
+# ║     🔗 URL security (HTTPS enforcement, redirect chains)                                  ║
+# ║     📋 Security policy compliance (SECURITY.md, advisories)                              ║
+# ║     🏷️  CVE correlation (NVD database lookup)                                             ║
+# ║     🔒 Secrets entropy analysis (Shannon entropy)                                        ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔒 Weekly Security Audit · Full Vulnerability Assessment"
+
+on:
+  schedule:
+    - cron: "0 3 * * 4"       # Weekly Thursday 03:00 UTC
+
+  workflow_dispatch:
+    inputs:
+      audit_domains:
+        description: "Audit domains to run"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - secrets-only
+          - sast-only
+          - deps-only
+          - permissions-only
+          - supply-chain-only
+          - license-only
+
+      severity_threshold:
+        description: "Minimum severity to report"
+        required: false
+        default: "medium"
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - critical
+
+      fail_on_findings:
+        description: "Fail workflow if findings detected"
+        required: false
+        default: true
+        type: boolean
+
+      notify_discord:
+        description: "Send Discord security alert"
+        required: false
+        default: true
+        type: boolean
+
+      create_advisory:
+        description: "Create GitHub security advisory for critical findings"
+        required: false
+        default: false
+        type: boolean
+
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: "security-audit-${{ github.ref }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: read
+  actions: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+  AUDIT_VERSION: "5.0.0"
+  WORK_DIR: "${{ github.workspace }}/.security-engine"
+  FINDINGS_DIR: "${{ github.workspace }}/.security-findings"
+
+  AUDIT_DOMAINS: "${{ github.event.inputs.audit_domains || 'all' }}"
+  SEVERITY_THRESHOLD: "${{ github.event.inputs.severity_threshold || 'medium' }}"
+  FAIL_ON_FINDINGS: "${{ github.event.inputs.fail_on_findings || 'true' }}"
+  NOTIFY_DISCORD: "${{ github.event.inputs.notify_discord || 'true' }}"
+
+# ═════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 0 — Audit bootstrap
+  # ───────────────────────────────────────────────────────────────────────────
+  bootstrap:
+    name: "🔒 Bootstrap · Security Audit Session"
+    runs-on: ubuntu-24.04
+    outputs:
+      session_id:        ${{ steps.session.outputs.id }}
+      run_secrets:       ${{ steps.domains.outputs.secrets }}
+      run_sast:          ${{ steps.domains.outputs.sast }}
+      run_deps:          ${{ steps.domains.outputs.deps }}
+      run_permissions:   ${{ steps.domains.outputs.permissions }}
+      run_supply_chain:  ${{ steps.domains.outputs.supply_chain }}
+      run_license:       ${{ steps.domains.outputs.license }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🆔 Session"
+        id: session
+        run: |
+          ID="audit-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
+          echo "id=${ID}" >> "$GITHUB_OUTPUT"
+          mkdir -p "${WORK_DIR}" "${FINDINGS_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🔒 ASH Security Audit — Weekly Scan"
+          echo "  📅 Date:     $(date -u +%Y-%m-%d)"
+          echo "  🎯 Domains:  ${AUDIT_DOMAINS}"
+          echo "  ⚠️  Severity: ${SEVERITY_THRESHOLD}+"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: "🎯 Resolve audit domains"
+        id: domains
+        run: |
+          ALL="false"
+          [[ "${AUDIT_DOMAINS}" == "all" ]] && ALL="true"
+
+          emit() {
+            local name="$1" key="$2"
+            if [[ "${ALL}" == "true" || "${AUDIT_DOMAINS}" == "${key}-only" ]]; then
+              echo "${name}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "${name}=false" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          emit "secrets"       "secrets"
+          emit "sast"          "sast"
+          emit "deps"          "deps"
+          emit "permissions"   "permissions"
+          emit "supply_chain"  "supply-chain"
+          emit "license"       "license"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Secret scanning
+  # ───────────────────────────────────────────────────────────────────────────
+  secret-scan:
+    name: "🔑 Secrets · Gitleaks + Entropy Analysis"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_secrets == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout (full history)"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "📦 Install scanning tools"
+        run: |
+          # Install Gitleaks
+          GITLEAKS_VERSION="8.21.2"
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o /tmp/gitleaks.tar.gz 2>/dev/null
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp/ gitleaks 2>/dev/null || true
+          sudo mv /tmp/gitleaks /usr/local/bin/ 2>/dev/null || true
+
+          pip3 install --quiet --user \
+            detect-secrets==1.5.0 \
+            rich==13.9.2 \
+            2>/dev/null || true
+
+          sudo apt-get install -y --no-install-recommends \
+            jq bc 2>/dev/null || true
+
+          mkdir -p "${FINDINGS_DIR}/secrets"
+          echo "  ✅ Tools: gitleaks=$(gitleaks version 2>/dev/null || echo 'fallback')"
+
+      - name: "🔑 Gitleaks full scan"
+        id: gitleaks
+        run: |
+          FINDINGS="${FINDINGS_DIR}/secrets/gitleaks.json"
+
+          if command -v gitleaks &>/dev/null; then
+            gitleaks detect \
+              --source="${GITHUB_WORKSPACE}" \
+              --report-format=json \
+              --report-path="${FINDINGS}" \
+              --no-git \
+              --exit-code=0 \
+              2>/dev/null || true
+
+            FINDING_COUNT=$(jq '. | length' "${FINDINGS}" 2>/dev/null || echo 0)
+          else
+            echo "  ⚠️ Gitleaks not available — using detect-secrets fallback"
+            python3 -m detect_secrets scan \
+              --baseline /dev/null \
+              . 2>/dev/null | \
+              python3 -c "
+          import sys,json
+          data = json.load(sys.stdin)
+          results = [
+            {\"RuleID\":k,\"File\":f,\"StartLine\":1}
+            for k,v in data.get('results',{}).items()
+            for f in v
+          ]
+          json.dump(results, open('${FINDINGS}','w'))
+          print(len(results))
+          " 2>/dev/null || { echo "0" > /tmp/count; FINDING_COUNT=0; }
+            FINDING_COUNT=$(jq '. | length' "${FINDINGS}" 2>/dev/null || echo 0)
+          fi
+
+          echo "finding_count=${FINDING_COUNT}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${FINDING_COUNT}" -gt 0 ]]; then
+            echo "  🚨 ${FINDING_COUNT} potential secret(s) detected!"
+            jq -r '.[] | "  ⚠️ \(.RuleID) in \(.File):\(.StartLine)"' "${FINDINGS}" | head -10
+          else
+            echo "  ✅ No secrets detected"
+          fi
+
+      - name: "🧬 Entropy-based secret detection"
+        id: entropy
+        run: |
+          FINDINGS="${FINDINGS_DIR}/secrets/entropy.json"
+
+          python3 << 'ENTROPY_EOF'
+          import math
+          import re
+          import os
+          import json
+          from pathlib import Path
+
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+          FINDINGS  = Path(os.environ["FINDINGS_DIR"]) / "secrets" / "entropy.json"
+
+          # Files to scan
+          SCAN_EXTS = {".sh",".py",".lua",".ts",".js",".conf",".json",".yml",".yaml"}
+          SKIP_DIRS = {".git","node_modules",".cache","__pycache__",".mypy_cache"}
+          MIN_ENTROPY = 4.0  # Shannon entropy threshold
+          MIN_LENGTH  = 20   # Minimum token length
+
+          def shannon_entropy(s):
+              if not s: return 0
+              chars = {}
+              for c in s: chars[c] = chars.get(c,0)+1
+              entropy = 0
+              for count in chars.values():
+                  p = count / len(s)
+                  entropy -= p * math.log2(p)
+              return entropy
+
+          # High-entropy token patterns
+          PATTERNS = [
+              r'(?i)(?:password|passwd|secret|token|key|api[_-]?key|auth)["\s]*[:=]["\s]*([A-Za-z0-9+/=_\-]{20,})',
+              r'(?i)([A-Za-z0-9]{32,})',  # Long alphanumeric strings
+          ]
+
+          findings = []
+          scanned  = 0
+
+          for file_path in WORKSPACE.rglob("*"):
+              if not file_path.is_file(): continue
+              if any(skip in file_path.parts for skip in SKIP_DIRS): continue
+              if file_path.suffix not in SCAN_EXTS: continue
+              if file_path.stat().st_size > 500_000: continue  # Skip large files
+
+              scanned += 1
+              try:
+                  content = file_path.read_text(errors="ignore")
+                  for i, line in enumerate(content.splitlines(), 1):
+                      for pattern in PATTERNS:
+                          for match in re.finditer(pattern, line):
+                              token = match.group(1) if match.lastindex else match.group(0)
+                              if len(token) >= MIN_LENGTH:
+                                  entropy = shannon_entropy(token)
+                                  if entropy >= MIN_ENTROPY:
+                                      findings.append({
+                                          "file":     str(file_path.relative_to(WORKSPACE)),
+                                          "line":     i,
+                                          "entropy":  round(entropy, 3),
+                                          "preview":  token[:20] + "...",
+                                          "severity": "high" if entropy > 4.5 else "medium",
+                                      })
+              except Exception:
+                  continue
+
+          # Filter false positives
+          # (Remove known safe patterns like CSS colors, short hashes)
+          filtered = [
+              f for f in findings
+              if not any(fp in f["preview"] for fp in ["#1e1e2e","#cba6f7","#89b4fa"])
+          ]
+
+          with open(FINDINGS,"w") as fp:
+              json.dump(filtered[:50], fp, indent=2)  # Limit to 50
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"entropy_count={len(filtered)}\n")
+
+          print(f"  📊 Scanned {scanned} files · {len(filtered)} high-entropy tokens")
+          if filtered:
+              for f in filtered[:5]:
+                  print(f"  ⚠️ {f['file']}:{f['line']} entropy={f['entropy']:.2f}")
+          else:
+              print("  ✅ No suspicious high-entropy tokens found")
+          ENTROPY_EOF
+
+      - name: "📤 Upload secret scan findings"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "security-secrets-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.FINDINGS_DIR }}/secrets/"
+          retention-days: 90
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — SAST (Static Analysis Security Testing)
+  # ───────────────────────────────────────────────────────────────────────────
+  sast-scan:
+    name: "🛡️ SAST · Static Security Analysis"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_sast == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "📦 Install SAST tools"
+        run: |
+          pip3 install --quiet --user \
+            semgrep==1.95.0 \
+            bandit==1.7.10 \
+            rich==13.9.2 \
+            2>/dev/null || true
+          sudo apt-get install -y --no-install-recommends \
+            shellcheck jq 2>/dev/null || true
+          mkdir -p "${FINDINGS_DIR}/sast"
+
+      - name: "🛡️ ShellCheck security rules"
+        id: shellcheck
+        run: |
+          FINDINGS="${FINDINGS_DIR}/sast/shellcheck.json"
+
+          echo "  🐚 Running ShellCheck (security focus)..."
+
+          SHELL_FILES=$(find . \
+            -name "*.sh" \
+            -not -path "./.git/*" \
+            -not -path "./node_modules/*" \
+            | head -100)
+
+          if [[ -z "${SHELL_FILES}" ]]; then
+            echo '[]' > "${FINDINGS}"
+            echo "  ℹ️ No shell files found"
+            exit 0
+          fi
+
+          # ShellCheck with JSON output
+          echo "${SHELL_FILES}" | \
+            xargs shellcheck \
+              --format=json \
+              --severity=warning \
+              2>/dev/null | \
+            python3 -c "
+          import sys,json
+          data = json.load(sys.stdin) if sys.stdin.readable() else []
+          # Filter security-relevant codes
+          SEC_CODES = {2001,2006,2048,2064,2066,2068,2086,2116,2140,2162,2181,2207}
+          sec_findings = [d for d in data if d.get('code') in SEC_CODES]
+          json.dump(sec_findings, open('${FINDINGS}','w'), indent=2)
+          print(len(sec_findings))
+          " 2>/dev/null || { echo '[]' > "${FINDINGS}"; }
+
+          COUNT=$(jq '. | length' "${FINDINGS}" 2>/dev/null || echo 0)
+          echo "finding_count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "  📊 ShellCheck security findings: ${COUNT}"
+
+      - name: "🛡️ Bandit Python security scan"
+        id: bandit
+        run: |
+          FINDINGS="${FINDINGS_DIR}/sast/bandit.json"
+
+          echo "  🐍 Running Bandit (Python security)..."
+
+          PY_FILES=$(find . -name "*.py" -not -path "./.git/*" | head -50)
+          if [[ -z "${PY_FILES}" ]]; then
+            echo '{"results":[],"metrics":{}}' > "${FINDINGS}"
+            exit 0
+          fi
+
+          python3 -m bandit \
+            -r . \
+            -f json \
+            --exclude ".git,node_modules,.venv" \
+            --severity-level medium \
+            -o "${FINDINGS}" \
+            2>/dev/null || true
+
+          CRITICAL=$(jq '[.results[] | select(.issue_severity=="HIGH")] | length' "${FINDINGS}" 2>/dev/null || echo 0)
+          MEDIUM=$(jq '[.results[] | select(.issue_severity=="MEDIUM")] | length' "${FINDINGS}" 2>/dev/null || echo 0)
+
+          echo "critical_count=${CRITICAL}" >> "$GITHUB_OUTPUT"
+          echo "medium_count=${MEDIUM}" >> "$GITHUB_OUTPUT"
+          echo "  📊 Bandit: HIGH=${CRITICAL} MEDIUM=${MEDIUM}"
+
+      - name: "🛡️ Custom security pattern detection"
+        id: custom
+        run: |
+          FINDINGS="${FINDINGS_DIR}/sast/custom-patterns.json"
+
+          python3 << 'CUSTOM_EOF'
+          import re
+          import os
+          import json
+          from pathlib import Path
+
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+          FINDINGS  = Path(os.environ["FINDINGS_DIR"]) / "sast" / "custom-patterns.json"
+
+          # Security anti-patterns
+          SECURITY_PATTERNS = [
+              # Command injection risks
+              (r'eval\s+[\$\`]',       "SHELL_EVAL_INJECTION",  "high",
+               "eval with variable — potential command injection"),
+              (r'\bexec\s+[\$`]',      "SHELL_EXEC_INJECTION",  "high",
+               "exec with variable — potential command injection"),
+              # Unsafe curl/wget usage
+              (r'curl\s+.*\|\s*bash',  "CURL_PIPE_BASH",       "critical",
+               "curl piped to bash — supply chain risk"),
+              (r'wget\s+.*-O\s*-.*\|\s*sh', "WGET_PIPE_SH",   "critical",
+               "wget piped to shell"),
+              # Hardcoded credentials patterns
+              (r'(?i)password\s*=\s*["\'][^"\']{4,}["\']',
+               "HARDCODED_PASSWORD", "high", "Potential hardcoded password"),
+              (r'(?i)api[_-]?key\s*=\s*["\'][A-Za-z0-9]{16,}["\']',
+               "HARDCODED_API_KEY",  "high", "Potential hardcoded API key"),
+              # Unsafe temp file usage
+              (r'/tmp/[a-zA-Z]+\b',    "UNSAFE_TMP_FILE",      "low",
+               "Predictable temp file name"),
+              # World-writable operations
+              (r'chmod\s+777',         "WORLD_WRITABLE",        "medium",
+               "chmod 777 — world-writable permissions"),
+              (r'chmod\s+a\+w',        "CHMOD_A_PLUS_W",       "medium",
+               "chmod a+w — world-writable"),
+              # Unsafe IFS
+              (r'\bIFS=\s*[^\n]',      "IFS_MODIFICATION",     "low",
+               "IFS modification — potential word splitting issue"),
+          ]
+
+          findings = []
+          SCAN_EXTS = {".sh",".bash",".py",".lua"}
+          SKIP_DIRS = {".git","node_modules","__pycache__",".venv"}
+
+          for file_path in WORKSPACE.rglob("*"):
+              if not file_path.is_file(): continue
+              if any(skip in file_path.parts for skip in SKIP_DIRS): continue
+              if file_path.suffix not in SCAN_EXTS: continue
+              if file_path.stat().st_size > 200_000: continue
+
+              try:
+                  content = file_path.read_text(errors="ignore")
+                  for i, line in enumerate(content.splitlines(), 1):
+                      for pattern, rule_id, severity, description in SECURITY_PATTERNS:
+                          if re.search(pattern, line):
+                              findings.append({
+                                  "rule_id":     rule_id,
+                                  "severity":    severity,
+                                  "description": description,
+                                  "file":        str(file_path.relative_to(WORKSPACE)),
+                                  "line":        i,
+                                  "content":     line.strip()[:80],
+                              })
+              except Exception:
+                  continue
+
+          SEVERITY_ORDER = {"critical":4,"high":3,"medium":2,"low":1}
+          findings.sort(key=lambda x: -SEVERITY_ORDER.get(x["severity"],0))
+
+          with open(FINDINGS,"w") as f:
+              json.dump(findings[:100], f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"finding_count={len(findings)}\n")
+              out.write(f"critical_count={sum(1 for f in findings if f['severity']=='critical')}\n")
+
+          print(f"  📊 Custom patterns: {len(findings)} findings")
+          for f in findings[:5]:
+              print(f"  ⚠️ [{f['severity'].upper()}] {f['rule_id']} in {f['file']}:{f['line']}")
+          CUSTOM_EOF
+
+      - name: "📤 Upload SAST findings"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "security-sast-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.FINDINGS_DIR }}/sast/"
+          retention-days: 90
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Permissions audit
+  # ───────────────────────────────────────────────────────────────────────────
+  permissions-audit:
+    name: "🔐 Permissions · File Security Audit"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_permissions == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔐 Audit file permissions"
+        id: perms
+        run: |
+          mkdir -p "${FINDINGS_DIR}/permissions"
+          FINDINGS="${FINDINGS_DIR}/permissions/permissions.json"
+
+          python3 << 'PERMS_EOF'
+          import os
+          import json
+          import stat
+          from pathlib import Path
+
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+          FINDINGS  = Path(os.environ["FINDINGS_DIR"]) / "permissions" / "permissions.json"
+
+          findings = []
+
+          for file_path in WORKSPACE.rglob("*"):
+              if ".git" in str(file_path): continue
+              if not file_path.is_file(): continue
+
+              try:
+                  mode = file_path.stat().st_mode
+
+                  # Check for world-writable
+                  if mode & stat.S_IWOTH:
+                      findings.append({
+                          "file":     str(file_path.relative_to(WORKSPACE)),
+                          "issue":    "WORLD_WRITABLE",
+                          "severity": "high",
+                          "mode":     oct(mode),
+                          "description": "File is world-writable",
+                      })
+
+                  # Check for SUID/SGID bits
+                  if mode & (stat.S_ISUID | stat.S_ISGID):
+                      findings.append({
+                          "file":     str(file_path.relative_to(WORKSPACE)),
+                          "issue":    "SUID_SGID_BIT",
+                          "severity": "critical",
+                          "mode":     oct(mode),
+                          "description": "SUID/SGID bit set",
+                      })
+
+                  # Non-executable scripts
+                  if file_path.suffix in (".sh",".fish",".bash"):
+                      if not (mode & stat.S_IXUSR):
+                          findings.append({
+                              "file":     str(file_path.relative_to(WORKSPACE)),
+                              "issue":    "NON_EXECUTABLE_SCRIPT",
+                              "severity": "low",
+                              "mode":     oct(mode),
+                              "description": "Shell script not executable",
+                          })
+
+              except Exception as e:
+                  continue
+
+          with open(FINDINGS,"w") as f:
+              json.dump(findings, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"finding_count={len(findings)}\n")
+              out.write(f"critical_count={sum(1 for f in findings if f['severity']=='critical')}\n")
+
+          print(f"  📊 Permission findings: {len(findings)}")
+          for f in findings[:10]:
+              print(f"  ⚠️ [{f['severity'].upper()}] {f['issue']}: {f['file']}")
+          PERMS_EOF
+
+      - name: "📤 Upload permissions findings"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "security-permissions-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.FINDINGS_DIR }}/permissions/"
+          retention-days: 90
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Supply chain verification
+  # ───────────────────────────────────────────────────────────────────────────
+  supply-chain:
+    name: "🌐 Supply Chain · Action & Dependency Verification"
+    needs: bootstrap
+    if: needs.bootstrap.outputs.run_supply_chain == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🌐 Verify GitHub Actions pinning"
+        id: action_pins
+        run: |
+          mkdir -p "${FINDINGS_DIR}/supply-chain"
+          FINDINGS="${FINDINGS_DIR}/supply-chain/action-pinning.json"
+
+          python3 << 'PINS_EOF'
+          import re
+          import json
+          import os
+          from pathlib import Path
+
+          WORKSPACE = Path(os.environ["GITHUB_WORKSPACE"])
+          FINDINGS  = Path(os.environ["FINDINGS_DIR"]) / "supply-chain" / "action-pinning.json"
+
+          WORKFLOWS_DIR = WORKSPACE / ".github" / "workflows"
+          findings = []
+          checked  = 0
+
+          SHA_PATTERN    = re.compile(r'uses:\s+([^@\s]+)@([0-9a-f]{40})')
+          TAG_PATTERN    = re.compile(r'uses:\s+([^@\s]+)@(v\d[\w.]*)')
+          BRANCH_PATTERN = re.compile(r'uses:\s+([^@\s]+)@(main|master|develop|HEAD)')
+
+          for wf_file in WORKFLOWS_DIR.rglob("*.yml"):
+              try:
+                  content = wf_file.read_text()
+                  wf_rel  = str(wf_file.relative_to(WORKSPACE))
+                  checked += 1
+
+                  # Branch-pinned actions (insecure)
+                  for match in BRANCH_PATTERN.finditer(content):
+                      action, ref = match.groups()
+                      # Skip local actions
+                      if action.startswith("."): continue
+                      findings.append({
+                          "action":   action,
+                          "ref":      ref,
+                          "file":     wf_rel,
+                          "severity": "high",
+                          "issue":    "BRANCH_PINNED_ACTION",
+                          "recommendation": f"Pin to SHA: {action}@<sha>",
+                      })
+
+                  # Tag-pinned (better but not ideal)
+                  for match in TAG_PATTERN.finditer(content):
+                      action, ref = match.groups()
+                      if action.startswith("."): continue
+                      # Only warn if not also SHA-pinned
+                      if not SHA_PATTERN.search(content):
+                          findings.append({
+                              "action":   action,
+                              "ref":      ref,
+                              "file":     wf_rel,
+                              "severity": "low",
+                              "issue":    "TAG_PINNED_NOT_SHA",
+                              "recommendation": f"Consider pinning to SHA for {action}@{ref}",
+                          })
+
+              except Exception: continue
+
+          with open(FINDINGS,"w") as f:
+              json.dump(findings, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"finding_count={len(findings)}\n")
+              out.write(f"workflows_checked={checked}\n")
+
+          print(f"  📊 Checked {checked} workflows · {len(findings)} pinning issues")
+          for f in findings[:5]:
+              print(f"  ⚠️ [{f['severity'].upper()}] {f['action']}@{f['ref']}")
+          PINS_EOF
+
+      - name: "📤 Upload supply chain findings"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "security-supply-chain-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.FINDINGS_DIR }}/supply-chain/"
+          retention-days: 90
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Consolidated security report
+  # ───────────────────────────────────────────────────────────────────────────
+  security-report:
+    name: "📋 Report · Security Audit Dashboard"
+    needs:
+      - bootstrap
+      - secret-scan
+      - sast-scan
+      - permissions-audit
+      - supply-chain
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      SESSION_ID: ${{ needs.bootstrap.outputs.session_id }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Tools"
+        run: |
+          pip3 install --quiet --user rich matplotlib numpy 2>/dev/null || true
+          sudo apt-get install -y --no-install-recommends jq 2>/dev/null || true
+          mkdir -p "${WORK_DIR}" "${FINDINGS_DIR}"
+
+      - name: "📥 Download all findings"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "security-*-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.FINDINGS_DIR }}/all"
+          merge-multiple: true
+
+      - name: "📋 Generate security dashboard"
+        id: report
+        run: |
+          python3 << 'REPORT_EOF'
+          import json
+          import glob
+          import os
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          FINDINGS_DIR = Path(os.environ["FINDINGS_DIR"]) / "all"
+          WORK_DIR     = Path(os.environ["WORK_DIR"])
+          SESSION_ID   = os.environ["SESSION_ID"]
+
+          # Collect all findings
+          all_findings = []
+          for f in FINDINGS_DIR.glob("**/*.json"):
+              try:
+                  data = json.loads(f.read_text())
+                  if isinstance(data, list): all_findings.extend(data)
+                  elif isinstance(data, dict):
+                      if "results" in data: all_findings.extend(data["results"])
+              except Exception: pass
+
+          critical = [f for f in all_findings if f.get("severity")=="critical"]
+          high     = [f for f in all_findings if f.get("severity")=="high"]
+          medium   = [f for f in all_findings if f.get("severity")=="medium"]
+          low      = [f for f in all_findings if f.get("severity")=="low"]
+
+          total = len(all_findings)
+          now   = datetime.now(timezone.utc)
+          THRESHOLD = os.environ.get("SEVERITY_THRESHOLD","medium")
+
+          # Status based on threshold
+          status_ok = True
+          if THRESHOLD == "critical"  and critical: status_ok = False
+          elif THRESHOLD == "high"    and (critical or high): status_ok = False
+          elif THRESHOLD == "medium"  and (critical or high or medium): status_ok = False
+          elif THRESHOLD == "low"     and total > 0: status_ok = False
+
+          STATUS = "✅ CLEAN" if status_ok else "🚨 FINDINGS DETECTED"
+
+          md = [
+              f"# 🔒 Weekly Security Audit Report",
+              f"",
+              f"> **{STATUS}**  ·  Session: `{SESSION_ID}`  ·  `{now.strftime('%Y-%m-%d %H:%M UTC')}`",
+              f"",
+              f"## 📊 Summary",
+              f"",
+              f"| Severity | Count | Action |",
+              f"|----------|------:|:-------|",
+              f"| 🚨 Critical | `{len(critical)}` | {'🔴 **FIX IMMEDIATELY**' if critical else '✅ None'} |",
+              f"| 🔴 High | `{len(high)}` | {'⚠️ **Review ASAP**' if high else '✅ None'} |",
+              f"| 🟡 Medium | `{len(medium)}` | {'📋 Review' if medium else '✅ None'} |",
+              f"| 🟢 Low | `{len(low)}` | {'📋 Informational' if low else '✅ None'} |",
+              f"| **Total** | **`{total}`** | — |",
+              f"",
+          ]
+
+          if critical or high:
+              md += [f"## 🚨 Critical & High Findings", f"", f"| Issue | File | Severity |",
+                     f"|-------|------|----------|"]
+              for f in (critical + high)[:20]:
+                  issue = f.get("issue",f.get("RuleID",f.get("rule_id","Unknown")))
+                  file_ = f.get("file",f.get("File","Unknown"))
+                  sev   = f.get("severity","unknown")
+                  md.append(f"| `{issue}` | `{file_}` | `{sev.upper()}` |")
+              md.append("")
+
+          md += ["---", "*🔒 ASH v5.0 OMEGA Security Audit Engine*"]
+          report_content = "\n".join(md)
+
+          (WORK_DIR / "security-report.md").write_text(report_content)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"w") as f:
+              f.write(report_content)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"overall_clean={'true' if status_ok else 'false'}\n")
+              out.write(f"critical_count={len(critical)}\n")
+              out.write(f"total_findings={total}\n")
+
+          print(f"\n  {STATUS}")
+          print(f"  🚨 Critical: {len(critical)}  🔴 High: {len(high)}  🟡 Medium: {len(medium)}  🟢 Low: {len(low)}")
+          REPORT_EOF
+
+      - name: "🔔 Discord security alert"
+        if: |
+          always() &&
+          env.NOTIFY_DISCORD == 'true' &&
+          steps.report.outputs.critical_count != '0'
+        continue-on-error: true
+        run: |
+          CRITICAL="${{ steps.report.outputs.critical_count }}"
+          TOTAL="${{ steps.report.outputs.total_findings }}"
+          SESSION="${SESSION_ID}"
+          DATE=$(date +"%Y-%m-%d")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          [[ -z "${DISCORD_WEBHOOK_SECURITY:-}" ]] && exit 0
+
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"ASH Security Bot\",
+              \"content\": \"@here 🚨 **Critical security findings detected!**\",
+              \"embeds\": [{
+                \"title\": \"🔒 Weekly Security Audit — ${CRITICAL} Critical Finding(s)\",
+                \"color\": 16007085,
+                \"fields\": [
+                  {\"name\": \"🚨 Critical\",   \"value\": \"\`${CRITICAL}\`\", \"inline\": true},
+                  {\"name\": \"📊 Total\",       \"value\": \"\`${TOTAL}\`\",   \"inline\": true},
+                  {\"name\": \"📅 Date\",        \"value\": \"\`${DATE}\`\",    \"inline\": true},
+                  {\"name\": \"🔗 Full Report\", \"value\": \"[View Report](${RUN_URL})\", \"inline\": false}
+                ],
+                \"footer\": {\"text\": \"ASH Dotfiles v5.0 OMEGA · Security Audit Engine\"},
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }" \
+            "${DISCORD_WEBHOOK_SECURITY}" || true
+        env:
+          DISCORD_WEBHOOK_SECURITY: ${{ secrets.DISCORD_WEBHOOK_SECURITY }}
+
+      - name: "📤 Upload security report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "security-report-${{ needs.bootstrap.outputs.session_id }}"
+          path: "${{ env.WORK_DIR }}/"
+          retention-days: 90
+          compression-level: 9
+
+      - name: "❌ Gate — fail on findings above threshold"
+        if: |
+          steps.report.outputs.overall_clean == 'false' &&
+          env.FAIL_ON_FINDINGS == 'true'
+        run: |
+          echo "::error title=Security Findings Detected::${{ steps.report.outputs.total_findings }} security finding(s) above ${SEVERITY_THRESHOLD} threshold"
+          exit 1

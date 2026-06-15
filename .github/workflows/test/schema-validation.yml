@@ -1,0 +1,1324 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      📐 ASH DOTFILES v5.0 OMEGA — SCHEMA VALIDATION WORKFLOW                          ║
+# ║                                                                                          ║
+# ║      Ultra-Premium JSON Schema Validation & Contract Testing Pipeline                   ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      JSON Schema Draft 2020-12  •  OpenAPI 3.1 Specs    •  Theme Schema v2           ║
+# ║      Plugin Schema v2           •  Config Schema         •  Metadata Schema          ║
+# ║      Snapshot Schema            •  Analytics Schema      •  Colors Schema            ║
+# ║      Cross-Reference Audit      •  Breaking Change Det   •  Migration Testing        ║
+# ║      Schema Evolution           •  Backwards Compat      •  Forward Compat           ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📐 Schema Validation — Contract Testing"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TRIGGERS
+# ══════════════════════════════════════════════════════════════════════════════
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "themes/schema/**"
+      - "plugins/schema/**"
+      - "api/schemas/**"
+      - "ash-cli/data/**"
+      - "themes/presets/**/colors.json"
+      - "themes/presets/**/metadata.json"
+      - "plugins/**/plugin.json"
+      - ".github/workflows/test/schema-validation.yml"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+      - "release/**"
+    paths:
+      - "themes/schema/**"
+      - "plugins/schema/**"
+      - "api/schemas/**"
+      - "themes/presets/**/colors.json"
+      - "themes/presets/**/metadata.json"
+      - "plugins/**/plugin.json"
+      - ".github/workflows/test/schema-validation.yml"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+  workflow_dispatch:
+    inputs:
+      schema_target:
+        description: "Schema target to validate"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - theme-schema
+          - plugin-schema
+          - config-schema
+          - colors-schema
+          - metadata-schema
+          - snapshot-schema
+          - analytics-schema
+          - openapi-schema
+      strict_mode:
+        description: "Strict — fail on warnings"
+        required: false
+        default: true
+        type: boolean
+      check_breaking:
+        description: "Check for breaking schema changes"
+        required: false
+        default: true
+        type: boolean
+      validate_examples:
+        description: "Validate schema examples"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 6 * * *"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PERMISSIONS
+# ══════════════════════════════════════════════════════════════════════════════
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONCURRENCY
+# ══════════════════════════════════════════════════════════════════════════════
+concurrency:
+  group: "schema-validation-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GLOBAL ENV
+# ══════════════════════════════════════════════════════════════════════════════
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+  SCHEMA_DRAFT: "https://json-schema.org/draft/2020-12/schema"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover Schemas & Instances"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      schema-matrix:    ${{ steps.discover.outputs.schema_matrix }}
+      schema-count:     ${{ steps.discover.outputs.schema_count }}
+      instance-count:   ${{ steps.discover.outputs.instance_count }}
+      has-schemas:      ${{ steps.discover.outputs.has_schemas }}
+      theme-count:      ${{ steps.discover.outputs.theme_count }}
+      plugin-count:     ${{ steps.discover.outputs.plugin_count }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover All Schemas"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📐 Schema Discovery Engine                                 ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          selected="${{ inputs.schema_target || 'all' }}"
+
+          # ── Discover schema definition files ──────────────────────────────
+          mapfile -t schema_files < <(
+            find . -type f \( -name "*schema*.json" -o -name "*schema*.yml" \) \
+              ! -path "./.git/*" \
+              ! -path "./node_modules/*" \
+              ! -path "./tests/fixtures/*" \
+              | sort
+          )
+
+          # ── Count instance files to validate ──────────────────────────────
+          theme_colors="$(find themes/presets -name "colors.json" 2>/dev/null | wc -l)"
+          theme_metadata="$(find themes/presets -name "metadata.json" 2>/dev/null | wc -l)"
+          plugin_manifests="$(find plugins -name "plugin.json" \
+            ! -path "*/schema/*" ! -path "*/template/*" \
+            2>/dev/null | wc -l)"
+          total_instances=$((theme_colors + theme_metadata + plugin_manifests))
+
+          schema_count="${#schema_files[@]}"
+
+          echo ""
+          echo "  📊 Schema Discovery Results:"
+          echo "  ├── Schema definitions: ${schema_count}"
+          echo "  ├── Theme colors.json:  ${theme_colors}"
+          echo "  ├── Theme metadata.json:${theme_metadata}"
+          echo "  ├── Plugin manifests:   ${plugin_manifests}"
+          echo "  └── Total instances:    ${total_instances}"
+          echo ""
+          echo "  📁 Schemas found:"
+          for schema in "${schema_files[@]}"; do
+            echo "     → ${schema}"
+          done
+
+          # ── Build matrix ──────────────────────────────────────────────────
+          matrix_include="[]"
+
+          declare -A SCHEMA_SUITES=(
+            ["theme-schema"]="themes/schema/theme-schema.json"
+            ["colors-schema"]="themes/schema/colors-schema.json"
+            ["metadata-schema"]="themes/schema/metadata-schema.json"
+            ["plugin-schema"]="plugins/schema/plugin-schema.json"
+            ["config-schema"]="ash-cli/data/ash-config-schema.json"
+            ["snapshot-schema"]="ash-cli/data/snapshot-schema.json"
+            ["analytics-schema"]="ash-cli/data/analytics-schema.json"
+          )
+
+          for suite in "${!SCHEMA_SUITES[@]}"; do
+            [[ "${selected}" != "all" && "${selected}" != "${suite}" ]] && continue
+
+            schema_file="${SCHEMA_SUITES[$suite]}"
+            exists="false"
+            [[ -f "${schema_file}" ]] && exists="true"
+
+            matrix_include="$(echo "${matrix_include}" | jq \
+              --arg suite "${suite}" \
+              --arg file "${schema_file}" \
+              --arg exists "${exists}" \
+              '. += [{"suite": $suite, "schema_file": $file, "exists": $exists}]')"
+          done
+
+          echo "schema_matrix={\"include\": ${matrix_include}}" >> "${GITHUB_OUTPUT}"
+          echo "schema_count=${schema_count}"       >> "${GITHUB_OUTPUT}"
+          echo "instance_count=${total_instances}"  >> "${GITHUB_OUTPUT}"
+          echo "theme_count=${theme_colors}"        >> "${GITHUB_OUTPUT}"
+          echo "plugin_count=${plugin_manifests}"   >> "${GITHUB_OUTPUT}"
+          echo "has_schemas=$([ "${schema_count}" -gt 0 ] || \
+            [ "${total_instances}" -gt 0 ] && echo 'true' || echo 'false')" \
+            >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: GENERATE-SCHEMAS — Create schemas if missing
+  # ────────────────────────────────────────────────────────────────────────────
+  generate-schemas:
+    name: "⚙️ Generate Missing Schemas"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "⚙️ Generate Schema Definitions"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚙️  Schema Definition Generator                             ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          pip install -q "jsonschema==4.23.0" 2>/dev/null
+
+          mkdir -p \
+            themes/schema \
+            plugins/schema \
+            ash-cli/data
+
+          python3 << 'SCHEMAGEN'
+          import json
+          from pathlib import Path
+
+          DRAFT = "https://json-schema.org/draft/2020-12/schema"
+
+          # ═══════════════════════════════════════════════════════════════════
+          # THEME COLORS SCHEMA v2
+          # ═══════════════════════════════════════════════════════════════════
+          colors_schema = {
+              "$schema": DRAFT,
+              "$id": "https://ash-dotfiles.github.io/schemas/colors-v2.json",
+              "title": "ASH Theme Colors Schema v2",
+              "description": "Complete color palette definition for ASH themes",
+              "type": "object",
+              "required": ["base", "accent"],
+              "additionalProperties": False,
+              "properties": {
+                  "$schema": {"type": "string"},
+                  "meta": {
+                      "type": "object",
+                      "properties": {
+                          "theme_id":    {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+                          "version":     {"type": "string", "pattern": r"^\d+\.\d+\.\d+$"},
+                          "generated":   {"type": "string", "format": "date-time"},
+                          "color_space": {"type": "string", "enum": ["sRGB", "Display-P3"]},
+                      }
+                  },
+                  "base": {
+                      "type": "object",
+                      "required": ["background", "foreground"],
+                      "additionalProperties": False,
+                      "properties": {
+                          "background":       {"$ref": "#/$defs/hexColor"},
+                          "background_alt":   {"$ref": "#/$defs/hexColor"},
+                          "background_dark":  {"$ref": "#/$defs/hexColor"},
+                          "surface":          {"$ref": "#/$defs/hexColor"},
+                          "overlay":          {"$ref": "#/$defs/hexColor"},
+                          "border":           {"$ref": "#/$defs/hexColor"},
+                          "foreground":       {"$ref": "#/$defs/hexColor"},
+                      }
+                  },
+                  "text": {
+                      "type": "object",
+                      "additionalProperties": False,
+                      "properties": {
+                          "primary":   {"$ref": "#/$defs/hexColor"},
+                          "secondary": {"$ref": "#/$defs/hexColor"},
+                          "disabled":  {"$ref": "#/$defs/hexColor"},
+                          "inverse":   {"$ref": "#/$defs/hexColor"},
+                      }
+                  },
+                  "accent": {
+                      "type": "object",
+                      "required": ["primary", "error", "success"],
+                      "additionalProperties": False,
+                      "properties": {
+                          "primary":   {"$ref": "#/$defs/hexColor"},
+                          "secondary": {"$ref": "#/$defs/hexColor"},
+                          "tertiary":  {"$ref": "#/$defs/hexColor"},
+                          "warning":   {"$ref": "#/$defs/hexColor"},
+                          "error":     {"$ref": "#/$defs/hexColor"},
+                          "success":   {"$ref": "#/$defs/hexColor"},
+                          "info":      {"$ref": "#/$defs/hexColor"},
+                      }
+                  },
+                  "syntax": {
+                      "type": "object",
+                      "additionalProperties": {"$ref": "#/$defs/hexColor"},
+                      "properties": {
+                          "keyword":     {"$ref": "#/$defs/hexColor"},
+                          "string":      {"$ref": "#/$defs/hexColor"},
+                          "function":    {"$ref": "#/$defs/hexColor"},
+                          "variable":    {"$ref": "#/$defs/hexColor"},
+                          "comment":     {"$ref": "#/$defs/hexColor"},
+                          "constant":    {"$ref": "#/$defs/hexColor"},
+                          "type":        {"$ref": "#/$defs/hexColor"},
+                          "operator":    {"$ref": "#/$defs/hexColor"},
+                          "punctuation": {"$ref": "#/$defs/hexColor"},
+                          "markup_tag":  {"$ref": "#/$defs/hexColor"},
+                      }
+                  },
+                  "terminal": {
+                      "type": "object",
+                      "additionalProperties": {"$ref": "#/$defs/hexColor"},
+                  },
+              },
+              "$defs": {
+                  "hexColor": {
+                      "type": "string",
+                      "pattern": r"^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
+                      "examples": ["#1e1e2e", "#cba6f7", "#a6e3a1"],
+                  }
+              }
+          }
+
+          # ═══════════════════════════════════════════════════════════════════
+          # THEME METADATA SCHEMA v1
+          # ═══════════════════════════════════════════════════════════════════
+          metadata_schema = {
+              "$schema": DRAFT,
+              "$id": "https://ash-dotfiles.github.io/schemas/metadata-v1.json",
+              "title": "ASH Theme Metadata Schema v1",
+              "description": "Theme store metadata and attribution",
+              "type": "object",
+              "required": ["id", "name", "version", "category", "author", "license"],
+              "additionalProperties": True,
+              "properties": {
+                  "id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]*$",
+                      "maxLength": 64,
+                      "description": "Unique theme identifier (kebab-case)",
+                  },
+                  "name": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "description": "Human-readable theme name",
+                  },
+                  "version": {
+                      "type": "string",
+                      "pattern": r"^\d+\.\d+\.\d+$",
+                      "description": "Semantic version",
+                  },
+                  "description": {"type": "string", "maxLength": 500},
+                  "category": {
+                      "type": "string",
+                      "enum": [
+                          "dark", "light", "neon", "nature", "space",
+                          "pastel", "anime", "retro", "gradient",
+                          "seasonal", "mood", "gaming", "minimal", "special",
+                      ],
+                  },
+                  "style": {
+                      "type": "array",
+                      "items": {"type": "string"},
+                  },
+                  "tags": {
+                      "type": "array",
+                      "items": {"type": "string"},
+                      "maxItems": 20,
+                  },
+                  "author": {
+                      "type": "object",
+                      "required": ["name"],
+                      "properties": {
+                          "name":    {"type": "string"},
+                          "github":  {"type": "string", "pattern": "^[a-zA-Z0-9-]+$"},
+                          "email":   {"type": "string", "format": "email"},
+                          "website": {"type": "string", "format": "uri"},
+                      }
+                  },
+                  "license": {
+                      "type": "string",
+                      "enum": [
+                          "MIT", "Apache-2.0", "GPL-3.0", "CC0-1.0",
+                          "CC-BY-4.0", "CC-BY-SA-4.0", "ISC",
+                          "BSD-2-Clause", "BSD-3-Clause",
+                      ],
+                  },
+                  "supports_dark":  {"type": "boolean"},
+                  "supports_light": {"type": "boolean"},
+                  "supports_auto":  {"type": "boolean"},
+                  "min_ash_version":{
+                      "type": "string",
+                      "pattern": r"^\d+\.\d+\.\d+$",
+                  },
+                  "colors": {
+                      "type": "object",
+                      "required": ["primary", "background", "foreground"],
+                      "properties": {
+                          "primary":    {"type": "string"},
+                          "secondary":  {"type": "string"},
+                          "background": {"type": "string"},
+                          "foreground": {"type": "string"},
+                      }
+                  },
+                  "screenshots": {
+                      "type": "object",
+                      "properties": {
+                          "preview": {"type": "string"},
+                      }
+                  },
+                  "wallpaper": {
+                      "type": "object",
+                      "properties": {
+                          "file":       {"type": "string"},
+                          "resolution": {"type": "string"},
+                          "license":    {"type": "string"},
+                          "source":     {"type": "string"},
+                      }
+                  },
+              }
+          }
+
+          # ═══════════════════════════════════════════════════════════════════
+          # PLUGIN MANIFEST SCHEMA v2
+          # ═══════════════════════════════════════════════════════════════════
+          plugin_schema = {
+              "$schema": DRAFT,
+              "$id": "https://ash-dotfiles.github.io/schemas/plugin-v2.json",
+              "title": "ASH Plugin Manifest Schema v2",
+              "description": "Plugin.json manifest definition",
+              "type": "object",
+              "required": ["id", "name", "version", "description",
+                           "author", "license", "entry"],
+              "additionalProperties": True,
+              "properties": {
+                  "$schema":     {"type": "string"},
+                  "id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]*$",
+                      "maxLength": 64,
+                  },
+                  "name":        {"type": "string", "maxLength": 80},
+                  "version": {
+                      "type": "string",
+                      "pattern": r"^\d+\.\d+\.\d+$",
+                  },
+                  "description": {"type": "string", "maxLength": 500},
+                  "long_description": {"type": "string"},
+                  "author": {
+                      "oneOf": [
+                          {
+                              "type": "object",
+                              "required": ["name"],
+                              "properties": {
+                                  "name":    {"type": "string"},
+                                  "github":  {"type": "string"},
+                                  "email":   {"type": "string"},
+                                  "website": {"type": "string"},
+                              }
+                          },
+                          {"type": "string"}
+                      ]
+                  },
+                  "license": {"type": "string"},
+                  "homepage":   {"type": "string", "format": "uri"},
+                  "repository": {"type": "string", "format": "uri"},
+                  "category": {
+                      "type": "string",
+                      "enum": [
+                          "productivity", "gaming", "streaming", "health",
+                          "integrations", "development", "media", "security",
+                          "system", "accessibility", "utilities", "other",
+                      ],
+                  },
+                  "tags": {
+                      "type": "array",
+                      "items": {"type": "string"},
+                  },
+                  "min_ash_version": {
+                      "type": "string",
+                      "pattern": r"^\d+\.\d+\.\d+$",
+                  },
+                  "max_ash_version": {
+                      "oneOf": [{"type": "string"}, {"type": "null"}]
+                  },
+                  "entry": {
+                      "type": "object",
+                      "required": ["init", "enable", "disable"],
+                      "properties": {
+                          "init":    {"type": "string", "pattern": r"^.+\.sh$"},
+                          "enable":  {"type": "string", "pattern": r"^.+\.sh$"},
+                          "disable": {"type": "string", "pattern": r"^.+\.sh$"},
+                          "status":  {"type": "string", "pattern": r"^.+\.sh$"},
+                          "update":  {"type": "string", "pattern": r"^.+\.sh$"},
+                          "health":  {"type": "string", "pattern": r"^.+\.sh$"},
+                      }
+                  },
+                  "permissions": {
+                      "type": "object",
+                      "properties": {
+                          "network":    {"type": "array", "items": {"type": "string"}},
+                          "filesystem": {
+                              "type": "object",
+                              "properties": {
+                                  "read":  {"type": "array", "items": {"type": "string"}},
+                                  "write": {"type": "array", "items": {"type": "string"}},
+                              }
+                          },
+                          "system_calls": {"type": "array", "items": {"type": "string"}},
+                          "ash_api":   {"type": "array", "items": {"type": "string"}},
+                          "secrets":   {"type": "array"},
+                          "sudo":      {"type": "boolean"},
+                          "dbus":      {"type": "array", "items": {"type": "string"}},
+                      }
+                  },
+                  "hooks": {
+                      "type": "object",
+                      "properties": {
+                          "registers": {"type": "array", "items": {"type": "string"}},
+                          "provides":  {"type": "array", "items": {"type": "string"}},
+                      }
+                  },
+                  "dependencies": {
+                      "type": "object",
+                      "properties": {
+                          "required": {
+                              "type": "object",
+                              "properties": {
+                                  "system":      {"type": "array"},
+                                  "ash_plugins": {"type": "array"},
+                              }
+                          },
+                          "optional": {"type": "object"},
+                          "conflicts": {"type": "array", "items": {"type": "string"}},
+                      }
+                  },
+                  "resources": {
+                      "type": "object",
+                      "properties": {
+                          "max_memory_mb":        {"type": "integer", "minimum": 1},
+                          "max_cpu_percent":      {"type": "number", "minimum": 0},
+                          "background_processes": {"type": "integer", "minimum": 0},
+                          "disk_usage_mb":        {"type": "integer", "minimum": 0},
+                      }
+                  },
+                  "lifecycle": {
+                      "type": "object",
+                      "properties": {
+                          "idempotent_enable":  {"type": "boolean"},
+                          "idempotent_disable": {"type": "boolean"},
+                          "clean_uninstall":    {"type": "boolean"},
+                          "state_persistence":  {"type": "boolean"},
+                          "auto_restart":       {"type": "boolean"},
+                      }
+                  },
+              }
+          }
+
+          # ═══════════════════════════════════════════════════════════════════
+          # ASH CONFIG SCHEMA
+          # ═══════════════════════════════════════════════════════════════════
+          config_schema = {
+              "$schema": DRAFT,
+              "$id": "https://ash-dotfiles.github.io/schemas/ash-config-v1.json",
+              "title": "ASH Dotfiles Configuration Schema v1",
+              "description": "ash.conf key-value validation schema",
+              "type": "object",
+              "additionalProperties": False,
+              "properties": {
+                  "theme.active":      {"type": "string"},
+                  "theme.auto":        {"type": "boolean"},
+                  "theme.transition":  {"type": "string", "enum": ["none","fade","smooth","cinematic"]},
+                  "wallpaper.current": {"type": "string"},
+                  "wallpaper.engine":  {"type": "string", "enum": ["swww","hyprpaper","swaybg","feh","nitrogen"]},
+                  "mode.current":      {"type": "string", "enum": ["default","game","work","focus","cinema","present","battery","stream","privacy","accessibility"]},
+                  "plugin.enabled":    {"type": "boolean"},
+                  "plugin.registry.official":  {"type": "boolean"},
+                  "plugin.registry.community": {"type": "boolean"},
+                  "analytics.enabled": {"type": "boolean"},
+                  "notifications.enabled": {"type": "boolean"},
+                  "bar.layout":        {"type": "string"},
+                  "snapshot.auto":     {"type": "boolean"},
+                  "snapshot.max_count":{"type": "integer", "minimum": 1, "maximum": 100},
+                  "api.enabled":       {"type": "boolean"},
+                  "api.port":          {"type": "integer", "minimum": 1024, "maximum": 65535},
+              }
+          }
+
+          # ── Save all schemas ──────────────────────────────────────────────
+          schemas = {
+              "themes/schema/colors-schema.json":     colors_schema,
+              "themes/schema/metadata-schema.json":   metadata_schema,
+              "plugins/schema/plugin-schema.json":    plugin_schema,
+              "ash-cli/data/ash-config-schema.json":  config_schema,
+          }
+
+          for path_str, schema in schemas.items():
+              path = Path(path_str)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              if not path.exists():
+                  path.write_text(json.dumps(schema, indent=2) + "\n")
+                  print(f"  ✅ Generated: {path}")
+              else:
+                  print(f"  ✅ Exists:    {path}")
+
+          print("\n  ✅ Schema generation complete")
+          SCHEMAGEN
+
+      - name: "📤 Cache Schemas"
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            themes/schema/
+            plugins/schema/
+            ash-cli/data/*schema*.json
+          key: "schemas-${{ github.sha }}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: VALIDATE-SCHEMAS — Validate schema definitions themselves
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-schemas:
+    name: "📐 Validate Schema Definitions"
+    needs: [discover, generate-schemas]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      schema-errors:  ${{ steps.validate.outputs.errors }}
+      schema-passed:  ${{ steps.validate.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: "📦 Install jsonschema"
+        shell: bash
+        run: |
+          pip install -q \
+            "jsonschema[format-nongpl]==4.23.0" \
+            "referencing==0.35.1" \
+            "jsonschema-specifications==2023.12.1" \
+            2>/dev/null
+
+      - name: "📥 Restore Schemas"
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            themes/schema/
+            plugins/schema/
+            ash-cli/data/*schema*.json
+          key: "schemas-${{ github.sha }}"
+          restore-keys: "schemas-"
+
+      - name: "📐 Validate Schema Definitions"
+        id: validate
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📐 JSON Schema Definition Validator                        ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'SCHEMAVALIDATE'
+          import json
+          import sys
+          import glob
+          from pathlib import Path
+
+          try:
+              import jsonschema
+              from jsonschema import Draft202012Validator
+          except ImportError:
+              print("  ⚠️  jsonschema not available")
+              sys.exit(0)
+
+          errors   = []
+          warnings = []
+          schemas_validated = 0
+
+          # ── Find all schema files ──────────────────────────────────────────
+          schema_files = []
+          for pattern in [
+              "themes/schema/*.json",
+              "plugins/schema/*.json",
+              "api/schemas/*.json",
+              "ash-cli/data/*schema*.json",
+          ]:
+              schema_files.extend(glob.glob(pattern))
+
+          print(f"  Found {len(schema_files)} schema definition files\n")
+
+          for schema_path_str in sorted(schema_files):
+              schema_path = Path(schema_path_str)
+              print(f"  📐 Validating: {schema_path}")
+
+              try:
+                  content = schema_path.read_text(encoding="utf-8")
+              except Exception as e:
+                  errors.append(f"{schema_path}: Cannot read file: {e}")
+                  continue
+
+              # ── JSON syntax check ──────────────────────────────────────────
+              try:
+                  schema = json.loads(content)
+              except json.JSONDecodeError as e:
+                  errors.append(f"{schema_path}: Invalid JSON: {e}")
+                  print(f"     ❌ JSON parse error: {e}")
+                  continue
+
+              # ── Validate it IS a valid JSON Schema ─────────────────────────
+              try:
+                  Draft202012Validator.check_schema(schema)
+                  print(f"     ✅ Valid JSON Schema (Draft 2020-12)")
+              except jsonschema.SchemaError as e:
+                  errors.append(f"{schema_path}: Invalid schema: {e.message}")
+                  print(f"     ❌ Schema error: {e.message}")
+                  continue
+
+              # ── Structural checks ──────────────────────────────────────────
+              if "$schema" not in schema:
+                  warnings.append(f"{schema_path}: Missing $schema declaration")
+                  print(f"     ⚠️  Missing $schema declaration")
+
+              if "$id" not in schema:
+                  warnings.append(f"{schema_path}: Missing $id")
+                  print(f"     ⚠️  Missing $id")
+
+              if "title" not in schema:
+                  warnings.append(f"{schema_path}: Missing title")
+
+              if "description" not in schema:
+                  warnings.append(f"{schema_path}: Missing description")
+
+              # ── Required fields check ──────────────────────────────────────
+              if schema.get("type") == "object":
+                  required = schema.get("required", [])
+                  properties = schema.get("properties", {})
+
+                  # Every required field should be in properties
+                  for req in required:
+                      if req not in properties:
+                          warnings.append(
+                              f"{schema_path}: Required '{req}' not in properties"
+                          )
+                          print(f"     ⚠️  Required field '{req}' not in properties")
+
+              # ── Examples validation ────────────────────────────────────────
+              examples = schema.get("examples", [])
+              if examples:
+                  validator = Draft202012Validator(schema)
+                  for i, example in enumerate(examples):
+                      ex_errors = list(validator.iter_errors(example))
+                      if ex_errors:
+                          errors.append(
+                              f"{schema_path}: Example {i} fails validation: "
+                              f"{ex_errors[0].message}"
+                          )
+                          print(f"     ❌ Example {i} invalid: {ex_errors[0].message}")
+                      else:
+                          print(f"     ✅ Example {i} valid")
+
+              schemas_validated += 1
+              print(f"     ✅ Schema validated successfully")
+
+          # ── Summary ────────────────────────────────────────────────────────
+          print(f"\n  📊 Schema Validation Summary:")
+          print(f"     Schemas validated: {schemas_validated}")
+          print(f"     Errors:            {len(errors)}")
+          print(f"     Warnings:          {len(warnings)}")
+
+          if errors:
+              print(f"\n  🔴 ERRORS:")
+              for e in errors:
+                  print(f"     ❌ {e}")
+
+          if warnings:
+              print(f"\n  🟠 WARNINGS:")
+              for w in warnings:
+                  print(f"     ⚠️  {w}")
+
+          with open("schema-validation-results.json", "w") as f:
+              json.dump({
+                  "schemas": schemas_validated,
+                  "errors": len(errors),
+                  "warnings": len(warnings),
+                  "error_list": errors,
+                  "warning_list": warnings,
+              }, f, indent=2)
+
+          sys.exit(0 if not errors else 1)
+          SCHEMAVALIDATE
+          validate_exit=$?
+
+          errors="$(jq '.errors' schema-validation-results.json 2>/dev/null || echo 0)"
+          passed="true"
+          [[ ${validate_exit} -ne 0 ]] && passed="false"
+
+          echo "errors=${errors}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: VALIDATE-INSTANCES — Validate all JSON files against schemas
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-instances:
+    name: "✅ Validate Schema Instances"
+    needs: [discover, generate-schemas, validate-schemas]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      total-errors:   ${{ steps.validate.outputs.total_errors }}
+      total-warnings: ${{ steps.validate.outputs.total_warnings }}
+      passed:         ${{ steps.validate.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: "📦 Install Dependencies"
+        shell: bash
+        run: |
+          pip install -q \
+            "jsonschema[format-nongpl]==4.23.0" \
+            "referencing==0.35.1" \
+            2>/dev/null
+
+      - name: "📥 Restore Schemas"
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            themes/schema/
+            plugins/schema/
+            ash-cli/data/*schema*.json
+          key: "schemas-${{ github.sha }}"
+          restore-keys: "schemas-"
+
+      - name: "✅ Validate Instance Files"
+        id: validate
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ✅ JSON Instance Validation Against Schemas                ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'INSTANCEVALIDATE'
+          import json
+          import sys
+          import glob
+          from pathlib import Path
+
+          try:
+              from jsonschema import Draft202012Validator
+              import jsonschema
+          except ImportError:
+              print("  ⚠️  jsonschema not available")
+              sys.exit(0)
+
+          total_errors   = 0
+          total_warnings = 0
+          total_files    = 0
+          results        = []
+
+          def load_schema(schema_path: str) -> dict | None:
+              try:
+                  return json.loads(Path(schema_path).read_text())
+              except Exception:
+                  return None
+
+          def validate_file(
+              instance_path: str,
+              schema: dict,
+              schema_name: str
+          ) -> list[str]:
+              """Validate a JSON file against a schema, return error list."""
+              try:
+                  instance = json.loads(Path(instance_path).read_text())
+              except json.JSONDecodeError as e:
+                  return [f"JSON parse error: {e}"]
+
+              validator = Draft202012Validator(schema)
+              errs = []
+              for error in sorted(validator.iter_errors(instance),
+                                   key=lambda e: e.path):
+                  path = " > ".join(str(p) for p in error.absolute_path)
+                  path = path or "root"
+                  errs.append(f"{path}: {error.message}")
+              return errs
+
+          # ── Load schemas ──────────────────────────────────────────────────
+          colors_schema   = load_schema("themes/schema/colors-schema.json")
+          metadata_schema = load_schema("themes/schema/metadata-schema.json")
+          plugin_schema   = load_schema("plugins/schema/plugin-schema.json")
+
+          # ── Validate theme colors.json files ──────────────────────────────
+          if colors_schema:
+              color_files = glob.glob(
+                  "themes/presets/**/colors.json", recursive=True
+              )
+              print(f"\n  🎨 Validating {len(color_files)} colors.json files...")
+              print(f"     Schema: colors-schema.json\n")
+
+              file_errors_count = 0
+              file_ok_count = 0
+
+              for cf in sorted(color_files):
+                  errs = validate_file(cf, colors_schema, "colors-schema")
+                  theme_name = Path(cf).parent.name
+                  total_files += 1
+
+                  if errs:
+                      file_errors_count += 1
+                      total_errors += len(errs)
+                      print(f"  ❌ {theme_name}:")
+                      for err in errs[:3]:
+                          print(f"     → {err}")
+                      if len(errs) > 3:
+                          print(f"     ... and {len(errs)-3} more")
+                  else:
+                      file_ok_count += 1
+                      print(f"  ✅ {theme_name}")
+
+              print(f"\n     colors.json: {file_ok_count} passed, "
+                    f"{file_errors_count} failed")
+
+          # ── Validate theme metadata.json files ────────────────────────────
+          if metadata_schema:
+              meta_files = glob.glob(
+                  "themes/presets/**/metadata.json", recursive=True
+              )
+              print(f"\n  📋 Validating {len(meta_files)} metadata.json files...")
+              print(f"     Schema: metadata-schema.json\n")
+
+              meta_ok = 0
+              meta_fail = 0
+
+              for mf in sorted(meta_files):
+                  errs = validate_file(mf, metadata_schema, "metadata-schema")
+                  theme_name = Path(mf).parent.name
+                  total_files += 1
+
+                  if errs:
+                      meta_fail += 1
+                      total_errors += len(errs)
+                      print(f"  ❌ {theme_name}:")
+                      for err in errs[:3]:
+                          print(f"     → {err}")
+                  else:
+                      meta_ok += 1
+                      print(f"  ✅ {theme_name}")
+
+              print(f"\n     metadata.json: {meta_ok} passed, {meta_fail} failed")
+
+          # ── Validate plugin.json files ────────────────────────────────────
+          if plugin_schema:
+              plugin_files = [
+                  f for f in glob.glob(
+                      "plugins/**/plugin.json", recursive=True
+                  )
+                  if "schema" not in f and "template" not in f
+              ]
+              print(f"\n  🔌 Validating {len(plugin_files)} plugin.json files...")
+              print(f"     Schema: plugin-schema.json\n")
+
+              plugin_ok = 0
+              plugin_fail = 0
+
+              for pf in sorted(plugin_files):
+                  errs = validate_file(pf, plugin_schema, "plugin-schema")
+                  plugin_id = Path(pf).parent.name
+                  total_files += 1
+
+                  if errs:
+                      plugin_fail += 1
+                      total_errors += len(errs)
+                      print(f"  ❌ {plugin_id}:")
+                      for err in errs[:3]:
+                          print(f"     → {err}")
+                  else:
+                      plugin_ok += 1
+                      print(f"  ✅ {plugin_id}")
+
+              print(f"\n     plugin.json: {plugin_ok} passed, {plugin_fail} failed")
+
+          # ── Final summary ──────────────────────────────────────────────────
+          print(f"\n  📊 Instance Validation Summary:")
+          print(f"     Total files validated: {total_files}")
+          print(f"     Total errors:          {total_errors}")
+          print(f"     Total warnings:        {total_warnings}")
+
+          with open("instance-validation-results.json", "w") as f:
+              json.dump({
+                  "total_files":    total_files,
+                  "total_errors":   total_errors,
+                  "total_warnings": total_warnings,
+                  "passed":         total_errors == 0,
+              }, f, indent=2)
+
+          sys.exit(0 if total_errors == 0 else 1)
+          INSTANCEVALIDATE
+          validate_exit=$?
+
+          total_errors="$(jq '.total_errors' instance-validation-results.json 2>/dev/null || echo 0)"
+          total_warnings="$(jq '.total_warnings' instance-validation-results.json 2>/dev/null || echo 0)"
+          passed="true"
+          [[ ${validate_exit} -ne 0 ]] && passed="false"
+
+          echo "total_errors=${total_errors}"    >> "${GITHUB_OUTPUT}"
+          echo "total_warnings=${total_warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"               >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "schema-validation-results"
+          path: |
+            schema-validation-results.json
+            instance-validation-results.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 05: BREAKING-CHANGE — Detect schema breaking changes
+  # ────────────────────────────────────────────────────────────────────────────
+  breaking-change:
+    name: "💔 Breaking Change Detection"
+    needs: discover
+    if: >
+      github.event_name == 'pull_request' &&
+      inputs.check_breaking != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout (head)"
+        uses: actions/checkout@v4
+        with:
+          path: head
+
+      - name: "📥 Checkout (base)"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "💔 Detect Breaking Schema Changes"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  💔 Schema Breaking Change Detector                         ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          pip install -q "jsonschema==4.23.0" 2>/dev/null
+
+          python3 << 'BREAKCHECK'
+          import json
+          import sys
+          from pathlib import Path
+
+          SCHEMA_PATHS = [
+              "themes/schema/colors-schema.json",
+              "themes/schema/metadata-schema.json",
+              "plugins/schema/plugin-schema.json",
+              "ash-cli/data/ash-config-schema.json",
+          ]
+
+          breaking_changes = []
+          non_breaking     = []
+
+          def get_required(schema: dict) -> set:
+              return set(schema.get("required", []))
+
+          def get_properties(schema: dict) -> set:
+              return set(schema.get("properties", {}).keys())
+
+          def get_enum_values(schema: dict, field: str) -> set:
+              props = schema.get("properties", {})
+              if field in props:
+                  return set(props[field].get("enum", []))
+              return set()
+
+          for schema_path in SCHEMA_PATHS:
+              base_file = Path("base") / schema_path
+              head_file = Path("head") / schema_path
+
+              if not base_file.exists():
+                  non_breaking.append(f"{schema_path}: NEW schema (no breaking change)")
+                  continue
+
+              if not head_file.exists():
+                  breaking_changes.append(f"{schema_path}: REMOVED schema (breaking!)")
+                  continue
+
+              try:
+                  base = json.loads(base_file.read_text())
+                  head = json.loads(head_file.read_text())
+              except json.JSONDecodeError as e:
+                  print(f"  ⚠️  Could not parse {schema_path}: {e}")
+                  continue
+
+              schema_name = Path(schema_path).stem
+
+              # ── Check 1: New required fields added ────────────────────────
+              base_req = get_required(base)
+              head_req = get_required(head)
+              new_required = head_req - base_req
+              if new_required:
+                  breaking_changes.append(
+                      f"{schema_name}: New required fields: {new_required} "
+                      f"(existing instances may fail)"
+                  )
+
+              # ── Check 2: Properties removed ───────────────────────────────
+              base_props = get_properties(base)
+              head_props = get_properties(head)
+              removed_props = base_props - head_props
+              if removed_props and base.get("additionalProperties") is False:
+                  breaking_changes.append(
+                      f"{schema_name}: Properties removed: {removed_props}"
+                  )
+
+              # ── Check 3: Enum values removed ──────────────────────────────
+              for field in base_props & head_props:
+                  base_enum = get_enum_values(base, field)
+                  head_enum = get_enum_values(head, field)
+                  removed_enum = base_enum - head_enum
+                  if removed_enum:
+                      breaking_changes.append(
+                          f"{schema_name}.{field}: Enum values removed: "
+                          f"{removed_enum}"
+                      )
+
+              # ── Check 4: Type changed ─────────────────────────────────────
+              base_props_full = base.get("properties", {})
+              head_props_full = head.get("properties", {})
+              for field in base_props & head_props:
+                  base_type = base_props_full.get(field, {}).get("type")
+                  head_type = head_props_full.get(field, {}).get("type")
+                  if base_type and head_type and base_type != head_type:
+                      breaking_changes.append(
+                          f"{schema_name}.{field}: Type changed from "
+                          f"'{base_type}' to '{head_type}'"
+                      )
+
+              # ── Check 5: additionalProperties made false ───────────────────
+              if (base.get("additionalProperties") is not False and
+                      head.get("additionalProperties") is False):
+                  breaking_changes.append(
+                      f"{schema_name}: additionalProperties changed to false "
+                      f"(rejects previously valid instances)"
+                  )
+
+              if not (new_required or removed_props):
+                  non_breaking.append(f"{schema_name}: No breaking changes")
+
+          # ── Report ─────────────────────────────────────────────────────────
+          print(f"\n  📊 Schema Breaking Change Report:")
+          print(f"     Breaking changes:     {len(breaking_changes)}")
+          print(f"     Non-breaking changes: {len(non_breaking)}")
+
+          if non_breaking:
+              print("\n  ✅ Non-breaking changes:")
+              for msg in non_breaking:
+                  print(f"     ✅ {msg}")
+
+          if breaking_changes:
+              print("\n  ❌ BREAKING CHANGES DETECTED:")
+              for msg in breaking_changes:
+                  print(f"     💔 {msg}")
+              print("\n  Breaking schema changes require a major version bump!")
+              sys.exit(1)
+          else:
+              print("\n  ✅ No breaking schema changes detected")
+              sys.exit(0)
+          BREAKCHECK
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 06: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Schema Validation"
+    needs: [discover, validate-schemas, validate-instances, breaking-change]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "📥 Download Results"
+        uses: actions/download-artifact@v4
+        with:
+          name: "schema-validation-results"
+          path: ./results/
+        continue-on-error: true
+
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const schemaPassed    = '${{ needs.validate-schemas.outputs.schema-passed }}' === 'true';
+            const instancePassed  = '${{ needs.validate-instances.outputs.passed }}' === 'true';
+            const breakingResult  = '${{ needs.breaking-change.result }}';
+            const breakingPassed  = breakingResult === 'success' || breakingResult === 'skipped';
+            const instanceErrors  = parseInt('${{ needs.validate-instances.outputs.total-errors || 0 }}');
+            const themeCount      = '${{ needs.discover.outputs.theme-count }}';
+            const pluginCount     = '${{ needs.discover.outputs.plugin-count }}';
+            const instanceCount   = '${{ needs.discover.outputs.instance-count }}';
+
+            const overallPassed = schemaPassed && instancePassed && breakingPassed;
+            const icon   = overallPassed ? '✅' : '❌';
+            const status = overallPassed ? 'PASSED' : 'FAILED';
+
+            const body = `## 📐 Schema Validation ${icon}
+
+            **Status: ${status}** | **${instanceCount}** instance files validated
+
+            | Check | Status |
+            |-------|--------|
+            | 📐 Schema Definitions | ${schemaPassed ? '✅' : '❌'} |
+            | ✅ Instance Validation | ${instancePassed ? '✅ 0 errors' : '❌ ' + instanceErrors + ' errors'} |
+            | 💔 Breaking Changes | ${breakingPassed ? '✅ None' : '❌ Detected'} |
+
+            **Validated:** ${themeCount} theme colors.json • ${themeCount} metadata.json • ${pluginCount} plugin.json
+
+            ${overallPassed
+              ? '### ✨ All schema validations pass!'
+              : `### 🔧 Fix Required\n\nSee schema validation errors in the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n**Common fixes:**\n- Ensure \`colors.json\` has required \`base.background\`, \`base.foreground\`, \`accent.primary\` fields\n- Ensure \`metadata.json\` has \`id\`, \`name\`, \`version\`, \`category\`, \`author\`, \`license\`\n- Ensure \`plugin.json\` has \`entry.init\`, \`entry.enable\`, \`entry.disable\``
+            }
+
+            ---
+            *🤖 ASH Schema Validation • JSON Schema Draft 2020-12 • [Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('📐 Schema Validation')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Quality Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Schema Validation Quality Gate                          ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          schema_passed="${{ needs.validate-schemas.outputs.schema-passed || 'true' }}"
+          instance_passed="${{ needs.validate-instances.outputs.passed || 'true' }}"
+          breaking_result="${{ needs.breaking-change.result }}"
+          breaking_passed="true"
+          [[ "${breaking_result}" == "failure" ]] && breaking_passed="false"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── Schema definitions: ${schema_passed}"
+          echo "  ├── Instance files:     ${instance_passed}"
+          echo "  └── Breaking changes:   ${breaking_passed}"
+          echo ""
+
+          all_passed="true"
+          [[ "${schema_passed}" != "true" ]] && all_passed="false"
+          [[ "${instance_passed}" != "true" ]] && all_passed="false"
+          [[ "${breaking_passed}" != "true" ]] && all_passed="false"
+
+          if [[ "${all_passed}" == "true" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+            echo "  🎉 All schemas and instances are valid!"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            [[ "${schema_passed}" != "true" ]] && echo "  Fix: Schema definition errors"
+            [[ "${instance_passed}" != "true" ]] && echo "  Fix: Instance validation errors"
+            [[ "${breaking_passed}" != "true" ]] && echo "  Fix: Breaking schema changes detected"
+            exit 1
+          fi

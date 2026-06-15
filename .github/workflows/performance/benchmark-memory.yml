@@ -1,0 +1,1138 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🧠 ASH DOTFILES v5.0 OMEGA — MEMORY USAGE BENCHMARK WORKFLOW               ║
+# ║  Profiles RSS, heap, peak memory for CLI, theme engine & plugin system      ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+name: "🧠 Benchmark · Memory Usage Profiling"
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+    paths:
+      - "ash-cli/ash"
+      - "ash-cli/lib/**"
+      - "ash-cli/engines/**"
+      - "ash-cli/commands/**"
+      - "plugins/core/**"
+      - ".github/workflows/performance/benchmark-memory.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "ash-cli/**"
+      - "plugins/core/**"
+  workflow_dispatch:
+    inputs:
+      sample_count:
+        description: "Memory sample count"
+        required: false
+        default: "30"
+        type: string
+      scenario:
+        description: "Benchmark scenario (all|cli|engine|plugins)"
+        required: false
+        default: "all"
+        type: string
+      regression_threshold:
+        description: "Memory regression threshold %"
+        required: false
+        default: "25"
+        type: string
+  schedule:
+    - cron: "0 3 * * *"   # Nightly at 03:00 UTC
+
+concurrency:
+  group: "bench-memory-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  BENCHMARK_VERSION: "5.0.0"
+  BENCHMARK_DIR: "${{ github.workspace }}/memory-benchmarks"
+  BASELINE_DIR: "${{ github.workspace }}/memory-baseline"
+  REPORTS_DIR: "${{ github.workspace }}/memory-reports"
+  SAMPLE_COUNT: "${{ github.event.inputs.sample_count || '30' }}"
+  SCENARIO: "${{ github.event.inputs.scenario || 'all' }}"
+  REGRESSION_THRESHOLD: "${{ github.event.inputs.regression_threshold || '25' }}"
+  # Memory thresholds (KB)
+  THRESHOLD_ASH_INIT_KB: "15360"       # 15 MB max for CLI init
+  THRESHOLD_COLOR_ENGINE_KB: "51200"   # 50 MB for color extraction
+  THRESHOLD_THEME_APPLY_KB: "102400"   # 100 MB for full theme apply
+  THRESHOLD_PLUGIN_SYSTEM_KB: "30720"  # 30 MB for plugin loading
+  THRESHOLD_HOT_RELOAD_KB: "20480"     # 20 MB for hot reload
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1: Setup
+  # ───────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "🛠️ Setup · Memory Profiling Environment"
+    runs-on: ubuntu-24.04
+    outputs:
+      bench_id: ${{ steps.id.outputs.bench_id }}
+      has_baseline: ${{ steps.baseline_check.outputs.has_baseline }}
+      system_memory_kb: ${{ steps.system.outputs.total_kb }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🆔 Generate benchmark ID"
+        id: id
+        run: |
+          BENCH_ID="memory-$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
+          echo "bench_id=${BENCH_ID}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Memory Benchmark ID::${BENCH_ID}"
+
+      - name: "📦 Install memory profiling tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            valgrind \
+            heaptrack \
+            massif-visualizer \
+            time \
+            procps \
+            sysstat \
+            smem \
+            jq \
+            bc \
+            python3 \
+            python3-pip \
+            linux-tools-generic \
+            2>/dev/null || \
+          sudo apt-get install -y --no-install-recommends \
+            valgrind \
+            time \
+            procps \
+            sysstat \
+            jq \
+            bc \
+            python3 \
+            python3-pip \
+            2>/dev/null || true
+
+          pip3 install --quiet --user \
+            matplotlib \
+            pandas \
+            psutil \
+            memory-profiler \
+            rich \
+            tabulate \
+            2>/dev/null || true
+
+          echo ""
+          echo "  ✅ Tool versions:"
+          echo "     valgrind: $(valgrind --version 2>/dev/null || echo 'not available')"
+          echo "     python3:  $(python3 --version)"
+          echo "     psutil:   $(python3 -c 'import psutil; print(psutil.__version__)' 2>/dev/null || echo 'not available')"
+
+      - name: "🖥️ System memory information"
+        id: system
+        run: |
+          TOTAL_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+          FREE_KB=$(awk '/MemAvailable/ {print $2}' /proc/meminfo)
+          TOTAL_GB=$(echo "scale=1; ${TOTAL_KB}/1024/1024" | bc)
+          FREE_GB=$(echo "scale=1; ${FREE_KB}/1024/1024" | bc)
+
+          echo "total_kb=${TOTAL_KB}" >> "$GITHUB_OUTPUT"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🖥️  System Memory"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Total:     ${TOTAL_GB} GB (${TOTAL_KB} KB)"
+          echo "  Available: ${FREE_GB} GB (${FREE_KB} KB)"
+          echo "  Swap:      $(awk '/SwapTotal/ {print $2}' /proc/meminfo) KB"
+
+          # Validate we have enough memory for benchmarks
+          MIN_FREE_KB=$((1024 * 1024))  # 1 GB minimum
+          if [[ "${FREE_KB}" -lt "${MIN_FREE_KB}" ]]; then
+            echo "::warning::Low available memory: ${FREE_GB}GB. Results may be inaccurate."
+          fi
+
+      - name: "📊 Check for baseline"
+        id: baseline_check
+        run: |
+          HAS_BASELINE="false"
+          if gh api \
+            "repos/${{ github.repository }}/actions/caches" \
+            --jq '.actions_caches[].key' 2>/dev/null | \
+            grep -q "bench-baseline-memory"; then
+            HAS_BASELINE="true"
+          fi
+          echo "has_baseline=${HAS_BASELINE}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📦 Cache baseline"
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-memory-${{ github.base_ref || 'main' }}"
+          restore-keys: |
+            bench-baseline-memory-main
+            bench-baseline-memory-
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2: Memory profiling per scenario
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-memory:
+    name: "🧠 Memory · ${{ matrix.scenario.name }}"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - name: "ash-cli-init"
+            description: "ASH CLI initialization memory"
+            threshold_env: "THRESHOLD_ASH_INIT_KB"
+            threshold_kb: 15360
+            command: "bash ash-cli/ash --version"
+            profile_type: "rss"
+            critical: true
+            weight: "critical"
+
+          - name: "color-engine-extract"
+            description: "Color engine extraction memory"
+            threshold_env: "THRESHOLD_COLOR_ENGINE_KB"
+            threshold_kb: 51200
+            command: "bash ash-cli/engines/color-engine/extract.sh tests/fixtures/sample-wallpaper.jpg"
+            profile_type: "peak"
+            critical: true
+            weight: "critical"
+
+          - name: "full-theme-apply"
+            description: "Full theme application peak memory"
+            threshold_env: "THRESHOLD_THEME_APPLY_KB"
+            threshold_kb: 102400
+            command: "bash ash-cli/commands/theme/apply.sh catppuccin-mocha --dry-run"
+            profile_type: "peak"
+            critical: true
+            weight: "high"
+
+          - name: "plugin-system-load"
+            description: "Plugin system loading memory"
+            threshold_env: "THRESHOLD_PLUGIN_SYSTEM_KB"
+            threshold_kb: 30720
+            command: "bash ash-cli/commands/plugin/list.sh"
+            profile_type: "rss"
+            critical: false
+            weight: "medium"
+
+          - name: "hot-reload-engine"
+            description: "Hot reload watcher memory"
+            threshold_env: "THRESHOLD_HOT_RELOAD_KB"
+            threshold_kb: 20480
+            command: "bash ash-cli/engines/hot-reload-engine/watcher.sh --once --exit"
+            profile_type: "rss"
+            critical: false
+            weight: "medium"
+
+    env:
+      SCENARIO_NAME: ${{ matrix.scenario.name }}
+      SCENARIO_THRESHOLD_KB: ${{ matrix.scenario.threshold_kb }}
+      SCENARIO_DESC: ${{ matrix.scenario.description }}
+      SCENARIO_CMD: ${{ matrix.scenario.command }}
+      SCENARIO_PROFILE_TYPE: ${{ matrix.scenario.profile_type }}
+      SCENARIO_WEIGHT: ${{ matrix.scenario.weight }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install profiling tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            valgrind time procps jq bc python3 python3-pip imagemagick \
+            2>/dev/null || true
+          pip3 install --quiet --user \
+            matplotlib pandas psutil rich tabulate 2>/dev/null || true
+
+      - name: "🏗️ Prepare test fixtures"
+        run: |
+          mkdir -p \
+            "${BENCHMARK_DIR}/${SCENARIO_NAME}" \
+            tests/fixtures
+
+          # Generate sample wallpaper
+          convert -size 1920x1080 gradient:"#1e1e2e-#cba6f7" \
+            tests/fixtures/sample-wallpaper.jpg 2>/dev/null || \
+          dd if=/dev/urandom bs=1920 count=1080 2>/dev/null | \
+            base64 -w0 > tests/fixtures/sample-wallpaper.jpg 2>/dev/null || true
+
+          # Ensure ash-cli is executable
+          chmod +x ash-cli/ash 2>/dev/null || true
+
+          # Create minimal config
+          mkdir -p "${HOME}/.config/ash"
+          cat > "${HOME}/.config/ash/ash.conf" << 'EOF'
+          [core]
+          theme = catppuccin-mocha
+          log_level = error
+          analytics = false
+          EOF
+
+          echo "ASH_ROOT=${GITHUB_WORKSPACE}/ash-cli" >> "$GITHUB_ENV"
+          echo "ASH_CONFIG=${HOME}/.config/ash/ash.conf" >> "$GITHUB_ENV"
+          echo "ASH_LOG_LEVEL=error" >> "$GITHUB_ENV"
+
+      - name: "🧠 Profile memory with /usr/bin/time"
+        id: time_profile
+        run: |
+          set -euo pipefail
+
+          OUTPUT_DIR="${BENCHMARK_DIR}/${SCENARIO_NAME}"
+          mkdir -p "${OUTPUT_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🧠 Memory Profiling: ${SCENARIO_DESC}"
+          echo "  📊 Command: ${SCENARIO_CMD}"
+          echo "  🎯 Threshold: ${SCENARIO_THRESHOLD_KB} KB"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          SAMPLES_FILE="${OUTPUT_DIR}/time-samples.json"
+          declare -a RSS_SAMPLES=()
+          declare -a WALL_SAMPLES=()
+
+          echo "  📊 Collecting ${SAMPLE_COUNT} samples..."
+
+          for i in $(seq 1 "${SAMPLE_COUNT}"); do
+            # Use /usr/bin/time for memory measurement
+            TIME_OUTPUT=$( \
+              /usr/bin/time -v bash -c "${SCENARIO_CMD}" 2>&1 || \
+              /usr/bin/time -l bash -c "${SCENARIO_CMD}" 2>&1 || \
+              echo "Maximum resident set size (kbytes): 0"
+            )
+
+            # Extract RSS (Maximum resident set size)
+            RSS_KB=$(echo "${TIME_OUTPUT}" | \
+              grep -i "maximum resident set size" | \
+              grep -oP '\d+' | tail -1 || echo "0")
+
+            # On some systems RSS is in pages, convert
+            if [[ "${RSS_KB}" -gt 0 ]]; then
+              # Check if value seems too small (pages vs KB)
+              PAGE_SIZE=$(getconf PAGE_SIZE 2>/dev/null || echo "4096")
+              if [[ "${RSS_KB}" -lt 1000 ]]; then
+                RSS_KB=$(( RSS_KB * PAGE_SIZE / 1024 ))
+              fi
+            fi
+
+            # Wall time
+            WALL_MS=$(echo "${TIME_OUTPUT}" | \
+              grep -i "elapsed" | \
+              grep -oP '[\d:]+\.\d+' | head -1 | \
+              awk -F: '{
+                if (NF==3) print ($1*3600 + $2*60 + $3)*1000;
+                else if (NF==2) print ($1*60 + $2)*1000;
+                else print $1*1000
+              }' || echo "0")
+
+            RSS_SAMPLES+=("${RSS_KB}")
+            WALL_SAMPLES+=("${WALL_MS}")
+
+            # Progress indicator every 10 samples
+            if (( i % 10 == 0 )); then
+              echo "    ${i}/${SAMPLE_COUNT} — RSS: ${RSS_KB}KB"
+            fi
+
+            sleep 0.1
+          done
+
+          # Write samples JSON
+          cat > "${SAMPLES_FILE}" << EOF
+          {
+            "scenario": "${SCENARIO_NAME}",
+            "command": "${SCENARIO_CMD}",
+            "sample_count": ${SAMPLE_COUNT},
+            "rss_samples_kb": [$(IFS=,; echo "${RSS_SAMPLES[*]}")],
+            "wall_time_ms": [$(IFS=,; echo "${WALL_SAMPLES[*]}")]
+          }
+          EOF
+
+          echo "  ✅ Samples collected"
+          echo "  📊 Sample RSS range: ${RSS_SAMPLES[0]}–${RSS_SAMPLES[-1]} KB"
+
+      - name: "🔬 Valgrind massif profiling (detailed)"
+        id: valgrind_profile
+        if: matrix.scenario.critical == true
+        run: |
+          OUTPUT_DIR="${BENCHMARK_DIR}/${SCENARIO_NAME}"
+          MASSIF_OUT="${OUTPUT_DIR}/massif.out"
+
+          echo "  🔬 Running Valgrind Massif..."
+
+          # Run massif with lower overhead settings for CI
+          valgrind \
+            --tool=massif \
+            --pages-as-heap=yes \
+            --massif-out-file="${MASSIF_OUT}" \
+            --time-unit=ms \
+            --detailed-freq=1 \
+            bash -c "${SCENARIO_CMD}" \
+            > "${OUTPUT_DIR}/valgrind-stdout.log" \
+            2> "${OUTPUT_DIR}/valgrind-stderr.log" || {
+              echo "  ⚠️ Valgrind massif failed — using RSS profiling only"
+            }
+
+          # Parse massif output if available
+          if [[ -f "${MASSIF_OUT}" ]]; then
+            echo "  ✅ Massif output generated"
+            PEAK_KB=$(grep "mem_heap_B=" "${MASSIF_OUT}" | \
+              awk -F= '{print $2}' | sort -n | tail -1 | \
+              awk '{printf "%.0f", $1/1024}' || echo "0")
+            echo "  📊 Heap peak: ${PEAK_KB} KB"
+            echo "massif_peak_kb=${PEAK_KB}" >> "$GITHUB_OUTPUT"
+          else
+            echo "massif_peak_kb=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "🐍 Python psutil profiling"
+        id: psutil_profile
+        run: |
+          OUTPUT_DIR="${BENCHMARK_DIR}/${SCENARIO_NAME}"
+          PSUTIL_OUT="${OUTPUT_DIR}/psutil-profile.json"
+
+          python3 << PYTHON_EOF
+          import subprocess
+          import psutil
+          import time
+          import json
+          import sys
+          import os
+          import shlex
+
+          cmd = shlex.split("bash -c '${SCENARIO_CMD}'")
+          samples = int("${SAMPLE_COUNT}")
+          results = []
+
+          for i in range(min(samples, 10)):  # Limit for CI speed
+              try:
+                  proc = subprocess.Popen(
+                      cmd,
+                      stdout=subprocess.DEVNULL,
+                      stderr=subprocess.DEVNULL,
+                  )
+
+                  ps_proc = psutil.Process(proc.pid)
+
+                  peak_rss_kb = 0
+                  peak_vms_kb = 0
+                  sample_times = []
+                  sample_rss   = []
+
+                  while proc.poll() is None:
+                      try:
+                          mem = ps_proc.memory_info()
+                          rss_kb = mem.rss // 1024
+                          vms_kb = mem.vms // 1024
+                          peak_rss_kb = max(peak_rss_kb, rss_kb)
+                          peak_vms_kb = max(peak_vms_kb, vms_kb)
+                          sample_rss.append(rss_kb)
+                          sample_times.append(time.time())
+                          time.sleep(0.005)
+                      except (psutil.NoSuchProcess, psutil.AccessDenied):
+                          break
+
+                  proc.wait(timeout=30)
+
+                  results.append({
+                      "run": i + 1,
+                      "peak_rss_kb": peak_rss_kb,
+                      "peak_vms_kb": peak_vms_kb,
+                      "sample_count": len(sample_rss),
+                      "rss_samples_kb": sample_rss[:50],  # First 50 samples
+                  })
+
+                  print(f"  Run {i+1}: peak_rss={peak_rss_kb}KB peak_vms={peak_vms_kb}KB")
+
+              except Exception as e:
+                  print(f"  ⚠️ Run {i+1} failed: {e}", file=sys.stderr)
+                  results.append({"run": i + 1, "error": str(e),
+                                  "peak_rss_kb": 0, "peak_vms_kb": 0})
+
+          # Statistics
+          valid = [r for r in results if "error" not in r]
+          if valid:
+              peak_rsses = [r["peak_rss_kb"] for r in valid]
+              avg_peak_rss = sum(peak_rsses) / len(peak_rsses)
+              max_peak_rss = max(peak_rsses)
+              min_peak_rss = min(peak_rsses)
+          else:
+              avg_peak_rss = max_peak_rss = min_peak_rss = 0
+
+          output = {
+              "scenario": "${SCENARIO_NAME}",
+              "command": "${SCENARIO_CMD}",
+              "runs": results,
+              "summary": {
+                  "avg_peak_rss_kb": round(avg_peak_rss, 1),
+                  "max_peak_rss_kb": max_peak_rss,
+                  "min_peak_rss_kb": min_peak_rss,
+              },
+          }
+
+          with open("${PSUTIL_OUT}", "w") as f:
+              json.dump(output, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"avg_peak_rss_kb={round(avg_peak_rss,1)}\n")
+              out.write(f"max_peak_rss_kb={max_peak_rss}\n")
+
+          print(f"\n  📊 avg_peak_rss={round(avg_peak_rss,1)}KB "
+                f"max={max_peak_rss}KB min={min_peak_rss}KB")
+          PYTHON_EOF
+
+      - name: "📊 Analyze and compile results"
+        id: analyze
+        run: |
+          OUTPUT_DIR="${BENCHMARK_DIR}/${SCENARIO_NAME}"
+          FINAL_REPORT="${OUTPUT_DIR}/memory-report.json"
+
+          python3 << PYTHON_EOF
+          import json
+          import os
+          import statistics
+
+          # Load time-based samples
+          samples_file = "${OUTPUT_DIR}/time-samples.json"
+          psutil_file  = "${OUTPUT_DIR}/psutil-profile.json"
+
+          # Try loading /usr/bin/time samples
+          rss_time = []
+          try:
+              with open(samples_file) as f:
+                  time_data = json.load(f)
+              rss_time = [k for k in time_data.get("rss_samples_kb", []) if k > 0]
+          except Exception as e:
+              print(f"  ⚠️ time-samples: {e}")
+
+          # Load psutil data
+          psutil_peak = 0
+          try:
+              with open(psutil_file) as f:
+                  psutil_data = json.load(f)
+              psutil_peak = psutil_data["summary"]["max_peak_rss_kb"]
+          except Exception as e:
+              print(f"  ⚠️ psutil: {e}")
+
+          # Use the best available data source
+          if rss_time:
+              rss_samples = rss_time
+          elif psutil_peak > 0:
+              rss_samples = [psutil_peak]
+          else:
+              rss_samples = [0]
+
+          mean_rss    = statistics.mean(rss_samples)
+          median_rss  = statistics.median(rss_samples)
+          max_rss     = max(rss_samples)
+          min_rss     = min(rss_samples)
+          stddev_rss  = statistics.stdev(rss_samples) if len(rss_samples) > 1 else 0
+
+          threshold_kb = float("${SCENARIO_THRESHOLD_KB}")
+          peak_to_use  = max(max_rss, psutil_peak)
+          passed       = peak_to_use <= threshold_kb
+
+          report = {
+              "scenario": "${SCENARIO_NAME}",
+              "description": "${SCENARIO_DESC}",
+              "weight": "${SCENARIO_WEIGHT}",
+              "git_sha": "${GITHUB_SHA}",
+              "command": "${SCENARIO_CMD}",
+              "rss_memory": {
+                  "mean_kb": round(mean_rss, 1),
+                  "median_kb": round(median_rss, 1),
+                  "max_kb": max_rss,
+                  "min_kb": min_rss,
+                  "stddev_kb": round(stddev_rss, 1),
+                  "peak_kb": peak_to_use,
+              },
+              "valgrind": {
+                  "massif_peak_kb": int("${{ steps.valgrind_profile.outputs.massif_peak_kb || '0' }}"),
+              },
+              "psutil": {
+                  "avg_peak_rss_kb": psutil_peak,
+              },
+              "threshold": {
+                  "threshold_kb": threshold_kb,
+                  "threshold_mb": round(threshold_kb / 1024, 1),
+                  "passed": passed,
+                  "overage_kb": round(max(0, peak_to_use - threshold_kb), 1),
+                  "margin_pct": round((threshold_kb - peak_to_use) / threshold_kb * 100, 2)
+                  if threshold_kb > 0 else 0,
+              },
+              "samples_count": len(rss_samples),
+          }
+
+          with open("${FINAL_REPORT}", "w") as f:
+              json.dump(report, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"passed={'true' if passed else 'false'}\n")
+              out.write(f"peak_kb={peak_to_use}\n")
+              out.write(f"mean_kb={round(mean_rss,1)}\n")
+
+          status = "✅ PASS" if passed else "❌ FAIL"
+          print(f"\n  {status}")
+          print(f"  peak={peak_to_use}KB ({round(peak_to_use/1024,1)}MB) "
+                f"threshold={threshold_kb}KB ({round(threshold_kb/1024,1)}MB)")
+          PYTHON_EOF
+
+      - name: "📈 Memory usage visualization"
+        run: |
+          OUTPUT_DIR="${BENCHMARK_DIR}/${SCENARIO_NAME}"
+          REPORT_FILE="${OUTPUT_DIR}/memory-report.json"
+          CHART_PATH="${OUTPUT_DIR}/memory-chart.png"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.patches as mpatches
+              import numpy as np
+          except ImportError:
+              print("::warning::matplotlib unavailable")
+              sys.exit(0)
+
+          with open("${REPORT_FILE}") as f:
+              data = json.load(f)
+
+          rss   = data["rss_memory"]
+          thr   = data["threshold"]
+          peak  = rss["peak_kb"]
+          mean  = rss["mean_kb"]
+          passed = thr["passed"]
+
+          palette = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "text":    "#cdd6f4",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "yellow":  "#f9e2af",
+              "teal":    "#94e2d5",
+          }
+
+          fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+          fig.patch.set_facecolor(palette["bg"])
+
+          accent = palette["green"] if passed else palette["red"]
+
+          # ── Left: Memory breakdown bar chart ─────────────────────────────
+          ax1 = axes[0]
+          ax1.set_facecolor(palette["surface"])
+          for sp in ax1.spines.values():
+              sp.set_edgecolor(palette["text"])
+              sp.set_alpha(0.3)
+          ax1.tick_params(colors=palette["text"])
+
+          categories = ["Min", "Mean", "Median", "Peak"]
+          values_kb  = [rss["min_kb"], rss["mean_kb"],
+                        rss["median_kb"], rss["peak_kb"]]
+          values_mb  = [v / 1024 for v in values_kb]
+          bar_colors = [palette["teal"], palette["blue"],
+                        palette["mauve"], accent]
+
+          bars = ax1.bar(categories, values_mb, color=bar_colors,
+                         alpha=0.82, width=0.5, zorder=3,
+                         edgecolor=palette["bg"], linewidth=1.2)
+
+          # Value labels
+          for bar, val_mb, val_kb in zip(bars, values_mb, values_kb):
+              ax1.text(
+                  bar.get_x() + bar.get_width() / 2,
+                  bar.get_height() + max(values_mb) * 0.02,
+                  f"{val_mb:.1f} MB\n({val_kb:,} KB)",
+                  ha="center", va="bottom",
+                  color=palette["text"], fontsize=9, fontweight="bold"
+              )
+
+          # Threshold line
+          thr_mb = thr["threshold_kb"] / 1024
+          ax1.axhline(thr_mb, color=palette["red"], linewidth=2,
+                      linestyle="--", alpha=0.7, zorder=4,
+                      label=f"Threshold: {thr_mb:.0f}MB")
+
+          ax1.set_ylabel("Memory (MB)", color=palette["text"], fontsize=10)
+          ax1.set_ylim(0, max(max(values_mb), thr_mb) * 1.25)
+          ax1.grid(True, alpha=0.1, color=palette["text"], axis="y", zorder=1)
+          ax1.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=9, framealpha=0.85)
+          ax1.set_title("Memory Statistics", color=palette["text"],
+                        fontsize=12, fontweight="bold", pad=12)
+
+          # ── Right: Gauge-style visualization ─────────────────────────────
+          ax2 = axes[1]
+          ax2.set_facecolor(palette["surface"])
+          ax2.set_aspect("equal")
+          ax2.axis("off")
+
+          # Usage percentage
+          usage_pct = min(peak / thr["threshold_kb"] * 100, 110)  # cap at 110%
+          theta_start = np.pi
+          theta_end   = 0
+          theta_range = theta_start - theta_end
+
+          # Background arc
+          theta = np.linspace(theta_start, theta_end, 100)
+          ax2.plot(np.cos(theta), np.sin(theta), color=palette["surface2"],
+                   linewidth=20, solid_capstyle="round", alpha=0.5)
+
+          # Filled arc (usage)
+          fill_end   = theta_start - (usage_pct / 100) * theta_range
+          theta_fill = np.linspace(theta_start, max(fill_end, theta_end), 100)
+          ax2.plot(np.cos(theta_fill), np.sin(theta_fill),
+                   color=accent, linewidth=20, solid_capstyle="round", alpha=0.85)
+
+          # Center text
+          status_text = "PASS" if passed else "FAIL"
+          ax2.text(0, 0.1,
+                   f"{round(peak/1024,1)} MB",
+                   ha="center", va="center",
+                   color=accent, fontsize=24, fontweight="bold")
+          ax2.text(0, -0.25,
+                   f"of {round(thr_mb,0):.0f} MB limit",
+                   ha="center", va="center",
+                   color=palette["text"], fontsize=11)
+          ax2.text(0, -0.5,
+                   f"{usage_pct:.1f}% used",
+                   ha="center", va="center",
+                   color=palette["text"], fontsize=10)
+
+          # Status badge
+          badge_color = palette["green"] if passed else palette["red"]
+          ax2.text(0, -0.78,
+                   f"{'✅' if passed else '❌'} {status_text}",
+                   ha="center", va="center",
+                   color=badge_color, fontsize=16, fontweight="bold")
+
+          ax2.set_xlim(-1.3, 1.3)
+          ax2.set_ylim(-1.0, 1.2)
+          ax2.set_title("Memory Usage Gauge", color=palette["text"],
+                        fontsize=12, fontweight="bold", pad=12)
+
+          # ── Global title ──────────────────────────────────────────────────
+          fig.suptitle(
+              f"🧠 ASH Memory Profile — {data['description']}\n"
+              f"{'✅ PASSED' if passed else '❌ FAILED'}  "
+              f"·  peak={round(peak/1024,1)}MB  "
+              f"·  threshold={round(thr_mb,0):.0f}MB",
+              color=palette["text"],
+              fontsize=13,
+              fontweight="bold",
+              y=1.03
+          )
+
+          plt.tight_layout()
+          plt.savefig("${CHART_PATH}",
+                      dpi=150,
+                      bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 Memory chart saved: ${CHART_PATH}")
+          PYTHON_EOF
+
+      - name: "⚖️ Regression check against baseline"
+        id: regression
+        run: |
+          REPORT_FILE="${BENCHMARK_DIR}/${SCENARIO_NAME}/memory-report.json"
+          BASELINE_FILE="${BASELINE_DIR}/${SCENARIO_NAME}-memory.json"
+
+          if [[ -f "${BASELINE_FILE}" ]]; then
+            python3 << PYTHON_EOF
+          import json
+          import os
+
+          with open("${REPORT_FILE}") as f:
+              current = json.load(f)
+          with open("${BASELINE_FILE}") as f:
+              baseline = json.load(f)
+
+          cur_peak  = current["rss_memory"]["peak_kb"]
+          base_peak = baseline.get("rss_memory", {}).get("peak_kb", cur_peak)
+          threshold_pct = float("${REGRESSION_THRESHOLD}")
+
+          change_pct = ((cur_peak - base_peak) / base_peak * 100) \
+              if base_peak > 0 else 0
+          regression = change_pct > threshold_pct
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"regression_detected={'true' if regression else 'false'}\n")
+              out.write(f"regression_percent={round(change_pct, 2)}\n")
+              out.write(f"baseline_peak_kb={base_peak}\n")
+
+          status = "🚨 REGRESSION" if regression else "✅ OK"
+          print(f"  {status} — current={cur_peak}KB baseline={base_peak}KB "
+                f"change={change_pct:+.1f}%")
+          PYTHON_EOF
+          else
+            echo "  ℹ️ No baseline — skipping regression check"
+            echo "regression_detected=false" >> "$GITHUB_OUTPUT"
+            echo "regression_percent=0" >> "$GITHUB_OUTPUT"
+            echo "baseline_peak_kb=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "📤 Upload artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "memory-${{ matrix.scenario.name }}-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCHMARK_DIR }}/${{ matrix.scenario.name }}/"
+          retention-days: 30
+
+      - name: "❌ Fail on threshold breach"
+        if: |
+          steps.analyze.outputs.passed == 'false' &&
+          matrix.scenario.weight == 'critical'
+        run: |
+          PEAK="${{ steps.analyze.outputs.peak_kb }}"
+          echo "::error title=Memory Threshold Exceeded::"
+          echo "  ${SCENARIO_NAME} peak=${PEAK}KB"
+          echo "  exceeds threshold=${SCENARIO_THRESHOLD_KB}KB"
+          exit 1
+
+      - name: "🚨 Fail on memory regression"
+        if: |
+          steps.regression.outputs.regression_detected == 'true' &&
+          matrix.scenario.weight == 'critical'
+        run: |
+          echo "::error title=Memory Regression Detected::"
+          echo "  ${SCENARIO_NAME} increased by ${{ steps.regression.outputs.regression_percent }}%"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3: Memory report consolidation
+  # ───────────────────────────────────────────────────────────────────────────
+  memory-report:
+    name: "📊 Report · Memory Usage Summary"
+    needs: [setup, bench-memory]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install tools"
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            jq python3 python3-pip 2>/dev/null || true
+          pip3 install --quiet --user matplotlib pandas rich tabulate jinja2
+
+      - name: "📥 Download artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "memory-*-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCHMARK_DIR }}/all"
+          merge-multiple: true
+
+      - name: "📊 Consolidate memory results"
+        id: consolidate
+        run: |
+          mkdir -p "${REPORTS_DIR}"
+
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import os
+          from datetime import datetime, timezone
+
+          collected_dir = "${BENCHMARK_DIR}/all"
+          reports_dir   = "${REPORTS_DIR}"
+
+          all_reports = []
+          for f in glob.glob(f"{collected_dir}/**/memory-report.json", recursive=True):
+              try:
+                  with open(f) as fp:
+                      data = json.load(fp)
+                  all_reports.append(data)
+                  print(f"  ✓ {data.get('scenario', f)}")
+              except Exception as e:
+                  print(f"  ✗ {f}: {e}")
+
+          passed_all  = all(r["threshold"]["passed"] for r in all_reports)
+          total       = len(all_reports)
+          failed      = sum(1 for r in all_reports if not r["threshold"]["passed"])
+          crit_failed = sum(1 for r in all_reports
+                            if not r["threshold"]["passed"]
+                            and r.get("weight") == "critical")
+
+          # Total memory footprint
+          total_peak_kb = sum(r["rss_memory"]["peak_kb"] for r in all_reports)
+
+          consolidated = {
+              "bench_id": "${needs.setup.outputs.bench_id}",
+              "git_sha": "${GITHUB_SHA}",
+              "timestamp": datetime.now(timezone.utc).isoformat(),
+              "system_memory_kb": int("${{ needs.setup.outputs.system_memory_kb || '0' }}"),
+              "summary": {
+                  "overall_pass": passed_all,
+                  "total": total,
+                  "passed": total - failed,
+                  "failed": failed,
+                  "critical_failures": crit_failed,
+                  "total_peak_kb": total_peak_kb,
+                  "total_peak_mb": round(total_peak_kb / 1024, 1),
+              },
+              "scenarios": all_reports,
+          }
+
+          with open(f"{reports_dir}/memory-consolidated.json", "w") as f:
+              json.dump(consolidated, f, indent=2)
+
+          # Generate markdown report
+          status = "✅ PASSED" if passed_all else "❌ FAILED"
+          md = [
+              f"# 🧠 ASH Memory Benchmark Report",
+              f"",
+              f"> **{status}**  &nbsp;·&nbsp; SHA `{consolidated['git_sha'][:8]}`"
+              f"  &nbsp;·&nbsp;  {consolidated['timestamp']}",
+              f"",
+              f"## 📊 Summary",
+              f"",
+              f"| Metric | Value |",
+              f"|--------|-------|",
+              f"| Total Scenarios | `{total}` |",
+              f"| Passed | `{total - failed}` ✅ |",
+              f"| Failed | `{failed}` {'❌' if failed > 0 else '—'} |",
+              f"| Critical Failures | `{crit_failed}` {'🚨' if crit_failed > 0 else '—'} |",
+              f"| Combined Peak Memory | `{round(total_peak_kb/1024,1)} MB` |",
+              f"",
+              f"## 🧠 Memory Details",
+              f"",
+              f"| Scenario | Mean | Peak | Threshold | Status |",
+              f"|----------|------|------|-----------|--------|",
+          ]
+
+          for r in sorted(all_reports, key=lambda x: x["rss_memory"]["peak_kb"], reverse=True):
+              icon  = "✅" if r["threshold"]["passed"] else "❌"
+              mean  = r["rss_memory"]["mean_kb"]
+              peak  = r["rss_memory"]["peak_kb"]
+              thr   = r["threshold"]["threshold_kb"]
+              md.append(
+                  f"| `{r['scenario']}` "
+                  f"| `{round(mean/1024,1)} MB` "
+                  f"| **`{round(peak/1024,1)} MB`** "
+                  f"| `{round(thr/1024,0):.0f} MB` "
+                  f"| {icon} |"
+              )
+
+          md += ["", f"---", f"*Generated by ASH v5.0 Omega Memory Benchmark*"]
+
+          report_md = "\n".join(md)
+          with open(f"{reports_dir}/memory-report.md", "w") as f:
+              f.write(report_md)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "w") as f:
+              f.write(report_md)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"overall_pass={'true' if passed_all else 'false'}\n")
+              out.write(f"failed_count={failed}\n")
+              out.write(f"critical_failures={crit_failed}\n")
+
+          print(f"\n  {status} — {total - failed}/{total} scenarios passed")
+          PYTHON_EOF
+
+      - name: "📈 Combined memory chart"
+        run: |
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          reports = []
+          for f in glob.glob("${BENCHMARK_DIR}/all/**/memory-report.json", recursive=True):
+              try:
+                  with open(f) as fp:
+                      reports.append(json.load(fp))
+              except Exception:
+                  pass
+
+          if not reports:
+              sys.exit(0)
+
+          palette = {
+              "bg": "#1e1e2e", "surface": "#313244", "text": "#cdd6f4",
+              "green": "#a6e3a1", "red": "#f38ba8", "blue": "#89b4fa",
+              "mauve": "#cba6f7", "peach": "#fab387", "teal": "#94e2d5",
+          }
+
+          reports.sort(key=lambda r: r["rss_memory"]["peak_kb"], reverse=True)
+          names    = [r["scenario"].replace("-", "\n") for r in reports]
+          peaks_mb = [r["rss_memory"]["peak_kb"] / 1024 for r in reports]
+          thrs_mb  = [r["threshold"]["threshold_kb"] / 1024 for r in reports]
+          colors   = [palette["green"] if r["threshold"]["passed"]
+                      else palette["red"] for r in reports]
+
+          fig, ax = plt.subplots(figsize=(max(10, len(reports) * 2), 6))
+          fig.patch.set_facecolor(palette["bg"])
+          ax.set_facecolor(palette["surface"])
+          for sp in ax.spines.values():
+              sp.set_edgecolor(palette["text"])
+              sp.set_alpha(0.3)
+          ax.tick_params(colors=palette["text"], labelsize=8)
+
+          x = np.arange(len(reports))
+          width = 0.35
+
+          # Peak memory bars
+          bars_peak = ax.bar(x - width/2, peaks_mb, width,
+                             color=colors, alpha=0.82, zorder=3,
+                             edgecolor=palette["bg"], linewidth=1.2,
+                             label="Peak Memory")
+
+          # Threshold bars (transparent outline)
+          bars_thr = ax.bar(x + width/2, thrs_mb, width,
+                            color=palette["mauve"], alpha=0.2, zorder=3,
+                            edgecolor=palette["mauve"], linewidth=1.5,
+                            label="Threshold")
+
+          # Labels
+          for bar, val_mb in zip(bars_peak, peaks_mb):
+              ax.text(bar.get_x() + bar.get_width()/2,
+                      bar.get_height() + max(peaks_mb) * 0.02,
+                      f"{val_mb:.1f}MB",
+                      ha="center", va="bottom",
+                      color=palette["text"], fontsize=8, fontweight="bold")
+
+          ax.set_xticks(x)
+          ax.set_xticklabels(names, color=palette["text"], fontsize=8)
+          ax.set_ylabel("Memory (MB)", color=palette["text"], fontsize=11)
+          ax.set_ylim(0, max(max(peaks_mb), max(thrs_mb)) * 1.2)
+          ax.grid(True, alpha=0.1, color=palette["text"], axis="y", zorder=1)
+          ax.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                    fontsize=9, framealpha=0.85)
+          ax.set_title(
+              "🧠 ASH Memory Usage — All Scenarios",
+              color=palette["text"], fontsize=13, fontweight="bold", pad=14
+          )
+
+          plt.tight_layout()
+          plt.savefig("${REPORTS_DIR}/memory-combined-chart.png",
+                      dpi=150, bbox_inches="tight", facecolor=palette["bg"])
+          plt.close()
+          print("  📈 Combined chart saved")
+          PYTHON_EOF
+
+      - name: "💬 Post PR comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let content = '';
+            try {
+              content = fs.readFileSync('${{ env.REPORTS_DIR }}/memory-report.md', 'utf8');
+            } catch (e) {
+              content = '> Memory report unavailable.';
+            }
+
+            const overallPass = '${{ steps.consolidate.outputs.overall_pass }}' === 'true';
+
+            const body = [
+              `## 🧠 Memory Usage Benchmark Results`,
+              ``,
+              `${overallPass ? '✅ All memory benchmarks passed' : '❌ Memory thresholds exceeded'}`,
+              ``,
+              `<details><summary>📊 Full Memory Report</summary>`,
+              ``,
+              content,
+              ``,
+              `</details>`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Memory Usage Benchmark Results')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: "💾 Save baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.consolidate.outputs.overall_pass == 'true'
+        run: |
+          mkdir -p "${BASELINE_DIR}"
+          # Save individual scenario results as baseline
+          find "${BENCHMARK_DIR}/all" \
+            -name "memory-report.json" \
+            -exec bash -c '
+              scenario=$(jq -r .scenario "$1")
+              cp "$1" "${BASELINE_DIR}/${scenario}-memory.json"
+              echo "  💾 Saved baseline: ${scenario}"
+            ' _ {} \;
+          echo "  ✅ All baselines saved"
+        env:
+          BASELINE_DIR: ${{ env.BASELINE_DIR }}
+
+      - name: "💾 Cache baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.consolidate.outputs.overall_pass == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-memory-main"
+
+      - name: "📤 Upload final reports"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "memory-report-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.REPORTS_DIR }}/"
+          retention-days: 90
+          compression-level: 9
+
+      - name: "❌ Gate: fail on critical memory failures"
+        if: steps.consolidate.outputs.critical_failures != '0'
+        run: |
+          echo "::error title=Critical Memory Failures::"
+          echo "  ${{ steps.consolidate.outputs.critical_failures }} critical scenario(s) exceeded limits"
+          exit 1

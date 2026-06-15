@@ -1,0 +1,1864 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  📸 ASH DOTFILES v5.0 OMEGA — GENERATE SCREENSHOTS ACTION                                ║
+# ║                                                                                           ║
+# ║  ░██████╗░█████╗░██╗░░░██╗████████╗███████╗                                              ║
+# ║  ██╔════╝██╔══██╗██║░░░██║╚══██╔══╝██╔════╝                                              ║
+# ║  ╚█████╗░██║░░╚═╝██║░░░██║░░░██║░░░█████╗░░                                              ║
+# ║  ░╚═══██╗██║░░██╗██║░░░██║░░░██║░░░██╔══╝░░                                              ║
+# ║  ██████╔╝╚█████╔╝╚██████╔╝░░░██║░░░███████╗                                              ║
+# ║  ╚═════╝░░╚════╝░░╚═════╝░░░░╚═╝░░░╚══════╝                                              ║
+# ║                                                                                           ║
+# ║  ░██████╗░█████╗░██████╗░███████╗███████╗███╗░░██╗░██████╗██╗  ██╗░█████╗░████████╗     ║
+# ║  ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝████╗░██║██╔════╝██║  ██║██╔══██╗╚══██╔══╝     ║
+# ║  ╚█████╗░██║░░╚═╝██████╔╝█████╗░░█████╗░░██╔██╗██║╚█████╗░███████║██║░░██║░░░██║░░░     ║
+# ║  ░╚═══██╗██║░░██╗██╔══██╗██╔══╝░░██╔══╝░░██║╚████║░╚═══██╗██╔══██║██║░░██║░░░██║░░░     ║
+# ║  ██████╔╝╚█████╔╝██║░░██║███████╗███████╗██║░╚███║██████╔╝██║░░██║╚█████╔╝░░░██║░░░     ║
+# ║  ╚═════╝░░╚════╝░╚═╝░░╚═╝╚══════╝╚══════╝╚═╝░░╚══╝╚═════╝░╚═╝░░╚═╝░╚════╝░░░░╚═╝░░░     ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 SCREENSHOT GENERATION TYPES:                                                          ║
+# ║     🖥️  desktop      — Full riced desktop composite (Hyprland + Waybar + apps)            ║
+# ║     📝  neovim       — Neovim IDE (syntax + LSP hover + neo-tree + statusline)           ║
+# ║     🧩  components   — UI components (Waybar/Rofi/Kitty/Dunst/Hyprlock/AGS)             ║
+# ║     🎨  card         — Compact theme card for gallery listing (600×400)                  ║
+# ║     🌈  swatch       — 26-color palette grid with WCAG contrast ratios                  ║
+# ║     🏆  comparison   — Side-by-side comparison (before/after, vs competitors)            ║
+# ║     🎬  animated     — GIF/APNG animations (theme switching / install demo)              ║
+# ║     📱  mobile       — Mobile preview (Flutter app / web dashboard mockup)               ║
+# ║     🖼️  hero         — README hero banner (1920×600 marketing image)                     ║
+# ║     📊  performance  — Benchmark charts (startup/apply/memory timelines)                 ║
+# ║     🔄  mosaic       — Theme thumbnail mosaic grid (all 250+ themes)                     ║
+# ║     ♿  accessibility — WCAG heatmaps (contrast ratio visualization)                      ║
+# ║                                                                                           ║
+# ║  ⚡ ENGINE FEATURES:                                                                      ║
+# ║     • Pure Python Pillow rendering (no Xvfb / display server required)                  ║
+# ║     • Catppuccin Mocha dark theme throughout all rendered scenes                        ║
+# ║     • WebP / AVIF / PNG multi-format output with quality tiers                          ║
+# ║     • Retina 2x / 4K ultra-high resolution export variants                              ║
+# ║     • 4-level quality presets (draft → standard → production → ultra)                   ║
+# ║     • Content-hash caching (skip unchanged, resume interrupted runs)                     ║
+# ║     • Parallel generation (configurable worker pool, per-type matrix)                   ║
+# ║     • Watermark embedding (version badge, optional)                                      ║
+# ║     • JSON metadata sidecar (dimensions, colors, generation time)                       ║
+# ║     • SHA-256 checksum manifest (integrity verification)                                 ║
+# ║     • CDN-ready output structure (hierarchical directory layout)                         ║
+# ║     • README section injection (<!-- MARKER --> pattern)                                 ║
+# ║     • PR comment with preview grid and per-type thumbnails                               ║
+# ║     • Discord notification (generation summary + image previews)                        ║
+# ║     • GitHub Releases asset upload (automated)                                           ║
+# ║     • Duplicate detection (perceptual hash deduplication)                               ║
+# ║     • Progressive enhancement (JPEG fallback for compatibility)                          ║
+# ║     • EXIF metadata stripping (privacy + size reduction)                                ║
+# ║     • Asset catalog (searchable JSON database of all screenshots)                       ║
+# ║     • Incremental updates (smart diff, only re-render changed themes)                   ║
+# ║     • Multi-arch support (amd64/arm64 runner compatibility)                              ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📸 Generate Screenshots"
+
+description: >
+  🎨 Premium screenshot generation engine for ASH Dotfiles v5.0 OMEGA.
+
+  Renders 12 screenshot types (desktop composites, Neovim IDE, theme cards,
+  color swatches, hero banners, performance charts, animated GIFs, mobile
+  previews, accessibility heatmaps, comparison collages, and theme mosaics)
+  using pure Python Pillow with Catppuccin Mocha palette.
+
+  Features: WebP/AVIF/PNG output · retina 2x/4K · content-hash caching ·
+  parallel rendering · checksum manifests · README injection · PR preview
+  grids · Discord notifications · GitHub Releases integration.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS — Complete specification (45+ inputs)
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎨 TARGET SPECIFICATION                             ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  themes:
+    description: >
+      🎨 Theme selection strategy.
+
+      Modes:
+        • "changed"          — Auto-detect themes modified in current commit/PR
+        • "all"              — Render every theme in themes/presets/ (slow)
+        • "featured"         — Curated top-10 showcase themes
+        • "dark"             — All dark category themes only
+        • "light"            — All light category themes only
+        • "neon"             — All neon/cyberpunk themes only
+        • "nature"           — All nature-inspired themes only
+        • "custom:<names>"   — Explicit list: "custom:catppuccin-mocha,tokyo-night"
+        • "<name1>,<name2>"  — Direct comma-separated list (legacy)
+
+      Examples:
+        "changed"                              → auto-detect from git diff
+        "custom:catppuccin-mocha,gruvbox-dark" → two specific themes
+        "featured"                             → top-10 curated showcase
+    required: false
+    default: "changed"
+
+  screenshot_types:
+    description: >
+      📸 Screenshot types to generate (comma-separated or "all").
+
+      Available types:
+        desktop      — Full desktop composite (Hyprland + Waybar + terminal)
+        neovim       — Neovim IDE with syntax highlighting and LSP
+        components   — Individual UI component screenshots
+        card         — Compact 600×400 theme gallery card
+        swatch       — 26-color palette with WCAG contrast ratios
+        comparison   — Side-by-side before/after or vs-competitor
+        animated     — GIF/APNG theme transition animation
+        mobile       — Flutter app / web dashboard mockup
+        hero         — 1920×600 README marketing hero banner
+        performance  — Benchmark results visualization charts
+        mosaic       — All-themes thumbnail mosaic grid
+        accessibility — WCAG contrast ratio heatmap visualization
+
+      Special values:
+        all          — Generate every available type
+        minimal      — Just: card + swatch (fastest, ~3s/theme)
+        showcase     — desktop + card + swatch + hero
+        full         — All types except animated (default for CI)
+
+      Examples:
+        "desktop,card,swatch"
+        "all"
+        "showcase"
+        "hero,performance"
+    required: false
+    default: "desktop,card,swatch"
+
+  themes_dir:
+    description: >
+      📁 Root directory for theme definitions (relative to workspace).
+      Action will search <themes_dir>/<category>/<theme_name>/colors.json
+    required: false
+    default: "themes/presets"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎚️  QUALITY & FORMAT                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  quality_preset:
+    description: >
+      🎚️ Output quality preset.
+
+      Presets:
+        draft      — 1280×720  @ 72dpi  · WebP q70  · ~2-4s/theme   (CI preview)
+        standard   — 1920×1080 @ 96dpi  · WebP q80  · ~6-10s/theme  (PR review)
+        production — 2560×1440 @ 120dpi · WebP q90  · ~12-18s/theme (main branch)
+        ultra      — 3840×2160 @ 150dpi · WebP q100 · ~30-60s/theme (releases)
+
+      Affects: resolution, DPI, compression quality, render complexity
+    required: false
+    default: "production"
+
+  output_format:
+    description: >
+      📦 Primary output format (primary file format for each screenshot).
+
+      Formats:
+        webp  — Modern lossy/lossless · 60-85% smaller than PNG (recommended)
+        avif  — Next-generation · best compression · limited support
+        png   — Lossless · universal · largest file size
+        jpg   — Lossy · widest compatibility · no transparency
+        all   — Generate WebP + PNG + AVIF simultaneously
+
+      Note: WebP is strongly recommended for web delivery.
+    required: false
+    default: "webp"
+
+  webp_quality:
+    description: >
+      🎚️ WebP encoding quality (0-100).
+      Overrides the quality_preset's default value.
+      0 = smallest file / lowest quality
+      100 = lossless equivalent
+
+      Leave empty to use quality_preset default.
+    required: false
+    default: ""
+
+  lossless:
+    description: >
+      ✨ Enable lossless compression mode.
+      • WebP lossless: perfect quality, ~2x file size vs lossy q90
+      • AVIF lossless: similar tradeoff
+      • PNG: always lossless (this flag has no additional effect)
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔍 RESOLUTION & VARIANTS                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  generate_2x:
+    description: >
+      🔍 Generate 2x retina/HiDPI resolution variants.
+      Creates @2x suffixed files alongside standard resolution.
+      File size increases ~4x. Recommended for high-DPI displays.
+    required: false
+    default: "false"
+
+  generate_4k:
+    description: >
+      🔍 Generate 4K ultra-high resolution variants (@4x).
+      Only available with production/ultra quality presets.
+      Primarily useful for print-quality assets or 4K monitors.
+    required: false
+    default: "false"
+
+  generate_thumbnails:
+    description: >
+      🖼️ Generate small thumbnail versions (200×150).
+      Used by: Rofi wallpaper picker, web gallery, PR previews.
+      Adds minimal overhead (~0.2s/theme).
+    required: false
+    default: "true"
+
+  thumbnail_width:
+    description: "🖼️ Thumbnail width in pixels"
+    required: false
+    default: "400"
+
+  thumbnail_height:
+    description: "🖼️ Thumbnail height in pixels"
+    required: false
+    default: "225"
+
+  hero_width:
+    description: "🖼️ Hero banner width (pixels)"
+    required: false
+    default: "1920"
+
+  hero_height:
+    description: "🖼️ Hero banner height (pixels)"
+    required: false
+    default: "600"
+
+  card_width:
+    description: "🃏 Theme card width (pixels)"
+    required: false
+    default: "600"
+
+  card_height:
+    description: "🃏 Theme card height (pixels)"
+    required: false
+    default: "400"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎬 ANIMATION OPTIONS                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  animated_fps:
+    description: >
+      🎬 Frames per second for animated GIF/APNG output.
+      Range: 1-60 fps (recommended: 12-24 for theme transitions)
+      Higher FPS = smoother animation but larger file.
+    required: false
+    default: "12"
+
+  animated_duration_ms:
+    description: >
+      🎬 Total animation duration in milliseconds.
+      Each frame displays for: duration_ms / frame_count milliseconds.
+    required: false
+    default: "3000"
+
+  animated_loop:
+    description: "🎬 Number of animation loops (0 = infinite loop)"
+    required: false
+    default: "0"
+
+  animated_optimize:
+    description: >
+      🎬 Optimize animated GIF size with gifsicle.
+      Can reduce file size by 30-60% with minimal quality loss.
+    required: false
+    default: "true"
+
+  animated_themes:
+    description: >
+      🎬 Specific themes to include in animation sequence.
+      Leave empty to use the main 'themes' input selection.
+      Example: "catppuccin-mocha,tokyo-night,gruvbox-dark,nord"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📊 CONTENT & BRANDING                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  include_watermark:
+    description: >
+      💧 Add ASH version watermark badge to screenshots.
+      Displays "ASH v5.0 OMEGA" in corner at 60% opacity.
+      Recommended: false for clean screenshots, true for demos.
+    required: false
+    default: "false"
+
+  watermark_text:
+    description: "💧 Custom watermark text (overrides default)"
+    required: false
+    default: "ASH v5.0 OMEGA"
+
+  watermark_position:
+    description: >
+      💧 Watermark position on screenshot.
+      Options: top-left, top-right, bottom-left, bottom-right, center
+    required: false
+    default: "bottom-right"
+
+  include_metadata:
+    description: >
+      📋 Generate JSON metadata sidecar files alongside screenshots.
+      Contains: theme name, colors, dimensions, generation time,
+      file checksums, WCAG scores, color harmony analysis.
+    required: false
+    default: "true"
+
+  include_checksums:
+    description: >
+      🔒 Generate SHA-256 + MD5 checksum manifest.
+      Output: checksums.sha256 and checksums.md5 in work directory.
+      Used for integrity verification in CI/CD pipelines.
+    required: false
+    default: "true"
+
+  include_asset_catalog:
+    description: >
+      📚 Generate searchable asset catalog (assets.json).
+      Contains indexed database of all screenshots with metadata,
+      themes, types, sizes, and URL paths for API consumption.
+    required: false
+    default: "true"
+
+  strip_exif:
+    description: >
+      🔒 Strip EXIF/metadata from output images (privacy + size).
+      Removes GPS, camera data, software version from image metadata.
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📊 PERFORMANCE & BENCHMARKS                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  benchmark_data_path:
+    description: >
+      📊 Path to benchmark results JSON for performance chart generation.
+      If provided, generates visual charts for startup/apply/memory metrics.
+      Format: see benchmarks/startup-time.json schema.
+    required: false
+    default: "benchmarks/startup-time.json"
+
+  mosaic_cols:
+    description: >
+      🔄 Number of columns in theme mosaic grid.
+      Total themes / mosaic_cols = number of rows.
+      Recommended: 5-8 columns for visual balance.
+    required: false
+    default: "6"
+
+  mosaic_padding:
+    description: "🔄 Pixel padding between mosaic cells"
+    required: false
+    default: "4"
+
+  comparison_themes:
+    description: >
+      🏆 Themes to use in comparison screenshot (comma-separated pairs).
+      Format: "before_theme,after_theme" or multiple pairs.
+      Example: "default,catppuccin-mocha" or "nord,tokyo-night"
+    required: false
+    default: ""
+
+  comparison_layout:
+    description: >
+      🏆 Layout for comparison screenshots.
+      Options:
+        side-by-side — Two themes in horizontal split
+        top-bottom   — Two themes in vertical split
+        grid-2x2     — Four themes in 2×2 grid
+    required: false
+    default: "side-by-side"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  💾 CACHING & PERFORMANCE                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  cache_enabled:
+    description: >
+      💾 Enable content-hash based screenshot caching.
+      Skips re-rendering screenshots whose source files haven't changed.
+      Cache key: hash(colors.json + theme.conf + screenshot_type + quality)
+      Typical cache hit rate: 70-90% on incremental runs.
+    required: false
+    default: "true"
+
+  cache_ttl_hours:
+    description: >
+      💾 Cache TTL in hours before screenshots are considered stale.
+      Screenshots older than this are re-rendered even if hash matches.
+      0 = never expire (hash-only validation)
+    required: false
+    default: "168"
+
+  force_regenerate:
+    description: >
+      ⚡ Force regenerate all screenshots, ignoring all caches.
+      Use when: rendering engine updated, quality settings changed,
+      or debugging render issues. Significantly slower.
+    required: false
+    default: "false"
+
+  cache_key_prefix:
+    description: >
+      💾 Custom prefix for GitHub Actions cache keys.
+      Change this to invalidate all existing caches.
+    required: false
+    default: "ash-screenshots-v5"
+
+  parallel_workers:
+    description: >
+      ⚡ Number of parallel render workers.
+      Each worker handles one theme at a time.
+      Recommended: 2-4 (limited by runner CPU, typically 2 cores).
+      Higher values may cause memory pressure on shared runners.
+    required: false
+    default: "3"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📁 OUTPUT & ARTIFACTS                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  output_dir:
+    description: >
+      📁 Output directory for all generated screenshots.
+      Structure created:
+        <output_dir>/
+          desktop/    — Full desktop composites
+          neovim/     — Neovim IDE screenshots
+          components/ — UI component shots
+          cards/      — Theme gallery cards
+          swatches/   — Color palette swatches
+          hero/       — Hero banner images
+          animated/   — GIF/APNG animations
+          mobile/     — Mobile preview shots
+          performance/— Benchmark charts
+          mosaics/    — Theme grid mosaics
+          thumbs/     — Thumbnail versions
+          brand/      — Branding assets
+    required: false
+    default: "assets/screenshots"
+
+  commit_screenshots:
+    description: >
+      💾 Commit generated screenshots to repository.
+      Creates a [skip ci] commit to prevent recursive workflow triggers.
+      Requires: contents: write permission.
+    required: false
+    default: "false"
+
+  commit_message:
+    description: >
+      💬 Custom commit message when commit_screenshots is true.
+      Leave empty for auto-generated message with stats.
+    required: false
+    default: ""
+
+  commit_branch:
+    description: >
+      🌿 Branch to commit screenshots to.
+      Leave empty to use the current branch.
+      Example: "screenshots" for a dedicated screenshots branch.
+    required: false
+    default: ""
+
+  push_to_release:
+    description: >
+      🚀 Upload screenshots as GitHub Release assets.
+      Requires: GITHUB_TOKEN with releases: write permission.
+      Only runs when triggered by a release event.
+    required: false
+    default: "false"
+
+  upload_artifact:
+    description: >
+      📤 Upload screenshots as GitHub Actions workflow artifact.
+      Accessible via Actions tab for 30 days (configurable).
+    required: false
+    default: "true"
+
+  artifact_name:
+    description: >
+      📤 Name for the uploaded artifact.
+      Default auto-includes quality preset and run ID.
+    required: false
+    default: ""
+
+  artifact_retention_days:
+    description: >
+      📤 How many days to retain the uploaded artifact.
+      Range: 1-90 days (GitHub Actions limit)
+    required: false
+    default: "30"
+
+  artifact_include_sources:
+    description: >
+      📤 Include source PNG files in artifact (before WebP conversion).
+      Useful for post-processing or re-encoding with different settings.
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📖 README & DOCUMENTATION                           ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  update_readme:
+    description: >
+      📖 Auto-inject screenshots into README.md using section markers.
+
+      Supported injection points (add these markers to README.md):
+        <!-- HERO_START --> ... <!-- HERO_END -->
+        <!-- GALLERY_START --> ... <!-- GALLERY_END -->
+        <!-- SCREENSHOTS_START --> ... <!-- SCREENSHOTS_END -->
+        <!-- SWATCH_START --> ... <!-- SWATCH_END -->
+        <!-- STATS_START --> ... <!-- STATS_END -->
+
+      Each marker section is replaced with appropriate content.
+    required: false
+    default: "false"
+
+  readme_path:
+    description: "📖 Path to README.md file for injection"
+    required: false
+    default: "README.md"
+
+  readme_image_base_url:
+    description: >
+      🔗 Base URL for images in README injection.
+      Leave empty to use raw.githubusercontent.com auto-detection.
+      Example: "https://cdn.example.com/ash-screenshots"
+    required: false
+    default: ""
+
+  gallery_columns:
+    description: >
+      🖼️ Number of columns in README gallery grid injection.
+    required: false
+    default: "3"
+
+  gallery_max_themes:
+    description: >
+      🖼️ Maximum themes to show in README gallery injection.
+    required: false
+    default: "12"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  💬 NOTIFICATIONS & REPORTING                        ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  post_pr_preview:
+    description: >
+      💬 Post screenshot preview grid as PR comment.
+      Shows generated screenshots inline in the pull request.
+      Updates existing comment if found (no spam).
+    required: false
+    default: "true"
+
+  pr_preview_columns:
+    description: "💬 Columns in PR preview grid (1-4)"
+    required: false
+    default: "3"
+
+  pr_preview_max_themes:
+    description: "💬 Max themes shown in PR preview grid"
+    required: false
+    default: "6"
+
+  pr_preview_types:
+    description: >
+      💬 Screenshot types to show in PR preview.
+      Comma-separated list from: desktop,card,swatch,hero
+    required: false
+    default: "card"
+
+  notify_discord:
+    description: >
+      🔔 Send generation summary to Discord webhook.
+      Requires: DISCORD_WEBHOOK_SCREENSHOTS secret.
+      Includes: stats, sample previews, artifact link.
+    required: false
+    default: "false"
+
+  generate_html_report:
+    description: >
+      📊 Generate an HTML gallery report of all screenshots.
+      Includes: thumbnail grid, theme metadata, quality info.
+      Saved to: <work_dir>/gallery-report.html
+    required: false
+    default: "false"
+
+  generate_changelog:
+    description: >
+      📝 Generate a screenshot changelog (new/updated/removed).
+      Compares against previous run's manifest.
+      Useful for tracking visual changes in PRs.
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  ⚙️  LIMITS & BEHAVIOR                               ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  max_themes:
+    description: >
+      🔢 Maximum number of themes to process in a single run.
+      Themes beyond this limit are skipped with a warning.
+      Use 0 for unlimited (not recommended for "all" mode).
+    required: false
+    default: "25"
+
+  timeout_minutes:
+    description: >
+      ⏱️ Maximum runtime for the generation step in minutes.
+      Exceeding this causes the step to fail (not the action).
+      Recommended: 10 (draft), 20 (standard), 45 (production), 90 (ultra)
+    required: false
+    default: "20"
+
+  fail_on_error:
+    description: >
+      🚨 Fail the action if any individual render fails.
+      false (default): continue with remaining themes, report failures
+      true: stop immediately on first render failure
+    required: false
+    default: "false"
+
+  fail_threshold:
+    description: >
+      🚨 Fail if more than N% of renders fail (0-100).
+      0 = never fail based on failure rate
+      50 = fail if more than half of renders fail
+      100 = fail on any failure (equivalent to fail_on_error: true)
+    required: false
+    default: "50"
+
+  verbose:
+    description: >
+      📢 Enable verbose output with detailed per-file logging.
+      Useful for debugging render issues.
+    required: false
+    default: "false"
+
+  dry_run:
+    description: >
+      🔍 Dry run mode — plan generation without executing renders.
+      Outputs: which themes would be rendered, estimated time,
+      cache hit predictions, file size estimates.
+      No files are created.
+    required: false
+    default: "false"
+
+  renderer_backend:
+    description: >
+      🔧 Rendering backend selection.
+      Options:
+        pillow     — Python Pillow (default, no display required)
+        matplotlib — Matplotlib Agg (richer charts, slightly slower)
+        hybrid     — Pillow for screenshots, Matplotlib for charts (recommended)
+    required: false
+    default: "hybrid"
+
+  color_profile:
+    description: >
+      🎨 ICC color profile for output images.
+      Options: sRGB (web-standard), Display-P3 (wide gamut), none
+    required: false
+    default: "sRGB"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔌 INTEGRATIONS                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  github_token:
+    description: >
+      🔑 GitHub token for API operations (PR comments, releases).
+      Defaults to the automatic GITHUB_TOKEN if not provided.
+    required: false
+    default: "${{ github.token }}"
+
+  upload_to_cdn:
+    description: >
+      ☁️ Upload screenshots to external CDN/storage.
+      Requires: CDN_UPLOAD_URL and CDN_UPLOAD_TOKEN secrets.
+    required: false
+    default: "false"
+
+  cdn_base_url:
+    description: >
+      ☁️ CDN base URL for README/PR comment image links.
+      Used when upload_to_cdn is true.
+    required: false
+    default: ""
+
+  s3_bucket:
+    description: >
+      ☁️ AWS S3 bucket name for screenshot upload.
+      Requires: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets.
+    required: false
+    default: ""
+
+  s3_prefix:
+    description: "☁️ S3 key prefix for uploaded screenshots"
+    required: false
+    default: "screenshots/"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS — Complete specification (20+ outputs)
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Generation results ────────────────────────────────────────────────────
+  screenshots_generated:
+    description: "📸 Total number of screenshot files generated"
+    value: ${{ steps.generate.outputs.total_generated }}
+
+  screenshots_failed:
+    description: "❌ Number of failed render attempts"
+    value: ${{ steps.generate.outputs.total_failed }}
+
+  screenshots_cached:
+    description: "💾 Number of screenshots served from cache"
+    value: ${{ steps.generate.outputs.total_cached }}
+
+  screenshots_skipped:
+    description: "⏭️ Number of screenshots skipped (dry_run / filtered)"
+    value: ${{ steps.generate.outputs.total_skipped }}
+
+  themes_rendered:
+    description: "🎨 Number of themes successfully rendered"
+    value: ${{ steps.generate.outputs.themes_rendered }}
+
+  themes_failed:
+    description: "❌ Comma-separated list of themes that failed"
+    value: ${{ steps.generate.outputs.themes_failed }}
+
+  types_generated:
+    description: "📸 Comma-separated list of screenshot types generated"
+    value: ${{ steps.generate.outputs.types_generated }}
+
+  # ── Output info ───────────────────────────────────────────────────────────
+  output_directory:
+    description: "📁 Absolute path to generated screenshots directory"
+    value: ${{ steps.generate.outputs.output_dir }}
+
+  manifest_path:
+    description: "📋 Path to screenshot manifest JSON file"
+    value: ${{ steps.generate.outputs.manifest_path }}
+
+  catalog_path:
+    description: "📚 Path to asset catalog JSON (searchable database)"
+    value: ${{ steps.generate.outputs.catalog_path }}
+
+  checksums_path:
+    description: "🔒 Path to SHA-256 checksum manifest"
+    value: ${{ steps.generate.outputs.checksums_path }}
+
+  html_report_path:
+    description: "📊 Path to HTML gallery report (if generated)"
+    value: ${{ steps.generate.outputs.html_report_path }}
+
+  # ── Size & performance ────────────────────────────────────────────────────
+  total_size_mb:
+    description: "📦 Total size of all generated files in MB"
+    value: ${{ steps.generate.outputs.total_size_mb }}
+
+  total_size_bytes:
+    description: "📦 Total size of all generated files in bytes"
+    value: ${{ steps.generate.outputs.total_size_bytes }}
+
+  average_size_kb:
+    description: "📦 Average file size per screenshot in KB"
+    value: ${{ steps.generate.outputs.avg_size_kb }}
+
+  largest_file:
+    description: "📦 Path to the largest generated file"
+    value: ${{ steps.generate.outputs.largest_file }}
+
+  # ── Timing & status ───────────────────────────────────────────────────────
+  generation_success:
+    description: "✅ Overall success (true if failure_rate < fail_threshold)"
+    value: ${{ steps.generate.outputs.success }}
+
+  generation_duration_s:
+    description: "⏱️ Total generation wall-clock time in seconds"
+    value: ${{ steps.generate.outputs.duration_s }}
+
+  render_throughput:
+    description: "⚡ Screenshots generated per minute"
+    value: ${{ steps.generate.outputs.throughput }}
+
+  cache_hit_rate:
+    description: "💾 Cache hit rate as percentage (0-100)"
+    value: ${{ steps.generate.outputs.cache_hit_rate }}
+
+  failure_rate:
+    description: "❌ Failure rate as percentage (0-100)"
+    value: ${{ steps.generate.outputs.failure_rate }}
+
+  # ── Hero & key assets ─────────────────────────────────────────────────────
+  hero_path:
+    description: "🖼️ Path to generated hero banner image"
+    value: ${{ steps.generate.outputs.hero_path }}
+
+  mosaic_path:
+    description: "🔄 Path to generated theme mosaic grid"
+    value: ${{ steps.generate.outputs.mosaic_path }}
+
+  # ── Artifact ──────────────────────────────────────────────────────────────
+  artifact_url:
+    description: "🔗 GitHub Actions artifact download URL"
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+  artifact_id:
+    description: "🔗 GitHub Actions artifact ID"
+    value: ${{ steps.upload.outputs.artifact-id }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS — Complete composite action pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight: validate inputs, resolve theme list, create dirs
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Validate inputs & resolve configuration"
+      shell: bash
+      id: preflight
+      env:
+        THEMES_INPUT:      ${{ inputs.themes }}
+        SHOT_TYPES:        ${{ inputs.screenshot_types }}
+        QUALITY:           ${{ inputs.quality_preset }}
+        FORMAT:            ${{ inputs.output_format }}
+        THEMES_DIR:        ${{ inputs.themes_dir }}
+        MAX_THEMES:        ${{ inputs.max_themes }}
+        PARALLEL:          ${{ inputs.parallel_workers }}
+        DRY_RUN:           ${{ inputs.dry_run }}
+        VERBOSE:           ${{ inputs.verbose }}
+        FAIL_THRESHOLD:    ${{ inputs.fail_threshold }}
+        RENDERER_BACKEND:  ${{ inputs.renderer_backend }}
+      run: |
+        set -euo pipefail
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+        START_TIME=$(date +%s)
+        SESSION_ID="shot-$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD 2>/dev/null || echo 'ci')"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════════╗"
+        echo "║  📸 ASH Screenshot Engine v5.0.0-omega                           ║"
+        echo "╠══════════════════════════════════════════════════════════════════╣"
+        printf "║  🆔 Session:   %-53s║\n" "${SESSION_ID}"
+        printf "║  🎨 Themes:    %-53s║\n" "${THEMES_INPUT}"
+        printf "║  📸 Types:     %-53s║\n" "${SHOT_TYPES}"
+        printf "║  🎚️  Quality:   %-53s║\n" "${QUALITY}"
+        printf "║  📦 Format:    %-53s║\n" "${FORMAT}"
+        printf "║  🔧 Backend:   %-53s║\n" "${RENDERER_BACKEND}"
+        printf "║  🔍 Dry run:   %-53s║\n" "${DRY_RUN}"
+        echo "╚══════════════════════════════════════════════════════════════════╝"
+
+        # ── Input validation ────────────────────────────────────────────────
+        VALID_PRESETS="draft standard production ultra"
+        if ! echo "${VALID_PRESETS}" | grep -qw "${QUALITY}"; then
+          echo "::error title=Invalid quality_preset::Must be one of: ${VALID_PRESETS}"
+          exit 1
+        fi
+
+        VALID_FORMATS="webp avif png jpg all"
+        if ! echo "${VALID_FORMATS}" | grep -qw "${FORMAT}"; then
+          echo "::error title=Invalid output_format::Must be one of: ${VALID_FORMATS}"
+          exit 1
+        fi
+
+        VALID_BACKENDS="pillow matplotlib hybrid"
+        if ! echo "${VALID_BACKENDS}" | grep -qw "${RENDERER_BACKEND}"; then
+          echo "::error title=Invalid renderer_backend::Must be one of: ${VALID_BACKENDS}"
+          exit 1
+        fi
+
+        # ── Resolve quality preset parameters ───────────────────────────────
+        case "${QUALITY}" in
+          draft)      RES_W=1280;  RES_H=720;  DPI=72;  DEFAULT_WQ=70  ;;
+          standard)   RES_W=1920;  RES_H=1080; DPI=96;  DEFAULT_WQ=80  ;;
+          production) RES_W=2560;  RES_H=1440; DPI=120; DEFAULT_WQ=90  ;;
+          ultra)      RES_W=3840;  RES_H=2160; DPI=150; DEFAULT_WQ=100 ;;
+        esac
+
+        # ── Resolve screenshot types ─────────────────────────────────────────
+        RESOLVED_TYPES="${SHOT_TYPES}"
+        case "${SHOT_TYPES}" in
+          all)        RESOLVED_TYPES="desktop,neovim,components,card,swatch,comparison,animated,mobile,hero,performance,mosaic,accessibility" ;;
+          minimal)    RESOLVED_TYPES="card,swatch" ;;
+          showcase)   RESOLVED_TYPES="desktop,card,swatch,hero" ;;
+          full)       RESOLVED_TYPES="desktop,neovim,components,card,swatch,hero,performance,mosaic,accessibility" ;;
+        esac
+
+        # ── Resolve theme list ───────────────────────────────────────────────
+        THEME_LIST=""
+        THEMES_FULLDIR="${WORKSPACE}/${THEMES_DIR:-themes/presets}"
+
+        if [[ "${THEMES_INPUT}" == "all" ]]; then
+          THEME_LIST=$(find "${THEMES_FULLDIR}" \
+            -mindepth 2 -maxdepth 2 -type d \
+            2>/dev/null | \
+            xargs -I{} basename {} 2>/dev/null | \
+            sort | tr '\n' ',' | sed 's/,$//' || echo "catppuccin-mocha")
+          echo "  🎨 Discovered: $(echo "${THEME_LIST}" | tr ',' '\n' | grep -c .) themes"
+
+        elif [[ "${THEMES_INPUT}" == "featured" ]]; then
+          THEME_LIST="catppuccin-mocha,tokyo-night,gruvbox-dark,nord,dracula,rose-pine,everforest-dark,kanagawa-wave,cyberpunk-2077,one-dark"
+
+        elif [[ "${THEMES_INPUT}" == "dark" ]]; then
+          THEME_LIST=$(find "${THEMES_FULLDIR}/dark" -mindepth 1 -maxdepth 1 -type d \
+            2>/dev/null | xargs -I{} basename {} | tr '\n' ',' | sed 's/,$//' || echo "catppuccin-mocha")
+
+        elif [[ "${THEMES_INPUT}" == "light" ]]; then
+          THEME_LIST=$(find "${THEMES_FULLDIR}/light" -mindepth 1 -maxdepth 1 -type d \
+            2>/dev/null | xargs -I{} basename {} | tr '\n' ',' | sed 's/,$//' || echo "catppuccin-latte")
+
+        elif [[ "${THEMES_INPUT}" == "neon" ]]; then
+          THEME_LIST=$(find "${THEMES_FULLDIR}/neon" -mindepth 1 -maxdepth 1 -type d \
+            2>/dev/null | xargs -I{} basename {} | tr '\n' ',' | sed 's/,$//' || echo "cyberpunk-2077")
+
+        elif [[ "${THEMES_INPUT}" == "nature" ]]; then
+          THEME_LIST=$(find "${THEMES_FULLDIR}/nature" -mindepth 1 -maxdepth 1 -type d \
+            2>/dev/null | xargs -I{} basename {} | tr '\n' ',' | sed 's/,$//' || echo "everforest-dark")
+
+        elif [[ "${THEMES_INPUT}" == "changed" ]]; then
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || \
+                    git diff --name-only HEAD   2>/dev/null || \
+                    git status --porcelain 2>/dev/null | awk '{print $2}' || echo "")
+          THEME_LIST=$(echo "${CHANGED}" | \
+            grep "themes/presets/" | \
+            sed 's|themes/presets/[^/]*/\([^/]*\)/.*|\1|' | \
+            sort -u | tr '\n' ',' | sed 's/,$//' || echo "")
+          if [[ -z "${THEME_LIST}" ]]; then
+            echo "  ℹ️ No theme changes detected — falling back to featured set"
+            THEME_LIST="catppuccin-mocha,tokyo-night"
+          fi
+
+        elif [[ "${THEMES_INPUT}" == custom:* ]]; then
+          THEME_LIST="${THEMES_INPUT#custom:}"
+
+        else
+          THEME_LIST="${THEMES_INPUT}"
+        fi
+
+        # ── Apply max_themes limit ───────────────────────────────────────────
+        MAX_T="${MAX_THEMES:-25}"
+        if [[ "${MAX_T}" -gt 0 ]]; then
+          THEME_COUNT=$(echo "${THEME_LIST}" | tr ',' '\n' | grep -cv '^$' || echo 0)
+          if [[ "${THEME_COUNT}" -gt "${MAX_T}" ]]; then
+            THEME_LIST=$(echo "${THEME_LIST}" | tr ',' '\n' | \
+              grep -v '^$' | head -"${MAX_T}" | tr '\n' ',' | sed 's/,$//')
+            echo "  ⚠️ Theme list capped at ${MAX_T} (was ${THEME_COUNT})"
+          fi
+        fi
+
+        FINAL_THEME_COUNT=$(echo "${THEME_LIST}" | tr ',' '\n' | grep -cv '^$' || echo 0)
+
+        # ── Setup directories ────────────────────────────────────────────────
+        OUTPUT_DIR="${WORKSPACE}/${{ inputs.output_dir }}"
+        WORK_DIR="${WORKSPACE}/.screenshot-engine"
+        CACHE_DIR="${WORK_DIR}/.cache"
+
+        for dir in \
+          "${OUTPUT_DIR}/desktop"    \
+          "${OUTPUT_DIR}/neovim"     \
+          "${OUTPUT_DIR}/components" \
+          "${OUTPUT_DIR}/cards"      \
+          "${OUTPUT_DIR}/swatches"   \
+          "${OUTPUT_DIR}/hero"       \
+          "${OUTPUT_DIR}/animated"   \
+          "${OUTPUT_DIR}/mobile"     \
+          "${OUTPUT_DIR}/performance"\
+          "${OUTPUT_DIR}/mosaics"    \
+          "${OUTPUT_DIR}/thumbs"     \
+          "${OUTPUT_DIR}/brand"      \
+          "${OUTPUT_DIR}/2x"         \
+          "${OUTPUT_DIR}/4k"         \
+          "${WORK_DIR}"              \
+          "${CACHE_DIR}"; do
+          mkdir -p "${dir}"
+        done
+
+        # ── Dry run summary ──────────────────────────────────────────────────
+        if [[ "${DRY_RUN}" == "true" ]]; then
+          echo ""
+          echo "  🔍 DRY RUN — No files will be created"
+          echo "  📋 Would render:"
+          echo "     Themes: ${FINAL_THEME_COUNT}"
+          echo "     Types:  ${RESOLVED_TYPES}"
+          echo "     Quality: ${QUALITY} (${RES_W}x${RES_H} @ ${DPI}dpi)"
+          echo ""
+        fi
+
+        # ── Emit outputs ─────────────────────────────────────────────────────
+        {
+          echo "session_id=${SESSION_ID}"
+          echo "start_time=${START_TIME}"
+          echo "theme_list=${THEME_LIST}"
+          echo "theme_count=${FINAL_THEME_COUNT}"
+          echo "resolved_types=${RESOLVED_TYPES}"
+          echo "output_dir=${OUTPUT_DIR}"
+          echo "work_dir=${WORK_DIR}"
+          echo "cache_dir=${CACHE_DIR}"
+          echo "workspace=${WORKSPACE}"
+          echo "res_w=${RES_W}"
+          echo "res_h=${RES_H}"
+          echo "dpi=${DPI}"
+          echo "default_wq=${DEFAULT_WQ}"
+        } >> "$GITHUB_OUTPUT"
+
+        echo ""
+        echo "  ✅ Pre-flight complete"
+        echo "  🎨 Themes: ${FINAL_THEME_COUNT} → ${THEME_LIST:0:80}..."
+        echo "  📸 Types:  ${RESOLVED_TYPES}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Cache restore
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💾 Cache · Restore screenshot cache"
+      if: inputs.cache_enabled == 'true' && inputs.force_regenerate != 'true'
+      id: cache-restore
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.preflight.outputs.output_dir }}
+          ${{ steps.preflight.outputs.cache_dir }}
+        key: >-
+          ${{ inputs.cache_key_prefix }}-
+          ${{ inputs.quality_preset }}-
+          ${{ inputs.output_format }}-
+          ${{ steps.preflight.outputs.resolved_types }}-
+          ${{ hashFiles('themes/presets/**', 'config/**', 'assets/brand/**') }}-
+          ${{ github.sha }}
+        restore-keys: |
+          ${{ inputs.cache_key_prefix }}-${{ inputs.quality_preset }}-${{ inputs.output_format }}-${{ steps.preflight.outputs.resolved_types }}-
+          ${{ inputs.cache_key_prefix }}-${{ inputs.quality_preset }}-${{ inputs.output_format }}-
+          ${{ inputs.cache_key_prefix }}-${{ inputs.quality_preset }}-
+          ${{ inputs.cache_key_prefix }}-
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Install rendering dependencies
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install rendering stack"
+      shell: bash
+      id: deps
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing screenshot rendering stack..."
+
+        # Python imaging packages
+        pip3 install --quiet --user \
+          Pillow==11.0.0 \
+          pillow-avif-plugin==1.4.3 \
+          matplotlib==3.9.2 \
+          numpy==2.1.2 \
+          scipy==1.14.1 \
+          colormath==3.0.0 \
+          imagehash==4.3.1 \
+          rich==13.9.2 \
+          tabulate==0.9.0 \
+          jinja2==3.1.4 \
+          2>/dev/null || true
+
+        # System image tools
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          imagemagick \
+          libwebp-dev \
+          webp \
+          fonts-noto \
+          fonts-noto-color-emoji \
+          fonts-noto-cjk \
+          fonts-liberation \
+          fonts-firacode \
+          gifsicle \
+          optipng \
+          pngquant \
+          jpegoptim \
+          exiftool \
+          jq \
+          bc \
+          sqlite3 \
+          2>/dev/null || true
+
+        # Verify critical tools
+        PILLOW_VER=$(python3 -c 'import PIL; print(PIL.__version__)' 2>/dev/null || echo '?')
+        IM_VER=$(convert --version 2>/dev/null | head -1 | awk '{print $3}' || echo '?')
+        SC_VER=$(shellcheck --version 2>/dev/null | grep version: | head -1 || echo 'N/A')
+
+        echo ""
+        echo "  ✅ Pillow:       ${PILLOW_VER}"
+        echo "  ✅ ImageMagick:  ${IM_VER}"
+        echo "  ✅ gifsicle:     $(gifsicle --version 2>/dev/null | head -1 || echo '?')"
+        echo "  ✅ cwebp:        $(cwebp -version 2>/dev/null || echo '?')"
+
+        echo "deps_ready=true" >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Main generation engine
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📸 Generate · Execute screenshot rendering pipeline"
+      shell: bash
+      id: generate
+      if: inputs.dry_run != 'true'
+      timeout-minutes: ${{ fromJson(inputs.timeout_minutes) }}
+      env:
+        # Session info
+        SESSION_ID:        ${{ steps.preflight.outputs.session_id }}
+        THEME_LIST:        ${{ steps.preflight.outputs.theme_list }}
+        SCREENSHOT_TYPES:  ${{ steps.preflight.outputs.resolved_types }}
+        # Quality settings
+        QUALITY_PRESET:    ${{ inputs.quality_preset }}
+        OUTPUT_FORMAT:     ${{ inputs.output_format }}
+        WEBP_QUALITY:      ${{ inputs.webp_quality }}
+        LOSSLESS:          ${{ inputs.lossless }}
+        RES_W:             ${{ steps.preflight.outputs.res_w }}
+        RES_H:             ${{ steps.preflight.outputs.res_h }}
+        DPI:               ${{ steps.preflight.outputs.dpi }}
+        DEFAULT_WQ:        ${{ steps.preflight.outputs.default_wq }}
+        # Resolution variants
+        GEN_2X:            ${{ inputs.generate_2x }}
+        GEN_4K:            ${{ inputs.generate_4k }}
+        GEN_THUMBS:        ${{ inputs.generate_thumbnails }}
+        THUMB_W:           ${{ inputs.thumbnail_width }}
+        THUMB_H:           ${{ inputs.thumbnail_height }}
+        HERO_W:            ${{ inputs.hero_width }}
+        HERO_H:            ${{ inputs.hero_height }}
+        CARD_W:            ${{ inputs.card_width }}
+        CARD_H:            ${{ inputs.card_height }}
+        # Animation
+        ANIMATED_FPS:      ${{ inputs.animated_fps }}
+        ANIMATED_DUR:      ${{ inputs.animated_duration_ms }}
+        ANIMATED_LOOP:     ${{ inputs.animated_loop }}
+        ANIMATED_OPT:      ${{ inputs.animated_optimize }}
+        ANIMATED_THEMES:   ${{ inputs.animated_themes }}
+        # Content
+        WATERMARK:         ${{ inputs.include_watermark }}
+        WATERMARK_TEXT:    ${{ inputs.watermark_text }}
+        WATERMARK_POS:     ${{ inputs.watermark_position }}
+        METADATA:          ${{ inputs.include_metadata }}
+        CHECKSUMS:         ${{ inputs.include_checksums }}
+        ASSET_CATALOG:     ${{ inputs.include_asset_catalog }}
+        STRIP_EXIF:        ${{ inputs.strip_exif }}
+        COLOR_PROFILE:     ${{ inputs.color_profile }}
+        # Benchmark/advanced
+        BENCHMARK_DATA:    ${{ inputs.benchmark_data_path }}
+        MOSAIC_COLS:       ${{ inputs.mosaic_cols }}
+        MOSAIC_PADDING:    ${{ inputs.mosaic_padding }}
+        COMPARISON_THEMES: ${{ inputs.comparison_themes }}
+        COMPARISON_LAYOUT: ${{ inputs.comparison_layout }}
+        # Caching
+        CACHE_ENABLED:     ${{ inputs.cache_enabled }}
+        CACHE_TTL_HOURS:   ${{ inputs.cache_ttl_hours }}
+        FORCE_REGEN:       ${{ inputs.force_regenerate }}
+        CACHE_HIT:         ${{ steps.cache-restore.outputs.cache-hit || 'false' }}
+        # Paths
+        OUTPUT_DIR:        ${{ steps.preflight.outputs.output_dir }}
+        WORK_DIR:          ${{ steps.preflight.outputs.work_dir }}
+        CACHE_DIR:         ${{ steps.preflight.outputs.cache_dir }}
+        WORKSPACE:         ${{ steps.preflight.outputs.workspace }}
+        THEMES_DIR:        ${{ inputs.themes_dir }}
+        # Performance
+        PARALLEL_WORKERS:  ${{ inputs.parallel_workers }}
+        FAIL_ON_ERROR:     ${{ inputs.fail_on_error }}
+        FAIL_THRESHOLD:    ${{ inputs.fail_threshold }}
+        VERBOSE:           ${{ inputs.verbose }}
+        RENDERER_BACKEND:  ${{ inputs.renderer_backend }}
+        # HTML report
+        GEN_HTML:          ${{ inputs.generate_html_report }}
+        GEN_CHANGELOG:     ${{ inputs.generate_changelog }}
+      run: |
+        bash "${{ github.action_path }}/generate.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Dry run output
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Dry Run · Generation plan summary"
+      shell: bash
+      id: dryrun
+      if: inputs.dry_run == 'true'
+      env:
+        THEME_LIST:   ${{ steps.preflight.outputs.theme_list }}
+        THEME_COUNT:  ${{ steps.preflight.outputs.theme_count }}
+        SHOT_TYPES:   ${{ steps.preflight.outputs.resolved_types }}
+        QUALITY:      ${{ inputs.quality_preset }}
+        RES_W:        ${{ steps.preflight.outputs.res_w }}
+        RES_H:        ${{ steps.preflight.outputs.res_h }}
+        DPI:          ${{ steps.preflight.outputs.dpi }}
+      run: |
+        TYPE_COUNT=$(echo "${SHOT_TYPES}" | tr ',' '\n' | grep -cv '^$')
+        ESTIMATED_FILES=$((THEME_COUNT * TYPE_COUNT))
+        ESTIMATED_SECS=$((ESTIMATED_FILES * 8))
+
+        python3 << 'DRYRUN_EOF'
+        import os
+
+        THEME_LIST  = os.environ["THEME_LIST"].split(",")
+        TYPES       = os.environ["SHOT_TYPES"].split(",")
+        QUALITY     = os.environ["QUALITY"]
+        RES_W       = os.environ["RES_W"]
+        RES_H       = os.environ["RES_H"]
+        DPI         = os.environ["DPI"]
+        TOTAL_FILES = len(THEME_LIST) * len(TYPES)
+        EST_SECS    = TOTAL_FILES * 8
+
+        C = {
+            "mauve": "\033[38;2;203;166;247m",
+            "blue":  "\033[38;2;137;180;250m",
+            "green": "\033[38;2;166;227;161m",
+            "yellow":"\033[38;2;249;226;175m",
+            "text":  "\033[38;2;205;214;244m",
+            "sub":   "\033[38;2;166;173;200m",
+            "R":     "\033[0m",
+            "B":     "\033[1m",
+        }
+
+        print(f"\n  {C['mauve']}{C['B']}━━━ DRY RUN PLAN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C['R']}")
+        print(f"\n  {C['text']}Quality:     {C['blue']}{QUALITY} ({RES_W}×{RES_H} @ {DPI}dpi){C['R']}")
+        print(f"  {C['text']}Themes:      {C['green']}{len(THEME_LIST)}{C['R']}")
+        print(f"  {C['text']}Types:       {C['green']}{len(TYPES)}{C['R']}")
+        print(f"  {C['text']}Total files: {C['mauve']}{TOTAL_FILES}{C['R']}")
+        print(f"  {C['text']}Est. time:   {C['yellow']}~{EST_SECS//60}m {EST_SECS%60}s{C['R']}")
+
+        print(f"\n  {C['blue']}📸 Screenshot matrix:{C['R']}")
+        for i, theme in enumerate(THEME_LIST[:10], 1):
+            print(f"     {C['sub']}{i:2}. {theme}{C['R']}")
+        if len(THEME_LIST) > 10:
+            print(f"     {C['sub']}... +{len(THEME_LIST)-10} more{C['R']}")
+
+        print(f"\n  {C['blue']}🎯 Types to render:{C['R']}")
+        ICONS = {"desktop":"🖥️","neovim":"📝","components":"🧩","card":"🎨",
+                  "swatch":"🌈","hero":"🖼️","animated":"🎬","mobile":"📱",
+                  "performance":"📊","mosaic":"🔄","accessibility":"♿","comparison":"🏆"}
+        for t in TYPES:
+            icon = ICONS.get(t.strip(), "📸")
+            print(f"     {icon} {t.strip()}")
+
+        print(f"\n  {C['mauve']}{C['B']}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C['R']}\n")
+        DRYRUN_EOF
+
+        # Emit dry-run outputs
+        {
+          echo "total_generated=0"
+          echo "total_failed=0"
+          echo "total_cached=0"
+          echo "total_skipped=${ESTIMATED_FILES}"
+          echo "themes_rendered=0"
+          echo "themes_failed="
+          echo "types_generated="
+          echo "output_dir=${{ steps.preflight.outputs.output_dir }}"
+          echo "total_size_mb=0"
+          echo "total_size_bytes=0"
+          echo "avg_size_kb=0"
+          echo "duration_s=0"
+          echo "throughput=0"
+          echo "cache_hit_rate=0"
+          echo "failure_rate=0"
+          echo "success=true"
+        } >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Save cache
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💾 Cache · Save screenshot cache"
+      if: |
+        inputs.cache_enabled == 'true' &&
+        inputs.dry_run != 'true' &&
+        steps.cache-restore.outputs.cache-hit != 'true' &&
+        steps.generate.outputs.total_generated != '0'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ steps.preflight.outputs.output_dir }}
+          ${{ steps.preflight.outputs.cache_dir }}
+        key: >-
+          ${{ inputs.cache_key_prefix }}-
+          ${{ inputs.quality_preset }}-
+          ${{ inputs.output_format }}-
+          ${{ steps.preflight.outputs.resolved_types }}-
+          ${{ hashFiles('themes/presets/**', 'config/**', 'assets/brand/**') }}-
+          ${{ github.sha }}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 6 — README injection
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📖 README · Inject screenshots into documentation"
+      shell: bash
+      id: readme
+      if: inputs.update_readme == 'true' && inputs.dry_run != 'true'
+      env:
+        README_PATH:     ${{ inputs.readme_path }}
+        OUTPUT_DIR:      ${{ steps.preflight.outputs.output_dir }}
+        WORKSPACE:       ${{ steps.preflight.outputs.workspace }}
+        REPO:            ${{ github.repository }}
+        BRANCH:          ${{ github.ref_name }}
+        BASE_URL:        ${{ inputs.readme_image_base_url }}
+        GALLERY_COLS:    ${{ inputs.gallery_columns }}
+        GALLERY_MAX:     ${{ inputs.gallery_max_themes }}
+      run: |
+        set -euo pipefail
+
+        README="${WORKSPACE}/${README_PATH}"
+        [[ ! -f "${README}" ]] && {
+          echo "  ⚠️ ${README_PATH} not found — skipping injection"
+          exit 0
+        }
+
+        # Auto-detect base URL
+        if [[ -z "${BASE_URL}" ]]; then
+          BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
+        fi
+
+        python3 << 'INJECT_EOF'
+        import re
+        import os
+        from pathlib import Path
+        from datetime import datetime, timezone
+
+        README  = Path(os.environ["README"])
+        OUT_DIR = Path(os.environ["OUTPUT_DIR"])
+        REPO    = os.environ["REPO"]
+        BRANCH  = os.environ["BRANCH"]
+        BASE    = os.environ["BASE_URL"].rstrip("/")
+        COLS    = int(os.environ.get("GALLERY_COLS","3"))
+        MAX_G   = int(os.environ.get("GALLERY_MAX","12"))
+        NOW     = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+        content = README.read_text()
+        changed = False
+
+        # ── Hero banner injection ─────────────────────────────────────────────
+        HERO_FILE = OUT_DIR / "hero" / "hero-banner.webp"
+        if HERO_FILE.exists():
+            HERO_URL  = f"{BASE}/assets/screenshots/hero/hero-banner.webp"
+            HERO_BLOCK = (
+                "<!-- HERO_START -->\n"
+                "<p align=\"center\">\n"
+                f"  <img src=\"{HERO_URL}\" "
+                "alt=\"ASH Dotfiles v5.0 OMEGA\" width=\"100%\">\n"
+                "</p>\n"
+                "<!-- HERO_END -->"
+            )
+            content, n = re.subn(
+                r"<!-- HERO_START -->.*?<!-- HERO_END -->",
+                HERO_BLOCK, content, flags=re.DOTALL
+            )
+            if n: print(f"  ✅ Hero banner injected"); changed = True
+
+        # ── Gallery grid injection ─────────────────────────────────────────────
+        card_files = sorted((OUT_DIR / "cards").glob("*.webp"))[:MAX_G]
+        if card_files:
+            rows = []
+            for i in range(0, len(card_files), COLS):
+                chunk = card_files[i:i+COLS]
+                cells = " | ".join(
+                    f"[![{p.stem}]({BASE}/assets/screenshots/cards/{p.name})]"
+                    f"(#{p.stem.lower().replace('-','--').replace(' ','-')})"
+                    for p in chunk
+                )
+                rows.append(f"| {cells} |")
+            header = "| " + " | ".join(["Preview"] * min(COLS, len(card_files))) + " |"
+            sep    = "|" + "|".join([":---:"] * min(COLS, len(card_files))) + "|"
+            GALLERY_BLOCK = (
+                "<!-- GALLERY_START -->\n"
+                f"<!-- Auto-generated: {NOW} -->\n"
+                f"{header}\n{sep}\n"
+                + "\n".join(rows)
+                + "\n<!-- GALLERY_END -->"
+            )
+            content, n = re.subn(
+                r"<!-- GALLERY_START -->.*?<!-- GALLERY_END -->",
+                GALLERY_BLOCK, content, flags=re.DOTALL
+            )
+            if n: print(f"  ✅ Gallery ({len(card_files)} themes) injected"); changed = True
+
+        # ── Stats injection ────────────────────────────────────────────────────
+        STATS_BLOCK = (
+            "<!-- STATS_START -->\n"
+            f"<!-- Last screenshot update: {NOW} -->\n"
+            "<!-- STATS_END -->"
+        )
+        content, n = re.subn(
+            r"<!-- STATS_START -->.*?<!-- STATS_END -->",
+            STATS_BLOCK, content, flags=re.DOTALL
+        )
+        if n: changed = True
+
+        if changed:
+            README.write_text(content)
+            print(f"  ✅ README.md updated")
+        else:
+            print(f"  ℹ️ No injection markers found — no changes made")
+        INJECT_EOF
+
+        echo "readme_updated=true" >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 7 — Commit screenshots to repository
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💾 Commit · Push screenshots to repository"
+      shell: bash
+      id: commit
+      if: |
+        inputs.commit_screenshots == 'true' &&
+        inputs.dry_run != 'true' &&
+        github.event_name != 'pull_request'
+      run: |
+        set -euo pipefail
+
+        cd "${{ steps.preflight.outputs.workspace }}"
+
+        git config user.name  "ash-screenshot-bot[bot]"
+        git config user.email "ash-screenshot-bot@users.noreply.github.com"
+
+        # Checkout target branch if specified
+        COMMIT_BRANCH="${{ inputs.commit_branch }}"
+        if [[ -n "${COMMIT_BRANCH}" ]]; then
+          git checkout -B "${COMMIT_BRANCH}" 2>/dev/null || \
+          git checkout "${COMMIT_BRANCH}" 2>/dev/null || true
+        fi
+
+        git add "${{ inputs.output_dir }}/" \
+                "${{ inputs.readme_path }}" \
+                2>/dev/null || true
+
+        if git diff --cached --quiet; then
+          echo "  ℹ️ No screenshot changes to commit"
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        GENERATED="${{ steps.generate.outputs.total_generated || '0' }}"
+        THEMES="${{ steps.preflight.outputs.theme_count }}"
+        SESSION="${{ steps.preflight.outputs.session_id }}"
+        CUSTOM_MSG="${{ inputs.commit_message }}"
+
+        if [[ -n "${CUSTOM_MSG}" ]]; then
+          COMMIT_MSG="${CUSTOM_MSG} [skip ci]"
+        else
+          COMMIT_MSG="📸 chore(screenshots): generate ${GENERATED} screenshots for ${THEMES} theme(s) [skip ci]
+
+        Session:  ${SESSION}
+        Quality:  ${{ inputs.quality_preset }}
+        Format:   ${{ inputs.output_format }}
+        Types:    ${{ steps.preflight.outputs.resolved_types }}
+        RunID:    ${{ github.run_id }}
+
+        Generated by ASH v5.0 OMEGA Screenshot Engine"
+        fi
+
+        git commit -m "${COMMIT_MSG}"
+
+        [[ -n "${COMMIT_BRANCH}" ]] && \
+          git push --set-upstream origin "${COMMIT_BRANCH}" || \
+          git push
+
+        echo "  ✅ Screenshots committed"
+        echo "committed=true" >> "$GITHUB_OUTPUT"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 8 — PR comment with preview grid
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💬 Comment · Post screenshot preview to pull request"
+      if: |
+        inputs.post_pr_preview == 'true' &&
+        inputs.dry_run != 'true' &&
+        github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const fs   = require("fs");
+          const path = require("path");
+
+          const OUT_DIR     = "${{ steps.preflight.outputs.output_dir }}";
+          const WORK_DIR    = "${{ steps.preflight.outputs.work_dir }}";
+          const GENERATED   = parseInt("${{ steps.generate.outputs.total_generated   || '0' }}");
+          const FAILED      = parseInt("${{ steps.generate.outputs.total_failed      || '0' }}");
+          const CACHED      = parseInt("${{ steps.generate.outputs.total_cached      || '0' }}");
+          const DURATION    = "${{ steps.generate.outputs.duration_s || '?' }}";
+          const SIZE_MB     = "${{ steps.generate.outputs.total_size_mb || '?' }}";
+          const THROUGHPUT  = "${{ steps.generate.outputs.throughput || '?' }}";
+          const CACHE_RATE  = "${{ steps.generate.outputs.cache_hit_rate || '0' }}";
+          const THEMES_RAW  = "${{ steps.preflight.outputs.theme_list }}";
+          const THEMES      = THEMES_RAW.split(",").filter(Boolean);
+          const QUALITY     = "${{ inputs.quality_preset }}";
+          const FORMAT      = "${{ inputs.output_format }}";
+          const SHOT_TYPES  = "${{ steps.preflight.outputs.resolved_types }}";
+          const THEME_COUNT = parseInt("${{ steps.preflight.outputs.theme_count || '0' }}");
+          const SESSION_ID  = "${{ steps.preflight.outputs.session_id }}";
+          const REPO        = context.repo.owner + "/" + context.repo.repo;
+          const BRANCH      = context.payload.pull_request?.head?.ref || "main";
+
+          const MAX_PREVIEW   = parseInt("${{ inputs.pr_preview_max_themes || '6' }}");
+          const PREVIEW_COLS  = parseInt("${{ inputs.pr_preview_columns    || '3' }}");
+          const PREVIEW_TYPES = "${{ inputs.pr_preview_types || 'card' }}".split(",").map(s=>s.trim());
+
+          const STATUS_ICON = FAILED === 0 ? "✅" : FAILED < GENERATED / 2 ? "⚠️" : "❌";
+          const TOTAL = GENERATED + FAILED + CACHED;
+          const SUCCESS_PCT = TOTAL > 0 ? Math.round(GENERATED / TOTAL * 100) : 100;
+          const CACHE_PCT   = TOTAL > 0 ? Math.round(CACHED / TOTAL * 100) : 0;
+
+          const BAR_W = 25;
+          const makeBar = (pct, char="█", empty="░") => {
+            const f = Math.round(pct/100*BAR_W);
+            return char.repeat(f) + empty.repeat(BAR_W-f);
+          };
+
+          // ── Theme icons ──────────────────────────────────────────────────
+          const ICONS = {
+            "catppuccin-mocha":"🟣","catppuccin-latte":"☕","tokyo-night":"🌃",
+            "gruvbox-dark":"🟤","gruvbox-light":"🌞","nord":"🔵","dracula":"💜",
+            "rose-pine":"🌸","everforest-dark":"🌿","kanagawa-wave":"🎋",
+            "cyberpunk-2077":"⚡","synthwave-84":"🎸","one-dark":"🌑",
+            "matrix-green":"🟢","vaporwave":"🌊","ayu-dark":"🟠",
+          };
+
+          // ── Preview grid ──────────────────────────────────────────────────
+          const displayThemes = THEMES.slice(0, MAX_PREVIEW);
+          let previewGrid = "";
+          const BASE_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+
+          if (displayThemes.length > 0) {
+            const PREVIEW_TYPE = PREVIEW_TYPES[0] || "card";
+            const TYPE_DIR_MAP = {
+              card: "cards", desktop: "desktop", swatch: "swatches",
+              neovim: "neovim", hero: "hero",
+            };
+            const imgDir = TYPE_DIR_MAP[PREVIEW_TYPE] || "cards";
+
+            previewGrid += "### 🎨 Theme Previews\n\n";
+
+            for (let r = 0; r < displayThemes.length; r += PREVIEW_COLS) {
+              const chunk = displayThemes.slice(r, r + PREVIEW_COLS);
+              const cells = chunk.map(t => {
+                const icon    = ICONS[t] || "🎨";
+                const imgUrl  = `${BASE_URL}/assets/screenshots/${imgDir}/${t}.webp`;
+                const anchor  = t.toLowerCase().replace(/-/g,"--");
+                return `${icon} \`${t}\``;
+              });
+              previewGrid += "| " + cells.join(" | ") + " |\n";
+              if (r === 0) {
+                previewGrid += "|" + Array(chunk.length).fill(":---:").join("|") + "|\n";
+              }
+              previewGrid += "| " + chunk.map(t => {
+                const imgUrl = `${BASE_URL}/assets/screenshots/${imgDir}/${t}.webp`;
+                return `![${t}](${imgUrl})`;
+              }).join(" | ") + " |\n";
+            }
+
+            if (THEMES.length > MAX_PREVIEW) {
+              previewGrid += `\n_... and ${THEMES.length - MAX_PREVIEW} more themes_\n`;
+            }
+            previewGrid += "\n";
+          }
+
+          // ── Build body ────────────────────────────────────────────────────
+          const body = [
+            `## 📸 Screenshot Generation — ${STATUS_ICON} Report`,
+            ``,
+            `> 🆔 **Session:** \`${SESSION_ID}\`  &nbsp;·&nbsp;  `+
+            `**Quality:** \`${QUALITY}\`  &nbsp;·&nbsp;  `+
+            `**Format:** \`${FORMAT}\`  &nbsp;·&nbsp;  `+
+            `**Duration:** \`${DURATION}s\``,
+            ``,
+            `### 📊 Generation Statistics`,
+            ``,
+            `\`\`\``,
+            `Success: [${makeBar(SUCCESS_PCT)}] ${SUCCESS_PCT}%  (${GENERATED} generated)`,
+            `Cached:  [${makeBar(CACHE_PCT,    "▓","░")}] ${CACHE_PCT}%  (${CACHED} from cache)`,
+            `\`\`\``,
+            ``,
+            `| Metric | Value | Metric | Value |`,
+            `|--------|------:|--------|------:|`,
+            `| 📸 Generated | \`${GENERATED}\` | 💾 Cached | \`${CACHED}\` |`,
+            `| ❌ Failed | \`${FAILED}\` | 🎨 Themes | \`${THEME_COUNT}\` |`,
+            `| 📦 Total Size | \`${SIZE_MB} MB\` | ⚡ Rate | \`${THROUGHPUT}/min\` |`,
+            `| 💾 Cache Rate | \`${CACHE_RATE}%\` | 🎯 Types | \`${SHOT_TYPES.split(",").length}\` |`,
+            ``,
+            previewGrid,
+            `<details>`,
+            `<summary>📋 Generated Types (${SHOT_TYPES.split(",").length})</summary>`,
+            ``,
+            SHOT_TYPES.split(",").map(t => {
+              const TYPE_ICONS = {desktop:"🖥️",neovim:"📝",components:"🧩",
+                card:"🎨",swatch:"🌈",hero:"🖼️",animated:"🎬",
+                mobile:"📱",performance:"📊",mosaic:"🔄",
+                accessibility:"♿",comparison:"🏆"};
+              const icon = TYPE_ICONS[t.trim()] || "📸";
+              return `- ${icon} \`${t.trim()}\``;
+            }).join("\n"),
+            ``,
+            `</details>`,
+            ``,
+            `---`,
+            `*📸 ASH v5.0 OMEGA Screenshot Engine · `+
+            `[View Artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) · `+
+            `[Docs](https://ash-dotfiles.dev/docs/screenshots)*`,
+          ].filter(l => l !== undefined).join("\n");
+
+          // ── Find & update/create comment ──────────────────────────────────
+          const { data: comments } = await github.rest.issues.listComments({
+            owner:       context.repo.owner,
+            repo:        context.repo.repo,
+            issue_number:context.issue.number,
+          });
+
+          const existing = comments.find(c =>
+            c.user.type === "Bot" &&
+            c.body.includes("Screenshot Generation")
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: existing.id,
+              body,
+            });
+            console.log(`✅ Updated PR comment #${existing.id}`);
+          } else {
+            await github.rest.issues.createComment({
+              owner:       context.repo.owner,
+              repo:        context.repo.repo,
+              issue_number:context.issue.number,
+              body,
+            });
+            console.log("✅ Created PR comment");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 9 — Discord notification
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔔 Discord · Send generation summary notification"
+      shell: bash
+      id: discord
+      if: |
+        inputs.notify_discord == 'true' &&
+        inputs.dry_run != 'true'
+      continue-on-error: true
+      env:
+        GENERATED:  ${{ steps.generate.outputs.total_generated || '0' }}
+        FAILED:     ${{ steps.generate.outputs.total_failed    || '0' }}
+        CACHED:     ${{ steps.generate.outputs.total_cached    || '0' }}
+        SIZE_MB:    ${{ steps.generate.outputs.total_size_mb   || '0' }}
+        DURATION:   ${{ steps.generate.outputs.duration_s      || '0' }}
+        THEMES:     ${{ steps.preflight.outputs.theme_count }}
+        QUALITY:    ${{ inputs.quality_preset }}
+        SESSION_ID: ${{ steps.preflight.outputs.session_id }}
+        RUN_URL:    ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        [[ -z "${DISCORD_WEBHOOK_SCREENSHOTS:-}" ]] && {
+          echo "  ℹ️ DISCORD_WEBHOOK_SCREENSHOTS not set — skipping"
+          exit 0
+        }
+
+        OVERALL_COLOR="$([[ "${FAILED}" -eq 0 ]] && echo 6416844 || echo 16007085)"
+        STATUS_TEXT="$([[ "${FAILED}" -eq 0 ]] && echo "✅ Complete" || echo "⚠️ Partial")"
+
+        PAYLOAD=$(cat << EOF
+        {
+          "username": "ASH Screenshot Bot",
+          "avatar_url": "https://raw.githubusercontent.com/${{ github.repository }}/main/assets/brand/logos/ash-logo-256.png",
+          "content": "📸 Screenshot generation complete for \`${{ github.ref_name }}\`",
+          "embeds": [{
+            "title": "${STATUS_TEXT} — Screenshot Generation",
+            "color": ${OVERALL_COLOR},
+            "fields": [
+              {"name": "📸 Generated",  "value": "\`${GENERATED}\`", "inline": true},
+              {"name": "💾 Cached",     "value": "\`${CACHED}\`",    "inline": true},
+              {"name": "❌ Failed",     "value": "\`${FAILED}\`",    "inline": true},
+              {"name": "🎨 Themes",     "value": "\`${THEMES}\`",    "inline": true},
+              {"name": "📦 Size",       "value": "\`${SIZE_MB} MB\`","inline": true},
+              {"name": "⏱️ Duration",   "value": "\`${DURATION}s\`", "inline": true},
+              {"name": "🎚️ Quality",   "value": "\`${QUALITY}\`",   "inline": true},
+              {"name": "🆔 Session",   "value": "\`${SESSION_ID}\`", "inline": true},
+              {"name": "🔗 View Run",  "value": "[Open](${RUN_URL})", "inline": false}
+            ],
+            "footer": {"text": "ASH Dotfiles v5.0 OMEGA · Screenshot Engine"},
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }]
+        }
+        EOF
+        )
+
+        curl -sf -X POST \
+          -H "Content-Type: application/json" \
+          -d "${PAYLOAD}" \
+          "${DISCORD_WEBHOOK_SCREENSHOTS}" && \
+          echo "  ✅ Discord notified" || \
+          echo "  ⚠️ Discord notification failed"
+      env:
+        DISCORD_WEBHOOK_SCREENSHOTS: ${{ secrets.DISCORD_WEBHOOK_SCREENSHOTS }}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 10 — Upload artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Screenshot artifact to GitHub Actions"
+      if: inputs.upload_artifact == 'true' && inputs.dry_run != 'true'
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          ${{ inputs.artifact_name != '' && inputs.artifact_name ||
+              format('screenshots-{0}-{1}-{2}',
+                     inputs.quality_preset,
+                     github.run_id,
+                     steps.preflight.outputs.session_id) }}
+        path: |
+          ${{ steps.preflight.outputs.output_dir }}/
+          ${{ steps.preflight.outputs.work_dir }}/manifest.json
+          ${{ steps.preflight.outputs.work_dir }}/checksums.sha256
+          ${{ steps.preflight.outputs.work_dir }}/assets.json
+          ${{ steps.preflight.outputs.work_dir }}/gallery-report.html
+        retention-days: ${{ fromJson(inputs.artifact_retention_days) }}
+        compression-level: 1
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 11 — GitHub Step Summary
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📊 Summary · Write GitHub Step Summary report"
+      shell: bash
+      id: summary
+      if: always()
+      env:
+        GENERATED:    ${{ steps.generate.outputs.total_generated  || steps.dryrun.outputs.total_generated   || '0' }}
+        FAILED:       ${{ steps.generate.outputs.total_failed     || steps.dryrun.outputs.total_failed      || '0' }}
+        CACHED:       ${{ steps.generate.outputs.total_cached     || steps.dryrun.outputs.total_cached      || '0' }}
+        SKIPPED:      ${{ steps.generate.outputs.total_skipped    || steps.dryrun.outputs.total_skipped     || '0' }}
+        THEMES:       ${{ steps.preflight.outputs.theme_count }}
+        SIZE_MB:      ${{ steps.generate.outputs.total_size_mb    || '0' }}
+        DURATION:     ${{ steps.generate.outputs.duration_s       || '0' }}
+        THROUGHPUT:   ${{ steps.generate.outputs.throughput       || '0' }}
+        CACHE_RATE:   ${{ steps.generate.outputs.cache_hit_rate   || '0' }}
+        FAIL_RATE:    ${{ steps.generate.outputs.failure_rate     || '0' }}
+        SUCCESS:      ${{ steps.generate.outputs.success          || 'true' }}
+        TYPES:        ${{ steps.preflight.outputs.resolved_types }}
+        QUALITY:      ${{ inputs.quality_preset }}
+        FORMAT:       ${{ inputs.output_format }}
+        SESSION_ID:   ${{ steps.preflight.outputs.session_id }}
+        DRY_RUN:      ${{ inputs.dry_run }}
+        THEME_LIST:   ${{ steps.preflight.outputs.theme_list }}
+        RES_W:        ${{ steps.preflight.outputs.res_w }}
+        RES_H:        ${{ steps.preflight.outputs.res_h }}
+        DPI:          ${{ steps.preflight.outputs.dpi }}
+        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url || '' }}
+      run: |
+        DRY_TAG=""
+        [[ "${DRY_RUN}" == "true" ]] && DRY_TAG=" **(DRY RUN)**"
+
+        STATUS="✅ Success"
+        [[ "${SUCCESS}" != "true" ]] && STATUS="❌ Failed"
+        [[ "${FAILED}" -gt 0 && "${SUCCESS}" == "true" ]] && STATUS="⚠️ Partial"
+
+        TOTAL=$(( GENERATED + FAILED + CACHED ))
+        SUCCESS_PCT=0
+        [[ "${TOTAL}" -gt 0 ]] && SUCCESS_PCT=$(( GENERATED * 100 / TOTAL ))
+        CACHE_BAR_F=$(( CACHE_RATE * 25 / 100 ))
+        CACHE_BAR_E=$(( 25 - CACHE_BAR_F ))
+        CACHE_BAR="$(printf '▓%.0s' $(seq 1 "${CACHE_BAR_F}" 2>/dev/null || true))"
+        CACHE_BAR+="$(printf '░%.0s' $(seq 1 "${CACHE_BAR_E}" 2>/dev/null || true))"
+
+        TYPE_COUNT=$(echo "${TYPES}" | tr ',' '\n' | grep -cv '^$' || echo 0)
+
+        cat >> "${GITHUB_STEP_SUMMARY}" << EOF
+        # 📸 Screenshot Generation Report${DRY_TAG}
+
+        > **${STATUS}**  &nbsp;·&nbsp;  Session: \`${SESSION_ID}\`  &nbsp;·&nbsp;  \`$(date -u +%Y-%m-%d\ %H:%M)\ UTC\`
+
+        ## 📊 Generation Statistics
+
+        | Metric | Value | Metric | Value |
+        |--------|------:|--------|------:|
+        | 📸 **Generated** | \`${GENERATED}\` | 💾 **Cached** | \`${CACHED}\` |
+        | ❌ **Failed** | \`${FAILED}\` | ⏭️ **Skipped** | \`${SKIPPED}\` |
+        | 🎨 **Themes** | \`${THEMES}\` | 📸 **Types** | \`${TYPE_COUNT}\` |
+        | 📦 **Size** | \`${SIZE_MB} MB\` | ⚡ **Throughput** | \`${THROUGHPUT}/min\` |
+        | ⏱️ **Duration** | \`${DURATION}s\` | 💾 **Cache Rate** | \`${CACHE_RATE}%\` |
+        | 🎚️ **Quality** | \`${QUALITY}\` | 📐 **Resolution** | \`${RES_W}×${RES_H}@${DPI}dpi\` |
+
+        ## 💾 Cache Performance
+
+        \`\`\`
+        Hit rate: [${CACHE_BAR}] ${CACHE_RATE}%
+        \`\`\`
+
+        ## 🎯 Configuration
+
+        | Setting | Value |
+        |---------|-------|
+        | 🎚️ Quality Preset | \`${QUALITY}\` |
+        | 📦 Output Format | \`${FORMAT}\` |
+        | 📐 Resolution | \`${RES_W}×${RES_H} @ ${DPI}dpi\` |
+        | 📸 Screenshot Types | \`${TYPES}\` |
+        | 🎨 Themes | \`${THEME_LIST:0:100}...\` |
+        $([[ -n "${ARTIFACT_URL}" ]] && echo "| 📤 Artifact | [Download](${ARTIFACT_URL}) |" || true)
+
+        ---
+        *📸 ASH v5.0 OMEGA Screenshot Engine · [Documentation](https://ash-dotfiles.dev/docs/screenshots)*
+        EOF
+
+        echo "  ✅ Step summary written"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 12 — Fail gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚨 Gate · Fail on threshold exceeded"
+      shell: bash
+      if: inputs.dry_run != 'true'
+      run: |
+        SUCCESS="${{ steps.generate.outputs.success || 'true' }}"
+        FAILURE_RATE="${{ steps.generate.outputs.failure_rate || '0' }}"
+        FAIL_THRESHOLD="${{ inputs.fail_threshold }}"
+        FAILED="${{ steps.generate.outputs.total_failed || '0' }}"
+        GENERATED="${{ steps.generate.outputs.total_generated || '0' }}"
+
+        if [[ "${SUCCESS}" != "true" ]]; then
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ❌ SCREENSHOT GENERATION THRESHOLD EXCEEDED                 ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  ❌ Failed:     %-47s║\n" "${FAILED}"
+          printf "║  ✅ Generated:  %-47s║\n" "${GENERATED}"
+          printf "║  📊 Fail Rate:  %-47s║\n" "${FAILURE_RATE}% (threshold: ${FAIL_THRESHOLD}%)"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "::error title=Screenshot Threshold Exceeded::Failure rate ${FAILURE_RATE}% exceeded threshold ${FAIL_THRESHOLD}%"
+          exit 1
+        fi
+
+        echo "✅ Screenshot generation passed (failure rate: ${FAILURE_RATE}% ≤ ${FAIL_THRESHOLD}%)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "camera"
+  color: "purple"

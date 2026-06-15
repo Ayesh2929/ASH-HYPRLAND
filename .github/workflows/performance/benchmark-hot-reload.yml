@@ -1,0 +1,1538 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — HOT RELOAD BENCHMARK WORKFLOW                     ║
+# ║                                                                                  ║
+# ║  Measures hot reload propagation latency across all targets:                    ║
+# ║    file-change → detect → dispatch → reload → verify                            ║
+# ║                                                                                  ║
+# ║  Tracks: latency · concurrency · stability · cascade timing                     ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔥 Benchmark · Hot Reload Latency"
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+    paths:
+      - "ash-cli/engines/hot-reload-engine/**"
+      - "ash-cli/lib/ipc.sh"
+      - "ash-cli/lib/event-bus.sh"
+      - "ash-cli/lib/debounce.sh"
+      - ".github/workflows/performance/benchmark-hot-reload.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "ash-cli/engines/hot-reload-engine/**"
+      - "ash-cli/lib/**"
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: "Reload iterations per target"
+        required: false
+        default: "20"
+        type: string
+      targets:
+        description: "Reload targets (all|hyprland|waybar|kitty|dunst|gtk|nvim)"
+        required: false
+        default: "all"
+        type: string
+      regression_threshold:
+        description: "Latency regression threshold %"
+        required: false
+        default: "20"
+        type: string
+      stress_concurrency:
+        description: "Concurrent reload stress test count"
+        required: false
+        default: "5"
+        type: string
+  schedule:
+    - cron: "45 2 * * *"   # Nightly 02:45 UTC
+
+concurrency:
+  group: "bench-hot-reload-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  BENCHMARK_VERSION: "5.0.0"
+  BENCH_DIR: "${{ github.workspace }}/bench-hot-reload"
+  BASELINE_DIR: "${{ github.workspace }}/baseline-hot-reload"
+  REPORTS_DIR: "${{ github.workspace }}/reports-hot-reload"
+  ITERATIONS: "${{ github.event.inputs.iterations || '20' }}"
+  TARGETS_INPUT: "${{ github.event.inputs.targets || 'all' }}"
+  REGRESSION_THRESHOLD: "${{ github.event.inputs.regression_threshold || '20' }}"
+  STRESS_CONCURRENCY: "${{ github.event.inputs.stress_concurrency || '5' }}"
+  # ── Latency thresholds (ms) ──
+  THRESHOLD_DETECT_MS: "50"
+  THRESHOLD_DISPATCH_MS: "30"
+  THRESHOLD_RELOAD_HYPRLAND_MS: "200"
+  THRESHOLD_RELOAD_WAYBAR_MS: "300"
+  THRESHOLD_RELOAD_KITTY_MS: "100"
+  THRESHOLD_RELOAD_DUNST_MS: "150"
+  THRESHOLD_RELOAD_GTK_MS: "200"
+  THRESHOLD_RELOAD_NVIM_MS: "150"
+  THRESHOLD_FULL_CASCADE_MS: "1200"
+  THRESHOLD_DEBOUNCE_MS: "150"
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Setup & mock environment
+  # ───────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "🛠️ Setup · Hot Reload Environment"
+    runs-on: ubuntu-24.04
+    outputs:
+      bench_id: ${{ steps.id.outputs.bench_id }}
+      has_baseline: ${{ steps.baseline.outputs.has_baseline }}
+      targets_json: ${{ steps.targets.outputs.json }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🆔 Benchmark ID"
+        id: id
+        run: |
+          ID="reload-$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::8}"
+          echo "bench_id=${ID}" >> "$GITHUB_OUTPUT"
+
+      - name: "📦 Install tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            inotify-tools \
+            python3 \
+            python3-pip \
+            jq \
+            bc \
+            time \
+            procps \
+            netcat-openbsd \
+            socat \
+            2>/dev/null || true
+          pip3 install --quiet --user \
+            matplotlib \
+            pandas \
+            numpy \
+            scipy \
+            rich \
+            watchdog \
+            2>/dev/null || true
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb || true
+
+          echo "  ✅ inotifywait: $(inotifywait --version 2>&1 | head -1 || echo 'available')"
+          echo "  ✅ hyperfine:   $(hyperfine --version 2>/dev/null || echo 'available')"
+          echo "  ✅ socat:       $(socat -V 2>&1 | head -1 || echo 'available')"
+          echo "  ✅ python3:     $(python3 --version)"
+
+      - name: "🏗️ Setup hot reload engine mocks"
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            ash-cli/engines/hot-reload-engine \
+            ash-cli/lib \
+            /tmp/ash-watch-test
+
+          # ── Watcher daemon ────────────────────────────────────────────
+          cat > ash-cli/engines/hot-reload-engine/watcher.sh << 'WATCHER_EOF'
+          #!/usr/bin/env bash
+          # ASH Hot Reload Watcher v5.0
+          set -euo pipefail
+
+          WATCH_DIR="${1:-${HOME}/.config}"
+          SOCKET_PATH="${ASH_IPC_SOCKET:-/tmp/ash-reload.sock}"
+          EVENTS="close_write,moved_to,create"
+          EXCLUDE_PATTERN="(\.git|\.cache|tmp|logs)"
+
+          # Parse args
+          for arg in "$@"; do
+            case "${arg}" in
+              --once)   ONCE_MODE=true ;;
+              --exit)   EXIT_AFTER=1 ;;
+              --socket=*) SOCKET_PATH="${arg#*=}" ;;
+            esac
+          done
+
+          ONCE_MODE="${ONCE_MODE:-false}"
+          EXIT_AFTER="${EXIT_AFTER:-0}"
+
+          echo "[ASH-WATCHER] Starting watch on: ${WATCH_DIR}" >&2
+          echo "[ASH-WATCHER] Socket: ${SOCKET_PATH}" >&2
+
+          if [[ "${ONCE_MODE}" == "true" ]] || [[ "${EXIT_AFTER}" -gt 0 ]]; then
+            echo "[ASH-WATCHER] One-shot mode — exiting immediately"
+            exit 0
+          fi
+
+          # Use inotifywait if available
+          if command -v inotifywait &>/dev/null; then
+            inotifywait \
+              --monitor \
+              --recursive \
+              --event "${EVENTS}" \
+              --exclude "${EXCLUDE_PATTERN}" \
+              --format '%T %w%f %e' \
+              --timefmt '%s' \
+              "${WATCH_DIR}" 2>/dev/null | \
+            while IFS=' ' read -r timestamp filepath event; do
+              TARGET=$(bash ash-cli/engines/hot-reload-engine/dispatcher.sh \
+                "${filepath}" "${event}" 2>/dev/null || echo "unknown")
+              echo "[ASH-RELOAD] ${timestamp} ${event} → ${TARGET}: ${filepath}"
+            done
+          else
+            echo "[ASH-WATCHER] inotifywait not available — polling mode"
+            while true; do sleep 1; done
+          fi
+          WATCHER_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/watcher.sh
+
+          # ── Dispatcher ────────────────────────────────────────────────
+          cat > ash-cli/engines/hot-reload-engine/dispatcher.sh << 'DISPATCH_EOF'
+          #!/usr/bin/env bash
+          # ASH Hot Reload Dispatcher v5.0
+          set -euo pipefail
+
+          FILEPATH="${1:-}"
+          EVENT="${2:-modify}"
+
+          [[ -z "${FILEPATH}" ]] && exit 0
+
+          # Determine target based on file path
+          case "${FILEPATH}" in
+            */hypr/*.conf)       echo "hyprland" ;;
+            */waybar/*.*)        echo "waybar" ;;
+            */kitty/*.conf)      echo "kitty" ;;
+            */dunst/*)           echo "dunst" ;;
+            */swaync/*)          echo "swaync" ;;
+            */gtk-3.0/*|*/gtk-4.0/*) echo "gtk" ;;
+            */nvim/*.lua)        echo "nvim" ;;
+            */fish/*.fish)       echo "fish" ;;
+            */themes/*)          echo "all" ;;
+            *)                   echo "unknown" ;;
+          esac
+          DISPATCH_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/dispatcher.sh
+
+          # ── Per-target reloaders ──────────────────────────────────────
+          for target in hyprland waybar kitty dunst swaync gtk fish nvim ags spicetify discord; do
+            cat > "ash-cli/engines/hot-reload-engine/reload-${target}.sh" << RELOAD_EOF
+          #!/usr/bin/env bash
+          # ASH ${target} hot-reload v5.0
+          set -euo pipefail
+          CONFIG_FILE="\${1:-}"
+          START=\$(date +%s%N)
+          # Simulate ${target} reload (mock)
+          case "${target}" in
+            hyprland)  sleep 0.050 ;;   # ~50ms
+            waybar)    sleep 0.080 ;;   # ~80ms
+            kitty)     sleep 0.020 ;;   # ~20ms
+            dunst)     sleep 0.040 ;;   # ~40ms
+            nvim)      sleep 0.030 ;;   # ~30ms
+            gtk)       sleep 0.060 ;;   # ~60ms
+            *)         sleep 0.010 ;;   # ~10ms
+          esac
+          END=\$(date +%s%N)
+          ELAPSED_MS=\$(( (END - START) / 1000000 ))
+          echo "[ASH-RELOAD-${target^^}] Reloaded in \${ELAPSED_MS}ms"
+          RELOAD_EOF
+            chmod +x "ash-cli/engines/hot-reload-engine/reload-${target}.sh"
+          done
+
+          # ── Debounce engine ───────────────────────────────────────────
+          cat > ash-cli/engines/hot-reload-engine/debounce.sh << 'DEBOUNCE_EOF'
+          #!/usr/bin/env bash
+          # ASH Debounce Engine v5.0
+          DELAY_MS="${1:-100}"
+          SIGNAL_FILE="/tmp/ash-debounce-signal-$$"
+          echo "debounce_delay=${DELAY_MS}ms" > "${SIGNAL_FILE}"
+          sleep "$(echo "scale=3; ${DELAY_MS}/1000" | bc)s"
+          rm -f "${SIGNAL_FILE}"
+          echo "[DEBOUNCE] Fired after ${DELAY_MS}ms"
+          DEBOUNCE_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/debounce.sh
+
+          # ── All-targets reloader ──────────────────────────────────────
+          cat > ash-cli/engines/hot-reload-engine/reload-all.sh << 'ALL_EOF'
+          #!/usr/bin/env bash
+          # ASH Full cascade reload v5.0
+          set -euo pipefail
+          TARGETS=(hyprland waybar kitty dunst gtk nvim fish)
+          for target in "${TARGETS[@]}"; do
+            bash "ash-cli/engines/hot-reload-engine/reload-${target}.sh" &
+          done
+          wait
+          echo "[ASH-RELOAD-ALL] Cascade complete"
+          ALL_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/reload-all.sh
+
+          # ── IPC server mock ───────────────────────────────────────────
+          cat > ash-cli/engines/ipc-engine/server.sh << 'IPC_EOF'
+          #!/usr/bin/env bash
+          # ASH IPC Server Mock v5.0
+          SOCKET="${1:-/tmp/ash-ipc-test.sock}"
+          mkdir -p "$(dirname "${SOCKET}")"
+          echo "[ASH-IPC] Server mock — not starting listener in CI"
+          exit 0
+          IPC_EOF
+          chmod +x ash-cli/engines/ipc-engine/server.sh 2>/dev/null || \
+            mkdir -p ash-cli/engines/ipc-engine && \
+            chmod +x ash-cli/engines/ipc-engine/server.sh
+
+          echo "  ✅ Hot reload engine ready"
+          find ash-cli/engines/hot-reload-engine -name "*.sh" -exec echo "  📄 {}" \;
+
+      - name: "🎯 Build target list"
+        id: targets
+        run: |
+          INPUT="${TARGETS_INPUT}"
+          if [[ "${INPUT}" == "all" ]]; then
+            TARGETS='["hyprland","waybar","kitty","dunst","gtk","nvim","fish","all-cascade"]'
+          else
+            IFS=',' read -ra T_ARR <<< "${INPUT}"
+            TARGETS=$(printf '%s\n' "${T_ARR[@]}" | jq -R . | jq -s -c .)
+          fi
+          echo "json=${TARGETS}" >> "$GITHUB_OUTPUT"
+          echo "  🎯 Targets: ${TARGETS}"
+
+      - name: "📊 Baseline check"
+        id: baseline
+        run: |
+          HAS="false"
+          if gh api \
+            "repos/${{ github.repository }}/actions/caches" \
+            --jq '.actions_caches[].key' 2>/dev/null | \
+            grep -q "bench-baseline-hot-reload"; then
+            HAS="true"
+          fi
+          echo "has_baseline=${HAS}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📦 Cache baseline"
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-hot-reload-${{ github.base_ref || 'main' }}"
+          restore-keys: |
+            bench-baseline-hot-reload-main
+            bench-baseline-hot-reload-
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Per-target reload latency
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-target:
+    name: "⚡ Reload · ${{ matrix.target.name }}"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: "hyprland"
+            description: "Hyprland compositor reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-hyprland.sh"
+            threshold_ms: 200
+            critical: true
+            weight: "critical"
+            mock_signal: "hyprctl reload"
+
+          - name: "waybar"
+            description: "Waybar status bar reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-waybar.sh"
+            threshold_ms: 300
+            critical: true
+            weight: "critical"
+            mock_signal: "pkill -SIGUSR2 waybar"
+
+          - name: "kitty"
+            description: "Kitty terminal reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-kitty.sh"
+            threshold_ms: 100
+            critical: true
+            weight: "high"
+            mock_signal: "kitty @ set-colors"
+
+          - name: "dunst"
+            description: "Dunst notification daemon reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-dunst.sh"
+            threshold_ms: 150
+            critical: false
+            weight: "medium"
+            mock_signal: "pkill -SIGUSR1 dunst"
+
+          - name: "gtk"
+            description: "GTK theme reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-gtk.sh"
+            threshold_ms: 200
+            critical: false
+            weight: "medium"
+            mock_signal: "gsettings set gtk-theme"
+
+          - name: "nvim"
+            description: "Neovim color scheme reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-nvim.sh"
+            threshold_ms: 150
+            critical: false
+            weight: "medium"
+            mock_signal: "nvim --remote-send"
+
+          - name: "fish"
+            description: "Fish shell environment reload"
+            reload_script: "ash-cli/engines/hot-reload-engine/reload-fish.sh"
+            threshold_ms: 80
+            critical: false
+            weight: "low"
+            mock_signal: "fish -c source"
+
+    env:
+      TARGET_NAME: ${{ matrix.target.name }}
+      TARGET_THRESHOLD_MS: ${{ matrix.target.threshold_ms }}
+      TARGET_WEIGHT: ${{ matrix.target.weight }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            inotify-tools jq bc time python3 python3-pip procps 2>/dev/null || true
+          pip3 install --quiet --user matplotlib numpy rich 2>/dev/null || true
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && \
+          sudo dpkg -i /tmp/hyperfine.deb || true
+
+      - name: "🏗️ Setup reload scripts"
+        run: |
+          mkdir -p ash-cli/engines/hot-reload-engine
+
+          # Create reload script if it doesn't exist
+          RELOAD_SCRIPT="${{ matrix.target.reload_script }}"
+          [[ -f "${RELOAD_SCRIPT}" ]] && { echo "  ✅ Script exists"; exit 0; }
+
+          cat > "${RELOAD_SCRIPT}" << SCRIPT_EOF
+          #!/usr/bin/env bash
+          # ASH ${TARGET_NAME} hot-reload v5.0
+          set -euo pipefail
+          CONFIG_FILE="\${1:-}"
+          START=\$(date +%s%N)
+          case "${TARGET_NAME}" in
+            hyprland) sleep 0.050 ;;
+            waybar)   sleep 0.080 ;;
+            kitty)    sleep 0.020 ;;
+            dunst)    sleep 0.040 ;;
+            gtk)      sleep 0.060 ;;
+            nvim)     sleep 0.030 ;;
+            fish)     sleep 0.015 ;;
+            *)        sleep 0.025 ;;
+          esac
+          END=\$(date +%s%N)
+          ELAPSED_MS=\$(( (END - START) / 1000000 ))
+          echo "${TARGET_NAME} reloaded in \${ELAPSED_MS}ms"
+          SCRIPT_EOF
+          chmod +x "${RELOAD_SCRIPT}"
+          echo "  ✅ Reload script created: ${RELOAD_SCRIPT}"
+
+      - name: "🔥 Warmup reload engine"
+        run: |
+          echo "  🔥 Warming up ${TARGET_NAME} reload..."
+          for i in $(seq 1 3); do
+            bash "${{ matrix.target.reload_script }}" > /dev/null 2>&1 || true
+            sleep 0.1
+          done
+          echo "  ✅ Warmup done"
+
+      - name: "⚡ Hyperfine reload latency benchmark"
+        id: bench
+        run: |
+          OUTPUT_DIR="${BENCH_DIR}/${TARGET_NAME}"
+          mkdir -p "${OUTPUT_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ Hot Reload Benchmark: ${TARGET_NAME}"
+          echo "  📋 ${{ matrix.target.description }}"
+          echo "  🔁 Iterations: ${ITERATIONS}"
+          echo "  ⏱️  Threshold:  ${TARGET_THRESHOLD_MS}ms"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          hyperfine \
+            --runs "${ITERATIONS}" \
+            --warmup 3 \
+            --time-unit millisecond \
+            --export-json "${OUTPUT_DIR}/hyperfine.json" \
+            --export-markdown "${OUTPUT_DIR}/hyperfine.md" \
+            --export-csv "${OUTPUT_DIR}/hyperfine.csv" \
+            --shell bash \
+            --command-name "${TARGET_NAME}-reload" \
+            "bash ${{ matrix.target.reload_script }}" || {
+              echo "::warning::hyperfine unavailable — manual timing"
+              TIMES=()
+              for i in $(seq 1 "${ITERATIONS}"); do
+                S=$(date +%s%N)
+                bash "${{ matrix.target.reload_script }}" > /dev/null 2>&1 || true
+                E=$(date +%s%N)
+                TIMES+=("$(( (E-S)/1000000 ))")
+              done
+              MEAN=0
+              for t in "${TIMES[@]}"; do MEAN=$((MEAN+t)); done
+              MEAN=$((MEAN/${#TIMES[@]}))
+              echo '{"results":[{"command":"'${TARGET_NAME}'","mean":'$((MEAN))',"stddev":0,"times":['$(IFS=,;echo "${TIMES[*]/%/.0}")']}]}' \
+                > "${OUTPUT_DIR}/hyperfine.json"
+            }
+
+          echo "  ✅ Benchmark complete"
+          jq '.results[0] | {mean,stddev,min,max}' "${OUTPUT_DIR}/hyperfine.json" 2>/dev/null || true
+
+      - name: "📊 Analyze reload latency"
+        id: analyze
+        run: |
+          OUTPUT_DIR="${BENCH_DIR}/${TARGET_NAME}"
+          PROCESSED="${OUTPUT_DIR}/analysis.json"
+
+          python3 << PYTHON_EOF
+          import json
+          import os
+          import statistics
+
+          with open("${OUTPUT_DIR}/hyperfine.json") as f:
+              raw = json.load(f)
+
+          r = raw.get("results", [{}])[0]
+          times_s  = r.get("times", [r.get("mean", 0)])
+          times_ms = [t * 1000 for t in times_s]
+          n        = len(times_ms)
+
+          mean_ms   = statistics.mean(times_ms)
+          median_ms = statistics.median(times_ms)
+          stddev_ms = statistics.stdev(times_ms) if n > 1 else 0
+          min_ms    = min(times_ms)
+          max_ms    = max(times_ms)
+          cv_pct    = (stddev_ms / mean_ms * 100) if mean_ms > 0 else 0
+          jitter_ms = max_ms - min_ms
+
+          sorted_t = sorted(times_ms)
+          p90 = sorted_t[min(int(n*0.90), n-1)]
+          p95 = sorted_t[min(int(n*0.95), n-1)]
+          p99 = sorted_t[min(int(n*0.99), n-1)]
+
+          threshold_ms = float("${TARGET_THRESHOLD_MS}")
+          passed = mean_ms <= threshold_ms
+
+          result = {
+              "target":      "${TARGET_NAME}",
+              "description": "${{ matrix.target.description }}",
+              "weight":      "${TARGET_WEIGHT}",
+              "git_sha":     "${GITHUB_SHA}",
+              "timing": {
+                  "mean_ms":   round(mean_ms, 3),
+                  "median_ms": round(median_ms, 3),
+                  "min_ms":    round(min_ms, 3),
+                  "max_ms":    round(max_ms, 3),
+                  "stddev_ms": round(stddev_ms, 3),
+                  "cv_percent": round(cv_pct, 2),
+                  "jitter_ms": round(jitter_ms, 3),
+                  "p90_ms":    round(p90, 3),
+                  "p95_ms":    round(p95, 3),
+                  "p99_ms":    round(p99, 3),
+              },
+              "threshold": {
+                  "threshold_ms": threshold_ms,
+                  "passed": passed,
+                  "margin_ms": round(threshold_ms - mean_ms, 3),
+                  "margin_pct": round((threshold_ms-mean_ms)/threshold_ms*100, 2),
+              },
+              "stability": {
+                  "stable": cv_pct < 15.0,
+                  "jitter_ms": round(jitter_ms, 3),
+                  "cv_percent": round(cv_pct, 2),
+              },
+              "iterations": n,
+              "raw_times_ms": [round(t, 3) for t in times_ms],
+          }
+
+          with open("${PROCESSED}", "w") as f:
+              json.dump(result, f, indent=2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"mean_ms={round(mean_ms,3)}\n")
+              out.write(f"p95_ms={round(p95,3)}\n")
+              out.write(f"passed={'true' if passed else 'false'}\n")
+              out.write(f"jitter_ms={round(jitter_ms,3)}\n")
+              out.write(f"cv_percent={round(cv_pct,2)}\n")
+
+          status = "✅" if passed else "❌"
+          print(f"  {status} mean={round(mean_ms,1)}ms p95={round(p95,1)}ms "
+                f"jitter={round(jitter_ms,1)}ms cv={round(cv_pct,1)}%")
+          PYTHON_EOF
+
+      - name: "📈 Latency time-series chart"
+        run: |
+          OUTPUT_DIR="${BENCH_DIR}/${TARGET_NAME}"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import matplotlib.patches as patches
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          with open("${OUTPUT_DIR}/analysis.json") as f:
+              data = json.load(f)
+
+          times   = data["raw_times_ms"]
+          t       = data["timing"]
+          thr     = data["threshold"]
+          stab    = data["stability"]
+          passed  = thr["passed"]
+          n       = len(times)
+
+          palette = {
+              "bg":      "#1e1e2e",
+              "surface": "#313244",
+              "surface2":"#585b70",
+              "text":    "#cdd6f4",
+              "subtext": "#a6adc8",
+              "green":   "#a6e3a1",
+              "red":     "#f38ba8",
+              "blue":    "#89b4fa",
+              "mauve":   "#cba6f7",
+              "peach":   "#fab387",
+              "yellow":  "#f9e2af",
+              "teal":    "#94e2d5",
+              "sky":     "#89dceb",
+          }
+
+          accent = palette["green"] if passed else palette["red"]
+          stable_color = palette["teal"] if stab["stable"] else palette["yellow"]
+
+          fig, axes = plt.subplots(2, 2, figsize=(16, 10))
+          fig.patch.set_facecolor(palette["bg"])
+          axes = axes.flatten()
+
+          def style_ax(ax):
+              ax.set_facecolor(palette["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(palette["surface2"])
+                  sp.set_alpha(0.4)
+              ax.tick_params(colors=palette["text"], labelsize=9)
+              ax.grid(True, alpha=0.1, color=palette["text"], zorder=1)
+
+          # ── Panel 1: Time series ──────────────────────────────────────
+          ax1 = axes[0]
+          style_ax(ax1)
+          x = np.arange(1, n+1)
+          ax1.fill_between(x, times, t["mean_ms"],
+                           alpha=0.12, color=palette["blue"])
+          ax1.plot(x, times, color=palette["blue"], linewidth=1.2,
+                   alpha=0.8, zorder=3)
+          ax1.scatter(x, times, color=palette["blue"], s=20,
+                      alpha=0.7, zorder=4)
+
+          ax1.axhline(t["mean_ms"], color=palette["mauve"], linewidth=1.8,
+                      linestyle="--", zorder=4,
+                      label=f"Mean: {t['mean_ms']:.1f}ms")
+          ax1.axhline(t["p95_ms"], color=palette["peach"], linewidth=1.3,
+                      linestyle=":", zorder=4,
+                      label=f"p95: {t['p95_ms']:.1f}ms")
+          ax1.axhline(thr["threshold_ms"], color=palette["red"],
+                      linewidth=1.8, linestyle="-", alpha=0.6, zorder=4,
+                      label=f"Threshold: {thr['threshold_ms']:.0f}ms")
+
+          # Highlight outliers (> p95)
+          outliers = [(i+1, v) for i, v in enumerate(times) if v > t["p95_ms"]]
+          if outliers:
+              ox, oy = zip(*outliers)
+              ax1.scatter(list(ox), list(oy), color=palette["red"],
+                          s=60, zorder=5, marker="^",
+                          label=f"Outliers: {len(outliers)}")
+
+          ax1.set_xlabel("Iteration #", color=palette["text"], fontsize=10)
+          ax1.set_ylabel("Reload Time (ms)", color=palette["text"], fontsize=10)
+          ax1.set_title("Reload Time Series", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+          ax1.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8, framealpha=0.85)
+
+          # ── Panel 2: Distribution histogram ──────────────────────────
+          ax2 = axes[1]
+          style_ax(ax2)
+          n_bins = max(6, len(times) // 3)
+          counts, bin_edges, patches_list = ax2.hist(
+              times, bins=n_bins, color=accent, alpha=0.72,
+              edgecolor=palette["bg"], linewidth=0.8, zorder=3
+          )
+
+          # Color bins beyond threshold red
+          for patch, left_edge in zip(patches_list, bin_edges[:-1]):
+              if left_edge >= thr["threshold_ms"]:
+                  patch.set_facecolor(palette["red"])
+                  patch.set_alpha(0.9)
+
+          ax2.axvline(t["mean_ms"], color=palette["mauve"],
+                      linewidth=2, linestyle="--",
+                      label=f"Mean: {t['mean_ms']:.1f}ms", zorder=4)
+          ax2.axvline(t["p95_ms"], color=palette["peach"],
+                      linewidth=1.5, linestyle=":",
+                      label=f"p95: {t['p95_ms']:.1f}ms", zorder=4)
+          ax2.axvline(thr["threshold_ms"], color=palette["red"],
+                      linewidth=1.8, alpha=0.7,
+                      label=f"Threshold: {thr['threshold_ms']:.0f}ms", zorder=4)
+
+          ax2.set_xlabel("Reload Time (ms)", color=palette["text"], fontsize=10)
+          ax2.set_ylabel("Frequency", color=palette["text"], fontsize=10)
+          ax2.set_title("Latency Distribution", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+          ax2.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8, framealpha=0.85)
+
+          # ── Panel 3: Box plot with annotations ───────────────────────
+          ax3 = axes[2]
+          style_ax(ax3)
+          bp = ax3.boxplot(
+              times,
+              vert=True,
+              patch_artist=True,
+              notch=True,
+              widths=0.5,
+              boxprops={"facecolor": accent, "alpha": 0.7,
+                        "edgecolor": palette["text"], "linewidth": 1.5},
+              whiskerprops={"color": palette["text"], "linewidth": 1.5},
+              capprops={"color": palette["text"], "linewidth": 2},
+              flierprops={"marker": "o", "color": palette["red"],
+                          "alpha": 0.6, "markersize": 5},
+              medianprops={"color": palette["bg"], "linewidth": 2},
+          )
+
+          ax3.axhline(thr["threshold_ms"], color=palette["red"],
+                      linewidth=1.5, linestyle="--", alpha=0.7,
+                      label=f"Threshold: {thr['threshold_ms']:.0f}ms")
+
+          # Annotations
+          stats_text = (
+              f"min:    {t['min_ms']:.1f}ms\n"
+              f"Q1:     {np.percentile(times, 25):.1f}ms\n"
+              f"median: {t['median_ms']:.1f}ms\n"
+              f"Q3:     {np.percentile(times, 75):.1f}ms\n"
+              f"max:    {t['max_ms']:.1f}ms\n"
+              f"─────────────────\n"
+              f"mean:   {t['mean_ms']:.1f}ms\n"
+              f"stddev: ±{t['stddev_ms']:.1f}ms\n"
+              f"CV:     {t['cv_percent']:.1f}%\n"
+              f"jitter: {t['jitter_ms']:.1f}ms"
+          )
+          ax3.text(1.35, np.percentile(times, 75),
+                   stats_text,
+                   color=palette["text"],
+                   fontsize=8,
+                   fontfamily="monospace",
+                   va="center",
+                   bbox={"boxstyle":"round,pad=0.5",
+                         "facecolor": palette["surface2"],
+                         "alpha": 0.8,
+                         "edgecolor": palette["surface2"]})
+
+          ax3.set_xticklabels([data["target"]], color=palette["text"])
+          ax3.set_ylabel("Reload Time (ms)", color=palette["text"], fontsize=10)
+          ax3.set_title("Statistical Box Plot", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+          ax3.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=8, framealpha=0.85)
+
+          # ── Panel 4: Stability + summary ──────────────────────────────
+          ax4 = axes[3]
+          ax4.set_facecolor(palette["surface"])
+          ax4.axis("off")
+
+          # Performance gauge (mini)
+          usage = min(t["mean_ms"] / thr["threshold_ms"], 1.05)
+          theta = np.linspace(np.pi, 0, 100)
+          ax4.plot(0.25 + 0.2*np.cos(theta),
+                   0.75 + 0.2*np.sin(theta),
+                   color=palette["surface2"], linewidth=12,
+                   solid_capstyle="round", alpha=0.5,
+                   transform=ax4.transAxes)
+
+          fill_end = np.pi - usage * np.pi
+          theta_fill = np.linspace(np.pi, max(fill_end, 0), 100)
+          ax4.plot(0.25 + 0.2*np.cos(theta_fill),
+                   0.75 + 0.2*np.sin(theta_fill),
+                   color=accent, linewidth=12,
+                   solid_capstyle="round", alpha=0.9,
+                   transform=ax4.transAxes)
+
+          # Summary stats grid
+          rows = [
+              ("🎯 Target",       data["target"]),
+              ("⏱️  Mean",         f"{t['mean_ms']:.2f}ms"),
+              ("📊 p95",          f"{t['p95_ms']:.2f}ms"),
+              ("📊 p99",          f"{t['p99_ms']:.2f}ms"),
+              ("📐 Threshold",    f"{thr['threshold_ms']:.0f}ms"),
+              ("🎲 Jitter",       f"{t['jitter_ms']:.2f}ms"),
+              ("📉 CV",           f"{t['cv_percent']:.1f}%"),
+              ("🔢 Iterations",   str(n)),
+              ("🔋 Stable",       "✅ Yes" if stab["stable"] else "⚠️  No"),
+              ("✅ Pass",         "✅ PASS" if passed else "❌ FAIL"),
+          ]
+
+          y_pos = 0.52
+          for label, value in rows:
+              ax4.text(0.03, y_pos, label,
+                       transform=ax4.transAxes,
+                       color=palette["subtext"], fontsize=10)
+              val_color = (
+                  (palette["green"] if passed else palette["red"])
+                  if "Pass" in label else palette["text"]
+              )
+              ax4.text(0.68, y_pos, value,
+                       transform=ax4.transAxes,
+                       color=val_color,
+                       fontsize=10, fontweight="bold", ha="right")
+              y_pos -= 0.048
+
+          ax4.text(0.25, 0.88, f"{t['mean_ms']:.0f}ms",
+                   transform=ax4.transAxes,
+                   ha="center", color=accent,
+                   fontsize=13, fontweight="bold")
+          ax4.set_title("Performance Summary", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+
+          # ── Global suptitle ───────────────────────────────────────────
+          fig.suptitle(
+              f"🔥 ASH Hot Reload Benchmark — {data['target'].upper()}\n"
+              f"{'✅ PASSED' if passed else '❌ FAILED'}  ·  "
+              f"mean={t['mean_ms']:.2f}ms  ·  p95={t['p95_ms']:.2f}ms  ·  "
+              f"threshold={thr['threshold_ms']:.0f}ms  ·  "
+              f"jitter={t['jitter_ms']:.1f}ms",
+              color=palette["text"],
+              fontsize=13,
+              fontweight="bold",
+              y=1.02
+          )
+
+          plt.tight_layout(rect=[0, 0, 1, 0.98])
+          chart_path = "${OUTPUT_DIR}/reload-chart.png"
+          plt.savefig(chart_path, dpi=150, bbox_inches="tight",
+                      facecolor=palette["bg"])
+          plt.close()
+          print(f"  📈 Chart: {chart_path}")
+          PYTHON_EOF
+
+      - name: "⚖️ Regression detection"
+        id: regression
+        run: |
+          ANALYSIS="${BENCH_DIR}/${TARGET_NAME}/analysis.json"
+          BASELINE="${BASELINE_DIR}/${TARGET_NAME}-reload.json"
+
+          if [[ -f "${BASELINE}" ]]; then
+            python3 << PYTHON_EOF
+          import json, os
+
+          with open("${ANALYSIS}") as f: current = json.load(f)
+          with open("${BASELINE}") as f: baseline = json.load(f)
+
+          cur = current["timing"]["mean_ms"]
+          bas = baseline.get("timing",{}).get("mean_ms", cur)
+          threshold_pct = float("${REGRESSION_THRESHOLD}")
+          change_pct = ((cur - bas) / bas * 100) if bas > 0 else 0
+          regression = change_pct > threshold_pct
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"regression_detected={'true' if regression else 'false'}\n")
+              out.write(f"regression_percent={round(change_pct, 2)}\n")
+
+          status = "🚨 REGRESSION" if regression else "✅ OK"
+          print(f"  {status} — cur={cur:.1f}ms base={bas:.1f}ms change={change_pct:+.1f}%")
+          PYTHON_EOF
+          else
+            echo "  ℹ️ No baseline — skipping"
+            echo "regression_detected=false" >> "$GITHUB_OUTPUT"
+            echo "regression_percent=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "📤 Upload artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "reload-${{ matrix.target.name }}-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/${{ matrix.target.name }}/"
+          retention-days: 30
+
+      - name: "❌ Fail on critical threshold breach"
+        if: |
+          steps.analyze.outputs.passed == 'false' &&
+          matrix.target.weight == 'critical'
+        run: |
+          echo "::error title=Hot Reload Threshold Exceeded::"
+          echo "  ${TARGET_NAME} mean=${{ steps.analyze.outputs.mean_ms }}ms"
+          echo "  exceeds threshold=${TARGET_THRESHOLD_MS}ms (critical)"
+          exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Cascade reload benchmark (all targets simultaneously)
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-cascade:
+    name: "⚡ Cascade · Full System Reload"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            jq bc time python3 python3-pip procps 2>/dev/null || true
+          pip3 install --quiet --user matplotlib numpy rich 2>/dev/null || true
+          wget -q \
+            "https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb" \
+            -O /tmp/hyperfine.deb && sudo dpkg -i /tmp/hyperfine.deb || true
+
+      - name: "🏗️ Setup reload scripts"
+        run: |
+          mkdir -p ash-cli/engines/hot-reload-engine
+          for target in hyprland waybar kitty dunst gtk nvim fish; do
+            f="ash-cli/engines/hot-reload-engine/reload-${target}.sh"
+            [[ -f "${f}" ]] && continue
+            DELAY="0.050"
+            case "${target}" in
+              hyprland) DELAY="0.050" ;; waybar) DELAY="0.080" ;;
+              kitty)    DELAY="0.020" ;; dunst)  DELAY="0.040" ;;
+              gtk)      DELAY="0.060" ;; nvim)   DELAY="0.030" ;;
+              fish)     DELAY="0.015" ;;
+            esac
+            printf '#!/usr/bin/env bash\nsleep %s\necho "%s reloaded"\n' \
+              "${DELAY}" "${target}" > "${f}"
+            chmod +x "${f}"
+          done
+
+          cat > ash-cli/engines/hot-reload-engine/reload-all.sh << 'ALL_EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          TARGETS=(hyprland waybar kitty dunst gtk nvim fish)
+          for t in "${TARGETS[@]}"; do
+            bash "ash-cli/engines/hot-reload-engine/reload-${t}.sh" &
+          done
+          wait
+          echo "[CASCADE] All ${#TARGETS[@]} targets reloaded"
+          ALL_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/reload-all.sh
+
+      - name: "⚡ Cascade timing benchmark"
+        id: cascade
+        run: |
+          CASCADE_DIR="${BENCH_DIR}/cascade"
+          mkdir -p "${CASCADE_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ⚡ Full Cascade Reload Benchmark"
+          echo "  🎯 Threshold: ${THRESHOLD_FULL_CASCADE_MS}ms"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          TIMES=()
+          STAGE_ROWS=()
+
+          for i in $(seq 1 "${ITERATIONS}"); do
+            RUN_START=$(date +%s%N)
+
+            # Sequential cascade (guaranteed order)
+            declare -A STAGE_TIMES_RUN=()
+            for target in hyprland waybar kitty dunst gtk nvim fish; do
+              S=$(date +%s%N)
+              bash "ash-cli/engines/hot-reload-engine/reload-${target}.sh" \
+                > /dev/null 2>&1 || true
+              E=$(date +%s%N)
+              STAGE_TIMES_RUN["${target}"]=$(( (E-S)/1000000 ))
+            done
+
+            RUN_END=$(date +%s%N)
+            RUN_TOTAL=$(( (RUN_END-RUN_START)/1000000 ))
+            TIMES+=("${RUN_TOTAL}")
+
+            if [[ "${i}" -eq 1 ]]; then
+              for t in hyprland waybar kitty dunst gtk nvim fish; do
+                STAGE_ROWS+=("${t}=${STAGE_TIMES_RUN[${t}]}")
+              done
+            fi
+
+            echo "    Run ${i}: ${RUN_TOTAL}ms"
+          done
+
+          # Parallel cascade
+          PAR_START=$(date +%s%N)
+          bash ash-cli/engines/hot-reload-engine/reload-all.sh \
+            > /dev/null 2>&1 || true
+          PAR_END=$(date +%s%N)
+          PAR_MS=$(( (PAR_END-PAR_START)/1000000 ))
+
+          # Stats
+          MEAN=0
+          for t in "${TIMES[@]}"; do MEAN=$((MEAN+t)); done
+          MEAN=$((MEAN/${#TIMES[@]}))
+
+          echo ""
+          echo "  📊 Sequential cascade mean: ${MEAN}ms"
+          echo "  📊 Parallel cascade:        ${PAR_MS}ms"
+          echo "  ⚡ Speedup:                $(echo "scale=2; ${MEAN}/${PAR_MS}" | bc)x"
+
+          PASSED="true"
+          if [[ "${MEAN}" -gt "${THRESHOLD_FULL_CASCADE_MS}" ]]; then
+            PASSED="false"
+          fi
+
+          # Write JSON
+          STAGES_JSON="{"
+          for row in "${STAGE_ROWS[@]}"; do
+            K="${row%%=*}"
+            V="${row##*=}"
+            STAGES_JSON+="\"${K}_ms\":${V},"
+          done
+          STAGES_JSON="${STAGES_JSON%,}}"
+
+          cat > "${CASCADE_DIR}/cascade-results.json" << EOF
+          {
+            "git_sha": "${GITHUB_SHA}",
+            "sequential_mean_ms": ${MEAN},
+            "parallel_ms": ${PAR_MS},
+            "speedup_factor": $(echo "scale=2; ${MEAN}/${PAR_MS}" | bc),
+            "threshold_ms": ${THRESHOLD_FULL_CASCADE_MS},
+            "passed": ${PASSED},
+            "iterations": ${#TIMES[@]},
+            "first_run_stages": ${STAGES_JSON}
+          }
+          EOF
+
+          echo "mean_ms=${MEAN}" >> "$GITHUB_OUTPUT"
+          echo "parallel_ms=${PAR_MS}" >> "$GITHUB_OUTPUT"
+          echo "passed=${PASSED}" >> "$GITHUB_OUTPUT"
+
+      - name: "📈 Cascade visualization"
+        run: |
+          CASCADE_DIR="${BENCH_DIR}/cascade"
+
+          python3 << PYTHON_EOF
+          import json
+          import sys
+
+          try:
+              import matplotlib
+              matplotlib.use('Agg')
+              import matplotlib.pyplot as plt
+              import numpy as np
+          except ImportError:
+              sys.exit(0)
+
+          with open("${CASCADE_DIR}/cascade-results.json") as f:
+              data = json.load(f)
+
+          palette = {
+              "bg":"#1e1e2e","surface":"#313244","surface2":"#585b70",
+              "text":"#cdd6f4","subtext":"#a6adc8",
+              "green":"#a6e3a1","red":"#f38ba8","blue":"#89b4fa",
+              "mauve":"#cba6f7","peach":"#fab387","teal":"#94e2d5",
+              "sky":"#89dceb","yellow":"#f9e2af","pink":"#f5c2e7",
+          }
+
+          stages = data.get("first_run_stages", {})
+          passed = data["passed"]
+          accent = palette["green"] if passed else palette["red"]
+
+          stage_colors = [
+              palette["blue"], palette["teal"], palette["sky"],
+              palette["mauve"], palette["peach"], palette["green"],
+              palette["pink"],
+          ]
+
+          fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+          fig.patch.set_facecolor(palette["bg"])
+
+          for ax in [ax1, ax2]:
+              ax.set_facecolor(palette["surface"])
+              for sp in ax.spines.values():
+                  sp.set_edgecolor(palette["surface2"])
+                  sp.set_alpha(0.4)
+              ax.tick_params(colors=palette["text"], labelsize=9)
+              ax.grid(True, alpha=0.1, color=palette["text"], zorder=1)
+
+          # ── Waterfall bar for stages ──────────────────────────────────
+          stage_items = [(k.replace("_ms",""), v)
+                         for k, v in stages.items() if k.endswith("_ms")]
+          if stage_items:
+              names, vals = zip(*stage_items)
+              cumulative = 0
+              for i, (name, val) in enumerate(zip(names, vals)):
+                  ax1.barh([i], [val], left=[cumulative],
+                            color=stage_colors[i % len(stage_colors)],
+                            alpha=0.82, height=0.6,
+                            edgecolor=palette["bg"], linewidth=1, zorder=3)
+                  ax1.text(cumulative + val/2, i, f"{val}ms",
+                           ha="center", va="center",
+                           color=palette["bg"], fontsize=9, fontweight="bold")
+                  ax1.text(-3, i, name, ha="right", va="center",
+                           color=palette["text"], fontsize=9)
+                  cumulative += val
+
+              ax1.axvline(data["threshold_ms"], color=palette["red"],
+                          linewidth=1.5, linestyle="--", alpha=0.7,
+                          label=f"Threshold: {data['threshold_ms']}ms")
+              ax1.axvline(data["sequential_mean_ms"],
+                          color=accent, linewidth=2.0, linestyle="-", alpha=0.9,
+                          label=f"Total: {data['sequential_mean_ms']}ms")
+              ax1.set_yticks([])
+              ax1.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                         fontsize=8, framealpha=0.85)
+
+          ax1.set_xlabel("Time (ms)", color=palette["text"], fontsize=10)
+          ax1.set_title("Stage Waterfall (Sequential)", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+
+          # ── Sequential vs Parallel comparison ─────────────────────────
+          modes = ["Sequential\nMean", "Parallel\n(All at once)"]
+          vals2 = [data["sequential_mean_ms"], data["parallel_ms"]]
+          bar_colors2 = [palette["blue"], palette["green"]]
+          bars2 = ax2.bar(modes, vals2, color=bar_colors2, alpha=0.82,
+                          width=0.4, zorder=3,
+                          edgecolor=palette["bg"], linewidth=1.2)
+          for bar, val in zip(bars2, vals2):
+              ax2.text(bar.get_x() + bar.get_width()/2,
+                       bar.get_height() + max(vals2)*0.03,
+                       f"{val}ms",
+                       ha="center", color=palette["text"],
+                       fontsize=12, fontweight="bold")
+
+          ax2.axhline(data["threshold_ms"], color=palette["red"],
+                      linewidth=1.5, linestyle="--", alpha=0.7,
+                      label=f"Threshold: {data['threshold_ms']}ms")
+          speedup = data.get("speedup_factor", 0)
+          ax2.annotate(
+              f"⚡ {speedup:.1f}x faster",
+              xy=(1, data["parallel_ms"]),
+              xytext=(0.5, max(vals2)*0.6),
+              ha="center", color=palette["peach"], fontsize=11,
+              fontweight="bold",
+              arrowprops=dict(arrowstyle="->", color=palette["peach"], lw=1.5),
+          )
+          ax2.set_ylabel("Time (ms)", color=palette["text"], fontsize=10)
+          ax2.legend(facecolor=palette["bg"], labelcolor=palette["text"],
+                     fontsize=9, framealpha=0.85)
+          ax2.set_title("Sequential vs Parallel", color=palette["text"],
+                        fontsize=11, fontweight="bold", pad=10)
+
+          fig.suptitle(
+              f"⚡ ASH Full Cascade Reload Benchmark\n"
+              f"{'✅ PASSED' if passed else '❌ FAILED'}  ·  "
+              f"seq={data['sequential_mean_ms']}ms  ·  "
+              f"par={data['parallel_ms']}ms  ·  "
+              f"speedup={speedup:.1f}x  ·  "
+              f"threshold={data['threshold_ms']}ms",
+              color=palette["text"], fontsize=13, fontweight="bold", y=1.04
+          )
+
+          plt.tight_layout()
+          plt.savefig("${CASCADE_DIR}/cascade-chart.png",
+                      dpi=150, bbox_inches="tight", facecolor=palette["bg"])
+          plt.close()
+          print("  📈 Cascade chart saved")
+          PYTHON_EOF
+
+      - name: "📤 Upload cascade results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "reload-cascade-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/cascade/"
+          retention-days: 30
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Debounce + stress testing
+  # ───────────────────────────────────────────────────────────────────────────
+  bench-stress:
+    name: "💪 Stress · Debounce & Concurrency"
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install tools"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            inotify-tools jq bc python3 python3-pip procps 2>/dev/null || true
+          pip3 install --quiet --user matplotlib numpy rich 2>/dev/null || true
+
+      - name: "🏗️ Setup stress test scripts"
+        run: |
+          mkdir -p ash-cli/engines/hot-reload-engine
+          [[ -f "ash-cli/engines/hot-reload-engine/debounce.sh" ]] || \
+          cat > ash-cli/engines/hot-reload-engine/debounce.sh << 'DEBOUNCE_EOF'
+          #!/usr/bin/env bash
+          DELAY_MS="${1:-100}"
+          sleep "$(echo "scale=3; ${DELAY_MS}/1000" | bc)s"
+          echo "[DEBOUNCE] ${DELAY_MS}ms"
+          DEBOUNCE_EOF
+          chmod +x ash-cli/engines/hot-reload-engine/debounce.sh
+          for t in hyprland waybar; do
+            [[ -f "ash-cli/engines/hot-reload-engine/reload-${t}.sh" ]] || {
+              printf '#!/usr/bin/env bash\nsleep 0.05\necho "%s reloaded"\n' "${t}" \
+                > "ash-cli/engines/hot-reload-engine/reload-${t}.sh"
+              chmod +x "ash-cli/engines/hot-reload-engine/reload-${t}.sh"
+            }
+          done
+
+      - name: "🔄 Debounce effectiveness test"
+        id: debounce
+        run: |
+          STRESS_DIR="${BENCH_DIR}/stress"
+          mkdir -p "${STRESS_DIR}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🔄 Debounce Benchmark"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          declare -A DEBOUNCE_RESULTS=()
+          DELAYS=(50 100 150 200 300)
+
+          for delay in "${DELAYS[@]}"; do
+            TIMES=()
+            for i in $(seq 1 10); do
+              S=$(date +%s%N)
+              bash ash-cli/engines/hot-reload-engine/debounce.sh "${delay}" \
+                > /dev/null 2>&1 || true
+              E=$(date +%s%N)
+              TIMES+=("$(( (E-S)/1000000 ))")
+            done
+            MEAN=0
+            for t in "${TIMES[@]}"; do MEAN=$((MEAN+t)); done
+            MEAN=$((MEAN/${#TIMES[@]}))
+            DEBOUNCE_RESULTS["${delay}"]="${MEAN}"
+            echo "  delay=${delay}ms → actual=${MEAN}ms"
+          done
+
+          # Write results JSON
+          DEBOUNCE_JSON="{"
+          for delay in "${DELAYS[@]}"; do
+            DEBOUNCE_JSON+="\"${delay}ms\":{\"target_ms\":${delay},\"actual_ms\":${DEBOUNCE_RESULTS[${delay}]}},"
+          done
+          DEBOUNCE_JSON="${DEBOUNCE_JSON%,}}"
+
+          cat > "${STRESS_DIR}/debounce-results.json" << EOF
+          {
+            "git_sha": "${GITHUB_SHA}",
+            "threshold_ms": ${THRESHOLD_DEBOUNCE_MS},
+            "measurements": ${DEBOUNCE_JSON}
+          }
+          EOF
+          echo "  ✅ Debounce test complete"
+
+      - name: "💥 Concurrent reload stress test"
+        id: stress
+        run: |
+          STRESS_DIR="${BENCH_DIR}/stress"
+          CONCURRENCY="${STRESS_CONCURRENCY}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  💥 Concurrent Stress Test (${CONCURRENCY} simultaneous)"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          declare -a STRESS_TIMES=()
+          declare -a ERROR_COUNTS=()
+
+          for run in $(seq 1 5); do
+            S=$(date +%s%N)
+            ERRORS=0
+
+            # Launch N concurrent reloads
+            PIDS=()
+            for i in $(seq 1 "${CONCURRENCY}"); do
+              bash ash-cli/engines/hot-reload-engine/reload-waybar.sh \
+                > /dev/null 2>&1 &
+              PIDS+=($!)
+            done
+
+            # Wait for all with error tracking
+            for pid in "${PIDS[@]}"; do
+              wait "${pid}" 2>/dev/null || (( ERRORS++ )) || true
+            done
+
+            E=$(date +%s%N)
+            ELAPSED=$(( (E-S)/1000000 ))
+            STRESS_TIMES+=("${ELAPSED}")
+            ERROR_COUNTS+=("${ERRORS}")
+            echo "  Run ${run}: ${ELAPSED}ms  errors=${ERRORS}"
+          done
+
+          MEAN_STRESS=0
+          TOTAL_ERRORS=0
+          for t in "${STRESS_TIMES[@]}"; do MEAN_STRESS=$((MEAN_STRESS+t)); done
+          MEAN_STRESS=$((MEAN_STRESS/${#STRESS_TIMES[@]}))
+          for e in "${ERROR_COUNTS[@]}"; do TOTAL_ERRORS=$((TOTAL_ERRORS+e)); done
+
+          STRESS_THRESHOLD=$(( TARGET_THRESHOLD_MS * CONCURRENCY + 500 ))
+
+          cat > "${STRESS_DIR}/stress-results.json" << EOF
+          {
+            "git_sha": "${GITHUB_SHA}",
+            "concurrency": ${CONCURRENCY},
+            "runs": ${#STRESS_TIMES[@]},
+            "mean_ms": ${MEAN_STRESS},
+            "total_errors": ${TOTAL_ERRORS},
+            "error_rate_pct": $(echo "scale=2; ${TOTAL_ERRORS} * 100 / (${#STRESS_TIMES[@]} * ${CONCURRENCY})" | bc),
+            "threshold_ms": ${STRESS_THRESHOLD},
+            "passed": $([ "${TOTAL_ERRORS}" -eq 0 ] && echo "true" || echo "false")
+          }
+          EOF
+
+          echo ""
+          echo "  📊 Mean concurrent time: ${MEAN_STRESS}ms"
+          echo "  📊 Total errors:         ${TOTAL_ERRORS}"
+          echo "error_count=${TOTAL_ERRORS}" >> "$GITHUB_OUTPUT"
+          echo "mean_ms=${MEAN_STRESS}" >> "$GITHUB_OUTPUT"
+
+      - name: "📤 Upload stress results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "reload-stress-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/stress/"
+          retention-days: 30
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Consolidated report
+  # ───────────────────────────────────────────────────────────────────────────
+  reload-report:
+    name: "📊 Report · Hot Reload Summary"
+    needs: [setup, bench-target, bench-cascade, bench-stress]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Install tools"
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            jq python3 python3-pip 2>/dev/null || true
+          pip3 install --quiet --user matplotlib pandas rich tabulate
+
+      - name: "📥 Download all artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "reload-*-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.BENCH_DIR }}/collected"
+          merge-multiple: true
+
+      - name: "📊 Build consolidated report"
+        id: report
+        run: |
+          mkdir -p "${REPORTS_DIR}"
+
+          python3 << PYTHON_EOF
+          import json
+          import glob
+          import os
+          from datetime import datetime, timezone
+
+          collected = "${BENCH_DIR}/collected"
+          reports   = "${REPORTS_DIR}"
+
+          target_analyses = []
+          cascade = {}
+          stress  = {}
+
+          for f in glob.glob(f"{collected}/**/analysis.json", recursive=True):
+              try:
+                  with open(f) as fp: target_analyses.append(json.load(fp))
+              except Exception: pass
+
+          try:
+              cc = glob.glob(f"{collected}/**/cascade-results.json", recursive=True)
+              if cc:
+                  with open(cc[0]) as f: cascade = json.load(f)
+          except Exception: pass
+
+          try:
+              ss = glob.glob(f"{collected}/**/stress-results.json", recursive=True)
+              if ss:
+                  with open(ss[0]) as f: stress = json.load(f)
+          except Exception: pass
+
+          passed_all = (
+              all(a.get("threshold",{}).get("passed",True) for a in target_analyses) and
+              cascade.get("passed", True) and
+              stress.get("passed", True)
+          )
+          total  = len(target_analyses)
+          failed = sum(1 for a in target_analyses if not a.get("threshold",{}).get("passed",True))
+
+          consolidated = {
+              "bench_id": "${needs.setup.outputs.bench_id}",
+              "git_sha": "${GITHUB_SHA}",
+              "timestamp": datetime.now(timezone.utc).isoformat(),
+              "overall_pass": passed_all,
+              "summary": {"total":total,"passed":total-failed,"failed":failed},
+              "targets": target_analyses,
+              "cascade": cascade,
+              "stress": stress,
+          }
+
+          with open(f"{reports}/reload-consolidated.json","w") as f:
+              json.dump(consolidated, f, indent=2)
+
+          # Markdown report
+          status = "✅ PASSED" if passed_all else "❌ FAILED"
+          md = [
+              f"# 🔥 Hot Reload Benchmark Report",
+              f"",
+              f"> **{status}**  ·  SHA `{consolidated['git_sha'][:8]}`"
+              f"  ·  {consolidated['timestamp']}",
+              f"",
+              f"## ⚡ Per-Target Results",
+              f"",
+              f"| Target | Mean | p95 | Jitter | CV% | Threshold | Status |",
+              f"|--------|------|-----|--------|-----|-----------|--------|",
+          ]
+
+          for a in sorted(target_analyses, key=lambda x: x.get("timing",{}).get("mean_ms",0)):
+              t    = a.get("timing", {})
+              thr  = a.get("threshold", {})
+              icon = "✅" if thr.get("passed") else "❌"
+              md.append(
+                  f"| `{a.get('target','—')}` "
+                  f"| `{t.get('mean_ms','—')}ms` "
+                  f"| `{t.get('p95_ms','—')}ms` "
+                  f"| `{t.get('jitter_ms','—')}ms` "
+                  f"| `{t.get('cv_percent','—')}%` "
+                  f"| `{thr.get('threshold_ms','—')}ms` "
+                  f"| {icon} |"
+              )
+
+          if cascade:
+              c_icon = "✅" if cascade.get("passed") else "❌"
+              md += [
+                  f"",
+                  f"## 🔄 Cascade Reload: {c_icon}",
+                  f"- Sequential mean: `{cascade.get('sequential_mean_ms','—')}ms`",
+                  f"- Parallel: `{cascade.get('parallel_ms','—')}ms`",
+                  f"- Speedup: `{cascade.get('speedup_factor','—')}x`",
+              ]
+
+          if stress:
+              s_icon = "✅" if stress.get("passed") else "❌"
+              md += [
+                  f"",
+                  f"## 💪 Stress Test: {s_icon}",
+                  f"- Concurrency: `{stress.get('concurrency','—')}` simultaneous reloads",
+                  f"- Error rate: `{stress.get('error_rate_pct','—')}%`",
+                  f"- Total errors: `{stress.get('total_errors','—')}`",
+              ]
+
+          md += ["","---","*Generated by ASH v5.0 Omega Hot Reload Benchmark*"]
+
+          report_content = "\n".join(md)
+          with open(f"{reports}/reload-report.md","w") as f:
+              f.write(report_content)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"w") as f:
+              f.write(report_content)
+
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out:
+              out.write(f"overall_pass={'true' if passed_all else 'false'}\n")
+
+          print(f"  {status} — {total-failed}/{total} targets passed")
+          PYTHON_EOF
+
+      - name: "💬 Post PR comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let content = '';
+            try { content = fs.readFileSync('${{ env.REPORTS_DIR }}/reload-report.md','utf8'); }
+            catch(e) { content = '> Hot reload report unavailable.'; }
+            const passed = '${{ steps.report.outputs.overall_pass }}' === 'true';
+            const body = [
+              `## 🔥 Hot Reload Benchmark Results`,
+              ``,
+              `${passed ? '✅ All reload benchmarks passed' : '❌ Some benchmarks failed'}`,
+              ``,
+              `<details><summary>📊 Full Report</summary>`,
+              ``,
+              content,
+              `</details>`,
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Hot Reload Benchmark Results')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "💾 Save baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.report.outputs.overall_pass == 'true'
+        run: |
+          mkdir -p "${BASELINE_DIR}"
+          find "${BENCH_DIR}/collected" -name "analysis.json" | \
+          while read -r f; do
+            TARGET=$(jq -r .target "${f}" 2>/dev/null || echo "unknown")
+            cp "${f}" "${BASELINE_DIR}/${TARGET}-reload.json"
+            echo "  💾 Saved: ${TARGET}"
+          done
+
+      - name: "💾 Cache baseline"
+        if: |
+          github.ref == 'refs/heads/main' &&
+          steps.report.outputs.overall_pass == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: "${{ env.BASELINE_DIR }}"
+          key: "bench-baseline-hot-reload-main"
+
+      - name: "📤 Upload final report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "reload-report-${{ needs.setup.outputs.bench_id }}"
+          path: "${{ env.REPORTS_DIR }}/"
+          retention-days: 90
+          compression-level: 9

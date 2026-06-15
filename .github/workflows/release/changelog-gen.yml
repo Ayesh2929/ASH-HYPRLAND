@@ -1,0 +1,898 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      📜 ASH DOTFILES v5.0 OMEGA — CHANGELOG GENERATION WORKFLOW                       ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Changelog Generation, Validation & Publishing Pipeline              ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Git Cliff Engine      •  Conventional Commits  •  Multi-Format Output           ║
+# ║      Markdown Generation   •  JSON Output           •  RSS Feed                     ║
+# ║      Category Organization •  Breaking Changes      •  Stats Integration           ║
+# ║      PR Link Generation    •  Author Attribution    •  Emoji Mapping              ║
+# ║      Diff Statistics       •  Unreleased Section    •  Archive Support            ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "📜 Changelog — Generate, Validate & Publish"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.sh"
+      - "**.py"
+      - "**.ts"
+      - "**.lua"
+      - "themes/**"
+      - "plugins/**"
+      - "ash-cli/**"
+      - "config/**"
+      - ".github/workflows/release/changelog-gen.yml"
+
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+  workflow_dispatch:
+    inputs:
+      from_tag:
+        description: "Generate from tag (empty = last tag)"
+        required: false
+        default: ""
+        type: string
+      to_tag:
+        description: "Generate to tag (empty = HEAD)"
+        required: false
+        default: ""
+        type: string
+      format:
+        description: "Output format"
+        required: false
+        default: "all"
+        type: choice
+        options: [all, markdown, json, rss]
+      include_unreleased:
+        description: "Include unreleased commits"
+        required: false
+        default: true
+        type: boolean
+      commit_changes:
+        description: "Commit updated CHANGELOG.md"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    - cron: "0 16 * * 5"
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: "changelog-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: GENERATE — Generate comprehensive changelog
+  # ────────────────────────────────────────────────────────────────────────────
+  generate:
+    name: "📜 Generate Changelog"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    outputs:
+      changelog-generated: ${{ steps.gen.outputs.generated }}
+      entry-count:         ${{ steps.gen.outputs.entry_count }}
+      breaking-count:      ${{ steps.gen.outputs.breaking_count }}
+      from-version:        ${{ steps.gen.outputs.from_version }}
+      to-version:          ${{ steps.gen.outputs.to_version }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: "📦 Install Dependencies"
+        shell: bash
+        run: |
+          pip install -q \
+            "gitpython==3.1.43" \
+            "jinja2==3.1.4" \
+            "pyyaml==6.0.2" \
+            2>/dev/null
+          echo "  ✅ Python dependencies ready"
+
+      - name: "⚙️ Generate cliff.toml"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚙️  Git Cliff Configuration Generator                       ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          if [[ ! -f "cliff.toml" ]]; then
+            cat > cliff.toml << 'CLIFFTOM'
+          # ╔══════════════════════════════════════════════════════════════════╗
+          # ║  ASH Dotfiles v5.0 OMEGA — Git Cliff Configuration             ║
+          # ╚══════════════════════════════════════════════════════════════════╝
+
+          [changelog]
+          header = """
+          # 📜 ASH Dotfiles Changelog
+
+          All notable changes to ASH Dotfiles are documented here.
+          The format follows [Conventional Commits](https://www.conventionalcommits.org/).
+
+          """
+          body = """
+          {% if version %}\
+          ## [{{ version | trim_start_matches(pat="v") }}] — {{ timestamp | date(format="%Y-%m-%d") }}
+          {% else %}\
+          ## [Unreleased]
+          {% endif %}\
+
+          {% for group, commits in commits | group_by(attribute="group") %}
+          ### {{ group }}
+          {% for commit in commits %}
+          - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first }}\
+          {% if commit.github.username %} ([#{{ commit.github.pr_number }}]({{ commit.github.pr_url }})) [@{{ commit.github.username }}](https://github.com/{{ commit.github.username }}){% endif %}\
+          {% if commit.breaking %} ⚠️ **BREAKING**{% endif %}
+          {% endfor %}
+          {% endfor %}
+          """
+          trim = true
+          footer = ""
+          output = "CHANGELOG.md"
+          postprocessors = [
+            { pattern = '\$REPO', replace = "https://github.com/ash-dotfiles/ash-dotfiles" },
+          ]
+
+          [git]
+          conventional_commits = true
+          filter_unconventional = true
+          split_commits = false
+          commit_preprocessors = [
+            { pattern = '\(#([0-9]+)\)', replace = "([#${1}]($REPO/pull/${1}))" },
+          ]
+          commit_parsers = [
+            { message = "^feat",     group = "✨ Features"        },
+            { message = "^theme",    group = "🎨 New Themes"      },
+            { message = "^plugin",   group = "🔌 New Plugins"     },
+            { message = "^fix",      group = "🐛 Bug Fixes"       },
+            { message = "^perf",     group = "⚡ Performance"     },
+            { message = "^security", group = "🔒 Security"        },
+            { message = "^refactor", group = "♻️  Refactoring"     },
+            { message = "^deps",     group = "📦 Dependencies"    },
+            { message = "^docs",     group = "📖 Documentation"   },
+            { message = "^style",    group = "🎨 Styling"         },
+            { message = "^test",     group = "🧪 Tests",   skip = true },
+            { message = "^build",    group = "🏗️  Build",   skip = true },
+            { message = "^ci",       group = "⚙️  CI/CD",   skip = true },
+            { message = "^chore",    group = "🔧 Chores",  skip = true },
+          ]
+          protect_breaking_commits = true
+          filter_commits = false
+          tag_pattern = "v[0-9]*"
+          skip_tags = "v0.1.0-beta|v0.2.0-beta"
+          ignore_tags = ""
+          topo_order = false
+          sort_commits = "oldest"
+          link_parsers = [
+            { pattern = "RFC(\\d+)", href = "https://datatracker.ietf.org/doc/html/rfc$1"},
+            { pattern = "ISSUE(\\d+)", href = "https://github.com/ash-dotfiles/ash-dotfiles/issues/$1"},
+            { pattern = "CVE-(\\d{4})-(\\d{4,7})", href = "https://nvd.nist.gov/vuln/detail/CVE-$1-$2"},
+          ]
+          limit_commits = 0
+
+          CLIFFTOM
+            echo "  ✅ cliff.toml generated"
+          fi
+
+      - name: "📜 Generate Comprehensive Changelog"
+        id: gen
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  📜 Changelog Generation Engine                             ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          FROM_TAG="${{ inputs.from_tag || '' }}"
+          TO_TAG="${{ inputs.to_tag || '' }}"
+          INCLUDE_UNRELEASED="${{ inputs.include_unreleased || 'true' }}"
+          FORMAT="${{ inputs.format || 'all' }}"
+
+          python3 << 'CLGEN'
+          import re
+          import os
+          import sys
+          import json
+          import subprocess
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from collections import defaultdict
+
+          # ═══════════════════════════════════════════════════════════════════
+          # ASH DOTFILES — Ultra-Premium Changelog Generator v5.0
+          # ═══════════════════════════════════════════════════════════════════
+
+          FROM_TAG  = os.environ.get("FROM_TAG", "")
+          TO_TAG    = os.environ.get("TO_TAG", "")
+          REPO_URL  = "https://github.com/ash-dotfiles/ash-dotfiles"
+          BUILD_DATE= datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+          # ── Commit type configuration ─────────────────────────────────────
+          COMMIT_GROUPS = {
+              "feat":     {"emoji": "✨", "title": "New Features",    "hidden": False, "bump": "minor"},
+              "theme":    {"emoji": "🎨", "title": "New Themes",      "hidden": False, "bump": "minor"},
+              "plugin":   {"emoji": "🔌", "title": "New Plugins",     "hidden": False, "bump": "minor"},
+              "fix":      {"emoji": "🐛", "title": "Bug Fixes",       "hidden": False, "bump": "patch"},
+              "perf":     {"emoji": "⚡", "title": "Performance",     "hidden": False, "bump": "patch"},
+              "security": {"emoji": "🔒", "title": "Security",        "hidden": False, "bump": "patch"},
+              "refactor": {"emoji": "♻️",  "title": "Refactoring",    "hidden": False, "bump": "patch"},
+              "deps":     {"emoji": "📦", "title": "Dependencies",    "hidden": False, "bump": "patch"},
+              "docs":     {"emoji": "📖", "title": "Documentation",   "hidden": False, "bump": False  },
+              "style":    {"emoji": "🎨", "title": "Styling",         "hidden": True,  "bump": False  },
+              "test":     {"emoji": "🧪", "title": "Tests",           "hidden": True,  "bump": False  },
+              "build":    {"emoji": "🏗️",  "title": "Build System",    "hidden": True,  "bump": False  },
+              "ci":       {"emoji": "⚙️",  "title": "CI/CD",           "hidden": True,  "bump": False  },
+              "chore":    {"emoji": "🔧", "title": "Maintenance",     "hidden": True,  "bump": False  },
+              "revert":   {"emoji": "⏪", "title": "Reverts",         "hidden": False, "bump": "patch"},
+          }
+
+          def run_git(cmd: list[str]) -> str:
+              try:
+                  return subprocess.run(
+                      ["git"] + cmd,
+                      capture_output=True, text=True
+                  ).stdout.strip()
+              except Exception:
+                  return ""
+
+          def get_tags() -> list[str]:
+              tags = run_git(["tag", "--sort=-version:refname"])
+              return [t for t in tags.split("\n") if t.strip()]
+
+          def get_commits(from_ref: str, to_ref: str = "HEAD") -> list[dict]:
+              """Get structured commit data between two refs."""
+              if from_ref:
+                  range_spec = f"{from_ref}..{to_ref}"
+              else:
+                  range_spec = to_ref
+
+              log_format = "%H|||%s|||%b|||%an|||%ae|||%ad|||%D"
+              log_output = run_git([
+                  "log", range_spec,
+                  f"--format={log_format}",
+                  "--date=iso-strict",
+              ])
+
+              commits = []
+              for line in log_output.split("\n"):
+                  parts = line.split("|||")
+                  if len(parts) < 7:
+                      continue
+
+                  sha, subject, body, author, email, date, refs = parts[:7]
+                  if not sha:
+                      continue
+
+                  # Parse conventional commit
+                  cc_match = re.match(
+                      r'^(?P<type>[a-z]+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?\s*:\s*(?P<desc>.+)$',
+                      subject.strip()
+                  )
+
+                  if not cc_match:
+                      commits.append({
+                          "sha":      sha[:8],
+                          "full_sha": sha,
+                          "type":     "other",
+                          "scope":    None,
+                          "breaking": False,
+                          "subject":  subject.strip(),
+                          "body":     body.strip(),
+                          "author":   author,
+                          "email":    email,
+                          "date":     date[:10] if date else "",
+                          "refs":     refs,
+                          "pr_number":None,
+                          "pr_url":   None,
+                      })
+                      continue
+
+                  ctype    = cc_match.group("type")
+                  scope    = cc_match.group("scope")
+                  breaking = bool(cc_match.group("breaking"))
+                  desc     = cc_match.group("desc").strip()
+
+                  # Check body for BREAKING CHANGE
+                  if "BREAKING CHANGE" in body or "BREAKING CHANGES" in body:
+                      breaking = True
+
+                  # Extract PR number
+                  pr_match = re.search(r'#(\d+)', subject)
+                  pr_number = pr_match.group(1) if pr_match else None
+                  pr_url = f"{REPO_URL}/pull/{pr_number}" if pr_number else None
+
+                  commits.append({
+                      "sha":      sha[:8],
+                      "full_sha": sha,
+                      "type":     ctype,
+                      "scope":    scope,
+                      "breaking": breaking,
+                      "subject":  desc,
+                      "body":     body.strip(),
+                      "author":   author,
+                      "email":    email,
+                      "date":     date[:10] if date else "",
+                      "refs":     refs,
+                      "pr_number":pr_number,
+                      "pr_url":   pr_url,
+                  })
+
+              return commits
+
+          def generate_markdown_section(
+              commits: list[dict],
+              version: str,
+              date: str
+          ) -> str:
+              """Generate a single changelog section."""
+              if not commits:
+                  return ""
+
+              # Group commits
+              grouped = defaultdict(list)
+              breaking_commits = []
+
+              for commit in commits:
+                  ctype = commit["type"]
+                  if commit["breaking"]:
+                      breaking_commits.append(commit)
+                  grouped[ctype].append(commit)
+
+              lines = []
+              header = f"## [{version}] — {date}" if version != "Unreleased" else \
+                       f"## [Unreleased]"
+              lines.append(header)
+              lines.append("")
+
+              # ── Breaking changes first ────────────────────────────────────
+              if breaking_commits:
+                  lines.append("### ⚠️  BREAKING CHANGES")
+                  lines.append("")
+                  for c in breaking_commits:
+                      scope = f"**{c['scope']}:** " if c["scope"] else ""
+                      pr    = f" ([#{c['pr_number']}]({c['pr_url']}))" if c["pr_number"] else ""
+                      lines.append(f"- 💔 {scope}{c['subject']}{pr}")
+                      if c["body"]:
+                          for bline in c["body"].splitlines():
+                              if "BREAKING CHANGE" in bline:
+                                  detail = bline.replace("BREAKING CHANGE:", "").strip()
+                                  if detail:
+                                      lines.append(f"  > {detail}")
+                  lines.append("")
+
+              # ── Grouped commits ───────────────────────────────────────────
+              for ctype, group_config in COMMIT_GROUPS.items():
+                  if group_config["hidden"]:
+                      continue
+                  if ctype not in grouped:
+                      continue
+
+                  emoji = group_config["emoji"]
+                  title = group_config["title"]
+                  lines.append(f"### {emoji} {title}")
+                  lines.append("")
+
+                  for commit in sorted(grouped[ctype], key=lambda c: c["scope"] or ""):
+                      scope = f"**{commit['scope']}:** " if commit["scope"] else ""
+                      sha   = f" [`{commit['sha']}`]({REPO_URL}/commit/{commit['full_sha']})"
+                      pr    = f" ([#{commit['pr_number']}]({commit['pr_url']}))" \
+                              if commit["pr_number"] else ""
+                      brk   = " ⚠️" if commit["breaking"] else ""
+
+                      lines.append(f"- {scope}{commit['subject']}{pr}{sha}{brk}")
+
+                  lines.append("")
+
+              return "\n".join(lines)
+
+          # ── Get version information ────────────────────────────────────────
+          all_tags = get_tags()
+          current_version = all_tags[0] if all_tags else "v5.0.0"
+          prev_version    = FROM_TAG or (all_tags[1] if len(all_tags) > 1 else "")
+
+          print(f"  📊 Changelog Generation:")
+          print(f"  ├── From: {prev_version or 'beginning'}")
+          print(f"  ├── To:   {TO_TAG or 'HEAD'}")
+          print(f"  └── Tags: {len(all_tags)} found")
+
+          # ── Generate FULL changelog (all history) ─────────────────────────
+          full_sections = []
+          entry_count   = 0
+          breaking_count= 0
+
+          if os.environ.get("INCLUDE_UNRELEASED", "true") == "true":
+              unreleased_commits = get_commits(
+                  FROM_TAG or (all_tags[0] if all_tags else ""),
+                  TO_TAG or "HEAD"
+              )
+              if unreleased_commits:
+                  section = generate_markdown_section(
+                      unreleased_commits,
+                      "Unreleased",
+                      BUILD_DATE
+                  )
+                  if section:
+                      full_sections.append(section)
+                      entry_count   += len(unreleased_commits)
+                      breaking_count += sum(1 for c in unreleased_commits if c["breaking"])
+
+          # Process historical tags
+          for i, tag in enumerate(all_tags[:10]):  # Last 10 releases
+              prev = all_tags[i + 1] if i + 1 < len(all_tags) else ""
+              tag_commits = get_commits(prev, tag)
+              if not tag_commits:
+                  continue
+
+              # Get tag date
+              tag_date = run_git(["log", "-1", "--format=%ad", "--date=short", tag])
+              version_num = tag.lstrip("v")
+
+              section = generate_markdown_section(tag_commits, version_num, tag_date)
+              if section:
+                  full_sections.append(section)
+                  entry_count   += len(tag_commits)
+                  breaking_count += sum(1 for c in tag_commits if c["breaking"])
+
+          # ── Write CHANGELOG.md ────────────────────────────────────────────
+          header = """# 📜 ASH Dotfiles Changelog
+
+          All notable changes to ASH Dotfiles are documented here.
+
+          **Format:** [Keep a Changelog](https://keepachangelog.com/)
+          **Versioning:** [Semantic Versioning](https://semver.org/)
+          **Commits:** [Conventional Commits](https://www.conventionalcommits.org/)
+
+          ---
+
+          """
+
+          changelog_content = header.strip() + "\n\n" + "\n\n---\n\n".join(full_sections)
+          Path("CHANGELOG.md").write_text(changelog_content + "\n")
+          print(f"  ✅ CHANGELOG.md: {len(full_sections)} sections, {entry_count} entries")
+
+          # ── Write JSON changelog ──────────────────────────────────────────
+          json_data = {
+              "generated_at": datetime.now(timezone.utc).isoformat(),
+              "repo_url":     REPO_URL,
+              "current_version": current_version,
+              "prev_version":    prev_version,
+              "total_entries":   entry_count,
+              "breaking_changes":breaking_count,
+              "sections": []
+          }
+
+          all_commits = []
+          for i, tag in enumerate(all_tags[:5]):
+              prev = all_tags[i + 1] if i + 1 < len(all_tags) else ""
+              tag_commits = get_commits(prev, tag)
+              if tag_commits:
+                  tag_date = run_git(["log", "-1", "--format=%ad", "--date=short", tag])
+                  json_data["sections"].append({
+                      "version":  tag.lstrip("v"),
+                      "tag":      tag,
+                      "date":     tag_date,
+                      "commits":  tag_commits,
+                      "count":    len(tag_commits),
+                      "breaking": sum(1 for c in tag_commits if c["breaking"]),
+                  })
+
+          Path("changelog.json").write_text(json.dumps(json_data, indent=2) + "\n")
+          print(f"  ✅ changelog.json: {len(json_data['sections'])} releases")
+
+          # ── Write stats ───────────────────────────────────────────────────
+          with open("/tmp/changelog-stats.txt", "w") as f:
+              f.write(f"entries={entry_count}\n")
+              f.write(f"breaking={breaking_count}\n")
+              f.write(f"from_version={prev_version}\n")
+              f.write(f"to_version={current_version}\n")
+
+          print(f"\n  📊 Statistics:")
+          print(f"  ├── Total entries:  {entry_count}")
+          print(f"  ├── Breaking:       {breaking_count}")
+          print(f"  └── Sections:       {len(full_sections)}")
+          CLGEN
+
+          # Read stats
+          source /tmp/changelog-stats.txt 2>/dev/null || true
+
+          entries="${entries:-0}"
+          breaking="${breaking:-0}"
+          from_ver="${from_version:-unknown}"
+          to_ver="${to_version:-HEAD}"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  📜 Changelog: %-43s║\n" "${entries} entries, ${breaking} breaking"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          {
+            echo "generated=true"
+            echo "entry_count=${entries}"
+            echo "breaking_count=${breaking}"
+            echo "from_version=${from_ver}"
+            echo "to_version=${to_ver}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: "🌐 Generate RSS Feed"
+        if: inputs.format == 'rss' || inputs.format == 'all' || inputs.format == null
+        shell: bash
+        run: |
+          echo "  📡 Generating RSS feed..."
+          python3 << 'RSSGEN'
+          import json
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from email.utils import formatdate
+
+          REPO_URL = "https://github.com/ash-dotfiles/ash-dotfiles"
+
+          try:
+              data = json.loads(Path("changelog.json").read_text())
+          except Exception:
+              data = {"sections": [], "current_version": "5.0.0"}
+
+          now = formatdate(usegmt=True)
+
+          items = []
+          for section in data.get("sections", [])[:10]:
+              version = section.get("version", "?")
+              tag     = section.get("tag", f"v{version}")
+              date    = section.get("date", "")
+              count   = section.get("count", 0)
+              breaking= section.get("breaking", 0)
+
+              # Build RSS item
+              item = f"""  <item>
+            <title>ASH Dotfiles v{version}</title>
+            <link>{REPO_URL}/releases/tag/{tag}</link>
+            <guid isPermaLink="true">{REPO_URL}/releases/tag/{tag}</guid>
+            <pubDate>{date}T00:00:00+00:00</pubDate>
+            <description><![CDATA[
+              <p><strong>ASH Dotfiles v{version}</strong></p>
+              <p>{count} changes, {breaking} breaking.</p>
+              <p><a href="{REPO_URL}/releases/tag/{tag}">View release notes →</a></p>
+            ]]></description>
+            <category>Release</category>
+          </item>"""
+              items.append(item)
+
+          rss = f"""<?xml version="1.0" encoding="UTF-8"?>
+          <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+            <channel>
+              <title>ASH Dotfiles Releases</title>
+              <link>{REPO_URL}</link>
+              <description>ASH Dotfiles v5.0 OMEGA — Release Feed</description>
+              <language>en-us</language>
+              <lastBuildDate>{now}</lastBuildDate>
+              <atom:link href="{REPO_URL}/releases.rss"
+                         rel="self" type="application/rss+xml"/>
+              <image>
+                <url>https://ash-dotfiles.github.io/assets/brand/logos/ash-logo-256.png</url>
+                <title>ASH Dotfiles</title>
+                <link>{REPO_URL}</link>
+              </image>
+          {"".join(items)}
+            </channel>
+          </rss>"""
+
+          Path("changelog.rss").write_text(rss)
+          print(f"  ✅ RSS feed: {len(items)} items")
+          RSSGEN
+
+      - name: "📤 Upload Changelog Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "changelog-outputs"
+          path: |
+            CHANGELOG.md
+            changelog.json
+            changelog.rss
+          retention-days: 90
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: VALIDATE — Validate generated changelog
+  # ────────────────────────────────────────────────────────────────────────────
+  validate:
+    name: "✅ Validate Changelog"
+    needs: generate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    outputs:
+      validation-passed: ${{ steps.validate.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📥 Download Changelog"
+        uses: actions/download-artifact@v4
+        with:
+          name: "changelog-outputs"
+          path: ./changelog-artifacts/
+
+      - name: "✅ Validate Changelog Quality"
+        id: validate
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ✅ Changelog Quality Validation                            ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          errors=0
+          warnings=0
+
+          # ── Validate CHANGELOG.md ──────────────────────────────────────────
+          CHANGELOG="changelog-artifacts/CHANGELOG.md"
+
+          if [[ ! -f "${CHANGELOG}" ]]; then
+            echo "  ❌ CHANGELOG.md not found"
+            errors=$((errors + 1))
+          else
+            echo "  📋 [1/5] CHANGELOG.md structure..."
+            lines="$(wc -l < "${CHANGELOG}")"
+            size="$(du -sh "${CHANGELOG}" | cut -f1)"
+            echo "  ✅ Size: ${size} (${lines} lines)"
+
+            # Check required sections
+            if grep -q "^# " "${CHANGELOG}"; then
+              echo "  ✅ Has title header"
+            else
+              echo "  ❌ Missing title header"
+              errors=$((errors + 1))
+            fi
+
+            if grep -qE "^## \[" "${CHANGELOG}"; then
+              section_count="$(grep -cE "^## \[" "${CHANGELOG}" || echo 0)"
+              echo "  ✅ Version sections: ${section_count}"
+            else
+              echo "  ⚠️  No version sections found"
+              warnings=$((warnings + 1))
+            fi
+
+            # Check for empty sections
+            empty_sections="$(grep -B1 "^$" "${CHANGELOG}" | \
+              grep "^### " | wc -l || echo 0)"
+            if [[ ${empty_sections} -gt 0 ]]; then
+              echo "  ⚠️  ${empty_sections} potentially empty sections"
+              warnings=$((warnings + 1))
+            fi
+          fi
+
+          # ── Validate JSON ──────────────────────────────────────────────────
+          echo ""
+          echo "  📋 [2/5] changelog.json validity..."
+          JSON="changelog-artifacts/changelog.json"
+          if [[ -f "${JSON}" ]]; then
+            if python3 -c "import json; json.load(open('${JSON}'))" 2>/dev/null; then
+              releases="$(python3 -c "
+          import json
+          d = json.load(open('${JSON}'))
+          print(len(d.get('sections', [])))" 2>/dev/null || echo 0)"
+              echo "  ✅ JSON valid: ${releases} releases"
+            else
+              echo "  ❌ Invalid JSON"
+              errors=$((errors + 1))
+            fi
+          else
+            echo "  ⚠️  changelog.json not found"
+            warnings=$((warnings + 1))
+          fi
+
+          # ── Validate RSS ───────────────────────────────────────────────────
+          echo ""
+          echo "  📋 [3/5] changelog.rss validity..."
+          RSS="changelog-artifacts/changelog.rss"
+          if [[ -f "${RSS}" ]]; then
+            if python3 -c "
+          import xml.etree.ElementTree as ET
+          ET.parse('${RSS}')
+          print('valid')" 2>/dev/null | grep -q "valid"; then
+              items="$(grep -c "<item>" "${RSS}" || echo 0)"
+              echo "  ✅ RSS valid: ${items} items"
+            else
+              echo "  ❌ Invalid RSS XML"
+              errors=$((errors + 1))
+            fi
+          fi
+
+          # ── Check conventional commit coverage ────────────────────────────
+          echo ""
+          echo "  📋 [4/5] Commit coverage analysis..."
+          total_commits="$(git log --oneline | wc -l || echo 0)"
+          conventional_commits="$(git log --format="%s" | \
+            grep -cE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|theme|plugin|security|deps)" \
+            || echo 0)"
+          if [[ ${total_commits} -gt 0 ]]; then
+            pct=$((conventional_commits * 100 / total_commits))
+            echo "  📊 Conventional commits: ${conventional_commits}/${total_commits} (${pct}%)"
+            [[ ${pct} -ge 60 ]] && echo "  ✅ Good commit coverage" || \
+              echo "  ⚠️  Low conventional commit coverage"
+          fi
+
+          # ── Spell check key terms ──────────────────────────────────────────
+          echo ""
+          echo "  📋 [5/5] Terminology check..."
+          EXPECTED_TERMS=(
+            "ASH Dotfiles"
+            "Hyprland"
+            "Wayland"
+          )
+          for term in "${EXPECTED_TERMS[@]}"; do
+            if grep -qF "${term}" "changelog-artifacts/CHANGELOG.md" 2>/dev/null; then
+              echo "  ✅ Term found: ${term}"
+            fi
+          done
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          printf "║  📊 Validation: %-42s║\n" "${errors} errors, ${warnings} warnings"
+
+          passed="true"
+          [[ ${errors} -gt 0 ]] && passed="false"
+          [[ "${passed}" == "true" ]] && \
+            echo "║  ✅ STATUS: VALIDATION PASSED                               ║" || \
+            echo "║  ❌ STATUS: VALIDATION FAILED                               ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          echo "passed=${passed}" >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: COMMIT — Commit changelog to repository
+  # ────────────────────────────────────────────────────────────────────────────
+  commit:
+    name: "📤 Commit Changelog"
+    needs: [generate, validate]
+    if: >
+      needs.validate.outputs.validation-passed == 'true' &&
+      (
+        inputs.commit_changes == 'true' ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      )
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📥 Download Changelog"
+        uses: actions/download-artifact@v4
+        with:
+          name: "changelog-outputs"
+          path: ./
+
+      - name: "📤 Commit Changelog Updates"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            docs: update CHANGELOG.md and changelog artifacts
+
+            Automated changelog regeneration.
+            - ${{ needs.generate.outputs.entry-count }} entries
+            - ${{ needs.generate.outputs.breaking-count }} breaking changes
+            [skip ci]
+          file_pattern: |
+            CHANGELOG.md
+            changelog.json
+            changelog.rss
+          commit_user_name: "ASH Changelog Bot"
+          commit_user_email: "changelog@ash-dotfiles.dev"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Changelog"
+    needs: [generate, validate]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const generated    = '${{ needs.generate.outputs.changelog-generated }}' === 'true';
+            const validated    = '${{ needs.validate.outputs.validation-passed || "true" }}' === 'true';
+            const entryCount   = '${{ needs.generate.outputs.entry-count || 0 }}';
+            const breakingCount= '${{ needs.generate.outputs.breaking-count || 0 }}';
+            const fromVer      = '${{ needs.generate.outputs.from-version }}';
+            const toVer        = '${{ needs.generate.outputs.to-version }}';
+
+            const overall = generated && validated;
+            const body = `## 📜 Changelog Generation ${overall ? '✅' : '❌'}
+
+            **Status: ${overall ? 'PASSED' : 'FAILED'}**
+
+            | Metric | Value |
+            |--------|-------|
+            | 📝 Total Entries | \`${entryCount}\` |
+            | ⚠️ Breaking Changes | \`${breakingCount}\` |
+            | 📅 From Version | \`${fromVer || 'beginning'}\` |
+            | 📅 To Version | \`${toVer || 'HEAD'}\` |
+
+            **Outputs:** CHANGELOG.md • changelog.json • changelog.rss
+
+            ${overall ? '### ✅ Changelog generated successfully!' : '### 🔧 Changelog generation issues found'}
+
+            ---
+            *🤖 ASH Changelog Generator • Git Cliff Engine*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('📜 Changelog Generation')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Changelog Quality Gate                                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          generated="${{ needs.generate.outputs.changelog-generated || 'true' }}"
+          validated="${{ needs.validate.outputs.validation-passed || 'true' }}"
+
+          echo ""
+          echo "  📊 Gate Summary:"
+          echo "  ├── Generated: ${generated}"
+          echo "  ├── Validated: ${validated}"
+          echo "  ├── Entries:   ${{ needs.generate.outputs.entry-count || '0' }}"
+          echo "  └── Breaking:  ${{ needs.generate.outputs.breaking-count || '0' }}"
+          echo ""
+
+          if [[ "${generated}" == "true" && "${validated}" == "true" ]]; then
+            echo "  ✅ CHANGELOG GATE: PASSED"
+            echo "  🎉 Changelog generated and validated!"
+          else
+            echo "  ❌ CHANGELOG GATE: FAILED"
+            exit 1
+          fi

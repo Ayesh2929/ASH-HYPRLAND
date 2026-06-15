@@ -1,0 +1,1600 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════╗
+# ║       🔌 ASH DOTFILES v5.0 OMEGA — PLUGIN SUBMISSION ISSUE TEMPLATE               ║
+# ║       Ultra-Comprehensive Plugin Contribution Form • Full SDK Validation           ║
+# ║       Security Audit • Performance SLA • API Compatibility • Lifecycle Mgmt       ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔌 Plugin Submission"
+description: >
+  Submit a new plugin to the ASH Dotfiles plugin ecosystem!
+  This comprehensive form ensures your plugin meets our quality,
+  security, performance, and API standards for official inclusion.
+title: "🔌 [PLUGIN] — "
+labels:
+  - "🔌 plugin-submission"
+  - "🔍 needs-review"
+  - "🔒 needs-security-audit"
+  - "✨ community-contribution"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — HERO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ██████╗ ██╗     ██╗   ██╗ ██████╗ ██╗███╗   ██╗
+        ██╔══██╗██║     ██║   ██║██╔════╝ ██║████╗  ██║
+        ██████╔╝██║     ██║   ██║██║  ███╗██║██╔██╗ ██║
+        ██╔═══╝ ██║     ██║   ██║██║   ██║██║██║╚██╗██║
+        ██║     ███████╗╚██████╔╝╚██████╔╝██║██║ ╚████║
+        ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝
+
+        ░██████╗██╗░░░██╗██████╗░███╗░░░███╗██╗░██████╗░██████╗██╗░█████╗░███╗░░██╗
+        ██╔════╝██║░░░██║██╔══██╗████╗░████║██║██╔════╝██╔════╝██║██╔══██╗████╗░██║
+        ╚█████╗░██║░░░██║██████╦╝██╔████╔██║██║╚█████╗░╚█████╗░██║██║░░██║██╔██╗██║
+        ░╚═══██╗██║░░░██║██╔══██╗██║╚██╔╝██║██║░╚═══██╗░╚═══██╗██║██║░░██║██║╚████║
+        ██████╔╝╚██████╔╝██████╦╝██║░╚═╝░██║██║██████╔╝██████╔╝██║╚█████╔╝██║░╚███║
+        ╚═════╝░░╚═════╝░╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚══╝
+        ```
+
+        # 🔌 Plugin Submission — ASH Dotfiles v5.0 OMEGA
+
+        > *"Plugins are the heartbeat of the ASH ecosystem — build something legendary"*
+
+        </div>
+
+        ---
+
+        > [!IMPORTANT]
+        > **ALL plugins undergo automated security scanning before human review.**
+        > Your plugin WILL be rejected if it contains:
+        > - Hardcoded credentials, API keys, or secrets
+        > - Network calls to undisclosed endpoints
+        > - File operations outside permitted directories
+        > - Privilege escalation attempts
+        > - Obfuscated or minified code without source
+
+        > [!TIP]
+        > **New to plugin development?**
+        > ```bash
+        > # Scaffold a plugin instantly:
+        > ash plugin create --interactive --name "my-plugin"
+        >
+        > # Validate before submitting:
+        > ash plugin validate --strict --security ./my-plugin/
+        >
+        > # Run the full test suite:
+        > ash plugin test --all ./my-plugin/
+        >
+        > # Check API compatibility:
+        > ash plugin compat-check ./my-plugin/
+        > ```
+        > 📖 Read the full [Plugin Development Guide](https://ash-dotfiles.github.io/docs/plugin-development)
+
+        ---
+
+        ### 🔌 Plugin Submission Pre-Flight Checklist
+
+        **Security (MANDATORY — hard failures):**
+        - [ ] 🔒 **No hardcoded secrets** — all credentials use ASH secure store
+        - [ ] 🌐 **All network endpoints disclosed** in `plugin.json` `permissions.network`
+        - [ ] 📁 **File access restricted** to permitted directories only
+        - [ ] 🔑 **No sudo/root** operations without explicit justification
+        - [ ] 🧹 **No eval** or dynamic code execution of user-provided strings
+
+        **Quality (MANDATORY — required for acceptance):**
+        - [ ] 📝 **Complete `plugin.json`** with all required fields
+        - [ ] 🧪 **All tests pass** (`ash plugin test ./my-plugin/`)
+        - [ ] ✅ **Strict validation** passes (`ash plugin validate --strict`)
+        - [ ] 📖 **README.md** with installation, usage, config documentation
+        - [ ] 🔄 **Clean enable/disable lifecycle** (no orphaned processes)
+
+        **Quality (RECOMMENDED — increases acceptance speed):**
+        - [ ] 📸 Screenshot/demo GIF of plugin in action
+        - [ ] ♿ Accessible UI (if plugin has visual components)
+        - [ ] 📊 Performance benchmarks included
+        - [ ] 🌍 i18n-ready (string externalization)
+        - [ ] ↩️ Full rollback capability on disable/uninstall
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — PLUGIN IDENTITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: plugin_name
+    attributes:
+      label: "🏷️ Plugin Display Name"
+      description: >
+        The official display name shown in the plugin store and CLI listings.
+        Use Title Case. Max 60 characters. No special characters except spaces and hyphens.
+      placeholder: "e.g., Smart Focus Timer, Discord Rich Presence, AI Wallpaper Generator"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_id
+    attributes:
+      label: "🔑 Plugin ID (slug)"
+      description: >
+        Unique machine identifier. `kebab-case` only, no spaces or special chars.
+        Used in CLI: `ash plugin install [id]`. Check uniqueness in the
+        [Plugin Registry](https://ash-dotfiles.github.io/plugins).
+      placeholder: "e.g., smart-focus-timer, discord-rpc, ai-wallpaper-gen"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: "🔢 Plugin Version"
+      description: "Semantic versioning (MAJOR.MINOR.PATCH). Must start at 1.0.0 for stable."
+      placeholder: "e.g., 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_repository
+    attributes:
+      label: "🐙 Plugin Repository URL"
+      description: "Full URL to your plugin's public repository"
+      placeholder: "https://github.com/yourusername/ash-plugin-smart-focus-timer"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — PLUGIN CLASSIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: plugin_category
+    attributes:
+      label: "🗂️ Plugin Category"
+      description: "Primary category for store browsing and discovery"
+      options:
+        # Productivity
+        - "⏱️ Productivity — Focus, Pomodoro, time management"
+        - "📋 Task Management — Todo, goals, habits, tracking"
+        - "📅 Calendar & Scheduling — Events, reminders, meetings"
+        - "📝 Notes & Writing — Quick notes, journaling, docs"
+        # Desktop Enhancement
+        - "🪟 Window Management — Tiling, layouts, rules"
+        - "🎨 Visual Enhancement — Effects, animations, shaders"
+        - "🖼️ Wallpaper — Wallpaper sources, effects, rotation"
+        - "🖱️ Cursor & Input — Cursor effects, gesture control"
+        - "📊 Bar & Widget — Waybar/AGS modules, widgets"
+        # System Management
+        - "🔋 Power Management — Battery, thermal, performance"
+        - "🌐 Network — WiFi, VPN, monitoring, proxy"
+        - "🔊 Audio — Volume, EQ, visualizer, profiles"
+        - "🖥️ Display — Multi-monitor, brightness, color temp"
+        - "📦 Storage — Disk monitoring, auto-mount, cleanup"
+        - "🔒 Security — Firewall, VPN, encryption, privacy"
+        # Development
+        - "💻 Developer Tools — Docker, K8s, Git, SSH"
+        - "📊 Monitoring — System stats, alerts, dashboards"
+        - "🧪 Testing & Debug — Development utilities"
+        # Entertainment
+        - "🎵 Media & Music — Players, visualizers, controls"
+        - "🎮 Gaming — Game mode, MangoHUD, Steam, Proton"
+        - "📺 Streaming — OBS, Streamlabs, stream deck"
+        - "🎭 Entertainment — Fun, novelty, ambient"
+        # Integrations
+        - "💬 Communication — Discord, Telegram, Slack, Matrix"
+        - "📱 Social Media — Reddit, Twitter, Mastodon"
+        - "☁️ Cloud Services — Google, AWS, Azure, storage"
+        - "🤖 AI & ML — AI assistants, generation, automation"
+        - "🏠 Smart Home — Home Assistant, Hue, Nanoleaf"
+        - "📊 Finance — Crypto, stocks, budgeting"
+        # Health & Wellness
+        - "🏥 Health & Wellness — Break reminders, eye care, posture"
+        # Other
+        - "🔧 Utilities — General purpose tools"
+        - "🌍 Internationalization — Language, locale, translation"
+        - "♿ Accessibility — Screen reader, high contrast, motor"
+        - "❓ Other / Uncategorized"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: plugin_type
+    attributes:
+      label: "⚙️ Plugin Architecture Type"
+      description: "What is the primary technical architecture of your plugin?"
+      options:
+        - "📜 Shell Script — Pure bash/sh/fish scripts (recommended for simplicity)"
+        - "🐍 Python — Python 3 with pip dependencies"
+        - "🟢 Node.js — JavaScript/TypeScript with npm dependencies"
+        - "🦀 Rust — Compiled Rust binary"
+        - "🐹 Go — Compiled Go binary"
+        - "🌊 Fish — Pure Fish shell functions/scripts"
+        - "🌙 Lua — Lua scripts (for Neovim integration)"
+        - "🔗 Hybrid — Multiple languages (specify in description)"
+        - "🐋 Container — Runs in Docker/Podman container"
+        - "⚙️ Systemd — Primary delivery via systemd user unit"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: plugin_tier
+    attributes:
+      label: "🏆 Requested Plugin Tier"
+      description: >
+        Plugins are classified into tiers based on scope and quality.
+        **Tier 1 (Core):** Bundled with ASH, maintained by core team
+        **Tier 2 (Official):** Published in official store, community maintained
+        **Tier 3 (Community):** Listed in store, author maintained
+      options:
+        - "🥇 Tier 2 (Official) — I want this in the official ASH plugin store"
+        - "🥈 Tier 3 (Community) — I want this listed as a community plugin"
+        - "💡 Tier 1 (Core) — I believe this should be bundled with ASH core"
+        - "🤷 Either — I'll accept whatever tier is appropriate"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — PLUGIN DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: plugin_description
+    attributes:
+      label: "📝 Plugin Description"
+      description: >
+        Write a compelling, detailed description of your plugin.
+        **Short (≤160 chars):** For CLI listings and store previews.
+        **Long (≤2000 chars):** For full plugin store page.
+      placeholder: |
+        ## 🎯 One-Line Pitch (≤80 chars)
+        Smart Pomodoro timer with ASH theme integration and break animations
+
+        ## 📋 Short Description (≤160 chars — store card)
+        A fully-integrated Pomodoro focus timer that automatically enables Focus Mode,
+        dims distracting apps, and rewards completed sessions with theme celebrations.
+
+        ## 📖 Full Description (≤2000 chars — store page)
+
+        **Smart Focus Timer** transforms your ASH desktop into a productivity powerhouse
+        by seamlessly integrating the Pomodoro Technique with ASH's mode system.
+
+        ### ✨ What makes it special?
+
+        Unlike basic timer apps, Smart Focus Timer **deeply integrates** with ASH:
+
+        - 🎭 **Auto-enables Focus Mode** when a Pomodoro starts, disabling notifications,
+          hiding the taskbar's distracting elements, and muting non-essential sounds
+        - 🎨 **Live color shifting** — the desktop accent color gradually shifts from
+          energetic blue at session start to calming amber as time progresses
+        - 🏆 **Completion celebrations** — on session complete, triggers a theme flash
+          animation and plays customizable sound effects
+        - 📊 **Waybar integration** — shows live countdown, progress arc, and
+          current Pomodoro number directly in your bar
+        - 📈 **Analytics integration** — all sessions tracked in ASH analytics
+          dashboard with productivity trends and streak tracking
+        - 🔔 **Smart notifications** — custom dunst notifications with session
+          context, next action, and one-click controls
+
+        ### 📊 Session Statistics
+        Track your focus quality with built-in metrics: sessions per day, focus
+        streak, distraction events, and weekly/monthly productivity trends.
+
+        ### ⚙️ Highly Configurable
+        Work duration, break duration, long break intervals, auto-start behavior,
+        focus mode intensity, sound selection, and color shift ranges — all
+        configurable via `ash config set plugin.smart-focus-timer.*`.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — PROBLEM & SOLUTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: problem_solution
+    attributes:
+      label: "🎯 Problem Solved & Value Proposition"
+      description: >
+        Articulate the exact problem this plugin solves and why it belongs
+        in the ASH ecosystem rather than being a standalone tool.
+      placeholder: |
+        ## 😤 Problem Statement
+
+        **Pain point:** ASH users who practice Pomodoro technique currently need
+        to use separate apps (Gnome Clocks, KDE timer, external CLI tools) that:
+        - Don't integrate with ASH's Focus Mode system
+        - Can't modify theme colors or bar widgets automatically
+        - Don't trigger ASH hooks for pre/post session actions
+        - Aren't styleable with ASH's current theme
+
+        **Evidence of demand:**
+        - 47 upvotes on Discord #feature-requests for "integrated focus timer"
+        - Issue #234 requesting Pomodoro integration
+        - 12 users mentioned in the community survey (Q3 2024)
+
+        ## 💡 Why This Plugin vs Existing Solutions
+
+        | Feature | Existing Tools | Smart Focus Timer |
+        |---------|---------------|-------------------|
+        | ASH Mode integration | ❌ | ✅ Auto-enables Focus Mode |
+        | Waybar widget | ❌ | ✅ Live countdown + arc |
+        | Theme color shift | ❌ | ✅ Dynamic urgency colors |
+        | ASH hooks | ❌ | ✅ Full hook support |
+        | Analytics | ❌ | ✅ ASH analytics integration |
+        | Themed notifications | ❌ | ✅ Dunst with progress bar |
+        | Config via `ash config` | ❌ | ✅ Full ash config integration |
+
+        ## 🎯 Why This Belongs in ASH Core (Not Just Standalone)
+
+        This plugin demonstrates the power of deep ASH integration — it couldn't
+        exist as a meaningful standalone tool because its value comes entirely from
+        the ASH ecosystem hooks, mode system, theme engine, and analytics framework.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — PLUGIN.JSON SPECIFICATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: plugin_json
+    attributes:
+      label: "📋 plugin.json — Complete Manifest"
+      description: >
+        Paste your complete `plugin.json` manifest.
+        This is the most critical file — it defines your plugin's identity,
+        permissions, hooks, dependencies, and configuration schema.
+        **Validation WILL fail without a complete, schema-valid manifest.**
+      placeholder: |
+        ```json
+        {
+          "$schema": "https://ash-dotfiles.github.io/schemas/plugin-v2.json",
+
+          "id": "smart-focus-timer",
+          "name": "Smart Focus Timer",
+          "version": "1.0.0",
+          "description": "Pomodoro focus timer with deep ASH desktop integration",
+          "long_description": "...",
+
+          "author": {
+            "name": "Jane Developer",
+            "github": "janedeveloper",
+            "email": "jane@example.com",
+            "website": "https://janedeveloper.dev"
+          },
+
+          "license": "MIT",
+          "homepage": "https://github.com/janedeveloper/ash-plugin-smart-focus-timer",
+          "repository": "https://github.com/janedeveloper/ash-plugin-smart-focus-timer",
+          "issues": "https://github.com/janedeveloper/ash-plugin-smart-focus-timer/issues",
+          "funding": "https://github.com/sponsors/janedeveloper",
+
+          "category": "productivity",
+          "tags": ["pomodoro", "focus", "timer", "productivity", "work", "wellness"],
+          "keywords": ["focus-timer", "pomodoro-technique", "time-management"],
+
+          "min_ash_version": "5.0.0",
+          "max_ash_version": null,
+          "targets": ["hyprland"],
+
+          "entry": {
+            "init":    "init.sh",
+            "enable":  "enable.sh",
+            "disable": "disable.sh",
+            "status":  "status.sh",
+            "update":  "update.sh",
+            "health":  "health.sh"
+          },
+
+          "config": {
+            "schema_version": "1",
+            "defaults": {
+              "work_duration":        25,
+              "short_break_duration":  5,
+              "long_break_duration":  15,
+              "long_break_interval":   4,
+              "auto_start_breaks":  true,
+              "auto_start_work":   false,
+              "sound_enabled":      true,
+              "sound_work_start":   "pomodoro-start",
+              "sound_break_start":  "pomodoro-end",
+              "sound_complete":     "success",
+              "focus_mode_auto":    true,
+              "color_shift_enabled":true,
+              "waybar_module":      true,
+              "analytics_enabled":  true,
+              "notification_style": "detailed",
+              "celebration_enabled":true
+            },
+            "schema": {
+              "work_duration": {
+                "type": "integer",
+                "min": 1,
+                "max": 120,
+                "description": "Work session duration in minutes"
+              },
+              "short_break_duration": {
+                "type": "integer",
+                "min": 1,
+                "max": 30,
+                "description": "Short break duration in minutes"
+              },
+              "focus_mode_auto": {
+                "type": "boolean",
+                "description": "Automatically enable Focus Mode during work sessions"
+              }
+            }
+          },
+
+          "permissions": {
+            "network":    [],
+            "filesystem": {
+              "read":  ["$XDG_CONFIG_HOME/ash", "$HOME/.local/share/ash"],
+              "write": ["$HOME/.local/share/ash/plugins/smart-focus-timer",
+                        "$HOME/.local/share/ash/data/analytics"]
+            },
+            "system_calls": ["notify-send", "playerctl", "hyprctl"],
+            "ash_api":  ["theme.accent", "mode.set", "mode.get",
+                         "analytics.record", "notification.send",
+                         "config.get", "config.set", "hook.register"],
+            "secrets":  [],
+            "sudo":     false,
+            "dbus":     ["org.freedesktop.Notifications"],
+            "sockets":  ["$HYPRLAND_INSTANCE_SIGNATURE"]
+          },
+
+          "hooks": {
+            "registers": [
+              "pre-mode-change",
+              "post-mode-change",
+              "on-idle",
+              "on-resume",
+              "on-suspend",
+              "on-battery",
+              "on-ac-power"
+            ],
+            "provides": [
+              "on-pomodoro-start",
+              "on-pomodoro-complete",
+              "on-break-start",
+              "on-break-complete",
+              "on-long-break-start",
+              "on-session-complete"
+            ]
+          },
+
+          "dependencies": {
+            "required": {
+              "system": ["bash>=5.0", "notify-send", "bc"],
+              "ash_plugins": []
+            },
+            "optional": {
+              "system": ["playerctl", "mpv"],
+              "ash_plugins": ["analytics", "discord-rpc"]
+            },
+            "conflicts": ["focus-timer", "pomodoro"]
+          },
+
+          "provides": {
+            "waybar_module": "custom/ash-pomodoro",
+            "rofi_menu":     "pomodoro",
+            "fish_functions": ["pomodoro", "pomo", "pomo_status"],
+            "keybinds":      true,
+            "systemd_units": ["ash-pomodoro.service", "ash-pomodoro.timer"]
+          },
+
+          "lifecycle": {
+            "idempotent_enable":  true,
+            "idempotent_disable": true,
+            "clean_uninstall":    true,
+            "state_persistence":  true,
+            "auto_restart":       true
+          },
+
+          "resources": {
+            "max_memory_mb":   50,
+            "max_cpu_percent":  2,
+            "background_processes": 1,
+            "disk_usage_mb":   10
+          },
+
+          "ui": {
+            "has_waybar_module":  true,
+            "has_rofi_menu":      true,
+            "has_notifications":  true,
+            "has_tui":           false,
+            "has_gui":           false,
+            "theme_aware":        true
+          },
+
+          "screenshots": [
+            { "file": "screenshots/waybar-active.webp",  "caption": "Waybar countdown during work session" },
+            { "file": "screenshots/notification.webp",   "caption": "Pomodoro complete notification" },
+            { "file": "screenshots/rofi-menu.webp",      "caption": "Rofi control menu" },
+            { "file": "screenshots/color-shift.webp",    "caption": "Dynamic color shift during session" }
+          ],
+
+          "changelog": [
+            {
+              "version": "1.0.0",
+              "date": "2024-01-15",
+              "changes": ["Initial release", "Waybar module", "Focus Mode integration", "Analytics support"]
+            }
+          ],
+
+          "stats": {
+            "install_time_seconds": 5,
+            "init_time_ms":        50,
+            "enable_time_ms":     200,
+            "disable_time_ms":    100
+          }
+        }
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — FILE STRUCTURE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: file_structure
+    attributes:
+      label: "📁 Complete Plugin File Structure"
+      description: >
+        Show the complete directory structure of your plugin.
+        Every file listed in `plugin.json` must exist.
+      placeholder: |
+        ```
+        ash-plugin-smart-focus-timer/
+        │
+        ├── 📄 plugin.json              ← Plugin manifest (required)
+        ├── 📄 README.md                ← Documentation (required)
+        ├── 📄 LICENSE                  ← License file (required)
+        ├── 📄 CHANGELOG.md             ← Version history
+        │
+        ├── 📄 init.sh                  ← First-time setup (required)
+        ├── 📄 enable.sh                ← Activation logic (required)
+        ├── 📄 disable.sh               ← Deactivation + cleanup (required)
+        ├── 📄 status.sh                ← Current state reporter (required)
+        ├── 📄 update.sh                ← Self-update logic
+        ├── 📄 health.sh                ← Health check endpoint
+        │
+        ├── 📁 lib/
+        │   ├── 📄 timer.sh             ← Core timer logic
+        │   ├── 📄 state.sh             ← State management
+        │   ├── 📄 notifications.sh     ← Notification templates
+        │   ├── 📄 waybar.sh            ← Waybar module output
+        │   ├── 📄 color-shift.sh       ← Dynamic color shifting
+        │   ├── 📄 analytics.sh         ← ASH analytics integration
+        │   └── 📄 hooks.sh             ← ASH hook handlers
+        │
+        ├── 📁 config/
+        │   ├── 📄 defaults.json        ← Default configuration values
+        │   └── 📄 schema.json          ← Config validation schema
+        │
+        ├── 📁 waybar/
+        │   ├── 📄 module.jsonc         ← Waybar module definition
+        │   └── 📄 style.css            ← Module CSS (theme variables)
+        │
+        ├── 📁 rofi/
+        │   ├── 📄 menu.rasi            ← Rofi menu layout
+        │   └── 📄 menu.sh              ← Rofi menu handler
+        │
+        ├── 📁 fish/
+        │   ├── 📄 pomodoro.fish        ← Main fish function
+        │   ├── 📄 pomo.fish            ← Short alias function
+        │   └── 📄 completions.fish     ← Fish completions
+        │
+        ├── 📁 systemd/
+        │   ├── 📄 ash-pomodoro.service ← Background daemon
+        │   └── 📄 ash-pomodoro.timer   ← Systemd timer
+        │
+        ├── 📁 notifications/
+        │   ├── 📄 work-start.sh        ← Work session start notification
+        │   ├── 📄 work-complete.sh     ← Work session complete notification
+        │   ├── 📄 break-start.sh       ← Break notification
+        │   └── 📄 long-break.sh        ← Long break notification
+        │
+        ├── 📁 screenshots/
+        │   ├── 📄 waybar-active.webp   ← Demo screenshots
+        │   ├── 📄 notification.webp
+        │   ├── 📄 rofi-menu.webp
+        │   └── 📄 color-shift.webp
+        │
+        └── 📁 tests/
+            ├── 📄 test-timer.sh        ← Unit tests
+            ├── 📄 test-state.sh        ← State management tests
+            ├── 📄 test-lifecycle.sh    ← Enable/disable lifecycle tests
+            ├── 📄 test-hooks.sh        ← Hook handler tests
+            └── 📄 run-tests.sh         ← Test runner
+        ```
+
+        **Total files:** 38
+        **Total estimated size:** ~125 KB (scripts only, no binaries)
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — CORE SCRIPT PREVIEWS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: core_scripts
+    attributes:
+      label: "📜 Core Script Previews"
+      description: >
+        Paste the content of your most critical scripts.
+        At minimum: `init.sh`, `enable.sh`, `disable.sh`, `status.sh`.
+        Our security team reviews these before automated scanning.
+      placeholder: |
+        ## init.sh — First-time initialization
+
+        ```bash
+        #!/usr/bin/env bash
+        # ╔══════════════════════════════════════════════════╗
+        # ║  Smart Focus Timer — init.sh                    ║
+        # ║  First-time plugin initialization               ║
+        # ╚══════════════════════════════════════════════════╝
+
+        set -euo pipefail
+
+        # Source ASH plugin API
+        # shellcheck source=/dev/null
+        source "${ASH_PLUGIN_API:-/usr/lib/ash/plugin-api.sh}"
+
+        ASH_PLUGIN_ID="smart-focus-timer"
+        ASH_PLUGIN_VERSION="1.0.0"
+
+        ash::plugin::log "info" "Initializing ${ASH_PLUGIN_ID} v${ASH_PLUGIN_VERSION}"
+
+        # ── Create plugin data directory ──────────────────
+        local data_dir
+        data_dir="$(ash::plugin::data_dir)"
+        mkdir -p "${data_dir}"/{state,sessions,logs}
+
+        # ── Initialize state file ─────────────────────────
+        if [[ ! -f "${data_dir}/state/current.json" ]]; then
+          cat > "${data_dir}/state/current.json" << 'EOF'
+        {
+          "status":          "idle",
+          "session_type":    null,
+          "session_number":  0,
+          "start_time":      null,
+          "duration_minutes": 25,
+          "pomodoros_today": 0,
+          "streak_days":     0
+        }
+        EOF
+          ash::plugin::log "debug" "State file initialized"
+        fi
+
+        # ── Register Waybar module ─────────────────────────
+        if ash::config::get "plugin.${ASH_PLUGIN_ID}.waybar_module" | grep -q "true"; then
+          ash::plugin::register_waybar_module "custom/ash-pomodoro" \
+            "${ASH_PLUGIN_DIR}/waybar/module.jsonc"
+          ash::plugin::log "info" "Waybar module registered"
+        fi
+
+        # ── Register ASH hooks ────────────────────────────
+        ash::hook::register "on-suspend"    "${ASH_PLUGIN_DIR}/lib/hooks.sh::on_suspend"
+        ash::hook::register "on-resume"     "${ASH_PLUGIN_DIR}/lib/hooks.sh::on_resume"
+        ash::hook::register "on-battery"    "${ASH_PLUGIN_DIR}/lib/hooks.sh::on_battery"
+        ash::hook::register "on-ac-power"   "${ASH_PLUGIN_DIR}/lib/hooks.sh::on_ac_power"
+
+        # ── Install Fish functions ─────────────────────────
+        ash::plugin::install_fish_functions "${ASH_PLUGIN_DIR}/fish/"
+
+        # ── Verify required dependencies ──────────────────
+        local -a required_cmds=("bash" "bc" "notify-send" "date")
+        for cmd in "${required_cmds[@]}"; do
+          if ! command -v "${cmd}" &>/dev/null; then
+            ash::plugin::log "error" "Missing required dependency: ${cmd}"
+            ash::plugin::fail "Dependency not found: ${cmd}"
+          fi
+        done
+
+        ash::plugin::log "success" "Plugin initialized successfully"
+        ash::plugin::emit_event "initialized" "{\"version\": \"${ASH_PLUGIN_VERSION}\"}"
+        ```
+
+        ## enable.sh — Plugin activation
+
+        ```bash
+        #!/usr/bin/env bash
+        # Smart Focus Timer — enable.sh
+
+        set -euo pipefail
+        source "${ASH_PLUGIN_API:-/usr/lib/ash/plugin-api.sh}"
+
+        ASH_PLUGIN_ID="smart-focus-timer"
+
+        ash::plugin::log "info" "Enabling ${ASH_PLUGIN_ID}"
+
+        # ── Start background daemon via systemd ───────────
+        systemctl --user enable --now "ash-pomodoro.service" \
+          || ash::plugin::log "warn" "systemd unit start failed — using fallback"
+
+        # ── Update Waybar ─────────────────────────────────
+        ash::waybar::reload
+
+        ash::plugin::log "success" "Smart Focus Timer enabled"
+        ash::plugin::set_status "enabled"
+        ```
+
+        ## disable.sh — Clean deactivation
+
+        ```bash
+        #!/usr/bin/env bash
+        # Smart Focus Timer — disable.sh
+
+        set -euo pipefail
+        source "${ASH_PLUGIN_API:-/usr/lib/ash/plugin-api.sh}"
+
+        ASH_PLUGIN_ID="smart-focus-timer"
+
+        ash::plugin::log "info" "Disabling ${ASH_PLUGIN_ID}"
+
+        # ── Stop any active timer gracefully ──────────────
+        local state_file
+        state_file="$(ash::plugin::data_dir)/state/current.json"
+
+        if [[ -f "${state_file}" ]]; then
+          local current_status
+          current_status="$(jq -r '.status' "${state_file}" 2>/dev/null || echo "idle")"
+
+          if [[ "${current_status}" != "idle" ]]; then
+            ash::plugin::log "info" "Stopping active timer (status: ${current_status})"
+            # Save partial session to analytics before stopping
+            source "${ASH_PLUGIN_DIR}/lib/analytics.sh"
+            analytics::record_partial_session
+          fi
+        fi
+
+        # ── Stop systemd service ──────────────────────────
+        systemctl --user disable --now "ash-pomodoro.service" 2>/dev/null || true
+
+        # ── Restore Focus Mode if we set it ──────────────
+        local focus_set_by_plugin
+        focus_set_by_plugin="$(ash::state::get "plugin.${ASH_PLUGIN_ID}.set_focus_mode" || echo false)"
+        if [[ "${focus_set_by_plugin}" == "true" ]]; then
+          ash::mode::restore_previous
+          ash::state::set "plugin.${ASH_PLUGIN_ID}.set_focus_mode" "false"
+        fi
+
+        # ── Restore original theme accent ─────────────────
+        ash::theme::restore_accent
+
+        # ── Remove Waybar module ──────────────────────────
+        ash::waybar::remove_module "custom/ash-pomodoro"
+        ash::waybar::reload
+
+        # ── Deregister hooks ──────────────────────────────
+        ash::hook::deregister_all "${ASH_PLUGIN_ID}"
+
+        ash::plugin::log "success" "Plugin disabled cleanly — no orphaned processes"
+        ash::plugin::set_status "disabled"
+        ```
+
+        ## status.sh — State reporter
+
+        ```bash
+        #!/usr/bin/env bash
+        # Smart Focus Timer — status.sh
+
+        set -euo pipefail
+        source "${ASH_PLUGIN_API:-/usr/lib/ash/plugin-api.sh}"
+
+        ASH_PLUGIN_ID="smart-focus-timer"
+
+        state_file="$(ash::plugin::data_dir)/state/current.json"
+
+        if [[ ! -f "${state_file}" ]]; then
+          ash::plugin::output::json '{
+            "status": "not_initialized",
+            "plugin": "smart-focus-timer"
+          }'
+          exit 0
+        fi
+
+        # Read current state
+        status="$(jq -r '.status' "${state_file}")"
+        session_type="$(jq -r '.session_type // "none"' "${state_file}")"
+        pomodoros_today="$(jq -r '.pomodoros_today' "${state_file}")"
+
+        # Calculate time remaining if active
+        time_remaining=""
+        if [[ "${status}" == "running" ]]; then
+          start_time="$(jq -r '.start_time' "${state_file}")"
+          duration_secs=$(( $(jq -r '.duration_minutes' "${state_file}") * 60 ))
+          elapsed=$(( $(date +%s) - start_time ))
+          remaining=$(( duration_secs - elapsed ))
+          time_remaining="$(printf '%02d:%02d' $((remaining/60)) $((remaining%60)))"
+        fi
+
+        ash::plugin::output::json "$(jq -n \
+          --arg status "${status}" \
+          --arg session_type "${session_type}" \
+          --arg time_remaining "${time_remaining}" \
+          --argjson pomodoros_today "${pomodoros_today}" \
+          '{
+            "status": $status,
+            "session_type": $session_type,
+            "time_remaining": $time_remaining,
+            "pomodoros_today": $pomodoros_today
+          }')"
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — SECURITY AUDIT SELF-ASSESSMENT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: security_audit
+    attributes:
+      label: "🔒 Security Audit Self-Assessment"
+      description: >
+        **CRITICAL SECTION — All plugins undergo mandatory security review.**
+        Complete this self-assessment honestly. Undisclosed security concerns
+        discovered during review will result in immediate rejection.
+      placeholder: |
+        ## 🌐 Network Access
+
+        **Does your plugin make any network requests?**
+        - [ ] ❌ No network access whatsoever
+        - [x] ✅ Yes — all endpoints disclosed below
+
+        **Disclosed network endpoints:**
+        | Endpoint | Purpose | When Called | Data Sent | TLS? |
+        |----------|---------|-------------|-----------|------|
+        | None | — | — | — | — |
+
+        *This plugin makes ZERO network requests.*
+
+        ## 📁 Filesystem Access
+
+        **Read access required:**
+        - `$XDG_CONFIG_HOME/ash/ash.conf` — read current ASH config
+        - `$HOME/.local/share/ash/` — read ASH state
+
+        **Write access required:**
+        - `$HOME/.local/share/ash/plugins/smart-focus-timer/` — plugin state & logs
+        - `$HOME/.local/share/ash/data/analytics/` — session analytics records
+
+        **Sensitive files accessed:** None (no access to ~/.ssh, ~/.gnupg, etc.)
+
+        ## 🔑 Privilege Requirements
+
+        - **sudo/root:** ❌ Never required
+        - **setuid/setgid:** ❌ Not used
+        - **Capabilities:** ❌ None required
+        - **Polkit:** ❌ Not used
+
+        ## 💉 Input Sanitization
+
+        All external inputs (config values, user input, hook parameters) are:
+        - Validated against schema before use
+        - Quoted in all shell contexts to prevent injection
+        - Type-checked (integer ranges, boolean, enum validation)
+
+        Example sanitization:
+        ```bash
+        # Config value read — validated as integer, clamped to safe range
+        work_duration="$(ash::config::get_int \
+          "plugin.smart-focus-timer.work_duration" \
+          --default 25 --min 1 --max 120)"
+        ```
+
+        ## 🔐 Secrets & Credentials
+
+        - **Hardcoded secrets:** ❌ Zero
+        - **API keys:** ❌ Not required
+        - **Authentication:** ❌ Not required
+        - **Credential storage:** ❌ Not used
+
+        ## 🧹 Code Quality Security Indicators
+
+        - **ShellCheck score:** 0 warnings, 0 errors
+        - **eval usage:** ❌ Not used
+        - **Dynamic code exec:** ❌ Not used
+        - **Temp file handling:** Uses `mktemp` with proper cleanup traps
+        - **Error handling:** `set -euo pipefail` in all scripts
+
+        ## 🔍 Third-Party Code
+
+        All code is original. No vendored dependencies with known CVEs.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — ASH API USAGE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: api_usage
+    attributes:
+      label: "⚡ ASH Plugin API Usage"
+      description: >
+        Document all ASH Plugin API calls your plugin makes.
+        This ensures compatibility across ASH versions and helps us
+        plan API stability around your plugin's requirements.
+      placeholder: |
+        ## ASH Plugin API Functions Used
+
+        ### Core Plugin API
+        | Function | Purpose | Required/Optional |
+        |----------|---------|-------------------|
+        | `ash::plugin::log` | Structured logging | Required |
+        | `ash::plugin::data_dir` | Get plugin data directory | Required |
+        | `ash::plugin::set_status` | Update plugin status | Required |
+        | `ash::plugin::fail` | Fatal error with cleanup | Required |
+        | `ash::plugin::emit_event` | Emit lifecycle events | Required |
+        | `ash::plugin::output::json` | Structured JSON output | Required |
+
+        ### Theme API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::theme::set_accent` | Temporarily shift accent color |
+        | `ash::theme::restore_accent` | Restore original accent |
+        | `ash::theme::get_color` | Read current theme color value |
+
+        ### Mode API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::mode::set "focus"` | Enable Focus Mode |
+        | `ash::mode::get` | Check current active mode |
+        | `ash::mode::restore_previous` | Return to pre-plugin mode |
+
+        ### Config API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::config::get` | Read user config values |
+        | `ash::config::get_int` | Read typed integer config |
+        | `ash::config::get_bool` | Read typed boolean config |
+        | `ash::config::set` | Write config values |
+
+        ### Hook API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::hook::register` | Register for system events |
+        | `ash::hook::deregister_all` | Clean removal of all hooks |
+        | `ash::hook::emit` | Emit plugin-specific hooks |
+
+        ### Analytics API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::analytics::record` | Record session completion metrics |
+        | `ash::analytics::increment` | Increment counter metrics |
+
+        ### Notification API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::notification::send` | Theme-aware notification |
+        | `ash::notification::send_progress` | Progress-style notification |
+
+        ### Waybar API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::waybar::reload` | Reload waybar config |
+        | `ash::waybar::remove_module` | Remove custom module |
+
+        ### State API
+        | Function | Purpose |
+        |----------|---------|
+        | `ash::state::get` | Read persistent state |
+        | `ash::state::set` | Write persistent state |
+
+        ## Minimum ASH Version Required
+        `ash >= 5.0.0` — all APIs used are available since v5.0.0
+
+        ## API Compatibility Notes
+        - Uses `ash::theme::set_accent` — added in v5.0.0, stable
+        - Uses `ash::analytics::record` — added in v5.0.0, marked `@stable`
+        - No use of any `@experimental` or `@deprecated` APIs
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — LIFECYCLE MANAGEMENT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: lifecycle
+    attributes:
+      label: "🔄 Plugin Lifecycle Management"
+      description: >
+        Describe exactly what your plugin does at each lifecycle stage.
+        **Clean lifecycle management is a hard requirement for acceptance.**
+      placeholder: |
+        ## ⬇️ Install (`ash plugin install smart-focus-timer`)
+
+        1. Downloads plugin from repository
+        2. Runs `init.sh`:
+           - Creates `~/.local/share/ash/plugins/smart-focus-timer/` data dir
+           - Initializes `state/current.json` with defaults
+           - Registers Waybar module definition
+           - Installs Fish functions to `~/.config/fish/functions/`
+           - Installs systemd user units (not yet enabled)
+        3. Validates all dependencies are present
+        4. Sets plugin status to `installed`
+
+        **Files created during install:**
+        ```
+        ~/.local/share/ash/plugins/smart-focus-timer/
+        ├── state/current.json
+        ├── sessions/
+        └── logs/plugin.log
+        ~/.config/fish/functions/pomodoro.fish (symlink)
+        ~/.config/fish/functions/pomo.fish (symlink)
+        ~/.config/systemd/user/ash-pomodoro.service (symlink)
+        ```
+
+        ## ✅ Enable (`ash plugin enable smart-focus-timer`)
+
+        1. Starts `ash-pomodoro.service` via systemd
+        2. Registers Waybar module in active config
+        3. Reloads Waybar
+        4. Registers ASH event hooks
+        5. Sets status to `enabled`
+
+        **Changes to running system:**
+        - 1 new background process: `ash-pomodoro-daemon`
+        - Waybar gains `custom/ash-pomodoro` module
+        - 4 ASH hooks registered
+
+        ## ❌ Disable (`ash plugin disable smart-focus-timer`)
+
+        1. If timer is active: saves partial session data, sends "timer stopped" notification
+        2. If Focus Mode was enabled by plugin: restores previous mode
+        3. If accent color was shifted: restores original accent
+        4. Stops `ash-pomodoro.service`
+        5. Removes Waybar module, reloads Waybar
+        6. Deregisters all ASH hooks
+        7. Sets status to `disabled`
+
+        **System state after disable:** ✅ Clean — identical to before enable was called
+
+        ## 🗑️ Uninstall (`ash plugin remove smart-focus-timer`)
+
+        1. Runs disable if currently enabled
+        2. Removes systemd units
+        3. Removes Fish function symlinks
+        4. **Optionally** removes data dir (prompts user — session history preserved by default)
+        5. Removes plugin from ASH plugin registry
+
+        **Files remaining after uninstall (with data preserved):**
+        ```
+        ~/.local/share/ash/plugins/smart-focus-timer/sessions/  ← preserved by default
+        ```
+
+        **Files remaining after uninstall (full clean):**
+        ```
+        Nothing — complete removal confirmed ✅
+        ```
+
+        ## 🔄 Update (`ash plugin update smart-focus-timer`)
+
+        1. Downloads new version
+        2. Runs `disable.sh` (graceful stop)
+        3. Backs up current state to `~/.local/share/ash/plugins/smart-focus-timer/backups/`
+        4. Replaces plugin files
+        5. Runs migration script if config schema changed
+        6. Runs `enable.sh` to restart
+        7. Verifies health check passes
+
+        **Zero data loss guaranteed during updates ✅**
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — PERFORMANCE SPECIFICATIONS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: performance
+    attributes:
+      label: "📊 Performance Specifications & Benchmarks"
+      description: >
+        All plugins must meet ASH's performance SLAs.
+        Provide measured benchmarks — not estimates.
+      placeholder: |
+        ## ⏱️ Timing Benchmarks
+
+        All measurements taken on: Arch Linux, AMD Ryzen 7 5800X, 32GB RAM
+
+        | Operation | Measured Time | ASH SLA | Status |
+        |-----------|--------------|---------|--------|
+        | `init.sh` execution | 48ms | < 500ms | ✅ PASS |
+        | `enable.sh` execution | 187ms | < 1000ms | ✅ PASS |
+        | `disable.sh` execution | 95ms | < 500ms | ✅ PASS |
+        | `status.sh` execution | 12ms | < 100ms | ✅ PASS |
+        | Waybar module update cycle | 950ms | < 1000ms | ✅ PASS |
+        | Hook handler (on-suspend) | 25ms | < 100ms | ✅ PASS |
+
+        ## 💾 Resource Usage
+
+        | Resource | Idle (enabled, no timer) | Active (timer running) | ASH Limit |
+        |----------|------------------------|----------------------|-----------|
+        | RAM (RSS) | 2.1 MB | 3.4 MB | < 50 MB ✅ |
+        | CPU | ~0% | < 0.1% | < 2% ✅ |
+        | Disk space | 1.2 MB | 1.5 MB | < 10 MB ✅ |
+        | Background processes | 1 (daemon) | 1 (daemon) | ≤ 2 ✅ |
+        | Open file descriptors | 3 | 4 | — |
+
+        ## 🚀 Startup Impact
+
+        - **ASH startup overhead:** +0ms (plugin daemon started separately by systemd)
+        - **Fish shell startup overhead:** +2ms (Fish functions are lazy-loaded)
+        - **Waybar startup overhead:** +8ms (one additional JSON parse for module)
+
+        ## 📉 Benchmark Methodology
+
+        ```bash
+        # Timing benchmarks:
+        hyperfine --warmup 5 --runs 20 'bash ./init.sh'
+        hyperfine --warmup 3 --runs 10 'bash ./enable.sh'
+
+        # Memory measurement:
+        /usr/bin/time -v bash ./enable.sh 2>&1 | grep "Maximum resident"
+
+        # CPU usage during active timer:
+        pidstat -p $(pgrep ash-pomodoro) 1 60  # 1-second intervals for 60s
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — TEST SUITE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: test_suite
+    attributes:
+      label: "🧪 Test Suite Documentation"
+      description: >
+        All plugins must include tests. Paste your test runner output
+        showing all tests passing, and describe your test coverage.
+      placeholder: |
+        ## Test Runner Output
+
+        ```bash
+        $ ash plugin test --all ./smart-focus-timer/
+
+        🧪 Smart Focus Timer — Test Suite v1.0.0
+        ════════════════════════════════════════════════════════
+
+        Unit Tests:
+          ✅ timer::calculate_remaining — elapsed 300s of 1500s → "20:00"  (2ms)
+          ✅ timer::calculate_remaining — elapsed 1500s of 1500s → "00:00" (1ms)
+          ✅ timer::determine_session_type — 1st pomodoro → "work"          (1ms)
+          ✅ timer::determine_session_type — 4th pomodoro → "long_break"    (1ms)
+          ✅ state::read — valid state file → correct JSON                  (3ms)
+          ✅ state::write — atomic write → no corruption on interrupt       (5ms)
+          ✅ state::reset — clears active session, preserves daily count    (2ms)
+          ✅ config::validate — work_duration=0 → rejected (below min)      (4ms)
+          ✅ config::validate — work_duration=121 → rejected (above max)    (4ms)
+          ✅ config::validate — work_duration=25 → accepted                 (3ms)
+          ✅ notifications::build_work_start — correct title/body/icon      (8ms)
+          ✅ notifications::build_complete — correct title/body/action      (7ms)
+          ✅ waybar::format_output — running → JSON with countdown          (2ms)
+          ✅ waybar::format_output — idle → JSON with idle state            (2ms)
+          ✅ color_shift::calculate — 0% elapsed → start color             (1ms)
+          ✅ color_shift::calculate — 100% elapsed → end color             (1ms)
+          ✅ analytics::build_record — complete session → valid JSON        (3ms)
+
+        Lifecycle Tests:
+          ✅ init.sh — creates required directories                        (12ms)
+          ✅ init.sh — idempotent (safe to run multiple times)             (10ms)
+          ✅ enable.sh — starts systemd service                           (180ms)
+          ✅ enable.sh — registers Waybar module                           (95ms)
+          ✅ enable.sh — idempotent (safe to run when already enabled)    (185ms)
+          ✅ disable.sh — stops service, no orphaned processes             (97ms)
+          ✅ disable.sh — restores focus mode if set by plugin             (48ms)
+          ✅ disable.sh — restores theme accent if shifted                 (32ms)
+          ✅ disable.sh — removes Waybar module                            (88ms)
+          ✅ disable.sh — idempotent (safe to run when already disabled)   (45ms)
+          ✅ full enable→disable cycle — clean system state after          (290ms)
+
+        Hook Tests:
+          ✅ on_suspend — pauses active timer, saves state                 (18ms)
+          ✅ on_resume — restores timer state after suspend                (15ms)
+          ✅ on_battery — reduces animation, keeps timer running           (12ms)
+          ✅ on_ac_power — restores full functionality                     (11ms)
+
+        Integration Tests:
+          ✅ ASH config integration — reads/writes via ash::config::*      (35ms)
+          ✅ ASH mode integration — enables focus mode correctly           (125ms)
+          ✅ ASH analytics integration — records session metrics           (22ms)
+          ✅ ASH notification integration — themed notification sent       (45ms)
+
+        Security Tests:
+          ✅ ShellCheck — 0 warnings, 0 errors (all scripts)               (890ms)
+          ✅ No hardcoded secrets (gitleaks scan)                          (340ms)
+          ✅ No network calls in offline mode                              (15ms)
+          ✅ Input sanitization — malicious config values rejected          (28ms)
+          ✅ Temp file cleanup on interrupt (SIGTERM/SIGINT trap)          (52ms)
+
+        ════════════════════════════════════════════════════════
+        Results: 42/42 tests PASSED ✅ (0 failed, 0 skipped)
+        Total time: 2.891s
+        Coverage: 94% (estimated)
+        ```
+
+        ## Test Coverage Summary
+
+        | Module | Coverage | Critical Paths |
+        |--------|----------|---------------|
+        | `lib/timer.sh` | 97% | ✅ All edge cases covered |
+        | `lib/state.sh` | 95% | ✅ Atomic writes, corruption recovery |
+        | `lib/hooks.sh` | 88% | ✅ All registered hooks tested |
+        | `lib/analytics.sh` | 91% | ✅ Data integrity verified |
+        | `enable.sh` | 100% | ✅ Including idempotency |
+        | `disable.sh` | 100% | ✅ Including all cleanup paths |
+        | `init.sh` | 100% | ✅ Including idempotency |
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — SCREENSHOTS & DEMO
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 Screenshots & Demo Media"
+      description: >
+        Visual evidence of your plugin working in real conditions.
+        High-quality screenshots dramatically accelerate review approval.
+      placeholder: |
+        ## 🖥️ Plugin in Action
+
+        ### Waybar Module — Active Work Session
+        <!-- Show the countdown timer in the bar with progress indicator -->
+        [drag image here]
+
+        ### Waybar Module — Break Time
+        <!-- Show the break indicator in the bar -->
+        [drag image here]
+
+        ### Dunst Notification — Session Complete
+        <!-- Show the themed completion notification with action buttons -->
+        [drag image here]
+
+        ### Rofi Control Menu
+        <!-- Show the rofi menu with start/pause/stop/status options -->
+        [drag image here]
+
+        ### Dynamic Color Shift (before → during → after)
+        <!-- Side-by-side showing accent color progression -->
+        [drag image here]
+
+        ### Focus Mode Integration
+        <!-- Desktop before vs during focus session -->
+        [drag image here]
+
+        ## 🎬 Demo Recording
+
+        <!-- A screen recording (GIF or MP4) showing the full workflow:
+             starting a session, watching the timer, completion notification,
+             and the analytics dashboard update -->
+        [drag GIF/MP4 here]
+
+        ## 📋 CLI Output Examples
+
+        ```bash
+        $ ash plugin status smart-focus-timer
+        ╔══════════════════════════════════════════╗
+        ║  🔌 Smart Focus Timer — Status           ║
+        ╠══════════════════════════════════════════╣
+        ║  Status:        🟢 Running               ║
+        ║  Session:       🍅 Work #3 of 4          ║
+        ║  Time Left:     17:34 remaining          ║
+        ║  Today:         2 Pomodoros completed    ║
+        ║  Streak:        🔥 5 days                ║
+        ╚══════════════════════════════════════════╝
+
+        $ pomo status
+        🍅 Work session — 17:34 remaining
+        ```
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — COMPATIBILITY MATRIX
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: "🌍 Compatibility Matrix"
+      description: >
+        Document which systems, distros, and configurations your plugin
+        has been tested with and any known limitations.
+      placeholder: |
+        ## 🐧 Distribution Compatibility
+
+        | Distribution | Version | Status | Notes |
+        |-------------|---------|--------|-------|
+        | Arch Linux | Rolling | ✅ Fully supported | Primary dev platform |
+        | EndeavourOS | Rolling | ✅ Fully supported | Same as Arch |
+        | NixOS | 23.11, 24.05 | ✅ Fully supported | Nix module included |
+        | Fedora | 39, 40 | ✅ Fully supported | Tested with COPR |
+        | openSUSE Tumbleweed | Rolling | ✅ Supported | Minor path differences |
+        | Void Linux | Rolling | ✅ Supported | runit → systemd compat layer |
+        | Debian | 12 (Bookworm) | ⚠️ Partial | bash 5.1, missing `bc` by default |
+        | Ubuntu | 24.04 LTS | ⚠️ Partial | Same as Debian |
+        | Gentoo | Rolling | 🧪 Untested | Should work, unverified |
+
+        ## 🪟 Hyprland Version Compatibility
+
+        | Hyprland | Supports | Notes |
+        |----------|----------|-------|
+        | v0.40.0+ | ✅ Full | Current minimum recommended |
+        | v0.36.0 - v0.39.x | ✅ Full | Tested |
+        | v0.30.0 - v0.35.x | ⚠️ Partial | Missing `hyprctl dispatch focusmonitor` |
+        | < v0.30.0 | ❌ Unsupported | IPC format incompatible |
+
+        ## 🖥️ Hardware Compatibility
+
+        | GPU Driver | Status | Notes |
+        |-----------|--------|-------|
+        | AMD (amdgpu) | ✅ Full | Primary test platform |
+        | NVIDIA (proprietary) | ✅ Full | Tested on RTX 3080 |
+        | NVIDIA (open) | ✅ Full | Tested on RTX 4090 |
+        | Intel (iris/i915) | ✅ Full | Tested on Iris Xe |
+        | VM (VMware/QEMU) | ⚠️ Partial | Animations disabled in VM |
+
+        ## ⚙️ Configuration Compatibility
+
+        - **Multiple monitors:** ✅ Supported — Waybar module appears on primary
+        - **Multiple Waybar instances:** ✅ Supported — module on each bar
+        - **Vertical Waybar:** ✅ Supported — compact text mode auto-enabled
+        - **AGS instead of Waybar:** 🔜 Planned for v1.1.0
+        - **Without systemd (runit/OpenRC):** ⚠️ Fallback mode using background process
+
+        ## 🔌 Plugin Compatibility
+
+        | Plugin | Status | Notes |
+        |--------|--------|-------|
+        | `analytics` | ✅ Integrates | Automatically records sessions |
+        | `discord-rpc` | ✅ Integrates | Shows "Focusing 🍅" in Discord status |
+        | `focus-mode` (deprecated) | ⚠️ Conflicts | Use this plugin instead |
+        | `game-mode` | ⚠️ Advisory | Warns when game mode conflicts with focus |
+        | `do-not-disturb` | ✅ Compatible | Works alongside DND mode |
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — VALIDATION OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: validation_output
+    attributes:
+      label: "✅ Plugin Validation Output"
+      description: >
+        **REQUIRED:** Paste the complete output of `ash plugin validate --strict --security ./plugin/`
+        Your plugin must pass ALL validation checks before submission will be reviewed.
+      render: shell
+      placeholder: |
+        $ ash plugin validate --strict --security ./smart-focus-timer/
+
+        🔌 ASH Plugin Validator v5.0 — STRICT + SECURITY MODE
+        ════════════════════════════════════════════════════════════
+
+        Plugin: Smart Focus Timer v1.0.0
+        Path: ./smart-focus-timer/
+        ID: smart-focus-timer
+
+        ── Manifest Validation ──────────────────────────────────
+        ✅ plugin.json — schema valid (plugin-v2.json)
+        ✅ Required fields — all present
+        ✅ Version format — valid semver (1.0.0)
+        ✅ Plugin ID — valid format, not in registry
+        ✅ ASH version constraint — valid (>=5.0.0)
+        ✅ Author information — complete
+        ✅ License — MIT (SPDX recognized)
+        ✅ Repository URL — reachable (200)
+        ✅ Permissions — no undeclared access
+
+        ── File Structure Validation ─────────────────────────────
+        ✅ init.sh — present, executable
+        ✅ enable.sh — present, executable
+        ✅ disable.sh — present, executable
+        ✅ status.sh — present, executable
+        ✅ README.md — present (2847 words)
+        ✅ LICENSE — present (MIT)
+        ✅ All declared files — present (38/38)
+
+        ── Security Scanning ─────────────────────────────────────
+        ✅ ShellCheck — 0 errors, 0 warnings (22 scripts)
+        ✅ Gitleaks — no secrets detected
+        ✅ eval usage — none detected
+        ✅ Hardcoded paths — none (all use env vars)
+        ✅ sudo usage — none
+        ✅ Undeclared network — none detected
+        ✅ Filesystem boundaries — respected (no ../.. traversal)
+        ✅ SUID/SGID bits — not set
+        ✅ World-writable files — none
+
+        ── Performance Validation ────────────────────────────────
+        ✅ init.sh execution time — 48ms (SLA: <500ms)
+        ✅ enable.sh execution time — 187ms (SLA: <1000ms)
+        ✅ disable.sh execution time — 95ms (SLA: <500ms)
+        ✅ status.sh execution time — 12ms (SLA: <100ms)
+        ✅ Memory footprint — 3.4MB peak (SLA: <50MB)
+        ✅ Background processes — 1 (SLA: ≤2)
+
+        ── API Compatibility ─────────────────────────────────────
+        ✅ All API calls — valid for ash>=5.0.0
+        ✅ No deprecated API usage
+        ✅ No experimental API usage
+        ✅ Hook names — all valid
+
+        ── Lifecycle Validation ──────────────────────────────────
+        ✅ Enable idempotent — passed
+        ✅ Disable idempotent — passed
+        ✅ Clean uninstall — passed (no orphaned files)
+        ✅ No orphaned processes after disable
+
+        ── Test Suite ────────────────────────────────────────────
+        ✅ Tests present — 42 tests found
+        ✅ All tests pass — 42/42 ✅
+
+        ════════════════════════════════════════════════════════════
+        RESULT: ✅ ALL CHECKS PASSED (32/32)
+        Plugin is ready for submission! 🚀
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — LICENSE & ATTRIBUTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: license
+    attributes:
+      label: "⚖️ Plugin License"
+      description: "License for your plugin code"
+      options:
+        - "MIT — Maximum permissive, attribution required"
+        - "Apache 2.0 — Permissive with patent protection"
+        - "GPL v3 — Copyleft, derivative works must be open"
+        - "LGPL v3 — Library copyleft"
+        - "ISC — Simplified permissive"
+        - "BSD 2-Clause — Simple permissive"
+        - "BSD 3-Clause — Permissive with no-endorsement clause"
+        - "CC0 1.0 — Public domain dedication"
+        - "Proprietary — Closed source (requires special review)"
+        - "Other (describe in additional context)"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 18 — AUTHOR INFORMATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: author_name
+    attributes:
+      label: "👤 Author Name / Handle"
+      placeholder: "e.g., Jane Developer / @janedeveloper"
+    validations:
+      required: true
+
+  - type: input
+    id: author_github
+    attributes:
+      label: "🐙 GitHub Username"
+      placeholder: "e.g., janedeveloper"
+    validations:
+      required: true
+
+  - type: input
+    id: author_contact
+    attributes:
+      label: "📬 Support Contact"
+      description: "How should users reach you for plugin support?"
+      placeholder: "e.g., GitHub Issues, Discord: janedeveloper#1234, email"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 19 — MAINTENANCE COMMITMENT
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: maintenance
+    attributes:
+      label: "🔧 Maintenance Commitment"
+      description: >
+        Plugin maintainers must respond to critical security issues within 72 hours
+        or the plugin will be removed from the official store.
+      options:
+        - "🌟 Active — I commit to regular updates and prompt security responses"
+        - "📅 Periodic — I'll update for major ASH releases and security issues"
+        - "👀 Minimal — Security fixes only, no feature updates planned"
+        - "🤝 Seeking Co-Maintainer — I want help maintaining this"
+        - "🎁 Transferring — I'm willing to transfer ownership to ASH core team"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 20 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Plugin Submission Final Checklist"
+      description: "ALL items must be confirmed for submission to be processed"
+      options:
+        - label: >
+            🔑 Plugin ID is **unique** — verified against plugin registry
+          required: true
+        - label: >
+            📋 `plugin.json` is **complete and schema-valid** (plugin-v2.json)
+          required: true
+        - label: >
+            ✅ `ash plugin validate --strict --security` — **ALL checks passed**
+          required: true
+        - label: >
+            🔒 **Zero hardcoded secrets** — all credentials use ASH secure store
+          required: true
+        - label: >
+            🌐 **All network endpoints** are disclosed in `plugin.json` permissions
+          required: true
+        - label: >
+            🧪 **All tests pass** — 100% of lifecycle tests green
+          required: true
+        - label: >
+            🔄 Plugin has **clean enable/disable lifecycle** — no orphaned processes
+          required: true
+        - label: >
+            📖 `README.md` is **complete** with install, usage, config, and troubleshooting
+          required: true
+        - label: >
+            ⚖️ **LICENSE file** is present and I have rights to distribute all included code
+          required: true
+        - label: >
+            🔧 I commit to maintaining this plugin and responding to **security issues within 72 hours**
+          required: true
+        - label: >
+            📖 I agree to the
+            [Plugin Developer Agreement](https://ash-dotfiles.github.io/plugin-developer-agreement)
+            and [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 21 — CLOSING BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### 🔌 Thank You for Your Plugin Submission!
+
+        #### 🔄 Review Pipeline
+
+        ```
+        Submit → Security Scan → Auto-Validation → Sandbox Test → Human Review → Decision
+          now       ~1hr           ~30min           ~2hrs           1-5 days      instant
+        ```
+
+        #### 📋 Review Criteria Weights
+
+        | Criteria | Weight |
+        |----------|--------|
+        | 🔒 Security (clean audit) | 40% |
+        | 🔄 Lifecycle cleanliness | 20% |
+        | 🧪 Test coverage | 15% |
+        | 📖 Documentation quality | 15% |
+        | ✨ Feature value / uniqueness | 10% |
+
+        #### 🏆 Accepted Plugin Benefits
+
+        - 🌟 Listed in official ASH Plugin Store
+        - 📊 Real-time install statistics dashboard
+        - 💬 Featured in Discord `#new-plugins` channel
+        - 🏅 Plugin Developer badge on contributor wall
+        - 🤝 Direct access to `#plugin-dev` Discord channel
+        - 💰 Eligibility for community bounty rewards
+
+        ---
+        **Join [#plugin-dev on Discord](https://discord.gg/ash-dotfiles)
+        for developer support, API previews, and co-review!**
+
+        *— The ASH Dotfiles Plugin Team* 🔌
+
+        </div>

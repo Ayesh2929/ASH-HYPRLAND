@@ -1,0 +1,675 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🔌 ASH DOTFILES v5.0 OMEGA — VALIDATE PLUGIN ACTION                                     ║
+# ║                                                                                           ║
+# ║  ██╗   ██╗ █████╗ ██╗     ██╗██████╗  █████╗ ████████╗███████╗                           ║
+# ║  ██║   ██║██╔══██╗██║     ██║██╔══██╗██╔══██╗╚══██╔══╝██╔════╝                           ║
+# ║  ██║   ██║███████║██║     ██║██║  ██║███████║   ██║   █████╗                             ║
+# ║  ╚██╗ ██╔╝██╔══██║██║     ██║██║  ██║██╔══██║   ██║   ██╔══╝                             ║
+# ║   ╚████╔╝ ██║  ██║███████╗██║██████╔╝██║  ██║   ██║   ███████╗                           ║
+# ║    ╚═══╝  ╚═╝  ╚═╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝                           ║
+# ║                                                                                           ║
+# ║  ██████╗ ██╗     ██╗   ██╗ ██████╗ ██╗███╗   ██╗                                         ║
+# ║  ██╔══██╗██║     ██║   ██║██╔════╝ ██║████╗  ██║                                         ║
+# ║  ██████╔╝██║     ██║   ██║██║  ███╗██║██╔██╗ ██║                                         ║
+# ║  ██╔═══╝ ██║     ██║   ██║██║   ██║██║██║╚██╗██║                                         ║
+# ║  ██║     ███████╗╚██████╔╝╚██████╔╝██║██║ ╚████║                                         ║
+# ║  ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝                                         ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 VALIDATION PIPELINE (15 checks):                                                      ║
+# ║     📋 Manifest schema (plugin.json — JSON Schema Draft-7)                               ║
+# ║     📁 File structure (init/enable/disable/status scripts)                               ║
+# ║     🔐 Script security (injection / eval / dangerous patterns)                           ║
+# ║     🐚 ShellCheck lint (all .sh files — severity: warning)                               ║
+# ║     ♿ Accessibility (help text / user-facing messages quality)                           ║
+# ║     📊 Dependency verification (declared deps exist on system)                           ║
+# ║     🔢 API contract (required functions exported from init.sh)                            ║
+# ║     ⚡ Performance (script complexity / line count / nested loops)                        ║
+# ║     🔤 Naming convention (kebab-case / no spaces / length limits)                        ║
+# ║     🏷️  Metadata completeness (name/version/author/category/desc)                         ║
+# ║     📜 License verification (FOSS compatible or custom)                                   ║
+# ║     🧪 Test coverage (tests/ directory presence & test count)                             ║
+# ║     📖 Documentation (README.md quality score)                                            ║
+# ║     🔗 Config integration (config.json schema conformance)                                ║
+# ║     🔄 Lifecycle completeness (enable ↔ disable symmetry)                               ║
+# ║     📊 Quality score (0-100) with letter grade (A+→F)                                    ║
+# ║     💬 PR comment with rich validation dashboard                                          ║
+# ║     📤 Full artifact report (Markdown + JSON)                                             ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔌 Validate ASH Plugin"
+description: >
+  Comprehensive plugin validation engine for ASH Dotfiles v5.0 OMEGA.
+  Validates plugin manifest schema, lifecycle script completeness, ShellCheck
+  compliance, security patterns, API contract, dependency declarations,
+  test coverage, documentation quality, naming conventions, and generates
+  a detailed quality report with a 0-100 score and letter grade.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ── Target specification ──────────────────────────────────────────────────
+  plugin_path:
+    description: >
+      📁 Path to the plugin directory or plugin.json manifest.
+      Examples:
+        "plugins/core/game-mode"
+        "plugins/core/game-mode/plugin.json"
+    required: true
+
+  plugin_name:
+    description: >
+      🏷️ Plugin name override. If empty, auto-detected from plugin.json
+      or directory name.
+    required: false
+    default: ""
+
+  # ── Validation depth ──────────────────────────────────────────────────────
+  validation_level:
+    description: >
+      🎯 Validation depth level.
+      • quick    — Manifest + file presence only (~3s)
+      • standard — Full validation without perf check (~15s)
+      • strict   — All checks + ShellCheck + security (~25s)
+      • paranoid — Everything + test coverage + docs (~40s)
+    required: false
+    default: "standard"
+
+  # ── Script validation ─────────────────────────────────────────────────────
+  run_shellcheck:
+    description: "🐚 Run ShellCheck on all plugin scripts"
+    required: false
+    default: "true"
+
+  shellcheck_severity:
+    description: "🐚 ShellCheck minimum severity (error|warning|info|style)"
+    required: false
+    default: "warning"
+
+  fail_on_shellcheck:
+    description: "🐚 Fail if ShellCheck finds errors"
+    required: false
+    default: "true"
+
+  # ── Security ──────────────────────────────────────────────────────────────
+  security_scan:
+    description: "🔐 Run security pattern scan on scripts"
+    required: false
+    default: "true"
+
+  fail_on_security:
+    description: "🔐 Fail on security vulnerabilities found"
+    required: false
+    default: "true"
+
+  allowed_commands:
+    description: >
+      🔐 Comma-separated list of additional allowed commands.
+      Add commands your plugin legitimately needs.
+    required: false
+    default: ""
+
+  # ── Required lifecycle scripts ────────────────────────────────────────────
+  required_scripts:
+    description: >
+      📁 Required lifecycle scripts (comma-separated).
+      Default enforces the full ASH plugin lifecycle.
+    required: false
+    default: "init.sh,enable.sh,disable.sh,status.sh"
+
+  check_api_contract:
+    description: "🔢 Verify API contract functions in init.sh"
+    required: false
+    default: "true"
+
+  required_functions:
+    description: >
+      🔢 Required functions in init.sh (comma-separated).
+    required: false
+    default: "ash_plugin_init,ash_plugin_info,ash_plugin_help"
+
+  check_lifecycle_symmetry:
+    description: "🔄 Check enable/disable script symmetry"
+    required: false
+    default: "true"
+
+  # ── Metadata ──────────────────────────────────────────────────────────────
+  required_metadata_fields:
+    description: "🏷️ Required plugin.json fields (comma-separated)"
+    required: false
+    default: "name,version,author,category,description,license"
+
+  valid_categories:
+    description: >
+      📁 Valid plugin categories (comma-separated).
+    required: false
+    default: "core,integration,theme,performance,accessibility,gaming,productivity,media,system,network,security,developer"
+
+  enforce_semver:
+    description: "🔖 Enforce semantic versioning (X.Y.Z)"
+    required: false
+    default: "true"
+
+  # ── Dependencies ──────────────────────────────────────────────────────────
+  check_dependencies:
+    description: "📊 Verify declared dependencies exist"
+    required: false
+    default: "true"
+
+  fail_on_missing_deps:
+    description: "📊 Fail if declared dependencies are missing"
+    required: false
+    default: "false"
+
+  # ── Test coverage ─────────────────────────────────────────────────────────
+  check_test_coverage:
+    description: "🧪 Check for test files"
+    required: false
+    default: "true"
+
+  min_test_count:
+    description: "🧪 Minimum number of test cases"
+    required: false
+    default: "1"
+
+  # ── Documentation ─────────────────────────────────────────────────────────
+  check_documentation:
+    description: "📖 Validate README.md quality"
+    required: false
+    default: "true"
+
+  min_readme_lines:
+    description: "📖 Minimum README.md lines"
+    required: false
+    default: "20"
+
+  # ── Performance thresholds ─────────────────────────────────────────────────
+  max_script_lines:
+    description: "⚡ Maximum lines per script file"
+    required: false
+    default: "500"
+
+  max_total_size_kb:
+    description: "⚡ Maximum total plugin directory size (KB)"
+    required: false
+    default: "5120"
+
+  # ── Scoring ───────────────────────────────────────────────────────────────
+  minimum_score:
+    description: "📊 Minimum quality score (0-100) to pass"
+    required: false
+    default: "65"
+
+  # ── Output & reporting ────────────────────────────────────────────────────
+  post_pr_comment:
+    description: "💬 Post validation results as PR comment"
+    required: false
+    default: "true"
+
+  update_existing_comment:
+    description: "💬 Update existing PR comment"
+    required: false
+    default: "true"
+
+  generate_report:
+    description: "📄 Generate detailed validation report artifact"
+    required: false
+    default: "true"
+
+  fail_on_error:
+    description: "🚨 Fail action if validation fails"
+    required: false
+    default: "true"
+
+  verbose:
+    description: "📢 Enable verbose output"
+    required: false
+    default: "false"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  # ── Overall result ────────────────────────────────────────────────────────
+  validation_passed:
+    description: "✅ Whether validation passed (true/false)"
+    value: ${{ steps.validate.outputs.validation_passed }}
+
+  validation_score:
+    description: "📊 Quality score (0-100)"
+    value: ${{ steps.validate.outputs.score }}
+
+  validation_grade:
+    description: "🏅 Letter grade (A+/A/B/C/D/F)"
+    value: ${{ steps.validate.outputs.grade }}
+
+  # ── Plugin info ───────────────────────────────────────────────────────────
+  plugin_name:
+    description: "🏷️ Detected plugin name"
+    value: ${{ steps.validate.outputs.plugin_name }}
+
+  plugin_version:
+    description: "🔖 Plugin version from manifest"
+    value: ${{ steps.validate.outputs.plugin_version }}
+
+  plugin_category:
+    description: "📁 Plugin category"
+    value: ${{ steps.validate.outputs.plugin_category }}
+
+  plugin_author:
+    description: "👤 Plugin author"
+    value: ${{ steps.validate.outputs.plugin_author }}
+
+  # ── Check results ─────────────────────────────────────────────────────────
+  manifest_passed:
+    description: "📋 Manifest schema check result"
+    value: ${{ steps.validate.outputs.manifest_passed }}
+
+  structure_passed:
+    description: "📁 File structure check result"
+    value: ${{ steps.validate.outputs.structure_passed }}
+
+  shellcheck_passed:
+    description: "🐚 ShellCheck result"
+    value: ${{ steps.validate.outputs.shellcheck_passed }}
+
+  shellcheck_errors:
+    description: "🐚 Number of ShellCheck errors"
+    value: ${{ steps.validate.outputs.shellcheck_errors }}
+
+  shellcheck_warnings:
+    description: "🐚 Number of ShellCheck warnings"
+    value: ${{ steps.validate.outputs.shellcheck_warnings }}
+
+  security_passed:
+    description: "🔐 Security scan result"
+    value: ${{ steps.validate.outputs.security_passed }}
+
+  security_threats:
+    description: "🔐 Number of security threats found"
+    value: ${{ steps.validate.outputs.security_threats }}
+
+  api_passed:
+    description: "🔢 API contract check result"
+    value: ${{ steps.validate.outputs.api_passed }}
+
+  deps_passed:
+    description: "📊 Dependency check result"
+    value: ${{ steps.validate.outputs.deps_passed }}
+
+  tests_passed:
+    description: "🧪 Test coverage check result"
+    value: ${{ steps.validate.outputs.tests_passed }}
+
+  test_count:
+    description: "🧪 Number of test cases found"
+    value: ${{ steps.validate.outputs.test_count }}
+
+  docs_passed:
+    description: "📖 Documentation check result"
+    value: ${{ steps.validate.outputs.docs_passed }}
+
+  naming_passed:
+    description: "🔤 Naming convention result"
+    value: ${{ steps.validate.outputs.naming_passed }}
+
+  lifecycle_passed:
+    description: "🔄 Lifecycle symmetry check result"
+    value: ${{ steps.validate.outputs.lifecycle_passed }}
+
+  # ── Issues ────────────────────────────────────────────────────────────────
+  error_count:
+    description: "❌ Number of validation errors"
+    value: ${{ steps.validate.outputs.error_count }}
+
+  warning_count:
+    description: "⚠️ Number of validation warnings"
+    value: ${{ steps.validate.outputs.warning_count }}
+
+  errors_json:
+    description: "❌ JSON array of error messages"
+    value: ${{ steps.validate.outputs.errors_json }}
+
+  # ── Artifacts ─────────────────────────────────────────────────────────────
+  report_path:
+    description: "📄 Path to generated validation report"
+    value: ${{ steps.validate.outputs.report_path }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Pre-flight
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Resolve plugin path & validate inputs"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        PLUGIN_PATH="${{ inputs.plugin_path }}"
+        WORKSPACE="${GITHUB_WORKSPACE:-$(pwd)}"
+
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  🔌 ASH Plugin Validation Engine v5.0 OMEGA                  ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  📁 Plugin: %-50s║\n" "${PLUGIN_PATH:0:50}"
+        printf "║  🎯 Level:  %-50s║\n" "${{ inputs.validation_level }}"
+        printf "║  🐚 SC:     %-50s║\n" "${{ inputs.shellcheck_severity }}"
+        printf "║  🔐 Sec:    %-50s║\n" "${{ inputs.security_scan }}"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+
+        # Resolve absolute path
+        if [[ "${PLUGIN_PATH}" = /* ]]; then
+          ABS_PLUGIN_PATH="${PLUGIN_PATH}"
+        else
+          ABS_PLUGIN_PATH="${WORKSPACE}/${PLUGIN_PATH}"
+        fi
+
+        # If path is plugin.json, use parent
+        if [[ "${ABS_PLUGIN_PATH}" == */plugin.json ]]; then
+          ABS_PLUGIN_DIR=$(dirname "${ABS_PLUGIN_PATH}")
+        else
+          ABS_PLUGIN_DIR="${ABS_PLUGIN_PATH}"
+        fi
+
+        # Validate directory exists
+        if [[ ! -d "${ABS_PLUGIN_DIR}" ]]; then
+          echo "::error title=Plugin Not Found::Plugin directory not found: ${ABS_PLUGIN_DIR}"
+          exit 1
+        fi
+
+        # Auto-detect plugin name
+        PLUGIN_NAME="${{ inputs.plugin_name }}"
+        if [[ -z "${PLUGIN_NAME}" ]]; then
+          MANIFEST="${ABS_PLUGIN_DIR}/plugin.json"
+          if [[ -f "${MANIFEST}" ]]; then
+            PLUGIN_NAME=$(jq -r '.name // empty' "${MANIFEST}" 2>/dev/null | head -c 64 || echo "")
+          fi
+          [[ -z "${PLUGIN_NAME}" ]] && PLUGIN_NAME=$(basename "${ABS_PLUGIN_DIR}")
+        fi
+
+        # Validate level input
+        VALID_LEVELS="quick standard strict paranoid"
+        if ! echo "${VALID_LEVELS}" | grep -qw "${{ inputs.validation_level }}"; then
+          echo "::error::Invalid validation_level '${{ inputs.validation_level }}'"
+          exit 1
+        fi
+
+        WORK_DIR="${WORKSPACE}/.plugin-validator"
+        mkdir -p "${WORK_DIR}"
+
+        echo "abs_plugin_dir=${ABS_PLUGIN_DIR}" >> "$GITHUB_OUTPUT"
+        echo "plugin_name=${PLUGIN_NAME}"        >> "$GITHUB_OUTPUT"
+        echo "work_dir=${WORK_DIR}"              >> "$GITHUB_OUTPUT"
+
+        echo "  ✅ Pre-flight passed"
+        echo "  📁 Plugin dir:  ${ABS_PLUGIN_DIR}"
+        echo "  🏷️  Plugin name: ${PLUGIN_NAME}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Install dependencies
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📦 Dependencies · Install validation toolchain"
+      shell: bash
+      id: deps
+      run: |
+        set -euo pipefail
+
+        echo "  📦 Installing plugin validation tools..."
+
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          shellcheck \
+          jq \
+          bc \
+          file \
+          wc \
+          2>/dev/null || true
+
+        pip3 install --quiet --user \
+          jsonschema==4.23.0 \
+          rich==13.9.2 \
+          tabulate==0.9.0 \
+          matplotlib==3.9.2 \
+          numpy==2.1.2 \
+          2>/dev/null || true
+
+        echo "  ✅ ShellCheck: $(shellcheck --version 2>/dev/null | grep version: | head -1 || echo 'available')"
+        echo "  ✅ jq: $(jq --version 2>/dev/null || echo 'available')"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — Run validation
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔌 Validate · Full plugin validation pipeline"
+      shell: bash
+      id: validate
+      env:
+        PLUGIN_DIR:         ${{ steps.preflight.outputs.abs_plugin_dir }}
+        PLUGIN_NAME:        ${{ steps.preflight.outputs.plugin_name }}
+        WORK_DIR:           ${{ steps.preflight.outputs.work_dir }}
+        VALIDATION_LEVEL:   ${{ inputs.validation_level }}
+        RUN_SHELLCHECK:     ${{ inputs.run_shellcheck }}
+        SC_SEVERITY:        ${{ inputs.shellcheck_severity }}
+        FAIL_ON_SC:         ${{ inputs.fail_on_shellcheck }}
+        SECURITY_SCAN:      ${{ inputs.security_scan }}
+        FAIL_ON_SECURITY:   ${{ inputs.fail_on_security }}
+        ALLOWED_CMDS:       ${{ inputs.allowed_commands }}
+        REQUIRED_SCRIPTS:   ${{ inputs.required_scripts }}
+        CHECK_API:          ${{ inputs.check_api_contract }}
+        REQUIRED_FUNCTIONS: ${{ inputs.required_functions }}
+        CHECK_LIFECYCLE:    ${{ inputs.check_lifecycle_symmetry }}
+        REQUIRED_META:      ${{ inputs.required_metadata_fields }}
+        VALID_CATEGORIES:   ${{ inputs.valid_categories }}
+        ENFORCE_SEMVER:     ${{ inputs.enforce_semver }}
+        CHECK_DEPS:         ${{ inputs.check_dependencies }}
+        FAIL_ON_DEPS:       ${{ inputs.fail_on_missing_deps }}
+        CHECK_TESTS:        ${{ inputs.check_test_coverage }}
+        MIN_TESTS:          ${{ inputs.min_test_count }}
+        CHECK_DOCS:         ${{ inputs.check_documentation }}
+        MIN_README_LINES:   ${{ inputs.min_readme_lines }}
+        MAX_SCRIPT_LINES:   ${{ inputs.max_script_lines }}
+        MAX_SIZE_KB:        ${{ inputs.max_total_size_kb }}
+        MINIMUM_SCORE:      ${{ inputs.minimum_score }}
+        VERBOSE:            ${{ inputs.verbose }}
+      run: |
+        bash "${{ github.action_path }}/validate.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Post PR comment
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "💬 Comment · Post validation results to PR"
+      if: inputs.post_pr_comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const fs = require("fs");
+
+          const WORK_DIR      = "${{ steps.preflight.outputs.work_dir }}";
+          const PLUGIN_NAME   = "${{ steps.validate.outputs.plugin_name    || steps.preflight.outputs.plugin_name }}";
+          const SCORE         = "${{ steps.validate.outputs.score          || '0' }}";
+          const GRADE         = "${{ steps.validate.outputs.grade          || 'F' }}";
+          const PASSED        = "${{ steps.validate.outputs.validation_passed }}" === "true";
+          const ERROR_COUNT   = parseInt("${{ steps.validate.outputs.error_count   || '0' }}");
+          const WARNING_COUNT = parseInt("${{ steps.validate.outputs.warning_count || '0' }}");
+          const CATEGORY      = "${{ steps.validate.outputs.plugin_category || '?' }}";
+          const VERSION       = "${{ steps.validate.outputs.plugin_version  || '?' }}";
+          const AUTHOR        = "${{ steps.validate.outputs.plugin_author   || '?' }}";
+          const SC_ERRORS     = "${{ steps.validate.outputs.shellcheck_errors   || '0' }}";
+          const SC_WARNS      = "${{ steps.validate.outputs.shellcheck_warnings || '0' }}";
+          const TEST_COUNT    = "${{ steps.validate.outputs.test_count      || '0' }}";
+          const SEC_THREATS   = "${{ steps.validate.outputs.security_threats || '0' }}";
+          const SCORE_INT     = parseInt(SCORE) || 0;
+
+          const STATUS_ICON   = PASSED ? "✅" : "❌";
+          const STATUS_TEXT   = PASSED ? "PASSED" : "FAILED";
+
+          const GRADE_EMOJI = {
+            "A+":"🏆","A":"🥇","B":"🥈","C":"🥉","D":"📋","F":"❌"
+          }[GRADE] || "📊";
+
+          const SCORE_BAR = (() => {
+            const filled = Math.round(SCORE_INT / 5);
+            return "█".repeat(filled) + "░".repeat(20 - filled);
+          })();
+
+          // Load report
+          let reportMd = "";
+          const reportFile = `${WORK_DIR}/plugin-report.md`;
+          try {
+            if (fs.existsSync(reportFile))
+              reportMd = fs.readFileSync(reportFile,"utf8").slice(0,2500);
+          } catch(e) {}
+
+          // Load errors
+          let errors = [], warnings = [];
+          try {
+            const ef = `${WORK_DIR}/errors.json`;
+            const wf = `${WORK_DIR}/warnings.json`;
+            if (fs.existsSync(ef))   errors   = JSON.parse(fs.readFileSync(ef,"utf8"));
+            if (fs.existsSync(wf))   warnings = JSON.parse(fs.readFileSync(wf,"utf8"));
+          } catch(e) {}
+
+          // Check result helper
+          const chk = (key) =>
+            `${{ steps.validate.outputs[key] || 'false' }}` === "true" ? "✅" : "❌";
+
+          const body = [
+            `## 🔌 Plugin Validation — ${STATUS_ICON} **${STATUS_TEXT}**`,
+            ``,
+            `> **Plugin:** \`${PLUGIN_NAME}\` &nbsp;·&nbsp; **v${VERSION}** &nbsp;·&nbsp; `+
+            `**Category:** \`${CATEGORY}\` &nbsp;·&nbsp; **Author:** \`${AUTHOR}\``,
+            ``,
+            `### 📊 Quality Score`,
+            ``,
+            `\`\`\``,
+            `Score: [${SCORE_BAR}] ${SCORE}/100   Grade: ${GRADE_EMOJI} ${GRADE}`,
+            `\`\`\``,
+            ``,
+            `### 🔍 Validation Results`,
+            ``,
+            `| Check | Status | Details |`,
+            `|-------|:------:|---------|`,
+            `| 📋 Manifest Schema | ${chk("manifest_passed")} | plugin.json conformance |`,
+            `| 📁 File Structure  | ${chk("structure_passed")} | Lifecycle scripts present |`,
+            `| 🐚 ShellCheck      | ${chk("shellcheck_passed")} | \`${SC_ERRORS}\` errors · \`${SC_WARNS}\` warnings |`,
+            `| 🔐 Security Scan   | ${chk("security_passed")} | \`${SEC_THREATS}\` threat(s) found |`,
+            `| 🔢 API Contract    | ${chk("api_passed")} | Required functions exported |`,
+            `| 📊 Dependencies    | ${chk("deps_passed")} | Declared deps verified |`,
+            `| 🧪 Test Coverage   | ${chk("tests_passed")} | \`${TEST_COUNT}\` test case(s) |`,
+            `| 📖 Documentation   | ${chk("docs_passed")} | README.md quality |`,
+            `| 🔤 Naming          | ${chk("naming_passed")} | Naming conventions |`,
+            `| 🔄 Lifecycle       | ${chk("lifecycle_passed")} | enable↔disable symmetry |`,
+            ``,
+            errors.length > 0 ? [
+              `### ❌ Errors (${ERROR_COUNT})`,``,
+              errors.slice(0,6).map(e=>`- ❌ ${e}`).join("\n"),
+              errors.length > 6 ? `\n_... ${errors.length-6} more_` : "",``,
+            ].join("\n") : "",
+            warnings.length > 0 ? [
+              `### ⚠️ Warnings (${WARNING_COUNT})`,``,
+              warnings.slice(0,4).map(w=>`- ⚠️ ${w}`).join("\n"),
+              warnings.length > 4 ? `\n_... ${warnings.length-4} more_` : "",``,
+            ].join("\n") : "",
+            reportMd ? [
+              `<details><summary>📄 Full Report</summary>`,``,
+              reportMd,``,`</details>`,
+            ].join("\n") : "",
+            `---`,
+            `*🔌 ASH v5.0 OMEGA Plugin Validator · \`${{ inputs.validation_level }}\` · `+
+            `ShellCheck \`${{ inputs.shellcheck_severity }}\`*`,
+          ].filter(Boolean).join("\n");
+
+          const UPDATE = "${{ inputs.update_existing_comment }}" === "true";
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner, repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          const existing = UPDATE && comments.find(c =>
+            c.user.type === "Bot" && c.body.includes("Plugin Validation")
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              comment_id: existing.id, body,
+            });
+            console.log(`✅ Updated comment #${existing.id}`);
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number, body,
+            });
+            console.log("✅ Created comment");
+          }
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 4 — Upload artifact
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📤 Upload · Validation report artifact"
+      if: inputs.generate_report == 'true'
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: >-
+          plugin-validation-${{ steps.preflight.outputs.plugin_name }}-${{ github.run_id }}
+        path: "${{ steps.preflight.outputs.work_dir }}/"
+        retention-days: 30
+        compression-level: 9
+        if-no-files-found: warn
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 5 — Annotation & gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📋 Annotate · GitHub Check + Fail gate"
+      shell: bash
+      if: always()
+      run: |
+        PASSED="${{ steps.validate.outputs.validation_passed }}"
+        SCORE="${{ steps.validate.outputs.score || '0' }}"
+        GRADE="${{ steps.validate.outputs.grade || 'F' }}"
+        PLUGIN="${{ steps.preflight.outputs.plugin_name }}"
+        ERRORS="${{ steps.validate.outputs.error_count || '0' }}"
+        WARNS="${{ steps.validate.outputs.warning_count || '0' }}"
+
+        if [[ "${PASSED}" == "true" ]]; then
+          echo "::notice title=🔌 Plugin Validation Passed::${PLUGIN} — Score: ${SCORE}/100 (${GRADE}) · ${ERRORS} errors · ${WARNS} warnings"
+        else
+          echo "::error title=🔌 Plugin Validation Failed::${PLUGIN} — Score: ${SCORE}/100 (${GRADE}) · ${ERRORS} errors · ${WARNS} warnings"
+        fi
+
+        if [[ "${PASSED}" != "true" && "${{ inputs.fail_on_error }}" == "true" ]]; then
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ❌ PLUGIN VALIDATION FAILED                                 ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          printf "║  🔌 Plugin:  %-49s║\n" "${PLUGIN}"
+          printf "║  📊 Score:   %-49s║\n" "${SCORE}/100 (${GRADE})"
+          printf "║  ❌ Errors:  %-49s║\n" "${ERRORS}"
+          printf "║  ⚠️  Warns:   %-49s║\n" "${WARNS}"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          exit 1
+        fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "package"
+  color: "blue"

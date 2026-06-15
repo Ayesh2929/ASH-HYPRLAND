@@ -1,0 +1,704 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                           ║
+# ║  🔔 ASH DOTFILES v5.0 OMEGA — NOTIFY DISCORD ACTION                                      ║
+# ║                                                                                           ║
+# ║  ███╗   ██╗ ██████╗ ████████╗██╗███████╗██╗   ██╗                                        ║
+# ║  ████╗  ██║██╔═══██╗╚══██╔══╝██║██╔════╝╚██╗ ██╔╝                                        ║
+# ║  ██╔██╗ ██║██║   ██║   ██║   ██║█████╗   ╚████╔╝                                         ║
+# ║  ██║╚██╗██║██║   ██║   ██║   ██║██╔══╝    ╚██╔╝                                          ║
+# ║  ██║ ╚████║╚██████╔╝   ██║   ██║██║        ██║                                           ║
+# ║  ╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚═╝╚═╝        ╚═╝                                           ║
+# ║                                                                                           ║
+# ║  ██████╗ ██╗███████╗ ██████╗ ██████╗ ██████╗                                             ║
+# ║  ██╔══██╗██║██╔════╝██╔════╝██╔═══██╗██╔══██╗                                            ║
+# ║  ██║  ██║██║███████╗██║     ██║   ██║██████╔╝                                            ║
+# ║  ██║  ██║██║╚════██║██║     ██║   ██║██╔══██╗                                            ║
+# ║  ██████╔╝██║███████║╚██████╗╚██████╔╝██║  ██║                                            ║
+# ║  ╚═════╝ ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝                                            ║
+# ║                                                                                           ║
+# ║  ─────────────────────────────────────────────────────────────────────────────────────── ║
+# ║                                                                                           ║
+# ║  🎯 NOTIFICATION CAPABILITIES:                                                            ║
+# ║     📡 Multi-channel routing (up to 5 simultaneous webhook targets)                      ║
+# ║     🎨 Rich embed builder (color/thumbnail/image/author/footer/fields)                   ║
+# ║     🏷️  Message templates (12 built-in presets + custom)                                  ║
+# ║     📊 Dynamic field grids (auto-layout, inline/block mixed)                             ║
+# ║     🔘 Action buttons (Discord component-style link buttons)                             ║
+# ║     🎭 Severity theming (Catppuccin Mocha color coding per level)                        ║
+# ║     🌡️  Status indicators (health/degraded/critical/maintenance)                          ║
+# ║     📋 Payload validation (JSON schema verification before send)                         ║
+# ║     🔄 Retry logic (exponential backoff, configurable attempts)                          ║
+# ║     ⏱️  Rate limiting (Discord 50req/s respect + queue)                                   ║
+# ║     🗜️  Payload compression (stay within 6000 char limit)                                ║
+# ║     📈 Delivery tracking (success/fail/retry metrics)                                    ║
+# ║     🔒 Webhook URL masking (secrets never in logs)                                       ║
+# ║     🧵 Thread support (send to specific thread ID)                                       ║
+# ║     🔔 @mention support (everyone/here/role/user)                                        ║
+# ║     📱 TTS support (text-to-speech messages)                                             ║
+# ║                                                                                           ║
+# ║  🎨 BUILT-IN TEMPLATES:                                                                   ║
+# ║     release · deployment · security · ci-failure · ci-success                           ║
+# ║     benchmark · docs · theme-drop · plugin-drop · contributor                           ║
+# ║     maintenance · custom                                                                 ║
+# ║                                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🔔 Notify Discord"
+description: >
+  📡 Ultra-comprehensive Discord notification engine for ASH Dotfiles v5.0 OMEGA.
+
+  Supports multi-channel routing (5 simultaneous webhooks), 12 built-in message
+  templates, rich embed builder with dynamic field grids, severity-based
+  Catppuccin Mocha theming, action buttons, @mention support, thread targeting,
+  exponential retry with rate-limit awareness, payload compression, delivery
+  tracking, and full secrets masking.
+
+author: "ASH Dotfiles Team <ash@dotfiles.dev>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INPUTS — Complete specification (55+ inputs)
+# ─────────────────────────────────────────────────────────────────────────────
+inputs:
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📡 WEBHOOK CONFIGURATION                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  webhook_url:
+    description: >
+      🔗 Primary Discord webhook URL.
+      Store as repository secret for security.
+      Format: https://discord.com/api/webhooks/{id}/{token}
+    required: false
+    default: ""
+
+  webhook_url_2:
+    description: "🔗 Secondary webhook URL (additional channel)"
+    required: false
+    default: ""
+
+  webhook_url_3:
+    description: "🔗 Tertiary webhook URL (additional channel)"
+    required: false
+    default: ""
+
+  webhook_url_4:
+    description: "🔗 Quaternary webhook URL (additional channel)"
+    required: false
+    default: ""
+
+  webhook_url_5:
+    description: "🔗 Quinary webhook URL (additional channel)"
+    required: false
+    default: ""
+
+  thread_id:
+    description: >
+      🧵 Discord thread ID to post into.
+      Appended as ?thread_id={id} to the webhook URL.
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🏷️  MESSAGE TEMPLATE                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  template:
+    description: >
+      🏷️ Built-in message template to use.
+
+      Templates:
+        custom          — Full manual configuration (default)
+        release         — Version release notification
+        deployment      — Deployment status update
+        ci-success      — CI pipeline passed
+        ci-failure      — CI pipeline failed
+        security        — Security advisory alert
+        benchmark       — Performance benchmark results
+        docs            — Documentation build update
+        theme-drop      — New theme(s) published
+        plugin-drop     — New plugin(s) published
+        contributor     — New contributor welcome
+        maintenance     — Maintenance window notice
+        regression      — Performance regression alert
+
+      Templates auto-populate: color, title, description, footer, thumbnail.
+      Override any field with explicit input values.
+    required: false
+    default: "custom"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  💬 BASIC MESSAGE                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  content:
+    description: >
+      💬 Plain text message content (appears above embed).
+      Supports @everyone, @here, <@role_id>, <@user_id>.
+      Max 2000 characters.
+    required: false
+    default: ""
+
+  username:
+    description: >
+      🤖 Override the webhook bot username.
+      Max 80 characters. Overrides webhook default.
+    required: false
+    default: ""
+
+  avatar_url:
+    description: >
+      🖼️ Override the webhook bot avatar URL.
+      Must be a direct image URL (PNG/JPG/GIF/WebP).
+    required: false
+    default: ""
+
+  tts:
+    description: "🔊 Enable text-to-speech for the message"
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🎨 EMBED CONFIGURATION                              ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  embed_title:
+    description: >
+      📋 Embed title text (max 256 characters).
+      Supports Discord markdown formatting.
+    required: false
+    default: ""
+
+  embed_description:
+    description: >
+      📝 Embed description (max 4096 characters).
+      Supports Discord markdown: **bold**, *italic*, `code`, > quote, etc.
+    required: false
+    default: ""
+
+  embed_url:
+    description: "🔗 URL that makes the embed title a hyperlink"
+    required: false
+    default: ""
+
+  embed_color:
+    description: >
+      🎨 Embed accent color.
+
+      Named presets (Catppuccin Mocha):
+        mauve      — #cba6f7 (default purple)
+        blue       — #89b4fa
+        green      — #a6e3a1
+        red        — #f38ba8
+        yellow     — #f9e2af
+        peach      — #fab387
+        teal       — #94e2d5
+        sapphire   — #74c7ec
+        lavender   — #b4befe
+        pink       — #f5c2e7
+        sky        — #89dceb
+        maroon     — #eba0ac
+        flamingo   — #f2cdcd
+        rosewater  — #f5e0dc
+
+      Severity presets:
+        success    — green (#a6e3a1)
+        warning    — yellow (#f9e2af)
+        error      — red (#f38ba8)
+        critical   — maroon (#eba0ac)
+        info       — blue (#89b4fa)
+        neutral    — surface (#45475a)
+
+      Or provide raw decimal: "10481652"
+      Or hex with #: "#cba6f7"
+    required: false
+    default: "mauve"
+
+  embed_timestamp:
+    description: >
+      ⏰ Embed timestamp.
+      Options:
+        now        — Current UTC time (default when non-empty)
+        ""         — No timestamp
+        ISO 8601   — Custom: "2024-01-15T10:30:00Z"
+    required: false
+    default: "now"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  👤 EMBED AUTHOR                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  author_name:
+    description: "👤 Embed author name (max 256 chars)"
+    required: false
+    default: ""
+
+  author_url:
+    description: "👤 URL link for the author name"
+    required: false
+    default: ""
+
+  author_icon_url:
+    description: "👤 Author avatar/icon image URL"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🖼️  EMBED IMAGES                                    ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  thumbnail_url:
+    description: >
+      🖼️ Small thumbnail image (top-right of embed).
+      Direct image URL or 'auto' for ASH logo.
+    required: false
+    default: ""
+
+  image_url:
+    description: >
+      🖼️ Large inline image (bottom of embed).
+      Direct image URL for full-width image display.
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📊 EMBED FIELDS                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  fields:
+    description: >
+      📊 Embed fields as JSON array.
+
+      Format:
+      ```json
+      [
+        {"name": "Field Name", "value": "Field value", "inline": true},
+        {"name": "Another", "value": "Content", "inline": true},
+        {"name": "Wide Field", "value": "Full width", "inline": false}
+      ]
+      ```
+
+      Max 25 fields. Inline fields appear side-by-side (up to 3 per row).
+      Name max 256 chars, value max 1024 chars.
+    required: false
+    default: ""
+
+  field_1_name:
+    description: "📊 Field 1 name (quick field shorthand)"
+    required: false
+    default: ""
+
+  field_1_value:
+    description: "📊 Field 1 value"
+    required: false
+    default: ""
+
+  field_1_inline:
+    description: "📊 Field 1 inline display"
+    required: false
+    default: "true"
+
+  field_2_name:
+    description: "📊 Field 2 name"
+    required: false
+    default: ""
+
+  field_2_value:
+    description: "📊 Field 2 value"
+    required: false
+    default: ""
+
+  field_2_inline:
+    description: "📊 Field 2 inline display"
+    required: false
+    default: "true"
+
+  field_3_name:
+    description: "📊 Field 3 name"
+    required: false
+    default: ""
+
+  field_3_value:
+    description: "📊 Field 3 value"
+    required: false
+    default: ""
+
+  field_3_inline:
+    description: "📊 Field 3 inline display"
+    required: false
+    default: "true"
+
+  field_4_name:
+    description: "📊 Field 4 name"
+    required: false
+    default: ""
+
+  field_4_value:
+    description: "📊 Field 4 value"
+    required: false
+    default: ""
+
+  field_4_inline:
+    description: "📊 Field 4 inline display"
+    required: false
+    default: "true"
+
+  field_5_name:
+    description: "📊 Field 5 name"
+    required: false
+    default: ""
+
+  field_5_value:
+    description: "📊 Field 5 value"
+    required: false
+    default: ""
+
+  field_5_inline:
+    description: "📊 Field 5 inline display"
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🦶 EMBED FOOTER                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  footer_text:
+    description: >
+      🦶 Footer text (max 2048 chars).
+      Leave empty to use template default or none.
+    required: false
+    default: ""
+
+  footer_icon_url:
+    description: "🦶 Footer icon image URL"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔔 MENTIONS & NOTIFICATIONS                         ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  mention:
+    description: >
+      🔔 Discord mention to include in message content.
+
+      Options:
+        ""           — No mention
+        @everyone    — Mention everyone
+        @here        — Mention online users
+        @role:ID     — Mention specific role: "@role:123456789"
+        @user:ID     — Mention specific user: "@user:987654321"
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔁 RETRY & RELIABILITY                              ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  max_retries:
+    description: >
+      🔄 Maximum delivery retry attempts on failure.
+      Retries use exponential backoff: 2^n seconds (max 30s).
+    required: false
+    default: "3"
+
+  retry_delay_seconds:
+    description: "⏱️ Base delay between retries (seconds)"
+    required: false
+    default: "2"
+
+  timeout_seconds:
+    description: "⏱️ HTTP request timeout per attempt (seconds)"
+    required: false
+    default: "15"
+
+  fail_on_error:
+    description: >
+      🚨 Fail the action if notification cannot be delivered.
+      false (default) = log warning but continue.
+    required: false
+    default: "false"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  📁 FILE PAYLOAD                                     ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  payload_file:
+    description: >
+      📁 Path to pre-built JSON payload file.
+      When provided, overrides all embed configuration inputs.
+      Useful for complex payloads built in previous steps.
+    required: false
+    default: ""
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔧 CONTEXT AUTO-FILL                                ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  include_github_context:
+    description: >
+      📋 Auto-include GitHub context fields (repo, branch, SHA, actor).
+    required: false
+    default: "true"
+
+  include_run_link:
+    description: >
+      🔗 Auto-include link to this workflow run.
+    required: false
+    default: "true"
+
+  # ╔══════════════════════════════════════════════════════╗
+  # ║  🔍 DEBUG                                            ║
+  # ╚══════════════════════════════════════════════════════╝
+
+  dry_run:
+    description: >
+      🔍 Dry run — build and validate payload without sending.
+      Logs the full payload for inspection.
+    required: false
+    default: "false"
+
+  verbose:
+    description: "📢 Enable verbose output"
+    required: false
+    default: "false"
+
+  debug_payload:
+    description: "🔎 Log the full payload JSON (secrets masked)"
+    required: false
+    default: "false"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+
+  delivered:
+    description: "✅ Whether notification was successfully delivered"
+    value: ${{ steps.notify.outputs.delivered }}
+
+  delivery_count:
+    description: "📡 Number of webhooks successfully delivered to"
+    value: ${{ steps.notify.outputs.delivery_count }}
+
+  failed_count:
+    description: "❌ Number of webhook delivery failures"
+    value: ${{ steps.notify.outputs.failed_count }}
+
+  retry_count:
+    description: "🔄 Total retry attempts across all webhooks"
+    value: ${{ steps.notify.outputs.retry_count }}
+
+  message_id:
+    description: "🆔 Discord message ID(s) from successful delivery (comma-separated)"
+    value: ${{ steps.notify.outputs.message_id }}
+
+  payload_size_bytes:
+    description: "📦 Payload size in bytes"
+    value: ${{ steps.notify.outputs.payload_size }}
+
+  duration_ms:
+    description: "⏱️ Total delivery duration in milliseconds"
+    value: ${{ steps.notify.outputs.duration_ms }}
+
+  status:
+    description: "📊 Delivery status: success | partial | failed | skipped | dry-run"
+    value: ${{ steps.notify.outputs.status }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNS
+# ─────────────────────────────────────────────────────────────────────────────
+runs:
+  using: "composite"
+
+  steps:
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 0 — Validate & resolve configuration
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🔍 Pre-flight · Validate configuration & resolve webhooks"
+      shell: bash
+      id: preflight
+      run: |
+        set -euo pipefail
+
+        # ── Resolve webhooks (collect non-empty) ──────────────────────────────
+        declare -a WEBHOOKS=()
+
+        for url_var in \
+          "${{ inputs.webhook_url }}" \
+          "${{ inputs.webhook_url_2 }}" \
+          "${{ inputs.webhook_url_3 }}" \
+          "${{ inputs.webhook_url_4 }}" \
+          "${{ inputs.webhook_url_5 }}"; do
+          [[ -n "${url_var}" ]] && WEBHOOKS+=("${url_var}")
+        done
+
+        WEBHOOK_COUNT="${#WEBHOOKS[@]}"
+
+        if [[ "${WEBHOOK_COUNT}" -eq 0 ]]; then
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "  🔍 [DRY RUN] No webhooks configured — simulation only"
+          else
+            echo "::warning title=No Webhook::No webhook URLs configured — notification skipped"
+          fi
+          {
+            echo "webhook_count=0"
+            echo "has_webhooks=false"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Validate webhook URL format
+        for url in "${WEBHOOKS[@]}"; do
+          if ! echo "${url}" | grep -qE '^https://discord(app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+'; then
+            echo "::warning::Webhook URL format appears invalid (not logging URL)"
+          fi
+        done
+
+        # Validate color input
+        COLOR="${{ inputs.embed_color }}"
+        VALID_COLORS="mauve blue green red yellow peach teal sapphire lavender pink sky maroon flamingo rosewater success warning error critical info neutral"
+        if [[ "${COLOR}" =~ ^[0-9]+$ ]] || \
+           [[ "${COLOR}" =~ ^#[0-9A-Fa-f]{6}$ ]] || \
+           echo "${VALID_COLORS}" | grep -qw "${COLOR}"; then
+          echo "  ✅ Color: ${COLOR}"
+        else
+          echo "::warning::Unknown color '${COLOR}' — defaulting to mauve"
+        fi
+
+        {
+          echo "webhook_count=${WEBHOOK_COUNT}"
+          echo "has_webhooks=true"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "  📡 Webhooks configured: ${WEBHOOK_COUNT}"
+        echo "  🏷️  Template: ${{ inputs.template }}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 1 — Execute notification
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "📡 Notify · Execute Discord notification pipeline"
+      shell: bash
+      id: notify
+      if: steps.preflight.outputs.has_webhooks == 'true' || inputs.dry_run == 'true'
+      env:
+        # Webhooks (masked via env)
+        WEBHOOK_PRIMARY:   ${{ inputs.webhook_url }}
+        WEBHOOK_2:         ${{ inputs.webhook_url_2 }}
+        WEBHOOK_3:         ${{ inputs.webhook_url_3 }}
+        WEBHOOK_4:         ${{ inputs.webhook_url_4 }}
+        WEBHOOK_5:         ${{ inputs.webhook_url_5 }}
+        THREAD_ID:         ${{ inputs.thread_id }}
+        # Template
+        TEMPLATE:          ${{ inputs.template }}
+        # Basic message
+        CONTENT:           ${{ inputs.content }}
+        BOT_USERNAME:      ${{ inputs.username }}
+        AVATAR_URL:        ${{ inputs.avatar_url }}
+        TTS:               ${{ inputs.tts }}
+        # Embed
+        EMBED_TITLE:       ${{ inputs.embed_title }}
+        EMBED_DESC:        ${{ inputs.embed_description }}
+        EMBED_URL:         ${{ inputs.embed_url }}
+        EMBED_COLOR:       ${{ inputs.embed_color }}
+        EMBED_TIMESTAMP:   ${{ inputs.embed_timestamp }}
+        # Author
+        AUTHOR_NAME:       ${{ inputs.author_name }}
+        AUTHOR_URL:        ${{ inputs.author_url }}
+        AUTHOR_ICON:       ${{ inputs.author_icon_url }}
+        # Images
+        THUMBNAIL_URL:     ${{ inputs.thumbnail_url }}
+        IMAGE_URL:         ${{ inputs.image_url }}
+        # Fields (JSON)
+        FIELDS_JSON:       ${{ inputs.fields }}
+        # Quick fields
+        F1_NAME:           ${{ inputs.field_1_name }}
+        F1_VALUE:          ${{ inputs.field_1_value }}
+        F1_INLINE:         ${{ inputs.field_1_inline }}
+        F2_NAME:           ${{ inputs.field_2_name }}
+        F2_VALUE:          ${{ inputs.field_2_value }}
+        F2_INLINE:         ${{ inputs.field_2_inline }}
+        F3_NAME:           ${{ inputs.field_3_name }}
+        F3_VALUE:          ${{ inputs.field_3_value }}
+        F3_INLINE:         ${{ inputs.field_3_inline }}
+        F4_NAME:           ${{ inputs.field_4_name }}
+        F4_VALUE:          ${{ inputs.field_4_value }}
+        F4_INLINE:         ${{ inputs.field_4_inline }}
+        F5_NAME:           ${{ inputs.field_5_name }}
+        F5_VALUE:          ${{ inputs.field_5_value }}
+        F5_INLINE:         ${{ inputs.field_5_inline }}
+        # Footer
+        FOOTER_TEXT:       ${{ inputs.footer_text }}
+        FOOTER_ICON:       ${{ inputs.footer_icon_url }}
+        # Mentions
+        MENTION:           ${{ inputs.mention }}
+        # Reliability
+        MAX_RETRIES:       ${{ inputs.max_retries }}
+        RETRY_DELAY:       ${{ inputs.retry_delay_seconds }}
+        TIMEOUT_SECONDS:   ${{ inputs.timeout_seconds }}
+        FAIL_ON_ERROR:     ${{ inputs.fail_on_error }}
+        # File payload
+        PAYLOAD_FILE:      ${{ inputs.payload_file }}
+        # Context
+        INCLUDE_GITHUB:    ${{ inputs.include_github_context }}
+        INCLUDE_RUN_LINK:  ${{ inputs.include_run_link }}
+        # Debug
+        DRY_RUN:           ${{ inputs.dry_run }}
+        VERBOSE:           ${{ inputs.verbose }}
+        DEBUG_PAYLOAD:     ${{ inputs.debug_payload }}
+        # GitHub context
+        GITHUB_REPO:       ${{ github.repository }}
+        GITHUB_SHA_SHORT:  ${{ github.sha }}
+        GITHUB_REF_NAME:   ${{ github.ref_name }}
+        GITHUB_ACTOR:      ${{ github.actor }}
+        GITHUB_EVENT:      ${{ github.event_name }}
+        GITHUB_RUN_ID:     ${{ github.run_id }}
+        GITHUB_SERVER:     ${{ github.server_url }}
+        GITHUB_WORKFLOW:   ${{ github.workflow }}
+        WEBHOOK_COUNT:     ${{ steps.preflight.outputs.webhook_count }}
+      run: |
+        bash "${{ github.action_path }}/notify.sh"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 2 — No-op when skipped
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "⏭️ Skip · No webhooks configured"
+      shell: bash
+      if: steps.preflight.outputs.has_webhooks != 'true' && inputs.dry_run != 'true'
+      run: |
+        {
+          echo "delivered=false"
+          echo "delivery_count=0"
+          echo "failed_count=0"
+          echo "retry_count=0"
+          echo "message_id="
+          echo "payload_size=0"
+          echo "duration_ms=0"
+          echo "status=skipped"
+        } >> "$GITHUB_OUTPUT"
+        echo "  ⏭️ Notification skipped — no webhooks configured"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # STEP 3 — Fail gate
+    # ─────────────────────────────────────────────────────────────────────────
+    - name: "🚨 Gate · Fail on delivery error"
+      shell: bash
+      if: always()
+      run: |
+        STATUS="${{ steps.notify.outputs.status || 'skipped' }}"
+        FAIL="${{ inputs.fail_on_error }}"
+
+        if [[ "${FAIL}" == "true" && "${STATUS}" == "failed" ]]; then
+          echo "::error title=Discord Notification Failed::All webhook delivery attempts failed"
+          exit 1
+        fi
+
+        echo "  📊 Notification status: ${STATUS}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ─────────────────────────────────────────────────────────────────────────────
+branding:
+  icon: "bell"
+  color: "purple"

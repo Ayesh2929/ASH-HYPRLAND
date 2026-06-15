@@ -1,47 +1,812 @@
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ASH DOTFILES v3.1.0 — CODEOWNERS                                           ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  👥 ASH DOTFILES v5.0 OMEGA — CODE OWNERS                                  ║
+# ║  Defines required reviewers for every section of the repository             ║
+# ║  Syntax: <pattern> <owner> [<owner> ...]                                    ║
+# ║  Docs: https://docs.github.com/en/repositories/managing-your-repositorys-  ║
+# ║        settings-and-features/customizing-your-repository/about-code-owners  ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+#
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │  OWNERSHIP TIERS                                                             │
+# │  ─────────────────────────────────────────────────────────────────────────  │
+# │  🏆 Core Maintainers   — Full repository access, release authority          │
+# │  🔧 Module Owners      — Domain-specific ownership with merge rights        │
+# │  🎨 Theme Reviewers    — Theme quality & consistency gatekeepers            │
+# │  🔌 Plugin Reviewers   — Plugin safety & API compliance reviewers           │
+# │  🔒 Security Team      — Security-sensitive file reviewers                  │
+# │  📖 Docs Team          — Documentation quality reviewers                   │
+# │  🤖 Bot Accounts       — Automated review accounts                         │
+# └─────────────────────────────────────────────────────────────────────────────┘
 
-# Global: all files need review
-*                                       @yourusername
+# ══════════════════════════════════════════════════════════════════════════════
+#  🌐 GLOBAL FALLBACK — Core maintainers review everything unmatched
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Core Hyprland — critical, careful review
-config/hypr/core/                       @yourusername
-config/hypr/modules/keybinds.conf       @yourusername
-config/hypr/modules/autostart.conf      @yourusername
-config/hypr/rules/                      @yourusername
+*                                           @ash-dotfiles/core-maintainers
 
-# Theme engine — most critical component
-config/hypr/scripts/theme/theme-engine.sh    @yourusername
-config/hypr/scripts/theme/wallpaper-picker.sh @yourusername
 
-# Unique features — new features
-config/hypr/scripts/theme/album-art-theme.sh @yourusername
-config/hypr/scripts/theme/health-score.sh    @yourusername
-config/hypr/scripts/theme/workspace-profiles.sh @yourusername
-config/hypr/scripts/theme/smart-wallpaper.sh @yourusername
-config/hypr/scripts/theme/ai-theme.sh        @yourusername
-config/hypr/scripts/theme/theme-undo.sh      @yourusername
-config/hypr/scripts/theme/light-theme.sh     @yourusername
-config/hypr/scripts/theme/context-theme.sh   @yourusername
-config/hypr/scripts/analytics/               @yourusername
+# ══════════════════════════════════════════════════════════════════════════════
+#  🏗️  SECTION 01 — DEVOPS & CI/CD INFRASTRUCTURE
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Waybar — style changes need careful review
-config/waybar/styles/                        @yourusername
-config/waybar/configs/                       @yourusername
+# GitHub Actions workflows — devops team + security review required
+.github/workflows/                          @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
 
-# Neovim — complex config
-config/nvim/                                 @yourusername
+# Security-critical workflows — always require security team sign-off
+.github/workflows/security/                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
 
-# CI/CD — critical infrastructure
-.github/                                     @yourusername
+# Release workflows — core maintainers only (release authority)
+.github/workflows/release/                  @ash-dotfiles/core-maintainers
 
-# Install scripts — security sensitive
-install.sh                                   @yourusername
-quickstart.sh                                @yourusername
-scripts/core/                                @yourusername
+# Build workflows — devops ownership
+.github/workflows/build/                    @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
 
-# Documentation
-docs/                                        @yourusername
-README.md                                    @yourusername
-ATTRIBUTION.md                               @yourusername
+# Lint workflows — devops + language-specific owners
+.github/workflows/lint/                     @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+# Performance benchmarks — performance team
+.github/workflows/performance/              @ash-dotfiles/performance-team \
+                                            @ash-dotfiles/devops
+
+# Test workflows — QA team ownership
+.github/workflows/test/                     @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/devops
+
+# Custom GitHub Actions — devops owns composite actions
+.github/actions/                            @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+# Automation workflows — devops
+.github/workflows/automation/               @ash-dotfiles/devops
+
+# Scheduled jobs — devops + core maintainers
+.github/workflows/schedules/                @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+# GitHub config files — core maintainers only
+.github/FUNDING.yml                         @ash-dotfiles/core-maintainers
+.github/CODEOWNERS                          @ash-dotfiles/core-maintainers
+.github/settings.yml                        @ash-dotfiles/core-maintainers
+.github/labels.yml                          @ash-dotfiles/core-maintainers
+.github/release.yml                         @ash-dotfiles/core-maintainers
+
+# Security policy — security team + core maintainers
+.github/SECURITY.md                         @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Dependabot config — security team + devops
+.github/dependabot.yml                      @ash-dotfiles/security-team \
+                                            @ash-dotfiles/devops
+
+# Issue & PR templates — docs team + devops
+.github/ISSUE_TEMPLATE/                     @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/devops
+
+.github/PULL_REQUEST_TEMPLATE/              @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/devops
+
+# Security-specific templates
+.github/ISSUE_TEMPLATE/security_vulnerability.yml \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Helper scripts
+.github/scripts/                            @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🪝  SECTION 02 — GIT HOOKS & TOOLING
+# ══════════════════════════════════════════════════════════════════════════════
+
+.husky/                                     @ash-dotfiles/devops
+.git-hooks/                                 @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+# Secret checking hook — always needs security review
+.git-hooks/check-secrets.sh                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🎨  SECTION 03 — ASSETS & MEDIA
+# ══════════════════════════════════════════════════════════════════════════════
+
+# All assets — design team primary
+assets/                                     @ash-dotfiles/design-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Brand assets — strict core + design ownership (brand identity protection)
+assets/brand/                               @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/design-team
+
+assets/brand/logos/                         @ash-dotfiles/core-maintainers
+assets/brand/banners/                       @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/design-team
+
+# Screenshots — docs team verifies accuracy
+assets/screenshots/                         @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/design-team
+
+# Icons — design team
+assets/icons/                               @ash-dotfiles/design-team
+
+# Fonts — design team + legal (licensing)
+assets/fonts/                               @ash-dotfiles/design-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Sounds — design/media team
+assets/sounds/                              @ash-dotfiles/design-team
+
+# Animations — design team
+assets/animations/                          @ash-dotfiles/design-team
+
+# Default wallpapers — design team
+assets/wallpapers/                          @ash-dotfiles/design-team \
+                                            @ash-dotfiles/theme-reviewers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ⚙️  SECTION 04 — CONFIGURATION FILES
+# ══════════════════════════════════════════════════════════════════════════════
+
+# All config — module-specific owners
+config/                                     @ash-dotfiles/config-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Hyprland — hyprland module owners
+config/hypr/                                @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/config-team
+
+config/hypr/keybinds/                       @ash-dotfiles/hyprland-team
+config/hypr/animations/                     @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/design-team
+
+config/hypr/shaders/                        @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/design-team
+
+config/hypr/modes/                          @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/config-team
+
+# Security-sensitive Hyprland configs
+config/hypr/per-device/                     @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/security-team
+
+# Waybar — waybar module owners
+config/waybar/                              @ash-dotfiles/waybar-team \
+                                            @ash-dotfiles/config-team
+
+config/waybar/scripts/                      @ash-dotfiles/waybar-team \
+                                            @ash-dotfiles/security-team
+
+# Rofi — rofi module owners
+config/rofi/                                @ash-dotfiles/rofi-team \
+                                            @ash-dotfiles/config-team
+
+config/rofi/menus/                          @ash-dotfiles/rofi-team
+config/rofi/scripts/                        @ash-dotfiles/rofi-team \
+                                            @ash-dotfiles/security-team
+
+# Neovim — neovim team (complex LSP/plugin configs)
+config/nvim/                                @ash-dotfiles/neovim-team \
+                                            @ash-dotfiles/config-team
+
+config/nvim/lua/plugins/lsp/                @ash-dotfiles/neovim-team
+config/nvim/lua/plugins/completion/         @ash-dotfiles/neovim-team
+config/nvim/lua/plugins/dap/                @ash-dotfiles/neovim-team
+config/nvim/lua/plugins/ai/                 @ash-dotfiles/neovim-team \
+                                            @ash-dotfiles/ai-team
+
+# Fish shell
+config/fish/                                @ash-dotfiles/shell-team \
+                                            @ash-dotfiles/config-team
+
+config/fish/functions/                      @ash-dotfiles/shell-team
+config/fish/completions/                    @ash-dotfiles/shell-team
+
+# Kitty terminal
+config/kitty/                               @ash-dotfiles/terminal-team \
+                                            @ash-dotfiles/config-team
+
+# Notification daemons
+config/dunst/                               @ash-dotfiles/notification-team
+config/swaync/                              @ash-dotfiles/notification-team
+
+# Lock screen
+config/hyprlock/                            @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/security-team
+
+# Idle daemon — security-adjacent
+config/hypridle/                            @ash-dotfiles/hyprland-team \
+                                            @ash-dotfiles/security-team
+
+# GTK themes
+config/gtk-3.0/                             @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/config-team
+
+config/gtk-4.0/                             @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/config-team
+
+# AGS widgets
+config/ags/                                 @ash-dotfiles/ags-team \
+                                            @ash-dotfiles/config-team
+
+# Security-sensitive configs
+config/ssh/                                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+config/gpg/                                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+config/wireguard/                           @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+config/docker/                              @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+config/podman/                              @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+config/kubernetes/                          @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+# Git config — core maintainers (global gitignore etc.)
+config/git/                                 @ash-dotfiles/core-maintainers
+
+# Browser configs
+config/firefox/                             @ash-dotfiles/browser-team \
+                                            @ash-dotfiles/security-team
+
+config/qutebrowser/                         @ash-dotfiles/browser-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ⚡  SECTION 05 — ASH CLI ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
+
+# CLI core — core maintainers
+ash-cli/                                    @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/cli-team
+
+ash-cli/ash                                 @ash-dotfiles/core-maintainers
+
+ash-cli/lib/                                @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/cli-team
+
+# Security-critical lib files
+ash-cli/lib/crypto.sh                       @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/lib/http-client.sh                  @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/lib/telemetry.sh                    @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/lib/auto-updater.sh                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Commands — cli team + relevant domain owners
+ash-cli/commands/theme/                     @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/theme-reviewers
+
+ash-cli/commands/theme/ai-*.sh             @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/cli-team
+
+ash-cli/commands/plugin/                    @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/plugin-reviewers
+
+ash-cli/commands/snapshot/                  @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/commands/doctor/                    @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/qa-team
+
+ash-cli/commands/security/                  @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/commands/net/                       @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/security-team
+
+ash-cli/commands/ai/                        @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/cli-team
+
+ash-cli/commands/cloud/                     @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/security-team
+
+ash-cli/commands/backup/                    @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/security-team
+
+ash-cli/commands/completion/                @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/shell-team
+
+# Engines — core maintainers + domain specialists
+ash-cli/engines/                            @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/cli-team
+
+ash-cli/engines/color-engine/               @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/engines/ai-engine/                  @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/engines/hot-reload-engine/          @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/performance-team
+
+ash-cli/engines/backup-engine/              @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+ash-cli/engines/sync-engine/               @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/security-team
+
+ash-cli/engines/ipc-engine/                 @ash-dotfiles/core-maintainers
+
+# Public API surface
+ash-cli/api/                                @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/cli-team
+
+# Static data & registries — core maintainers gate this
+ash-cli/data/                               @ash-dotfiles/core-maintainers
+ash-cli/data/plugin-registry.json           @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/plugin-reviewers
+ash-cli/data/theme-store.json               @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/theme-reviewers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🎨  SECTION 06 — THEMES LIBRARY
+# ══════════════════════════════════════════════════════════════════════════════
+
+# All themes — theme reviewers primary
+themes/                                     @ash-dotfiles/theme-reviewers
+
+# Theme schema — core maintainers (API contract)
+themes/schema/                              @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/theme-reviewers
+
+# Category-specific theme ownership
+themes/presets/dark/                        @ash-dotfiles/theme-reviewers
+themes/presets/light/                       @ash-dotfiles/theme-reviewers
+themes/presets/neon/                        @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/design-team
+themes/presets/nature/                      @ash-dotfiles/theme-reviewers
+themes/presets/space/                       @ash-dotfiles/theme-reviewers
+themes/presets/pastel/                      @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/design-team
+themes/presets/anime/                       @ash-dotfiles/theme-reviewers
+themes/presets/retro/                       @ash-dotfiles/theme-reviewers
+themes/presets/gradient/                    @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/design-team
+themes/presets/seasonal/                    @ash-dotfiles/theme-reviewers
+themes/presets/mood/                        @ash-dotfiles/theme-reviewers
+themes/presets/gaming/                      @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/gaming-team
+themes/presets/minimal/                     @ash-dotfiles/theme-reviewers
+
+# Accessibility themes — require accessibility team sign-off
+themes/presets/special/                     @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/accessibility-team \
+                                            @ash-dotfiles/core-maintainers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🔌  SECTION 07 — PLUGINS ECOSYSTEM
+# ══════════════════════════════════════════════════════════════════════════════
+
+# All plugins — plugin reviewers primary gate
+plugins/                                    @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/core-maintainers
+
+# Core plugins — stricter review
+plugins/core/                               @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/core-maintainers
+
+# Security-adjacent plugins
+plugins/core/game-mode/                     @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/performance-team
+
+plugins/core/ai-assistant/                  @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/security-team
+
+plugins/core/remote-control/                @ash-dotfiles/security-team \
+                                            @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/core-maintainers
+
+plugins/core/cloud-sync/                    @ash-dotfiles/security-team \
+                                            @ash-dotfiles/plugin-reviewers
+
+plugins/core/backup-auto/                   @ash-dotfiles/security-team \
+                                            @ash-dotfiles/plugin-reviewers
+
+plugins/core/privacy-mode/                  @ash-dotfiles/security-team \
+                                            @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/core-maintainers
+
+# Integration plugins — security review required (external APIs)
+plugins/integrations/                       @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/security-team
+
+plugins/integrations/discord-rpc/           @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/security-team
+
+plugins/integrations/home-assistant/        @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+plugins/integrations/stream-deck/           @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/gaming-team
+
+# Plugin schema — core maintainers own the contract
+plugins/schema/                             @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/plugin-reviewers
+
+# Plugin template — docs + plugin reviewers
+plugins/template/                           @ash-dotfiles/plugin-reviewers \
+                                            @ash-dotfiles/docs-team
+
+# Community plugins — lighter review (self-maintained)
+plugins/community/                          @ash-dotfiles/plugin-reviewers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🖼️  SECTION 08 — WALLPAPERS
+# ══════════════════════════════════════════════════════════════════════════════
+
+wallpapers/                                 @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/design-team
+
+# Animated wallpapers — design team sign-off (performance impact)
+wallpapers/animated/                        @ash-dotfiles/design-team \
+                                            @ash-dotfiles/performance-team \
+                                            @ash-dotfiles/theme-reviewers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  📜  SECTION 09 — SCRIPTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+scripts/                                    @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Install scripts — core maintainers must review (touches user systems)
+scripts/install/                            @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/security-team
+
+# System-level scripts — security review required
+scripts/system/                             @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Security scripts
+scripts/security/                           @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Theme scripts
+scripts/theme/                              @ash-dotfiles/theme-reviewers \
+                                            @ash-dotfiles/cli-team
+
+# Hook scripts
+scripts/hooks/                              @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/cli-team
+
+# AI scripts — ai team + security
+scripts/ai/                                 @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/security-team
+
+# Backup scripts — security team
+scripts/backup/                             @ash-dotfiles/security-team \
+                                            @ash-dotfiles/cli-team
+
+# Integration scripts — security review (external API calls)
+scripts/integrations/                       @ash-dotfiles/security-team \
+                                            @ash-dotfiles/cli-team
+
+# Screenshot scripts
+scripts/screenshot/                         @ash-dotfiles/cli-team \
+                                            @ash-dotfiles/privacy-team
+
+# Notification scripts
+scripts/notification/                       @ash-dotfiles/cli-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ⏱️  SECTION 10 — SYSTEMD SERVICES
+# ══════════════════════════════════════════════════════════════════════════════
+
+systemd/                                    @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+# System-level services — highest security scrutiny
+systemd/system/                             @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# User services — devops + core maintainers
+systemd/user/                               @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+
+# Security-adjacent user services
+systemd/user/ash-backup-daily.*             @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+systemd/user/ash-cloud-sync.*               @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+systemd/user/ash-ai-assistant.*             @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🖥️  SECTION 11 — DISPLAY MANAGER & BOOT
+# ══════════════════════════════════════════════════════════════════════════════
+
+# SDDM — system-level, security review
+sddm/                                       @ash-dotfiles/security-team \
+                                            @ash-dotfiles/design-team \
+                                            @ash-dotfiles/core-maintainers
+
+# GRUB — boot-critical, strictest review
+grub/                                       @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/security-team
+
+# Plymouth boot splash
+plymouth/                                   @ash-dotfiles/design-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Cursors — design team
+cursors/                                    @ash-dotfiles/design-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🌐  SECTION 12 — REST API SERVER
+# ══════════════════════════════════════════════════════════════════════════════
+
+# All API code — security + core mandatory review
+api/                                        @ash-dotfiles/api-team \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+api/auth.py                                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+api/server.py                               @ash-dotfiles/api-team \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+api/websocket.py                            @ash-dotfiles/api-team \
+                                            @ash-dotfiles/security-team
+
+api/endpoints/                              @ash-dotfiles/api-team \
+                                            @ash-dotfiles/security-team
+
+api/Dockerfile                              @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+api/openapi.yaml                            @ash-dotfiles/api-team \
+                                            @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+
+api/tests/                                  @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/api-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🖥️  SECTION 13 — WEB DASHBOARD
+# ══════════════════════════════════════════════════════════════════════════════
+
+web/                                        @ash-dotfiles/frontend-team \
+                                            @ash-dotfiles/core-maintainers
+
+web/src/                                    @ash-dotfiles/frontend-team
+web/src/components/                         @ash-dotfiles/frontend-team \
+                                            @ash-dotfiles/design-team
+
+# API client — security review for web-to-API auth
+web/src/api/                                @ash-dotfiles/frontend-team \
+                                            @ash-dotfiles/security-team
+
+web/Dockerfile                              @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+web/package.json                            @ash-dotfiles/frontend-team \
+                                            @ash-dotfiles/security-team
+
+web/tailwind.config.ts                      @ash-dotfiles/frontend-team \
+                                            @ash-dotfiles/design-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  📱  SECTION 14 — MOBILE COMPANION APP
+# ══════════════════════════════════════════════════════════════════════════════
+
+mobile/                                     @ash-dotfiles/mobile-team \
+                                            @ash-dotfiles/core-maintainers
+
+mobile/flutter/                             @ash-dotfiles/mobile-team
+mobile/android/                             @ash-dotfiles/mobile-team \
+                                            @ash-dotfiles/security-team
+
+mobile/ios/                                 @ash-dotfiles/mobile-team \
+                                            @ash-dotfiles/security-team
+
+# API service in mobile — security review
+mobile/flutter/lib/services/api_service.dart \
+                                            @ash-dotfiles/mobile-team \
+                                            @ash-dotfiles/security-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🧩  SECTION 15 — BROWSER EXTENSION
+# ══════════════════════════════════════════════════════════════════════════════
+
+browser-extension/                          @ash-dotfiles/browser-team \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+browser-extension/manifest.json             @ash-dotfiles/browser-team \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+browser-extension/src/background.ts         @ash-dotfiles/browser-team \
+                                            @ash-dotfiles/security-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  💾  SECTION 16 — RUNTIME DATA & STATE
+# ══════════════════════════════════════════════════════════════════════════════
+
+data/                                       @ash-dotfiles/core-maintainers
+
+# Log and analytics data — privacy team
+data/logs/                                  @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/privacy-team
+
+data/analytics/                             @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/privacy-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🔒  SECTION 17 — SECRETS & SECURITY
+# ══════════════════════════════════════════════════════════════════════════════
+
+# MAXIMUM SECURITY — every file requires security team + 2 core maintainers
+secrets/                                    @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🧪  SECTION 24 — TESTING
+# ══════════════════════════════════════════════════════════════════════════════
+
+tests/                                      @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/core-maintainers
+
+tests/unit/                                 @ash-dotfiles/qa-team
+tests/integration/                          @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/core-maintainers
+
+tests/e2e/                                  @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/core-maintainers
+
+tests/security/                             @ash-dotfiles/security-team \
+                                            @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/core-maintainers
+
+tests/api/                                  @ash-dotfiles/qa-team \
+                                            @ash-dotfiles/api-team
+
+tests/benchmark/                            @ash-dotfiles/performance-team \
+                                            @ash-dotfiles/qa-team
+
+tests/helpers/                              @ash-dotfiles/qa-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  📖  SECTION 25 — DOCUMENTATION
+# ══════════════════════════════════════════════════════════════════════════════
+
+docs/                                       @ash-dotfiles/docs-team
+
+docs/contributing/                          @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Code of Conduct — core maintainers only
+docs/contributing/CODE_OF_CONDUCT.md        @ash-dotfiles/core-maintainers
+
+docs/contributing/SECURITY.md               @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+docs/reference/                             @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+
+docs/reference/rest-api-reference.md        @ash-dotfiles/api-team \
+                                            @ash-dotfiles/docs-team
+
+docs/changelog/                             @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/docs-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  📦  SECTION 26 — NIX, DOCKER & PACKAGING
+# ══════════════════════════════════════════════════════════════════════════════
+
+nix/                                        @ash-dotfiles/nix-team \
+                                            @ash-dotfiles/core-maintainers
+
+docker/                                     @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team
+
+docker/Dockerfile                           @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+packaging/                                  @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/devops
+
+packaging/aur/                              @ash-dotfiles/core-maintainers
+packaging/flatpak/                          @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/devops
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🤖  SECTION 21 — AI & ML MODELS
+# ══════════════════════════════════════════════════════════════════════════════
+
+ml-models/                                  @ash-dotfiles/ai-team \
+                                            @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/privacy-team
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  🔧  SECTION 27 — ROOT CONFIG FILES (STRICTEST GATE)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Root-level toolchain configs — core maintainers only
+Makefile                                    @ash-dotfiles/core-maintainers
+Justfile                                    @ash-dotfiles/core-maintainers
+Taskfile.yml                                @ash-dotfiles/core-maintainers
+.editorconfig                               @ash-dotfiles/core-maintainers
+.gitignore                                  @ash-dotfiles/core-maintainers
+.gitattributes                              @ash-dotfiles/core-maintainers
+.shellcheckrc                               @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+.luacheckrc                                 @ash-dotfiles/neovim-team \
+                                            @ash-dotfiles/core-maintainers
+.markdownlint.yml                           @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+.yamllint.yml                               @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+.pre-commit-config.yaml                     @ash-dotfiles/devops \
+                                            @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+.commitlintrc.yml                           @ash-dotfiles/devops \
+                                            @ash-dotfiles/core-maintainers
+.releaserc.yml                              @ash-dotfiles/core-maintainers
+
+# Legal & community — core maintainers only
+LICENSE                                     @ash-dotfiles/core-maintainers
+CODE_OF_CONDUCT.md                          @ash-dotfiles/core-maintainers
+CONTRIBUTING.md                             @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+SECURITY.md                                 @ash-dotfiles/security-team \
+                                            @ash-dotfiles/core-maintainers
+
+# README — docs team + core maintainers
+README.md                                   @ash-dotfiles/docs-team \
+                                            @ash-dotfiles/core-maintainers
+
+# Version — core maintainers only (release authority)
+version.json                                @ash-dotfiles/core-maintainers
+
+# Changelog — core maintainers + docs
+CHANGELOG.md                                @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/docs-team
+
+# Installation entry point — core maintainers + security
+setup.sh                                    @ash-dotfiles/core-maintainers \
+                                            @ash-dotfiles/security-team

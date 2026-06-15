@@ -1,0 +1,846 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║      🎨 ASH DOTFILES v5.0 OMEGA — THEME SUBMISSION ISSUE TEMPLATE             ║
+# ║      Complete Theme Contribution Form with Quality Standards & Validation      ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🎨 Theme Submission"
+description: >
+  Submit a new theme for the ASH Dotfiles theme library!
+  Follow this comprehensive form to ensure your theme meets our
+  quality standards and gets accepted into the official collection.
+title: "🎨 [THEME] — "
+labels:
+  - "🎨 theme-submission"
+  - "🔍 needs-review"
+  - "✨ community-contribution"
+assignees: []
+
+body:
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 01 — INTRO BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        <div align="center">
+
+        ```
+        ████████╗██╗  ██╗███████╗███╗   ███╗███████╗
+        ╚══██╔══╝██║  ██║██╔════╝████╗ ████║██╔════╝
+           ██║   ███████║█████╗  ██╔████╔██║█████╗
+           ██║   ██╔══██║██╔══╝  ██║╚██╔╝██║██╔══╝
+           ██║   ██║  ██║███████╗██║ ╚═╝ ██║███████╗
+           ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚══════╝
+
+        ░██████╗██╗░░░██╗██████╗░███╗░░░███╗██╗░██████╗░██████╗██╗░█████╗░███╗░░██╗
+        ██╔════╝██║░░░██║██╔══██╗████╗░████║██║██╔════╝██╔════╝██║██╔══██╗████╗░██║
+        ╚█████╗░██║░░░██║██████╦╝██╔████╔██║██║╚█████╗░╚█████╗░██║██║░░██║██╔██╗██║
+        ░╚═══██╗██║░░░██║██╔══██╗██║╚██╔╝██║██║░╚═══██╗░╚═══██╗██║██║░░██║██║╚████║
+        ██████╔╝╚██████╔╝██████╦╝██║░╚═╝░██║██║██████╔╝██████╔╝██║╚█████╔╝██║░╚███║
+        ╚═════╝░░╚═════╝░╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚══╝
+        ```
+
+        # 🎨 Theme Submission — ASH Dotfiles v5.0 OMEGA
+
+        > *"A great theme transforms a desktop into a work of art"*
+
+        </div>
+
+        ---
+
+        > [!IMPORTANT]
+        > **All submitted themes must pass automated validation before human review.**
+        > Run `ash theme validate --strict path/to/your/theme` before submitting!
+
+        > [!TIP]
+        > **New to theme creation?** Read the
+        > [Theme Creation Guide](https://ash-dotfiles.github.io/docs/theme-creation)
+        > and use `ash theme create --interactive` to scaffold your theme correctly.
+
+        ---
+
+        ### 🎨 Theme Submission Requirements Checklist
+
+        **Mandatory requirements — your theme MUST:**
+        - [ ] 🎨 Define all **required color variables** (see schema)
+        - [ ] ♿ Pass **WCAG AA contrast** requirements (4.5:1 minimum)
+        - [ ] 📝 Include **complete metadata** (`metadata.json`)
+        - [ ] 🖼️ Include a **preview screenshot** (`preview.webp`)
+        - [ ] 🧪 Pass `ash theme validate --strict`
+        - [ ] 🎭 Work across all **required target applications**
+        - [ ] 📄 Include **LICENSE** information
+        - [ ] 🚫 **Not infringe** on existing copyrights / trademarks
+
+        **Recommended (strongly preferred):**
+        - [ ] 🌓 Provide **both dark and light variants** (if applicable)
+        - [ ] 🖼️ Include a **custom wallpaper** matching the theme
+        - [ ] 📱 Test on **multiple screen resolutions**
+        - [ ] 🎮 Test with **game mode** enabled
+        - [ ] 📊 Provide **color palette documentation**
+        - [ ] 🤖 Include **AI generation prompt** (for wallpaper compatibility)
+
+        ---
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 02 — THEME IDENTITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: theme_name
+    attributes:
+      label: "🏷️ Theme Name"
+      description: >
+        The official display name of your theme.
+        Use Title Case. Max 50 characters. No special characters except hyphens and spaces.
+      placeholder: "e.g., Tokyo Night Storm, Catppuccin Mocha, Aurora Borealis"
+    validations:
+      required: true
+
+  - type: input
+    id: theme_id
+    attributes:
+      label: "🔑 Theme ID (slug)"
+      description: >
+        Unique identifier. lowercase-with-hyphens only. Used in CLI: `ash theme apply [id]`
+        Must be unique — check the [theme list](https://ash-dotfiles.github.io/themes)!
+      placeholder: "e.g., tokyo-night-storm, catppuccin-mocha, aurora-borealis"
+    validations:
+      required: true
+
+  - type: input
+    id: theme_version
+    attributes:
+      label: "🔢 Theme Version"
+      description: "Semantic version for your theme"
+      placeholder: "e.g., 1.0.0"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 03 — THEME CATEGORY
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: theme_category
+    attributes:
+      label: "🗂️ Theme Category"
+      description: "Which category does your theme belong to?"
+      options:
+        - "🌑 Dark — Standard dark theme"
+        - "🌕 Light — Standard light theme"
+        - "⚡ Neon — Neon/cyberpunk/synthwave aesthetic"
+        - "🌿 Nature — Nature-inspired (forest, ocean, desert, etc.)"
+        - "🌌 Space — Space/cosmic/nebula aesthetic"
+        - "🍬 Pastel — Soft pastel colors"
+        - "🎌 Anime — Anime/manga inspired"
+        - "🕹️ Retro — Retro/vintage/pixel aesthetic"
+        - "🌈 Gradient — Multi-color gradient based"
+        - "🍂 Seasonal — Holiday/seasonal themes"
+        - "💆 Mood — Emotion/mood-based themes"
+        - "🎮 Gaming — Game/franchise inspired"
+        - "◾ Minimal — Minimalist / monochrome"
+        - "🌟 Special — Special occasion / pride / accessibility"
+        - "🎨 Art — Art movement / artist inspired"
+        - "🏢 Professional — Business / enterprise look"
+        - "❓ Other — Doesn't fit existing categories"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: theme_style
+    attributes:
+      label: "✨ Theme Style / Mood"
+      description: "The primary visual style / mood of your theme"
+      multiple: true
+      options:
+        - "🌙 Dark & Moody"
+        - "☀️ Bright & Vibrant"
+        - "🌫️ Muted & Subtle"
+        - "⚡ High Contrast"
+        - "🎨 Colorful & Playful"
+        - "🏔️ Cold & Blue-toned"
+        - "🔥 Warm & Earthy"
+        - "💜 Purple-dominant"
+        - "💚 Green-dominant"
+        - "💙 Blue-dominant"
+        - "🧡 Orange/Red-dominant"
+        - "🤍 Near-white / Very light"
+        - "🖤 Near-black / Very dark"
+        - "🌈 Rainbow / Multi-hued"
+        - "🎭 Dramatic / High-impact"
+        - "🧘 Calm & Zen"
+        - "⚔️ Edgy & Bold"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 04 — THEME DESCRIPTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: theme_description
+    attributes:
+      label: "📝 Theme Description"
+      description: >
+        Write a compelling description of your theme. This appears in the
+        theme store, CLI listings, and documentation.
+        **150-500 characters for short description, up to 2000 for long.**
+      placeholder: |
+        ## Short Description (150-500 chars — for CLI listing)
+
+        A deep, atmospheric dark theme inspired by the aurora borealis, featuring
+        electric greens and blues dancing across a near-black background. Perfect
+        for late-night coding sessions with its easy-on-the-eyes contrast ratios.
+
+        ## Long Description (up to 2000 chars — for theme store page)
+
+        Aurora Borealis draws its color palette from the magical natural phenomenon
+        of the northern lights, capturing the ethereal dance of greens, blues, and
+        purples across the Arctic sky.
+
+        **Design Philosophy:**
+        The theme uses a very dark background (#0d1117) that represents the night sky,
+        allowing the vivid accent colors to pop like actual aurora light. Every color
+        was carefully selected to maintain WCAG AAA accessibility standards while
+        preserving the magical aesthetic.
+
+        **Best paired with:**
+        - Wallpapers: Northern lights photography, abstract cosmic art
+        - Fonts: JetBrains Mono, Iosevka, Maple Mono
+        - Music: Lo-fi, ambient electronic, Scandinavian folk
+
+        **Color inspiration:**
+        - Background: Arctic night sky
+        - Green accent: Kp-index 7+ aurora
+        - Blue tones: Aurora corona phenomena
+        - Purple hints: Proton aurora events
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 05 — COLOR PALETTE
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: color_palette
+    attributes:
+      label: "🎨 Color Palette Specification"
+      description: >
+        Define your theme's complete color palette.
+        All hex values must be in `#RRGGBB` format.
+        Run `ash theme validate path/to/theme` to verify these values are complete.
+      placeholder: |
+        ## Required Base Colors
+
+        ```json
+        {
+          "colors": {
+            "base": {
+              "background":     "#0d1117",  // main background
+              "background_alt": "#161b22",  // secondary background (sidebars, panels)
+              "background_dark":"#090e14",  // darkest background (statusbars)
+              "surface":        "#1c2128",  // elevated surface (cards, modals)
+              "overlay":        "#22272e",  // overlaid elements
+              "border":         "#2d3748"   // borders and separators
+            },
+            "text": {
+              "primary":    "#e6edf3",  // main text
+              "secondary":  "#8b949e",  // secondary/muted text
+              "disabled":   "#484f58",  // disabled/placeholder text
+              "inverse":    "#0d1117"   // text on accent backgrounds
+            },
+            "accent": {
+              "primary":   "#39d353",  // primary accent (aurora green)
+              "secondary": "#58a6ff",  // secondary accent (aurora blue)
+              "tertiary":  "#bc8cff",  // tertiary accent (aurora purple)
+              "warning":   "#e3b341",  // warning color
+              "error":     "#f85149",  // error/danger color
+              "success":   "#3fb950",  // success color
+              "info":      "#388bfd"   // info color
+            },
+            "syntax": {
+              "keyword":    "#ff7b72",  // keywords (if, for, class)
+              "string":     "#a5d6ff",  // strings
+              "function":   "#d2a8ff",  // function names
+              "variable":   "#ffa657",  // variables
+              "comment":    "#8b949e",  // comments
+              "constant":   "#79c0ff",  // constants/numbers
+              "type":       "#7ee787",  // types
+              "operator":   "#ff7b72",  // operators
+              "punctuation":"#8b949e",  // punctuation
+              "markup_tag": "#7ee787"   // HTML/XML tags
+            },
+            "terminal": {
+              "black":         "#484f58",
+              "red":           "#ff7b72",
+              "green":         "#3fb950",
+              "yellow":        "#d29922",
+              "blue":          "#58a6ff",
+              "magenta":       "#bc8cff",
+              "cyan":          "#56d364",
+              "white":         "#b1bac4",
+              "bright_black":  "#6e7681",
+              "bright_red":    "#ffa198",
+              "bright_green":  "#56d364",
+              "bright_yellow": "#e3b341",
+              "bright_blue":   "#79c0ff",
+              "bright_magenta":"#d2a8ff",
+              "bright_cyan":   "#56d364",
+              "bright_white":  "#f0f6fc"
+            }
+          }
+        }
+        ```
+
+        ## Contrast Ratios (WCAG Compliance)
+
+        | Combination | Ratio | WCAG Level |
+        |-------------|-------|------------|
+        | Primary text on background | 12.5:1 | ✅ AAA |
+        | Secondary text on background | 4.8:1 | ✅ AA |
+        | Primary accent on background | 5.2:1 | ✅ AA |
+        | Error on background | 4.6:1 | ✅ AA |
+        | Disabled text on background | 2.1:1 | ⚠️ Below AA (intentional — disabled) |
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 06 — TARGET APPLICATION COVERAGE
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: target_apps
+    attributes:
+      label: "🎯 Supported Target Applications"
+      description: >
+        Check all applications your theme has been tested with.
+        **Bold items are required for submission acceptance.**
+      options:
+        # Required
+        - label: "🪟 **Hyprland** — Window manager colors (REQUIRED)"
+          required: true
+        - label: "📊 **Waybar** — Status bar styling (REQUIRED)"
+          required: true
+        - label: "🚀 **Rofi** — Launcher styling (REQUIRED)"
+          required: true
+        - label: "🔔 **Dunst** — Notification styling (REQUIRED)"
+          required: true
+        - label: "🖥️ **Kitty** — Terminal colors (REQUIRED)"
+          required: true
+        - label: "🐟 **Fish Shell** — Shell prompt colors (REQUIRED)"
+          required: true
+        - label: "📝 **Neovim** — Editor theme (REQUIRED)"
+          required: true
+        - label: "🎭 **GTK 3** — GTK3 application theme (REQUIRED)"
+          required: true
+        - label: "🎭 **GTK 4** — GTK4/libadwaita theme (REQUIRED)"
+          required: true
+        # Recommended
+        - label: "🔒 Hyprlock — Lock screen"
+        - label: "📊 AGS — Alternative bar/widgets"
+        - label: "📊 Eww — Widgets"
+        - label: "⭐ Starship — Prompt theme"
+        - label: "💻 btop — System monitor"
+        - label: "🎵 cava — Audio visualizer"
+        - label: "🔓 wlogout — Logout menu"
+        - label: "📁 Yazi — File manager"
+        - label: "🦇 bat — File viewer"
+        - label: "⏱️ tmux — Terminal multiplexer"
+        - label: "💻 WezTerm — Alternative terminal"
+        - label: "🔲 Zellij — Terminal workspace"
+        - label: "🎭 Qt/Kvantum — Qt application theme"
+        # Optional
+        - label: "📝 Helix — Alternative editor"
+        - label: "📝 Zed — Alternative editor"
+        - label: "📝 VSCode — VS Code theme"
+        - label: "🌐 Firefox — Browser theme (userChrome.css)"
+        - label: "💬 Discord — BetterDiscord/Vencord theme"
+        - label: "🎵 Spotify — Spicetify theme"
+        - label: "🖥️ SDDM — Login screen"
+        - label: "🥾 GRUB — Boot menu"
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 07 — SCREENSHOTS & PREVIEWS
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 Screenshots & Preview Images"
+      description: >
+        **High-quality screenshots are essential for theme acceptance.**
+
+        **Required screenshots:**
+        1. `preview.webp` — Full desktop view (1920×1080+ recommended)
+        2. Neovim with code open (showing syntax highlighting)
+        3. Terminal with fish prompt
+        4. Waybar styling
+
+        **Additional (strongly recommended):**
+        - Rofi launcher
+        - Notification (dunst)
+        - Lock screen (if supported)
+        - Side-by-side comparison of dark/light variants
+
+        > 💡 **Pro tip:** Use `ash shot full --quality max` for perfect screenshots!
+        > Then use `ash shot annotate` to add labels and callouts.
+      placeholder: |
+        ## Required Screenshots
+
+        ### 🖥️ Full Desktop Preview
+        <!-- Required: 1920×1080+ fullscreen screenshot -->
+        [drag image here]
+
+        ### 📝 Neovim with Code
+        <!-- Required: Show Rust/Python/TypeScript code with syntax highlighting -->
+        [drag image here]
+
+        ### 🖥️ Terminal / Fish Prompt
+        <!-- Required: Show the shell prompt and terminal colors -->
+        [drag image here]
+
+        ### 📊 Waybar
+        <!-- Required: Show the status bar -->
+        [drag image here]
+
+        ## Additional Screenshots (Recommended)
+
+        ### 🚀 Rofi Launcher
+        [drag image here]
+
+        ### 🔔 Dunst Notification
+        [drag image here]
+
+        ### 🌓 Light Variant (if provided)
+        [drag image here]
+
+        ## Color Palette Swatch
+        <!-- A color palette image showing all theme colors -->
+        [drag image here]
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 08 — WALLPAPER
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: wallpaper
+    attributes:
+      label: "🖼️ Included Wallpaper(s)"
+      description: >
+        Themes should ideally include a matching wallpaper.
+        Provide wallpaper details and image(s) here.
+      placeholder: |
+        ## Wallpaper Details
+
+        - **Filename:** aurora-borealis.jpg
+        - **Resolution:** 3840×2160 (4K)
+        - **Format:** JPEG / PNG / WebP
+        - **File size:** ~4.2 MB
+        - **Source:** [Self-created / Unsplash / Wallhaven / AI-generated]
+        - **License:** [CC0 / CC BY 4.0 / Personal creation]
+        - **Author/Credit:** [Your name / Original photographer]
+        - **Original URL:** [if from external source]
+
+        ### Wallpaper Preview
+        [drag wallpaper image here]
+
+        ## Additional Wallpaper Variants (if any)
+        - Dark variant:      aurora-borealis-dark.jpg (1920×1080)
+        - Ultrawide variant: aurora-borealis-uw.jpg (3440×1440)
+
+        ## AI Generation Prompt (if AI-generated)
+        ```
+        "Northern lights aurora borealis, dark night sky, electric green and blue
+        colors, Arctic landscape, cinematic lighting, 8K ultra detailed,
+        photorealistic, --ar 16:9 --style raw"
+        ```
+
+        > ⚠️ If you cannot include a wallpaper, the theme will still be accepted
+        > but will use a default wallpaper. Community members may contribute one later.
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 09 — INSPIRATION & ATTRIBUTION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: inspiration
+    attributes:
+      label: "🌟 Inspiration & Attribution"
+      description: >
+        Where did the inspiration come from? Give credit where due.
+        If your theme is based on an existing color scheme, specify it here.
+      placeholder: |
+        ## Design Inspiration
+
+        This theme was inspired by:
+        - The [GitHub Dark theme](https://github.com) color palette (used as base)
+        - Photography of the aurora borealis in Tromsø, Norway
+        - The Neovim colorscheme [aurora.nvim](https://github.com/...)
+
+        ## Attribution / Credits
+
+        | Resource | Author | License | URL |
+        |----------|--------|---------|-----|
+        | Base color palette | GitHub Inc. | MIT | https://github.com |
+        | Wallpaper image | John Doe | CC BY 4.0 | https://unsplash.com/... |
+        | Icon inspiration | Papirus Icons | LGPL | https://github.com/... |
+
+        ## Relationship to Existing Themes
+
+        - [ ] 🆕 Completely original design
+        - [ ] 🔀 Port from another colorscheme (specify below)
+        - [ ] 🔧 Variant/fork of existing ASH theme (specify below)
+        - [ ] 🎨 Custom color selection based on existing color system
+
+        **If port/fork:** Original theme: _____________ by _____________ (License: _____)
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 10 — ACCESSIBILITY
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: "♿ Accessibility Validation"
+      description: >
+        All themes must pass accessibility checks. Paste your validation results here.
+        Run: `ash theme validate --accessibility path/to/theme`
+      placeholder: |
+        ## WCAG Contrast Validation
+
+        ```
+        $ ash theme validate --accessibility ./themes/aurora-borealis
+
+        ♿ Accessibility Report — Aurora Borealis v1.0.0
+        ═══════════════════════════════════════════════
+
+        Color Contrast Checks (WCAG 2.1):
+        ✅ text.primary on base.background         — 12.5:1  (AAA ≥7.0)
+        ✅ text.secondary on base.background        —  4.8:1  (AA ≥4.5)
+        ✅ accent.primary on base.background        —  5.2:1  (AA ≥4.5)
+        ✅ accent.secondary on base.background      —  4.7:1  (AA ≥4.5)
+        ✅ accent.error on base.background          —  4.6:1  (AA ≥4.5)
+        ✅ accent.warning on base.background        —  4.9:1  (AA ≥4.5)
+        ✅ accent.success on base.background        —  5.1:1  (AA ≥4.5)
+        ⚠️ text.disabled on base.background        —  2.1:1  (Below AA — intentional)
+
+        Color Blindness Simulation:
+        ✅ Deuteranopia (red-green) — readable
+        ✅ Protanopia (red) — readable
+        ✅ Tritanopia (blue-yellow) — readable
+        ✅ Achromatopsia (grayscale) — readable
+
+        Overall: ✅ PASS — Meets WCAG AA (8/8 required checks passed)
+        ```
+
+        ## Color Blindness Notes
+
+        If any combinations fail for specific color blindness types,
+        explain here and describe any accommodations made.
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 11 — VALIDATION OUTPUT
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: validation_output
+    attributes:
+      label: "🧪 Theme Validation Output"
+      description: >
+        **REQUIRED:** Paste the complete output of `ash theme validate --strict path/to/theme`
+        Your theme must pass ALL validation checks before submission.
+      render: shell
+      placeholder: |
+        $ ash theme validate --strict ./themes/aurora-borealis
+
+        🎨 ASH Theme Validator v5.0
+        ════════════════════════════════════════════════════
+        Theme: Aurora Borealis v1.0.0
+        Path: ./themes/aurora-borealis
+        Mode: STRICT
+
+        ✅ Schema validation: PASS
+        ✅ Required colors: PASS (all 48 required colors defined)
+        ✅ Color format: PASS (all values valid hex)
+        ✅ Contrast ratios: PASS (WCAG AA)
+        ✅ Metadata: PASS (all required fields)
+        ✅ Preview image: PASS (1920×1080, WebP)
+        ✅ Wallpaper: PASS (3840×2160, JPEG)
+        ✅ License: PASS (MIT)
+        ✅ Target templates: PASS (all 9 required templates)
+        ✅ Color harmony: PASS
+        ✅ Dark theme check: PASS (bg luminance < 0.2)
+
+        Results: 11/11 checks PASSED ✅
+        Theme is ready for submission! 🎉
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 12 — THEME FILES
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: theme_files
+    attributes:
+      label: "📁 Theme Files / Repository"
+      description: >
+        Link to your theme files. Can be a GitHub repo, Gist, or paste inline.
+        The complete file structure must follow the ASH theme schema.
+      placeholder: |
+        ## Theme Repository / Files
+
+        **GitHub Repository:** https://github.com/yourusername/ash-theme-aurora-borealis
+        **Branch:** main
+        **Direct link to theme folder:** https://github.com/.../tree/main/aurora-borealis
+
+        ## Or: File Structure Confirmation
+
+        Confirm your theme directory contains:
+        ```
+        aurora-borealis/
+        ├── theme.conf          ✅
+        ├── colors.json         ✅
+        ├── metadata.json       ✅
+        ├── preview.webp        ✅ (1920×1080)
+        ├── wallpaper.jpg       ✅ (3840×2160)
+        ├── LICENSE             ✅
+        └── README.md           ✅
+        ```
+
+        ## metadata.json Preview
+
+        ```json
+        {
+          "id": "aurora-borealis",
+          "name": "Aurora Borealis",
+          "version": "1.0.0",
+          "description": "A deep atmospheric theme inspired by northern lights",
+          "category": "nature",
+          "style": ["dark", "cool", "atmospheric"],
+          "author": {
+            "name": "Your Name",
+            "github": "yourusername",
+            "email": "optional@example.com"
+          },
+          "license": "MIT",
+          "tags": ["aurora", "northern-lights", "dark", "green", "blue", "nature"],
+          "supports_dark": true,
+          "supports_light": false,
+          "supports_auto": false,
+          "min_ash_version": "5.0.0",
+          "dependencies": [],
+          "screenshots": {
+            "preview": "preview.webp",
+            "neovim": "screenshots/neovim.webp",
+            "terminal": "screenshots/terminal.webp",
+            "desktop": "screenshots/desktop.webp"
+          },
+          "wallpaper": {
+            "file": "wallpaper.jpg",
+            "resolution": "3840x2160",
+            "license": "CC0",
+            "source": "Self-created"
+          },
+          "colors": {
+            "primary": "#39d353",
+            "secondary": "#58a6ff",
+            "background": "#0d1117",
+            "foreground": "#e6edf3"
+          }
+        }
+        ```
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 13 — LICENSE
+  # ════════════════════════════════════════════════════════════════════
+  - type: dropdown
+    id: license
+    attributes:
+      label: "⚖️ Theme License"
+      description: "Under which license are you releasing your theme?"
+      options:
+        - "MIT — Maximum permissive, attribution required"
+        - "Apache 2.0 — Permissive with patent protection"
+        - "GPL v3 — Copyleft, derivative works must be open source"
+        - "CC0 1.0 — Public domain, no restrictions"
+        - "CC BY 4.0 — Attribution required"
+        - "CC BY-SA 4.0 — Attribution + ShareAlike"
+        - "CC BY-NC 4.0 — Attribution + Non-commercial"
+        - "Other (specify in description)"
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 14 — AUTHOR INFORMATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: input
+    id: author_name
+    attributes:
+      label: "👤 Author Name / Handle"
+      placeholder: "e.g., John Doe / @johndoe"
+    validations:
+      required: true
+
+  - type: input
+    id: author_github
+    attributes:
+      label: "🐙 GitHub Username"
+      placeholder: "e.g., johndoe (without @)"
+    validations:
+      required: true
+
+  - type: input
+    id: author_contact
+    attributes:
+      label: "📬 Contact (optional)"
+      description: "Email, Discord handle, or social media for credit/questions"
+      placeholder: "e.g., johndoe@example.com / discord: johndoe#1234"
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 15 — VARIANTS & RELATED THEMES
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: variants
+    attributes:
+      label: "🌓 Variants & Related Themes"
+      description: "Do you have multiple variants of this theme? List them all here."
+      placeholder: |
+        ## Theme Variants Submitted
+
+        | Variant ID | Variant Name | Background | Status |
+        |-----------|-------------|------------|--------|
+        | aurora-borealis | Aurora Borealis (Dark) | #0d1117 | ✅ Main submission |
+        | aurora-dawn | Aurora Dawn (Light) | #f8fafc | 🔜 Planned |
+        | aurora-midnight | Aurora Midnight (OLED) | #000000 | 🔜 Planned |
+
+        ## Part of Theme Family?
+        - [ ] Yes, this is part of a larger theme family
+        - [ ] No, standalone theme
+
+        **If yes, family name:** ________________________
+        **Other family members (GitHub links):**
+        - aurora-synthwave: https://github.com/...
+    validations:
+      required: false
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 16 — TESTING CONFIRMATION
+  # ════════════════════════════════════════════════════════════════════
+  - type: textarea
+    id: testing
+    attributes:
+      label: "🧪 Testing Environment"
+      description: "Describe the system(s) where you tested your theme."
+      placeholder: |
+        ## Tested On
+
+        | System | Distro | GPU | Hyprland | Status |
+        |--------|--------|-----|----------|--------|
+        | Desktop | Arch Linux | RX 7900 XTX | v0.36.0 | ✅ Perfect |
+        | Laptop | NixOS 23.11 | Intel Iris Xe | v0.35.0 | ✅ Good |
+        | VM | Fedora 39 | VMware SVGA | v0.36.0 | ⚠️ Minor issues in VM |
+
+        ## Known Issues / Limitations
+        - [ ] No known issues
+        - [x] Minor rendering difference on NVIDIA (colors slightly different due to gamma)
+        - [ ] Other: ________________________
+
+        ## Tested Resolution(s)
+        - [x] 1920×1080 (FHD)
+        - [x] 2560×1440 (QHD)
+        - [x] 3840×2160 (4K)
+        - [ ] 3440×1440 (Ultrawide)
+        - [ ] 1366×768 (Laptop)
+    validations:
+      required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 17 — FINAL CHECKLIST
+  # ════════════════════════════════════════════════════════════════════
+  - type: checkboxes
+    id: final_checklist
+    attributes:
+      label: "✅ Theme Submission Checklist"
+      description: "ALL items must be checked for submission to proceed"
+      options:
+        - label: >
+            🏷️ Theme ID is **unique** — not already in the [theme list](https://ash-dotfiles.github.io/themes)
+          required: true
+        - label: >
+            🎨 All **required color variables** are defined (ran `ash theme validate --strict`)
+          required: true
+        - label: >
+            🧪 Theme passes `ash theme validate --strict` — **all checks green**
+          required: true
+        - label: >
+            ♿ Theme passes **WCAG AA contrast** requirements
+          required: true
+        - label: >
+            📸 **Preview screenshot** (`preview.webp`) is included at 1920×1080+
+          required: true
+        - label: >
+            📝 `metadata.json` is **complete** with all required fields
+          required: true
+        - label: >
+            ⚖️ I have the **right to distribute** all included assets (images, fonts, etc.)
+          required: true
+        - label: >
+            📄 **LICENSE file** is included in the theme directory
+          required: true
+        - label: >
+            🎯 Theme works correctly with **all 9 required target applications**
+          required: true
+        - label: >
+            🚫 Theme does **not** infringe on any copyrights or trademarks
+          required: true
+        - label: >
+            📖 I agree to release under the specified license and to the
+            [Contributor Agreement](https://ash-dotfiles.github.io/contributing)
+          required: true
+        - label: >
+            📖 I have read and agree to the
+            [Code of Conduct](https://github.com/ash-dotfiles/ash-dotfiles/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+
+  # ════════════════════════════════════════════════════════════════════
+  # SECTION 18 — CLOSING BANNER
+  # ════════════════════════════════════════════════════════════════════
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        <div align="center">
+
+        ### 🎨 Thank You for Your Theme Submission!
+
+        Your theme will go through our automated validation pipeline and then
+        human review by the ASH Dotfiles team.
+
+        #### 📋 Review Process
+
+        ```
+        Submission → Auto-Validation → Preview Generation → Human Review → Merge / Feedback
+            1hr           2hrs              30min              1-3 days       Immediate
+        ```
+
+        #### 🏆 Accepted Theme Benefits
+
+        | Benefit | Details |
+        |---------|---------|
+        | 🌟 Attribution | Your name/GitHub in theme metadata & store |
+        | 📊 Download Stats | Real-time download counter in theme store |
+        | 💬 Featured | Possible spotlight in Discord & social media |
+        | 🏅 Contributor Badge | Listed as theme contributor on the website |
+        | 💰 Potential Bounty | Some themes may qualify for bounty rewards |
+
+        ---
+
+        **Join #theme-creators on [Discord](https://discord.gg/ash-dotfiles)
+        for real-time feedback from the community!**
+
+        *— The ASH Dotfiles Theme Team* 🎨
+
+        </div>

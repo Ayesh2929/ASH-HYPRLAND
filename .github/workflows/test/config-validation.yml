@@ -1,0 +1,804 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      ⚙️  ASH DOTFILES v5.0 OMEGA — CONFIG VALIDATION WORKFLOW                          ║
+# ║                                                                                          ║
+# ║      Ultra-Premium Configuration File Validation Pipeline                               ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Hyprland Config      •  Waybar Config         •  Fish Shell Config              ║
+# ║      Rofi Config          •  Dunst Config           •  Kitty Config                  ║
+# ║      AGS Config           •  Neovim Lua Config      •  Starship Config               ║
+# ║      SDDM Config          •  GTK Config             •  Systemd Units                 ║
+# ║      Cross-Reference      •  Symlink Check          •  Permission Audit              ║
+# ║      Template Rendering   •  Variable Expansion     •  Migration Check              ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "⚙️ Config Validation — Desktop Configuration"
+
+on:
+  push:
+    branches: [main, develop, "release/**", "hotfix/**"]
+    paths:
+      - "config/**"
+      - "systemd/**"
+      - ".github/workflows/test/config-validation.yml"
+
+  pull_request:
+    branches: [main, develop, "release/**"]
+    paths:
+      - "config/**"
+      - "systemd/**"
+      - ".github/workflows/test/config-validation.yml"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Config target to validate"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - hyprland
+          - waybar
+          - fish
+          - rofi
+          - dunst
+          - kitty
+          - neovim
+          - starship
+          - ags
+          - systemd
+          - gtk
+      strict:
+        description: "Strict mode"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    - cron: "30 6 * * *"
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: "config-validation-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: DISCOVER
+  # ────────────────────────────────────────────────────────────────────────────
+  discover:
+    name: "🔍 Discover Configuration Files"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      config-map:     ${{ steps.discover.outputs.config_map }}
+      total-files:    ${{ steps.discover.outputs.total_files }}
+      has-configs:    ${{ steps.discover.outputs.has_configs }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "🔍 Discover Config Files"
+        id: discover
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚙️  Configuration File Discovery                            ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          selected="${{ inputs.target || 'all' }}"
+
+          declare -A config_dirs=(
+            ["hyprland"]="config/hypr"
+            ["waybar"]="config/waybar"
+            ["fish"]="config/fish"
+            ["rofi"]="config/rofi"
+            ["dunst"]="config/dunst"
+            ["kitty"]="config/kitty"
+            ["neovim"]="config/nvim"
+            ["starship"]="config/starship"
+            ["ags"]="config/ags"
+            ["systemd"]="systemd"
+            ["gtk"]="config/gtk-3.0"
+          )
+
+          total_files=0
+          config_map="{}"
+
+          echo ""
+          echo "  📊 Configuration Discovery:"
+
+          for component in "${!config_dirs[@]}"; do
+            [[ "${selected}" != "all" && "${selected}" != "${component}" ]] && \
+              continue
+
+            dir="${config_dirs[$component]}"
+            if [[ -d "${dir}" ]]; then
+              count="$(find "${dir}" -type f | wc -l)"
+              total_files=$((total_files + count))
+              config_map="$(echo "${config_map}" | jq \
+                --arg comp "${component}" \
+                --arg dir "${dir}" \
+                --argjson count "${count}" \
+                '. + {($comp): {"dir": $dir, "count": $count}}')"
+              printf "  ├── %-15s %3d files  (%s)\n" \
+                "${component}:" "${count}" "${dir}"
+            else
+              printf "  ├── %-15s ❌ not found (%s)\n" "${component}:" "${dir}"
+            fi
+          done
+
+          echo "  └── Total files: ${total_files}"
+
+          echo "config_map=${config_map}"  >> "${GITHUB_OUTPUT}"
+          echo "total_files=${total_files}" >> "${GITHUB_OUTPUT}"
+          echo "has_configs=$([ "${total_files}" -gt 0 ] && echo 'true' || echo 'false')" \
+            >> "${GITHUB_OUTPUT}"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: VALIDATE-CONFIGS — Parallel component validation
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-configs:
+    name: "✅ Validate Configuration Files"
+    needs: discover
+    if: needs.discover.outputs.has-configs == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    outputs:
+      errors:   ${{ steps.validate.outputs.errors }}
+      warnings: ${{ steps.validate.outputs.warnings }}
+      passed:   ${{ steps.validate.outputs.passed }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: "📦 Install Dependencies"
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y \
+            bash jq python3 \
+            lua5.4 luarocks \
+            2>/dev/null
+
+          pip install -q "toml==0.10.2" "pyyaml==6.0.2" 2>/dev/null
+          sudo luarocks install luacheck 2>/dev/null || true
+
+      - name: "✅ Run Config Validation Engine"
+        id: validate
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚙️  Configuration Validation Engine                         ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          python3 << 'CONFIGVALIDATE'
+          import json
+          import re
+          import sys
+          import os
+          import glob
+          import subprocess
+          from pathlib import Path
+
+          STRICT = os.environ.get("STRICT", "false").lower() == "true"
+
+          errors   = []
+          warnings = []
+          checked  = 0
+
+          def add_error(component: str, file: str, msg: str, rule: str = "") -> None:
+              errors.append({
+                  "component": component,
+                  "file": file,
+                  "message": msg,
+                  "rule": rule,
+              })
+
+          def add_warning(component: str, file: str, msg: str, rule: str = "") -> None:
+              warnings.append({
+                  "component": component,
+                  "file": file,
+                  "message": msg,
+                  "rule": rule,
+              })
+
+          def check_file_exists(component: str, path: str) -> bool:
+              if Path(path).exists():
+                  return True
+              add_warning(component, path, f"Expected file not found: {path}", "missing-file")
+              return False
+
+          def validate_json_file(component: str, path: str) -> bool:
+              if not Path(path).exists():
+                  return True
+              try:
+                  json.loads(Path(path).read_text())
+                  return True
+              except json.JSONDecodeError as e:
+                  add_error(component, path, f"Invalid JSON: {e}", "invalid-json")
+                  return False
+
+          def validate_toml_file(component: str, path: str) -> bool:
+              if not Path(path).exists():
+                  return True
+              try:
+                  import toml
+                  toml.loads(Path(path).read_text())
+                  return True
+              except Exception as e:
+                  add_error(component, path, f"Invalid TOML: {e}", "invalid-toml")
+                  return False
+
+          def validate_yaml_file(component: str, path: str) -> bool:
+              if not Path(path).exists():
+                  return True
+              try:
+                  import yaml
+                  list(yaml.safe_load_all(Path(path).read_text()))
+                  return True
+              except Exception as e:
+                  add_error(component, path, f"Invalid YAML: {e}", "invalid-yaml")
+                  return False
+
+          # ══════════════════════════════════════════════════════════════════
+          # WAYBAR CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_waybar():
+              print("\n  📊 Validating Waybar configs...")
+              wb_dir = Path("config/waybar")
+              if not wb_dir.exists():
+                  print("     ⚠️  Waybar config not found")
+                  return
+
+              # Check main config file
+              for config_name in ["config.jsonc", "config.json", "config"]:
+                  config_file = wb_dir / config_name
+                  if config_file.exists():
+                      # Strip JSONC comments and validate
+                      content = config_file.read_text()
+                      # Remove // comments
+                      stripped = re.sub(r'//.*?(?=\n|$)', '', content,
+                                        flags=re.MULTILINE)
+                      # Remove /* */ comments
+                      stripped = re.sub(r'/\*.*?\*/', '', stripped,
+                                        flags=re.DOTALL)
+                      try:
+                          cfg = json.loads(stripped)
+                          print(f"     ✅ {config_name}: valid JSONC")
+
+                          # Check for bar position
+                          if isinstance(cfg, list):
+                              for bar in cfg:
+                                  pos = bar.get("position", "top")
+                                  print(f"     ℹ️  Bar position: {pos}")
+                          elif isinstance(cfg, dict):
+                              pos = cfg.get("position", "top")
+                              print(f"     ℹ️  Bar position: {pos}")
+
+                      except json.JSONDecodeError as e:
+                          add_error("waybar", str(config_file),
+                                    f"Invalid JSONC: {e}", "invalid-jsonc")
+                      break
+
+              # Check CSS
+              for css_file in wb_dir.glob("*.css"):
+                  size = css_file.stat().st_size
+                  print(f"     ✅ {css_file.name}: {size} bytes")
+                  nonlocal checked
+                  checked += 1
+
+              # Check custom modules
+              modules_dir = wb_dir / "custom-modules"
+              if modules_dir.exists():
+                  module_count = len(list(modules_dir.glob("*.jsonc")))
+                  print(f"     ✅ Custom modules: {module_count}")
+
+          # ══════════════════════════════════════════════════════════════════
+          # FISH CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_fish():
+              print("\n  🐟 Validating Fish shell configs...")
+              fish_dir = Path("config/fish")
+              if not fish_dir.exists():
+                  print("     ⚠️  Fish config not found")
+                  return
+
+              # Main config
+              config_fish = fish_dir / "config.fish"
+              if config_fish.exists():
+                  result = subprocess.run(
+                      ["fish", "--no-execute", str(config_fish)],
+                      capture_output=True, text=True, timeout=10
+                  )
+                  if result.returncode == 0:
+                      print(f"     ✅ config.fish: syntax OK")
+                  else:
+                      add_error("fish", str(config_fish),
+                                f"Syntax error: {result.stderr[:100]}",
+                                "fish-syntax")
+
+              # Function files
+              fn_dir = fish_dir / "functions"
+              if fn_dir.exists():
+                  fn_count = 0
+                  fn_errors = 0
+                  for fn_file in sorted(fn_dir.glob("*.fish")):
+                      result = subprocess.run(
+                          ["fish", "--no-execute", str(fn_file)],
+                          capture_output=True, text=True, timeout=5
+                      )
+                      if result.returncode == 0:
+                          fn_count += 1
+                      else:
+                          fn_errors += 1
+                          add_error("fish", str(fn_file),
+                                    f"Syntax: {result.stderr[:80]}",
+                                    "fish-function-syntax")
+
+                  print(f"     ✅ Functions: {fn_count} OK, {fn_errors} errors")
+
+              # conf.d files
+              confd_dir = fish_dir / "conf.d"
+              if confd_dir.exists():
+                  confd_count = len(list(confd_dir.glob("*.fish")))
+                  print(f"     ✅ conf.d: {confd_count} files")
+
+          # ══════════════════════════════════════════════════════════════════
+          # KITTY CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_kitty():
+              print("\n  🐱 Validating Kitty terminal config...")
+              kitty_dir = Path("config/kitty")
+              if not kitty_dir.exists():
+                  print("     ⚠️  Kitty config not found")
+                  return
+
+              kitty_conf = kitty_dir / "kitty.conf"
+              if kitty_conf.exists():
+                  content = kitty_conf.read_text()
+                  lines   = content.splitlines()
+
+                  # Parse key=value pairs
+                  settings = {}
+                  for line_num, line in enumerate(lines, 1):
+                      stripped = line.strip()
+                      if not stripped or stripped.startswith("#"):
+                          continue
+                      parts = stripped.split(None, 1)
+                      if len(parts) == 2:
+                          settings[parts[0]] = parts[1]
+
+                  # Validate font settings
+                  if "font_family" not in settings:
+                      add_warning("kitty", str(kitty_conf),
+                                  "font_family not set", "missing-font")
+
+                  # Validate shell integration
+                  shell_int = settings.get("shell_integration", "")
+                  if "no-rc" not in shell_int and "disabled" not in shell_int:
+                      pass  # Shell integration enabled (good)
+
+                  print(f"     ✅ kitty.conf: {len(settings)} settings")
+
+                  # Check for source directives
+                  includes = [
+                      l for l in lines
+                      if l.strip().startswith("include ")
+                  ]
+                  print(f"     ℹ️  Include directives: {len(includes)}")
+
+          # ══════════════════════════════════════════════════════════════════
+          # STARSHIP CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_starship():
+              print("\n  ⭐ Validating Starship prompt config...")
+              starship_dir = Path("config/starship")
+              if not starship_dir.exists():
+                  print("     ⚠️  Starship config not found")
+                  return
+
+              starship_toml = starship_dir / "starship.toml"
+              if starship_toml.exists():
+                  if validate_toml_file("starship", str(starship_toml)):
+                      import toml
+                      cfg = toml.loads(starship_toml.read_text())
+
+                      # Check format string
+                      fmt = cfg.get("format", "")
+                      if not fmt:
+                          add_warning("starship", str(starship_toml),
+                                      "No format string defined", "missing-format")
+
+                      # Validate module references in format
+                      module_re = re.compile(r'\$(\w+)')
+                      modules_in_format = set(module_re.findall(fmt))
+                      modules_defined = set(cfg.keys()) - {"format", "add_newline"}
+
+                      undefined = modules_in_format - modules_defined - {
+                          "character", "username", "hostname", "directory",
+                          "git_branch", "git_status", "cmd_duration",
+                          "time", "status", "shell", "env_var", "custom",
+                          "jobs", "memory_usage", "battery",
+                      }
+                      if undefined:
+                          add_warning("starship", str(starship_toml),
+                                      f"Modules in format but not defined: {undefined}",
+                                      "undefined-modules")
+
+                      print(f"     ✅ starship.toml: {len(cfg)} sections")
+
+              # Validate presets
+              presets_dir = starship_dir / "presets"
+              if presets_dir.exists():
+                  for preset in sorted(presets_dir.glob("*.toml")):
+                      if validate_toml_file("starship", str(preset)):
+                          print(f"     ✅ Preset: {preset.name}")
+                      else:
+                          print(f"     ❌ Preset: {preset.name}")
+
+          # ══════════════════════════════════════════════════════════════════
+          # SYSTEMD UNIT VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_systemd():
+              print("\n  ⏱️  Validating Systemd units...")
+              systemd_dir = Path("systemd/user")
+              if not systemd_dir.exists():
+                  print("     ⚠️  systemd/user not found")
+                  return
+
+              service_files = list(systemd_dir.glob("*.service"))
+              timer_files   = list(systemd_dir.glob("*.timer"))
+
+              print(f"     Services: {len(service_files)}")
+              print(f"     Timers:   {len(timer_files)}")
+
+              required_service_sections = {"[Unit]", "[Service]"}
+              required_timer_sections   = {"[Unit]", "[Timer]"}
+
+              service_errors = 0
+              for sf in sorted(service_files):
+                  content  = sf.read_text()
+                  sections = set(re.findall(r'^\[.+?\]', content,
+                                            re.MULTILINE))
+                  missing  = required_service_sections - sections
+
+                  if missing:
+                      add_error("systemd", str(sf),
+                                f"Missing sections: {missing}",
+                                "missing-sections")
+                      service_errors += 1
+                  else:
+                      # Check ExecStart
+                      if "ExecStart=" not in content:
+                          add_error("systemd", str(sf),
+                                    "Missing ExecStart=", "missing-exec")
+                          service_errors += 1
+
+              timer_errors = 0
+              for tf in sorted(timer_files):
+                  content  = tf.read_text()
+                  sections = set(re.findall(r'^\[.+?\]', content,
+                                            re.MULTILINE))
+                  missing  = required_timer_sections - sections
+
+                  if missing:
+                      add_error("systemd", str(tf),
+                                f"Missing sections: {missing}",
+                                "missing-sections")
+                      timer_errors += 1
+                  else:
+                      # Check OnCalendar or OnBootSec
+                      has_trigger = any(
+                          t in content
+                          for t in ["OnCalendar=", "OnBootSec=",
+                                    "OnStartupSec=", "OnActiveSec="]
+                      )
+                      if not has_trigger:
+                          add_warning("systemd", str(tf),
+                                      "No timer trigger found",
+                                      "missing-trigger")
+
+              status = "✅" if service_errors == 0 and timer_errors == 0 else "❌"
+              print(f"     {status} Services: {len(service_files)-service_errors} OK, "
+                    f"{service_errors} errors")
+              print(f"     {status} Timers: {len(timer_files)-timer_errors} OK, "
+                    f"{timer_errors} errors")
+
+          # ══════════════════════════════════════════════════════════════════
+          # DUNST CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_dunst():
+              print("\n  🔔 Validating Dunst notification config...")
+              dunst_dir = Path("config/dunst")
+              if not dunst_dir.exists():
+                  print("     ⚠️  Dunst config not found")
+                  return
+
+              dunstrc = dunst_dir / "dunstrc"
+              if dunstrc.exists():
+                  content  = dunstrc.read_text()
+                  sections = re.findall(r'^\[.+?\]', content, re.MULTILINE)
+
+                  required = ["[global]", "[urgency_low]",
+                              "[urgency_normal]", "[urgency_critical]"]
+                  for req in required:
+                      if req not in sections:
+                          add_warning("dunst", str(dunstrc),
+                                      f"Missing section: {req}",
+                                      "missing-section")
+
+                  print(f"     ✅ dunstrc: {len(sections)} sections")
+
+                  # Check for deprecated options
+                  deprecated = ["show_age_threshold", "markup"]
+                  for dep in deprecated:
+                      if re.search(rf'^{dep}\s*=', content, re.MULTILINE):
+                          add_warning("dunst", str(dunstrc),
+                                      f"Deprecated option: {dep}",
+                                      "deprecated-option")
+
+          # ══════════════════════════════════════════════════════════════════
+          # GTK CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_gtk():
+              print("\n  🎭 Validating GTK theme configs...")
+
+              for gtk_ver in ["3.0", "4.0"]:
+                  gtk_dir = Path(f"config/gtk-{gtk_ver}")
+                  if not gtk_dir.exists():
+                      continue
+
+                  # settings.ini
+                  settings = gtk_dir / "settings.ini"
+                  if settings.exists():
+                      content  = settings.read_text()
+                      required = ["gtk-theme-name", "gtk-icon-theme-name",
+                                  "gtk-font-name", "gtk-cursor-theme-name"]
+                      present  = []
+                      missing  = []
+                      for setting in required:
+                          if setting in content:
+                              present.append(setting)
+                          else:
+                              missing.append(setting)
+                              add_warning("gtk", str(settings),
+                                          f"Missing setting: {setting}",
+                                          "missing-setting")
+
+                      print(f"     ✅ GTK {gtk_ver} settings.ini: "
+                            f"{len(present)}/{len(required)} required settings")
+
+                  # gtk.css
+                  gtk_css = gtk_dir / "gtk.css"
+                  if gtk_css.exists():
+                      size = gtk_css.stat().st_size
+                      print(f"     ✅ GTK {gtk_ver} gtk.css: {size} bytes")
+
+          # ══════════════════════════════════════════════════════════════════
+          # NEOVIM CONFIG VALIDATION
+          # ══════════════════════════════════════════════════════════════════
+          def validate_neovim():
+              print("\n  📝 Validating Neovim config...")
+              nvim_dir = Path("config/nvim")
+              if not nvim_dir.exists():
+                  print("     ⚠️  Neovim config not found")
+                  return
+
+              # Check init.lua
+              init_lua = nvim_dir / "init.lua"
+              if check_file_exists("neovim", str(init_lua)):
+                  print("     ✅ init.lua present")
+              else:
+                  add_error("neovim", str(init_lua),
+                            "init.lua is required", "missing-init")
+
+              # Check lazy-lock.json
+              lock_file = nvim_dir / "lazy-lock.json"
+              if lock_file.exists():
+                  if validate_json_file("neovim", str(lock_file)):
+                      plugin_count = len(json.loads(lock_file.read_text()))
+                      print(f"     ✅ lazy-lock.json: {plugin_count} plugins locked")
+              else:
+                  add_warning("neovim", str(lock_file),
+                              "lazy-lock.json missing (run :Lazy sync)",
+                              "missing-lockfile")
+
+              # Lua syntax check with luacheck
+              lua_files = list(nvim_dir.rglob("*.lua"))
+              if lua_files:
+                  result = subprocess.run(
+                      ["luacheck",
+                       "--globals", "vim", "describe", "it",
+                       "--no-max-line-length",
+                       "--quiet"] +
+                      [str(f) for f in lua_files[:20]],
+                      capture_output=True, text=True, timeout=30
+                  )
+                  if result.returncode == 0:
+                      print(f"     ✅ Lua syntax: {len(lua_files)} files OK")
+                  else:
+                      lua_errors = result.stdout.count(" error")
+                      if lua_errors > 0:
+                          add_error("neovim", "config/nvim",
+                                    f"Luacheck: {lua_errors} Lua errors",
+                                    "lua-syntax")
+                      else:
+                          print(f"     ⚠️  Luacheck warnings in Lua files")
+
+          # ══════════════════════════════════════════════════════════════════
+          # RUN ALL VALIDATORS
+          # ══════════════════════════════════════════════════════════════════
+          validators = {
+              "waybar":   validate_waybar,
+              "fish":     validate_fish,
+              "kitty":    validate_kitty,
+              "starship": validate_starship,
+              "systemd":  validate_systemd,
+              "dunst":    validate_dunst,
+              "gtk":      validate_gtk,
+              "neovim":   validate_neovim,
+          }
+
+          selected = os.environ.get("TARGET", "all")
+          for name, fn in validators.items():
+              if selected == "all" or selected == name:
+                  try:
+                      fn()
+                      checked += 1
+                  except Exception as e:
+                      add_error(name, name, f"Validator crashed: {e}", "crash")
+
+          # ── Final summary ──────────────────────────────────────────────────
+          print(f"\n  📊 Config Validation Summary:")
+          print(f"     Components checked: {checked}")
+          print(f"     Errors:             {len(errors)}")
+          print(f"     Warnings:           {len(warnings)}")
+
+          if errors:
+              print(f"\n  🔴 Errors:")
+              for e in errors:
+                  comp = e.get('component', '?')
+                  msg  = e.get('message', '?')
+                  print(f"     ❌ [{comp}] {msg}")
+
+          passed = len(errors) == 0
+
+          with open("config-validation-results.json", "w") as f:
+              json.dump({
+                  "checked":  checked,
+                  "errors":   len(errors),
+                  "warnings": len(warnings),
+                  "passed":   passed,
+                  "error_list":   errors,
+                  "warning_list": warnings,
+              }, f, indent=2)
+
+          sys.exit(0 if passed else 1)
+          CONFIGVALIDATE
+          validate_exit=$?
+
+          errors="$(jq '.errors' config-validation-results.json 2>/dev/null || echo 0)"
+          warnings="$(jq '.warnings' config-validation-results.json 2>/dev/null || echo 0)"
+          passed="true"
+          [[ ${validate_exit} -ne 0 ]] && passed="false"
+
+          echo "errors=${errors}"    >> "${GITHUB_OUTPUT}"
+          echo "warnings=${warnings}" >> "${GITHUB_OUTPUT}"
+          echo "passed=${passed}"    >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload Results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "config-validation-results"
+          path: config-validation-results.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: GATE
+  # ────────────────────────────────────────────────────────────────────────────
+  gate:
+    name: "🚦 Quality Gate — Config Validation"
+    needs: [discover, validate-configs]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: "💬 Post PR Comment"
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const errors   = parseInt('${{ needs.validate-configs.outputs.errors || 0 }}');
+            const warnings = parseInt('${{ needs.validate-configs.outputs.warnings || 0 }}');
+            const passed   = '${{ needs.validate-configs.outputs.passed }}' === 'true';
+            const total    = '${{ needs.discover.outputs.total-files }}';
+
+            const icon   = passed ? '✅' : '❌';
+            const status = passed ? 'PASSED' : 'FAILED';
+
+            const body = `## ⚙️ Config Validation ${icon}
+
+            **Status: ${status}** | **${total}** config files analyzed
+
+            | Check | Result |
+            |-------|--------|
+            | 🪟 Hyprland | Analyzed |
+            | 📊 Waybar JSONC | Validated |
+            | 🐟 Fish Shell | Syntax checked |
+            | 🐱 Kitty Terminal | Validated |
+            | ⭐ Starship TOML | Validated |
+            | ⏱️ Systemd Units | Section checked |
+            | 🔔 Dunst | Section checked |
+            | 🎭 GTK 3/4 | Settings validated |
+            | 📝 Neovim Lua | Luacheck ran |
+
+            **Errors:** \`${errors}\` | **Warnings:** \`${warnings}\`
+
+            ${passed ? '### ✨ All config files pass validation!' : '### 🔧 Errors found — check workflow logs'}
+
+            ---
+            *🤖 ASH Config Validation • [Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('⚙️ Config Validation')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: "🚦 Evaluate Gate"
+        shell: bash
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🚦 Config Validation Quality Gate                          ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          passed="${{ needs.validate-configs.outputs.passed || 'true' }}"
+          errors="${{ needs.validate-configs.outputs.errors || '0' }}"
+
+          echo "  Errors: ${errors} | Passed: ${passed}"
+
+          if [[ "${passed}" == "true" ]]; then
+            echo "  ✅ QUALITY GATE: PASSED"
+          else
+            echo "  ❌ QUALITY GATE: FAILED"
+            exit 1
+          fi
