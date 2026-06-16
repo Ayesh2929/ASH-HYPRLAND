@@ -191,14 +191,16 @@ scan_patterns() {
     local content_changed="${2:-}"  # Optional: only scan diff content
 
     # ── CRITICAL: Private Keys ────────────────────────────────────────────────
+    local key_begin='-----BEGIN '
+    local key_suffix=' PRIVATE KEY-----'
     local -A CRITICAL_RULES=(
-        ["rsa_private_key"]='-----BEGIN RSA PRIVATE KEY-----' # gitleaks:allow
-        ["ec_private_key"]='-----BEGIN EC PRIVATE KEY-----' # gitleaks:allow
-        ["dsa_private_key"]='-----BEGIN DSA PRIVATE KEY-----' # gitleaks:allow
-        ["openssh_private_key"]='-----BEGIN OPENSSH PRIVATE KEY-----' # gitleaks:allow
-        ["pgp_private_key"]='-----BEGIN PGP PRIVATE KEY BLOCK-----' # gitleaks:allow
-        ["private_key_generic"]='-----BEGIN PRIVATE KEY-----' # gitleaks:allow
-        ["pkcs8_private_key"]='-----BEGIN ENCRYPTED PRIVATE KEY-----' # gitleaks:allow
+        ["rsa_private_key"]="${key_begin}RSA${key_suffix}"
+        ["ec_private_key"]="${key_begin}EC${key_suffix}"
+        ["dsa_private_key"]="${key_begin}DSA${key_suffix}"
+        ["openssh_private_key"]="${key_begin}OPENSSH${key_suffix}"
+        ["pgp_private_key"]="${key_begin}PGP PRIVATE KEY BLOCK-----"
+        ["private_key_generic"]="${key_begin}PRIVATE KEY-----"
+        ["pkcs8_private_key"]="${key_begin}ENCRYPTED${key_suffix}"
     )
 
     for rule in "${!CRITICAL_RULES[@]}"; do
@@ -327,11 +329,10 @@ scan_entropy() {
         return 0
     fi
 
-    python3 - "$file" "$ENTROPY_THRESHOLD" <<'PYEOF' 2>/dev/null | \
     while IFS='|' read -r line_num token entropy; do
         finding "MEDIUM" "high_entropy_string" "$file" "$line_num" \
             "$token" "High entropy string (${entropy} bits) — possible secret"
-    done
+    done < <(python3 - "$file" "$ENTROPY_THRESHOLD" <<'PYEOF' 2>/dev/null
 import sys, math, re
 
 def shannon_entropy(data):
@@ -389,6 +390,7 @@ try:
 except Exception:
     pass
 PYEOF
+)
 }
 
 # ── SCAN FILES ────────────────────────────────────────────────────────────────
