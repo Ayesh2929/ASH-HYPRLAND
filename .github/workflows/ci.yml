@@ -486,6 +486,7 @@ jobs:
 
       - name: "📤 Upload Trivy SARIF"
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
           sarif_file: trivy-fs.sarif
@@ -2637,6 +2638,7 @@ jobs:
       - name: "📤 Upload image SARIF"
         if: always() && github.event_name != 'pull_request' && hashFiles('trivy-image.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: trivy-image.sarif
           category: "trivy-image-${{ matrix.platform }}"

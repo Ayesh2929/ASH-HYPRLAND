@@ -506,6 +506,7 @@ jobs:
       - name: "📤 Upload Semgrep SARIF"
         if: always() && hashFiles('semgrep-results/results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: semgrep-results/results.sarif
           category: "semgrep-sast"
@@ -652,6 +653,7 @@ jobs:
       - name: "📤 Upload Bandit SARIF"
         if: always() && hashFiles('bandit-results/results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: bandit-results/results.sarif
           category: "bandit-python-sast"
@@ -829,6 +831,7 @@ jobs:
       - name: "📤 Upload ShellCheck SARIF"
         if: always() && hashFiles('shellcheck-results/results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: shellcheck-results/results.sarif
           category: "shellcheck-sast"
