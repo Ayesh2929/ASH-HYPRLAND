@@ -176,6 +176,7 @@ jobs:
     timeout-minutes: 6
     permissions:
       contents: read
+      pull-requests: read
 
     outputs:
       # Change flags
@@ -1769,6 +1770,8 @@ jobs:
     timeout-minutes: 20
     needs: [shots-aggregate]
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
 
     steps:
       - name: "📥 Checkout"
