@@ -1535,16 +1535,20 @@ jobs:
           PNG="$SHOTS_DIR/${_THEME}.png"
           THUMB_DIR="$SHOTS_DIR/thumbnails"
           mkdir -p "$THUMB_DIR"
+          TMP_THUMB="$(mktemp --suffix=.png)"
+          trap 'rm -f "$TMP_THUMB"' EXIT
 
           convert "$PNG" \
             -filter Lanczos \
             -resize "${THUMB_W}x${THUMB_H}^" \
             -gravity center \
             -extent "${THUMB_W}x${THUMB_H}" \
-            -strip PNG:- \
-            | cwebp \
-                -q 82 -m 5 -sharp_yuv -metadata none \
-                - -o "$THUMB_DIR/${_THEME}-thumb.webp"
+            -strip \
+            "$TMP_THUMB"
+
+          cwebp \
+            -q 82 -m 5 -sharp_yuv -metadata none \
+            "$TMP_THUMB" -o "$THUMB_DIR/${_THEME}-thumb.webp"
 
           echo "  Thumb: $(numfmt --to=iec "$(wc -c < "$THUMB_DIR/${_THEME}-thumb.webp")")"
 
@@ -1552,15 +1556,22 @@ jobs:
         env:
           _THEME: ${{ matrix.theme }}
         run: |
+          set -euo pipefail
           THUMB_DIR="$SHOTS_DIR/thumbnails"
+          mkdir -p "$THUMB_DIR"
+          TMP_THUMB_2X="$(mktemp --suffix=.png)"
+          trap 'rm -f "$TMP_THUMB_2X"' EXIT
+
           convert "$SHOTS_DIR/${_THEME}.png" \
             -filter Lanczos \
             -resize "1280x720^" \
             -gravity center \
             -extent "1280x720" \
-            -strip PNG:- \
-            | cwebp -q 85 -m 5 -sharp_yuv -metadata none \
-                - -o "$THUMB_DIR/${_THEME}-thumb@2x.webp"
+            -strip \
+            "$TMP_THUMB_2X"
+
+          cwebp -q 85 -m 5 -sharp_yuv -metadata none \
+            "$TMP_THUMB_2X" -o "$THUMB_DIR/${_THEME}-thumb@2x.webp"
           echo "  @2x: done"
 
       - name: "🎯 AVIF variant"
