@@ -192,13 +192,13 @@ scan_patterns() {
 
     # ── CRITICAL: Private Keys ────────────────────────────────────────────────
     local -A CRITICAL_RULES=(
-        ["rsa_private_key"]='-----BEGIN RSA PRIVATE KEY-----'
-        ["ec_private_key"]='-----BEGIN EC PRIVATE KEY-----'
-        ["dsa_private_key"]='-----BEGIN DSA PRIVATE KEY-----'
-        ["openssh_private_key"]='-----BEGIN OPENSSH PRIVATE KEY-----'
-        ["pgp_private_key"]='-----BEGIN PGP PRIVATE KEY BLOCK-----'
-        ["private_key_generic"]='-----BEGIN PRIVATE KEY-----'
-        ["pkcs8_private_key"]='-----BEGIN ENCRYPTED PRIVATE KEY-----'
+        ["rsa_private_key"]='-----BEGIN RSA PRIVATE KEY-----' # gitleaks:allow
+        ["ec_private_key"]='-----BEGIN EC PRIVATE KEY-----' # gitleaks:allow
+        ["dsa_private_key"]='-----BEGIN DSA PRIVATE KEY-----' # gitleaks:allow
+        ["openssh_private_key"]='-----BEGIN OPENSSH PRIVATE KEY-----' # gitleaks:allow
+        ["pgp_private_key"]='-----BEGIN PGP PRIVATE KEY BLOCK-----' # gitleaks:allow
+        ["private_key_generic"]='-----BEGIN PRIVATE KEY-----' # gitleaks:allow
+        ["pkcs8_private_key"]='-----BEGIN ENCRYPTED PRIVATE KEY-----' # gitleaks:allow
     )
 
     for rule in "${!CRITICAL_RULES[@]}"; do
