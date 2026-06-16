@@ -1840,6 +1840,7 @@ jobs:
     needs: [shots-aggregate]
     if: github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
 
     steps:
@@ -1929,12 +1930,25 @@ jobs:
 
           cat "$REPORT"
 
+      - name: "📝 Ensure regression report"
+        if: always()
+        run: |
+          if [[ ! -s regression-report.md ]]; then
+            cat > regression-report.md << 'MDEOF'
+          # Visual Regression Report
+
+          Visual regression report was not generated. Check the screenshot comparison logs for details.
+          MDEOF
+          fi
+
       - name: "💬 PR comment"
         uses: marocchino/sticky-pull-request-comment@v2
+        continue-on-error: true
         if: always()
         with:
           header: visual-regression
           path: regression-report.md
+          ignore_empty: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
