@@ -174,6 +174,9 @@ jobs:
     name: "🧠 Pipeline Intelligence"
     runs-on: ubuntu-24.04
     timeout-minutes: 6
+    permissions:
+      contents: read
+
     outputs:
       # Change flags
       has_screenshots:   ${{ steps.filter.outputs.screenshots }}
@@ -399,7 +402,7 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
       - name: "🔍 TruffleHog OSS"
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.82.0
         with:
           path: "./"
           base: ${{ github.event.repository.default_branch }}
@@ -450,7 +453,7 @@ jobs:
           [[ "$CRIT" -gt 0 ]] && { echo "  FAIL — critical vulns"; exit 1; } || true
 
       - name: "🔍 Trivy FS scan"
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: fs
           scan-ref: "."
@@ -2538,7 +2541,7 @@ jobs:
 
       - name: "🔍 Trivy image scan"
         if: github.event_name != 'pull_request'
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: "ghcr.io/${{ github.repository }}:sha-${{ github.sha }}"
           format: sarif
@@ -2707,6 +2710,7 @@ jobs:
             > Expires when PR is closed.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
   deploy-api:
     name: "🌐 Deploy API"
     runs-on: ubuntu-24.04
@@ -2716,6 +2720,9 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push'
 
+    permissions:
+      contents: read
+
     environment:
       name: api-production
       url: https://api.ash-dotfiles.dev
@@ -2724,19 +2731,25 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "🔑 Login GHCR"
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "🔍 Check Fly token availability"
+        id: fly_token
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [[ -n "${FLY_API_TOKEN:-}" ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "  ✅ FLY_API_TOKEN detected"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "  ⚠️ FLY_API_TOKEN not set — deploy will be skipped"
+          fi
 
-      - name: "🚀 Deploy (fly.io)"
-        if: ${{ secrets.FLY_API_TOKEN != '' }}
-        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: "⚙️ Setup Flyctl"
+        if: steps.fly_token.outputs.present == 'true'
+        uses: superfly/flyctl-actions/setup-flyctl@v1.5.1
 
       - name: "🚀 Deploy"
-        if: ${{ secrets.FLY_API_TOKEN != '' }}
+        if: steps.fly_token.outputs.present == 'true'
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
@@ -2746,7 +2759,12 @@ jobs:
             --build-arg ASH_VERSION="${{ env.ASH_VERSION }}" \
             --build-arg VCS_REF="${{ github.sha }}" \
             2>&1 | tail -30
-          echo "  API deployed"
+          echo "  ✅ API deployed"
+
+      - name: "⏭️ Skip deploy notice"
+        if: steps.fly_token.outputs.present != 'true'
+        run: |
+          echo "  ⏭️ Skipping API deploy because FLY_API_TOKEN is not configured"
 
 
 # ┌─────────────────────────────────────────────────────────────────────────────
