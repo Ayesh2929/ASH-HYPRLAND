@@ -1082,30 +1082,30 @@ jobs:
 
             const section = `
 
-          ## 📦 Flatpak Package
+            ## 📦 Flatpak Package
 
-          | Property | Value |
-          |----------|-------|
-          | App ID | \`${{ env.APP_ID }}\` |
-          | Runtime | \`${{ env.RUNTIME }}/${runtimeVer}\` |
-          | Bundle Size | \`${bundleSize}\` |
-          | Permission Score | \`${permScore}/10\` |
-          | Validation | ${validPassed ? "✅ Passed (8/8 checks)" : "❌ Failed"} |
+            | Property | Value |
+            |----------|-------|
+            | App ID | \`${{ env.APP_ID }}\` |
+            | Runtime | \`${{ env.RUNTIME }}/${runtimeVer}\` |
+            | Bundle Size | \`${bundleSize}\` |
+            | Permission Score | \`${permScore}/10\` |
+            | Validation | ${validPassed ? "✅ Passed (8/8 checks)" : "❌ Failed"} |
 
-          ### 📥 Installation
+            ### 📥 Installation
 
-          \`\`\`bash
-          # Install from Flathub
-          flatpak install flathub ${{ env.APP_ID }}
+            \`\`\`bash
+            # Install from Flathub
+            flatpak install flathub ${{ env.APP_ID }}
 
-          # Or from bundle
-          flatpak install --user ash-dotfiles-${version}.flatpak
+            # Or from bundle
+            flatpak install --user ash-dotfiles-${version}.flatpak
 
-          # Run
-          flatpak run ${{ env.APP_ID }}
-          \`\`\`
+            # Run
+            flatpak run ${{ env.APP_ID }}
+            \`\`\`
 
-          ${dryRun ? "> ℹ️ Dry run mode — package validated but not published to Flathub" : ""}`;
+            ${dryRun ? "> ℹ️ Dry run mode — package validated but not published to Flathub" : ""}`;
 
             try {
               const { data: releases } = await github.rest.repos.listReleases({

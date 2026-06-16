@@ -404,7 +404,8 @@ jobs:
 
       - name: "📤 Upload Container SARIF"
         if: always() && hashFiles('container-scan-results/trivy-container.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: container-scan-results/trivy-container.sarif
           category: "container-scan"

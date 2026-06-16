@@ -643,7 +643,8 @@ jobs:
 
       - name: "📤 Upload SARIF"
         if: always() && hashFiles('golangci-lint.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: golangci-lint.sarif
           category: "golangci-lint"
@@ -792,7 +793,8 @@ jobs:
 
       - name: "📤 Upload gosec SARIF"
         if: always() && hashFiles('gosec.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: gosec.sarif
           category: "gosec-go"

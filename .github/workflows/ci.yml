@@ -174,6 +174,10 @@ jobs:
     name: "🧠 Pipeline Intelligence"
     runs-on: ubuntu-24.04
     timeout-minutes: 6
+    permissions:
+      contents: read
+      pull-requests: read
+
     outputs:
       # Change flags
       has_screenshots:   ${{ steps.filter.outputs.screenshots }}
@@ -186,6 +190,8 @@ jobs:
       has_hypr:          ${{ steps.filter.outputs.hypr }}
       has_api:           ${{ steps.filter.outputs.api }}
       has_web:           ${{ steps.filter.outputs.web }}
+      web_exists:        ${{ steps.web.outputs.exists }}
+      web_lock_exists:   ${{ steps.web.outputs.lock_exists }}
       # Pipeline decisions
       run_full:          ${{ steps.decide.outputs.run_full }}
       run_screenshots:   ${{ steps.decide.outputs.run_screenshots }}
@@ -207,9 +213,16 @@ jobs:
           fetch-depth: 2
           sparse-checkout: |
             .github
+            web
             themes
             assets/screenshots
             plugins
+
+      - name: "🔎 Detect web project"
+        id: web
+        run: |
+          [[ -f web/package.json ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+          [[ -f web/package-lock.json ]] && echo "lock_exists=true" >> "$GITHUB_OUTPUT" || echo "lock_exists=false" >> "$GITHUB_OUTPUT"
 
       - name: "🔍 Path filter"
         id: filter
@@ -383,8 +396,10 @@ jobs:
     timeout-minutes: 12
     needs: intelligence
     permissions:
+      actions: read
       contents: read
       security-events: write
+      pull-requests: read
 
     steps:
       - name: "📥 Checkout (full history)"
@@ -399,12 +414,12 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
       - name: "🔍 TruffleHog OSS"
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.82.0
         with:
           path: "./"
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
-          extra_args: "--only-verified --json --no-update"
+          extra_args: "--only-verified --json"
 
       - name: "📊 Upload reports"
         if: always()
@@ -424,6 +439,7 @@ jobs:
     timeout-minutes: 15
     needs: intelligence
     permissions:
+      actions: read
       contents: read
       security-events: write
 
@@ -432,13 +448,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_exists == 'true' && needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_exists == 'true' && needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "🔍 NPM audit"
+        if: needs.intelligence.outputs.web_exists == 'true'
         working-directory: web
         run: |
           npm audit --audit-level=moderate --json \
@@ -450,7 +474,7 @@ jobs:
           [[ "$CRIT" -gt 0 ]] && { echo "  FAIL — critical vulns"; exit 1; } || true
 
       - name: "🔍 Trivy FS scan"
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: "."
@@ -458,14 +482,26 @@ jobs:
           output: trivy-fs.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: "1"
+          exit-code: "0"
 
       - name: "📤 Upload Trivy SARIF"
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs
+
+      - name: "🚦 Enforce Trivy policy"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
 
       - name: "🐍 Safety (Python)"
         working-directory: api
@@ -781,14 +817,30 @@ jobs:
 
       - name: "🔍 YAML validation"
         run: |
+          YAML_FILES=()
+          while IFS= read -r file; do
+            YAML_FILES+=("$file")
+          done < <(
+            find . \
+              -path "./.git" -prune -o \
+              -path "./node_modules" -prune -o \
+              \( -name "*.yml" -o -name "*.yaml" \) \
+              -print | head -300
+          )
+
+          if [[ "${#YAML_FILES[@]}" -eq 0 ]]; then
+            echo "  YAML: no files found"
+            exit 0
+          fi
+
           yamllint \
             --config-file .yamllint.yml \
             --format colored \
-            $(find . \( -name "*.yml" -o -name "*.yaml" \) \
-              | grep -v ".git" | grep -v "node_modules" | head -300) \
+            "${YAML_FILES[@]}" \
             2>&1 | tee yamllint-out.txt || true
 
-          ERRS=$(grep -c ": error" yamllint-out.txt || true)
+          ERRS=$(sed -E 's/\x1B\[[0-9;]*[mK]//g' yamllint-out.txt \
+            | grep -Ec '(^|[[:space:]:\[])error([][:space:]]|$)' || true)
           echo "  YAML errors: $ERRS"
           [[ "$ERRS" -gt 0 ]] && exit 1 || echo "  YAML valid"
 
@@ -854,24 +906,34 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [intelligence, sec-secrets]
-    if: |
-      needs.intelligence.outputs.has_web == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+    if: needs.intelligence.outputs.web_exists == 'true' && (needs.intelligence.outputs.has_web == 'true' || needs.intelligence.outputs.run_full == 'true')
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🔍 TypeScript"
         working-directory: web
@@ -1766,6 +1828,8 @@ jobs:
     timeout-minutes: 20
     needs: [shots-aggregate]
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
 
     steps:
       - name: "📥 Checkout"
@@ -2249,25 +2313,35 @@ jobs:
     name: "🌐 Web Dashboard Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [lint-typescript]
-    if: |
-      needs.intelligence.outputs.has_web == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+    needs: [intelligence, lint-typescript]
+    if: needs.intelligence.outputs.web_exists == 'true' && (needs.intelligence.outputs.has_web == 'true' || needs.intelligence.outputs.run_full == 'true')
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🧪 Unit tests (Vitest)"
         working-directory: web
@@ -2421,22 +2495,35 @@ jobs:
     name: "🌐 Build Web"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [lint-typescript, test-shell]
+    needs: [intelligence, lint-typescript, test-shell]
+    if: needs.intelligence.outputs.web_exists == 'true'
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🏗️ Build"
         working-directory: web
@@ -2478,8 +2565,10 @@ jobs:
       github.event.inputs.pipeline_mode == 'full'
 
     permissions:
+      actions: read
       contents: read
       packages: write
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -2538,7 +2627,7 @@ jobs:
 
       - name: "🔍 Trivy image scan"
         if: github.event_name != 'pull_request'
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: "ghcr.io/${{ github.repository }}:sha-${{ github.sha }}"
           format: sarif
@@ -2547,8 +2636,9 @@ jobs:
           exit-code: "0"
 
       - name: "📤 Upload image SARIF"
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && github.event_name != 'pull_request' && hashFiles('trivy-image.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
         with:
           sarif_file: trivy-image.sarif
           category: "trivy-image-${{ matrix.platform }}"
@@ -2707,6 +2797,7 @@ jobs:
             > Expires when PR is closed.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
   deploy-api:
     name: "🌐 Deploy API"
     runs-on: ubuntu-24.04
@@ -2716,6 +2807,9 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push'
 
+    permissions:
+      contents: read
+
     environment:
       name: api-production
       url: https://api.ash-dotfiles.dev
@@ -2724,19 +2818,25 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
-      - name: "🔑 Login GHCR"
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "🔍 Check Fly token availability"
+        id: fly_token
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [[ -n "${FLY_API_TOKEN:-}" ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "  ✅ FLY_API_TOKEN detected"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "  ⚠️ FLY_API_TOKEN not set — deploy will be skipped"
+          fi
 
-      - name: "🚀 Deploy (fly.io)"
-        if: ${{ secrets.FLY_API_TOKEN != '' }}
-        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: "⚙️ Setup Flyctl"
+        if: steps.fly_token.outputs.present == 'true'
+        uses: superfly/flyctl-actions/setup-flyctl@v1.5.1
 
       - name: "🚀 Deploy"
-        if: ${{ secrets.FLY_API_TOKEN != '' }}
+        if: steps.fly_token.outputs.present == 'true'
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
@@ -2746,7 +2846,12 @@ jobs:
             --build-arg ASH_VERSION="${{ env.ASH_VERSION }}" \
             --build-arg VCS_REF="${{ github.sha }}" \
             2>&1 | tail -30
-          echo "  API deployed"
+          echo "  ✅ API deployed"
+
+      - name: "⏭️ Skip deploy notice"
+        if: steps.fly_token.outputs.present != 'true'
+        run: |
+          echo "  ⏭️ Skipping API deploy because FLY_API_TOKEN is not configured"
 
 
 # ┌─────────────────────────────────────────────────────────────────────────────
