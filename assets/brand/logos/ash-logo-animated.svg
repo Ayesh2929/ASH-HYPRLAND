@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🎬 ASH DOTFILES v5.0 OMEGA — FULLY ANIMATED LOGO                          ║
+║  Cinema-grade SVG animation with 12 simultaneous animation tracks          ║
+║  Boot sequence · Particle physics · Morphing waves · Letter choreography   ║
+║  Orchestrated timeline: 0s intro → 2s settle → ∞ idle loop                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 520 180"
+  width="520"
+  height="180"
+  role="img"
+  aria-labelledby="ash-anim-title ash-anim-desc">
+
+  <title id="ash-anim-title">ASH Dotfiles — Animated Logo</title>
+  <desc id="ash-anim-desc">
+    Fully animated ASH Dotfiles logo featuring boot sequence,
+    wave animations, particle system, and continuous idle animations.
+  </desc>
+
+  <defs>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MASTER ANIMATION STYLESHEET
+         ══════════════════════════════════════════════════════════════════ -->
+    <style><![CDATA[
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         BOOT SEQUENCE — runs once on load (0s → 2.5s)
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      /* Mark scales up from zero */
+      #an-mark {
+        animation:
+          an-mark-boot     0.8s cubic-bezier(0.34,1.56,0.64,1) 0.1s both,
+          an-mark-idle     4s   ease-in-out                     2s   infinite;
+      }
+
+      /* Ring expands from center */
+      .an-ring-outer {
+        animation: an-ring-expand 1s cubic-bezier(0.4,0,0.2,1) 0.3s both;
+        transform-origin: 90px 90px;
+      }
+      .an-ring-inner {
+        animation: an-ring-expand 0.8s cubic-bezier(0.4,0,0.2,1) 0.5s both;
+        transform-origin: 90px 90px;
+      }
+
+      /* Letter A boot — slide up with elastic bounce */
+      .an-letter-a {
+        animation:
+          an-letter-boot   0.7s cubic-bezier(0.34,1.56,0.64,1) 0.9s  both,
+          an-letter-shimmer 4s  ease-in-out                     2.5s  infinite;
+      }
+      .an-letter-s {
+        animation:
+          an-letter-boot   0.7s cubic-bezier(0.34,1.56,0.64,1) 1.05s both,
+          an-letter-shimmer 4s  ease-in-out                     2.7s  infinite;
+      }
+      .an-letter-h {
+        animation:
+          an-letter-boot   0.7s cubic-bezier(0.34,1.56,0.64,1) 1.2s  both,
+          an-letter-shimmer 4s  ease-in-out                     2.9s  infinite;
+      }
+
+      /* Wordmark separator slides in */
+      .an-separator {
+        animation: an-separator-slide 0.5s cubic-bezier(0.4,0,0.2,1) 1.4s both;
+      }
+
+      /* Right panel fades in */
+      .an-panel-right {
+        animation: an-panel-fade 0.8s ease-out 1.6s both;
+      }
+
+      /* Tagline types in */
+      .an-tagline {
+        animation: an-tagline-reveal 0.6s ease-out 1.8s both;
+      }
+
+      /* Underline sweeps left to right */
+      .an-underline {
+        animation: an-underline-sweep 0.8s cubic-bezier(0.4,0,0.2,1) 1.3s both;
+        transform-origin: left center;
+      }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         WAVE SYSTEM — continuous loops
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .an-wave-1 {
+        animation:
+          an-wave-appear 0.8s ease-out 0.4s both,
+          an-wave-flow   7s   ease-in-out 2s infinite;
+        transform-origin: 90px 78px;
+      }
+      .an-wave-2 {
+        animation:
+          an-wave-appear  0.8s ease-out 0.55s both,
+          an-wave-flow-rv 9s   ease-in-out 2s infinite;
+        transform-origin: 90px 86px;
+      }
+      .an-wave-3 {
+        animation:
+          an-wave-appear 0.8s ease-out  0.7s both,
+          an-wave-flow   11s  ease-in-out 2s infinite 1.5s;
+        transform-origin: 90px 94px;
+      }
+      .an-wave-fill {
+        animation: an-wave-fill-pulse 6s ease-in-out 2s infinite;
+      }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         ORBITAL SYSTEM — continuous rotation
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .an-orbit-1 {
+        animation:
+          an-orbit-appear 0.5s ease-out 0.8s both,
+          an-orbit-cw     8s  linear 2s infinite;
+        transform-origin: 90px 90px;
+      }
+      .an-orbit-2 {
+        animation:
+          an-orbit-appear 0.5s ease-out 1s both,
+          an-orbit-ccw    12s linear 2s infinite;
+        transform-origin: 90px 90px;
+      }
+      .an-orbit-3 {
+        animation:
+          an-orbit-appear 0.5s ease-out 1.2s both,
+          an-orbit-cw     16s linear 2s infinite;
+        transform-origin: 90px 90px;
+      }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PARTICLE SYSTEM — staggered launch then loop
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .an-particle {
+        animation: an-particle-life 5s ease-out infinite;
+        opacity: 0;
+      }
+      .an-p1 { animation-delay: 2.0s; animation-duration: 4.8s; }
+      .an-p2 { animation-delay: 2.6s; animation-duration: 5.5s; }
+      .an-p3 { animation-delay: 3.2s; animation-duration: 4.2s; }
+      .an-p4 { animation-delay: 3.8s; animation-duration: 6.1s; }
+      .an-p5 { animation-delay: 4.4s; animation-duration: 5.0s; }
+      .an-p6 { animation-delay: 5.0s; animation-duration: 4.6s; }
+      .an-p7 { animation-delay: 2.3s; animation-duration: 5.8s; }
+      .an-p8 { animation-delay: 3.5s; animation-duration: 4.9s; }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         SCAN LINE — tech boot effect
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .an-scanline {
+        animation: an-scanline-run 2s ease-out 0s 1;
+      }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         PULSATING ELEMENTS
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .an-pulse-ring {
+        animation: an-pulse-ring-exp 3s ease-out 2s infinite;
+        transform-origin: 90px 90px;
+      }
+      .an-status-dot {
+        animation: an-status-blink 2s ease-in-out 2.5s infinite;
+      }
+      .an-ring-spin {
+        animation: an-ring-spin-anim 30s linear infinite;
+        transform-origin: 90px 90px;
+      }
+      .an-ring-spin-rv {
+        animation: an-ring-spin-rv-anim 20s linear infinite;
+        transform-origin: 90px 90px;
+      }
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         REDUCED MOTION
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; }
+        #an-mark,
+        .an-letter-a, .an-letter-s, .an-letter-h,
+        .an-panel-right, .an-tagline, .an-ring-outer,
+        .an-ring-inner, .an-separator, .an-underline,
+        .an-wave-1, .an-wave-2, .an-wave-3,
+        .an-wave-fill, .an-orbit-1, .an-orbit-2,
+        .an-orbit-3, .an-particle, .an-scanline,
+        .an-pulse-ring, .an-status-dot,
+        .an-ring-spin, .an-ring-spin-rv {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         KEYFRAME DEFINITIONS
+         ══════════════════════════════════════════════════════════════════ */
+
+      /* Boot: mark scale from 0 */
+      @keyframes an-mark-boot {
+        from { transform: scale(0) rotate(-10deg); opacity: 0; }
+        to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+      }
+      /* Idle: mark subtle breathe */
+      @keyframes an-mark-idle {
+        0%, 100% { transform: scale(1)     translateY(0);   }
+        50%       { transform: scale(1.015) translateY(-3px); }
+      }
+
+      /* Ring expand boot */
+      @keyframes an-ring-expand {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+      }
+
+      /* Letter boot from below */
+      @keyframes an-letter-boot {
+        from { transform: translateY(20px) scale(0.8); opacity: 0; }
+        to   { transform: translateY(0)    scale(1);   opacity: 1; }
+      }
+
+      /* Letter shimmer idle */
+      @keyframes an-letter-shimmer {
+        0%, 100% { filter: brightness(1);   }
+        50%       { filter: brightness(1.1); }
+      }
+
+      /* Separator slide down */
+      @keyframes an-separator-slide {
+        from { transform: scaleY(0); opacity: 0; }
+        to   { transform: scaleY(1); opacity: 1; }
+      }
+
+      /* Panel fade in + slide right */
+      @keyframes an-panel-fade {
+        from { transform: translateX(-12px); opacity: 0; }
+        to   { transform: translateX(0);     opacity: 1; }
+      }
+
+      /* Tagline reveal */
+      @keyframes an-tagline-reveal {
+        from { letter-spacing: 8px; opacity: 0; }
+        to   { letter-spacing: 4px; opacity: 1; }
+      }
+
+      /* Underline sweep */
+      @keyframes an-underline-sweep {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+
+      /* Wave appear */
+      @keyframes an-wave-appear {
+        from { opacity: 0; stroke-dashoffset: 300; stroke-dasharray: 300; }
+        to   { opacity: 1; stroke-dashoffset: 0;   stroke-dasharray: 300; }
+      }
+
+      /* Wave flow idle */
+      @keyframes an-wave-flow {
+        0%, 100% { transform: translateX(0)  translateY(0);  }
+        33%       { transform: translateX(4px)  translateY(-4px); }
+        66%       { transform: translateX(-3px) translateY(3px);  }
+      }
+      @keyframes an-wave-flow-rv {
+        0%, 100% { transform: translateX(0)   translateY(0);  }
+        33%       { transform: translateX(-4px) translateY(4px);  }
+        66%       { transform: translateX(3px)  translateY(-3px); }
+      }
+
+      @keyframes an-wave-fill-pulse {
+        0%, 100% { opacity: 0.06; }
+        50%       { opacity: 0.12; }
+      }
+
+      /* Orbit appear */
+      @keyframes an-orbit-appear {
+        from { opacity: 0; transform: scale(0); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+
+      /* Orbital rotation */
+      @keyframes an-orbit-cw  {
+        from { transform: rotate(0deg);   }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes an-orbit-ccw {
+        from { transform: rotate(0deg);    }
+        to   { transform: rotate(-360deg); }
+      }
+
+      /* Particle lifecycle */
+      @keyframes an-particle-life {
+        0%   { transform: translate(0,0)       scale(0);   opacity: 0; }
+        5%   { opacity: 1; }
+        40%  { transform: translate(var(--dx,6px),var(--dy,-24px)) scale(1.3); opacity: 0.9; }
+        80%  { transform: translate(var(--dx2,10px),var(--dy2,-40px)) scale(0.6); opacity: 0.3; }
+        100% { transform: translate(var(--dx3,14px),var(--dy3,-55px)) scale(0); opacity: 0; }
+      }
+
+      /* Scan line */
+      @keyframes an-scanline-run {
+        0%   { transform: translateY(-180px); opacity: 0.7; }
+        60%  { opacity: 0.7; }
+        100% { transform: translateY(180px);  opacity: 0;   }
+      }
+
+      /* Pulse ring expand and fade */
+      @keyframes an-pulse-ring-exp {
+        0%   { transform: scale(1);   opacity: 0.6; }
+        100% { transform: scale(1.25); opacity: 0;  }
+      }
+
+      /* Status blink */
+      @keyframes an-status-blink {
+        0%, 100% { opacity: 1;   r: 5; }
+        50%       { opacity: 0.4; r: 4; }
+      }
+
+      /* Ring decorative spins */
+      @keyframes an-ring-spin-anim {
+        from { transform: rotate(0deg);   }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes an-ring-spin-rv-anim {
+        from { transform: rotate(0deg);    }
+        to   { transform: rotate(-360deg); }
+      }
+
+    ]]></style>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         GRADIENT LIBRARY
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Primary — animated blue/purple cycle -->
+    <linearGradient id="an-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#89DCEB;#A6E3A1;#89B4FA"
+          dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%"  stop-color="#CBA6F7">
+        <animate attributeName="stop-color"
+          values="#CBA6F7;#89DCEB;#A6E3A1;#89B4FA;#CBA6F7"
+          dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#89DCEB">
+        <animate attributeName="stop-color"
+          values="#89DCEB;#A6E3A1;#89B4FA;#CBA6F7;#89DCEB"
+          dur="10s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Wave — flowing blue-teal -->
+    <linearGradient id="an-grad-wave" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA"/>
+      <stop offset="50%"  stop-color="#74C7EC"/>
+      <stop offset="100%" stop-color="#89DCEB"/>
+    </linearGradient>
+
+    <!-- Wave 2 — purple -->
+    <linearGradient id="an-grad-wave-2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#CBA6F7" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#B4BEFE" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Wave 3 — teal -->
+    <linearGradient id="an-grad-wave-3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#94E2D5" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <!-- Mark background -->
+    <radialGradient id="an-grad-mark-bg" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#313244"/>
+      <stop offset="70%"  stop-color="#1E1E2E"/>
+      <stop offset="100%" stop-color="#11111B"/>
+    </radialGradient>
+
+    <!-- Halo -->
+    <radialGradient id="an-grad-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Text -->
+    <linearGradient id="an-grad-text" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#CDD6F4"/>
+      <stop offset="100%" stop-color="#A6ADC8"/>
+    </linearGradient>
+
+    <!-- Scan line -->
+    <linearGradient id="an-grad-scan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#89B4FA" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Particle colors -->
+    <radialGradient id="an-p-blue"   cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89B4FA"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-purple" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#CBA6F7"/>
+      <stop offset="100%" stop-color="#CBA6F7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-teal"   cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#94E2D5"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-green"  cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#A6E3A1"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-peach"  cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FAB387"/>
+      <stop offset="100%" stop-color="#FAB387" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-yellow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9E2AF"/>
+      <stop offset="100%" stop-color="#F9E2AF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-pink"   cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F38BA8"/>
+      <stop offset="100%" stop-color="#F38BA8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="an-p-sky"    cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89DCEB"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         FILTERS
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <filter id="an-f-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b1"/>
+      <feGaussianBlur stdDeviation="8" result="b2"/>
+      <feMerge>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="an-f-glow-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 0.537  0 0 0 0 0.706  0 0 0 0 0.98  0 0 0 0.6 0"
+        result="colored"/>
+      <feMerge>
+        <feMergeNode in="colored"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="an-f-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10"
+        flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <filter id="an-f-letter-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#89B4FA" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="an-clip-mark">
+      <circle cx="90" cy="90" r="62"/>
+    </clipPath>
+
+    <clipPath id="an-clip-scanline">
+      <rect x="0" y="0" width="520" height="180"/>
+    </clipPath>
+
+    <mask id="an-mask-wave">
+      <rect x="24" y="0" width="132" height="180" fill="white"/>
+      <rect x="24" y="0" width="16"  height="180" fill="url(#an-fade-l)"/>
+      <rect x="140" y="0" width="16" height="180" fill="url(#an-fade-r)"/>
+    </mask>
+    <linearGradient id="an-fade-l" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="black"/>
+      <stop offset="100%" stop-color="white"/>
+    </linearGradient>
+    <linearGradient id="an-fade-r" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="white"/>
+      <stop offset="100%" stop-color="black"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       BOOT SCAN LINE — runs once, then disappears
+       ══════════════════════════════════════════════════════════════════════ -->
+  <rect class="an-scanline" x="0" y="-4" width="520" height="8"
+    fill="url(#an-grad-scan)"
+    clip-path="url(#an-clip-scanline)"
+    opacity="0"/>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LAYER 1 — AMBIENT BACKGROUND
+       ══════════════════════════════════════════════════════════════════════ -->
+  <ellipse cx="90" cy="90" rx="100" ry="100"
+    fill="url(#an-grad-halo)">
+    <animate attributeName="rx" values="100;115;100" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="ry" values="100;115;100" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0.5" dur="2s" fill="freeze"/>
+  </ellipse>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LAYER 2 — MARK
+       ══════════════════════════════════════════════════════════════════════ -->
+  <g id="an-mark" opacity="0">
+
+    <!-- Decorative outer ring — slow clockwise spin -->
+    <g class="an-ring-spin">
+      <circle cx="90" cy="90" r="82"
+        fill="none"
+        stroke="url(#an-grad-primary)"
+        stroke-width="1"
+        stroke-dasharray="5 7"
+        opacity="0.3"/>
+    </g>
+
+    <!-- Decorative inner ring — counter spin -->
+    <g class="an-ring-spin-rv">
+      <circle cx="90" cy="90" r="74"
+        fill="none"
+        stroke="url(#an-grad-wave-2)"
+        stroke-width="0.75"
+        stroke-dasharray="2 10"
+        opacity="0.4"/>
+    </g>
+
+    <!-- Boot ring animation -->
+    <circle class="an-ring-outer" cx="90" cy="90" r="66"
+      fill="none"
+      stroke="url(#an-grad-primary)"
+      stroke-width="2.5"
+      opacity="0" style="animation-fill-mode:forwards"/>
+
+    <circle class="an-ring-inner" cx="90" cy="90" r="60"
+      fill="url(#an-grad-mark-bg)"
+      stroke="none"/>
+
+    <!-- Glass highlight -->
+    <ellipse cx="90" cy="62" rx="46" ry="26"
+      fill="white" opacity="0.05"/>
+
+    <!-- ── WAVE SYSTEM ─────────────────────────────────────────── -->
+    <g clip-path="url(#an-clip-mark)" mask="url(#an-mask-wave)">
+
+      <!-- Wave 3 — deepest, teal -->
+      <path class="an-wave-3"
+        d="M 24 94 C 42 76, 60 112, 78 94 C 96 76, 112 112, 130 94
+                   C 140 80, 148 98, 156 90"
+        fill="none"
+        stroke="url(#an-grad-wave-3)"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        opacity="0"/>
+
+      <!-- Wave 2 — purple mid -->
+      <path class="an-wave-2"
+        d="M 24 86 C 42 66, 62 104, 82 86 C 102 66, 118 104, 138 86
+                   C 148 70, 154 90, 156 82"
+        fill="none"
+        stroke="url(#an-grad-wave-2)"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        opacity="0"/>
+
+      <!-- Wave 1 — primary blue, glowing -->
+      <path class="an-wave-1"
+        d="M 24 78 C 44 56, 66 98, 88 78 C 110 56, 128 98, 148 78
+                   C 154 64, 158 84, 156 74"
+        fill="none"
+        stroke="url(#an-grad-wave)"
+        stroke-width="5"
+        stroke-linecap="round"
+        filter="url(#an-f-glow)"
+        opacity="0"/>
+
+      <!-- Wave fill — ambient -->
+      <path class="an-wave-fill"
+        d="M 24 78 C 44 56, 66 98, 88 78 C 110 56, 128 98, 148 78
+                   C 154 64, 158 84, 156 74 L 156 156 L 24 156 Z"
+        fill="url(#an-grad-wave)"
+        opacity="0.06"/>
+
+      <!-- Animated crest nodes -->
+      <circle cx="56"  cy="78" r="3.5" fill="#89B4FA" filter="url(#an-f-glow)">
+        <animate attributeName="opacity" values="0;0;0.8;0.8" dur="2s" fill="freeze"
+          begin="1.5s"/>
+        <animate attributeName="r" values="3.5;5;3.5" dur="2.5s" begin="2s"
+          repeatCount="indefinite"/>
+      </circle>
+      <circle cx="88"  cy="72" r="3.5" fill="#74C7EC" filter="url(#an-f-glow)">
+        <animate attributeName="opacity" values="0;0;0.8;0.8" dur="2s" fill="freeze"
+          begin="1.7s"/>
+        <animate attributeName="r" values="3.5;5;3.5" dur="3s" begin="2s"
+          repeatCount="indefinite"/>
+      </circle>
+      <circle cx="120" cy="78" r="3.5" fill="#89DCEB" filter="url(#an-f-glow)">
+        <animate attributeName="opacity" values="0;0;0.8;0.8" dur="2s" fill="freeze"
+          begin="1.9s"/>
+        <animate attributeName="r" values="3.5;5;3.5" dur="3.5s" begin="2s"
+          repeatCount="indefinite"/>
+      </circle>
+
+    </g>
+
+    <!-- ── CENTER LETTER A ─────────────────────────────────────── -->
+    <!-- Glow bloom -->
+    <text x="90" y="106"
+      font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+      font-size="62" font-weight="900" text-anchor="middle"
+      fill="#89B4FA" opacity="0.25"
+      filter="url(#an-f-glow-lg)">A</text>
+    <!-- Main -->
+    <text x="90" y="106"
+      font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+      font-size="62" font-weight="900" text-anchor="middle"
+      fill="url(#an-grad-primary)"
+      filter="url(#an-f-letter-glow)">A</text>
+
+    <!-- ── ORBITAL SYSTEM ─────────────────────────────────────── -->
+
+    <!-- Orbit 1 — blue, inner -->
+    <g class="an-orbit-1" opacity="0">
+      <ellipse cx="90" cy="90" rx="50" ry="18"
+        fill="none" stroke="url(#an-grad-wave)" stroke-width="0.5"
+        stroke-dasharray="2 8" opacity="0.2"
+        transform="rotate(-20 90 90)"/>
+      <circle cx="140" cy="90" r="4"
+        fill="#89B4FA" filter="url(#an-f-glow)" opacity="0.9"
+        transform="rotate(-20 90 90)"/>
+    </g>
+
+    <!-- Orbit 2 — purple, mid -->
+    <g class="an-orbit-2" opacity="0">
+      <circle cx="90" cy="24" r="3"
+        fill="#CBA6F7" filter="url(#an-f-glow)" opacity="0.8"/>
+    </g>
+
+    <!-- Orbit 3 — teal, outer -->
+    <g class="an-orbit-3" opacity="0">
+      <circle cx="90" cy="18" r="2"
+        fill="#94E2D5" filter="url(#an-f-glow)" opacity="0.7"/>
+    </g>
+
+    <!-- Pulse ring — expands outward -->
+    <circle class="an-pulse-ring" cx="90" cy="90" r="66"
+      fill="none"
+      stroke="url(#an-grad-primary)"
+      stroke-width="2"
+      opacity="0"/>
+
+    <!-- Status indicator -->
+    <circle class="an-status-dot" cx="122" cy="48" r="5"
+      fill="#A6E3A1" filter="url(#an-f-glow)">
+      <animate attributeName="opacity" values="0;0;1" dur="2.5s" fill="freeze"/>
+    </circle>
+    <!-- Status pulse -->
+    <circle cx="122" cy="48" r="5"
+      fill="none" stroke="#A6E3A1" stroke-width="1.5"
+      opacity="0">
+      <animate attributeName="r"        values="5;12;5"    dur="2.5s" begin="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity"  values="0.8;0;0.8" dur="2.5s" begin="2.5s" repeatCount="indefinite"/>
+    </circle>
+
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LAYER 3 — PARTICLE SYSTEM (launches after boot)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <g id="an-particles">
+
+    <!-- Particle definitions:  cx · cy · r · fill · class · CSS vars -->
+    <circle class="an-particle an-p1" cx="170" cy="55"  r="4"
+      fill="url(#an-p-blue)"
+      style="--dx:5px;--dy:-20px;--dx2:8px;--dy2:-38px;--dx3:12px;--dy3:-55px"/>
+
+    <circle class="an-particle an-p2" cx="174" cy="82"  r="3"
+      fill="url(#an-p-purple)"
+      style="--dx:-4px;--dy:-16px;--dx2:-7px;--dy2:-32px;--dx3:-10px;--dy3:-48px"/>
+
+    <circle class="an-particle an-p3" cx="168" cy="118" r="3.5"
+      fill="url(#an-p-teal)"
+      style="--dx:7px;--dy:-22px;--dx2:11px;--dy2:-42px;--dx3:16px;--dy3:-60px"/>
+
+    <circle class="an-particle an-p4" cx="172" cy="62"  r="2.5"
+      fill="url(#an-p-green)"
+      style="--dx:-6px;--dy:-18px;--dx2:-10px;--dy2:-36px;--dx3:-15px;--dy3:-52px"/>
+
+    <circle class="an-particle an-p5" cx="166" cy="104" r="4"
+      fill="url(#an-p-peach)"
+      style="--dx:9px;--dy:-24px;--dx2:14px;--dy2:-44px;--dx3:20px;--dy3:-64px"/>
+
+    <circle class="an-particle an-p6" cx="176" cy="136" r="2"
+      fill="url(#an-p-yellow)"
+      style="--dx:-5px;--dy:-20px;--dx2:-9px;--dy2:-38px;--dx3:-13px;--dy3:-56px"/>
+
+    <circle class="an-particle an-p7" cx="164" cy="76"  r="3.5"
+      fill="url(#an-p-pink)"
+      style="--dx:8px;--dy:-26px;--dx2:12px;--dy2:-46px;--dx3:18px;--dy3:-66px"/>
+
+    <circle class="an-particle an-p8" cx="178" cy="96"  r="2.5"
+      fill="url(#an-p-sky)"
+      style="--dx:-7px;--dy:-14px;--dx2:-11px;--dy2:-30px;--dx3:-16px;--dy3:-46px"/>
+
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LAYER 4 — WORDMARK
+       ══════════════════════════════════════════════════════════════════════ -->
+  <g id="an-wordmark" transform="translate(196, 0)">
+
+    <!-- ── LETTERS ────────────────────────────────────────────────── -->
+
+    <!-- A — boots first -->
+    <g class="an-letter-a" style="opacity:0">
+      <text x="0" y="108"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="82" font-weight="900" letter-spacing="-4"
+        fill="url(#an-grad-text)">A</text>
+    </g>
+
+    <!-- S — boots second, with glow -->
+    <g class="an-letter-s" style="opacity:0">
+      <text x="59" y="108"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="82" font-weight="900" letter-spacing="-4"
+        fill="url(#an-grad-primary)"
+        filter="url(#an-f-glow)">S</text>
+    </g>
+
+    <!-- H — boots third -->
+    <g class="an-letter-h" style="opacity:0">
+      <text x="116" y="108"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="82" font-weight="900" letter-spacing="-4"
+        fill="url(#an-grad-text)">H</text>
+    </g>
+
+    <!-- ── ANIMATED UNDERLINE ────────────────────────────────────── -->
+    <rect class="an-underline" x="0" y="115" width="182" height="3" rx="1.5"
+      fill="url(#an-grad-primary)"
+      opacity="0.8"
+      style="transform-origin:0% 50%"/>
+
+    <!-- ── SEPARATOR ──────────────────────────────────────────────── -->
+    <line class="an-separator" x1="192" y1="24" x2="192" y2="116"
+      stroke="url(#an-grad-primary)"
+      stroke-width="2"
+      stroke-linecap="round"
+      opacity="0.4"
+      style="transform-origin:192px 70px"/>
+
+    <!-- ── RIGHT PANEL ────────────────────────────────────────────── -->
+    <g class="an-panel-right" transform="translate(204, 0)" style="opacity:0">
+
+      <!-- DOTFILES label -->
+      <text class="an-tagline" x="0" y="52"
+        font-family="'SF Mono','JetBrains Mono','Fira Code',monospace"
+        font-size="12" font-weight="600" letter-spacing="4"
+        fill="#6C7086">DOTFILES</text>
+
+      <!-- Version badge -->
+      <rect x="0" y="60" width="116" height="22" rx="11"
+        fill="rgba(137,180,250,0.12)"
+        stroke="url(#an-grad-primary)"
+        stroke-width="1.5"
+        opacity="0.9">
+        <animate attributeName="stroke-opacity"
+          values="0.6;1;0.6" dur="3s" begin="2.5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="58" y="75"
+        font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="9.5" font-weight="700" letter-spacing="2"
+        fill="url(#an-grad-primary)" text-anchor="middle">v5.0 OMEGA ⚡</text>
+
+      <!-- ── COLOR SWATCHES — animate in sequentially ──────────── -->
+      <g transform="translate(0, 94)">
+        <g>
+          <rect x="0"   y="0" width="15" height="15" rx="4" fill="#89B4FA">
+            <animate attributeName="opacity" values="0;0;1" dur="2.2s" fill="freeze"/>
+          </rect>
+          <rect x="18"  y="0" width="15" height="15" rx="4" fill="#CBA6F7">
+            <animate attributeName="opacity" values="0;0;1" dur="2.4s" fill="freeze"/>
+          </rect>
+          <rect x="36"  y="0" width="15" height="15" rx="4" fill="#A6E3A1">
+            <animate attributeName="opacity" values="0;0;1" dur="2.6s" fill="freeze"/>
+          </rect>
+          <rect x="54"  y="0" width="15" height="15" rx="4" fill="#F38BA8">
+            <animate attributeName="opacity" values="0;0;1" dur="2.8s" fill="freeze"/>
+          </rect>
+          <rect x="72"  y="0" width="15" height="15" rx="4" fill="#FAB387">
+            <animate attributeName="opacity" values="0;0;1" dur="3.0s" fill="freeze"/>
+          </rect>
+          <rect x="90"  y="0" width="15" height="15" rx="4" fill="#89DCEB">
+            <animate attributeName="opacity" values="0;0;1" dur="3.2s" fill="freeze"/>
+          </rect>
+          <rect x="108" y="0" width="15" height="15" rx="4" fill="#F9E2AF">
+            <animate attributeName="opacity" values="0;0;1" dur="3.4s" fill="freeze"/>
+          </rect>
+        </g>
+
+        <!-- Active shimmer cycles through swatches -->
+        <rect x="0" y="0" width="15" height="15" rx="4"
+          fill="white" opacity="0">
+          <animate attributeName="x"
+            values="0;18;36;54;72;90;108;0"
+            dur="3.5s" begin="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity"
+            values="0;0.4;0;0.4;0;0.4;0;0.4;0"
+            dur="3.5s" begin="3.5s" repeatCount="indefinite"/>
+        </rect>
+      </g>
+
+      <!-- ── FEATURE TAGS ───────────────────────────────────────── -->
+      <g transform="translate(0, 122)">
+        <text x="0" y="12"
+          font-family="'SF Mono',monospace"
+          font-size="8" font-weight="500" letter-spacing="1.5"
+          fill="#45475A">250+ THEMES</text>
+        <line x1="84" y1="6" x2="86" y2="6"
+          stroke="#45475A" stroke-width="1.5" opacity="0.4"/>
+        <text x="90" y="12"
+          font-family="'SF Mono',monospace"
+          font-size="8" font-weight="500" letter-spacing="1.5"
+          fill="#45475A">150+ PLUGINS</text>
+      </g>
+
+      <!-- ── MICRO TAGLINE ──────────────────────────────────────── -->
+      <text x="0" y="148"
+        font-family="'SF Mono',monospace"
+        font-size="7.5" font-weight="400" letter-spacing="2"
+        fill="url(#an-grad-primary)" opacity="0.6">AI-NATIVE · HYPRLAND · WAYLAND</text>
+
+    </g>
+  </g>
+
+</svg>
