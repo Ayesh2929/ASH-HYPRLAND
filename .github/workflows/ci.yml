@@ -124,7 +124,7 @@ concurrency:
 env:
   # ── Core ────────────────────────────────────────────────────────────
   ASH_VERSION:               "5.0.0-omega"
-  ASH_PIPELINE_VERSION:      "2.0.0"
+  ASH_PIPELINE_VERSION:      "2.1.0"  # Enhanced version
   ASH_ENV:                   "ci"
   ASH_NO_COLOR:              "0"
   ASH_LOG_LEVEL:             "info"
@@ -799,7 +799,7 @@ jobs:
             json.load(open('$file'))
             sys.exit(0)
           except json.JSONDecodeError as e:
-            print(f'  ❌ {\"$file\"}: {e}')
+            print(f'  ❌ ${"$file"}: {e}')
             sys.exit(1)
           " 2>&1; then
               (( PASS++ ))
@@ -1776,7 +1776,7 @@ jobs:
             fi
 
             # Calculate SSIM using Python (ImageMagick as fallback)
-            SSIM=$(python3 << 'PYEOF' 2>/dev/null || echo "N/A"
+            SSIM=$(python3 << 'PYEOF' 2>/dev/null || echo "N/A")
           try:
             from PIL import Image
             import numpy as np
@@ -2374,7 +2374,7 @@ jobs:
           img = Image.new('RGB', (2560, 1440), '#2D3B2D')
           img.save('/tmp/bench-test.png')
           "
-          }
+            }
 
           hyperfine \
             --warmup 2 \
@@ -3108,4 +3108,4 @@ jobs:
               }
             }
 
-            console.log(`  🧹 Deleted ${deleted} old artifacts`);
+            console.log(`  🧹 Deleted ${deleted} old artifacts`)
