@@ -114,11 +114,30 @@ spin_run() {
     local fn="$2"
     local frames=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
     local frame=0
+    local pid output exit_code
 
-    # Run in background
-    local output="" exit_code=0
-    output="$("$fn" 2>&1)" || exit_code=$?
+    # Run function in background, capture output
+    local tmpfile
+    tmpfile="$(mktemp)"
+    (
+        "$fn" >"$tmpfile" 2>&1
+        echo $? >"${tmpfile}.exit"
+    ) &
+    pid=$!
 
+    # Spinner animation while waiting
+    printf "  %s⠋%s %-52s" "${CYAN}${B}" "$R" "${B}${WHITE}$name${R}" >&2
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r  %s%s%s %-52s" "${CYAN}${B}" "${frames[frame]}" "$R" "${B}${WHITE}$name${R}" >&2
+        frame=$(( (frame + 1) % ${#frames[@]} ))
+        sleep 0.08
+    done
+    wait "$pid" 2>/dev/null
+    exit_code=$(cat "${tmpfile}.exit" 2>/dev/null || echo 1)
+    output=$(cat "$tmpfile" 2>/dev/null || true)
+    rm -f "$tmpfile" "${tmpfile}.exit"
+
+    printf "\r" >&2
     case $exit_code in
         0) task_done  "$name" "$output" ;;
         2) task_warn  "$name" "$output" ;;
