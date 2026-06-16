@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ⬛ ASH DOTFILES v5.0 OMEGA — MONOCHROME LOGO                              ║
+║  Single-color: works on any background · perfect for print & emboss        ║
+║  Variants: currentColor · forced-white · forced-black                      ║
+║  Use on: merchandise · embossing · watermarks · stamps · single-color print ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 480 160"
+  width="480"
+  height="160"
+  role="img"
+  aria-labelledby="ash-mono-title ash-mono-desc"
+  color="currentColor">
+
+  <title id="ash-mono-title">ASH Dotfiles — Monochrome Logo</title>
+  <desc id="ash-mono-desc">
+    ASH Dotfiles monochrome logo. Uses currentColor for universal compatibility.
+    Renders white on dark backgrounds, black on light backgrounds.
+  </desc>
+
+  <defs>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MONO STYLE — uses currentColor throughout
+         ══════════════════════════════════════════════════════════════════ -->
+    <style><![CDATA[
+
+      /* ── currentColor cascade ────────────────────────────────────────
+         All fills and strokes inherit from parent color attribute.
+         Override with: color="white" or color="black" or color="#HEX"
+         ──────────────────────────────────────────────────────────────── */
+
+      .mn-fill         { fill:           currentColor; }
+      .mn-fill-dim     { fill:           currentColor; opacity: 0.5; }
+      .mn-fill-dimmer  { fill:           currentColor; opacity: 0.3; }
+      .mn-fill-ghost   { fill:           currentColor; opacity: 0.12; }
+      .mn-fill-trace   { fill:           currentColor; opacity: 0.06; }
+      .mn-stroke       { fill: none; stroke: currentColor; }
+      .mn-stroke-dim   { fill: none; stroke: currentColor; opacity: 0.4; }
+      .mn-stroke-ghost { fill: none; stroke: currentColor; opacity: 0.2; }
+
+      /* ── Adaptive: auto switch black/white based on background ────── */
+      @media (prefers-color-scheme: dark) {
+        :root { color: white; }
+      }
+      @media (prefers-color-scheme: light) {
+        :root { color: black; }
+      }
+
+      /* ── Hover interactivity (when embedded in HTML) ──────────────── */
+      #mn-root:hover .mn-hover-glow {
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+      }
+      .mn-hover-glow { opacity: 0; transition: opacity 0.3s ease; }
+
+      /* ── Print optimization ───────────────────────────────────────── */
+      @media print {
+        .mn-anim { animation: none !important; }
+        * { color: black !important; }
+      }
+
+      /* ── Subtle idle animation (very restrained for mono) ─────────── */
+      .mn-wave-1 { animation: mn-wave 8s ease-in-out infinite; }
+      .mn-wave-2 { animation: mn-wave 10s ease-in-out infinite reverse; }
+      .mn-wave-3 { animation: mn-wave 13s ease-in-out infinite 2s; }
+      .mn-ring-anim { animation: mn-ring-spin 40s linear infinite; transform-origin: 80px 80px; }
+      .mn-pulse { animation: mn-pulse 4s ease-in-out infinite; transform-origin: 80px 80px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .mn-wave-1, .mn-wave-2, .mn-wave-3,
+        .mn-ring-anim, .mn-pulse { animation: none !important; }
+      }
+
+      @keyframes mn-wave {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-3px); }
+      }
+      @keyframes mn-ring-spin {
+        from { transform: rotate(0deg);   }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes mn-pulse {
+        0%, 100% { opacity: 0.15; }
+        50%       { opacity: 0.35; }
+      }
+
+    ]]></style>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MONOCHROME GRADIENTS
+         Uses only black/white/currentColor for true mono output
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Linear fade — full to 50% opacity -->
+    <linearGradient id="mn-grad-fade-top" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="currentColor" stop-opacity="1"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Linear fade — full to transparent -->
+    <linearGradient id="mn-grad-fade-out" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="currentColor" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Horizontal fade — for wave mask -->
+    <linearGradient id="mn-grad-h-fade-l" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+      <stop offset="100%" stop-color="white" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="mn-grad-h-fade-r" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="white" stop-opacity="1"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Radial — for subtle inner shadow on circle -->
+    <radialGradient id="mn-grad-circle-inner" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="currentColor" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Radial — for highlight spot -->
+    <radialGradient id="mn-grad-highlight" cx="38%" cy="30%" r="40%">
+      <stop offset="0%"   stop-color="currentColor" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         FILTERS — monochrome only
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Subtle shadow -->
+    <filter id="mn-f-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6"
+        flood-color="currentColor" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Very subtle inner glow on circle ring -->
+    <filter id="mn-f-ring-glow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Emboss-like effect for elevated elements -->
+    <filter id="mn-f-emboss">
+      <feConvolveMatrix
+        order="3"
+        kernelMatrix="-1 -1 0  -1 1 1  0 1 1"
+        preserveAlpha="true"/>
+    </filter>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         CLIP PATHS & MASKS
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="mn-clip-mark">
+      <circle cx="80" cy="80" r="60"/>
+    </clipPath>
+
+    <!-- Wave fade mask — left and right edges fade out -->
+    <mask id="mn-mask-waves">
+      <rect x="20" y="0" width="120" height="160" fill="white"/>
+      <rect x="20" y="0" width="14"  height="160" fill="url(#mn-grad-h-fade-l)"/>
+      <rect x="126" y="0" width="14" height="160" fill="url(#mn-grad-h-fade-r)"/>
+    </mask>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         REUSABLE PATTERNS
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Dot grid — for mark background texture -->
+    <pattern id="mn-pat-dots" x="0" y="0" width="8" height="8"
+      patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="0.6" fill="currentColor" opacity="0.3"/>
+    </pattern>
+
+    <!-- Diagonal lines — alternative texture -->
+    <pattern id="mn-pat-lines" x="0" y="0" width="6" height="6"
+      patternUnits="userSpaceOnUse"
+      patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6"
+        stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
+
+    <!-- Fine crosshatch -->
+    <pattern id="mn-pat-cross" x="0" y="0" width="10" height="10"
+      patternUnits="userSpaceOnUse">
+      <line x1="0" y1="5" x2="10" y2="5"
+        stroke="currentColor" stroke-width="0.4" opacity="0.15"/>
+      <line x1="5" y1="0" x2="5"  y2="10"
+        stroke="currentColor" stroke-width="0.4" opacity="0.15"/>
+    </pattern>
+
+  </defs>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ROOT GROUP — set color here to change entire logo
+       Examples:
+         color="white"    — white logo on dark bg
+         color="black"    — black logo on light bg
+         color="#6366F1"  — indigo logo
+         color="currentColor" — inherits from parent (default)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <g id="mn-root">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LAYER 1 — MARK
+         ══════════════════════════════════════════════════════════════════ -->
+    <g id="mn-mark" filter="url(#mn-f-shadow)">
+
+      <!-- Outermost decorative ring — dashed, slow spin -->
+      <g class="mn-ring-anim mn-anim">
+        <circle cx="80" cy="80" r="74"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="0.75"
+          stroke-dasharray="3 9"
+          opacity="0.2"/>
+      </g>
+
+      <!-- Second ring — offset dash -->
+      <circle cx="80" cy="80" r="68"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.5"
+        stroke-dasharray="1 12"
+        opacity="0.15"/>
+
+      <!-- Main circle — filled -->
+      <circle cx="80" cy="80" r="62"
+        fill="currentColor"
+        opacity="0.08"/>
+
+      <!-- Main circle — outline (primary visual) -->
+      <circle cx="80" cy="80" r="62"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        filter="url(#mn-f-ring-glow)"/>
+
+      <!-- Dot texture inside -->
+      <circle cx="80" cy="80" r="61"
+        fill="url(#mn-pat-dots)"
+        clip-path="url(#mn-clip-mark)"
+        opacity="0.6"/>
+
+      <!-- Highlight spot — top left -->
+      <ellipse cx="62" cy="54" rx="32" ry="20"
+        fill="url(#mn-grad-highlight)"
+        clip-path="url(#mn-clip-mark)"/>
+
+      <!-- ── WAVE SYSTEM ─────────────────────────────────────────── -->
+      <g clip-path="url(#mn-clip-mark)" mask="url(#mn-mask-waves)">
+
+        <!-- Wave 3 — lightest, back -->
+        <path class="mn-wave-3 mn-anim"
+          d="M 20 92 C 37 74, 55 110, 73 92 C 91 74, 107 110, 125 92
+                     C 134 78, 140 96, 140 88"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          opacity="0.2"/>
+
+        <!-- Wave 2 — medium -->
+        <path class="mn-wave-2 mn-anim"
+          d="M 20 84 C 37 64, 57 102, 76 84 C 95 64, 111 102, 130 84
+                     C 138 68, 140 88, 140 80"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          opacity="0.4"/>
+
+        <!-- Wave 1 — strongest, front -->
+        <path class="mn-wave-1 mn-anim"
+          d="M 20 76 C 38 54, 60 96, 80 76 C 100 54, 118 96, 138 76
+                     C 140 62, 140 80, 138 72"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          opacity="0.9"/>
+
+        <!-- Wave fill — subtle area below primary wave -->
+        <path
+          d="M 20 76 C 38 54, 60 96, 80 76 C 100 54, 118 96, 138 76
+                     C 140 62, 140 80, 138 72 L 140 140 L 20 140 Z"
+          fill="currentColor"
+          opacity="0.07"/>
+
+        <!-- Wave crests — dots at peaks -->
+        <circle cx="50"  cy="76" r="2.5" fill="currentColor" opacity="0.7"/>
+        <circle cx="80"  cy="70" r="2.5" fill="currentColor" opacity="0.7"/>
+        <circle cx="110" cy="76" r="2.5" fill="currentColor" opacity="0.7"/>
+
+      </g>
+
+      <!-- ── CENTER LETTER A ─────────────────────────────────────── -->
+
+      <!-- Shadow duplicate (offset, lower opacity) -->
+      <text x="82" y="100"
+        font-family="'SF Pro Display','Inter','Helvetica Neue','Segoe UI',system-ui,sans-serif"
+        font-size="58" font-weight="900" text-anchor="middle"
+        fill="currentColor" opacity="0.15">A</text>
+
+      <!-- Main letter -->
+      <text x="80" y="98"
+        font-family="'SF Pro Display','Inter','Helvetica Neue','Segoe UI',system-ui,sans-serif"
+        font-size="58" font-weight="900" text-anchor="middle"
+        fill="currentColor" opacity="0.95">A</text>
+
+      <!-- Highlight stroke on letter -->
+      <text x="80" y="98"
+        font-family="'SF Pro Display','Inter','Helvetica Neue','Segoe UI',system-ui,sans-serif"
+        font-size="58" font-weight="900" text-anchor="middle"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.4"
+        opacity="0.2">A</text>
+
+      <!-- ── ORBITING ACCENT DOTS ────────────────────────────────── -->
+      <circle cx="80" cy="20" r="3.5"
+        fill="currentColor" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate"
+          from="0 80 80" to="360 80 80" dur="9s" repeatCount="indefinite"/>
+      </circle>
+
+      <circle cx="80" cy="24" r="2"
+        fill="currentColor" opacity="0.5">
+        <animateTransform attributeName="transform" type="rotate"
+          from="180 80 80" to="-180 80 80" dur="13s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- ── PULSE RING ──────────────────────────────────────────── -->
+      <circle class="mn-pulse mn-anim" cx="80" cy="80" r="62"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"/>
+
+      <!-- ── STATUS INDICATOR ────────────────────────────────────── -->
+      <circle cx="118" cy="48" r="4.5"
+        fill="currentColor" opacity="0.8"/>
+      <circle cx="118" cy="48" r="4.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        opacity="0">
+        <animate attributeName="r"       values="4.5;10;4.5"  dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0;0.6"   dur="3s" repeatCount="indefinite"/>
+      </circle>
+
+    </g>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LAYER 2 — WORDMARK
+         ══════════════════════════════════════════════════════════════════ -->
+    <g id="mn-wordmark" transform="translate(166, 0)">
+
+      <!-- ── MAIN LETTERS: ASH ─────────────────────────────────── -->
+      <text x="0" y="100"
+        font-family="'SF Pro Display','Inter','Helvetica Neue','Segoe UI',system-ui,sans-serif"
+        font-size="78" font-weight="900" letter-spacing="-3"
+        fill="currentColor">ASH</text>
+
+      <!-- ── GEOMETRIC UNDERLINE ───────────────────────────────── -->
+      <!-- Full rule -->
+      <rect x="0" y="108" width="180" height="2.5" rx="1.25"
+        fill="currentColor" opacity="0.8"/>
+      <!-- Thin accent rule below -->
+      <rect x="4" y="113" width="120" height="1" rx="0.5"
+        fill="currentColor" opacity="0.3"/>
+
+      <!-- ── VERTICAL SEPARATOR ────────────────────────────────── -->
+      <line x1="190" y1="22" x2="190" y2="118"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        opacity="0.35"/>
+
+      <!-- ── RIGHT TEXT PANEL ──────────────────────────────────── -->
+      <g transform="translate(202, 0)">
+
+        <!-- Brand label -->
+        <text x="0" y="46"
+          font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+          font-size="11" font-weight="700" letter-spacing="5"
+          fill="currentColor" opacity="0.9">DOTFILES</text>
+
+        <!-- Version — outlined box -->
+        <rect x="0" y="52" width="112" height="19" rx="9.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          opacity="0.6"/>
+        <text x="56" y="65.5"
+          font-family="'SF Mono','JetBrains Mono',monospace"
+          font-size="8.5" font-weight="700" letter-spacing="1.5"
+          fill="currentColor" opacity="0.85"
+          text-anchor="middle">v5.0 OMEGA ⚡</text>
+
+        <!-- ── MONOCHROME FEATURE DOTS ─────────────────────────── -->
+        <!-- Seven dots in varying opacity to suggest the color palette -->
+        <g transform="translate(0, 84)">
+          <circle cx="7"   cy="7" r="7" fill="currentColor" opacity="0.90"/>
+          <circle cx="22"  cy="7" r="7" fill="currentColor" opacity="0.80"/>
+          <circle cx="37"  cy="7" r="7" fill="currentColor" opacity="0.70"/>
+          <circle cx="52"  cy="7" r="7" fill="currentColor" opacity="0.60"/>
+          <circle cx="67"  cy="7" r="7" fill="currentColor" opacity="0.50"/>
+          <circle cx="82"  cy="7" r="7" fill="currentColor" opacity="0.40"/>
+          <circle cx="97"  cy="7" r="7" fill="currentColor" opacity="0.30"/>
+
+          <!-- Inner highlights on dots -->
+          <circle cx="5.5" cy="5.5" r="2" fill="currentColor" opacity="0.4"/>
+          <circle cx="20.5" cy="5.5" r="2" fill="currentColor" opacity="0.35"/>
+          <circle cx="35.5" cy="5.5" r="2" fill="currentColor" opacity="0.3"/>
+        </g>
+
+        <!-- ── STAT GRID ──────────────────────────────────────── -->
+        <g transform="translate(0, 110)">
+
+          <!-- Row 1 -->
+          <text x="0" y="11"
+            font-family="'SF Mono',monospace"
+            font-size="8.5" font-weight="700" letter-spacing="0.5"
+            fill="currentColor" opacity="0.9">250+</text>
+          <text x="30" y="11"
+            font-family="'SF Mono',monospace"
+            font-size="8.5" font-weight="400" letter-spacing="0.5"
+            fill="currentColor" opacity="0.5">THEMES</text>
+
+          <line x1="80" y1="5" x2="82" y2="5"
+            stroke="currentColor" stroke-width="1" opacity="0.3"/>
+
+          <text x="88" y="11"
+            font-family="'SF Mono',monospace"
+            font-size="8.5" font-weight="700" letter-spacing="0.5"
+            fill="currentColor" opacity="0.9">150+</text>
+          <text x="116" y="11"
+            font-family="'SF Mono',monospace"
+            font-size="8.5" font-weight="400" letter-spacing="0.5"
+            fill="currentColor" opacity="0.5">PLUGINS</text>
+
+          <!-- Row 2 -->
+          <text x="0" y="27"
+            font-family="'SF Mono',monospace"
+            font-size="7.5" font-weight="400" letter-spacing="1.5"
+            fill="currentColor" opacity="0.4">AI · HYPRLAND · WAYLAND</text>
+
+        </g>
+
+        <!-- ── CORNER MARKS — design accent ──────────────────── -->
+        <!-- Top left bracket -->
+        <g opacity="0.25">
+          <line x1="-8" y1="18" x2="0"  y2="18" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="-8" y1="18" x2="-8" y2="26" stroke="currentColor" stroke-width="1.5"/>
+        </g>
+        <!-- Bottom right bracket -->
+        <g transform="translate(150, 140)" opacity="0.25">
+          <line x1="8"  y1="0"  x2="0"  y2="0"  stroke="currentColor" stroke-width="1.5"/>
+          <line x1="8"  y1="0"  x2="8"  y2="-8" stroke="currentColor" stroke-width="1.5"/>
+        </g>
+
+      </g>
+
+    </g>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LAYER 3 — HOVER GLOW OVERLAY (HTML context only)
+         Invisible by default, appears on :hover via CSS
+         ══════════════════════════════════════════════════════════════════ -->
+    <rect class="mn-hover-glow"
+      x="0" y="0" width="480" height="160" rx="8"
+      fill="currentColor"/>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         INVISIBLE VARIANTS GUIDE (for implementors)
+         ══════════════════════════════════════════════════════════════════ -->
+    <!--
+      USAGE EXAMPLES:
+      ═══════════════
+
+      White on dark:
+        <use href="ash-logo-mono.svg#mn-root" color="white"/>
+        or: <img src="ash-logo-mono.svg" style="filter:invert(1)"/>
+
+      Black on light:
+        <use href="ash-logo-mono.svg#mn-root" color="black"/>
+
+      Brand color single-tone:
+        <use href="ash-logo-mono.svg#mn-root" color="#89B4FA"/>
+
+      CSS custom property:
+        svg { color: var(--brand-color, currentColor); }
+
+      Force color in CSS:
+        .mn-fill, .mn-stroke { color: #your-color !important; }
+
+      Print-safe (forces black):
+        @media print { #mn-root { color: #000 !important; } }
+
+      Accessibility — high contrast:
+        @media (forced-colors: active) {
+          #mn-root { color: ButtonText; }
+        }
+    -->
+
+  </g>
+
+</svg>

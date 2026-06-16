@@ -1,0 +1,837 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔷 ASH DOTFILES v5.0 OMEGA — ICO MASTER GENERATOR                         ║
+# ║  Produces ash-logo.ico with all required embedded sizes:                   ║
+# ║  16 · 20 · 24 · 32 · 40 · 48 · 64 · 96 · 128 · 256px                     ║
+# ║                                                                              ║
+# ║  ICO format specs:                                                           ║
+# ║    • Windows: 16/32/48/256px (PNG compressed for 256)                      ║
+# ║    • macOS:   16/32/64/128/256/512/1024 → ICNS via iconutil                ║
+# ║    • Web:     16/32/48px (favicon.ico)                                     ║
+# ║    • Android: 48/72/96/144/192px (mipmap)                                  ║
+# ║    • iOS:     20/29/40/60/76/83.5/1024px (AppIcon.appiconset)              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# ── ANSI ──────────────────────────────────────────────────────────────────────
+readonly ESC=$'\033'
+readonly R="${ESC}[0m"         readonly B="${ESC}[1m"
+readonly D="${ESC}[2m"
+readonly RED="${ESC}[31m"      readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m"   readonly CYAN="${ESC}[36m"
+readonly GOLD="${ESC}[38;5;220m"  readonly MINT="${ESC}[38;5;121m"
+readonly LAVENDER="${ESC}[38;5;183m" readonly SLATE="${ESC}[38;5;245m"
+readonly PEACH="${ESC}[38;5;217m"   readonly VIOLET="${ESC}[38;5;177m"
+readonly BG_MIDNIGHT="${ESC}[48;5;16m"
+
+# ── PATHS ─────────────────────────────────────────────────────────────────────
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SVG_256="${SCRIPT_DIR}/ash-logo-256.svg"
+readonly SVG_512="${SCRIPT_DIR}/ash-logo-512.svg"
+readonly SVG_1024="${SCRIPT_DIR}/ash-logo-1024.svg"
+readonly SVG_2048="${SCRIPT_DIR}/ash-logo-2048.svg"
+readonly OUT_ICO="${SCRIPT_DIR}/ash-logo.ico"
+readonly OUT_ICNS="${SCRIPT_DIR}/ash-logo.icns"
+readonly WORK_DIR="$(mktemp -d)"
+readonly START_MS="$(date +%s%3N)"
+
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+
+# All ICO sizes (Windows spec)
+readonly -a ICO_SIZES=(16 20 24 32 40 48 64 96 128 256)
+
+# macOS ICNS iconset sizes (points, not px — we export @1x)
+readonly -a ICNS_SIZES=(16 32 64 128 256 512 1024)
+
+# Web favicon sizes
+readonly -a FAVICON_SIZES=(16 32 48)
+
+# Android mipmap sizes
+readonly -a ANDROID_SIZES=(48 72 96 144 192)
+
+# iOS AppIcon sizes (rounded)
+readonly -a IOS_SIZES=(20 29 40 60 76 83 1024)
+
+# ── STATE ─────────────────────────────────────────────────────────────────────
+RENDERER=""
+GENERATED_COUNT=0
+FAILED_COUNT=0
+DRY_RUN=false
+VERBOSE=false
+BUILD_ICNS=true
+BUILD_FAVICON=true
+BUILD_ANDROID=false
+BUILD_IOS=false
+
+# ── TIMING ────────────────────────────────────────────────────────────────────
+now_ms()     { date +%s%3N; }
+elapsed_ms() { echo $(( $(now_ms) - START_MS )); }
+format_dur() {
+    local ms="$1"
+    [[ $ms -lt 1000 ]] && printf "%dms" "$ms" || \
+        printf "%.2fs" "$(echo "scale=2; $ms/1000" | bc 2>/dev/null || echo "$((ms/1000))")"
+}
+
+# ── LOGGING ───────────────────────────────────────────────────────────────────
+log_banner()  {
+    printf "\n%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+    printf "  ╔══════════════════════════════════════════════════════════════════╗  \n" >&2
+    printf "  ║  %s🔷 ASH DOTFILES — ICO MASTER GENERATOR%s                          ║  \n" \
+        "${B}" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+    printf "  ║  %sProfessional multi-platform icon builder%s                     ║  \n" \
+        "${D}" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+    printf "  ╚══════════════════════════════════════════════════════════════════╝  \n" >&2
+    printf "%s\n\n" "$R" >&2
+}
+log_section() { printf "\n  %s%s▶ %s%s\n" "$GOLD" "$B" "$*" "$R" >&2; }
+log_step()    { printf "  %s  ◆%s %s%s%s\n" "$CYAN" "$R" "$D" "$*" "$R" >&2; }
+log_pass()    {
+    printf "  %s  ✓%s %s%s%s\n" "${GREEN}${B}" "$R" "$MINT" "$*" "$R" >&2
+    ((GENERATED_COUNT++)) || true
+}
+log_fail()    {
+    printf "  %s  ✗%s %s%s%s\n" "${RED}${B}" "$R" "$RED" "$*" "$R" >&2
+    ((FAILED_COUNT++)) || true
+}
+log_warn()    { printf "  %s  ⚠%s %s%s%s\n" "${YELLOW}${B}" "$R" "$YELLOW" "$*" "$R" >&2; }
+log_skip()    { printf "  %s  ↷%s %s%s%s\n" "${SLATE}${D}" "$R" "$D" "$*" "$R" >&2; }
+log_info()    { printf "  %s  ℹ%s %s%s%s\n" "${LAVENDER}" "$R" "$D" "$*" "$R" >&2; }
+log_metric()  { printf "  %s  📊%s %s%s%s\n" "$VIOLET" "$R" "$D" "$*" "$R" >&2; }
+
+# ── CLEANUP ───────────────────────────────────────────────────────────────────
+cleanup() {
+    rm -rf "$WORK_DIR"
+    [[ $? -eq 0 ]] && log_info "Temp dir cleaned: $WORK_DIR"
+}
+trap cleanup EXIT
+
+# ── ARG PARSING ───────────────────────────────────────────────────────────────
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -n|--dry-run)    DRY_RUN=true;      shift ;;
+            -v|--verbose)    VERBOSE=true;       shift ;;
+            --no-icns)       BUILD_ICNS=false;   shift ;;
+            --no-favicon)    BUILD_FAVICON=false; shift ;;
+            --android)       BUILD_ANDROID=true; shift ;;
+            --ios)           BUILD_IOS=true;     shift ;;
+            --renderer)      RENDERER="${2:?}";  shift 2 ;;
+            -h|--help)       print_help; exit 0 ;;
+            *) log_warn "Unknown: $1"; shift ;;
+        esac
+    done
+}
+
+print_help() {
+    cat <<EOF
+${GOLD}${B}Usage:${R} $(basename "$0") [OPTIONS]
+
+${B}Options:${R}
+  ${GREEN}-n, --dry-run${R}     Preview without creating files
+  ${GREEN}-v, --verbose${R}     Verbose output
+  ${GREEN}--no-icns${R}         Skip macOS ICNS generation
+  ${GREEN}--no-favicon${R}      Skip favicon.ico generation
+  ${GREEN}--android${R}         Generate Android mipmap PNGs
+  ${GREEN}--ios${R}             Generate iOS AppIcon set
+  ${GREEN}--renderer${R} <r>    Force renderer (inkscape|resvg|cairosvg|magick)
+
+${B}Output files:${R}
+  ash-logo.ico          Windows multi-size ICO
+  ash-logo.icns         macOS App Store ICNS
+  favicon.ico           Web favicon (16/32/48px)
+  android/              Android mipmap PNGs
+  ios/AppIcon.appiconset iOS icon set
+
+EOF
+}
+
+# ── RENDERER DETECTION ────────────────────────────────────────────────────────
+detect_renderer() {
+    log_section "Detecting Renderer"
+
+    if [[ -n "$RENDERER" ]]; then
+        log_info "Forced: $RENDERER"
+        return
+    fi
+
+    if   command -v resvg     &>/dev/null; then RENDERER="resvg";     log_pass "resvg (best quality)"
+    elif command -v inkscape  &>/dev/null; then RENDERER="inkscape";  log_pass "Inkscape"
+    elif command -v cairosvg  &>/dev/null; then RENDERER="cairosvg"; log_pass "CairoSVG"
+    elif command -v convert   &>/dev/null; then RENDERER="magick";    log_warn "ImageMagick (fallback)"
+    else
+        log_fail "No renderer found — install resvg, inkscape, cairosvg, or imagemagick"
+        exit 1
+    fi
+}
+
+# ── CORE RENDER FUNCTION ──────────────────────────────────────────────────────
+render_svg_to_png() {
+    local src="$1"
+    local dst="$2"
+    local size="$3"
+
+    [[ "$DRY_RUN" == "true" ]] && {
+        log_skip "DRY: $dst (${size}px)"
+        return 0
+    }
+
+    [[ ! -f "$src" ]] && {
+        log_fail "SVG not found: $src"
+        return 1
+    }
+
+    local exit_code=0
+    local t_start; t_start="$(now_ms)"
+
+    case "$RENDERER" in
+        resvg)
+            resvg \
+                --width  "$size" \
+                --height "$size" \
+                --background transparent \
+                --dpi 96 \
+                "$src" "$dst" \
+                2>/dev/null || exit_code=$?
+            ;;
+        inkscape)
+            inkscape \
+                --export-type=png \
+                --export-filename="$dst" \
+                --export-width="$size" \
+                --export-height="$size" \
+                --export-background-opacity=0 \
+                "$src" \
+                2>/dev/null || exit_code=$?
+            ;;
+        cairosvg)
+            python3 -c "
+import cairosvg
+cairosvg.svg2png(
+    url='${src}',
+    write_to='${dst}',
+    output_width=${size},
+    output_height=${size},
+    background_color=None
+)" 2>/dev/null || exit_code=$?
+            ;;
+        magick)
+            convert \
+                -background none \
+                -density 288 \
+                "$src" \
+                -resize "${size}x${size}" \
+                -filter Lanczos \
+                "$dst" \
+                2>/dev/null || exit_code=$?
+            ;;
+    esac
+
+    local dur; dur="$(format_dur "$(( $(now_ms) - t_start ))")"
+
+    if [[ $exit_code -eq 0 ]] && [[ -f "$dst" ]]; then
+        [[ "$VERBOSE" == "true" ]] && \
+            log_pass "${size}px → $(basename "$dst") [${dur}]"
+        return 0
+    else
+        log_fail "Render failed: ${size}px (exit: $exit_code)"
+        return 1
+    fi
+}
+
+# ── OPTIMIZE PNG ──────────────────────────────────────────────────────────────
+optimize_png() {
+    local file="$1"
+    local before_size; before_size="$(wc -c < "$file" | tr -d ' ')"
+
+    if   command -v oxipng   &>/dev/null; then
+        oxipng --opt 4 --strip safe --quiet "$file" 2>/dev/null || true
+    elif command -v optipng  &>/dev/null; then
+        optipng -o4 -quiet "$file" 2>/dev/null || true
+    elif command -v pngquant &>/dev/null; then
+        pngquant --quality=85-100 --force --ext .png "$file" 2>/dev/null || true
+    fi
+
+    local after_size; after_size="$(wc -c < "$file" | tr -d ' ')"
+    local saved=$(( before_size - after_size ))
+    [[ $saved -gt 0 ]] && [[ "$VERBOSE" == "true" ]] && \
+        log_metric "Optimized $(basename "$file"): saved ${saved}B"
+}
+
+# ── SELECT SVG SOURCE FOR SIZE ────────────────────────────────────────────────
+svg_for_size() {
+    local size="$1"
+    if   [[ $size -le 256  ]]; then echo "$SVG_256"
+    elif [[ $size -le 512  ]]; then echo "$SVG_512"
+    elif [[ $size -le 1024 ]]; then echo "$SVG_1024"
+    else                            echo "$SVG_2048"
+    fi
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  BUILD TARGETS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── WINDOWS ICO ───────────────────────────────────────────────────────────────
+build_windows_ico() {
+    log_section "Building Windows ICO (${#ICO_SIZES[@]} sizes)"
+
+    mkdir -p "${WORK_DIR}/ico"
+    local png_files=()
+
+    for size in "${ICO_SIZES[@]}"; do
+        local png="${WORK_DIR}/ico/ash-${size}.png"
+        local src; src="$(svg_for_size "$size")"
+
+        log_step "Rendering ${size}×${size}px..."
+        if render_svg_to_png "$src" "$png" "$size"; then
+            optimize_png "$png"
+            png_files+=("$png")
+            log_pass "${size}px rendered"
+        fi
+    done
+
+    if [[ ${#png_files[@]} -eq 0 ]]; then
+        log_fail "No PNG files rendered — cannot build ICO"
+        return 1
+    fi
+
+    log_step "Assembling ${#png_files[@]}-size ICO..."
+
+    # Method 1: ImageMagick (most compatible ICO output)
+    if command -v convert &>/dev/null; then
+
+        # For ICO: sizes ≥ 256 should be PNG-compressed inside the ICO
+        local convert_args=()
+        for png in "${png_files[@]}"; do
+            convert_args+=("$png")
+        done
+
+        # Build with proper ICO format
+        convert "${convert_args[@]}" \
+            -define ico:auto-resize="256,128,96,64,48,40,32,24,20,16" \
+            "${OUT_ICO}" 2>/dev/null && {
+            log_pass "ICO assembled via ImageMagick"
+            return 0
+        }
+
+        # Fallback: direct concatenation
+        convert "${convert_args[@]}" "${OUT_ICO}" 2>/dev/null && {
+            log_pass "ICO assembled (fallback)"
+            return 0
+        }
+    fi
+
+    # Method 2: icotool (icoutils package)
+    if command -v icotool &>/dev/null; then
+        icotool \
+            --create \
+            --output="${OUT_ICO}" \
+            "${png_files[@]}" \
+            2>/dev/null && {
+            log_pass "ICO assembled via icotool"
+            return 0
+        }
+    fi
+
+    # Method 3: Python fallback — manual ICO binary construction
+    log_warn "Using Python ICO builder (manual binary)"
+    python3 - "${OUT_ICO}" "${png_files[@]}" <<'PYEOF'
+import sys, struct, os
+
+def read_png(path):
+    with open(path, 'rb') as f:
+        return f.read()
+
+def build_ico(output_path, png_paths):
+    """
+    ICO file format:
+      Header: ICONDIR  (6 bytes)
+      For each image: ICONDIRENTRY (16 bytes)
+      Image data: PNG or BMP bytes
+    """
+    images = []
+    for path in png_paths:
+        data = read_png(path)
+        # Get dimensions from PNG IHDR chunk
+        w = struct.unpack('>I', data[16:20])[0]
+        h = struct.unpack('>I', data[20:24])[0]
+        # ICO stores 0 for 256
+        w_ico = w if w < 256 else 0
+        h_ico = h if h < 256 else 0
+        images.append((w_ico, h_ico, w, h, data))
+
+    # Sort by size descending (largest first in ICO)
+    images.sort(key=lambda x: x[2], reverse=True)
+
+    count = len(images)
+
+    # Calculate data offsets
+    header_size = 6
+    entry_size  = 16
+    offset = header_size + entry_size * count
+
+    entries = []
+    for w_ico, h_ico, w, h, data in images:
+        entries.append({
+            'width':  w_ico,
+            'height': h_ico,
+            'color_count': 0,
+            'reserved': 0,
+            'planes': 1,
+            'bit_count': 32,
+            'bytes_in_res': len(data),
+            'image_offset': offset,
+            'data': data,
+        })
+        offset += len(data)
+
+    with open(output_path, 'wb') as f:
+        # ICONDIR header
+        f.write(struct.pack('<HHH', 0, 1, count))  # reserved, type=1(ICO), count
+
+        # ICONDIRENTRY for each image
+        for e in entries:
+            f.write(struct.pack('<BBBBHHII',
+                e['width'],
+                e['height'],
+                e['color_count'],
+                e['reserved'],
+                e['planes'],
+                e['bit_count'],
+                e['bytes_in_res'],
+                e['image_offset']
+            ))
+
+        # PNG image data
+        for e in entries:
+            f.write(e['data'])
+
+    total_size = os.path.getsize(output_path)
+    print(f"ICO: {output_path}")
+    print(f"  Sizes: {[e['width'] if e['width']>0 else 256 for e in entries]}")
+    print(f"  Total: {total_size:,} bytes ({total_size/1024:.1f}KB)")
+    print(f"  Images: {len(entries)}")
+
+output_path = sys.argv[1]
+png_paths   = sys.argv[2:]
+build_ico(output_path, png_paths)
+PYEOF
+
+    [[ -f "$OUT_ICO" ]] && \
+        log_pass "ICO built via Python: $(du -h "$OUT_ICO" | cut -f1)" || \
+        log_fail "ICO build failed"
+}
+
+# ── macOS ICNS ────────────────────────────────────────────────────────────────
+build_macos_icns() {
+    [[ "$BUILD_ICNS" != "true" ]] && { log_skip "ICNS (--no-icns)"; return 0; }
+    log_section "Building macOS ICNS"
+
+    # macOS iconutil requires a specific .iconset directory structure
+    local iconset_dir="${WORK_DIR}/AppIcon.iconset"
+    mkdir -p "$iconset_dir"
+
+    # ICNS requires @1x and @2x variants
+    local -A ICNS_FILENAMES=(
+        ["16"]="icon_16x16.png"
+        ["32"]="icon_16x16@2x.png:icon_32x32.png"
+        ["64"]="icon_32x32@2x.png"
+        ["128"]="icon_128x128.png"
+        ["256"]="icon_128x128@2x.png:icon_256x256.png"
+        ["512"]="icon_256x256@2x.png:icon_512x512.png"
+        ["1024"]="icon_512x512@2x.png"
+    )
+
+    for size in 16 32 64 128 256 512 1024; do
+        local src; src="$(svg_for_size "$size")"
+        local dst="${iconset_dir}/icon_temp_${size}.png"
+
+        if render_svg_to_png "$src" "$dst" "$size"; then
+            optimize_png "$dst"
+
+            # Copy to all required names for this size
+            local names="${ICNS_FILENAMES[$size]}"
+            IFS=':' read -ra name_list <<< "$names"
+            for name in "${name_list[@]}"; do
+                cp "$dst" "${iconset_dir}/${name}"
+                [[ "$VERBOSE" == "true" ]] && log_info "→ $name"
+            done
+            rm "$dst"
+            log_pass "${size}px ICNS layer"
+        fi
+    done
+
+    # Use iconutil (macOS only) to build ICNS
+    if command -v iconutil &>/dev/null; then
+        iconutil \
+            --convert icns \
+            --output "$OUT_ICNS" \
+            "$iconset_dir" \
+            2>/dev/null && \
+            log_pass "ICNS built via iconutil: $(du -h "$OUT_ICNS" | cut -f1)"
+
+    # Fallback: png2icns
+    elif command -v png2icns &>/dev/null; then
+        local icns_pngs=()
+        for f in "${iconset_dir}"/*.png; do
+            icns_pngs+=("$f")
+        done
+        png2icns "$OUT_ICNS" "${icns_pngs[@]}" 2>/dev/null && \
+            log_pass "ICNS built via png2icns"
+
+    else
+        log_warn "iconutil not available (macOS only) — ICNS skipped"
+        log_info "iconset directory preserved: $iconset_dir"
+        cp -r "$iconset_dir" "${SCRIPT_DIR}/AppIcon.iconset"
+    fi
+}
+
+# ── WEB FAVICON ICO ───────────────────────────────────────────────────────────
+build_favicon_ico() {
+    [[ "$BUILD_FAVICON" != "true" ]] && { log_skip "favicon.ico (disabled)"; return 0; }
+    log_section "Building Web Favicon"
+
+    local favicon_ico="${SCRIPT_DIR}/favicon.ico"
+    mkdir -p "${WORK_DIR}/favicon"
+
+    local fav_pngs=()
+    for size in "${FAVICON_SIZES[@]}"; do
+        local png="${WORK_DIR}/favicon/fav-${size}.png"
+        if render_svg_to_png "$SVG_256" "$png" "$size"; then
+            optimize_png "$png"
+            fav_pngs+=("$png")
+        fi
+    done
+
+    # Assemble minimal 3-size favicon.ico
+    if command -v convert &>/dev/null; then
+        convert "${fav_pngs[@]}" "$favicon_ico" 2>/dev/null && \
+            log_pass "favicon.ico (${FAVICON_SIZES[*]}px): $(du -h "$favicon_ico" | cut -f1)"
+
+    elif command -v icotool &>/dev/null; then
+        icotool --create --output="$favicon_ico" "${fav_pngs[@]}" 2>/dev/null && \
+            log_pass "favicon.ico built via icotool"
+    else
+        # Python minimal favicon
+        python3 - "$favicon_ico" "${fav_pngs[@]}" <<'PYEOF'
+import sys, struct
+output_path = sys.argv[1]
+png_paths   = sys.argv[2:]
+images = []
+for path in png_paths:
+    with open(path, 'rb') as f:
+        data = f.read()
+    w = struct.unpack('>I', data[16:20])[0]
+    images.append((w if w < 256 else 0, data))
+count = len(images)
+header = struct.pack('<HHH', 0, 1, count)
+offset = 6 + count * 16
+entries = b''
+blobs   = b''
+for w_ico, data in images:
+    entries += struct.pack('<BBBBHHII', w_ico, w_ico, 0, 0, 1, 32, len(data), offset)
+    offset  += len(data)
+    blobs   += data
+with open(output_path, 'wb') as f:
+    f.write(header + entries + blobs)
+print(f"favicon.ico: {len(images)} sizes")
+PYEOF
+        log_pass "favicon.ico built via Python"
+    fi
+
+    # Individual favicon PNGs (for modern HTML link rel="icon" approaches)
+    local favicon_dir="${SCRIPT_DIR}/../../favicons"
+    mkdir -p "$favicon_dir"
+    for size in 16 32 48 64 96 128 180 192 256 512; do
+        local src; src="$(svg_for_size "$size")"
+        local dst="${favicon_dir}/favicon-${size}x${size}.png"
+        render_svg_to_png "$src" "$dst" "$size" && \
+            optimize_png "$dst"
+    done
+    log_pass "Individual favicon PNGs generated"
+
+    # Apple touch icon (180×180, square, no rounding — iOS adds rounding)
+    render_svg_to_png "$SVG_256" "${favicon_dir}/apple-touch-icon.png" "180" && \
+        optimize_png "${favicon_dir}/apple-touch-icon.png" && \
+        log_pass "apple-touch-icon.png (180px)"
+
+    # PWA icons
+    render_svg_to_png "$SVG_512" "${favicon_dir}/pwa-192x192.png"  "192"
+    render_svg_to_png "$SVG_512" "${favicon_dir}/pwa-512x512.png"  "512"
+    render_svg_to_png "$SVG_1024" "${favicon_dir}/pwa-maskable-1024x1024.png" "1024"
+    log_pass "PWA icons generated (192/512/1024px)"
+
+    # Write web manifest
+    cat > "${favicon_dir}/site.webmanifest" <<'MANIFEST'
+{
+  "name": "ASH Dotfiles",
+  "short_name": "ASH",
+  "description": "The most advanced Hyprland dotfiles repository — v5.0 OMEGA",
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "background_color": "#1E1E2E",
+  "theme_color": "#89B4FA",
+  "orientation": "any",
+  "categories": ["productivity", "developer tools", "utilities"],
+  "icons": [
+    { "src": "/favicons/favicon-16x16.png",          "sizes": "16x16",     "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-32x32.png",          "sizes": "32x32",     "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-48x48.png",          "sizes": "48x48",     "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-64x64.png",          "sizes": "64x64",     "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-96x96.png",          "sizes": "96x96",     "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-128x128.png",        "sizes": "128x128",   "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/apple-touch-icon.png",       "sizes": "180x180",   "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-192x192.png",        "sizes": "192x192",   "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-256x256.png",        "sizes": "256x256",   "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/favicon-512x512.png",        "sizes": "512x512",   "type": "image/png", "purpose": "any" },
+    { "src": "/favicons/pwa-192x192.png",            "sizes": "192x192",   "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicons/pwa-512x512.png",            "sizes": "512x512",   "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicons/pwa-maskable-1024x1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/desktop/dark-catppuccin.webp",
+      "sizes": "1920x1080",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "ASH Dotfiles — Catppuccin Mocha desktop"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Theme Picker",
+      "short_name": "Themes",
+      "description": "Browse 250+ themes",
+      "url": "/themes",
+      "icons": [{ "src": "/favicons/favicon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Plugin Browser",
+      "short_name": "Plugins",
+      "description": "Explore 150+ plugins",
+      "url": "/plugins",
+      "icons": [{ "src": "/favicons/favicon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}
+MANIFEST
+    log_pass "site.webmanifest written"
+}
+
+# ── ANDROID MIPMAP ────────────────────────────────────────────────────────────
+build_android_icons() {
+    [[ "$BUILD_ANDROID" != "true" ]] && { log_skip "Android (use --android)"; return 0; }
+    log_section "Building Android Mipmap Icons"
+
+    local -A ANDROID_DIRS=(
+        ["48"]="mipmap-mdpi"
+        ["72"]="mipmap-hdpi"
+        ["96"]="mipmap-xhdpi"
+        ["144"]="mipmap-xxhdpi"
+        ["192"]="mipmap-xxxhdpi"
+    )
+
+    local android_out="${SCRIPT_DIR}/android"
+
+    for size in "${ANDROID_SIZES[@]}"; do
+        local dir="${android_out}/${ANDROID_DIRS[$size]}"
+        mkdir -p "$dir"
+        local src; src="$(svg_for_size "$size")"
+
+        render_svg_to_png "$src" "${dir}/ic_launcher.png"          "$size"
+        render_svg_to_png "$src" "${dir}/ic_launcher_round.png"    "$size"
+        render_svg_to_png "$src" "${dir}/ic_launcher_foreground.png" "$size"
+
+        for png in "${dir}"/*.png; do
+            optimize_png "$png"
+        done
+        log_pass "${ANDROID_DIRS[$size]}: ${size}px (3 variants)"
+    done
+
+    # Write Android strings resource
+    mkdir -p "${android_out}/values"
+    cat > "${android_out}/values/strings.xml" <<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ASH Dotfiles</string>
+</resources>
+XML
+    log_pass "Android icon set complete"
+}
+
+# ── iOS APP ICON ──────────────────────────────────────────────────────────────
+build_ios_icons() {
+    [[ "$BUILD_IOS" != "true" ]] && { log_skip "iOS (use --ios)"; return 0; }
+    log_section "Building iOS AppIcon Set"
+
+    local ios_out="${SCRIPT_DIR}/ios/Assets.xcassets/AppIcon.appiconset"
+    mkdir -p "$ios_out"
+
+    # iOS AppIcon spec (all required sizes)
+    # Format: "filename:size:scale"
+    local -a IOS_SPEC=(
+        "Icon-20@1x.png:20:1"
+        "Icon-20@2x.png:40:2"
+        "Icon-20@3x.png:60:3"
+        "Icon-29@1x.png:29:1"
+        "Icon-29@2x.png:58:2"
+        "Icon-29@3x.png:87:3"
+        "Icon-40@1x.png:40:1"
+        "Icon-40@2x.png:80:2"
+        "Icon-40@3x.png:120:3"
+        "Icon-60@2x.png:120:2"
+        "Icon-60@3x.png:180:3"
+        "Icon-76@1x.png:76:1"
+        "Icon-76@2x.png:152:2"
+        "Icon-83.5@2x.png:167:2"
+        "Icon-1024@1x.png:1024:1"
+    )
+
+    # Contents.json for Xcode
+    local contents_images=""
+    local first=true
+
+    for spec in "${IOS_SPEC[@]}"; do
+        IFS=':' read -r filename size scale <<< "$spec"
+        local point_size=$(( size / scale ))
+        local src; src="$(svg_for_size "$size")"
+
+        if render_svg_to_png "$src" "${ios_out}/${filename}" "$size"; then
+            optimize_png "${ios_out}/${filename}"
+            log_pass "iOS ${point_size}pt@${scale}x → ${filename}"
+
+            local scale_str="${scale}x"
+            local size_pt="${point_size}x${point_size}"
+
+            [[ "$first" == "true" ]] && first=false || \
+                contents_images+=","
+            contents_images+="
+    {
+      \"filename\": \"${filename}\",
+      \"idiom\": \"universal\",
+      \"scale\": \"${scale_str}\",
+      \"size\": \"${size_pt}\"
+    }"
+        fi
+    done
+
+    # Write Contents.json
+    cat > "${ios_out}/Contents.json" <<JSON
+{
+  "images": [${contents_images}
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
+JSON
+    log_pass "iOS Contents.json written"
+    log_pass "iOS AppIcon.appiconset complete"
+}
+
+# ── GENERATE ASSET MANIFEST ───────────────────────────────────────────────────
+generate_manifest() {
+    log_section "Generating Asset Manifest"
+
+    local manifest="${SCRIPT_DIR}/ico-manifest.json"
+
+    python3 - "$manifest" "$SCRIPT_DIR" <<'PYEOF'
+import json, os, sys, hashlib
+from pathlib import Path
+
+manifest_path = sys.argv[1]
+search_dir    = Path(sys.argv[2])
+
+files = []
+for ext in ['ico', 'icns', 'png', 'webp']:
+    for f in sorted(search_dir.rglob(f'*.{ext}')):
+        if '.git' in str(f): continue
+        try:
+            stat = f.stat()
+            sha  = hashlib.sha256(f.read_bytes()).hexdigest()[:16]
+            files.append({
+                "path":        str(f.relative_to(search_dir)),
+                "size_bytes":  stat.st_size,
+                "size_human":  f"{stat.st_size/1024:.1f}KB",
+                "sha256_short": sha,
+                "format":      ext.upper()
+            })
+        except Exception as e:
+            pass
+
+manifest = {
+    "_generator":  "ASH ICO Builder v5.0.0-omega",
+    "_timestamp":  __import__('datetime').datetime.utcnow().isoformat() + "Z",
+    "_total":      len(files),
+    "assets":      files
+}
+
+with open(manifest_path, 'w') as f:
+    json.dump(manifest, f, indent=2)
+
+print(f"Manifest: {len(files)} assets → {manifest_path}")
+PYEOF
+
+    log_pass "ico-manifest.json written"
+}
+
+# ── SUMMARY ───────────────────────────────────────────────────────────────────
+print_summary() {
+    local dur; dur="$(format_dur "$(elapsed_ms)")"
+
+    printf "\n" >&2
+    printf "%s%s" "$BG_MIDNIGHT" "$GOLD" >&2
+    printf "  ╔══════════════════════════════════════════════════════════════════╗  \n" >&2
+    printf "  ║  %s📊 ICO GENERATION SUMMARY%s                                         ║  \n" \
+        "${B}" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+    printf "  ╠══════════════════════════════════════════════════════════════════╣  \n" >&2
+
+    printf "  ║  %s✓ %-4s%s generated   %s✗ %-4s%s failed   %s⏱ %s%s              ║  \n" \
+        "${GREEN}${B}"  "$GENERATED_COUNT" "${R}${BG_MIDNIGHT}${GOLD}" \
+        "${RED}${B}"    "$FAILED_COUNT"    "${R}${BG_MIDNIGHT}${GOLD}" \
+        "${CYAN}${D}"   "$dur"             "${R}${BG_MIDNIGHT}${GOLD}" >&2
+
+    printf "  ╟──────────────────────────────────────────────────────────────────╢  \n" >&2
+
+    local -a OUTPUT_FILES=("$OUT_ICO")
+    [[ "$BUILD_ICNS"    == "true" ]] && OUTPUT_FILES+=("$OUT_ICNS")
+    [[ "$BUILD_FAVICON" == "true" ]] && OUTPUT_FILES+=("${SCRIPT_DIR}/favicon.ico")
+
+    for f in "${OUTPUT_FILES[@]}"; do
+        if [[ -f "$f" ]]; then
+            local size; size="$(du -h "$f" | cut -f1)"
+            printf "  ║  %s✓%s %-50s %s%s%s  ║  \n" \
+                "${GREEN}${B}" "$R" "$(basename "$f")" \
+                "${D}${SLATE}" "$size" "${R}${BG_MIDNIGHT}${GOLD}" >&2
+        fi
+    done
+
+    printf "  ╚══════════════════════════════════════════════════════════════════╝  \n" >&2
+    printf "%s\n\n" "$R" >&2
+}
+
+# ── MAIN ──────────────────────────────────────════════════════════════════════
+main() {
+    parse_args "$@"
+    log_banner
+    detect_renderer
+
+    build_windows_ico
+    build_macos_icns
+    build_favicon_ico
+    build_android_icons
+    build_ios_icons
+    generate_manifest
+
+    print_summary
+
+    [[ $FAILED_COUNT -gt 0 ]] && exit 1
+    exit 0
+}
+
+main "$@"
