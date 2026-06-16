@@ -190,6 +190,8 @@ jobs:
       has_hypr:          ${{ steps.filter.outputs.hypr }}
       has_api:           ${{ steps.filter.outputs.api }}
       has_web:           ${{ steps.filter.outputs.web }}
+      web_exists:        ${{ steps.web.outputs.exists }}
+      web_lock_exists:   ${{ steps.web.outputs.lock_exists }}
       # Pipeline decisions
       run_full:          ${{ steps.decide.outputs.run_full }}
       run_screenshots:   ${{ steps.decide.outputs.run_screenshots }}
@@ -211,9 +213,16 @@ jobs:
           fetch-depth: 2
           sparse-checkout: |
             .github
+            web
             themes
             assets/screenshots
             plugins
+
+      - name: "🔎 Detect web project"
+        id: web
+        run: |
+          [[ -f web/package.json ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+          [[ -f web/package-lock.json ]] && echo "lock_exists=true" >> "$GITHUB_OUTPUT" || echo "lock_exists=false" >> "$GITHUB_OUTPUT"
 
       - name: "🔍 Path filter"
         id: filter
@@ -387,6 +396,7 @@ jobs:
     timeout-minutes: 12
     needs: intelligence
     permissions:
+      actions: read
       contents: read
       security-events: write
       pull-requests: read
@@ -429,6 +439,7 @@ jobs:
     timeout-minutes: 15
     needs: intelligence
     permissions:
+      actions: read
       contents: read
       security-events: write
 
@@ -437,13 +448,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_exists == 'true' && needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_exists == 'true' && needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "🔍 NPM audit"
+        if: needs.intelligence.outputs.web_exists == 'true'
         working-directory: web
         run: |
           npm audit --audit-level=moderate --json \
@@ -463,14 +482,25 @@ jobs:
           output: trivy-fs.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: "1"
+          exit-code: "0"
 
       - name: "📤 Upload Trivy SARIF"
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs
+
+      - name: "🚦 Enforce Trivy policy"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
 
       - name: "🐍 Safety (Python)"
         working-directory: api
@@ -875,24 +905,34 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [intelligence, sec-secrets]
-    if: |
-      needs.intelligence.outputs.has_web == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+    if: needs.intelligence.outputs.web_exists == 'true' && (needs.intelligence.outputs.has_web == 'true' || needs.intelligence.outputs.run_full == 'true')
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🔍 TypeScript"
         working-directory: web
@@ -2272,25 +2312,35 @@ jobs:
     name: "🌐 Web Dashboard Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [lint-typescript]
-    if: |
-      needs.intelligence.outputs.has_web == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+    needs: [intelligence, lint-typescript]
+    if: needs.intelligence.outputs.web_exists == 'true' && (needs.intelligence.outputs.has_web == 'true' || needs.intelligence.outputs.run_full == 'true')
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🧪 Unit tests (Vitest)"
         working-directory: web
@@ -2444,22 +2494,35 @@ jobs:
     name: "🌐 Build Web"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [lint-typescript, test-shell]
+    needs: [intelligence, lint-typescript, test-shell]
+    if: needs.intelligence.outputs.web_exists == 'true'
 
     steps:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: "🟢 Node.js"
+        if: needs.intelligence.outputs.web_lock_exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: "📦 Install"
         working-directory: web
-        run: npm ci --prefer-offline
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --prefer-offline
+          else
+            npm install --prefer-offline
+          fi
 
       - name: "🏗️ Build"
         working-directory: web
@@ -2501,8 +2564,10 @@ jobs:
       github.event.inputs.pipeline_mode == 'full'
 
     permissions:
+      actions: read
       contents: read
       packages: write
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -2570,8 +2635,8 @@ jobs:
           exit-code: "0"
 
       - name: "📤 Upload image SARIF"
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && github.event_name != 'pull_request' && hashFiles('trivy-image.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image.sarif
           category: "trivy-image-${{ matrix.platform }}"
