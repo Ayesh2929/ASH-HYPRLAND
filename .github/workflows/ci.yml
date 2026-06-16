@@ -786,14 +786,30 @@ jobs:
 
       - name: "🔍 YAML validation"
         run: |
+          YAML_FILES=()
+          while IFS= read -r file; do
+            YAML_FILES+=("$file")
+          done < <(
+            find . \
+              -path "./.git" -prune -o \
+              -path "./node_modules" -prune -o \
+              \( -name "*.yml" -o -name "*.yaml" \) \
+              -print | head -300
+          )
+
+          if [[ "${#YAML_FILES[@]}" -eq 0 ]]; then
+            echo "  YAML: no files found"
+            exit 0
+          fi
+
           yamllint \
             --config-file .yamllint.yml \
             --format colored \
-            $(find . \( -name "*.yml" -o -name "*.yaml" \) \
-              | grep -v ".git" | grep -v "node_modules" | head -300) \
+            "${YAML_FILES[@]}" \
             2>&1 | tee yamllint-out.txt || true
 
-          ERRS=$(grep -c ": error" yamllint-out.txt || true)
+          ERRS=$(sed -E 's/\x1B\[[0-9;]*[mK]//g' yamllint-out.txt \
+            | grep -Ec '(^|[[:space:]:\[])error([][:space:]]|$)' || true)
           echo "  YAML errors: $ERRS"
           [[ "$ERRS" -gt 0 ]] && exit 1 || echo "  YAML valid"
 

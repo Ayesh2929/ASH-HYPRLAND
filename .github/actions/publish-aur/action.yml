@@ -598,26 +598,27 @@ runs:
 
         if [[ -f "${CHANGELOG_FILE}" ]]; then
           # Extract latest ## section from CHANGELOG.md
-          CHANGELOG_ENTRY=$(python3 << 'PYEOF'
-import re, os
-from pathlib import Path
+          CHANGELOG_ENTRY=$(python3 -c '
+          import textwrap
+          exec(textwrap.dedent("""
+          import os
+          import re
+          from pathlib import Path
 
-f    = Path(os.environ["CHANGELOG_FILE"])
-ver  = os.environ["VERSION"]
-text = f.read_text()
+          f = Path(os.environ["CHANGELOG_FILE"])
+          text = f.read_text()
 
-# Find first ## block (latest entry)
-sections = re.split(r'^## ', text, flags=re.MULTILINE)
-for sec in sections[1:]:
-    lines   = sec.strip().splitlines()
-    content = "\n".join(lines[1:]).strip()   # Skip header line
-    if content:
-        # Truncate to 500 chars for AUR comments
-        if len(content) > 500:
-            content = content[:497] + "..."
-        print(content)
-        break
-PYEOF
+          sections = re.split(r"^## ", text, flags=re.MULTILINE)
+          for sec in sections[1:]:
+              lines = sec.strip().splitlines()
+              content = "\n".join(lines[1:]).strip()
+              if content:
+                  if len(content) > 500:
+                      content = content[:497] + "..."
+                  print(content)
+                  break
+          """))
+          '
           ) || CHANGELOG_ENTRY=""
           echo "  ✅ Changelog extracted (${#CHANGELOG_ENTRY} chars)"
         else
@@ -694,201 +695,201 @@ PYEOF
         else:
             # ── Generate PKGBUILD from scratch ────────────────────────────────
             pkgbuild_content = f"""# Maintainer: ASH Dotfiles Bot <ash-bot@dotfiles.dev>
-# Co-Maintainer: ASH Dotfiles Team <ash@dotfiles.dev>
-# Generated: {NOW} by ASH v5.0.0-omega AUR Publishing Engine
+        # Co-Maintainer: ASH Dotfiles Team <ash@dotfiles.dev>
+        # Generated: {NOW} by ASH v5.0.0-omega AUR Publishing Engine
 
-pkgname={PKG_NAME}
-pkgver={VERSION}
-pkgrel={PKGREL}
-pkgdesc="{DESCRIPTION}"
-arch=('x86_64' 'aarch64')
-url="https://github.com/{REPO}"
-license=('MIT')
-depends=(
-    'hyprland'
-    'waybar'
-    'rofi-wayland'
-    'kitty'
-    'fish'
-    'git'
-    'python'
-    'python-pillow'
-    'jq'
-    'imagemagick'
-    'libwebp'
-    'ttf-nerd-fonts-symbols'
-    'ttf-fira-code'
-    'swww'
-    'hyprlock'
-    'hypridle'
-    'dunst'
-    'grim'
-    'slurp'
-    'wl-clipboard'
-    'cliphist'
-    'noto-fonts'
-    'noto-fonts-emoji'
-    'noto-fonts-cjk'
-    'curl'
-    'bc'
-)
-optdepends=(
-    'neovim: full Neovim IDE configuration'
-    'starship: enhanced shell prompt'
-    'btop: system monitor theme'
-    'cava: audio visualizer'
-    'fastfetch: system info display'
-    'spicetify-cli: Spotify theming'
-    'zoxide: smart cd replacement'
-    'fzf: fuzzy finder integration'
-    'eza: modern ls replacement'
-    'bat: cat clone with syntax highlighting'
-    'ripgrep: fast grep for Neovim'
-    'fd: fast find alternative'
-    'docker: container support'
-    'flatpak: Flatpak app support'
-    'obs-studio: screen recording'
-    'easyeffects: audio effects'
-)
-makedepends=(
-    'git'
-    'python-setuptools'
-    'make'
-)
-conflicts=('ash-dotfiles-git' 'ash-dotfiles-bin')
-provides=('ash-dotfiles')
-backup=(
-    'etc/ash/ash.conf'
-)
-install=ash-dotfiles.install
-source=("{PKG_NAME}-{VERSION}.tar.gz::{SOURCE_URL}")
-sha256sums=('{SHA256}')
+        pkgname={PKG_NAME}
+        pkgver={VERSION}
+        pkgrel={PKGREL}
+        pkgdesc="{DESCRIPTION}"
+        arch=('x86_64' 'aarch64')
+        url="https://github.com/{REPO}"
+        license=('MIT')
+        depends=(
+            'hyprland'
+            'waybar'
+            'rofi-wayland'
+            'kitty'
+            'fish'
+            'git'
+            'python'
+            'python-pillow'
+            'jq'
+            'imagemagick'
+            'libwebp'
+            'ttf-nerd-fonts-symbols'
+            'ttf-fira-code'
+            'swww'
+            'hyprlock'
+            'hypridle'
+            'dunst'
+            'grim'
+            'slurp'
+            'wl-clipboard'
+            'cliphist'
+            'noto-fonts'
+            'noto-fonts-emoji'
+            'noto-fonts-cjk'
+            'curl'
+            'bc'
+        )
+        optdepends=(
+            'neovim: full Neovim IDE configuration'
+            'starship: enhanced shell prompt'
+            'btop: system monitor theme'
+            'cava: audio visualizer'
+            'fastfetch: system info display'
+            'spicetify-cli: Spotify theming'
+            'zoxide: smart cd replacement'
+            'fzf: fuzzy finder integration'
+            'eza: modern ls replacement'
+            'bat: cat clone with syntax highlighting'
+            'ripgrep: fast grep for Neovim'
+            'fd: fast find alternative'
+            'docker: container support'
+            'flatpak: Flatpak app support'
+            'obs-studio: screen recording'
+            'easyeffects: audio effects'
+        )
+        makedepends=(
+            'git'
+            'python-setuptools'
+            'make'
+        )
+        conflicts=('ash-dotfiles-git' 'ash-dotfiles-bin')
+        provides=('ash-dotfiles')
+        backup=(
+            'etc/ash/ash.conf'
+        )
+        install=ash-dotfiles.install
+        source=("{PKG_NAME}-{VERSION}.tar.gz::{SOURCE_URL}")
+        sha256sums=('{SHA256}')
 
-pkgver() {{
-    echo "{VERSION}"
-}}
+        pkgver() {{
+            echo "{VERSION}"
+        }}
 
-prepare() {{
-    cd "${{srcdir}}/{SRC_DIR}"
-    # Ensure all scripts are executable
-    find . -name "*.sh" -exec chmod +x {{}} +
-    find ash-cli -name "ash" -exec chmod +x {{}} +
-    echo "  Prepared ASH Dotfiles {VERSION}"
-}}
+        prepare() {{
+            cd "${{srcdir}}/{SRC_DIR}"
+            # Ensure all scripts are executable
+            find . -name "*.sh" -exec chmod +x {{}} +
+            find ash-cli -name "ash" -exec chmod +x {{}} +
+            echo "  Prepared ASH Dotfiles {VERSION}"
+        }}
 
-build() {{
-    cd "${{srcdir}}/{SRC_DIR}"
-    # Pre-generate Python bytecode for faster startup
-    python3 -m compileall ash-cli/ 2>/dev/null || true
-    echo "  Built ASH Dotfiles {VERSION}"
-}}
+        build() {{
+            cd "${{srcdir}}/{SRC_DIR}"
+            # Pre-generate Python bytecode for faster startup
+            python3 -m compileall ash-cli/ 2>/dev/null || true
+            echo "  Built ASH Dotfiles {VERSION}"
+        }}
 
-check() {{
-    cd "${{srcdir}}/{SRC_DIR}"
-    # Run basic sanity checks
-    [[ -f "ash-cli/ash" ]] || {{ echo "ERROR: ash-cli/ash not found"; exit 1; }}
-    [[ -f "setup.sh" ]] || {{ echo "ERROR: setup.sh not found"; exit 1; }}
-    [[ -d "themes/presets" ]] || {{ echo "ERROR: themes/presets not found"; exit 1; }}
-    [[ -d "plugins" ]] || {{ echo "ERROR: plugins directory not found"; exit 1; }}
-    echo "  Checks passed for ASH Dotfiles {VERSION}"
-}}
+        check() {{
+            cd "${{srcdir}}/{SRC_DIR}"
+            # Run basic sanity checks
+            [[ -f "ash-cli/ash" ]] || {{ echo "ERROR: ash-cli/ash not found"; exit 1; }}
+            [[ -f "setup.sh" ]] || {{ echo "ERROR: setup.sh not found"; exit 1; }}
+            [[ -d "themes/presets" ]] || {{ echo "ERROR: themes/presets not found"; exit 1; }}
+            [[ -d "plugins" ]] || {{ echo "ERROR: plugins directory not found"; exit 1; }}
+            echo "  Checks passed for ASH Dotfiles {VERSION}"
+        }}
 
-package() {{
-    cd "${{srcdir}}/{SRC_DIR}"
+        package() {{
+            cd "${{srcdir}}/{SRC_DIR}"
 
-    # ── Install ASH CLI ────────────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/bin"
-    install -d "${{pkgdir}}/usr/lib/ash"
-    install -d "${{pkgdir}}/usr/share/ash"
-    install -d "${{pkgdir}}/etc/ash"
-    install -d "${{pkgdir}}/usr/share/doc/ash"
-    install -d "${{pkgdir}}/usr/share/licenses/{PKG_NAME}"
-    install -d "${{pkgdir}}/usr/share/man/man1"
+            # ── Install ASH CLI ────────────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/bin"
+            install -d "${{pkgdir}}/usr/lib/ash"
+            install -d "${{pkgdir}}/usr/share/ash"
+            install -d "${{pkgdir}}/etc/ash"
+            install -d "${{pkgdir}}/usr/share/doc/ash"
+            install -d "${{pkgdir}}/usr/share/licenses/{PKG_NAME}"
+            install -d "${{pkgdir}}/usr/share/man/man1"
 
-    # Main CLI binary
-    install -Dm755 "ash-cli/ash" "${{pkgdir}}/usr/bin/ash"
+            # Main CLI binary
+            install -Dm755 "ash-cli/ash" "${{pkgdir}}/usr/bin/ash"
 
-    # ASH library files
-    cp -r "ash-cli/lib/"*      "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
-    cp -r "ash-cli/commands/"* "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
-    cp -r "ash-cli/engines/"*  "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+            # ASH library files
+            cp -r "ash-cli/lib/"*      "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+            cp -r "ash-cli/commands/"* "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
+            cp -r "ash-cli/engines/"*  "${{pkgdir}}/usr/lib/ash/"  2>/dev/null || true
 
-    # ── Install themes ─────────────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/ash/themes"
-    cp -r "themes/"* "${{pkgdir}}/usr/share/ash/themes/"
+            # ── Install themes ─────────────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/ash/themes"
+            cp -r "themes/"* "${{pkgdir}}/usr/share/ash/themes/"
 
-    # ── Install plugins ────────────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/ash/plugins"
-    cp -r "plugins/"* "${{pkgdir}}/usr/share/ash/plugins/"
+            # ── Install plugins ────────────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/ash/plugins"
+            cp -r "plugins/"* "${{pkgdir}}/usr/share/ash/plugins/"
 
-    # ── Install wallpapers ─────────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/ash/wallpapers"
-    cp -r "wallpapers/"* "${{pkgdir}}/usr/share/ash/wallpapers/" 2>/dev/null || true
+            # ── Install wallpapers ─────────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/ash/wallpapers"
+            cp -r "wallpapers/"* "${{pkgdir}}/usr/share/ash/wallpapers/" 2>/dev/null || true
 
-    # ── Install config templates ───────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/ash/config"
-    cp -r "config/"* "${{pkgdir}}/usr/share/ash/config/"
+            # ── Install config templates ───────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/ash/config"
+            cp -r "config/"* "${{pkgdir}}/usr/share/ash/config/"
 
-    # ── Install scripts ────────────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/ash/scripts"
-    cp -r "scripts/"* "${{pkgdir}}/usr/share/ash/scripts/"
-    find "${{pkgdir}}/usr/share/ash/scripts" -name "*.sh" -exec chmod +x {{}} +
+            # ── Install scripts ────────────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/ash/scripts"
+            cp -r "scripts/"* "${{pkgdir}}/usr/share/ash/scripts/"
+            find "${{pkgdir}}/usr/share/ash/scripts" -name "*.sh" -exec chmod +x {{}} +
 
-    # ── Install systemd user units ─────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/lib/systemd/user"
-    cp -r "systemd/user/"*.service "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
-    cp -r "systemd/user/"*.timer   "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
+            # ── Install systemd user units ─────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/lib/systemd/user"
+            cp -r "systemd/user/"*.service "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
+            cp -r "systemd/user/"*.timer   "${{pkgdir}}/usr/lib/systemd/user/" 2>/dev/null || true
 
-    # ── Install shell completions ──────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/fish/completions"
-    install -d "${{pkgdir}}/usr/share/bash-completion/completions"
-    install -d "${{pkgdir}}/usr/share/zsh/site-functions"
-    install -Dm644 "ash-cli/commands/completion/ash.fish" \
-        "${{pkgdir}}/usr/share/fish/completions/ash.fish" 2>/dev/null || true
-    install -Dm644 "ash-cli/commands/completion/ash.bash" \
-        "${{pkgdir}}/usr/share/bash-completion/completions/ash" 2>/dev/null || true
-    install -Dm644 "ash-cli/commands/completion/ash.zsh" \
-        "${{pkgdir}}/usr/share/zsh/site-functions/_ash" 2>/dev/null || true
+            # ── Install shell completions ──────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/fish/completions"
+            install -d "${{pkgdir}}/usr/share/bash-completion/completions"
+            install -d "${{pkgdir}}/usr/share/zsh/site-functions"
+            install -Dm644 "ash-cli/commands/completion/ash.fish" \
+                "${{pkgdir}}/usr/share/fish/completions/ash.fish" 2>/dev/null || true
+            install -Dm644 "ash-cli/commands/completion/ash.bash" \
+                "${{pkgdir}}/usr/share/bash-completion/completions/ash" 2>/dev/null || true
+            install -Dm644 "ash-cli/commands/completion/ash.zsh" \
+                "${{pkgdir}}/usr/share/zsh/site-functions/_ash" 2>/dev/null || true
 
-    # ── Install documentation ──────────────────────────────────────────────
-    install -Dm644 "README.md"      "${{pkgdir}}/usr/share/doc/ash/README.md"
-    install -Dm644 "CHANGELOG.md"   "${{pkgdir}}/usr/share/doc/ash/CHANGELOG.md" 2>/dev/null || true
-    install -Dm644 "CONTRIBUTING.md""${{pkgdir}}/usr/share/doc/ash/CONTRIBUTING.md" 2>/dev/null || true
-    install -Dm644 "LICENSE"        "${{pkgdir}}/usr/share/licenses/{PKG_NAME}/LICENSE"
+            # ── Install documentation ──────────────────────────────────────────────
+            install -Dm644 "README.md"      "${{pkgdir}}/usr/share/doc/ash/README.md"
+            install -Dm644 "CHANGELOG.md"   "${{pkgdir}}/usr/share/doc/ash/CHANGELOG.md" 2>/dev/null || true
+            install -Dm644 "CONTRIBUTING.md""${{pkgdir}}/usr/share/doc/ash/CONTRIBUTING.md" 2>/dev/null || true
+            install -Dm644 "LICENSE"        "${{pkgdir}}/usr/share/licenses/{PKG_NAME}/LICENSE"
 
-    # ── Install man pages ──────────────────────────────────────────────────
-    install -Dm644 "docs/man/ash.1" \
-        "${{pkgdir}}/usr/share/man/man1/ash.1" 2>/dev/null || true
+            # ── Install man pages ──────────────────────────────────────────────────
+            install -Dm644 "docs/man/ash.1" \
+                "${{pkgdir}}/usr/share/man/man1/ash.1" 2>/dev/null || true
 
-    # ── Install default config ─────────────────────────────────────────────
-    install -Dm644 "ash-cli/data/defaults.conf" \
-        "${{pkgdir}}/etc/ash/ash.conf.example" 2>/dev/null || true
+            # ── Install default config ─────────────────────────────────────────────
+            install -Dm644 "ash-cli/data/defaults.conf" \
+                "${{pkgdir}}/etc/ash/ash.conf.example" 2>/dev/null || true
 
-    # ── Install desktop file ───────────────────────────────────────────────
-    install -d "${{pkgdir}}/usr/share/applications"
-    cat > "${{pkgdir}}/usr/share/applications/ash.desktop" << 'DESKTOP'
-[Desktop Entry]
-Name=ASH Dotfiles
-Comment={DESCRIPTION}
-Exec=ash
-Icon=ash
-Terminal=true
-Type=Application
-Categories=System;Settings;
-Keywords=dotfiles;themes;hyprland;ricing;
-DESKTOP
+            # ── Install desktop file ───────────────────────────────────────────────
+            install -d "${{pkgdir}}/usr/share/applications"
+            cat > "${{pkgdir}}/usr/share/applications/ash.desktop" << 'DESKTOP'
+        [Desktop Entry]
+        Name=ASH Dotfiles
+        Comment={DESCRIPTION}
+        Exec=ash
+        Icon=ash
+        Terminal=true
+        Type=Application
+        Categories=System;Settings;
+        Keywords=dotfiles;themes;hyprland;ricing;
+        DESKTOP
 
-    # ── Install icons ──────────────────────────────────────────────────────
-    for size in 16 32 48 64 128 256 512; do
-        install -d "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps"
-        cp "assets/brand/logos/ash-logo-${{size}}.png" \
-            "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps/ash.png" \
-            2>/dev/null || true
-    done
+            # ── Install icons ──────────────────────────────────────────────────────
+            for size in 16 32 48 64 128 256 512; do
+                install -d "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps"
+                cp "assets/brand/logos/ash-logo-${{size}}.png" \
+                    "${{pkgdir}}/usr/share/icons/hicolor/${{size}}x${{size}}/apps/ash.png" \
+                    2>/dev/null || true
+            done
 
-    echo "  Packaged ASH Dotfiles {VERSION} successfully"
-}}
-"""
+            echo "  Packaged ASH Dotfiles {VERSION} successfully"
+        }}
+        """
 
         # Write PKGBUILD
         pkgbuild_path = Path(WORK_DIR) / "PKGBUILD"
@@ -1246,7 +1247,7 @@ DESKTOP
         AUR_URL:         ${{ steps.publish.outputs.aur_url }}
         DURATION:        ${{ steps.publish.outputs.duration_s }}
         DRY_RUN:         ${{ inputs.dry_run }}
-        NOTIFY_FAIL_ONLY:${{ inputs.notify_on_failure_only }}
+        NOTIFY_FAIL_ONLY: ${{ inputs.notify_on_failure_only }}
         DISCORD_HOOK:    ${{ inputs.discord_webhook }}
       run: |
         # Resolve webhook

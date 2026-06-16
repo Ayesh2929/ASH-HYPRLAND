@@ -971,27 +971,27 @@ jobs:
 
             const section = `
 
-          ## 🐋 Container Images
+            ## 🐋 Container Images
 
-          | Registry | Image | Platforms |
-          |----------|-------|-----------|
-          | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-api:${version}\` | \`${platforms}\` |
-          | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-cli:${version}\` | \`${platforms}\` |
-          | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-test:${version}\` | \`${platforms}\` |
+            | Registry | Image | Platforms |
+            |----------|-------|-----------|
+            | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-api:${version}\` | \`${platforms}\` |
+            | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-cli:${version}\` | \`${platforms}\` |
+            | 📦 GHCR | \`ghcr.io/ash-dotfiles/ash-test:${version}\` | \`${platforms}\` |
 
-          **Security:** ${signed ? "✅ Signed with Cosign (keyless OIDC)" : "⚠️ Not signed"} | ${criticalVulns === 0 ? "✅ No critical CVEs" : `⚠️ ${criticalVulns} critical CVEs`}
+            **Security:** ${signed ? "✅ Signed with Cosign (keyless OIDC)" : "⚠️ Not signed"} | ${criticalVulns === 0 ? "✅ No critical CVEs" : `⚠️ ${criticalVulns} critical CVEs`}
 
-          \`\`\`bash
-          # Pull latest
-          docker pull ghcr.io/ash-dotfiles/ash-api:${version}
-          docker pull ghcr.io/ash-dotfiles/ash-cli:${version}
+            \`\`\`bash
+            # Pull latest
+            docker pull ghcr.io/ash-dotfiles/ash-api:${version}
+            docker pull ghcr.io/ash-dotfiles/ash-cli:${version}
 
-          # Verify signature
-          cosign verify \\
-            --certificate-oidc-issuer=https://token.actions.githubusercontent.com \\
-            --certificate-identity=https://github.com/ash-dotfiles/ash-dotfiles/.github/workflows/release/publish-ghcr.yml@refs/heads/main \\
-            ghcr.io/ash-dotfiles/ash-api:${version}
-          \`\`\``;
+            # Verify signature
+            cosign verify \\
+              --certificate-oidc-issuer=https://token.actions.githubusercontent.com \\
+              --certificate-identity=https://github.com/ash-dotfiles/ash-dotfiles/.github/workflows/release/publish-ghcr.yml@refs/heads/main \\
+              ghcr.io/ash-dotfiles/ash-api:${version}
+            \`\`\``;
 
             try {
               const { data: releases } = await github.rest.repos.listReleases({
