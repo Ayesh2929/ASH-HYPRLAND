@@ -455,7 +455,7 @@ jobs:
           [[ "$CRIT" -gt 0 ]] && { echo "  FAIL — critical vulns"; exit 1; } || true
 
       - name: "🔍 Trivy FS scan"
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: "."
@@ -2561,7 +2561,7 @@ jobs:
 
       - name: "🔍 Trivy image scan"
         if: github.event_name != 'pull_request'
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: "ghcr.io/${{ github.repository }}:sha-${{ github.sha }}"
           format: sarif
