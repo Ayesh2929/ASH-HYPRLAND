@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🔒 ASH DOTFILES v5.0 OMEGA — SECURITY RATING BADGE                         ║
+║  Animated shield security badge with threat scan visualization             ║
+║  Dimensions: 136 × 28px  ·  WCAG AA  ·  GitHub-safe                       ║
+║                                                                              ║
+║  Security ratings:                                                           ║
+║    A+  Catppuccin Green   #A6E3A1  — No known vulnerabilities               ║
+║    A   Catppuccin Teal    #94E2D5  — Minor advisory                         ║
+║    B   Catppuccin Yellow  #F9E2AF  — Medium CVE                             ║
+║    C   Catppuccin Orange  #FAB387  — High CVE present                       ║
+║    F   Catppuccin Red     #F38BA8  — Critical vulnerability                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 136 28"
+  width="136"
+  height="28"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  role="img"
+  aria-label="security: A+">
+
+  <title>security: A+</title>
+  <desc>ASH Dotfiles security badge — A+ rating, zero known vulnerabilities, hardened supply chain</desc>
+
+  <defs>
+
+    <style><![CDATA[
+
+      /* ── Track 01: Label breathe ────────────────────────────────────── */
+      .sc-label { animation: sc-breathe 6s ease-in-out infinite; }
+
+      /* ── Track 02: Rating text glow ─────────────────────────────────── */
+      .sc-rating { animation: sc-rating-pulse 3s ease-in-out infinite; }
+
+      /* ── Track 03: Plus superscript ─────────────────────────────────── */
+      .sc-plus   { animation: sc-plus-pulse  2s ease-in-out infinite; }
+
+      /* ── Track 04: Shield body pulse ────────────────────────────────── */
+      .sc-shield { animation: sc-shield-breathe 4s ease-in-out infinite; transform-origin: 11px 14px; }
+
+      /* ── Track 05: Shield checkmark draw ────────────────────────────── */
+      .sc-check  {
+        animation: sc-check-draw 0.9s ease-out 0.3s 1 both;
+        stroke-dasharray: 22;
+        stroke-dashoffset: 22;
+      }
+
+      /* ── Track 06: Radar scan ring ───────────────────────────────────── */
+      .sc-scan-ring-1 { animation: sc-radar-expand 3s ease-out 0.0s infinite; transform-origin: 11px 14px; }
+      .sc-scan-ring-2 { animation: sc-radar-expand 3s ease-out 1.0s infinite; transform-origin: 11px 14px; }
+      .sc-scan-ring-3 { animation: sc-radar-expand 3s ease-out 2.0s infinite; transform-origin: 11px 14px; }
+
+      /* ── Track 07: Rotating scan beam ───────────────────────────────── */
+      .sc-beam   { animation: sc-beam-spin 4s linear infinite; transform-origin: 11px 14px; }
+
+      /* ── Track 08-13: Lock mechanism ─────────────────────────────────── */
+      .sc-lock-shackle { animation: sc-lock-secure 5s ease-in-out infinite; transform-origin: 47px 12px; }
+      .sc-lock-body    { animation: sc-lock-glow 4s ease-in-out infinite; }
+      .sc-lock-key     { animation: sc-key-rotate 6s linear infinite; transform-origin: 47px 17px; }
+
+      /* ── Track 14-15: Hex node network ──────────────────────────────── */
+      .sc-hex-1 { animation: sc-node-pulse 4s ease-in-out 0.0s infinite; }
+      .sc-hex-2 { animation: sc-node-pulse 4s ease-in-out 1.0s infinite; }
+      .sc-hex-3 { animation: sc-node-pulse 4s ease-in-out 2.0s infinite; }
+
+      /* ── Track 16: Shimmer sweeps ────────────────────────────────────── */
+      .sc-shim-l { animation: sc-shimmer 5s ease-in-out infinite; }
+      .sc-shim-r { animation: sc-shimmer 7s ease-in-out infinite 2.5s; }
+
+      /* ── Track 17: Top accent bar ────────────────────────────────────── */
+      .sc-bar    { animation: sc-bar-flow 4s ease-in-out infinite; transform-origin: 0 0; }
+
+      /* ── Track 18: Ambient halo ──────────────────────────────────────── */
+      .sc-halo   { animation: sc-halo-breathe 4s ease-in-out infinite; transform-origin: 68px 14px; }
+
+      /* ── Track 19-22: Threat neutralized sparks ──────────────────────── */
+      .sc-spark-1 { animation: sc-spark 4.2s ease-out 0.4s infinite; }
+      .sc-spark-2 { animation: sc-spark 5.0s ease-out 1.7s infinite; }
+      .sc-spark-3 { animation: sc-spark 3.7s ease-out 3.0s infinite; }
+      .sc-spark-4 { animation: sc-spark 4.8s ease-out 1.0s infinite; }
+
+      /* ── Track 23: Scan line ─────────────────────────────────────────── */
+      .sc-scanline { animation: sc-scan 8s linear infinite; }
+
+      /* ── Track 24: Zero-vuln counter ─────────────────────────────────── */
+      .sc-count  { animation: sc-count-confirm 5s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+        .sc-check  { stroke-dashoffset: 0 !important; opacity: 1 !important; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         KEYFRAMES — Security-themed precision animations
+         ════════════════════════════════════════════════════════════════════ */
+
+      @keyframes sc-breathe {
+        0%,100% { opacity: 0.9; }
+        50%      { opacity: 1;   }
+      }
+
+      @keyframes sc-rating-pulse {
+        0%,100% { filter: brightness(1);    }
+        50%      { filter: brightness(1.22); }
+      }
+
+      @keyframes sc-plus-pulse {
+        0%,100% { opacity: 0.75; transform: scale(1);   translateY(0);   }
+        50%      { opacity: 1;    transform: scale(1.18) translateY(-1px); }
+      }
+
+      @keyframes sc-shield-breathe {
+        0%,100% { transform: scale(1);    filter: brightness(1);   }
+        50%      { transform: scale(1.04); filter: brightness(1.12); }
+      }
+
+      @keyframes sc-check-draw {
+        from { stroke-dashoffset: 22; opacity: 0; }
+        to   { stroke-dashoffset: 0;  opacity: 1; }
+      }
+
+      @keyframes sc-radar-expand {
+        0%   { transform: scale(0);   opacity: 0.8; }
+        100% { transform: scale(2.5); opacity: 0;   }
+      }
+
+      @keyframes sc-beam-spin {
+        from { transform: rotate(0deg);   }
+        to   { transform: rotate(360deg); }
+      }
+
+      @keyframes sc-lock-secure {
+        0%,80%,100% { transform: translateY(0);    }
+        82%          { transform: translateY(-2px); }
+        86%          { transform: translateY(0.5px); }
+        90%          { transform: translateY(-0.5px); }
+        94%          { transform: translateY(0);    }
+      }
+
+      @keyframes sc-lock-glow {
+        0%,100% { filter: brightness(1);   }
+        50%      { filter: brightness(1.15); }
+      }
+
+      @keyframes sc-key-rotate {
+        0%,88%,100% { transform: rotate(0deg); opacity: 0.6; }
+        90%          { transform: rotate(30deg); opacity: 1; }
+        92%          { transform: rotate(-15deg); opacity: 0.8; }
+        96%          { transform: rotate(0deg); opacity: 0.6; }
+      }
+
+      @keyframes sc-node-pulse {
+        0%,78%,100% { opacity: 0.4; transform: scale(1);    }
+        80%          { opacity: 1;   transform: scale(1.3);  }
+        85%          { opacity: 0.7; transform: scale(0.9);  }
+        90%          { opacity: 0.9; transform: scale(1.1);  }
+      }
+
+      @keyframes sc-shimmer {
+        0%   { transform: translateX(-80px) skewX(-7deg); opacity: 0; }
+        15%  { opacity: 0.5; }
+        85%  { opacity: 0.5; }
+        100% { transform: translateX(200px) skewX(-7deg); opacity: 0; }
+      }
+
+      @keyframes sc-bar-flow {
+        0%,100% { opacity: 0.78; transform: scaleX(1);    }
+        50%      { opacity: 1;    transform: scaleX(0.97); }
+      }
+
+      @keyframes sc-halo-breathe {
+        0%,100% { opacity: 0.32; transform: scale(1);    }
+        50%      { opacity: 0.62; transform: scale(1.07); }
+      }
+
+      @keyframes sc-spark {
+        0%   { transform: translate(0,0) scale(0) rotate(0deg);   opacity: 0; }
+        5%   { opacity: 1; }
+        50%  { transform: translate(var(--sx,4px),var(--sy,-10px)) scale(1.5) rotate(180deg); opacity: 0.9; }
+        90%  { opacity: 0.1; }
+        100% { transform: translate(var(--sx2,7px),var(--sy2,-18px)) scale(0) rotate(360deg); opacity: 0; }
+      }
+
+      @keyframes sc-scan {
+        0%   { transform: translateX(-30px); opacity: 0; }
+        5%   { opacity: 0.4; }
+        95%  { opacity: 0.4; }
+        100% { transform: translateX(200px); opacity: 0; }
+      }
+
+      @keyframes sc-count-confirm {
+        0%,85%,100% { opacity: 0.5; transform: scale(1);   }
+        87%          { opacity: 1;   transform: scale(1.1); }
+        89%          { opacity: 0.7; transform: scale(0.95); }
+        91%          { opacity: 1;   transform: scale(1);   }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         GRADIENT LIBRARY — Security green + shield palette
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Label bg — dark midnight blue-green -->
+    <linearGradient id="sc-g-label" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#141F1A"/>
+      <stop offset="100%" stop-color="#1E1E2E"/>
+    </linearGradient>
+
+    <!-- Value bg — animated secure green spectrum -->
+    <linearGradient id="sc-g-value" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#89B4FA;#A6E3A1;#94E2D5;#A6E3A1"
+          dur="12s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="40%"  stop-color="#40A02B">
+        <animate attributeName="stop-color"
+          values="#40A02B;#179299;#1E66F5;#40A02B;#179299;#40A02B"
+          dur="12s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#94E2D5">
+        <animate attributeName="stop-color"
+          values="#94E2D5;#89B4FA;#A6E3A1;#94E2D5;#89B4FA;#94E2D5"
+          dur="12s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Value dark overlay -->
+    <linearGradient id="sc-g-value-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#030D08" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#010804" stop-opacity="0.72"/>
+    </linearGradient>
+
+    <!-- Border — animated secure green -->
+    <linearGradient id="sc-g-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.65">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#89B4FA;#A6E3A1"
+          dur="9s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#40A02B" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Halo radial -->
+    <radialGradient id="sc-g-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.42">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#89B4FA;#A6E3A1"
+          dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Shield fill gradient -->
+    <linearGradient id="sc-g-shield" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.7"/>
+      <stop offset="50%"  stop-color="#40A02B" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <!-- Shield glow radial -->
+    <radialGradient id="sc-g-shield-glow" cx="40%" cy="30%" r="60%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Radar beam sweep gradient -->
+    <linearGradient id="sc-g-beam" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Glass -->
+    <linearGradient id="sc-g-glass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="55%"  stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="sc-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Scan line gradient -->
+    <linearGradient id="sc-g-scan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#A6E3A1" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Spark fills -->
+    <radialGradient id="sc-sf1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#A6E3A1"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sc-sf2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#94E2D5"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sc-sf3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89B4FA"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sc-sf4" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9E2AF"/>
+      <stop offset="100%" stop-color="#F9E2AF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         FILTERS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <filter id="sc-f-shadow" x="-4%" y="-14%" width="108%" height="128%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3"
+        flood-color="#000000" flood-opacity="0.55"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="6"
+        flood-color="#A6E3A1" flood-opacity="0.14"/>
+    </filter>
+
+    <filter id="sc-f-rating-glow" x="-15%" y="-45%" width="130%" height="190%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.55" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-f-shield" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.55" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-f-lock" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-f-spark" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+
+    <filter id="sc-f-radar" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="sc-clip-all">
+      <rect x="0" y="0" width="136" height="28" rx="6"/>
+    </clipPath>
+    <clipPath id="sc-clip-label">
+      <rect x="0" y="0" width="62" height="28"/>
+    </clipPath>
+    <clipPath id="sc-clip-value">
+      <rect x="62" y="0" width="74" height="28"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       AMBIENT HALO
+       ════════════════════════════════════════════════════════════════════ -->
+  <ellipse class="sc-halo" cx="68" cy="14" rx="68" ry="14"
+    fill="url(#sc-g-halo)"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       BADGE BODY
+       ════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#sc-clip-all)" filter="url(#sc-f-shadow)">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LABEL SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#sc-clip-label)">
+
+      <!-- Background -->
+      <rect x="0" y="0" width="62" height="28" fill="url(#sc-g-label)"/>
+
+      <!-- Glass top -->
+      <rect x="0" y="0" width="62" height="13" fill="url(#sc-g-glass)"/>
+
+      <!-- Shimmer left -->
+      <rect class="sc-shim-l"
+        x="-80" y="0" width="36" height="28"
+        fill="url(#sc-g-shimmer)"
+        clip-path="url(#sc-clip-label)"
+        opacity="0.4"/>
+
+      <!-- ── SECURITY SHIELD ICON ───────────────────────────────────── -->
+      <g transform="translate(11, 14)" filter="url(#sc-f-shield)">
+        <g class="sc-shield">
+
+          <!-- Shield outer glow -->
+          <path d="M 0,-11 L 8,-8 L 8,0 Q 8,8 0,12 Q -8,8 -8,0 L -8,-8 Z"
+            fill="url(#sc-g-shield-glow)"
+            opacity="0.3"
+            transform="scale(1.3)"/>
+
+          <!-- Shield body — main green fill -->
+          <path d="M 0,-8.5 L 6,-6 L 6,0.5 Q 6,6 0,9 Q -6,6 -6,0.5 L -6,-6 Z"
+            fill="url(#sc-g-shield)"
+            opacity="0.85"/>
+
+          <!-- Shield body border -->
+          <path d="M 0,-8.5 L 6,-6 L 6,0.5 Q 6,6 0,9 Q -6,6 -6,0.5 L -6,-6 Z"
+            fill="none"
+            stroke="#A6E3A1"
+            stroke-width="1.2"
+            opacity="0.9"/>
+
+          <!-- Shield glass highlight — top left -->
+          <path d="M -4,-7 Q -5,-3 -4,0 Q -2,-4 0,-6 Z"
+            fill="#FFFFFF"
+            opacity="0.18"/>
+
+          <!-- ── CHECKMARK inside shield ─────────────────────────────── -->
+          <path class="sc-check"
+            d="M -3,0 L -0.5,3 L 4,-2.5"
+            fill="none"
+            stroke="#CDD6F4"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-dasharray="22"
+            stroke-dashoffset="22"/>
+
+        </g>
+      </g>
+
+      <!-- ── RADAR SCAN RINGS ───────────────────────────────────────── -->
+      <g transform="translate(11, 14)" filter="url(#sc-f-radar)">
+        <circle class="sc-scan-ring-1" r="6"
+          fill="none" stroke="#A6E3A1" stroke-width="1" opacity="0.5"/>
+        <circle class="sc-scan-ring-2" r="6"
+          fill="none" stroke="#94E2D5" stroke-width="0.75" opacity="0.4"/>
+        <circle class="sc-scan-ring-3" r="6"
+          fill="none" stroke="#89DCEB" stroke-width="0.5" opacity="0.3"/>
+      </g>
+
+      <!-- ── RADAR BEAM (rotating sweep line) ─────────────────────── -->
+      <g transform="translate(11, 14)" filter="url(#sc-f-radar)">
+        <g class="sc-beam">
+          <line x1="0" y1="0" x2="0" y2="-9"
+            stroke="url(#sc-g-beam)"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity="0.55"/>
+          <!-- Beam trail (partial arc sector) -->
+          <path d="M 0,0 L 0,-9 A 9,9 0 0,1 3.12,-8.44 Z"
+            fill="#A6E3A1"
+            opacity="0.12"/>
+        </g>
+      </g>
+
+      <!-- "security" label -->
+      <text class="sc-label"
+        x="24" y="14"
+        font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="7.5"
+        font-weight="600"
+        letter-spacing="0.2"
+        fill="#A6ADC8">security</text>
+
+    </g>
+
+    <!-- ── DIVIDER ─────────────────────────────────────────────────────── -->
+    <rect x="61" y="0" width="1" height="28" fill="#A6E3A1" opacity="0.35"/>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         VALUE SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#sc-clip-value)">
+
+      <!-- Animated gradient base -->
+      <rect x="62" y="0" width="74" height="28" fill="url(#sc-g-value)"/>
+      <!-- Dark overlay -->
+      <rect x="62" y="0" width="74" height="28" fill="url(#sc-g-value-dark)"/>
+      <!-- Glass top -->
+      <rect x="62" y="0" width="74" height="12" fill="url(#sc-g-glass)"/>
+
+      <!-- Shimmer right -->
+      <rect class="sc-shim-r"
+        x="22" y="0" width="30" height="28"
+        fill="url(#sc-g-shimmer)"
+        clip-path="url(#sc-clip-value)"
+        opacity="0.52"/>
+
+      <!-- ── HORIZONTAL SCAN LINE ───────────────────────────────────── -->
+      <rect class="sc-scanline"
+        x="32" y="0" width="26" height="28"
+        fill="url(#sc-g-scan)"
+        clip-path="url(#sc-clip-value)"
+        opacity="0.3"/>
+
+      <!-- ── LOCK ICON ──────────────────────────────────────────────── -->
+      <g transform="translate(47, 15)" filter="url(#sc-f-lock)">
+
+        <!-- Lock shackle (top arc) -->
+        <g class="sc-lock-shackle">
+          <path d="M -4,-4 L -4,-8 Q -4,-12 0,-12 Q 4,-12 4,-8 L 4,-4"
+            fill="none"
+            stroke="#A6E3A1"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity="0.85"/>
+        </g>
+
+        <!-- Lock body -->
+        <g class="sc-lock-body">
+          <rect x="-6" y="-4" width="12" height="10" rx="2"
+            fill="#313244"
+            stroke="#A6E3A1"
+            stroke-width="1.2"
+            opacity="0.9"/>
+
+          <!-- Lock keyhole -->
+          <circle cx="0" cy="0" r="2.2"
+            fill="#A6E3A1" opacity="0.7"/>
+          <rect x="-1" y="0.5" width="2" height="3" rx="0.5"
+            fill="#A6E3A1" opacity="0.7"/>
+        </g>
+
+        <!-- Key turning animation -->
+        <g class="sc-lock-key" opacity="0.6">
+          <line x1="0" y1="0" x2="3" y2="-2"
+            stroke="#F9E2AF" stroke-width="1" stroke-linecap="round"/>
+        </g>
+
+      </g>
+
+      <!-- ── HEX NODE NETWORK (security mesh) ─────────────────────── -->
+      <g transform="translate(63, 6)">
+
+        <!-- Three connected nodes representing security layers -->
+        <circle class="sc-hex-1" cx="0"  cy="4" r="2.5"
+          fill="#A6E3A1" opacity="0.5"
+          style="transform-origin:0px 4px"/>
+        <line x1="2.5" y1="4" x2="7.5" y2="4"
+          stroke="#A6E3A1" stroke-width="0.75" opacity="0.3"
+          stroke-dasharray="2 2"/>
+        <circle class="sc-hex-2" cx="10" cy="4" r="2.5"
+          fill="#94E2D5" opacity="0.5"
+          style="transform-origin:10px 4px"/>
+        <line x1="12.5" y1="4" x2="17.5" y2="4"
+          stroke="#A6E3A1" stroke-width="0.75" opacity="0.3"
+          stroke-dasharray="2 2"/>
+        <circle class="sc-hex-3" cx="20" cy="4" r="2.5"
+          fill="#89B4FA" opacity="0.5"
+          style="transform-origin:20px 4px"/>
+
+        <!-- Node labels -->
+        <text x="0"  y="11" font-family="monospace" font-size="4" fill="#A6E3A1" opacity="0.45" text-anchor="middle">FW</text>
+        <text x="10" y="11" font-family="monospace" font-size="4" fill="#94E2D5" opacity="0.45" text-anchor="middle">TLS</text>
+        <text x="20" y="11" font-family="monospace" font-size="4" fill="#89B4FA" opacity="0.45" text-anchor="middle">GPG</text>
+
+      </g>
+
+      <!-- ── RATING "A+" ─────────────────────────────────────────────── -->
+      <text class="sc-rating"
+        x="85" y="20"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="15"
+        font-weight="900"
+        letter-spacing="-0.5"
+        fill="#CDD6F4"
+        filter="url(#sc-f-rating-glow)">A</text>
+
+      <!-- "+" superscript -->
+      <text class="sc-plus"
+        x="95.5" y="15"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="10"
+        font-weight="900"
+        fill="#A6E3A1"
+        style="transform-origin:98px 12px">+</text>
+
+      <!-- ── ZERO VULNERABILITIES INDICATOR ───────────────────────── -->
+      <g class="sc-count" transform="translate(62, 0)">
+        <!-- Small "0 CVE" label at bottom -->
+        <text x="0" y="26"
+          font-family="'SF Mono',monospace"
+          font-size="5.5"
+          letter-spacing="0.3"
+          fill="#A6E3A1"
+          opacity="0.45">0 CVEs · hardened</text>
+      </g>
+
+    </g>
+
+    <!-- ── OUTER BORDER ───────────────────────────────────────────────── -->
+    <rect x="0.5" y="0.5" width="135" height="27" rx="5.5"
+      fill="none"
+      stroke="url(#sc-g-border)"
+      stroke-width="1"/>
+
+    <!-- ── TOP ACCENT BAR ─────────────────────────────────────────────── -->
+    <rect class="sc-bar"
+      x="0" y="0" width="136" height="1.5" rx="0.75"
+      fill="url(#sc-g-value)"
+      opacity="0.85"
+      style="transform-origin:0 0"/>
+
+    <!-- ── LEFT EDGE ACCENT ───────────────────────────────────────────── -->
+    <rect x="0" y="0" width="1.5" height="28" rx="0.75"
+      fill="#A6E3A1" opacity="0.32"/>
+
+    <!-- ── BOTTOM EDGE ─────────────────────────────────────────────────── -->
+    <rect x="0" y="26.5" width="136" height="0.75" rx="0.375"
+      fill="#A6E3A1" opacity="0.2"/>
+
+  </g>
+
+  <!-- ── THREAT NEUTRALIZED SPARKS ─────────────────────────────────────── -->
+  <circle class="sc-spark-1" cx="118" cy="22" r="2.2"
+    fill="url(#sc-sf1)" style="--sx:3px;--sy:-9px;--sx2:6px;--sy2:-17px"/>
+  <circle class="sc-spark-2" cx="122" cy="18" r="1.8"
+    fill="url(#sc-sf2)" style="--sx:-3px;--sy:-8px;--sx2:-6px;--sy2:-15px"/>
+  <circle class="sc-spark-3" cx="115" cy="24" r="2"
+    fill="url(#sc-sf3)" style="--sx:5px;--sy:-10px;--sx2:9px;--sy2:-19px"/>
+  <circle class="sc-spark-4" cx="120" cy="26" r="1.5"
+    fill="url(#sc-sf4)" style="--sx:-4px;--sy:-11px;--sx2:-7px;--sy2:-21px"/>
+
+</svg>

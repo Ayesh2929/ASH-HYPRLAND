@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  📊 ASH DOTFILES v5.0 OMEGA — CODE COVERAGE BADGE                           ║
+║  Animated radial coverage meter with precision percentage display           ║
+║  Dimensions: 138 × 28px  ·  WCAG AA  ·  GitHub-safe  ·  SVG 1.1           ║
+║                                                                              ║
+║  Color thresholds (auto-adapts based on percentage text):                   ║
+║    ≥ 90%  Catppuccin Green   #A6E3A1  — Excellent                          ║
+║    ≥ 75%  Catppuccin Yellow  #F9E2AF  — Good                               ║
+║    ≥ 50%  Catppuccin Peach   #FAB387  — Acceptable                         ║
+║    <  50%  Catppuccin Red     #F38BA8  — Needs work                         ║
+║                                                                              ║
+║  Current: 94.7% — Excellent (Catppuccin Green)                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 138 28"
+  width="138"
+  height="28"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  role="img"
+  aria-label="code coverage: 94.7%">
+
+  <title>coverage: 94.7%</title>
+  <desc>ASH Dotfiles code coverage badge — 94.7% coverage across all test suites</desc>
+
+  <defs>
+
+    <style><![CDATA[
+
+      /* ── Track 01: Label breathe ────────────────────────────────────── */
+      .cv-label { animation: cv-label-breathe 6s ease-in-out infinite; }
+
+      /* ── Track 02-03: Percentage text glow + counter animation ──────── */
+      .cv-pct   { animation: cv-pct-glow  4s ease-in-out infinite; }
+      .cv-pct-n { animation: cv-number-roll 8s ease-in-out infinite; }
+
+      /* ── Track 04: Radial arc — the main coverage meter ────────────── */
+      .cv-arc   {
+        animation:
+          cv-arc-draw   1.2s cubic-bezier(0.4,0,0.2,1) 0.1s 1 both,
+          cv-arc-pulse  4s  ease-in-out 2s infinite;
+        transform-origin: 11px 14px;
+      }
+
+      /* ── Track 05: Arc background track ────────────────────────────── */
+      .cv-arc-bg { animation: cv-arc-bg-breathe 5s ease-in-out infinite; }
+
+      /* ── Track 06: Pie sector fill ──────────────────────────────────── */
+      .cv-pie {
+        animation:
+          cv-pie-expand 1.2s cubic-bezier(0.34,1.56,0.64,1) 0.2s 1 both,
+          cv-pie-breathe 4s ease-in-out 2s infinite;
+        transform-origin: 11px 14px;
+      }
+
+      /* ── Track 07: Center dot pulse ─────────────────────────────────── */
+      .cv-center-dot { animation: cv-dot-pulse 3s ease-in-out infinite; transform-origin: 11px 14px; }
+
+      /* ── Track 08-12: Satellite tick marks (radial ticks around arc) ── */
+      .cv-tick-1 { animation: cv-tick-light 8s ease-in-out 0.0s infinite; }
+      .cv-tick-2 { animation: cv-tick-light 8s ease-in-out 1.0s infinite; }
+      .cv-tick-3 { animation: cv-tick-light 8s ease-in-out 2.0s infinite; }
+      .cv-tick-4 { animation: cv-tick-light 8s ease-in-out 3.0s infinite; }
+      .cv-tick-5 { animation: cv-tick-light 8s ease-in-out 4.0s infinite; }
+
+      /* ── Track 13: Coverage bar (horizontal) ───────────────────────── */
+      .cv-bar {
+        animation:
+          cv-bar-fill  1.0s cubic-bezier(0.4,0,0.2,1) 0.3s 1 both,
+          cv-bar-pulse 4s  ease-in-out 2s infinite;
+        transform-origin: left center;
+      }
+
+      /* ── Track 14: Shimmer sweeps ───────────────────────────────────── */
+      .cv-shim-l { animation: cv-shimmer 5s ease-in-out infinite; }
+      .cv-shim-r { animation: cv-shimmer 7s ease-in-out infinite 2.5s; }
+
+      /* ── Track 15: Top accent bar ───────────────────────────────────── */
+      .cv-accent-bar { animation: cv-accent-scan 4s ease-in-out infinite; transform-origin: 0 0; }
+
+      /* ── Track 16: Halo ─────────────────────────────────────────────── */
+      .cv-halo { animation: cv-halo-breathe 4s ease-in-out infinite; transform-origin: 69px 14px; }
+
+      /* ── Track 17-20: Data point particles ──────────────────────────── */
+      .cv-dp-1 { animation: cv-datapoint 4.2s ease-out 0.3s infinite; }
+      .cv-dp-2 { animation: cv-datapoint 5.0s ease-out 1.5s infinite; }
+      .cv-dp-3 { animation: cv-datapoint 3.8s ease-out 2.8s infinite; }
+      .cv-dp-4 { animation: cv-datapoint 4.7s ease-out 0.9s infinite; }
+
+      /* ── Track 21-23: Coverage line graph sparkline ─────────────────── */
+      .cv-spark { animation: cv-sparkline-draw 2s ease-out 0.5s 1 both; }
+      .cv-spark-dot { animation: cv-spark-dot-pulse 3s ease-in-out infinite; }
+
+      /* ── Reduced motion ─────────────────────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+        .cv-arc     { stroke-dashoffset: 0 !important; opacity: 1 !important; }
+        .cv-pie     { transform: scale(1) !important; opacity: 1 !important; }
+        .cv-bar     { transform: scaleX(1) !important; opacity: 1 !important; }
+        .cv-spark   { stroke-dashoffset: 0 !important; opacity: 1 !important; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         KEYFRAMES — Coverage-themed precision animations
+         ════════════════════════════════════════════════════════════════════ */
+
+      @keyframes cv-label-breathe {
+        0%,100% { opacity: 0.88; }
+        50%      { opacity: 1;    }
+      }
+
+      @keyframes cv-pct-glow {
+        0%,100% { filter: brightness(1);    }
+        50%      { filter: brightness(1.18); }
+      }
+
+      @keyframes cv-number-roll {
+        0%,85%,100% { transform: translateY(0); opacity: 1; }
+        87%          { transform: translateY(-3px); opacity: 0.3; }
+        89%          { transform: translateY(2.5px); opacity: 0.6; }
+        91%          { transform: translateY(-1px); opacity: 0.8; }
+        93%          { transform: translateY(0); opacity: 1; }
+      }
+
+      /* Arc draws in — stroke-dashoffset 0 = fully drawn */
+      /* circumference = 2π×8 ≈ 50.27; 94.7% of 50.27 ≈ 47.6 */
+      @keyframes cv-arc-draw {
+        from { stroke-dashoffset: 50.27; opacity: 0; }
+        to   { stroke-dashoffset: 2.65;  opacity: 1; }
+      }
+
+      @keyframes cv-arc-pulse {
+        0%,100% { filter: brightness(1);   stroke-opacity: 0.9; }
+        50%      { filter: brightness(1.15); stroke-opacity: 1; }
+      }
+
+      @keyframes cv-arc-bg-breathe {
+        0%,100% { opacity: 0.15; }
+        50%      { opacity: 0.28; }
+      }
+
+      /* Pie sector: scale from zero */
+      @keyframes cv-pie-expand {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+      }
+
+      @keyframes cv-pie-breathe {
+        0%,100% { opacity: 0.18; }
+        50%      { opacity: 0.28; }
+      }
+
+      @keyframes cv-dot-pulse {
+        0%,100% { transform: scale(1);    opacity: 0.9; }
+        50%      { transform: scale(1.25); opacity: 1;   }
+      }
+
+      @keyframes cv-tick-light {
+        0%,78%,100% { opacity: 0.3; transform: scaleY(1);    }
+        80%          { opacity: 1;   transform: scaleY(1.4);  }
+        85%          { opacity: 0.6; transform: scaleY(0.85); }
+        90%          { opacity: 1;   transform: scaleY(1.1);  }
+      }
+
+      @keyframes cv-bar-fill {
+        from { transform: scaleX(0); opacity: 0; }
+        to   { transform: scaleX(1); opacity: 1; }
+      }
+
+      @keyframes cv-bar-pulse {
+        0%,100% { opacity: 0.75; }
+        50%      { opacity: 1;    }
+      }
+
+      @keyframes cv-shimmer {
+        0%   { transform: translateX(-80px) skewX(-6deg); opacity: 0; }
+        15%  { opacity: 0.52; }
+        85%  { opacity: 0.52; }
+        100% { transform: translateX(200px) skewX(-6deg); opacity: 0; }
+      }
+
+      @keyframes cv-accent-scan {
+        0%,100% { opacity: 0.8; transform: scaleX(1);    }
+        50%      { opacity: 1;   transform: scaleX(0.97); }
+      }
+
+      @keyframes cv-halo-breathe {
+        0%,100% { opacity: 0.32; transform: scale(1);    }
+        50%      { opacity: 0.6;  transform: scale(1.07); }
+      }
+
+      @keyframes cv-datapoint {
+        0%   { transform: translate(0,0) scale(0);   opacity: 0; }
+        6%   { opacity: 1; }
+        50%  { transform: translate(var(--dx,4px),var(--dy,-9px)) scale(1.5); opacity: 0.85; }
+        90%  { opacity: 0.1; }
+        100% { transform: translate(var(--dx2,7px),var(--dy2,-16px)) scale(0); opacity: 0; }
+      }
+
+      @keyframes cv-sparkline-draw {
+        from { stroke-dashoffset: 100; opacity: 0; }
+        to   { stroke-dashoffset: 0;   opacity: 1; }
+      }
+
+      @keyframes cv-spark-dot-pulse {
+        0%,100% { r: 1.5; opacity: 0.7; }
+        50%      { r: 2.5; opacity: 1;   }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         GRADIENT LIBRARY — Catppuccin Green precision palette
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Label bg — dark with green-tint -->
+    <linearGradient id="cv-g-label" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#1A2218"/>
+      <stop offset="100%" stop-color="#1E1E2E"/>
+    </linearGradient>
+
+    <!-- Value bg — animated green-teal precision spectrum -->
+    <linearGradient id="cv-g-value" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#89DCEB;#A6E3A1;#94E2D5;#A6E3A1"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%"  stop-color="#40A02B">
+        <animate attributeName="stop-color"
+          values="#40A02B;#179299;#A6E3A1;#40A02B;#179299;#40A02B"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#94E2D5">
+        <animate attributeName="stop-color"
+          values="#94E2D5;#A6E3A1;#179299;#94E2D5;#A6E3A1;#94E2D5"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Value dark overlay -->
+    <linearGradient id="cv-g-value-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#030F05" stop-opacity="0.58"/>
+      <stop offset="100%" stop-color="#010802" stop-opacity="0.72"/>
+    </linearGradient>
+
+    <!-- Border — animated green -->
+    <linearGradient id="cv-g-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.65">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#A6E3A1"
+          dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#40A02B" stop-opacity="0.30"/>
+    </linearGradient>
+
+    <!-- Halo radial -->
+    <radialGradient id="cv-g-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.42">
+        <animate attributeName="stop-color"
+          values="#A6E3A1;#94E2D5;#A6E3A1"
+          dur="9s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Arc stroke gradient — green to teal sweep -->
+    <linearGradient id="cv-g-arc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.95"/>
+      <stop offset="60%"  stop-color="#94E2D5" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Glass -->
+    <linearGradient id="cv-g-glass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="55%"  stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="cv-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Coverage bar gradient -->
+    <linearGradient id="cv-g-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.7"/>
+      <stop offset="80%"  stop-color="#94E2D5" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Sparkline gradient — fades to transparent on right -->
+    <linearGradient id="cv-g-spark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#A6E3A1" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Datapoint particle fills -->
+    <radialGradient id="cv-dp1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#A6E3A1"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cv-dp2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#94E2D5"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cv-dp3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89B4FA"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cv-dp4" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9E2AF"/>
+      <stop offset="100%" stop-color="#F9E2AF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         FILTERS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <filter id="cv-f-shadow" x="-4%" y="-14%" width="108%" height="128%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3"
+        flood-color="#000000" flood-opacity="0.55"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="5"
+        flood-color="#A6E3A1" flood-opacity="0.12"/>
+    </filter>
+
+    <filter id="cv-f-pct-glow" x="-10%" y="-40%" width="120%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="cv-f-arc-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="cv-f-dot" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <filter id="cv-f-dp" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="cv-clip-all">
+      <rect x="0" y="0" width="138" height="28" rx="6"/>
+    </clipPath>
+    <clipPath id="cv-clip-label">
+      <rect x="0" y="0" width="62" height="28"/>
+    </clipPath>
+    <clipPath id="cv-clip-value">
+      <rect x="62" y="0" width="76" height="28"/>
+    </clipPath>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         SVG SYMBOLS — Reusable icons
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Microscope icon — code analysis -->
+    <symbol id="cv-sym-scope" viewBox="0 0 14 20">
+      <rect x="5.5" y="0"  width="3" height="8"  rx="1" fill="#A6E3A1" opacity="0.85"/>
+      <rect x="4"   y="2"  width="6" height="3"  rx="1" fill="#94E2D5" opacity="0.75"/>
+      <rect x="6"   y="7"  width="2" height="5"  rx="1" fill="#A6E3A1" opacity="0.8"/>
+      <rect x="3.5" y="11" width="7" height="2"  rx="1" fill="#A6E3A1" opacity="0.85"/>
+      <path d="M 5 13 Q 2 15 2 17 L 12 17 Q 12 15 9 13 Z"
+        fill="#94E2D5" opacity="0.7"/>
+      <line x1="2" y1="17" x2="12" y2="17"
+        stroke="#A6E3A1" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
+    </symbol>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       AMBIENT HALO
+       ════════════════════════════════════════════════════════════════════ -->
+  <ellipse class="cv-halo" cx="69" cy="14" rx="69" ry="14"
+    fill="url(#cv-g-halo)"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       BADGE BODY
+       ════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#cv-clip-all)" filter="url(#cv-f-shadow)">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LABEL SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#cv-clip-label)">
+
+      <!-- Background -->
+      <rect x="0" y="0" width="62" height="28" fill="url(#cv-g-label)"/>
+
+      <!-- Glass top -->
+      <rect x="0" y="0" width="62" height="13" fill="url(#cv-g-glass)"/>
+
+      <!-- Shimmer left -->
+      <rect class="cv-shim-l"
+        x="-80" y="0" width="36" height="28"
+        fill="url(#cv-g-shimmer)"
+        clip-path="url(#cv-clip-label)"
+        opacity="0.4"/>
+
+      <!-- ── RADIAL ARC COVERAGE METER ─────────────────────────────── -->
+      <!-- Centered at (11,14), radius 8px -->
+      <!-- Full circumference = 2π×8 = 50.27 -->
+      <!-- 94.7% coverage → stroke-dasharray = "47.6 50.27" (covered, total) -->
+
+      <g transform="translate(11, 14)">
+
+        <!-- Arc background track — full circle dimmed -->
+        <circle class="cv-arc-bg" r="8"
+          fill="none"
+          stroke="#313244"
+          stroke-width="3"
+          stroke-opacity="0.4"/>
+
+        <!-- Pie sector fill — 94.7% green fill inside arc -->
+        <!-- Uses clip-path via SVG technique for pie slice -->
+        <path class="cv-pie"
+          d="M 0 0 L 0 -8
+             A 8 8 0 1 1 -1.66 -7.82
+             Z"
+          fill="#A6E3A1"
+          opacity="0.18"
+          filter="url(#cv-f-dot)"/>
+
+        <!-- Coverage arc — stroke-dasharray technique -->
+        <!-- dasharray = [covered_length, gap] where covered = pct × circumference -->
+        <!-- 94.7% × 50.27 = 47.61, gap = 50.27 - 47.61 = 2.66 -->
+        <circle class="cv-arc"
+          r="8"
+          fill="none"
+          stroke="url(#cv-g-arc)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-dasharray="47.61 50.27"
+          stroke-dashoffset="50.27"
+          transform="rotate(-90)"
+          filter="url(#cv-f-arc-glow)"/>
+
+        <!-- ── RADIAL TICK MARKS (5 major ticks: 0 25 50 75 100%) ──── -->
+        <!-- Each tick is a small line extending outward from radius 8 -->
+
+        <!-- 0% tick — starting position -->
+        <g class="cv-tick-1" style="transform-origin:0px -9px">
+          <line x1="0" y1="-9" x2="0" y2="-11"
+            stroke="#A6E3A1" stroke-width="1" stroke-linecap="round"
+            transform="rotate(0)" opacity="0.7"/>
+        </g>
+        <!-- 25% tick -->
+        <g class="cv-tick-2" style="transform-origin:9px 0px">
+          <line x1="9" y1="0" x2="11" y2="0"
+            stroke="#A6E3A1" stroke-width="1" stroke-linecap="round"
+            transform="rotate(0)" opacity="0.5"/>
+        </g>
+        <!-- 50% tick -->
+        <g class="cv-tick-3" style="transform-origin:0px 9px">
+          <line x1="0" y1="9" x2="0" y2="11"
+            stroke="#A6E3A1" stroke-width="1" stroke-linecap="round"
+            opacity="0.5"/>
+        </g>
+        <!-- 75% tick -->
+        <g class="cv-tick-4" style="transform-origin:-9px 0px">
+          <line x1="-9" y1="0" x2="-11" y2="0"
+            stroke="#A6E3A1" stroke-width="1" stroke-linecap="round"
+            opacity="0.5"/>
+        </g>
+        <!-- 94.7% end tick — where arc terminates -->
+        <g class="cv-tick-5"
+          style="transform-origin:-1.66px -7.82px"
+          transform="rotate(-19)">
+          <line x1="0" y1="-9" x2="0" y2="-11"
+            stroke="#A6E3A1" stroke-width="1.5" stroke-linecap="round"
+            opacity="0.9"/>
+        </g>
+
+        <!-- Center hub dot -->
+        <circle class="cv-center-dot" r="2.5"
+          fill="#A6E3A1" opacity="0.85"
+          filter="url(#cv-f-dot)"/>
+
+        <!-- Inner ring detail -->
+        <circle r="4.5"
+          fill="none"
+          stroke="#313244"
+          stroke-width="0.75"
+          opacity="0.4"/>
+
+      </g>
+
+      <!-- ── SPARKLINE HISTORY (mini trend graph) ───────────────────── -->
+      <!-- Shows coverage history: 89→91→90→92→93→94.7% upward trend -->
+      <g transform="translate(24, 20)">
+        <path class="cv-spark"
+          d="M 0,7 L 6,5 L 12,6 L 18,3 L 24,2 L 30,0"
+          fill="none"
+          stroke="url(#cv-g-spark)"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="100"
+          stroke-dashoffset="100"
+          opacity="0.6"/>
+
+        <!-- Endpoint dot — current coverage highlight -->
+        <circle class="cv-spark-dot" cx="30" cy="0" r="1.5"
+          fill="#A6E3A1" opacity="0.9"/>
+      </g>
+
+      <!-- "coverage" label -->
+      <text class="cv-label"
+        x="25" y="14"
+        font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="7.5"
+        font-weight="600"
+        letter-spacing="0.3"
+        fill="#A6ADC8">coverage</text>
+
+    </g>
+
+    <!-- ── DIVIDER ─────────────────────────────────────────────────────── -->
+    <rect x="61" y="0" width="1" height="28" fill="#A6E3A1" opacity="0.35"/>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         VALUE SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#cv-clip-value)">
+
+      <!-- Animated gradient base -->
+      <rect x="62" y="0" width="76" height="28" fill="url(#cv-g-value)"/>
+      <!-- Dark overlay -->
+      <rect x="62" y="0" width="76" height="28" fill="url(#cv-g-value-dark)"/>
+      <!-- Glass top -->
+      <rect x="62" y="0" width="76" height="12" fill="url(#cv-g-glass)"/>
+
+      <!-- Shimmer right -->
+      <rect class="cv-shim-r"
+        x="22" y="0" width="30" height="28"
+        fill="url(#cv-g-shimmer)"
+        clip-path="url(#cv-clip-value)"
+        opacity="0.52"/>
+
+      <!-- ── HORIZONTAL COVERAGE BAR ────────────────────────────────── -->
+      <!-- Thin bar showing 94.7% fill — at top of value section -->
+      <!-- Total width = 73px. 94.7% = 69.1px -->
+      <rect x="63" y="1" width="73" height="2" rx="1"
+        fill="#313244" opacity="0.4"/>
+      <rect class="cv-bar"
+        x="63" y="1" width="69.1" height="2" rx="1"
+        fill="url(#cv-g-bar)"
+        style="transform-origin:63px 2px"/>
+
+      <!-- ── PERCENTAGE DISPLAY ─────────────────────────────────────── -->
+      <!-- "94.7" -->
+      <g class="cv-pct-n">
+        <text class="cv-pct"
+          x="68" y="19.5"
+          font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+          font-size="12.5"
+          font-weight="800"
+          letter-spacing="-0.5"
+          fill="#CDD6F4"
+          filter="url(#cv-f-pct-glow)">94.7</text>
+      </g>
+
+      <!-- "%" suffix -->
+      <text
+        x="88.5" y="19.5"
+        font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="10"
+        font-weight="700"
+        fill="#A6E3A1"
+        opacity="0.9">%</text>
+
+      <!-- Precision grade indicator -->
+      <text x="100" y="14"
+        font-family="'SF Mono',monospace"
+        font-size="7.5"
+        font-weight="600"
+        letter-spacing="0.5"
+        fill="#A6E3A1"
+        opacity="0.75">A+</text>
+
+      <!-- Checkmark to left of grade -->
+      <path d="M 97 11.5 L 98.5 13 L 101.5 10"
+        fill="none"
+        stroke="#A6E3A1"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.7"/>
+
+      <!-- ── MINI STAT LINE ─────────────────────────────────────────── -->
+      <text x="63" y="25.5"
+        font-family="'SF Mono',monospace"
+        font-size="5.5"
+        letter-spacing="0.3"
+        fill="#A6E3A1"
+        opacity="0.4">4,821 / 5,093 lines</text>
+
+    </g>
+
+    <!-- ── OUTER BORDER ───────────────────────────────────────────────── -->
+    <rect x="0.5" y="0.5" width="137" height="27" rx="5.5"
+      fill="none"
+      stroke="url(#cv-g-border)"
+      stroke-width="1"/>
+
+    <!-- ── TOP ACCENT BAR ─────────────────────────────────────────────── -->
+    <rect class="cv-accent-bar"
+      x="0" y="0" width="138" height="1.5" rx="0.75"
+      fill="url(#cv-g-value)"
+      opacity="0.85"
+      style="transform-origin:0 0"/>
+
+    <!-- ── BOTTOM EDGE ─────────────────────────────────────────────────── -->
+    <rect x="0" y="26.5" width="138" height="0.75" rx="0.375"
+      fill="#A6E3A1" opacity="0.2"/>
+
+    <!-- ── LEFT ACCENT EDGE ───────────────────────────────────────────── -->
+    <rect x="0" y="0" width="1.5" height="28" rx="0.75"
+      fill="#A6E3A1" opacity="0.32"/>
+
+  </g>
+
+  <!-- ── DATA POINT PARTICLES ───────────────────────────────────────────── -->
+  <circle class="cv-dp-1" cx="120" cy="22" r="2.2"
+    fill="url(#cv-dp1)" style="--dx:3px;--dy:-8px;--dx2:5px;--dy2:-15px"/>
+  <circle class="cv-dp-2" cx="124" cy="18" r="1.8"
+    fill="url(#cv-dp2)" style="--dx:-3px;--dy:-7px;--dx2:-5px;--dy2:-13px"/>
+  <circle class="cv-dp-3" cx="117" cy="24" r="2"
+    fill="url(#cv-dp3)" style="--dx:4px;--dy:-9px;--dx2:8px;--dy2:-17px"/>
+  <circle class="cv-dp-4" cx="122" cy="26" r="1.5"
+    fill="url(#cv-dp4)" style="--dx:-4px;--dy:-10px;--dx2:-7px;--dy2:-19px"/>
+
+</svg>
