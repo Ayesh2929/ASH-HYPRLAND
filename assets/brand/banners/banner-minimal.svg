@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ◻️  ASH DOTFILES v5.0 OMEGA — MINIMAL BANNER                                            ║
+║                                                                                          ║
+║  Philosophy: Maximum signal, minimum noise.                                              ║
+║  Every pixel earns its place. Every element is intentional.                             ║
+║  Inspired by Braun design principles & Swiss International Style.                       ║
+║                                                                                          ║
+║  Dimensions: 1280 × 400px                                                               ║
+║  Palette: Catppuccin Mocha — restrained to 5 values                                    ║
+║    Base:      #1E1E2E  (background)                                                     ║
+║    Surface:   #313244  (elevated)                                                       ║
+║    Overlay:   #6C7086  (muted)                                                          ║
+║    Text:      #CDD6F4  (primary text)                                                   ║
+║    Accent:    #89B4FA  (single accent color)                                            ║
+║                                                                                          ║
+║  Animation: Subtle breathing · Single accent wave · Refined micro-interactions          ║
+║  Design principles: Grid alignment · Golden ratio typography · Generous whitespace       ║
+╚══════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 1280 400"
+  width="1280"
+  height="400"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  color-interpolation="linearRGB"
+  role="img"
+  aria-labelledby="bm-title bm-desc">
+
+  <title id="bm-title">ASH Dotfiles v5.0 OMEGA — Minimal Banner</title>
+  <desc id="bm-desc">
+    ASH Dotfiles minimal banner. Swiss International Style design with
+    Catppuccin Mocha palette. Clean, purposeful, precise.
+    The most advanced Hyprland dotfiles repository.
+  </desc>
+
+  <defs>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         MINIMAL ANIMATION SYSTEM
+         Only what serves the content. Nothing decorative for its own sake.
+         ════════════════════════════════════════════════════════════════════ -->
+    <style><![CDATA[
+
+      /* ── Design token: 8px grid system ─────────────────────────────── */
+      :root {
+        --grid:     8px;
+        --accent:   #89B4FA;
+        --text:     #CDD6F4;
+        --muted:    #6C7086;
+        --surface:  #313244;
+        --base:     #1E1E2E;
+      }
+
+      /* ── Single accent wave — the ONE animation ─────────────────────── */
+      .bm-wave {
+        animation: bm-wave-flow 12s ease-in-out infinite;
+        transform-origin: 640px 340px;
+      }
+
+      /* ── Accent line — geometric precision ─────────────────────────── */
+      .bm-accent-line {
+        animation: bm-accent-breathe 6s ease-in-out infinite;
+      }
+
+      /* ── Mark — very subtle float ───────────────────────────────────── */
+      .bm-mark {
+        animation: bm-mark-rest 8s ease-in-out infinite;
+      }
+
+      /* ── Text — fade in once, stay ──────────────────────────────────── */
+      .bm-title-in  { animation: bm-appear 0.8s ease-out 0.2s 1 both; }
+      .bm-sub-in    { animation: bm-appear 0.8s ease-out 0.4s 1 both; }
+      .bm-tag-in    { animation: bm-appear 0.6s ease-out 0.6s 1 both; }
+      .bm-pill-in-1 { animation: bm-rise   0.5s ease-out 0.8s 1 both; }
+      .bm-pill-in-2 { animation: bm-rise   0.5s ease-out 0.9s 1 both; }
+      .bm-pill-in-3 { animation: bm-rise   0.5s ease-out 1.0s 1 both; }
+      .bm-pill-in-4 { animation: bm-rise   0.5s ease-out 1.1s 1 both; }
+      .bm-stat-in   { animation: bm-appear 0.6s ease-out 1.2s 1 both; }
+
+      /* ── Dot grid — breathe ─────────────────────────────────────────── */
+      .bm-dot-grid  { animation: bm-grid-breathe 8s ease-in-out infinite; }
+
+      /* ── Separator line draw ────────────────────────────────────────── */
+      .bm-sep { animation: bm-line-draw 0.6s ease-out 0.5s 1 both; }
+
+      /* ── Cursor blink (code aesthetic) ─────────────────────────────── */
+      .bm-cursor { animation: bm-cursor-blink 1.2s step-end infinite; }
+
+      /* ── Reduced motion ─────────────────────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+        .bm-title-in, .bm-sub-in, .bm-tag-in,
+        .bm-pill-in-1, .bm-pill-in-2, .bm-pill-in-3, .bm-pill-in-4,
+        .bm-stat-in { opacity: 1; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         KEYFRAMES — Minimal, purposeful
+         ════════════════════════════════════════════════════════════════════ */
+
+      @keyframes bm-wave-flow {
+        0%,100% { transform: translateY(0)   scaleX(1);    }
+        50%      { transform: translateY(-8px) scaleX(1.01); }
+      }
+
+      @keyframes bm-accent-breathe {
+        0%,100% { opacity: 0.6; }
+        50%      { opacity: 1;   }
+      }
+
+      @keyframes bm-mark-rest {
+        0%,100% { transform: translateY(0);   }
+        50%      { transform: translateY(-4px); }
+      }
+
+      @keyframes bm-appear {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+
+      @keyframes bm-rise {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0);   }
+      }
+
+      @keyframes bm-grid-breathe {
+        0%,100% { opacity: 0.12; }
+        50%      { opacity: 0.22; }
+      }
+
+      @keyframes bm-line-draw {
+        from { transform: scaleY(0); transform-origin: top; }
+        to   { transform: scaleY(1); transform-origin: top; }
+      }
+
+      @keyframes bm-cursor-blink {
+        0%,100% { opacity: 1; }
+        50%      { opacity: 0; }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         MINIMAL GRADIENT LIBRARY — 5 values only
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Background — base to slightly elevated -->
+    <linearGradient id="bm-g-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1A1A2A"/>
+      <stop offset="60%"  stop-color="#1E1E2E"/>
+      <stop offset="100%" stop-color="#21212E"/>
+    </linearGradient>
+
+    <!-- Single accent gradient — the ONLY color -->
+    <linearGradient id="bm-g-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0.7"/>
+    </linearGradient>
+
+    <!-- Accent wave gradient — fades at edges -->
+    <linearGradient id="bm-g-wave" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0"/>
+      <stop offset="10%"  stop-color="#89B4FA" stop-opacity="0.8"/>
+      <stop offset="50%"  stop-color="#89B4FA" stop-opacity="0.9"/>
+      <stop offset="90%"  stop-color="#89B4FA" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Wave fill -->
+    <linearGradient id="bm-g-wave-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Mark gradient — accent on dark -->
+    <radialGradient id="bm-g-mark" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#313244"/>
+      <stop offset="100%" stop-color="#1E1E2E"/>
+    </radialGradient>
+
+    <!-- Mark glass — very subtle highlight -->
+    <radialGradient id="bm-g-mark-glass" cx="38%" cy="28%" r="48%">
+      <stop offset="0%"   stop-color="#CDD6F4" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#CDD6F4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Left panel fade — text always legible -->
+    <linearGradient id="bm-g-text-area" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#1E1E2E" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#1E1E2E" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         MINIMAL FILTERS — restraint is craft
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Single accent glow — used sparingly -->
+    <filter id="bm-f-accent-glow" x="-20%" y="-60%" width="140%" height="220%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#89B4FA" flood-opacity="0.35" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Text rendering optimization -->
+    <filter id="bm-f-text-crisp">
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="1"/>
+      </feComponentTransfer>
+    </filter>
+
+    <!-- Subtle mark glow -->
+    <filter id="bm-f-mark-glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12"
+        flood-color="#89B4FA" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="bm-clip-banner">
+      <rect x="0" y="0" width="1280" height="400" rx="0"/>
+    </clipPath>
+
+    <clipPath id="bm-clip-mark">
+      <circle cx="72" cy="200" r="56"/>
+    </clipPath>
+
+    <clipPath id="bm-clip-wave">
+      <rect x="0" y="280" width="1280" height="120"/>
+    </clipPath>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         PATTERNS — Micro-detail at appropriate scale
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- 8px dot grid — structural rhythm -->
+    <pattern id="bm-pat-dots" x="0" y="0" width="32" height="32"
+      patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="1" fill="#89B4FA" opacity="0.9"/>
+    </pattern>
+
+    <!-- Horizontal rule pattern -->
+    <pattern id="bm-pat-hr" x="0" y="0" width="1280" height="40"
+      patternUnits="userSpaceOnUse">
+      <line x1="0" y1="40" x2="1280" y2="40"
+        stroke="#313244" stroke-width="1"/>
+    </pattern>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LAYER 00 — GROUND
+       Pure, uncluttered background. The canvas breathes.
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#bm-clip-banner)">
+
+  <rect x="0" y="0" width="1280" height="400" fill="url(#bm-g-bg)"/>
+
+  <!-- ── STRUCTURAL DOT GRID — 8px rhythm ───────────────────────────── -->
+  <rect class="bm-dot-grid"
+    x="0" y="0" width="1280" height="400"
+    fill="url(#bm-pat-dots)"/>
+
+  <!-- ── HORIZONTAL RULE STRUCTURE ─────────────────────────────────── -->
+  <!-- Top rule — golden ratio placement (400 × 0.618 ≈ 247, inverted: 400 - 247 = 153) -->
+  <line x1="160" y1="96" x2="1280" y2="96"
+    stroke="#313244" stroke-width="1" opacity="0.6"/>
+
+  <!-- Main horizontal rule — visual center alignment -->
+  <line x1="160" y1="320" x2="1280" y2="320"
+    stroke="#313244" stroke-width="1" opacity="0.6"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LAYER 01 — SINGLE ACCENT WAVE
+       One wave. One color. Pure form.
+       ════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Wave fill area -->
+  <path class="bm-wave"
+    d="M 0 340
+       C 160 316, 320 364, 480 340
+       C 640 316, 800 364, 960 340
+       C 1120 316, 1200 348, 1280 336
+       L 1280 400 L 0 400 Z"
+    fill="url(#bm-g-wave-fill)"
+    clip-path="url(#bm-clip-wave)"/>
+
+  <!-- Wave line — the single accent mark -->
+  <path class="bm-wave bm-accent-line"
+    d="M 0 340
+       C 160 316, 320 364, 480 340
+       C 640 316, 800 364, 960 340
+       C 1120 316, 1200 348, 1280 336"
+    fill="none"
+    stroke="url(#bm-g-wave)"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    filter="url(#bm-f-accent-glow)"
+    clip-path="url(#bm-clip-wave)"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LAYER 02 — MARK ICON
+       Geometric. Contained. Purposeful.
+       ════════════════════════════════════════════════════════════════════════ -->
+
+  <g class="bm-mark" filter="url(#bm-f-mark-glow)">
+
+    <!-- Circle — the mark's container -->
+    <circle cx="72" cy="200" r="56"
+      fill="url(#bm-g-mark)"
+      stroke="#89B4FA"
+      stroke-width="1"
+      stroke-opacity="0.4"/>
+
+    <!-- Inner ring — structural detail -->
+    <circle cx="72" cy="200" r="50"
+      fill="none"
+      stroke="#313244"
+      stroke-width="1"/>
+
+    <!-- Glass microhighlight -->
+    <ellipse cx="72" cy="176" rx="36" ry="20"
+      fill="url(#bm-g-mark-glass)"
+      clip-path="url(#bm-clip-mark)"/>
+
+    <!-- Minimal wave inside mark — 1 line, accent color -->
+    <g clip-path="url(#bm-clip-mark)">
+      <path class="bm-wave"
+        d="M 16 204
+           C 28 194, 40 214, 52 204
+           C 64 194, 76 214, 88 204
+           C 100 194, 112 210, 128 204"
+        fill="none"
+        stroke="#89B4FA"
+        stroke-width="2"
+        stroke-linecap="round"
+        opacity="0.7"/>
+    </g>
+
+    <!-- Letter "A" — geometric, precise -->
+    <!-- Using coordinate precision: center at (72,200), size 44px -->
+    <text x="72" y="215"
+      font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+      font-size="44"
+      font-weight="700"
+      text-anchor="middle"
+      fill="#CDD6F4"
+      letter-spacing="-1">A</text>
+
+    <!-- Accent dot — bottom indicator -->
+    <circle cx="72" cy="246" r="2.5"
+      fill="#89B4FA"
+      opacity="0.8">
+      <animate attributeName="opacity"
+        values="0.8;1;0.8" dur="3s" repeatCount="indefinite"/>
+    </circle>
+
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LAYER 03 — TYPOGRAPHY SYSTEM
+       Swiss grid. 8pt baseline. Optical alignment.
+       ════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Vertical separator — structural precision -->
+  <line class="bm-sep"
+    x1="160" y1="96" x2="160" y2="320"
+    stroke="#89B4FA"
+    stroke-width="1"
+    opacity="0.4"
+    style="transform-origin: 160px 96px"/>
+
+  <!-- ── LEFT SECTION — Brand identity ──────────────────────────────── -->
+  <g transform="translate(184, 0)">
+
+    <!-- ── HEADLINE — Maximum weight, optical sizing ─────────────────── -->
+    <g class="bm-title-in" opacity="0">
+
+      <!-- "ASH" — the mark -->
+      <!-- Tracking: -3 (tight, professional) -->
+      <!-- Size: 80px — dominant, commanding -->
+
+      <text x="0" y="183"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="80"
+        font-weight="800"
+        letter-spacing="-3"
+        fill="#CDD6F4">A</text>
+
+      <!-- S — accent color, single color punch -->
+      <text x="58" y="183"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="80"
+        font-weight="800"
+        letter-spacing="-3"
+        fill="#89B4FA"
+        filter="url(#bm-f-accent-glow)">S</text>
+
+      <text x="114" y="183"
+        font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+        font-size="80"
+        font-weight="800"
+        letter-spacing="-3"
+        fill="#CDD6F4">H</text>
+
+    </g>
+
+    <!-- ── DESCRIPTOR — Swiss style, tracked caps ─────────────────────── -->
+    <g class="bm-sub-in" opacity="0">
+      <text x="2" y="205"
+        font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="11"
+        font-weight="500"
+        letter-spacing="6"
+        fill="#6C7086">DOTFILES</text>
+    </g>
+
+    <!-- ── ACCENT UNDERLINE — precise 1px rule ────────────────────────── -->
+    <rect class="bm-accent-line" x="0" y="212" width="180" height="1"
+      fill="#89B4FA" opacity="0.5">
+      <animate attributeName="width" values="0;180" dur="0.8s" fill="freeze"
+        begin="0.4s"/>
+    </rect>
+
+    <!-- ── VERSION MARKER ──────────────────────────────────────────────── -->
+    <g class="bm-tag-in" opacity="0" transform="translate(0, 224)">
+      <text x="0" y="14"
+        font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="10"
+        font-weight="500"
+        letter-spacing="2"
+        fill="#45475A">v5.0.0-omega</text>
+      <!-- Blinking cursor — code authenticity -->
+      <rect class="bm-cursor" x="74" y="4" width="6" height="12"
+        fill="#89B4FA" opacity="0.7"/>
+    </g>
+
+  </g>
+
+  <!-- ── VERTICAL RULE SECONDARY ──────────────────────────────────────── -->
+  <line x1="440" y1="112" x2="440" y2="304"
+    stroke="#313244" stroke-width="1" opacity="0.8"/>
+
+  <!-- ── RIGHT SECTION — Content ────────────────────────────────────── -->
+  <g transform="translate(464, 0)">
+
+    <!-- ── TAGLINE — Large, readable, purposeful ─────────────────────── -->
+    <g class="bm-title-in" opacity="0">
+      <text x="0" y="148"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="22"
+        font-weight="500"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">The most advanced Hyprland</text>
+      <text x="0" y="175"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="22"
+        font-weight="500"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">dotfiles repository.</text>
+    </g>
+
+    <!-- ── DESCRIPTOR LINE ───────────────────────────────────────────── -->
+    <g class="bm-sub-in" opacity="0">
+      <text x="0" y="202"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="13"
+        font-weight="400"
+        letter-spacing="0"
+        fill="#6C7086">Production-grade · AI-native · Wayland-native</text>
+    </g>
+
+    <!-- ── FEATURE TAGS — Restrained, functional ─────────────────────── -->
+    <g transform="translate(0, 220)">
+
+      <!-- Tag 1 -->
+      <g class="bm-pill-in-1" opacity="0">
+        <rect x="0" y="0" width="90" height="22" rx="2"
+          fill="none"
+          stroke="#313244"
+          stroke-width="1"/>
+        <text x="45" y="15"
+          font-family="'SF Mono',monospace"
+          font-size="9"
+          font-weight="500"
+          letter-spacing="1.5"
+          fill="#6C7086"
+          text-anchor="middle">250+ THEMES</text>
+      </g>
+
+      <!-- Tag 2 -->
+      <g class="bm-pill-in-2" opacity="0" transform="translate(98, 0)">
+        <rect x="0" y="0" width="94" height="22" rx="2"
+          fill="none"
+          stroke="#313244"
+          stroke-width="1"/>
+        <text x="47" y="15"
+          font-family="'SF Mono',monospace"
+          font-size="9"
+          font-weight="500"
+          letter-spacing="1.5"
+          fill="#6C7086"
+          text-anchor="middle">150+ PLUGINS</text>
+      </g>
+
+      <!-- Tag 3 — accent: this one is special -->
+      <g class="bm-pill-in-3" opacity="0" transform="translate(200, 0)">
+        <rect x="0" y="0" width="74" height="22" rx="2"
+          fill="rgba(137,180,250,0.06)"
+          stroke="#89B4FA"
+          stroke-width="1"
+          stroke-opacity="0.4"/>
+        <text x="37" y="15"
+          font-family="'SF Mono',monospace"
+          font-size="9"
+          font-weight="500"
+          letter-spacing="1.5"
+          fill="#89B4FA"
+          text-anchor="middle">AI-NATIVE</text>
+      </g>
+
+      <!-- Tag 4 -->
+      <g class="bm-pill-in-4" opacity="0" transform="translate(282, 0)">
+        <rect x="0" y="0" width="82" height="22" rx="2"
+          fill="none"
+          stroke="#313244"
+          stroke-width="1"/>
+        <text x="41" y="15"
+          font-family="'SF Mono',monospace"
+          font-size="9"
+          font-weight="500"
+          letter-spacing="1.5"
+          fill="#6C7086"
+          text-anchor="middle">HYPRLAND</text>
+      </g>
+
+    </g>
+
+    <!-- ── STATISTICS ROW — Data visualization, minimal ───────────────── -->
+    <g class="bm-stat-in" opacity="0" transform="translate(0, 268)">
+
+      <!-- Stat items: label · value · unit -->
+      <!-- All aligned to 8px grid -->
+
+      <!-- 5,000+ files -->
+      <text x="0"   y="12"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">5K+</text>
+      <text x="0"   y="26"
+        font-family="'SF Mono',monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#45475A">FILES</text>
+
+      <!-- Divider -->
+      <line x1="52" y1="2" x2="52" y2="28"
+        stroke="#313244" stroke-width="1"/>
+
+      <!-- 450K+ LOC -->
+      <text x="60"  y="12"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">450K</text>
+      <text x="60"  y="26"
+        font-family="'SF Mono',monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#45475A">LINES</text>
+
+      <!-- Divider -->
+      <line x1="126" y1="2" x2="126" y2="28"
+        stroke="#313244" stroke-width="1"/>
+
+      <!-- 900+ dirs -->
+      <text x="134" y="12"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">900+</text>
+      <text x="134" y="26"
+        font-family="'SF Mono',monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#45475A">DIRS</text>
+
+      <!-- Divider -->
+      <line x1="196" y1="2" x2="196" y2="28"
+        stroke="#313244" stroke-width="1"/>
+
+      <!-- 8 distros -->
+      <text x="204" y="12"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="-0.5"
+        fill="#CDD6F4">8</text>
+      <text x="204" y="26"
+        font-family="'SF Mono',monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#45475A">DISTROS</text>
+
+      <!-- Divider -->
+      <line x1="236" y1="2" x2="236" y2="28"
+        stroke="#313244" stroke-width="1"/>
+
+      <!-- MIT -->
+      <text x="244" y="12"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="-0.5"
+        fill="#89B4FA">MIT</text>
+      <text x="244" y="26"
+        font-family="'SF Mono',monospace"
+        font-size="8"
+        letter-spacing="2"
+        fill="#45475A">LICENSE</text>
+
+    </g>
+
+  </g>
+  <!-- End right section -->
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LAYER 04 — STRUCTURAL FRAME
+       The border IS the design. Precise. Intentional.
+       ════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Top rule — 1px, full width -->
+  <rect x="0" y="0"   width="1280" height="1" fill="#313244" opacity="0.8"/>
+
+  <!-- Bottom rule — accent color, the ONE ornamental element -->
+  <rect x="0" y="399" width="1280" height="1"
+    fill="#89B4FA" opacity="0.4"
+    filter="url(#bm-f-accent-glow)"/>
+
+  <!-- Left accent rule — structural anchor -->
+  <rect x="0" y="0"   width="1"  height="400" fill="#89B4FA" opacity="0.3"/>
+
+  <!-- Top-left corner cross — precise intersection mark -->
+  <g opacity="0.5">
+    <line x1="0"  y1="40" x2="16" y2="40" stroke="#89B4FA" stroke-width="1"/>
+    <line x1="40" y1="0"  x2="40" y2="16" stroke="#89B4FA" stroke-width="1"/>
+    <circle cx="40" cy="40" r="1.5" fill="#89B4FA" opacity="0.6"/>
+  </g>
+
+  <!-- Bottom-right corner mark -->
+  <g opacity="0.3">
+    <line x1="1240" y1="400" x2="1240" y2="384" stroke="#313244" stroke-width="1"/>
+    <line x1="1280" y1="360" x2="1264" y2="360" stroke="#313244" stroke-width="1"/>
+    <circle cx="1240" cy="360" r="1.5" fill="#313244"/>
+  </g>
+
+  <!-- ── REGISTRATION MARKS — Swiss precision ───────────────────────── -->
+  <!-- Four corner registration crosses -->
+  <g opacity="0.2" stroke="#89B4FA" stroke-width="0.5">
+    <!-- TL -->
+    <line x1="22" y1="16" x2="22" y2="24"/>
+    <line x1="18" y1="20" x2="26" y2="20"/>
+    <!-- TR -->
+    <line x1="1258" y1="16" x2="1258" y2="24"/>
+    <line x1="1254" y1="20" x2="1262" y2="20"/>
+    <!-- BL -->
+    <line x1="22" y1="376" x2="22" y2="384"/>
+    <line x1="18" y1="380" x2="26" y2="380"/>
+    <!-- BR -->
+    <line x1="1258" y1="376" x2="1258" y2="384"/>
+    <line x1="1254" y1="380" x2="1262" y2="380"/>
+  </g>
+
+  <!-- ── PAGE NUMBER / BUILD INFO — Bottom right ─────────────────────── -->
+  <g opacity="0.3">
+    <text x="1256" y="385"
+      font-family="'SF Mono','JetBrains Mono',monospace"
+      font-size="8"
+      font-weight="400"
+      letter-spacing="1"
+      fill="#45475A"
+      text-anchor="end">ASH 5.0 OMEGA</text>
+    <text x="1256" y="395"
+      font-family="'SF Mono','JetBrains Mono',monospace"
+      font-size="7"
+      letter-spacing="0.5"
+      fill="#45475A"
+      text-anchor="end">CATPPUCCIN MOCHA</text>
+  </g>
+
+  </g>
+  <!-- End clip group -->
+
+</svg>

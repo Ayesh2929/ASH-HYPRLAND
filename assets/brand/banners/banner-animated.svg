@@ -1,0 +1,1222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════════════════╗
+║  🎬 ASH DOTFILES v5.0 OMEGA — CINEMATIC ANIMATED BANNER                                 ║
+║                                                                                          ║
+║  Full cinema-grade SVG animation system.                                                 ║
+║  24 simultaneous animation tracks · 60fps-optimized keyframes                           ║
+║  Dimensions: 1280 × 400px                                                               ║
+║                                                                                          ║
+║  Animation Timeline:                                                                     ║
+║    0.0s → Boot scan line sweeps left-to-right                                           ║
+║    0.2s → Background grid materializes                                                   ║
+║    0.4s → Mark icon scales up with elastic bounce                                       ║
+║    0.6s → Wave system flows in from left                                                 ║
+║    0.8s → Letter A rises with spring physics                                            ║
+║    0.9s → Letter S blooms with gradient glow                                            ║
+║    1.0s → Letter H slides in with trail                                                  ║
+║    1.2s → Separator line draws top-to-bottom                                            ║
+║    1.4s → Tagline types in character by character                                       ║
+║    1.6s → Feature pills bounce in sequentially                                          ║
+║    2.0s → ∞ Idle loop: waves · particles · orbits · stars · shimmer                    ║
+║                                                                                          ║
+║  Tracks: waves·mark·letters·particles·constellation·shimmer·scan·grid·pills·status      ║
+╚══════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 1280 400"
+  width="1280"
+  height="400"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  color-interpolation="linearRGB"
+  color-interpolation-filters="linearRGB"
+  role="img"
+  aria-labelledby="ba-title ba-desc">
+
+  <title id="ba-title">ASH Dotfiles v5.0 OMEGA — Animated Banner</title>
+  <desc id="ba-desc">
+    Fully animated ASH Dotfiles banner with cinematic boot sequence,
+    wave physics, particle system, and continuous idle animations.
+    Catppuccin Mocha palette. 1280×400px.
+  </desc>
+
+  <defs>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         ⚡ MASTER ANIMATION STYLESHEET — 24 tracks
+         ════════════════════════════════════════════════════════════════════ -->
+    <style><![CDATA[
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 01 — BOOT SCAN LINE (runs once 0s→1s)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-boot-scan {
+        animation: ba-boot-scan-run 1.2s cubic-bezier(0.4,0,0.2,1) 0s 1 both;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 02 — BACKGROUND GRID MATERIALIZE (0.2s→0.8s, one-shot)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-grid-appear {
+        animation: ba-grid-materialize 0.6s ease-out 0.2s 1 both;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 03-09 — WAVE SYSTEM (boot-in + continuous idle)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-w1 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.6s 1 both,
+          ba-wave-flow-a    8s  ease-in-out 2s infinite;
+        transform-origin: 640px 200px;
+      }
+      .ba-w2 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.7s 1 both,
+          ba-wave-flow-b   10s  ease-in-out 2s infinite;
+        transform-origin: 640px 200px;
+      }
+      .ba-w3 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.8s 1 both,
+          ba-wave-flow-a   13s  ease-in-out 2s infinite 1.5s;
+        transform-origin: 640px 200px;
+      }
+      .ba-w4 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.85s 1 both,
+          ba-wave-flow-b    7s  ease-in-out 2s infinite;
+        transform-origin: 640px 200px;
+      }
+      .ba-w5 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.9s 1 both,
+          ba-wave-flow-a   17s  ease-in-out 2s infinite 3s;
+        transform-origin: 640px 200px;
+      }
+      .ba-w6 {
+        animation:
+          ba-wave-appear    0.8s ease-out 0.95s 1 both,
+          ba-wave-flow-b   22s  ease-in-out 2s infinite 5s;
+        transform-origin: 640px 200px;
+      }
+      .ba-w7 {
+        animation:
+          ba-wave-appear    0.8s ease-out 1.0s 1 both,
+          ba-wave-flow-a   28s  ease-in-out 2s infinite 7s;
+        transform-origin: 640px 200px;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 10 — MARK ICON BOOT + FLOAT
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-mark-body {
+        animation:
+          ba-mark-spring-in 0.9s cubic-bezier(0.34,1.56,0.64,1) 0.4s 1 both,
+          ba-mark-float     7s  ease-in-out 2.5s infinite;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 11-12 — MARK RINGS SPIN
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-ring-cw  {
+        animation:
+          ba-ring-appear  0.5s ease-out 0.6s 1 both,
+          ba-spin-cw     30s  linear 2s infinite;
+        transform-origin: 76px 200px;
+      }
+      .ba-ring-ccw {
+        animation:
+          ba-ring-appear  0.5s ease-out 0.65s 1 both,
+          ba-spin-ccw    22s  linear 2s infinite;
+        transform-origin: 76px 200px;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 13 — MARK ORBIT DOTS
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-orbit-a {
+        animation:
+          ba-ring-appear 0.4s ease-out 1s 1 both,
+          ba-spin-cw     9s  linear 2s infinite;
+        transform-origin: 76px 200px;
+      }
+      .ba-orbit-b {
+        animation:
+          ba-ring-appear 0.4s ease-out 1.1s 1 both,
+          ba-spin-ccw   13s  linear 2s infinite;
+        transform-origin: 76px 200px;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 14-16 — LETTER BOOT CHOREOGRAPHY
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-letter-a {
+        animation:
+          ba-letter-rise  0.7s cubic-bezier(0.34,1.56,0.64,1) 0.8s  1 both,
+          ba-letter-idle  5s  ease-in-out 2.5s infinite;
+      }
+      .ba-letter-s {
+        animation:
+          ba-letter-bloom 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.95s 1 both,
+          ba-letter-idle  5s  ease-in-out 2.7s infinite;
+      }
+      .ba-letter-h {
+        animation:
+          ba-letter-slide 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.1s  1 both,
+          ba-letter-idle  5s  ease-in-out 2.9s infinite;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 17 — SEPARATOR LINE DRAW
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-separator {
+        animation: ba-line-draw 0.5s cubic-bezier(0.4,0,0.2,1) 1.2s 1 both;
+        transform-origin: 214px 96px;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 18 — UNDERLINE SWEEP
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-underline {
+        animation: ba-underline-sweep 0.8s cubic-bezier(0.4,0,0.2,1) 1.15s 1 both;
+        transform-origin: left center;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 19 — RIGHT PANEL FADE
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-panel {
+        animation: ba-panel-materialize 0.8s ease-out 1.3s 1 both;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 20 — FEATURE PILLS STAGGERED ENTRY
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-p1 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.6s 1 both; }
+      .ba-p2 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.75s 1 both; }
+      .ba-p3 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.9s 1 both; }
+      .ba-p4 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 2.05s 1 both; }
+      .ba-p5 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 2.2s 1 both; }
+      .ba-p6 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 2.35s 1 both; }
+      .ba-p7 { animation: ba-pill-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 2.5s 1 both; }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 21 — PARTICLE EMITTERS (12 particles, staggered forever)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-pt { animation: ba-particle-fly 4.5s ease-out infinite; opacity: 0; }
+      .ba-pt01 { animation-duration: 5.2s; animation-delay: 2.1s; }
+      .ba-pt02 { animation-duration: 4.8s; animation-delay: 3.0s; }
+      .ba-pt03 { animation-duration: 6.1s; animation-delay: 2.6s; }
+      .ba-pt04 { animation-duration: 4.4s; animation-delay: 4.2s; }
+      .ba-pt05 { animation-duration: 5.7s; animation-delay: 3.5s; }
+      .ba-pt06 { animation-duration: 4.9s; animation-delay: 5.0s; }
+      .ba-pt07 { animation-duration: 5.4s; animation-delay: 2.3s; }
+      .ba-pt08 { animation-duration: 4.6s; animation-delay: 6.1s; }
+      .ba-pt09 { animation-duration: 6.3s; animation-delay: 3.8s; }
+      .ba-pt10 { animation-duration: 5.0s; animation-delay: 4.7s; }
+      .ba-pt11 { animation-duration: 4.3s; animation-delay: 5.5s; }
+      .ba-pt12 { animation-duration: 5.8s; animation-delay: 2.9s; }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 22 — CONSTELLATION LINES (flicker after boot)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-const {
+        animation:
+          ba-const-appear  0.5s ease-out 1.5s 1 both,
+          ba-const-flicker 6s  ease-in-out 2.5s infinite;
+      }
+      .ba-const-2 {
+        animation:
+          ba-const-appear  0.5s ease-out 1.7s 1 both,
+          ba-const-flicker 8s  ease-in-out 3s infinite;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 23 — SHIMMER SWEEPS (continuous)
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-shimmer-a { animation: ba-shimmer 5s ease-in-out 2s infinite; }
+      .ba-shimmer-b { animation: ba-shimmer 7s ease-in-out 4.5s infinite; }
+
+      /* ══════════════════════════════════════════════════════════════════
+         TRACK 24 — CREST NODE PULSE
+         ══════════════════════════════════════════════════════════════════ */
+      .ba-crest { animation: ba-crest-pulse 3s ease-in-out infinite; }
+      .ba-cr1 { animation-delay: 0s;    animation-duration: 2.8s; }
+      .ba-cr2 { animation-delay: 0.56s; animation-duration: 3.4s; }
+      .ba-cr3 { animation-delay: 1.12s; animation-duration: 3.0s; }
+      .ba-cr4 { animation-delay: 1.68s; animation-duration: 3.8s; }
+      .ba-cr5 { animation-delay: 2.24s; animation-duration: 2.5s; }
+
+      /* ── Stars ─────────────────────────────────────────────────────── */
+      .ba-star { animation: ba-star-twinkle 3s ease-in-out infinite; opacity: 0; }
+      .ba-st1  { animation-duration:2.3s; animation-delay:2.0s; }
+      .ba-st2  { animation-duration:3.1s; animation-delay:2.4s; }
+      .ba-st3  { animation-duration:2.7s; animation-delay:2.8s; }
+      .ba-st4  { animation-duration:3.5s; animation-delay:3.2s; }
+      .ba-st5  { animation-duration:2.1s; animation-delay:3.6s; }
+      .ba-st6  { animation-duration:3.8s; animation-delay:4.0s; }
+      .ba-st7  { animation-duration:2.5s; animation-delay:2.2s; }
+      .ba-st8  { animation-duration:3.2s; animation-delay:2.6s; }
+      .ba-st9  { animation-duration:2.9s; animation-delay:3.0s; }
+      .ba-st10 { animation-duration:3.6s; animation-delay:3.4s; }
+
+      /* ── Status indicator ───────────────────────────────────────────── */
+      .ba-status-core {
+        animation:
+          ba-ring-appear    0.4s ease-out 1.4s 1 both,
+          ba-status-beat    2.4s ease-in-out 2s infinite;
+        transform-origin: 118px 158px;
+      }
+
+      /* ── Mark pulse ring ────────────────────────────────────────────── */
+      .ba-mark-pulse {
+        animation:
+          ba-ring-appear  0.5s ease-out 0.8s 1 both,
+          ba-pulse        4s  ease-in-out 2.5s infinite;
+        transform-origin: 76px 200px;
+      }
+
+      /* ── Grid lines idle ────────────────────────────────────────────── */
+      .ba-grid-idle {
+        animation:
+          ba-grid-materialize 0.6s ease-out 0.2s 1 both,
+          ba-grid-breathe     5s ease-in-out 2s infinite;
+      }
+
+      /* ── Version badge ──────────────────────────────────────────────── */
+      .ba-version {
+        animation: ba-version-glow 4s ease-in-out 2.5s infinite;
+      }
+
+      /* ── Stats row ──────────────────────────────────────────────────── */
+      .ba-stats {
+        animation: ba-panel-materialize 0.6s ease-out 2.0s 1 both;
+      }
+
+      /* ── Swatch row ─────────────────────────────────────────────────── */
+      .ba-swatches {
+        animation: ba-panel-materialize 0.6s ease-out 2.4s 1 both;
+      }
+
+      /* ── Reduced motion ─────────────────────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+        .ba-letter-a, .ba-letter-s, .ba-letter-h,
+        .ba-mark-body, .ba-panel, .ba-separator,
+        .ba-underline, .ba-ring-cw, .ba-ring-ccw { opacity: 1; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         MASTER KEYFRAME LIBRARY
+         ════════════════════════════════════════════════════════════════════ */
+
+      /* Boot scan line — fast horizontal sweep */
+      @keyframes ba-boot-scan-run {
+        0%   { transform: translateX(-120px); opacity: 0; }
+        5%   { opacity: 0.9; }
+        95%  { opacity: 0.9; }
+        100% { transform: translateX(1400px); opacity: 0; }
+      }
+
+      /* Grid materialize — fade + scale from center */
+      @keyframes ba-grid-materialize {
+        from { opacity: 0; transform: scale(0.98); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+
+      /* Grid breathe idle */
+      @keyframes ba-grid-breathe {
+        0%,100% { opacity: 0.6; }
+        50%      { opacity: 1; }
+      }
+
+      /* Wave appear — draws in via stroke-dashoffset */
+      @keyframes ba-wave-appear {
+        from {
+          opacity: 0;
+          stroke-dashoffset: 2400;
+          stroke-dasharray: 2400;
+        }
+        to {
+          opacity: 1;
+          stroke-dashoffset: 0;
+          stroke-dasharray: 2400;
+        }
+      }
+
+      /* Wave flow A — gentle undulation */
+      @keyframes ba-wave-flow-a {
+        0%,100% { transform: translateY(0)   scaleX(1);    }
+        25%      { transform: translateY(-8px) scaleX(1.02); }
+        50%      { transform: translateY(5px)  scaleX(0.98); }
+        75%      { transform: translateY(-3px) scaleX(1.01); }
+      }
+
+      /* Wave flow B — reverse undulation */
+      @keyframes ba-wave-flow-b {
+        0%,100% { transform: translateY(0)   scaleX(1);    }
+        33%      { transform: translateY(7px)  scaleX(0.99); }
+        66%      { transform: translateY(-5px) scaleX(1.01); }
+      }
+
+      /* Mark spring-in — elastic scale from zero */
+      @keyframes ba-mark-spring-in {
+        0%   { transform: scale(0) rotate(-12deg); opacity: 0; }
+        60%  { transform: scale(1.08) rotate(2deg); opacity: 1; }
+        80%  { transform: scale(0.96) rotate(-1deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      /* Mark float — gentle vertical drift */
+      @keyframes ba-mark-float {
+        0%,100% { transform: translateY(0);   }
+        33%      { transform: translateY(-6px); }
+        66%      { transform: translateY(4px);  }
+      }
+
+      /* Ring appear — scale from center */
+      @keyframes ba-ring-appear {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+      }
+
+      /* Spin directions */
+      @keyframes ba-spin-cw  { from { transform: rotate(0deg); }   to { transform: rotate(360deg);  } }
+      @keyframes ba-spin-ccw { from { transform: rotate(0deg); }   to { transform: rotate(-360deg); } }
+
+      /* Letter A — rise from below with spring */
+      @keyframes ba-letter-rise {
+        0%   { transform: translateY(24px) scale(0.85); opacity: 0; }
+        60%  { transform: translateY(-4px)  scale(1.03); opacity: 1; }
+        80%  { transform: translateY(2px)   scale(0.99); }
+        100% { transform: translateY(0)     scale(1);    opacity: 1; }
+      }
+
+      /* Letter S — bloom from center with glow */
+      @keyframes ba-letter-bloom {
+        0%   { transform: scale(0.6); opacity: 0; filter: blur(8px); }
+        60%  { transform: scale(1.06); opacity: 1; filter: blur(0); }
+        80%  { transform: scale(0.97); }
+        100% { transform: scale(1); opacity: 1; filter: blur(0); }
+      }
+
+      /* Letter H — slide in from right with trail */
+      @keyframes ba-letter-slide {
+        0%   { transform: translateX(28px) scale(0.9); opacity: 0; }
+        60%  { transform: translateX(-4px) scale(1.02); opacity: 1; }
+        80%  { transform: translateX(2px) scale(0.99); }
+        100% { transform: translateX(0) scale(1); opacity: 1; }
+      }
+
+      /* Letter idle — subtle breathe */
+      @keyframes ba-letter-idle {
+        0%,100% { filter: brightness(1);   opacity: 1;   }
+        50%      { filter: brightness(1.1); opacity: 0.95; }
+      }
+
+      /* Separator draw — scaleY from top */
+      @keyframes ba-line-draw {
+        from { transform: scaleY(0); opacity: 0; }
+        to   { transform: scaleY(1); opacity: 1; }
+      }
+
+      /* Underline sweep — scaleX from left */
+      @keyframes ba-underline-sweep {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+
+      /* Panel materialize — slide up + fade */
+      @keyframes ba-panel-materialize {
+        from { transform: translateY(14px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+      }
+
+      /* Pill bounce — scale from bottom */
+      @keyframes ba-pill-bounce {
+        0%   { transform: translateY(12px) scale(0.85); opacity: 0; }
+        60%  { transform: translateY(-3px) scale(1.04); opacity: 1; }
+        80%  { transform: translateY(2px)  scale(0.98); }
+        100% { transform: translateY(0)    scale(1);    opacity: 1; }
+      }
+
+      /* Particle fly — rise and fade */
+      @keyframes ba-particle-fly {
+        0%   { transform: translate(0,0) scale(0); opacity: 0; }
+        6%   { opacity: 1; }
+        50%  { transform: translate(var(--px,8px),var(--py,-28px)) scale(1.5); opacity: 0.8; }
+        85%  { opacity: 0.2; }
+        100% { transform: translate(var(--px2,14px),var(--py2,-52px)) scale(0); opacity: 0; }
+      }
+
+      /* Constellation appear */
+      @keyframes ba-const-appear {
+        from { opacity: 0; stroke-dashoffset: 200; stroke-dasharray: 200; }
+        to   { opacity: 1; stroke-dashoffset: 0;   stroke-dasharray: 200; }
+      }
+
+      /* Constellation flicker */
+      @keyframes ba-const-flicker {
+        0%,100% { opacity: 0.15; stroke-dashoffset: 0;   }
+        50%      { opacity: 0.45; stroke-dashoffset: -24; }
+      }
+
+      /* Shimmer */
+      @keyframes ba-shimmer {
+        0%   { transform: translateX(-220px) skewX(-10deg); opacity: 0; }
+        15%  { opacity: 0.65; }
+        85%  { opacity: 0.65; }
+        100% { transform: translateX(1500px) skewX(-10deg); opacity: 0; }
+      }
+
+      /* Crest pulse */
+      @keyframes ba-crest-pulse {
+        0%,100% { r: 4; opacity: 0.8; }
+        50%      { r: 7; opacity: 1;   }
+      }
+
+      /* Star twinkle */
+      @keyframes ba-star-twinkle {
+        0%,100% { opacity: 0.2; transform: scale(0.8); }
+        50%      { opacity: 1;   transform: scale(1.4); }
+      }
+
+      /* Status heartbeat */
+      @keyframes ba-status-beat {
+        0%,100% { transform: scale(1);    opacity: 0.9; }
+        15%      { transform: scale(1.18); opacity: 1;   }
+        30%      { transform: scale(1);    opacity: 0.9; }
+        45%      { transform: scale(1.10); opacity: 0.95; }
+        60%      { transform: scale(1);    opacity: 0.9; }
+      }
+
+      /* Pulse ring */
+      @keyframes ba-pulse {
+        0%,100% { opacity: 0.4; transform: scale(1);    }
+        50%      { opacity: 0.8; transform: scale(1.05); }
+      }
+
+      /* Version badge glow */
+      @keyframes ba-version-glow {
+        0%,100% { filter: brightness(1);   box-shadow: none; }
+        50%      { filter: brightness(1.2); }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         🎨 FULL CATPPUCCIN MOCHA GRADIENT LIBRARY
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Animated primary spectrum -->
+    <linearGradient id="ba-g-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="40%"  stop-color="#CBA6F7">
+        <animate attributeName="stop-color"
+          values="#CBA6F7;#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA;#CBA6F7"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#89DCEB">
+        <animate attributeName="stop-color"
+          values="#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA;#CBA6F7;#89DCEB"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Deep background -->
+    <linearGradient id="ba-g-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0A0A12"/>
+      <stop offset="35%"  stop-color="#11111B"/>
+      <stop offset="70%"  stop-color="#181825"/>
+      <stop offset="100%" stop-color="#1E1E2E"/>
+    </linearGradient>
+
+    <!-- Background glow radials -->
+    <radialGradient id="ba-g-bg-l" cx="12%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#313244" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#11111B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ba-g-bg-r" cx="88%" cy="50%" r="45%">
+      <stop offset="0%"   stop-color="#313244" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#11111B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ba-g-bg-c" cx="50%" cy="50%" r="40%">
+      <stop offset="0%"   stop-color="#45475A" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#11111B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Wave gradients -->
+    <linearGradient id="ba-g-w1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA"/>
+      <stop offset="33%"  stop-color="#74C7EC"/>
+      <stop offset="66%"  stop-color="#89DCEB"/>
+      <stop offset="100%" stop-color="#94E2D5"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#CBA6F7" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#B4BEFE" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FAB387" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#F9E2AF" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#F38BA8" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#EBA0AC" stop-opacity="0.16"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#94E2D5" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w6" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#F5C2E7" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#F2CDCD" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="ba-g-w7" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#F9E2AF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#F5E0DC" stop-opacity="0.04"/>
+    </linearGradient>
+
+    <!-- Mark gradients -->
+    <radialGradient id="ba-g-mark-bg" cx="38%" cy="32%" r="68%">
+      <stop offset="0%"   stop-color="#45475A"/>
+      <stop offset="40%"  stop-color="#313244"/>
+      <stop offset="80%"  stop-color="#1E1E2E"/>
+      <stop offset="100%" stop-color="#11111B"/>
+    </radialGradient>
+    <radialGradient id="ba-g-mark-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0.4">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#89DCEB;#89B4FA"
+          dur="9s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ba-g-mark-glass" cx="34%" cy="24%" r="52%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Text gradients -->
+    <linearGradient id="ba-g-title" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#CDD6F4"/>
+      <stop offset="50%"  stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#BAC2DE"/>
+    </linearGradient>
+    <linearGradient id="ba-g-title-s" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#89DCEB;#89B4FA"
+          dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#CBA6F7">
+        <animate attributeName="stop-color"
+          values="#CBA6F7;#89DCEB;#89B4FA;#CBA6F7"
+          dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Scan line for boot -->
+    <linearGradient id="ba-g-scan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0"/>
+      <stop offset="30%"  stop-color="#89B4FA" stop-opacity="0.5"/>
+      <stop offset="50%"  stop-color="#CDD6F4" stop-opacity="0.9"/>
+      <stop offset="70%"  stop-color="#89B4FA" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="ba-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="48%"  stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="52%"  stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Constellation -->
+    <linearGradient id="ba-g-const" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#89B4FA" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#CBA6F7" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Particle fills — 12 colors -->
+    <radialGradient id="ba-pf01" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#89B4FA"/><stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf02" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#CBA6F7"/><stop offset="100%" stop-color="#CBA6F7" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf03" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#94E2D5"/><stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf04" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#A6E3A1"/><stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf05" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FAB387"/><stop offset="100%" stop-color="#FAB387" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf06" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F38BA8"/><stop offset="100%" stop-color="#F38BA8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf07" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F9E2AF"/><stop offset="100%" stop-color="#F9E2AF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf08" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#89DCEB"/><stop offset="100%" stop-color="#89DCEB" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf09" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#EBA0AC"/><stop offset="100%" stop-color="#EBA0AC" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf10" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B4BEFE"/><stop offset="100%" stop-color="#B4BEFE" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf11" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#74C7EC"/><stop offset="100%" stop-color="#74C7EC" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ba-pf12" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F5C2E7"/><stop offset="100%" stop-color="#F5C2E7" stop-opacity="0"/></radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         🔬 FILTERS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <filter id="ba-f-wave-glow" x="-5%" y="-80%" width="110%" height="260%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feFlood flood-color="#89B4FA" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="ba-f-mark-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8"  stdDeviation="14" flood-color="#000000" flood-opacity="0.65"/>
+      <feDropShadow dx="0" dy="2"  stdDeviation="5"  flood-color="#89B4FA" flood-opacity="0.25"/>
+    </filter>
+
+    <filter id="ba-f-letter-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="5"  result="b1"/>
+      <feGaussianBlur stdDeviation="12" result="b2"/>
+      <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="ba-f-crest" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+
+    <filter id="ba-f-title" x="-5%" y="-20%" width="110%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#89B4FA" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP & MASK
+         ════════════════════════════════════════════════════════════════════ -->
+    <clipPath id="ba-clip-banner">
+      <rect x="0" y="0" width="1280" height="400" rx="16"/>
+    </clipPath>
+    <clipPath id="ba-clip-mark">
+      <circle cx="76" cy="200" r="68"/>
+    </clipPath>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         PATTERNS
+         ════════════════════════════════════════════════════════════════════ -->
+    <pattern id="ba-pat-dots" x="0" y="0" width="20" height="20"
+      patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="0.8" fill="#89B4FA" opacity="0.15"/>
+    </pattern>
+    <pattern id="ba-pat-circuit" x="0" y="0" width="80" height="80"
+      patternUnits="userSpaceOnUse">
+      <path d="M 0 40 H 24 V 16 H 56 V 40 H 80" fill="none"
+        stroke="#89B4FA" stroke-width="0.5" opacity="0.05"/>
+      <path d="M 40 0 V 24 H 64 V 56 H 40 V 80" fill="none"
+        stroke="#CBA6F7" stroke-width="0.5" opacity="0.05"/>
+      <circle cx="24" cy="40" r="2" fill="#89B4FA" opacity="0.08"/>
+      <circle cx="56" cy="40" r="2" fill="#89B4FA" opacity="0.08"/>
+    </pattern>
+    <pattern id="ba-pat-hex" x="0" y="0" width="28" height="32"
+      patternUnits="userSpaceOnUse">
+      <polygon points="14,1 27,8 27,24 14,31 1,24 1,8"
+        fill="none" stroke="#89B4FA" stroke-width="0.4" opacity="0.06"/>
+    </pattern>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       BOOT SCAN LINE — runs once on load
+       ════════════════════════════════════════════════════════════════════════ -->
+  <rect class="ba-boot-scan"
+    x="-100" y="0" width="120" height="400"
+    fill="url(#ba-g-scan)"
+    clip-path="url(#ba-clip-banner)"
+    opacity="0"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       ALL CONTENT — clipped to banner shape
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#ba-clip-banner)">
+
+  <!-- ── BACKGROUND ─────────────────────────────────────────────────────── -->
+  <rect x="0" y="0" width="1280" height="400" fill="url(#ba-g-bg)"/>
+  <rect x="0" y="0" width="1280" height="400" fill="url(#ba-g-bg-l)"/>
+  <rect x="0" y="0" width="1280" height="400" fill="url(#ba-g-bg-r)"/>
+  <rect x="0" y="0" width="1280" height="400" fill="url(#ba-g-bg-c)"/>
+
+  <!-- ── TEXTURES (boot with grid) ──────────────────────────────────────── -->
+  <g class="ba-grid-appear">
+    <rect x="0" y="0" width="1280" height="400" fill="url(#ba-pat-hex)"     opacity="0.7"/>
+    <rect x="0" y="0" width="1280" height="400" fill="url(#ba-pat-circuit)" opacity="0.8"/>
+    <rect x="0" y="0" width="1280" height="400" fill="url(#ba-pat-dots)"    opacity="0.6"/>
+  </g>
+
+  <!-- ── GRID LINES ─────────────────────────────────────────────────────── -->
+  <g class="ba-grid-idle">
+    <line x1="0" y1="100" x2="1280" y2="100"
+      stroke="#89B4FA" stroke-width="1" stroke-dasharray="3 80" opacity="0.06"/>
+    <line x1="0" y1="200" x2="1280" y2="200"
+      stroke="#CBA6F7" stroke-width="1" stroke-dasharray="3 80" opacity="0.08"/>
+    <line x1="0" y1="300" x2="1280" y2="300"
+      stroke="#89B4FA" stroke-width="1" stroke-dasharray="3 80" opacity="0.06"/>
+    <line x1="500"  y1="0" x2="500"  y2="400"
+      stroke="#89B4FA" stroke-width="1" stroke-dasharray="2 60" opacity="0.05"/>
+    <line x1="900"  y1="0" x2="900"  y2="400"
+      stroke="#CBA6F7" stroke-width="1" stroke-dasharray="2 60" opacity="0.05"/>
+    <line x1="1100" y1="0" x2="1100" y2="400"
+      stroke="#89B4FA" stroke-width="1" stroke-dasharray="2 60" opacity="0.04"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       STAR FIELD (appear after boot)
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g filter="url(#ba-f-crest)">
+    <circle class="ba-star ba-st1"  cx="200"  cy="44"  r="1.5" fill="#CDD6F4"/>
+    <circle class="ba-star ba-st2"  cx="420"  cy="68"  r="1.2" fill="#89B4FA"/>
+    <circle class="ba-star ba-st3"  cx="620"  cy="32"  r="2"   fill="#CBA6F7"/>
+    <circle class="ba-star ba-st4"  cx="800"  cy="58"  r="1.3" fill="#89DCEB"/>
+    <circle class="ba-star ba-st5"  cx="980"  cy="38"  r="1.8" fill="#CDD6F4"/>
+    <circle class="ba-star ba-st6"  cx="1120" cy="72"  r="1"   fill="#89B4FA"/>
+    <circle class="ba-star ba-st7"  cx="1220" cy="28"  r="2.2" fill="#CBA6F7"/>
+    <circle class="ba-star ba-st8"  cx="320"  cy="360" r="1.5" fill="#CDD6F4"/>
+    <circle class="ba-star ba-st9"  cx="560"  cy="374" r="1.2" fill="#89B4FA"/>
+    <circle class="ba-star ba-st10" cx="1040" cy="362" r="1.8" fill="#94E2D5"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       SEVEN-WAVE SYSTEM (boot-in sequentially, then flow forever)
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g>
+    <!-- Wave 7 — warmest, deepest, faintest -->
+    <path class="ba-w7"
+      d="M 0 318 C 64 296, 128 340, 192 318 C 256 296, 320 340, 384 318
+                  C 448 296, 512 340, 576 318 C 640 296, 704 340, 768 318
+                  C 832 296, 896 340, 960 318 C 1024 296, 1088 340, 1152 318
+                  C 1216 296, 1280 318, 1280 318 L 1280 400 L 0 400 Z"
+      fill="url(#ba-g-w7)" opacity="0.9"/>
+
+    <!-- Wave 6 -->
+    <path class="ba-w6"
+      d="M 0 298 C 70 272, 140 324, 210 298 C 280 272, 350 324, 420 298
+                  C 490 272, 560 324, 630 298 C 700 272, 770 324, 840 298
+                  C 910 272, 980 324, 1050 298 C 1120 272, 1190 324, 1280 298"
+      fill="none" stroke="url(#ba-g-w6)" stroke-width="2.5"
+      stroke-linecap="round" opacity="0"/>
+
+    <!-- Wave 5 -->
+    <path class="ba-w5"
+      d="M 0 278 C 75 250, 150 306, 225 278 C 300 250, 375 306, 450 278
+                  C 525 250, 600 306, 675 278 C 750 250, 825 306, 900 278
+                  C 975 250, 1050 306, 1125 278 C 1190 252, 1240 290, 1280 272"
+      fill="none" stroke="url(#ba-g-w5)" stroke-width="3"
+      stroke-linecap="round" opacity="0"/>
+
+    <!-- Wave 4 -->
+    <path class="ba-w4"
+      d="M 0 258 C 80 226, 160 290, 240 258 C 320 226, 400 290, 480 258
+                  C 560 226, 640 290, 720 258 C 800 226, 880 290, 960 258
+                  C 1040 226, 1120 290, 1200 258 C 1244 240, 1268 272, 1280 254"
+      fill="none" stroke="url(#ba-g-w4)" stroke-width="3.5"
+      stroke-linecap="round" opacity="0"/>
+
+    <!-- Wave 3 -->
+    <path class="ba-w3"
+      d="M 0 238 C 85 204, 170 272, 255 238 C 340 204, 425 272, 510 238
+                  C 595 204, 680 272, 765 238 C 850 204, 935 272, 1020 238
+                  C 1105 204, 1180 270, 1240 244 C 1262 230, 1274 256, 1280 244"
+      fill="none" stroke="url(#ba-g-w3)" stroke-width="4"
+      stroke-linecap="round" opacity="0"/>
+
+    <!-- Wave 2 -->
+    <path class="ba-w2"
+      d="M 0 218 C 90 182, 180 254, 270 218 C 360 182, 450 254, 540 218
+                  C 630 182, 720 254, 810 218 C 900 182, 990 254, 1080 218
+                  C 1140 190, 1190 250, 1240 222 C 1262 208, 1274 238, 1280 224"
+      fill="none" stroke="url(#ba-g-w2)" stroke-width="5"
+      stroke-linecap="round" opacity="0"/>
+
+    <!-- Wave 1 — PRIMARY (thickest, loudest, glowing) -->
+    <path class="ba-w1"
+      d="M 0 198 C 96 156, 192 238, 288 198 C 384 156, 480 238, 576 198
+                  C 672 156, 768 238, 864 198 C 960 156, 1056 238, 1152 198
+                  C 1208 168, 1248 228, 1280 202"
+      fill="none" stroke="url(#ba-g-w1)" stroke-width="9"
+      stroke-linecap="round"
+      filter="url(#ba-f-wave-glow)"
+      opacity="0"/>
+
+    <!-- Wave 1 fill area -->
+    <path
+      d="M 0 198 C 96 156, 192 238, 288 198 C 384 156, 480 238, 576 198
+                  C 672 156, 768 238, 864 198 C 960 156, 1056 238, 1152 198
+                  C 1208 168, 1248 228, 1280 202 L 1280 400 L 0 400 Z"
+      fill="url(#ba-g-w1)" opacity="0.07"/>
+
+    <!-- Shimmer sweeps -->
+    <rect class="ba-shimmer-a" x="0" y="0" width="160" height="400"
+      fill="url(#ba-g-shimmer)" opacity="0.6"/>
+    <rect class="ba-shimmer-b" x="0" y="0" width="100" height="400"
+      fill="url(#ba-g-shimmer)" opacity="0.4"/>
+
+    <!-- Crest glow nodes -->
+    <g filter="url(#ba-f-crest)">
+      <circle class="ba-crest ba-cr1" cx="192"  cy="198" r="4" fill="#89B4FA" opacity="0"/>
+      <circle class="ba-crest ba-cr2" cx="480"  cy="178" r="4" fill="#74C7EC" opacity="0"/>
+      <circle class="ba-crest ba-cr3" cx="768"  cy="198" r="4" fill="#89DCEB" opacity="0"/>
+      <circle class="ba-crest ba-cr4" cx="1056" cy="178" r="4" fill="#94E2D5" opacity="0"/>
+      <circle class="ba-crest ba-cr5" cx="1248" cy="196" r="3" fill="#A6E3A1" opacity="0"/>
+    </g>
+
+    <!-- Constellation lines -->
+    <g>
+      <line class="ba-const"   x1="192"  y1="198" x2="480"  y2="178"
+        stroke="url(#ba-g-const)" stroke-width="1" stroke-dasharray="5 9"/>
+      <line class="ba-const"   x1="480"  y1="178" x2="768"  y2="198"
+        stroke="url(#ba-g-const)" stroke-width="1" stroke-dasharray="5 9"/>
+      <line class="ba-const-2" x1="768"  y1="198" x2="1056" y2="178"
+        stroke="url(#ba-g-const)" stroke-width="1" stroke-dasharray="5 9"/>
+      <line class="ba-const-2" x1="1056" y1="178" x2="1248" y2="196"
+        stroke="url(#ba-g-const)" stroke-width="1" stroke-dasharray="5 9"/>
+      <line class="ba-const"   x1="480"  y1="178" x2="480"  y2="68"
+        stroke="url(#ba-g-const)" stroke-width="0.75" stroke-dasharray="3 7"/>
+      <line class="ba-const-2" x1="1056" y1="178" x2="1056" y2="58"
+        stroke="url(#ba-g-const)" stroke-width="0.75" stroke-dasharray="3 7"/>
+    </g>
+
+  </g>
+  <!-- End wave system -->
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       MARK ICON (springs in at 0.4s)
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g class="ba-mark-body" filter="url(#ba-f-mark-shadow)" opacity="0">
+
+    <!-- Halo -->
+    <circle cx="76" cy="200" r="84" fill="url(#ba-g-mark-halo)">
+      <animate attributeName="r" values="84;92;84" dur="4s" begin="2.5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Decorative ring CW -->
+    <g class="ba-ring-cw" opacity="0">
+      <circle cx="76" cy="200" r="74"
+        fill="none" stroke="url(#ba-g-primary)"
+        stroke-width="1" stroke-dasharray="5 8" opacity="0.3"/>
+    </g>
+
+    <!-- Decorative ring CCW -->
+    <g class="ba-ring-ccw" opacity="0">
+      <circle cx="76" cy="200" r="68"
+        fill="none" stroke="url(#ba-g-w2)"
+        stroke-width="0.75" stroke-dasharray="2 12" opacity="0.25"/>
+    </g>
+
+    <!-- Main circle -->
+    <circle cx="76" cy="200" r="64"
+      fill="url(#ba-g-mark-bg)"
+      stroke="url(#ba-g-primary)"
+      stroke-width="2.5"/>
+
+    <!-- Glass highlight -->
+    <ellipse cx="76" cy="174" rx="44" ry="26"
+      fill="url(#ba-g-mark-glass)"
+      clip-path="url(#ba-clip-mark)"/>
+
+    <!-- Mini waves inside mark -->
+    <g clip-path="url(#ba-clip-mark)">
+      <path class="ba-w3"
+        d="M 12 218 C 27 200, 42 236, 57 218 C 72 200, 87 236, 102 218 C 117 200, 130 230, 140 218"
+        fill="none" stroke="#94E2D5" stroke-width="1.5"
+        stroke-linecap="round" opacity="0.3"/>
+      <path class="ba-w2"
+        d="M 12 208 C 28 188, 44 226, 60 208 C 76 188, 92 226, 108 208 C 124 188, 136 216, 140 206"
+        fill="none" stroke="url(#ba-g-w2)" stroke-width="2"
+        stroke-linecap="round" opacity="0.5"/>
+      <path class="ba-w1"
+        d="M 12 198 C 28 176, 46 218, 62 198 C 78 176, 94 218, 110 198 C 126 176, 138 208, 140 194"
+        fill="none" stroke="url(#ba-g-w1)" stroke-width="3.5"
+        stroke-linecap="round" filter="url(#ba-f-wave-glow)"/>
+    </g>
+
+    <!-- Center letter A — glow + main -->
+    <text x="76" y="220"
+      font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+      font-size="64" font-weight="900" text-anchor="middle"
+      fill="#89B4FA" opacity="0.25"
+      filter="url(#ba-f-letter-glow)">A</text>
+    <text x="76" y="220"
+      font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+      font-size="64" font-weight="900" text-anchor="middle"
+      fill="url(#ba-g-primary)">A</text>
+
+    <!-- Orbit A -->
+    <g class="ba-orbit-a" opacity="0">
+      <circle cx="76" cy="136" r="4" fill="#89B4FA"
+        filter="url(#ba-f-crest)" opacity="0.9">
+        <animate attributeName="opacity"
+          values="0.9;1;0.9" dur="2s" begin="2.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Orbit B -->
+    <g class="ba-orbit-b" opacity="0">
+      <circle cx="140" cy="200" r="3" fill="#CBA6F7"
+        filter="url(#ba-f-crest)" opacity="0.8"/>
+    </g>
+
+    <!-- Status indicator -->
+    <circle class="ba-status-core" cx="118" cy="158" r="6"
+      fill="#A6E3A1" opacity="0"
+      filter="url(#ba-f-crest)"
+      style="transform-origin:118px 158px"/>
+    <circle cx="118" cy="158" r="6"
+      fill="none" stroke="#A6E3A1" stroke-width="2" opacity="0">
+      <animate attributeName="r"       values="6;14;6"    dur="2.5s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0;0.7" dur="2.5s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Pulse ring -->
+    <circle class="ba-mark-pulse" cx="76" cy="200" r="64"
+      fill="none" stroke="url(#ba-g-primary)"
+      stroke-width="1.5" opacity="0"/>
+
+  </g>
+  <!-- End mark -->
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       WORDMARK (letters boot sequentially)
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g transform="translate(174, 0)">
+
+    <!-- Title bloom/glow -->
+    <text x="2" y="162"
+      font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+      font-size="88" font-weight="900" letter-spacing="-3"
+      fill="#89B4FA" opacity="0"
+      filter="url(#ba-f-title)">ASH</text>
+
+    <!-- Letter A — rises up -->
+    <g class="ba-letter-a" opacity="0">
+      <text x="0" y="160"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="88" font-weight="900" letter-spacing="-3"
+        fill="url(#ba-g-title)">A</text>
+    </g>
+
+    <!-- Letter S — blooms with gradient glow -->
+    <g class="ba-letter-s" opacity="0">
+      <text x="63" y="160"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="88" font-weight="900" letter-spacing="-3"
+        fill="url(#ba-g-title-s)"
+        filter="url(#ba-f-wave-glow)">S</text>
+    </g>
+
+    <!-- Letter H — slides in from right -->
+    <g class="ba-letter-h" opacity="0">
+      <text x="122" y="160"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="88" font-weight="900" letter-spacing="-3"
+        fill="url(#ba-g-title)">H</text>
+    </g>
+
+    <!-- DOTFILES sub-label -->
+    <g class="ba-panel" opacity="0">
+      <text x="2" y="182"
+        font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="13" font-weight="600" letter-spacing="6"
+        fill="#6C7086">DOTFILES</text>
+    </g>
+
+    <!-- Underline -->
+    <g class="ba-underline" style="transform-origin:0% 50%">
+      <rect x="0" y="188" width="196" height="2.5" rx="1.25"
+        fill="url(#ba-g-primary)" opacity="0.8"/>
+      <rect x="4" y="192" width="130" height="1" rx="0.5"
+        fill="url(#ba-g-primary)" opacity="0.3"/>
+    </g>
+
+    <!-- Separator -->
+    <line class="ba-separator" x1="214" y1="96" x2="214" y2="308"
+      stroke="url(#ba-g-primary)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      opacity="0.3"
+      style="transform-origin:214px 96px"/>
+
+    <!-- ── RIGHT PANEL ─────────────────────────────────────────────── -->
+    <g class="ba-panel" transform="translate(232, 0)" opacity="0">
+
+      <!-- Version badge -->
+      <g class="ba-version">
+        <rect x="0" y="92" width="132" height="26" rx="13"
+          fill="rgba(137,180,250,0.12)"
+          stroke="url(#ba-g-primary)"
+          stroke-width="1.5"/>
+        <text x="66" y="109.5"
+          font-family="'SF Mono','JetBrains Mono',monospace"
+          font-size="10.5" font-weight="700" letter-spacing="1.5"
+          fill="url(#ba-g-primary)" text-anchor="middle">v5.0 OMEGA ⚡</text>
+      </g>
+
+      <!-- Tagline -->
+      <text x="0" y="150"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="18" font-weight="600" letter-spacing="-0.3"
+        fill="#CDD6F4">The most advanced Hyprland dotfiles</text>
+
+      <text x="0" y="172"
+        font-family="'SF Pro Display','Inter',system-ui,sans-serif"
+        font-size="13.5" font-weight="400"
+        fill="#6C7086">AI-native theming · Wayland-native · Production grade</text>
+
+      <!-- Pills -->
+      <g transform="translate(0, 190)">
+        <g class="ba-p1">
+          <rect x="0"   y="0" width="82" height="24" rx="12"
+            fill="rgba(137,180,250,0.15)" stroke="#89B4FA" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="41"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#89B4FA" text-anchor="middle">🎨 250+ THEMES</text>
+        </g>
+        <g class="ba-p2" transform="translate(88,0)">
+          <rect x="0"   y="0" width="90" height="24" rx="12"
+            fill="rgba(203,166,247,0.15)" stroke="#CBA6F7" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="45"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#CBA6F7" text-anchor="middle">🔌 150+ PLUGINS</text>
+        </g>
+        <g class="ba-p3" transform="translate(184,0)">
+          <rect x="0"   y="0" width="70" height="24" rx="12"
+            fill="rgba(166,227,161,0.15)" stroke="#A6E3A1" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="35"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#A6E3A1" text-anchor="middle">🤖 AI-NATIVE</text>
+        </g>
+        <g class="ba-p4" transform="translate(260,0)">
+          <rect x="0"   y="0" width="82" height="24" rx="12"
+            fill="rgba(137,220,235,0.15)" stroke="#89DCEB" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="41"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#89DCEB" text-anchor="middle">🖥️ HYPRLAND</text>
+        </g>
+        <g class="ba-p5" transform="translate(0,32)">
+          <rect x="0"   y="0" width="72" height="24" rx="12"
+            fill="rgba(148,226,213,0.15)" stroke="#94E2D5" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="36"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#94E2D5" text-anchor="middle">🌐 REST API</text>
+        </g>
+        <g class="ba-p6" transform="translate(78,32)">
+          <rect x="0"   y="0" width="82" height="24" rx="12"
+            fill="rgba(180,190,254,0.15)" stroke="#B4BEFE" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="41"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#B4BEFE" text-anchor="middle">💧 WAYLAND</text>
+        </g>
+        <g class="ba-p7" transform="translate(166,32)">
+          <rect x="0"   y="0" width="80" height="24" rx="12"
+            fill="rgba(243,139,168,0.15)" stroke="#F38BA8" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="40"  y="16" font-family="'SF Mono',monospace" font-size="9.5"
+            font-weight="600" fill="#F38BA8" text-anchor="middle">🔒 SECURE</text>
+        </g>
+      </g>
+
+      <!-- Swatches -->
+      <g class="ba-swatches" transform="translate(0, 290)" opacity="0">
+        <rect x="0"   y="0" width="14" height="14" rx="4" fill="#89B4FA"/>
+        <rect x="17"  y="0" width="14" height="14" rx="4" fill="#CBA6F7"/>
+        <rect x="34"  y="0" width="14" height="14" rx="4" fill="#A6E3A1"/>
+        <rect x="51"  y="0" width="14" height="14" rx="4" fill="#F38BA8"/>
+        <rect x="68"  y="0" width="14" height="14" rx="4" fill="#FAB387"/>
+        <rect x="85"  y="0" width="14" height="14" rx="4" fill="#89DCEB"/>
+        <rect x="102" y="0" width="14" height="14" rx="4" fill="#F9E2AF"/>
+        <rect x="119" y="0" width="14" height="14" rx="4" fill="#94E2D5"/>
+        <rect x="136" y="0" width="14" height="14" rx="4" fill="#B4BEFE"/>
+        <text x="157" y="11"
+          font-family="'SF Mono',monospace" font-size="8.5"
+          font-weight="500" letter-spacing="1.5" fill="#45475A">CATPPUCCIN MOCHA</text>
+      </g>
+
+    </g>
+    <!-- End right panel -->
+
+    <!-- Stats row -->
+    <g class="ba-stats" transform="translate(0, 330)" opacity="0">
+      <text x="0"   y="14" font-family="'SF Mono',monospace" font-size="11"
+        font-weight="700" fill="url(#ba-g-primary)">5,000+</text>
+      <text x="0"   y="26" font-family="'SF Mono',monospace" font-size="8.5"
+        fill="#45475A">FILES</text>
+      <line x1="50"  y1="4" x2="50"  y2="28" stroke="#313244" stroke-width="1.5"/>
+      <text x="58"  y="14" font-family="'SF Mono',monospace" font-size="11"
+        font-weight="700" fill="url(#ba-g-primary)">450K+</text>
+      <text x="58"  y="26" font-family="'SF Mono',monospace" font-size="8.5"
+        fill="#45475A">LOC</text>
+      <line x1="116" y1="4" x2="116" y2="28" stroke="#313244" stroke-width="1.5"/>
+      <text x="124" y="14" font-family="'SF Mono',monospace" font-size="11"
+        font-weight="700" fill="url(#ba-g-primary)">900+</text>
+      <text x="124" y="26" font-family="'SF Mono',monospace" font-size="8.5"
+        fill="#45475A">DIRS</text>
+      <line x1="174" y1="4" x2="174" y2="28" stroke="#313244" stroke-width="1.5"/>
+      <text x="182" y="14" font-family="'SF Mono',monospace" font-size="11"
+        font-weight="700" fill="url(#ba-g-primary)">8</text>
+      <text x="182" y="26" font-family="'SF Mono',monospace" font-size="8.5"
+        fill="#45475A">DISTROS</text>
+      <line x1="220" y1="4" x2="220" y2="28" stroke="#313244" stroke-width="1.5"/>
+      <text x="228" y="14" font-family="'SF Mono',monospace" font-size="11"
+        font-weight="700" fill="url(#ba-g-primary)">MIT</text>
+      <text x="228" y="26" font-family="'SF Mono',monospace" font-size="8.5"
+        fill="#45475A">LICENSE</text>
+    </g>
+
+  </g>
+  <!-- End wordmark group -->
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       12-EMITTER PARTICLE SYSTEM
+       ════════════════════════════════════════════════════════════════════════ -->
+  <g id="ba-particles">
+    <circle class="ba-pt ba-pt01" cx="155" cy="260" r="5"
+      fill="url(#ba-pf01)" style="--px:6px;--py:-22px;--px2:10px;--py2:-42px"/>
+    <circle class="ba-pt ba-pt02" cx="162" cy="300" r="4"
+      fill="url(#ba-pf02)" style="--px:-5px;--py:-18px;--px2:-9px;--py2:-36px"/>
+    <circle class="ba-pt ba-pt03" cx="148" cy="340" r="5.5"
+      fill="url(#ba-pf03)" style="--px:8px;--py:-26px;--px2:14px;--py2:-50px"/>
+    <circle class="ba-pt ba-pt04" cx="166" cy="280" r="3.5"
+      fill="url(#ba-pf04)" style="--px:-7px;--py:-20px;--px2:-13px;--py2:-40px"/>
+    <circle class="ba-pt ba-pt05" cx="152" cy="320" r="6"
+      fill="url(#ba-pf05)" style="--px:10px;--py:-28px;--px2:18px;--py2:-56px"/>
+    <circle class="ba-pt ba-pt06" cx="158" cy="240" r="4.5"
+      fill="url(#ba-pf06)" style="--px:-4px;--py:-16px;--px2:-8px;--py2:-32px"/>
+    <circle class="ba-pt ba-pt07" cx="144" cy="360" r="5"
+      fill="url(#ba-pf07)" style="--px:12px;--py:-30px;--px2:22px;--py2:-58px"/>
+    <circle class="ba-pt ba-pt08" cx="164" cy="270" r="3"
+      fill="url(#ba-pf08)" style="--px:-9px;--py:-18px;--px2:-16px;--py2:-36px"/>
+    <circle class="ba-pt ba-pt09" cx="156" cy="310" r="5.5"
+      fill="url(#ba-pf09)" style="--px:7px;--py:-24px;--px2:12px;--py2:-46px"/>
+    <circle class="ba-pt ba-pt10" cx="160" cy="350" r="4"
+      fill="url(#ba-pf10)" style="--px:-11px;--py:-22px;--px2:-20px;--py2:-44px"/>
+    <circle class="ba-pt ba-pt11" cx="150" cy="290" r="6"
+      fill="url(#ba-pf11)" style="--px:9px;--py:-28px;--px2:16px;--py2:-54px"/>
+    <circle class="ba-pt ba-pt12" cx="168" cy="330" r="3.5"
+      fill="url(#ba-pf12)" style="--px:-6px;--py:-20px;--px2:-11px;--py2:-40px"/>
+  </g>
+
+  <!-- ── BORDER ──────────────────────────────────────────────────────────── -->
+  <rect x="0" y="0"   width="1280" height="2"    fill="url(#ba-g-primary)" rx="1" opacity="0.65"/>
+  <rect x="0" y="398" width="1280" height="2"    fill="url(#ba-g-primary)" rx="1" opacity="0.3"/>
+  <rect x="0" y="0"   width="2"    height="400"  fill="url(#ba-g-primary)" opacity="0.45"/>
+  <rect x="1278" y="0" width="2"  height="400"  fill="url(#ba-g-primary)" opacity="0.2"/>
+
+  <!-- Corner brackets -->
+  <path d="M 0 26 L 0 0 L 26 0" fill="none"
+    stroke="url(#ba-g-primary)" stroke-width="2.5" opacity="0.55"/>
+  <path d="M 1254 0 L 1280 0 L 1280 26" fill="none"
+    stroke="url(#ba-g-primary)" stroke-width="2.5" opacity="0.55"/>
+  <path d="M 0 374 L 0 400 L 26 400" fill="none"
+    stroke="url(#ba-g-primary)" stroke-width="2.5" opacity="0.3"/>
+  <path d="M 1254 400 L 1280 400 L 1280 374" fill="none"
+    stroke="url(#ba-g-primary)" stroke-width="2.5" opacity="0.3"/>
+
+  </g>
+  <!-- End banner clip -->
+
+</svg>

@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ⬇️  ASH DOTFILES v5.0 OMEGA — DOWNLOADS COUNT BADGE                        ║
+║  Animated download counter with data stream visualization                  ║
+║  Dimensions: 142 × 28px  ·  WCAG AA  ·  GitHub-safe                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 142 28"
+  width="142"
+  height="28"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  role="img"
+  aria-label="total downloads: 48.2k">
+
+  <title>downloads: 48.2k</title>
+  <desc>ASH Dotfiles downloads badge — 48.2k total downloads and growing</desc>
+
+  <defs>
+
+    <style><![CDATA[
+
+      /* ── Track 01: Label breathe ────────────────────────────────────── */
+      .dl-label { animation: dl-breathe 6s ease-in-out infinite; }
+
+      /* ── Track 02: Count text glow ──────────────────────────────────── */
+      .dl-count  { animation: dl-count-glow 4s ease-in-out infinite; }
+
+      /* ── Track 03-04: Number roll + K suffix pulse ───────────────────── */
+      .dl-num   { animation: dl-num-tick 7s ease-in-out infinite; }
+      .dl-k     { animation: dl-k-pulse  3s ease-in-out infinite; }
+
+      /* ── Track 05: Download arrow — bouncing ─────────────────────────── */
+      .dl-arrow { animation: dl-arrow-bounce 2s ease-in-out infinite; transform-origin: 11px 10px; }
+
+      /* ── Track 06: Arrow shadow (trailing duplicate, depth) ──────────── */
+      .dl-arrow-shadow { animation: dl-arrow-trail 2s ease-in-out infinite 0.12s; transform-origin: 11px 10px; }
+
+      /* ── Track 07: Data stream particles (falling dots) ─────────────── */
+      .dl-stream-1 { animation: dl-stream 1.8s linear 0.0s infinite; }
+      .dl-stream-2 { animation: dl-stream 1.8s linear 0.6s infinite; }
+      .dl-stream-3 { animation: dl-stream 1.8s linear 1.2s infinite; }
+
+      /* ── Track 08-10: Download bar fill animation ────────────────────── */
+      .dl-bar-fill {
+        animation:
+          dl-bar-enter 0.8s cubic-bezier(0.4,0,0.2,1) 0.1s 1 both,
+          dl-bar-scan  4s ease-in-out 1.5s infinite;
+        transform-origin: left center;
+      }
+
+      /* ── Track 11: Progress ticks along bar ─────────────────────────── */
+      .dl-tick-1 { animation: dl-bar-tick 5s ease-in-out 0.0s infinite; }
+      .dl-tick-2 { animation: dl-bar-tick 5s ease-in-out 1.0s infinite; }
+      .dl-tick-3 { animation: dl-bar-tick 5s ease-in-out 2.0s infinite; }
+      .dl-tick-4 { animation: dl-bar-tick 5s ease-in-out 3.0s infinite; }
+
+      /* ── Track 12-13: Shimmer sweeps ────────────────────────────────── */
+      .dl-shim-l { animation: dl-shimmer 5s ease-in-out infinite; }
+      .dl-shim-r { animation: dl-shimmer 7s ease-in-out infinite 2.5s; }
+
+      /* ── Track 14: Top accent bar ────────────────────────────────────── */
+      .dl-bar-top { animation: dl-top-bar 4s ease-in-out infinite; transform-origin: 0 0; }
+
+      /* ── Track 15: Ambient halo ──────────────────────────────────────── */
+      .dl-halo   { animation: dl-halo-pulse 4s ease-in-out infinite; transform-origin: 71px 14px; }
+
+      /* ── Track 16-20: Ejected data packets (small squares flying out) ── */
+      .dl-pkt-1 { animation: dl-packet 4.0s ease-out 0.3s infinite; }
+      .dl-pkt-2 { animation: dl-packet 4.8s ease-out 1.5s infinite; }
+      .dl-pkt-3 { animation: dl-packet 3.6s ease-out 2.8s infinite; }
+      .dl-pkt-4 { animation: dl-packet 5.2s ease-out 0.8s infinite; }
+      .dl-pkt-5 { animation: dl-packet 4.4s ease-out 3.5s infinite; }
+
+      /* ── Track 21: Trend indicator arrow ─────────────────────────────── */
+      .dl-trend  { animation: dl-trend-blink 2.5s ease-in-out infinite; }
+
+      /* ── Track 22: Cloud icon drift ──────────────────────────────────── */
+      .dl-cloud  { animation: dl-cloud-drift 6s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+        .dl-bar-fill { transform: scaleX(1) !important; opacity: 1 !important; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         KEYFRAMES — Download-themed motion design
+         ════════════════════════════════════════════════════════════════════ */
+
+      @keyframes dl-breathe {
+        0%,100% { opacity: 0.9; }
+        50%      { opacity: 1;   }
+      }
+
+      @keyframes dl-count-glow {
+        0%,100% { filter: brightness(1);    }
+        50%      { filter: brightness(1.2);  }
+      }
+
+      @keyframes dl-num-tick {
+        0%,86%,100% { transform: translateY(0);    opacity: 1;   }
+        88%          { transform: translateY(-4px); opacity: 0.3; }
+        90%          { transform: translateY(3px);  opacity: 0.6; }
+        92%          { transform: translateY(-1px); opacity: 0.9; }
+        94%          { transform: translateY(0);    opacity: 1;   }
+      }
+
+      @keyframes dl-k-pulse {
+        0%,100% { opacity: 0.85; transform: scale(1);    }
+        50%      { opacity: 1;    transform: scale(1.12); }
+      }
+
+      /* Arrow bounces downward — like downloading */
+      @keyframes dl-arrow-bounce {
+        0%,100% { transform: translateY(0);    }
+        20%      { transform: translateY(-3px); }
+        50%      { transform: translateY(3px);  }
+        70%      { transform: translateY(-1px); }
+        85%      { transform: translateY(2px);  }
+      }
+
+      @keyframes dl-arrow-trail {
+        0%,100% { transform: translateY(0);    opacity: 0.3; }
+        20%      { transform: translateY(-3px); opacity: 0.15; }
+        50%      { transform: translateY(3px);  opacity: 0.3; }
+        70%      { transform: translateY(-1px); opacity: 0.15; }
+      }
+
+      @keyframes dl-stream {
+        0%   { transform: translateY(-14px); opacity: 0; }
+        5%   { opacity: 0.9; }
+        95%  { opacity: 0.9; }
+        100% { transform: translateY(14px);  opacity: 0; }
+      }
+
+      @keyframes dl-bar-enter {
+        from { transform: scaleX(0); opacity: 0; }
+        to   { transform: scaleX(1); opacity: 1; }
+      }
+
+      @keyframes dl-bar-scan {
+        0%,100% { opacity: 0.7; }
+        50%      { opacity: 1;   }
+      }
+
+      @keyframes dl-bar-tick {
+        0%,80%,100% { opacity: 0.4; transform: scaleY(1);   }
+        82%          { opacity: 1;   transform: scaleY(1.5); }
+        86%          { opacity: 0.6; transform: scaleY(0.8); }
+        90%          { opacity: 1;   transform: scaleY(1.2); }
+      }
+
+      @keyframes dl-shimmer {
+        0%   { transform: translateX(-90px) skewX(-7deg); opacity: 0; }
+        15%  { opacity: 0.52; }
+        85%  { opacity: 0.52; }
+        100% { transform: translateX(220px) skewX(-7deg); opacity: 0; }
+      }
+
+      @keyframes dl-top-bar {
+        0%,100% { opacity: 0.78; transform: scaleX(1);    }
+        50%      { opacity: 1;    transform: scaleX(0.97); }
+      }
+
+      @keyframes dl-halo-pulse {
+        0%,100% { opacity: 0.32; transform: scale(1);    }
+        50%      { opacity: 0.62; transform: scale(1.07); }
+      }
+
+      @keyframes dl-packet {
+        0%   { transform: translate(0,0) scale(0) rotate(0deg);   opacity: 0; }
+        5%   { opacity: 1; }
+        50%  {
+          transform: translate(var(--px,5px),var(--py,-10px)) scale(1.4) rotate(90deg);
+          opacity: 0.9;
+        }
+        90%  { opacity: 0.1; }
+        100% {
+          transform: translate(var(--px2,9px),var(--py2,-19px)) scale(0) rotate(180deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes dl-trend-blink {
+        0%,100% { opacity: 0.7; transform: translateY(0);    }
+        50%      { opacity: 1;   transform: translateY(-1px); }
+      }
+
+      @keyframes dl-cloud-drift {
+        0%,100% { transform: translateX(0) translateY(0);   }
+        33%      { transform: translateX(2px) translateY(-1px); }
+        66%      { transform: translateX(-1px) translateY(1px);  }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         GRADIENT LIBRARY — Sapphire-blue download palette
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Label bg — dark sapphire-tinted -->
+    <linearGradient id="dl-g-label" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#141824"/>
+      <stop offset="100%" stop-color="#1E1E2E"/>
+    </linearGradient>
+
+    <!-- Value bg — animated blue-sapphire-lavender spectrum -->
+    <linearGradient id="dl-g-value" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#74C7EC">
+        <animate attributeName="stop-color"
+          values="#74C7EC;#89B4FA;#B4BEFE;#89DCEB;#74C7EC"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="40%"  stop-color="#209FB5">
+        <animate attributeName="stop-color"
+          values="#209FB5;#1E66F5;#8839EF;#04A5E5;#209FB5"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#B4BEFE">
+        <animate attributeName="stop-color"
+          values="#B4BEFE;#74C7EC;#89B4FA;#B4BEFE;#74C7EC"
+          dur="11s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Value dark overlay -->
+    <linearGradient id="dl-g-value-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#020612" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#010408" stop-opacity="0.72"/>
+    </linearGradient>
+
+    <!-- Border — animated blue gradient -->
+    <linearGradient id="dl-g-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#74C7EC" stop-opacity="0.65">
+        <animate attributeName="stop-color"
+          values="#74C7EC;#89B4FA;#B4BEFE;#74C7EC"
+          dur="9s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#209FB5" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Halo -->
+    <radialGradient id="dl-g-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#74C7EC" stop-opacity="0.42">
+        <animate attributeName="stop-color"
+          values="#74C7EC;#89B4FA;#89DCEB;#74C7EC"
+          dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#74C7EC" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Arrow gradient -->
+    <linearGradient id="dl-g-arrow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#B4BEFE" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#74C7EC" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Download bar gradient — left to right progress -->
+    <linearGradient id="dl-g-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#74C7EC" stop-opacity="0.7"/>
+      <stop offset="60%"  stop-color="#89B4FA" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#B4BEFE" stop-opacity="0.55"/>
+    </linearGradient>
+
+    <!-- Glass -->
+    <linearGradient id="dl-g-glass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="55%"  stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="dl-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Stream particle gradient — downward fade -->
+    <linearGradient id="dl-g-stream" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#74C7EC" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#74C7EC" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- Packet/particle fills -->
+    <radialGradient id="dl-pf1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#74C7EC"/>
+      <stop offset="100%" stop-color="#74C7EC" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dl-pf2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89B4FA"/>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dl-pf3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#B4BEFE"/>
+      <stop offset="100%" stop-color="#B4BEFE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dl-pf4" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#89DCEB"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dl-pf5" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#94E2D5"/>
+      <stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         FILTERS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <filter id="dl-f-shadow" x="-4%" y="-14%" width="108%" height="128%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3"
+        flood-color="#000000" flood-opacity="0.55"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="5"
+        flood-color="#74C7EC" flood-opacity="0.12"/>
+    </filter>
+
+    <filter id="dl-f-count-glow" x="-10%" y="-40%" width="120%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#74C7EC" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dl-f-arrow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#74C7EC" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dl-f-pkt" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+
+    <filter id="dl-f-cloud" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-color="#74C7EC" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="dl-clip-all">
+      <rect x="0" y="0" width="142" height="28" rx="6"/>
+    </clipPath>
+    <clipPath id="dl-clip-label">
+      <rect x="0" y="0" width="66" height="28"/>
+    </clipPath>
+    <clipPath id="dl-clip-value">
+      <rect x="66" y="0" width="76" height="28"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       AMBIENT HALO
+       ════════════════════════════════════════════════════════════════════ -->
+  <ellipse class="dl-halo" cx="71" cy="14" rx="71" ry="14"
+    fill="url(#dl-g-halo)"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       BADGE BODY
+       ════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#dl-clip-all)" filter="url(#dl-f-shadow)">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LABEL SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#dl-clip-label)">
+
+      <!-- Background -->
+      <rect x="0" y="0" width="66" height="28" fill="url(#dl-g-label)"/>
+
+      <!-- Glass top -->
+      <rect x="0" y="0" width="66" height="13" fill="url(#dl-g-glass)"/>
+
+      <!-- Shimmer left -->
+      <rect class="dl-shim-l"
+        x="-90" y="0" width="38" height="28"
+        fill="url(#dl-g-shimmer)"
+        clip-path="url(#dl-clip-label)"
+        opacity="0.4"/>
+
+      <!-- ── DOWNLOAD ARROW ICON ────────────────────────────────────── -->
+      <!-- Cloud-with-arrow icon -->
+      <g transform="translate(11, 14)" filter="url(#dl-f-arrow)">
+
+        <!-- Cloud (top body) -->
+        <g class="dl-cloud" filter="url(#dl-f-cloud)">
+          <!-- Cloud outline path -->
+          <path d="M -6,-5 Q -8,-8 -4,-9 Q -3,-11 0,-10 Q 3,-11 4,-9 Q 8,-8 6,-5 Z"
+            fill="#74C7EC"
+            opacity="0.7"/>
+          <path d="M -6,-5 Q -8,-8 -4,-9 Q -3,-11 0,-10 Q 3,-11 4,-9 Q 8,-8 6,-5 Z"
+            fill="none"
+            stroke="#74C7EC"
+            stroke-width="0.75"
+            opacity="0.85"/>
+        </g>
+
+        <!-- Download arrow (stem + head) -->
+        <g class="dl-arrow">
+          <!-- Arrow stem -->
+          <line x1="0" y1="-4" x2="0" y2="4"
+            stroke="url(#dl-g-arrow)"
+            stroke-width="2.5"
+            stroke-linecap="round"/>
+          <!-- Arrow head — inverted V pointing down -->
+          <path d="M -4,1.5 L 0,6 L 4,1.5"
+            fill="none"
+            stroke="url(#dl-g-arrow)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+          <!-- Base line -->
+          <line x1="-5" y1="8" x2="5" y2="8"
+            stroke="#74C7EC"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity="0.8"/>
+        </g>
+
+        <!-- Arrow trail (ghost behind arrow) -->
+        <g class="dl-arrow-shadow">
+          <line x1="0" y1="-4" x2="0" y2="4"
+            stroke="#74C7EC"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            opacity="0.2"/>
+        </g>
+
+        <!-- Falling data stream particles -->
+        <g filter="url(#dl-f-pkt)" opacity="0.7">
+          <rect class="dl-stream-1" x="-1.5" y="-14" width="3" height="3" rx="0.5"
+            fill="url(#dl-g-stream)"/>
+          <rect class="dl-stream-2" x="-1.5" y="-14" width="3" height="3" rx="0.5"
+            fill="url(#dl-g-stream)"/>
+          <rect class="dl-stream-3" x="-1.5" y="-14" width="3" height="3" rx="0.5"
+            fill="url(#dl-g-stream)"/>
+        </g>
+
+      </g>
+
+      <!-- ── DOWNLOAD PROGRESS BAR ──────────────────────────────────── -->
+      <!-- Thin bar showing total progress (always full = 100%) -->
+      <rect x="24" y="23.5" width="37" height="1.5" rx="0.75"
+        fill="#313244" opacity="0.5"/>
+
+      <!-- Animated fill bar + 4 tick marks -->
+      <g>
+        <rect class="dl-bar-fill"
+          x="24" y="23.5" width="37" height="1.5" rx="0.75"
+          fill="url(#dl-g-bar)"
+          style="transform-origin:24px 24.25px"/>
+
+        <!-- 4 tick marks at 25% intervals -->
+        <g opacity="0.7">
+          <line class="dl-tick-1" x1="33.25" y1="22.5" x2="33.25" y2="25.5"
+            stroke="#74C7EC" stroke-width="1" stroke-linecap="round"
+            style="transform-origin:33.25px 24px"/>
+          <line class="dl-tick-2" x1="42.5"  y1="22.5" x2="42.5"  y2="25.5"
+            stroke="#89B4FA" stroke-width="1" stroke-linecap="round"
+            style="transform-origin:42.5px 24px"/>
+          <line class="dl-tick-3" x1="51.75" y1="22.5" x2="51.75" y2="25.5"
+            stroke="#74C7EC" stroke-width="1" stroke-linecap="round"
+            style="transform-origin:51.75px 24px"/>
+          <line class="dl-tick-4" x1="61"    y1="22.5" x2="61"    y2="25.5"
+            stroke="#B4BEFE" stroke-width="1" stroke-linecap="round"
+            style="transform-origin:61px 24px"/>
+        </g>
+      </g>
+
+      <!-- "downloads" label -->
+      <text class="dl-label"
+        x="24" y="14"
+        font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="7.5"
+        font-weight="600"
+        letter-spacing="0.15"
+        fill="#A6ADC8">downloads</text>
+
+    </g>
+
+    <!-- ── DIVIDER ─────────────────────────────────────────────────────── -->
+    <rect x="65" y="0" width="1" height="28" fill="#74C7EC" opacity="0.35"/>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         VALUE SECTION
+         ══════════════════════════════════════════════════════════════════ -->
+    <g clip-path="url(#dl-clip-value)">
+
+      <!-- Animated gradient base -->
+      <rect x="66" y="0" width="76" height="28" fill="url(#dl-g-value)"/>
+      <!-- Dark overlay -->
+      <rect x="66" y="0" width="76" height="28" fill="url(#dl-g-value-dark)"/>
+      <!-- Glass top -->
+      <rect x="66" y="0" width="76" height="12" fill="url(#dl-g-glass)"/>
+
+      <!-- Shimmer right -->
+      <rect class="dl-shim-r"
+        x="24" y="0" width="32" height="28"
+        fill="url(#dl-g-shimmer)"
+        clip-path="url(#dl-clip-value)"
+        opacity="0.52"/>
+
+      <!-- ── TREND INDICATOR (↑ up-trend) ──────────────────────────── -->
+      <g class="dl-trend" transform="translate(69, 8)">
+        <!-- Upward trending arrow -->
+        <path d="M 0,7 L 4,3 L 8,5 L 14,0"
+          fill="none"
+          stroke="#74C7EC"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.55"/>
+        <!-- Arrowhead at end -->
+        <path d="M 12,-1.5 L 14,0 L 12.5,2"
+          fill="none"
+          stroke="#74C7EC"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.55"/>
+      </g>
+
+      <!-- ── DOWNLOAD COUNT DISPLAY ─────────────────────────────────── -->
+      <!-- "48.2" rolling number -->
+      <g class="dl-num">
+        <text class="dl-count"
+          x="72" y="19.5"
+          font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+          font-size="12"
+          font-weight="800"
+          letter-spacing="-0.5"
+          fill="#CDD6F4"
+          filter="url(#dl-f-count-glow)">48.2</text>
+      </g>
+
+      <!-- "k" suffix -->
+      <text class="dl-k"
+        x="91.5" y="19.5"
+        font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="11"
+        font-weight="700"
+        fill="#74C7EC"
+        style="transform-origin:94px 14px">k</text>
+
+      <!-- "⬇" arrow emoji subtle overlay -->
+      <text x="100" y="19"
+        font-family="system-ui,sans-serif"
+        font-size="11"
+        fill="#FFFFFF"
+        opacity="0.12">⬇</text>
+
+      <!-- ── GROWTH INDICATOR ───────────────────────────────────────── -->
+      <!-- Small "+12% this week" stat -->
+      <text x="67" y="26"
+        font-family="'SF Mono',monospace"
+        font-size="5.5"
+        letter-spacing="0.3"
+        fill="#74C7EC"
+        opacity="0.45">+12% this week</text>
+
+      <!-- ── SECONDARY STATS ────────────────────────────────────────── -->
+      <!-- GitHub releases + AUR stats displayed small -->
+      <text x="105" y="15"
+        font-family="'SF Mono',monospace"
+        font-size="6"
+        letter-spacing="0.2"
+        fill="#74C7EC"
+        opacity="0.6">GH</text>
+      <text x="105" y="21.5"
+        font-family="'SF Mono',monospace"
+        font-size="6"
+        letter-spacing="0.2"
+        fill="#89B4FA"
+        opacity="0.5">AUR</text>
+
+      <!-- Tiny bar chart (3 bars) representing download history -->
+      <g transform="translate(114, 11)" opacity="0.5">
+        <rect x="0"  y="8"  width="4" height="5"  rx="1" fill="#74C7EC"/>
+        <rect x="5"  y="5"  width="4" height="8"  rx="1" fill="#89B4FA"/>
+        <rect x="10" y="0"  width="4" height="13" rx="1" fill="#B4BEFE"/>
+      </g>
+
+    </g>
+
+    <!-- ── OUTER BORDER ───────────────────────────────────────────────── -->
+    <rect x="0.5" y="0.5" width="141" height="27" rx="5.5"
+      fill="none"
+      stroke="url(#dl-g-border)"
+      stroke-width="1"/>
+
+    <!-- ── TOP ACCENT BAR ─────────────────────────────────────────────── -->
+    <rect class="dl-bar-top"
+      x="0" y="0" width="142" height="1.5" rx="0.75"
+      fill="url(#dl-g-value)"
+      opacity="0.85"
+      style="transform-origin:0 0"/>
+
+    <!-- ── BOTTOM EDGE ─────────────────────────────────────────────────── -->
+    <rect x="0" y="26.5" width="142" height="0.75" rx="0.375"
+      fill="#74C7EC" opacity="0.2"/>
+
+    <!-- ── LEFT ACCENT EDGE ───────────────────────────────────────────── -->
+    <rect x="0" y="0" width="1.5" height="28" rx="0.75"
+      fill="#74C7EC" opacity="0.32"/>
+
+  </g>
+
+  <!-- ── DATA PACKET PARTICLES ──────────────────────────────────────────── -->
+  <!-- Small squares ejecting from badge — represent data packets downloading -->
+  <rect class="dl-pkt-1"
+    x="126" y="20" width="3" height="3" rx="0.5"
+    fill="url(#dl-pf1)"
+    style="--px:4px;--py:-9px;--px2:7px;--py2:-17px"/>
+
+  <rect class="dl-pkt-2"
+    x="130" y="17" width="2.5" height="2.5" rx="0.5"
+    fill="url(#dl-pf2)"
+    style="--px:-3px;--py:-8px;--px2:-6px;--py2:-15px"/>
+
+  <rect class="dl-pkt-3"
+    x="123" y="22" width="3.5" height="3.5" rx="0.75"
+    fill="url(#dl-pf3)"
+    style="--px:5px;--py:-10px;--px2:9px;--py2:-19px"/>
+
+  <rect class="dl-pkt-4"
+    x="128" y="24" width="2" height="2" rx="0.4"
+    fill="url(#dl-pf4)"
+    style="--px:-4px;--py:-11px;--px2:-7px;--py2:-21px"/>
+
+  <rect class="dl-pkt-5"
+    x="133" y="19" width="2.8" height="2.8" rx="0.5"
+    fill="url(#dl-pf5)"
+    style="--px:3px;--py:-8px;--px2:5px;--py2:-15px"/>
+
+</svg>

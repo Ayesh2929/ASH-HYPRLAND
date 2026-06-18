@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⬛ ASH DOTFILES v5.0 OMEGA — SQUARE ICON BANNER                                        ║
+║                                                                                          ║
+║  Perfect square format for social media profile pictures, app icons,                    ║
+║  Discord server icons, GitHub organization avatars.                                     ║
+║                                                                                          ║
+║  Dimensions: 800 × 800px (1:1 ratio)                                                    ║
+║                                                                                          ║
+║  Use cases:                                                                              ║
+║    • Discord server icon  (512×512 display, 800×800 upload)                            ║
+║    • GitHub org avatar    (460×460)                                                      ║
+║    • npm package icon     (400×400)                                                      ║
+║    • Crates.io icon       (300×300)                                                      ║
+║    • Reddit community icon (256×256)                                                    ║
+║    • Mastodon/Fediverse   (400×400)                                                      ║
+║    • Matrix room icon     (96×96 minimum, scales up)                                    ║
+║    • AUR package icon     (any square)                                                   ║
+║    • Flathub icon         (128×128 at 1x)                                               ║
+╚══════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 800 800"
+  width="800"
+  height="800"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  color-interpolation="linearRGB"
+  color-interpolation-filters="linearRGB"
+  role="img"
+  aria-labelledby="bs-title bs-desc">
+
+  <title id="bs-title">ASH Dotfiles v5.0 OMEGA — Square Icon</title>
+  <desc id="bs-desc">
+    ASH Dotfiles square icon at 800×800px.
+    Catppuccin Mocha palette with animated waves and orbital system.
+    For Discord, GitHub, npm, and social media profile pictures.
+  </desc>
+
+  <defs>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         SQUARE ICON ANIMATION ENGINE
+         ════════════════════════════════════════════════════════════════════ -->
+    <style><![CDATA[
+
+      /* ── Wave physics ───────────────────────────────────────────────── */
+      .bs-w1 { animation: bs-wave-a  8s ease-in-out infinite;      transform-origin: 400px 400px; }
+      .bs-w2 { animation: bs-wave-b 10s ease-in-out infinite reverse 1.5s; transform-origin: 400px 400px; }
+      .bs-w3 { animation: bs-wave-a 13s ease-in-out infinite 3s;   transform-origin: 400px 400px; }
+      .bs-w4 { animation: bs-wave-b  7s ease-in-out infinite 0.8s reverse; transform-origin: 400px 400px; }
+      .bs-w5 { animation: bs-wave-a 17s ease-in-out infinite 5s;   transform-origin: 400px 400px; }
+
+      /* ── Outer ring decorations ─────────────────────────────────────── */
+      .bs-ring-a { animation: bs-spin-cw  30s linear infinite; transform-origin: 400px 400px; }
+      .bs-ring-b { animation: bs-spin-ccw 22s linear infinite; transform-origin: 400px 400px; }
+      .bs-ring-c { animation: bs-spin-cw  16s linear infinite; transform-origin: 400px 400px; }
+
+      /* ── Mark float ─────────────────────────────────────────────────── */
+      .bs-mark { animation: bs-float 7s ease-in-out infinite; }
+
+      /* ── Orbital system ─────────────────────────────────────────────── */
+      .bs-orb-a { animation: bs-spin-cw  9s linear infinite; transform-origin: 400px 400px; }
+      .bs-orb-b { animation: bs-spin-ccw 13s linear infinite; transform-origin: 400px 400px; }
+      .bs-orb-c { animation: bs-spin-cw  18s linear infinite; transform-origin: 400px 400px; }
+      .bs-orb-d { animation: bs-spin-ccw 24s linear infinite; transform-origin: 400px 400px; }
+
+      /* ── Letter ─────────────────────────────────────────────────────── */
+      .bs-letter { animation: bs-letter-breathe 6s ease-in-out infinite; }
+
+      /* ── Shimmer sweeps ─────────────────────────────────────────────── */
+      .bs-shim-a { animation: bs-shimmer 5s ease-in-out infinite; }
+      .bs-shim-b { animation: bs-shimmer 7s ease-in-out infinite 2.5s; }
+
+      /* ── Pulse rings ────────────────────────────────────────────────── */
+      .bs-pulse { animation: bs-pulse 4s ease-in-out infinite; transform-origin: 400px 400px; }
+
+      /* ── Crest nodes ────────────────────────────────────────────────── */
+      .bs-crest { animation: bs-crest-pulse 3s ease-in-out infinite; }
+      .bs-cr1 { animation-delay: 0s;    animation-duration: 2.8s; }
+      .bs-cr2 { animation-delay: 0.7s;  animation-duration: 3.4s; }
+      .bs-cr3 { animation-delay: 1.4s;  animation-duration: 3.0s; }
+      .bs-cr4 { animation-delay: 2.1s;  animation-duration: 3.8s; }
+
+      /* ── Status ─────────────────────────────────────────────────────── */
+      .bs-status { animation: bs-status-beat 2.4s ease-in-out infinite; transform-origin: 618px 284px; }
+
+      /* ── Particles ──────────────────────────────────────────────────── */
+      .bs-pt { animation: bs-particle 5s ease-out infinite; opacity: 0; }
+      .bs-pt1 { animation-duration: 5.2s; animation-delay: 0.5s; }
+      .bs-pt2 { animation-duration: 6.1s; animation-delay: 1.4s; }
+      .bs-pt3 { animation-duration: 4.8s; animation-delay: 2.3s; }
+      .bs-pt4 { animation-duration: 7.0s; animation-delay: 0.9s; }
+      .bs-pt5 { animation-duration: 5.6s; animation-delay: 3.2s; }
+      .bs-pt6 { animation-duration: 4.4s; animation-delay: 2.0s; }
+      .bs-pt7 { animation-duration: 6.8s; animation-delay: 1.2s; }
+      .bs-pt8 { animation-duration: 5.1s; animation-delay: 4.1s; }
+
+      /* ── Version badge ──────────────────────────────────────────────── */
+      .bs-version { animation: bs-version-glow 4s ease-in-out infinite; }
+
+      /* ── Halo ───────────────────────────────────────────────────────── */
+      .bs-halo { animation: bs-halo-pulse 5s ease-in-out infinite; transform-origin: 400px 400px; }
+
+      /* ── Grid ───────────────────────────────────────────────────────── */
+      .bs-grid { animation: bs-grid-breathe 8s ease-in-out infinite; }
+
+      /* ── Stars ──────────────────────────────────────────────────────── */
+      .bs-star { animation: bs-star-twinkle 3s ease-in-out infinite; }
+      .bs-st1 { animation-duration: 2.3s; animation-delay: 0.0s; }
+      .bs-st2 { animation-duration: 3.2s; animation-delay: 0.6s; }
+      .bs-st3 { animation-duration: 2.8s; animation-delay: 1.2s; }
+      .bs-st4 { animation-duration: 3.6s; animation-delay: 1.8s; }
+      .bs-st5 { animation-duration: 2.4s; animation-delay: 2.4s; }
+      .bs-st6 { animation-duration: 3.4s; animation-delay: 0.4s; }
+      .bs-st7 { animation-duration: 2.7s; animation-delay: 1.0s; }
+      .bs-st8 { animation-duration: 3.1s; animation-delay: 1.6s; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; }
+      }
+
+      /* ════════════════════════════════════════════════════════════════════
+         KEYFRAMES
+         ════════════════════════════════════════════════════════════════════ */
+
+      @keyframes bs-wave-a {
+        0%,100% { transform: translateY(0)    scaleX(1);    }
+        25%      { transform: translateY(-14px) scaleX(1.02); }
+        50%      { transform: translateY(8px)   scaleX(0.98); }
+        75%      { transform: translateY(-5px)  scaleX(1.01); }
+      }
+      @keyframes bs-wave-b {
+        0%,100% { transform: translateY(0)   scaleX(1);    }
+        33%      { transform: translateY(12px) scaleX(0.99); }
+        66%      { transform: translateY(-8px) scaleX(1.01); }
+      }
+      @keyframes bs-spin-cw  { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+      @keyframes bs-spin-ccw { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
+      @keyframes bs-float {
+        0%,100% { transform: translateY(0);    }
+        33%      { transform: translateY(-10px); }
+        66%      { transform: translateY(6px);   }
+      }
+      @keyframes bs-letter-breathe {
+        0%,100% { filter: brightness(1);    opacity: 0.97; }
+        50%      { filter: brightness(1.12); opacity: 1;    }
+      }
+      @keyframes bs-shimmer {
+        0%   { transform: translateX(-300px) skewX(-10deg); opacity: 0; }
+        15%  { opacity: 0.6; }
+        85%  { opacity: 0.6; }
+        100% { transform: translateX(1100px)  skewX(-10deg); opacity: 0; }
+      }
+      @keyframes bs-pulse {
+        0%,100% { opacity: 0.4; transform: scale(1);    }
+        50%      { opacity: 0.8; transform: scale(1.05); }
+      }
+      @keyframes bs-crest-pulse {
+        0%,100% { r: 8;  opacity: 0.8; }
+        50%      { r: 14; opacity: 1;   }
+      }
+      @keyframes bs-status-beat {
+        0%,100% { transform: scale(1);    opacity: 0.9; }
+        20%      { transform: scale(1.25); opacity: 1;   }
+        40%      { transform: scale(1);    opacity: 0.9; }
+        60%      { transform: scale(1.15); opacity: 0.95; }
+      }
+      @keyframes bs-particle {
+        0%   { transform: translate(0,0) scale(0); opacity: 0; }
+        6%   { opacity: 1; }
+        50%  { transform: translate(var(--spx,14px),var(--spy,-48px)) scale(1.7); opacity: 0.85; }
+        90%  { opacity: 0.15; }
+        100% { transform: translate(var(--spx2,24px),var(--spy2,-90px)) scale(0); opacity: 0; }
+      }
+      @keyframes bs-version-glow {
+        0%,100% { filter: brightness(1);   }
+        50%      { filter: brightness(1.3); }
+      }
+      @keyframes bs-halo-pulse {
+        0%,100% { opacity: 0.4; transform: scale(1);    }
+        50%      { opacity: 0.8; transform: scale(1.06); }
+      }
+      @keyframes bs-grid-breathe {
+        0%,100% { opacity: 0.08; }
+        50%      { opacity: 0.18; }
+      }
+      @keyframes bs-star-twinkle {
+        0%,100% { opacity: 0.25; transform: scale(0.8); }
+        50%      { opacity: 1;    transform: scale(1.5); }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         GRADIENT LIBRARY
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Animated primary -->
+    <linearGradient id="bs-g-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89B4FA">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%"  stop-color="#CBA6F7">
+        <animate attributeName="stop-color"
+          values="#CBA6F7;#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA;#CBA6F7"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#89DCEB">
+        <animate attributeName="stop-color"
+          values="#89DCEB;#A6E3A1;#FAB387;#F38BA8;#89B4FA;#CBA6F7;#89DCEB"
+          dur="14s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Ultra-dark background -->
+    <radialGradient id="bs-g-bg" cx="40%" cy="35%" r="72%">
+      <stop offset="0%"   stop-color="#45475A"/>
+      <stop offset="25%"  stop-color="#313244"/>
+      <stop offset="55%"  stop-color="#1E1E2E"/>
+      <stop offset="80%"  stop-color="#181825"/>
+      <stop offset="100%" stop-color="#0D0D18"/>
+    </radialGradient>
+
+    <!-- Wave gradients -->
+    <linearGradient id="bs-g-w1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0"/>
+      <stop offset="10%"  stop-color="#89B4FA" stop-opacity="0.95"/>
+      <stop offset="50%"  stop-color="#74C7EC" stop-opacity="1"/>
+      <stop offset="90%"  stop-color="#89DCEB" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#89DCEB" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bs-g-w2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#CBA6F7" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#B4BEFE" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="bs-g-w3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FAB387" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#F9E2AF" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="bs-g-w4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#F38BA8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#EBA0AC" stop-opacity="0.14"/>
+    </linearGradient>
+    <linearGradient id="bs-g-w5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#94E2D5" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#A6E3A1" stop-opacity="0.1"/>
+    </linearGradient>
+
+    <!-- Halo -->
+    <radialGradient id="bs-g-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89B4FA" stop-opacity="0.45">
+        <animate attributeName="stop-color"
+          values="#89B4FA;#CBA6F7;#A6E3A1;#F38BA8;#89B4FA"
+          dur="12s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%"  stop-color="#CBA6F7" stop-opacity="0.18">
+        <animate attributeName="stop-color"
+          values="#CBA6F7;#A6E3A1;#F38BA8;#89B4FA;#CBA6F7"
+          dur="12s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Glass -->
+    <radialGradient id="bs-g-glass" cx="34%" cy="24%" r="52%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.24"/>
+      <stop offset="60%"  stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="bs-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="48%"  stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="52%"  stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Particle fills -->
+    <radialGradient id="bs-pf1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#89B4FA"/><stop offset="100%" stop-color="#89B4FA" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#CBA6F7"/><stop offset="100%" stop-color="#CBA6F7" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#94E2D5"/><stop offset="100%" stop-color="#94E2D5" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#A6E3A1"/><stop offset="100%" stop-color="#A6E3A1" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FAB387"/><stop offset="100%" stop-color="#FAB387" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F38BA8"/><stop offset="100%" stop-color="#F38BA8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F9E2AF"/><stop offset="100%" stop-color="#F9E2AF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bs-pf8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#89DCEB"/><stop offset="100%" stop-color="#89DCEB" stop-opacity="0"/></radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         FILTERS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <filter id="bs-f-wave" x="-5%" y="-60%" width="110%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#89B4FA" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="bs-f-mark" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="24"
+        flood-color="#000000" flood-opacity="0.65"/>
+      <feDropShadow dx="0" dy="0"  stdDeviation="16"
+        flood-color="#89B4FA" flood-opacity="0.2"/>
+    </filter>
+
+    <filter id="bs-f-letter" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="10" result="b1"/>
+      <feGaussianBlur stdDeviation="24" result="b2"/>
+      <feGaussianBlur stdDeviation="48" result="b3"/>
+      <feMerge><feMergeNode in="b3"/><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="bs-f-crest" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+
+    <filter id="bs-f-status" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feFlood flood-color="#A6E3A1" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CLIP PATHS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Square with rounded corners for social media -->
+    <clipPath id="bs-clip-sq">
+      <rect x="0" y="0" width="800" height="800" rx="80"/>
+    </clipPath>
+
+    <clipPath id="bs-clip-mark">
+      <circle cx="400" cy="400" r="260"/>
+    </clipPath>
+
+    <!-- Wave clip — centered band -->
+    <mask id="bs-mask-wave">
+      <rect x="0" y="0" width="800" height="800" fill="white"/>
+      <rect x="0"   y="0" width="40"  height="800" fill="url(#bs-fade-l)"/>
+      <rect x="760" y="0" width="40"  height="800" fill="url(#bs-fade-r)"/>
+    </mask>
+    <linearGradient id="bs-fade-l" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="black"/>
+      <stop offset="100%" stop-color="white"/>
+    </linearGradient>
+    <linearGradient id="bs-fade-r" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="white"/>
+      <stop offset="100%" stop-color="black"/>
+    </linearGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         PATTERNS
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <pattern id="bs-pat-dots" x="0" y="0" width="24" height="24"
+      patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.2" fill="#89B4FA" opacity="0.18"/>
+    </pattern>
+    <pattern id="bs-pat-hex" x="0" y="0" width="32" height="37"
+      patternUnits="userSpaceOnUse">
+      <polygon points="16,2 30,10 30,27 16,35 2,27 2,10"
+        fill="none" stroke="#89B4FA" stroke-width="0.4" opacity="0.07"/>
+    </pattern>
+
+  </defs>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ALL LAYERS
+       ══════════════════════════════════════════════════════════════════════ -->
+  <g clip-path="url(#bs-clip-sq)">
+
+  <!-- ── LAYER 00: BACKGROUND ───────────────────────────────────────────── -->
+  <rect x="0" y="0" width="800" height="800" fill="url(#bs-g-bg)"/>
+
+  <!-- Textures -->
+  <rect class="bs-grid" x="0" y="0" width="800" height="800"
+    fill="url(#bs-pat-hex)" opacity="0.8"/>
+  <rect class="bs-grid" x="0" y="0" width="800" height="800"
+    fill="url(#bs-pat-dots)" opacity="0.7"/>
+
+  <!-- Grid lines -->
+  <g class="bs-grid" opacity="0.5">
+    <line x1="0"   y1="200" x2="800" y2="200" stroke="#313244" stroke-width="1" stroke-dasharray="3 80"/>
+    <line x1="0"   y1="400" x2="800" y2="400" stroke="#89B4FA" stroke-width="1" stroke-dasharray="3 80" opacity="0.4"/>
+    <line x1="0"   y1="600" x2="800" y2="600" stroke="#313244" stroke-width="1" stroke-dasharray="3 80"/>
+    <line x1="200" y1="0"   x2="200" y2="800" stroke="#313244" stroke-width="1" stroke-dasharray="3 80"/>
+    <line x1="400" y1="0"   x2="400" y2="800" stroke="#313244" stroke-width="1" stroke-dasharray="3 80"/>
+    <line x1="600" y1="0"   x2="600" y2="800" stroke="#313244" stroke-width="1" stroke-dasharray="3 80"/>
+  </g>
+
+  <!-- ── LAYER 01: STAR FIELD ───────────────────────────────────────────── -->
+  <g filter="url(#bs-f-crest)">
+    <circle class="bs-star bs-st1" cx="120"  cy="88"   r="2.5" fill="#CDD6F4"/>
+    <circle class="bs-star bs-st2" cx="280"  cy="64"   r="2"   fill="#89B4FA"/>
+    <circle class="bs-star bs-st3" cx="520"  cy="92"   r="3"   fill="#CBA6F7"/>
+    <circle class="bs-star bs-st4" cx="700"  cy="72"   r="2.2" fill="#89DCEB"/>
+    <circle class="bs-star bs-st5" cx="80"   cy="720"  r="2.5" fill="#94E2D5"/>
+    <circle class="bs-star bs-st6" cx="300"  cy="740"  r="2"   fill="#89B4FA"/>
+    <circle class="bs-star bs-st7" cx="560"  cy="726"  r="2.8" fill="#CBA6F7"/>
+    <circle class="bs-star bs-st8" cx="720"  cy="710"  r="2.1" fill="#CDD6F4"/>
+  </g>
+
+  <!-- ── LAYER 02: AMBIENT HALO ─────────────────────────────────────────── -->
+  <circle class="bs-halo" cx="400" cy="400" r="390"
+    fill="url(#bs-g-halo)"/>
+
+  <!-- ── LAYER 03: FIVE-WAVE SYSTEM ─────────────────────────────────────── -->
+  <g mask="url(#bs-mask-wave)">
+
+    <!-- Wave 5 — warmest, deepest -->
+    <path class="bs-w5"
+      d="M 0 530 C 100 500, 200 560, 300 530 C 400 500, 500 560, 600 530
+                  C 700 500, 760 540, 800 524 L 800 800 L 0 800 Z"
+      fill="url(#bs-g-w5)" opacity="0.9"/>
+
+    <!-- Wave 4 — red/maroon -->
+    <path class="bs-w4"
+      d="M 0 504 C 110 464, 220 542, 330 504 C 440 464, 550 542, 660 504
+                  C 738 472, 778 518, 800 498"
+      fill="none" stroke="url(#bs-g-w4)" stroke-width="4.5"
+      stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Wave 3 — warm peach/yellow -->
+    <path class="bs-w3"
+      d="M 0 476 C 120 428, 240 522, 360 476 C 480 428, 600 522, 720 476
+                  C 762 452, 786 490, 800 470"
+      fill="none" stroke="url(#bs-g-w3)" stroke-width="6"
+      stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Wave 2 — mauve/lavender -->
+    <path class="bs-w2"
+      d="M 0 448 C 130 392, 260 500, 390 448 C 520 392, 650 500, 780 448
+                  C 792 430, 798 460, 800 444"
+      fill="none" stroke="url(#bs-g-w2)" stroke-width="8"
+      stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Wave 1 — PRIMARY (thickest, glowing) -->
+    <path class="bs-w1"
+      d="M 0 420 C 140 352, 280 484, 420 420 C 560 352, 700 484, 800 420"
+      fill="none" stroke="url(#bs-g-w1)" stroke-width="14"
+      stroke-linecap="round"
+      filter="url(#bs-f-wave)"/>
+
+    <!-- Wave 1 fill -->
+    <path
+      d="M 0 420 C 140 352, 280 484, 420 420 C 560 352, 700 484, 800 420
+                  L 800 800 L 0 800 Z"
+      fill="url(#bs-g-w1)" opacity="0.07"/>
+
+    <!-- Shimmer -->
+    <rect class="bs-shim-a" x="0" y="0" width="200" height="800"
+      fill="url(#bs-g-shimmer)" opacity="0.5"/>
+    <rect class="bs-shim-b" x="0" y="0" width="120" height="800"
+      fill="url(#bs-g-shimmer)" opacity="0.35"/>
+
+    <!-- Wave crest glow nodes — 4 peaks -->
+    <g filter="url(#bs-f-crest)">
+      <circle class="bs-crest bs-cr1" cx="140"  cy="420" r="8"  fill="#89B4FA" opacity="0.92"/>
+      <circle class="bs-crest bs-cr2" cx="352"  cy="372" r="8"  fill="#74C7EC" opacity="0.88"/>
+      <circle class="bs-crest bs-cr3" cx="564"  cy="420" r="8"  fill="#89DCEB" opacity="0.92"/>
+      <circle class="bs-crest bs-cr4" cx="776"  cy="380" r="6"  fill="#94E2D5" opacity="0.85"/>
+    </g>
+
+  </g>
+
+  <!-- ── LAYER 04: OUTER DECORATIVE RINGS ───────────────────────────────── -->
+
+  <!-- Ring A — outermost, CW -->
+  <g class="bs-ring-a">
+    <circle cx="400" cy="400" r="380"
+      fill="none" stroke="url(#bs-g-primary)"
+      stroke-width="2" stroke-dasharray="12 18" opacity="0.25"/>
+  </g>
+
+  <!-- Ring B — CCW -->
+  <g class="bs-ring-b">
+    <circle cx="400" cy="400" r="360"
+      fill="none" stroke="url(#bs-g-w2)"
+      stroke-width="1.5" stroke-dasharray="6 24" opacity="0.2"/>
+  </g>
+
+  <!-- Ring C — inner, CW -->
+  <g class="bs-ring-c">
+    <circle cx="400" cy="400" r="340"
+      fill="none" stroke="url(#bs-g-w3)"
+      stroke-width="1" stroke-dasharray="3 16" opacity="0.15"/>
+  </g>
+
+  <!-- ── LAYER 05: MARK ICON ────────────────────────────────────────────── -->
+  <g class="bs-mark" filter="url(#bs-f-mark)">
+
+    <!-- Main circle -->
+    <circle cx="400" cy="400" r="260"
+      fill="url(#bs-g-bg)"
+      stroke="url(#bs-g-primary)"
+      stroke-width="6"/>
+
+    <!-- Inner ring accent -->
+    <circle cx="400" cy="400" r="248"
+      fill="none" stroke="url(#bs-g-primary)"
+      stroke-width="2" opacity="0.25"/>
+
+    <!-- Second inner ring -->
+    <circle cx="400" cy="400" r="232"
+      fill="none" stroke="#313244" stroke-width="1.5"/>
+
+    <!-- Glass highlight -->
+    <ellipse cx="400" cy="320" rx="184" ry="110"
+      fill="url(#bs-g-glass)"
+      clip-path="url(#bs-clip-mark)"/>
+
+    <!-- Mini waves inside mark -->
+    <g clip-path="url(#bs-clip-mark)">
+
+      <!-- Mini wave 3 — teal -->
+      <path class="bs-w3"
+        d="M 140 424 C 200 388, 260 460, 320 424 C 380 388, 440 460, 500 424
+                       C 560 388, 620 452, 660 424"
+        fill="none" stroke="#94E2D5" stroke-width="3.5"
+        stroke-linecap="round" opacity="0.28"/>
+
+      <!-- Mini wave 2 — purple -->
+      <path class="bs-w2"
+        d="M 140 408 C 202 368, 266 448, 330 408 C 394 368, 456 448, 520 408
+                       C 582 368, 636 440, 660 412"
+        fill="none" stroke="url(#bs-g-w2)" stroke-width="5"
+        stroke-linecap="round" opacity="0.45"/>
+
+      <!-- Mini wave 1 — primary blue -->
+      <path class="bs-w1"
+        d="M 140 392 C 204 346, 272 436, 340 392 C 408 346, 474 436, 542 392
+                       C 606 346, 652 428, 660 396"
+        fill="none" stroke="url(#bs-g-w1)" stroke-width="9"
+        stroke-linecap="round"
+        filter="url(#bs-f-wave)"/>
+
+    </g>
+
+    <!-- Center letter A — 3-pass bloom -->
+    <text x="400" y="480"
+      font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+      font-size="260" font-weight="900" text-anchor="middle"
+      fill="#89B4FA" opacity="0.18"
+      filter="url(#bs-f-letter)">A</text>
+    <text x="400" y="480"
+      font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+      font-size="260" font-weight="900" text-anchor="middle"
+      fill="#CBA6F7" opacity="0.1"
+      filter="url(#bs-f-letter)">A</text>
+    <text class="bs-letter" x="400" y="480"
+      font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+      font-size="260" font-weight="900" text-anchor="middle"
+      fill="url(#bs-g-primary)">A</text>
+
+    <!-- Letter outline — ultra-subtle depth -->
+    <text x="400" y="480"
+      font-family="'SF Pro Display','Inter','Helvetica Neue',system-ui,sans-serif"
+      font-size="260" font-weight="900" text-anchor="middle"
+      fill="none" stroke="#FFFFFF" stroke-width="1"
+      opacity="0.08">A</text>
+
+    <!-- Orbital system — 4 dots at different radii -->
+    <g class="bs-orb-a">
+      <circle cx="400" cy="140" r="10"
+        fill="#89B4FA" filter="url(#bs-f-crest)" opacity="0.92">
+        <animate attributeName="opacity" values="0.92;1;0.92" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="400" cy="140" r="10"
+        fill="none" stroke="#89B4FA" stroke-width="3" opacity="0">
+        <animate attributeName="r"       values="10;22;10"  dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;0;0.7" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <g class="bs-orb-b">
+      <circle cx="660" cy="400" r="7.5"
+        fill="#CBA6F7" filter="url(#bs-f-crest)" opacity="0.85"/>
+    </g>
+    <g class="bs-orb-c">
+      <circle cx="400" cy="112" r="5.5"
+        fill="#94E2D5" filter="url(#bs-f-crest)" opacity="0.75"/>
+    </g>
+    <g class="bs-orb-d">
+      <circle cx="118" cy="400" r="4.5"
+        fill="#FAB387" filter="url(#bs-f-crest)" opacity="0.65"/>
+    </g>
+
+    <!-- Status indicator — top right -->
+    <circle class="bs-status" cx="618" cy="284" r="20"
+      fill="#A6E3A1"
+      filter="url(#bs-f-status)"
+      opacity="0.92"
+      style="transform-origin:618px 284px"/>
+    <circle cx="618" cy="284" r="20"
+      fill="none" stroke="#A6E3A1" stroke-width="4" opacity="0">
+      <animate attributeName="r"       values="20;42;20"  dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0;0.7" dur="3s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Satellite accent dots — cluster around status -->
+    <circle cx="588" cy="264" r="7"
+      fill="#F9E2AF" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="648" cy="264" r="6"
+      fill="#F38BA8" opacity="0.65">
+      <animate attributeName="opacity" values="0.65;0.9;0.65" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Mark pulse ring -->
+    <circle class="bs-pulse" cx="400" cy="400" r="260"
+      fill="none" stroke="url(#bs-g-primary)"
+      stroke-width="3" opacity="0.4"/>
+
+  </g>
+
+  <!-- ── LAYER 06: BOTTOM CONTENT STRIP ─────────────────────────────────── -->
+  <!-- Version badge — centered at bottom -->
+  <g class="bs-version" transform="translate(400, 690)">
+    <rect x="-80" y="-16" width="160" height="32" rx="16"
+      fill="rgba(137,180,250,0.12)"
+      stroke="url(#bs-g-primary)"
+      stroke-width="2"/>
+    <text x="0" y="5"
+      font-family="'SF Mono','JetBrains Mono',monospace"
+      font-size="12" font-weight="700" letter-spacing="1.5"
+      fill="url(#bs-g-primary)" text-anchor="middle">v5.0 OMEGA ⚡</text>
+  </g>
+
+  <!-- ASH wordmark — below version -->
+  <text x="400" y="744"
+    font-family="'SF Mono','JetBrains Mono',monospace"
+    font-size="11" font-weight="500" letter-spacing="6"
+    fill="#45475A" text-anchor="middle">DOTFILES</text>
+
+  <!-- Color swatch dots — bottom center -->
+  <g transform="translate(264, 762)">
+    <circle cx="0"   cy="0" r="5.5" fill="#89B4FA"/>
+    <circle cx="16"  cy="0" r="5.5" fill="#CBA6F7"/>
+    <circle cx="32"  cy="0" r="5.5" fill="#A6E3A1"/>
+    <circle cx="48"  cy="0" r="5.5" fill="#F38BA8"/>
+    <circle cx="64"  cy="0" r="5.5" fill="#FAB387"/>
+    <circle cx="80"  cy="0" r="5.5" fill="#89DCEB"/>
+    <circle cx="96"  cy="0" r="5.5" fill="#F9E2AF"/>
+    <circle cx="112" cy="0" r="5.5" fill="#94E2D5"/>
+    <circle cx="128" cy="0" r="5.5" fill="#B4BEFE"/>
+    <circle cx="144" cy="0" r="5.5" fill="#F5C2E7"/>
+    <circle cx="160" cy="0" r="5.5" fill="#74C7EC"/>
+    <circle cx="176" cy="0" r="5.5" fill="#EBA0AC"/>
+    <circle cx="192" cy="0" r="5.5" fill="#F2CDCD"/>
+    <circle cx="208" cy="0" r="5.5" fill="#F5E0DC"/>
+
+    <!-- Animated shimmer across swatches -->
+    <rect x="-6" y="-8" width="230" height="16" rx="8"
+      fill="url(#bs-g-shimmer)" opacity="0">
+      <animate attributeName="opacity" values="0;0.4;0" dur="4s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- ── LAYER 07: PARTICLE SYSTEM ──────────────────────────────────────── -->
+  <g id="bs-particles">
+    <circle class="bs-pt bs-pt1" cx="668" cy="480" r="10"
+      fill="url(#bs-pf1)" style="--spx:14px;--spy:-48px;--spx2:24px;--spy2:-90px"/>
+    <circle class="bs-pt bs-pt2" cx="680" cy="540" r="8"
+      fill="url(#bs-pf2)" style="--spx:-12px;--spy:-42px;--spx2:-22px;--spy2:-80px"/>
+    <circle class="bs-pt bs-pt3" cx="652" cy="600" r="9"
+      fill="url(#bs-pf3)" style="--spx:16px;--spy:-54px;--spx2:28px;--spy2:-102px"/>
+    <circle class="bs-pt bs-pt4" cx="688" cy="510" r="6"
+      fill="url(#bs-pf4)" style="--spx:-16px;--spy:-44px;--spx2:-30px;--spy2:-84px"/>
+    <circle class="bs-pt bs-pt5" cx="656" cy="560" r="11"
+      fill="url(#bs-pf5)" style="--spx:18px;--spy:-58px;--spx2:34px;--spy2:-110px"/>
+    <circle class="bs-pt bs-pt6" cx="676" cy="460" r="8"
+      fill="url(#bs-pf6)" style="--spx:-8px;--spy:-38px;--spx2:-16px;--spy2:-72px"/>
+    <circle class="bs-pt bs-pt7" cx="648" cy="624" r="10"
+      fill="url(#bs-pf7)" style="--spx:20px;--spy:-60px;--spx2:38px;--spy2:-116px"/>
+    <circle class="bs-pt bs-pt8" cx="684" cy="494" r="7"
+      fill="url(#bs-pf8)" style="--spx:-18px;--spy:-40px;--spx2:-34px;--spy2:-78px"/>
+  </g>
+
+  <!-- ── LAYER 08: BORDER & CORNER DECORATIONS ──────────────────────────── -->
+
+  <!-- Main border — rounded rectangle stroke -->
+  <rect x="2" y="2" width="796" height="796" rx="79"
+    fill="none"
+    stroke="url(#bs-g-primary)"
+    stroke-width="4"
+    opacity="0.55"/>
+
+  <!-- Inner border line -->
+  <rect x="12" y="12" width="776" height="776" rx="70"
+    fill="none"
+    stroke="url(#bs-g-primary)"
+    stroke-width="1.5"
+    opacity="0.2"/>
+
+  <!-- Corner accent brackets — 4 corners, large for 800px -->
+  <path d="M 0 56 L 0 0 L 56 0"   fill="none" stroke="#89B4FA" stroke-width="4" opacity="0.6"/>
+  <path d="M 744 0 L 800 0 L 800 56"  fill="none" stroke="#89B4FA" stroke-width="4" opacity="0.6"/>
+  <path d="M 0 744 L 0 800 L 56 800"  fill="none" stroke="#89B4FA" stroke-width="4" opacity="0.35"/>
+  <path d="M 744 800 L 800 800 L 800 744" fill="none" stroke="#89B4FA" stroke-width="4" opacity="0.35"/>
+
+  <!-- Corner dots -->
+  <circle cx="56"  cy="56"  r="5" fill="#89B4FA" opacity="0.55"/>
+  <circle cx="744" cy="56"  r="5" fill="#89B4FA" opacity="0.55"/>
+  <circle cx="56"  cy="744" r="5" fill="#89B4FA" opacity="0.32"/>
+  <circle cx="744" cy="744" r="5" fill="#89B4FA" opacity="0.32"/>
+
+  <!-- Top center indicator — brand mark line -->
+  <line x1="370" y1="20" x2="430" y2="20"
+    stroke="url(#bs-g-primary)" stroke-width="3"
+    stroke-linecap="round" opacity="0.5"/>
+
+  </g>
+  <!-- End clip group -->
+
+</svg>
