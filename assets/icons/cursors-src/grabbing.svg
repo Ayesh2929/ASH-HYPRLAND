@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="grabbingGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+    <filter id="dropShadow">
+      <feDropShadow dx="1" dy="1.5" stdDeviation="1.2"
+                    flood-color="#000" flood-opacity="0.38"/>
+    </filter>
+    <filter id="glowGrab" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Grabbing fist — closed hand -->
+  <g filter="url(#dropShadow)">
+    <!-- Four fingers curled into a fist -->
+    <path d="M7,14 Q7,10 10,10 Q13,10 13,13 L13,16 L8,16 Q7,16 7,14 Z"
+          fill="url(#grabbingGrd)" stroke="#1e1e2e" stroke-width="1.1"/>
+    <path d="M13,12 Q13,8 16,8 Q19,8 19,11 L19,16 L13,16 Z"
+          fill="url(#grabbingGrd)" stroke="#1e1e2e" stroke-width="1.1"/>
+    <path d="M19,13 Q19,9 22,9 Q25,9 25,12 L25,16 L19,16 Z"
+          fill="url(#grabbingGrd)" stroke="#1e1e2e" stroke-width="1.1"/>
+
+    <!-- Palm base -->
+    <path d="M7,16 L25,16 Q25,22 21,24 L11,24 Q7,22 7,16 Z"
+          fill="url(#grabbingGrd)" stroke="#1e1e2e"
+          stroke-width="1.2" stroke-linejoin="round"/>
+
+    <!-- Thumb (tucked side) -->
+    <path d="M7,16 Q5,15 5,18 Q5,22 7,22"
+          fill="url(#grabbingGrd)" stroke="#1e1e2e"
+          stroke-width="1.1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Knuckle highlights -->
+  <g stroke="#1e1e2e" stroke-width="0.7" stroke-linecap="round" opacity="0.35">
+    <line x1="9"  y1="14" x2="12" y2="14"/>
+    <line x1="14.5" y1="12" x2="17.5" y2="12"/>
+    <line x1="20" y1="13.5" x2="23" y2="13.5"/>
+  </g>
+
+  <!-- Glow effect (grabbing = active) -->
+  <path d="M7,14 L25,14 L25,24 L7,24 Z"
+        fill="url(#grabbingGrd)" opacity="0.10"
+        filter="url(#glowGrab)"/>
+</svg>

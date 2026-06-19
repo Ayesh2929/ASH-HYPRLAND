@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- Bluetooth ON — active, searching/on but not paired -->
+    <linearGradient id="btGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="50%"  stop-color="#b4befe"/>
+      <stop offset="100%" stop-color="#cba6f7"/>
+    </linearGradient>
+    <linearGradient id="btFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.06"/>
+    </linearGradient>
+    <radialGradient id="btAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowBt" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowBtOuter" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Ambient glow ── -->
+  <circle cx="12" cy="12" r="8"
+          fill="url(#btAmbient)" filter="url(#glowBtOuter)"/>
+
+  <!-- ── Bluetooth symbol — the classic ᛒ form ── -->
+  <!-- Constructed as: vertical bar + diamond/rhombus from diagonals -->
+
+  <!-- background fill (subtle) -->
+  <path d="M12,3 L12,21 M12,3 L17,7.5 L12,12 L17,16.5 L12,21 M12,12 L7,7.5 M12,12 L7,16.5"
+        fill="none" stroke="#89b4fa" stroke-width="4"
+        stroke-linecap="round" stroke-linejoin="round"
+        opacity="0.08" filter="url(#glowBtOuter)"/>
+
+  <!-- main Bluetooth symbol -->
+  <!-- vertical centre line -->
+  <line x1="12" y1="3" x2="12" y2="21"
+        stroke="url(#btGrad)" stroke-width="2"
+        stroke-linecap="round"
+        filter="url(#glowBt)"/>
+
+  <!-- upper-right diagonal (down-right) -->
+  <line x1="12" y1="3" x2="17" y2="7.5"
+        stroke="url(#btGrad)" stroke-width="2"
+        stroke-linecap="round"
+        filter="url(#glowBt)"/>
+
+  <!-- upper-right return (down-left, back to centre) -->
+  <line x1="17" y1="7.5" x2="12" y2="12"
+        stroke="url(#btGrad)" stroke-width="2"
+        stroke-linecap="round"
+        filter="url(#glowBt)"/>
+
+  <!-- lower-right diagonal (down-right) -->
+  <line x1="12" y1="12" x2="17" y2="16.5"
+        stroke="url(#btGrad)" stroke-width="2"
+        stroke-linecap="round"
+        filter="url(#glowBt)"/>
+
+  <!-- lower-right return (down-left, to bottom) -->
+  <line x1="17" y1="16.5" x2="12" y2="21"
+        stroke="url(#btGrad)" stroke-width="2"
+        stroke-linecap="round"
+        filter="url(#glowBt)"/>
+
+  <!-- ── Search pulses (top-right and bottom-right arcs) ── -->
+  <!-- indicating scanning/on but not connected -->
+  <!-- upper scan arc -->
+  <path d="M15.5,8.5 A3,3 0 0,1 15.5,5.5"
+        fill="none" stroke="#89b4fa"
+        stroke-width="1.2" stroke-linecap="round"
+        opacity="0.45" filter="url(#glowBt)"/>
+  <!-- outer upper scan -->
+  <path d="M17,9.5 A5,5 0 0,1 17,4.5"
+        fill="none" stroke="#89b4fa"
+        stroke-width="1" stroke-linecap="round"
+        opacity="0.25"/>
+
+  <!-- lower scan arc -->
+  <path d="M15.5,15.5 A3,3 0 0,0 15.5,18.5"
+        fill="none" stroke="#cba6f7"
+        stroke-width="1.2" stroke-linecap="round"
+        opacity="0.45" filter="url(#glowBt)"/>
+  <!-- outer lower scan -->
+  <path d="M17,14.5 A5,5 0 0,0 17,19.5"
+        fill="none" stroke="#cba6f7"
+        stroke-width="1" stroke-linecap="round"
+        opacity="0.25"/>
+
+  <title>Bluetooth On</title>
+</svg>

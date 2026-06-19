@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="editorGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="50%"  stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <linearGradient id="editorFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0.05"/>
+    </linearGradient>
+    <filter id="glowEd" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Editor window -->
+  <rect x="1" y="2" width="22" height="20" rx="3"
+        fill="url(#editorFill)" stroke="url(#editorGrd)"
+        stroke-width="1.4" filter="url(#glowEd)"/>
+
+  <!-- Side gutter -->
+  <rect x="1" y="2" width="4.5" height="20" rx="2" fill="#11111b"/>
+  <rect x="4.5" y="2" width="0.5" height="20" fill="#313244"/>
+
+  <!-- Line numbers -->
+  <g font-family="monospace" font-size="2.8" fill="#585b70" text-anchor="middle">
+    <text x="3" y="9">1</text>
+    <text x="3" y="12.5">2</text>
+    <text x="3" y="16">3</text>
+    <text x="3" y="19.5">4</text>
+  </g>
+
+  <!-- Top accent -->
+  <rect x="1" y="2" width="22" height="1.5" rx="1"
+        fill="url(#editorGrd)" opacity="0.75" filter="url(#glowEd)"/>
+
+  <!-- Active line highlight -->
+  <rect x="5" y="11" width="17.5" height="3" rx="1"
+        fill="#cba6f7" opacity="0.08"/>
+
+  <!-- Code lines with syntax highlight -->
+  <g font-family="monospace" font-size="2.8">
+    <text x="6" y="9">
+      <tspan fill="#cba6f7">function </tspan>
+      <tspan fill="#89b4fa">setup</tspan>
+      <tspan fill="#cdd6f4">()</tspan>
+    </text>
+    <!-- Current line (active) -->
+    <text x="6" y="12.5">
+      <tspan fill="#a6e3a1">  return </tspan>
+      <tspan fill="#f9e2af">"ash"</tspan>
+    </text>
+    <text x="6" y="16">
+      <tspan fill="#cba6f7">end</tspan>
+    </text>
+    <!-- Cursor -->
+    <rect x="6" y="17" width="1.5" height="2.5"
+          fill="#cba6f7" opacity="0.80"
+          filter="url(#glowEd)" rx="0.3"/>
+  </g>
+</svg>

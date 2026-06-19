@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="monGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="50%"  stop-color="#74c7ec"/>
+      <stop offset="100%" stop-color="#a6e3a1"/>
+    </linearGradient>
+    <linearGradient id="monFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+    <radialGradient id="shareGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowMon" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowArrow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Monitor body -->
+  <rect x="1.5" y="3" width="21" height="15" rx="2.5"
+        fill="url(#monFill)"/>
+  <rect x="1.5" y="3" width="21" height="15" rx="2.5"
+        fill="none" stroke="url(#monGrad)"
+        stroke-width="1.7" filter="url(#glowMon)"/>
+
+  <!-- Monitor screen inner -->
+  <rect x="3" y="4.5" width="18" height="12" rx="1.5"
+        fill="#181825" opacity="0.55"/>
+
+  <!-- Stand -->
+  <line x1="12" y1="18" x2="12" y2="21"
+        stroke="url(#monGrad)" stroke-width="1.7"
+        stroke-linecap="round" filter="url(#glowMon)"/>
+  <line x1="9" y1="21" x2="15" y2="21"
+        stroke="url(#monGrad)" stroke-width="1.9"
+        stroke-linecap="round" filter="url(#glowMon)"/>
+
+  <!-- Share / upload arrow inside screen -->
+  <!-- Ambient glow -->
+  <circle cx="12" cy="10.5" r="4"
+          fill="url(#shareGlow)" filter="url(#glowArrow)"/>
+  <!-- Arrow shaft (up) -->
+  <line x1="12" y1="12.5" x2="12" y2="7.5"
+        stroke="url(#arrowGrad)" stroke-width="1.8"
+        stroke-linecap="round" filter="url(#glowArrow)"/>
+  <!-- Arrow head -->
+  <path d="M9.5,9.5 L12,7 L14.5,9.5"
+        fill="none" stroke="url(#arrowGrad)"
+        stroke-width="1.8" stroke-linecap="round"
+        stroke-linejoin="round" filter="url(#glowArrow)"/>
+  <!-- Base line -->
+  <line x1="9.5" y1="13.5" x2="14.5" y2="13.5"
+        stroke="url(#arrowGrad)" stroke-width="1.6"
+        stroke-linecap="round" opacity="0.65"
+        filter="url(#glowArrow)"/>
+
+  <!-- Broadcasting dots (top-right corner) -->
+  <circle cx="19.5" cy="5.5" r="1.0"
+          fill="#a6e3a1" opacity="0.8" filter="url(#glowArrow)">
+    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

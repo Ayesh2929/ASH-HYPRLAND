@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="dndGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#eba0ac"/>
+      <stop offset="100%" stop-color="#f38ba8"/>
+    </linearGradient>
+    <linearGradient id="dndFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#eba0ac" stop-opacity="0.05"/>
+    </linearGradient>
+    <radialGradient id="dndAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowDnd" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient glow -->
+  <circle cx="12" cy="12" r="9"
+          fill="url(#dndAmbient)" filter="url(#glowDnd)"/>
+
+  <!-- Bell body (notification bell shape) -->
+  <!-- Bell top arc + body -->
+  <path d="M12,3.5 A6.5,6.5 0 0,1 18.5,10 L18.5,15.5 L5.5,15.5 L5.5,10 A6.5,6.5 0 0,1 12,3.5 Z"
+        fill="url(#dndFill)"/>
+  <path d="M12,3.5 A6.5,6.5 0 0,1 18.5,10 L18.5,15.5 L5.5,15.5 L5.5,10 A6.5,6.5 0 0,1 12,3.5 Z"
+        fill="none" stroke="url(#dndGrad)"
+        stroke-width="1.7" stroke-linejoin="round"
+        filter="url(#glowDnd)"/>
+
+  <!-- Bell clapper / base arch -->
+  <path d="M9,15.5 Q9,18.5 12,18.5 Q15,18.5 15,15.5"
+        fill="none" stroke="url(#dndGrad)"
+        stroke-width="1.6" stroke-linecap="round"
+        filter="url(#glowDnd)"/>
+
+  <!-- Bell handle (top ring) -->
+  <path d="M10.5,3.5 A1.5,1.5 0 0,1 13.5,3.5"
+        fill="none" stroke="url(#dndGrad)"
+        stroke-width="1.6" stroke-linecap="round"
+        filter="url(#glowDnd)"/>
+
+  <!-- DND horizontal minus bar (Do Not Disturb indicator) -->
+  <!-- bar background glow -->
+  <rect x="6.5" y="11.5" width="11" height="3" rx="1.5"
+        fill="#f38ba8" opacity="0.20" filter="url(#glowDnd)"/>
+  <!-- main bar -->
+  <rect x="6.5" y="11.5" width="11" height="3" rx="1.5"
+        fill="url(#dndGrad)" opacity="0.92"/>
+  <!-- bar inner highlight -->
+  <rect x="7" y="12" width="10" height="1" rx="0.5"
+        fill="#ffffff" opacity="0.18"/>
+</svg>

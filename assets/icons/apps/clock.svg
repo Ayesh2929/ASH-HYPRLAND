@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="clockGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="50%"  stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#f38ba8"/>
+    </linearGradient>
+    <linearGradient id="clockFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="hourGrd" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+    <linearGradient id="minGrd" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <radialGradient id="secGrd" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#e64466"/>
+    </radialGradient>
+    <filter id="glowClock" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowSec" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Clock face outer -->
+  <circle cx="12" cy="12" r="10.5"
+          fill="url(#clockFill)" stroke="url(#clockGrd)"
+          stroke-width="1.5" filter="url(#glowClock)"/>
+
+  <!-- Clock face inner ring -->
+  <circle cx="12" cy="12" r="8.5"
+          fill="none" stroke="url(#clockGrd)"
+          stroke-width="0.7" opacity="0.35"/>
+
+  <!-- Hour marks -->
+  <g stroke="url(#clockGrd)" stroke-linecap="round" opacity="0.55">
+    <!-- 12, 3, 6, 9 -->
+    <line x1="12" y1="3.5" x2="12" y2="5.5"  stroke-width="1.4"/>
+    <line x1="20.5" y1="12" x2="18.5" y2="12" stroke-width="1.4"/>
+    <line x1="12" y1="20.5" x2="12" y2="18.5" stroke-width="1.4"/>
+    <line x1="3.5" y1="12" x2="5.5" y2="12"  stroke-width="1.4"/>
+    <!-- Minor marks -->
+    <line x1="18" y1="5.5" x2="17.2" y2="6.8"  stroke-width="0.9"/>
+    <line x1="18" y1="18.5" x2="17.2" y2="17.2" stroke-width="0.9"/>
+    <line x1="6" y1="18.5" x2="6.8" y2="17.2"  stroke-width="0.9"/>
+    <line x1="6" y1="5.5" x2="6.8" y2="6.8"    stroke-width="0.9"/>
+  </g>
+
+  <!-- Hour hand (~10 o'clock position) -->
+  <line x1="12" y1="12" x2="7.5" y2="7.5"
+        stroke="url(#hourGrd)" stroke-width="2.2"
+        stroke-linecap="round" filter="url(#glowClock)"/>
+
+  <!-- Minute hand (~2 o'clock) -->
+  <line x1="12" y1="12" x2="16" y2="5.5"
+        stroke="url(#minGrd)" stroke-width="1.8"
+        stroke-linecap="round" filter="url(#glowClock)"/>
+
+  <!-- Second hand (thin, red) -->
+  <line x1="12" y1="14" x2="12" y2="4.5"
+        stroke="url(#secGrd)" stroke-width="1.0"
+        stroke-linecap="round" filter="url(#glowSec)"/>
+  <!-- Second hand tail -->
+  <line x1="12" y1="14" x2="12" y2="16"
+        stroke="url(#secGrd)" stroke-width="1.0"
+        stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Centre pivot -->
+  <circle cx="12" cy="12" r="1.6"
+          fill="url(#clockGrd)" filter="url(#glowClock)"/>
+  <circle cx="12" cy="12" r="0.7"
+          fill="#1e1e2e"/>
+</svg>

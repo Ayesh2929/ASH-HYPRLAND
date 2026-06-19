@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f9e2af"/>
+      <stop offset="50%"  stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#f9e2af"/>
+    </linearGradient>
+    <linearGradient id="moonFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f9e2af" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#fab387" stop-opacity="0.06"/>
+    </linearGradient>
+    <radialGradient id="moonAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f9e2af" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#f9e2af" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="starGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f9e2af"/>
+      <stop offset="100%" stop-color="#d4a820"/>
+    </radialGradient>
+    <filter id="glowMoon" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowStar" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient moon glow -->
+  <circle cx="11" cy="13" r="8"
+          fill="url(#moonAmbient)" filter="url(#glowMoon)"/>
+
+  <!-- Moon crescent shape -->
+  <!-- Fill -->
+  <path d="M14,4.5 A8,8 0 1,0 14,21.5 A5.5,5.5 0 1,1 14,4.5 Z"
+        fill="url(#moonFill)"/>
+  <!-- Main stroke -->
+  <path d="M14,4.5 A8,8 0 1,0 14,21.5 A5.5,5.5 0 1,1 14,4.5 Z"
+        fill="none" stroke="url(#moonGrad)"
+        stroke-width="1.7" stroke-linejoin="round"
+        filter="url(#glowMoon)"/>
+
+  <!-- Surface craters (subtle) -->
+  <circle cx="9" cy="14" r="1.2"
+          fill="none" stroke="#f9e2af"
+          stroke-width="0.7" opacity="0.30"/>
+  <circle cx="11" cy="9" r="0.8"
+          fill="none" stroke="#f9e2af"
+          stroke-width="0.6" opacity="0.22"/>
+
+  <!-- Stars (night-light indicators) -->
+  <!-- Star 1 (top-right) -->
+  <circle cx="19" cy="5" r="1.2"
+          fill="url(#starGrad)" filter="url(#glowStar)"/>
+  <circle cx="18.5" cy="4.5" r="0.4"
+          fill="#ffffff" opacity="0.45"/>
+
+  <!-- Star 2 (mid-right, tiny) -->
+  <circle cx="20.5" cy="10" r="0.8"
+          fill="url(#starGrad)" opacity="0.75"
+          filter="url(#glowStar)"/>
+
+  <!-- Star 3 (small, lower-right) -->
+  <circle cx="18" cy="14.5" r="0.65"
+          fill="url(#starGrad)" opacity="0.60"
+          filter="url(#glowStar)"/>
+
+  <!-- Star sparkle cross (large star) -->
+  <g transform="translate(20,7)" filter="url(#glowStar)" opacity="0.75">
+    <line x1="0" y1="-1.8" x2="0"  y2="1.8"
+          stroke="#f9e2af" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="-1.8" y1="0" x2="1.8" y2="0"
+          stroke="#f9e2af" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="-1.1" y1="-1.1" x2="1.1" y2="1.1"
+          stroke="#f9e2af" stroke-width="0.5" stroke-linecap="round" opacity="0.55"/>
+    <line x1="1.1" y1="-1.1" x2="-1.1" y2="1.1"
+          stroke="#f9e2af" stroke-width="0.5" stroke-linecap="round" opacity="0.55"/>
+  </g>
+
+  <!-- Warm temperature indicator (orange dot, night light warmth) -->
+  <circle cx="19.5" cy="18.5" r="2"
+          fill="#fab387" opacity="0.18" filter="url(#glowMoon)"/>
+  <circle cx="19.5" cy="18.5" r="1.3"
+          fill="#fab387" opacity="0.70" filter="url(#glowMoon)"/>
+</svg>

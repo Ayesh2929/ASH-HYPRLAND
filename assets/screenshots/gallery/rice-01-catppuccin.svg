@@ -1,0 +1,1076 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <!-- Catppuccin Mocha Palette -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap');
+    </style>
+
+    <!-- Background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1e2e"/>
+      <stop offset="50%" style="stop-color:#181825"/>
+      <stop offset="100%" style="stop-color:#11111b"/>
+    </linearGradient>
+
+    <!-- Waybar gradient -->
+    <linearGradient id="waybarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e1e2e;stop-opacity:0.98"/>
+      <stop offset="100%" style="stop-color:#181825;stop-opacity:0.98"/>
+    </linearGradient>
+
+    <!-- Window shadow -->
+    <filter id="windowShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#11111b" flood-opacity="0.8"/>
+    </filter>
+
+    <!-- Glow filter for accents -->
+    <filter id="glowPink" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Blur for background elements -->
+    <filter id="bgBlur">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+
+    <filter id="subtleBlur">
+      <feGaussianBlur stdDeviation="0.5"/>
+    </filter>
+
+    <!-- Glassmorphism filter -->
+    <filter id="glass">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Terminal scanline pattern -->
+    <pattern id="scanlines" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1" fill="rgba(0,0,0,0.08)"/>
+      <rect x="0" y="1" width="1" height="2" fill="transparent"/>
+    </pattern>
+
+    <!-- Dot grid pattern -->
+    <pattern id="dotGrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="rgba(203,166,247,0.06)"/>
+    </pattern>
+
+    <!-- Workspace pill gradient -->
+    <linearGradient id="wsActiveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#cba6f7"/>
+      <stop offset="100%" style="stop-color:#89b4fa"/>
+    </linearGradient>
+
+    <!-- Neovim statusline gradient -->
+    <linearGradient id="nvimStatusGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#cba6f7"/>
+      <stop offset="100%" style="stop-color:#89b4fa"/>
+    </linearGradient>
+
+    <!-- Clock gradient -->
+    <linearGradient id="clockGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#89b4fa"/>
+      <stop offset="100%" style="stop-color:#cba6f7"/>
+    </linearGradient>
+
+    <!-- Ambient glow blobs -->
+    <radialGradient id="blob1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#cba6f7;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#cba6f7;stop-opacity:0"/>
+    </radialGradient>
+
+    <radialGradient id="blob2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#89b4fa;stop-opacity:0.10"/>
+      <stop offset="100%" style="stop-color:#89b4fa;stop-opacity:0"/>
+    </radialGradient>
+
+    <radialGradient id="blob3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#f38ba8;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#f38ba8;stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- Clip paths -->
+    <clipPath id="nvimClip">
+      <rect x="40" y="50" width="900" height="600" rx="12"/>
+    </clipPath>
+
+    <clipPath id="termClip">
+      <rect x="980" y="50" width="500" height="290" rx="12"/>
+    </clipPath>
+
+    <clipPath id="btopClip">
+      <rect x="980" y="360" width="500" height="290" rx="12"/>
+    </clipPath>
+
+    <clipPath id="waybarClip">
+      <rect x="0" y="0" width="1920" height="40"/>
+    </clipPath>
+
+    <!-- Code highlight colors -->
+    <linearGradient id="lineHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#cba6f7;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#cba6f7;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- BACKGROUND                                          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Dot grid overlay -->
+  <rect width="1920" height="1080" fill="url(#dotGrid)" opacity="1"/>
+
+  <!-- Ambient glow blobs -->
+  <ellipse cx="300" cy="400" rx="400" ry="300" fill="url(#blob1)" filter="url(#bgBlur)"/>
+  <ellipse cx="1600" cy="700" rx="350" ry="280" fill="url(#blob2)" filter="url(#bgBlur)"/>
+  <ellipse cx="1000" cy="200" rx="300" ry="200" fill="url(#blob3)" filter="url(#bgBlur)"/>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- WAYBAR — TOP BAR                                    -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="0" y="0" width="1920" height="40" fill="url(#waybarGrad)" clip-path="url(#waybarClip)"/>
+
+  <!-- Waybar bottom border line -->
+  <rect x="0" y="39" width="1920" height="1" fill="#313244" opacity="0.8"/>
+
+  <!-- Hyprland Workspaces — LEFT -->
+  <!-- WS 1 Active -->
+  <rect x="12" y="6" width="52" height="28" rx="8" fill="url(#wsActiveGrad)"/>
+  <text x="38" y="24" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#1e1e2e" text-anchor="middle">1</text>
+
+  <!-- WS 2 -->
+  <rect x="70" y="6" width="30" height="28" rx="8" fill="#313244"/>
+  <text x="85" y="24" font-family="JetBrains Mono, monospace" font-size="11" fill="#6c7086" text-anchor="middle">2</text>
+
+  <!-- WS 3 -->
+  <rect x="106" y="6" width="30" height="28" rx="8" fill="#313244"/>
+  <text x="121" y="24" font-family="JetBrains Mono, monospace" font-size="11" fill="#6c7086" text-anchor="middle">3</text>
+
+  <!-- WS 4 -->
+  <rect x="142" y="6" width="30" height="28" rx="8" fill="#45475a" opacity="0.5"/>
+  <text x="157" y="24" font-family="JetBrains Mono, monospace" font-size="11" fill="#45475a" text-anchor="middle">4</text>
+
+  <!-- WS 5 -->
+  <rect x="178" y="6" width="30" height="28" rx="8" fill="#45475a" opacity="0.5"/>
+  <text x="193" y="24" font-family="JetBrains Mono, monospace" font-size="11" fill="#45475a" text-anchor="middle">5</text>
+
+  <!-- Active Window Title — CENTER-LEFT -->
+  <text x="280" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#7f849c">
+    <tspan fill="#cba6f7">󰊢</tspan>
+    <tspan fill="#585b70"> │ </tspan>
+    <tspan fill="#cdd6f4">nvim</tspan>
+    <tspan fill="#585b70"> — </tspan>
+    <tspan fill="#89b4fa">ash-dotfiles/config/nvim/init.lua</tspan>
+  </text>
+
+  <!-- CENTER — Clock -->
+  <rect x="870" y="4" width="180" height="32" rx="10" fill="url(#clockGrad)" opacity="0.15"/>
+  <rect x="870" y="4" width="180" height="32" rx="10" fill="none" stroke="#89b4fa" stroke-width="0.5" opacity="0.3"/>
+  <text x="960" y="25" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#cdd6f4" text-anchor="middle">
+    <tspan fill="#89b4fa">󰅐 </tspan>14:32:07
+  </text>
+
+  <!-- RIGHT MODULES -->
+  <!-- Media Player -->
+  <text x="1280" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#a6e3a1">
+    <tspan>󰎆 </tspan>
+    <tspan fill="#cdd6f4">Lofi Girl</tspan>
+    <tspan fill="#585b70"> — </tspan>
+    <tspan fill="#a6adc8">chill beats</tspan>
+  </text>
+
+  <!-- GitHub notif -->
+  <text x="1470" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#f9e2af">󰊤 3</text>
+
+  <!-- CPU -->
+  <text x="1520" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">
+    <tspan>󰻠 </tspan><tspan fill="#cdd6f4">12%</tspan>
+  </text>
+
+  <!-- RAM -->
+  <text x="1580" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#cba6f7">
+    <tspan>󰍛 </tspan><tspan fill="#cdd6f4">6.2G</tspan>
+  </text>
+
+  <!-- Network -->
+  <text x="1650" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#94e2d5">
+    <tspan>󰤨 </tspan><tspan fill="#cdd6f4">WiFi</tspan>
+  </text>
+
+  <!-- Volume -->
+  <text x="1720" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#f38ba8">
+    <tspan>󰕾 </tspan><tspan fill="#cdd6f4">65%</tspan>
+  </text>
+
+  <!-- Battery -->
+  <text x="1780" y="25" font-family="JetBrains Mono, monospace" font-size="10" fill="#a6e3a1">
+    <tspan>󰂀 </tspan><tspan fill="#cdd6f4">87%</tspan>
+  </text>
+
+  <!-- Tray -->
+  <text x="1858" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70">󰊔</text>
+  <text x="1882" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70">󱇨</text>
+  <text x="1906" y="25" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70">󰍹</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- NEOVIM WINDOW — MAIN LEFT                          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <g filter="url(#windowShadow)">
+    <rect x="40" y="50" width="900" height="600" rx="12" fill="#1e1e2e"/>
+    <rect x="40" y="50" width="900" height="600" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+  </g>
+
+  <!-- Neovim — Title bar -->
+  <rect x="40" y="50" width="900" height="36" rx="12" fill="#181825"/>
+  <rect x="40" y="74" width="900" height="12" fill="#181825"/>
+
+  <!-- Window controls -->
+  <circle cx="62" cy="68" r="6" fill="#f38ba8"/>
+  <circle cx="82" cy="68" r="6" fill="#f9e2af"/>
+  <circle cx="102" cy="68" r="6" fill="#a6e3a1"/>
+
+  <!-- Tab bar -->
+  <!-- Active tab -->
+  <rect x="122" y="55" width="140" height="26" rx="6" fill="#1e1e2e"/>
+  <rect x="122" y="55" width="140" height="26" rx="6" fill="none" stroke="#cba6f7" stroke-width="1" opacity="0.5"/>
+  <text x="132" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#cba6f7">󰢱 init.lua</text>
+  <rect x="254" y="77" width="8" height="2" rx="1" fill="#cba6f7"/>
+
+  <!-- Inactive tab -->
+  <rect x="268" y="55" width="130" height="26" rx="6" fill="#181825"/>
+  <text x="278" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#45475a">󰢱 options.lua</text>
+
+  <!-- Inactive tab 2 -->
+  <rect x="404" y="55" width="120" height="26" rx="6" fill="#181825"/>
+  <text x="414" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#45475a">󰢱 keymaps.lua</text>
+
+  <!-- Neovim — File tree (Neo-tree) -->
+  <rect x="40" y="86" width="180" height="528" fill="#181825"/>
+  <rect x="219" y="86" width="1" height="528" fill="#313244"/>
+
+  <!-- Neo-tree header -->
+  <rect x="40" y="86" width="180" height="28" fill="#181825"/>
+  <text x="52" y="104" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#cba6f7">󰙅 EXPLORER</text>
+
+  <!-- File tree items -->
+  <text x="52" y="130" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 ash-dotfiles</text>
+
+  <text x="60" y="148" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▾</text>
+  <text x="72" y="148" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 config</text>
+
+  <text x="80" y="166" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▾</text>
+  <text x="92" y="166" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb">󰉋 nvim</text>
+
+  <!-- Active file highlighted -->
+  <rect x="40" y="170" width="180" height="18" fill="url(#lineHighlight)"/>
+  <rect x="40" y="170" width="3" height="18" fill="#cba6f7"/>
+  <text x="100" y="183" font-family="JetBrains Mono, monospace" font-size="10" fill="#cba6f7">󰢱 init.lua</text>
+
+  <text x="100" y="201" font-family="JetBrains Mono, monospace" font-size="10" fill="#cdd6f4">󰢱 lazy.lua</text>
+  <text x="100" y="219" font-family="JetBrains Mono, monospace" font-size="10" fill="#cdd6f4">󰢱 options.lua</text>
+  <text x="100" y="237" font-family="JetBrains Mono, monospace" font-size="10" fill="#cdd6f4">󰢱 keymaps.lua</text>
+
+  <text x="92" y="255" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="104" y="255" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 plugins</text>
+
+  <text x="92" y="273" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="104" y="273" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 themes</text>
+
+  <text x="80" y="291" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="92" y="291" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb">󰉋 fish</text>
+
+  <text x="80" y="309" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="92" y="309" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb">󰉋 hypr</text>
+
+  <text x="80" y="327" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="92" y="327" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb">󰉋 waybar</text>
+
+  <text x="80" y="345" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="92" y="345" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb">󰉋 rofi</text>
+
+  <text x="60" y="363" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="72" y="363" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 themes</text>
+
+  <text x="60" y="381" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="72" y="381" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 plugins</text>
+
+  <text x="60" y="399" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">▸</text>
+  <text x="72" y="399" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰉋 scripts</text>
+
+  <!-- Git status indicators -->
+  <text x="190" y="183" font-family="JetBrains Mono, monospace" font-size="9" fill="#f9e2af">M</text>
+  <text x="190" y="201" font-family="JetBrains Mono, monospace" font-size="9" fill="#a6e3a1">A</text>
+
+  <!-- Neo-tree git stats -->
+  <text x="52" y="590" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">󰊢 main ↑2 ~4 +7</text>
+
+  <!-- Neovim — Code area -->
+  <rect x="220" y="86" width="720" height="528" fill="#1e1e2e"/>
+
+  <!-- Line numbers area -->
+  <rect x="220" y="86" width="45" height="528" fill="#1e1e2e"/>
+
+  <!-- Current line highlight -->
+  <rect x="265" y="200" width="675" height="16" fill="#313244" opacity="0.5"/>
+
+  <!-- Code content with syntax highlighting -->
+  <!-- Line 1 -->
+  <text x="228" y="112" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">1</text>
+  <text x="275" y="112" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#585b70">-- </tspan>
+    <tspan fill="#6c7086"> ASH Dotfiles — Neovim Configuration</tspan>
+  </text>
+
+  <!-- Line 2 -->
+  <text x="228" y="130" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">2</text>
+  <text x="275" y="130" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#585b70">-- </tspan>
+    <tspan fill="#6c7086"> Powered by lazy.nvim  |  v5.0 OMEGA</tspan>
+  </text>
+
+  <!-- Line 3 (blank) -->
+  <text x="228" y="148" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">3</text>
+
+  <!-- Line 4 -->
+  <text x="228" y="166" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">4</text>
+  <text x="275" y="166" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">local</tspan>
+    <tspan fill="#cdd6f4"> ash </tspan>
+    <tspan fill="#89dceb">=</tspan>
+    <tspan fill="#cdd6f4"> {}</tspan>
+  </text>
+
+  <!-- Line 5 (blank) -->
+  <text x="228" y="184" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">5</text>
+
+  <!-- Line 6 — CURRENT LINE -->
+  <rect x="265" y="188" width="675" height="16" fill="#313244" opacity="0.6"/>
+  <rect x="265" y="188" width="3" height="16" fill="#cba6f7" rx="1"/>
+  <text x="228" y="200" font-family="JetBrains Mono, monospace" font-size="11" fill="#cba6f7" text-anchor="middle">6</text>
+  <text x="275" y="200" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">ash</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">setup</tspan>
+    <tspan fill="#cdd6f4"> = </tspan>
+    <tspan fill="#cba6f7">function</tspan>
+    <tspan fill="#cdd6f4">(</tspan>
+    <tspan fill="#fab387">opts</tspan>
+    <tspan fill="#cdd6f4">)</tspan>
+  </text>
+  <!-- Cursor blink -->
+  <rect x="560" y="190" width="7" height="14" fill="#cba6f7" opacity="0.9" rx="1"/>
+
+  <!-- Line 7 -->
+  <text x="228" y="218" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">7</text>
+  <text x="275" y="218" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">  </tspan>
+    <tspan fill="#cba6f7">opts</tspan>
+    <tspan fill="#cdd6f4"> = </tspan>
+    <tspan fill="#cba6f7">opts</tspan>
+    <tspan fill="#cdd6f4"> or {}</tspan>
+  </text>
+
+  <!-- Line 8 -->
+  <text x="228" y="236" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">8</text>
+  <text x="275" y="236" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#585b70">  -- </tspan>
+    <tspan fill="#6c7086">Bootstrap lazy.nvim</tspan>
+  </text>
+
+  <!-- Line 9 -->
+  <text x="228" y="254" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">9</text>
+  <text x="275" y="254" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">  local</tspan>
+    <tspan fill="#cdd6f4"> lazypath </tspan>
+    <tspan fill="#89dceb">=</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#89b4fa">vim</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#94e2d5">fn</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">stdpath</tspan>
+    <tspan fill="#cdd6f4">(</tspan>
+    <tspan fill="#a6e3a1">"data"</tspan>
+    <tspan fill="#cdd6f4">)</tspan>
+  </text>
+
+  <!-- Line 10 -->
+  <text x="228" y="272" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">10</text>
+  <text x="275" y="272" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">    .. </tspan>
+    <tspan fill="#a6e3a1">"/lazy/lazy.nvim"</tspan>
+  </text>
+
+  <!-- Line 11 blank -->
+  <text x="228" y="290" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">11</text>
+
+  <!-- Line 12 -->
+  <text x="228" y="308" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">12</text>
+  <text x="275" y="308" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">  if not</tspan>
+    <tspan fill="#cdd6f4"> (</tspan>
+    <tspan fill="#89b4fa">vim</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#94e2d5">loop</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">fs_stat</tspan>
+    <tspan fill="#cdd6f4">)(lazypath) </tspan>
+    <tspan fill="#cba6f7">then</tspan>
+  </text>
+
+  <!-- Line 13 -->
+  <text x="228" y="326" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">13</text>
+  <text x="275" y="326" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">    local</tspan>
+    <tspan fill="#cdd6f4"> lazyrepo </tspan>
+    <tspan fill="#89dceb">=</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#a6e3a1">"https://github.com/folke/lazy.nvim"</tspan>
+  </text>
+
+  <!-- Line 14 -->
+  <text x="228" y="344" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">14</text>
+  <text x="275" y="344" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">    local</tspan>
+    <tspan fill="#cdd6f4"> out </tspan>
+    <tspan fill="#89dceb">=</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#89b4fa">vim</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#94e2d5">fn</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">system</tspan>
+    <tspan fill="#cdd6f4">({</tspan>
+  </text>
+
+  <!-- Line 15 -->
+  <text x="228" y="362" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">15</text>
+  <text x="275" y="362" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">      </tspan>
+    <tspan fill="#a6e3a1">"git"</tspan>
+    <tspan fill="#cdd6f4">, </tspan>
+    <tspan fill="#a6e3a1">"clone"</tspan>
+    <tspan fill="#cdd6f4">, </tspan>
+    <tspan fill="#a6e3a1">"--filter=blob:none"</tspan>
+    <tspan fill="#cdd6f4">,</tspan>
+  </text>
+
+  <!-- Line 16 -->
+  <text x="228" y="380" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">16</text>
+  <text x="275" y="380" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">      lazyrepo, </tspan>
+    <tspan fill="#a6e3a1">"--branch=stable"</tspan>
+    <tspan fill="#cdd6f4">, lazypath,</tspan>
+  </text>
+
+  <!-- Line 17 -->
+  <text x="228" y="398" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">17</text>
+  <text x="275" y="398" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">    })</tspan>
+  </text>
+
+  <!-- Line 18 -->
+  <text x="228" y="416" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">18</text>
+  <text x="275" y="416" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">    if</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#89b4fa">vim</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#94e2d5">v</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">shell_error</tspan>
+    <tspan fill="#cdd6f4"> ~= </tspan>
+    <tspan fill="#fab387">0</tspan>
+    <tspan fill="#cba6f7"> then</tspan>
+  </text>
+
+  <!-- Line 19 -->
+  <text x="228" y="434" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">19</text>
+  <text x="275" y="434" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">      error</tspan>
+    <tspan fill="#cdd6f4">(</tspan>
+    <tspan fill="#a6e3a1">"Error cloning lazy.nvim: "</tspan>
+    <tspan fill="#cdd6f4"> .. out)</tspan>
+  </text>
+
+  <!-- Line 20 -->
+  <text x="228" y="452" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">20</text>
+  <text x="275" y="452" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">    end</tspan>
+  </text>
+
+  <!-- Line 21 -->
+  <text x="228" y="470" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">21</text>
+  <text x="275" y="470" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">  end</tspan>
+  </text>
+
+  <!-- Line 22 -->
+  <text x="228" y="488" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">22</text>
+  <text x="275" y="488" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89b4fa">  vim</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#94e2d5">opt</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">rtp</tspan>
+    <tspan fill="#89dceb">:</tspan>
+    <tspan fill="#89b4fa">prepend</tspan>
+    <tspan fill="#cdd6f4">(lazypath)</tspan>
+  </text>
+
+  <!-- Line 23 -->
+  <text x="228" y="506" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">23</text>
+
+  <!-- Line 24 -->
+  <text x="228" y="524" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">24</text>
+  <text x="275" y="524" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#585b70">  -- </tspan>
+    <tspan fill="#6c7086">Load plugins via lazy.nvim</tspan>
+  </text>
+
+  <!-- Line 25 -->
+  <text x="228" y="542" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">25</text>
+  <text x="275" y="542" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89b4fa">  require</tspan>
+    <tspan fill="#cdd6f4">(</tspan>
+    <tspan fill="#a6e3a1">"lazy"</tspan>
+    <tspan fill="#cdd6f4">)</tspan>
+    <tspan fill="#89dceb">.</tspan>
+    <tspan fill="#89b4fa">setup</tspan>
+    <tspan fill="#cdd6f4">({</tspan>
+  </text>
+
+  <!-- Line 26 -->
+  <text x="228" y="560" font-family="JetBrains Mono, monospace" font-size="11" fill="#585b70" text-anchor="middle">26</text>
+  <text x="275" y="560" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cdd6f4">    spec = { </tspan>
+    <tspan fill="#cba6f7">import</tspan>
+    <tspan fill="#cdd6f4"> = </tspan>
+    <tspan fill="#a6e3a1">"plugins"</tspan>
+    <tspan fill="#cdd6f4"> },</tspan>
+  </text>
+
+  <!-- LSP Hover popup -->
+  <rect x="400" y="560" width="340" height="72" rx="8" fill="#181825" stroke="#313244" stroke-width="1"/>
+  <rect x="400" y="560" width="340" height="72" rx="8" fill="none" stroke="#cba6f7" stroke-width="0.5" opacity="0.3"/>
+  <text x="412" y="578" font-family="JetBrains Mono, monospace" font-size="9" fill="#6c7086">󰌖 function require(modname: string)</text>
+  <rect x="400" y="583" width="340" height="1" fill="#313244"/>
+  <text x="412" y="597" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">Loads the given module. Returns the module</text>
+  <text x="412" y="611" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">or raises an error if not found.</text>
+  <text x="412" y="625" font-family="JetBrains Mono, monospace" font-size="9">
+    <tspan fill="#cba6f7">@param</tspan>
+    <tspan fill="#cdd6f4"> modname </tspan>
+    <tspan fill="#a6e3a1">string</tspan>
+  </text>
+
+  <!-- Git decorations in gutter -->
+  <rect x="263" y="108" width="2" height="16" fill="#a6e3a1" rx="1"/>
+  <rect x="263" y="126" width="2" height="16" fill="#a6e3a1" rx="1"/>
+  <rect x="263" y="196" width="2" height="16" fill="#f9e2af" rx="1"/>
+  <rect x="263" y="214" width="2" height="16" fill="#f9e2af" rx="1"/>
+  <rect x="263" y="232" width="2" height="16" fill="#f38ba8" rx="1"/>
+
+  <!-- Neovim — Status line -->
+  <rect x="40" y="614" width="900" height="26" rx="0" fill="#181825"/>
+  <rect x="40" y="626" width="900" height="14" fill="#181825"/>
+
+  <!-- Mode indicator -->
+  <rect x="40" y="614" width="70" height="26" fill="#cba6f7" rx="0"/>
+  <rect x="40" y="614" width="70" height="26" fill="#cba6f7"/>
+  <text x="75" y="631" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#1e1e2e" text-anchor="middle">NORMAL</text>
+
+  <!-- Arrow separator -->
+  <polygon points="110,614 130,627 110,640" fill="#cba6f7"/>
+
+  <!-- Branch info -->
+  <text x="140" y="631" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">󰊢 main</text>
+
+  <!-- File info center -->
+  <text x="600" y="631" font-family="JetBrains Mono, monospace" font-size="10" fill="#6c7086" text-anchor="middle">lua  |  UTF-8  |  LF</text>
+
+  <!-- Position right -->
+  <text x="880" y="631" font-family="JetBrains Mono, monospace" font-size="10" fill="#6c7086" text-anchor="end">Ln 6, Col 12  |  26%</text>
+
+  <!-- LSP status -->
+  <text x="760" y="631" font-family="JetBrains Mono, monospace" font-size="10" fill="#a6e3a1">󰄬 0 errors  󰳥 0 warnings</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- KITTY TERMINAL — TOP RIGHT                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <g filter="url(#windowShadow)">
+    <rect x="980" y="50" width="900" height="290" rx="12" fill="#1e1e2e"/>
+    <rect x="980" y="50" width="900" height="290" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+  </g>
+
+  <!-- Terminal header -->
+  <rect x="980" y="50" width="900" height="36" rx="12" fill="#181825"/>
+  <rect x="980" y="74" width="900" height="12" fill="#181825"/>
+
+  <!-- Window controls -->
+  <circle cx="1002" cy="68" r="6" fill="#f38ba8"/>
+  <circle cx="1022" cy="68" r="6" fill="#f9e2af"/>
+  <circle cx="1042" cy="68" r="6" fill="#a6e3a1"/>
+
+  <!-- Terminal title -->
+  <text x="1430" y="72" font-family="JetBrains Mono, monospace" font-size="11" fill="#6c7086" text-anchor="middle">
+    <tspan fill="#89dceb">󰊠 </tspan>fish — ash@arch
+  </text>
+
+  <!-- Terminal tabs -->
+  <rect x="1070" y="55" width="80" height="26" rx="6" fill="#1e1e2e"/>
+  <rect x="1070" y="55" width="80" height="26" rx="6" fill="none" stroke="#89dceb" stroke-width="0.5" opacity="0.4"/>
+  <text x="1110" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#89dceb" text-anchor="middle">󰊠 fish</text>
+
+  <rect x="1156" y="55" width="80" height="26" rx="6" fill="#181825"/>
+  <text x="1196" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#45475a" text-anchor="middle">󰊠 fish</text>
+
+  <rect x="1242" y="55" width="80" height="26" rx="6" fill="#181825"/>
+  <text x="1282" y="72" font-family="JetBrains Mono, monospace" font-size="10" fill="#45475a" text-anchor="middle">󰊠 ssh</text>
+
+  <!-- Terminal content -->
+  <!-- Prompt line 1 -->
+  <text x="992" y="118" font-family="JetBrains Mono, monospace" font-size="12">
+    <tspan fill="#cba6f7">╭─ </tspan>
+    <tspan fill="#89b4fa">ash</tspan>
+    <tspan fill="#cdd6f4">@</tspan>
+    <tspan fill="#a6e3a1">arch</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#585b70">in </tspan>
+    <tspan fill="#f9e2af">~/ash-dotfiles</tspan>
+    <tspan fill="#585b70"> on </tspan>
+    <tspan fill="#f38ba8">󰊢 main</tspan>
+    <tspan fill="#585b70"> ↑2 ~4</tspan>
+    <tspan fill="#cdd6f4"> </tspan>
+    <tspan fill="#a6e3a1">took 1.2s</tspan>
+  </text>
+  <text x="992" y="140" font-family="JetBrains Mono, monospace" font-size="12">
+    <tspan fill="#cba6f7">╰─ </tspan>
+    <tspan fill="#89dceb">❯ </tspan>
+    <tspan fill="#cdd6f4">ash theme apply catppuccin-mocha</tspan>
+  </text>
+
+  <!-- Command output -->
+  <text x="992" y="162" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  ✓ </tspan>
+    <tspan fill="#cdd6f4">Extracting colors from wallpaper...</tspan>
+  </text>
+  <text x="992" y="180" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  ✓ </tspan>
+    <tspan fill="#cdd6f4">Generating palette (14 colors)</tspan>
+  </text>
+  <text x="992" y="198" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  ✓ </tspan>
+    <tspan fill="#cdd6f4">Applying to Hyprland...</tspan>
+  </text>
+  <text x="992" y="216" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  ✓ </tspan>
+    <tspan fill="#cdd6f4">Applying to Waybar, Rofi, Kitty...</tspan>
+  </text>
+  <text x="992" y="234" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  ✓ </tspan>
+    <tspan fill="#cdd6f4">Hot-reloading all components...</tspan>
+  </text>
+  <text x="992" y="252" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89b4fa">  ─────────────────────────────────────</tspan>
+  </text>
+  <text x="992" y="270" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">  🎨 Theme </tspan>
+    <tspan fill="#cba6f7">catppuccin-mocha</tspan>
+    <tspan fill="#a6e3a1"> applied in </tspan>
+    <tspan fill="#f9e2af">247ms</tspan>
+    <tspan fill="#a6e3a1">!</tspan>
+  </text>
+
+  <!-- Color swatches -->
+  <rect x="992" y="280" width="14" height="14" rx="3" fill="#1e1e2e"/>
+  <rect x="1010" y="280" width="14" height="14" rx="3" fill="#cba6f7"/>
+  <rect x="1028" y="280" width="14" height="14" rx="3" fill="#89b4fa"/>
+  <rect x="1046" y="280" width="14" height="14" rx="3" fill="#a6e3a1"/>
+  <rect x="1064" y="280" width="14" height="14" rx="3" fill="#f9e2af"/>
+  <rect x="1082" y="280" width="14" height="14" rx="3" fill="#f38ba8"/>
+  <rect x="1100" y="280" width="14" height="14" rx="3" fill="#89dceb"/>
+  <rect x="1118" y="280" width="14" height="14" rx="3" fill="#fab387"/>
+  <rect x="1136" y="280" width="14" height="14" rx="3" fill="#94e2d5"/>
+  <rect x="1154" y="280" width="14" height="14" rx="3" fill="#eba0ac"/>
+
+  <!-- New prompt -->
+  <text x="992" y="316" font-family="JetBrains Mono, monospace" font-size="12">
+    <tspan fill="#cba6f7">╭─ </tspan>
+    <tspan fill="#89b4fa">ash</tspan>
+    <tspan fill="#cdd6f4">@</tspan>
+    <tspan fill="#a6e3a1">arch</tspan>
+    <tspan fill="#585b70"> in </tspan>
+    <tspan fill="#f9e2af">~/ash-dotfiles</tspan>
+    <tspan fill="#585b70"> on </tspan>
+    <tspan fill="#f38ba8">󰊢 main</tspan>
+  </text>
+  <text x="992" y="334" font-family="JetBrains Mono, monospace" font-size="12">
+    <tspan fill="#cba6f7">╰─ </tspan>
+    <tspan fill="#89dceb">❯ </tspan>
+  </text>
+  <!-- Cursor -->
+  <rect x="1043" y="320" width="8" height="14" fill="#cdd6f4" opacity="0.9" rx="1"/>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- BTOP — BOTTOM RIGHT                                -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <g filter="url(#windowShadow)">
+    <rect x="980" y="360" width="900" height="290" rx="12" fill="#1e1e2e"/>
+    <rect x="980" y="360" width="900" height="290" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+  </g>
+
+  <!-- Btop header -->
+  <rect x="980" y="360" width="900" height="36" rx="12" fill="#181825"/>
+  <rect x="980" y="384" width="900" height="12" fill="#181825"/>
+
+  <!-- Window controls -->
+  <circle cx="1002" cy="378" r="6" fill="#f38ba8"/>
+  <circle cx="1022" cy="378" r="6" fill="#f9e2af"/>
+  <circle cx="1042" cy="378" r="6" fill="#a6e3a1"/>
+
+  <!-- Btop title -->
+  <text x="1430" y="382" font-family="JetBrains Mono, monospace" font-size="11" fill="#6c7086" text-anchor="middle">
+    <tspan fill="#89b4fa">󱑤 </tspan>btop — System Monitor
+  </text>
+
+  <!-- CPU Graph section -->
+  <rect x="992" y="404" width="380" height="120" rx="6" fill="#181825"/>
+  <rect x="992" y="404" width="380" height="120" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+
+  <text x="1000" y="420" font-family="JetBrains Mono, monospace" font-size="10" fill="#89b4fa">CPU  12%</text>
+  <text x="1340" y="420" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70" text-anchor="end">AMD Ryzen 9 7950X</text>
+
+  <!-- CPU bars -->
+  <rect x="1000" y="428" width="364" height="8" rx="2" fill="#313244"/>
+  <rect x="1000" y="428" width="44" height="8" rx="2" fill="#89b4fa"/>
+
+  <rect x="1000" y="440" width="364" height="8" rx="2" fill="#313244"/>
+  <rect x="1000" y="440" width="60" height="8" rx="2" fill="#89b4fa"/>
+
+  <rect x="1000" y="452" width="364" height="8" rx="2" fill="#313244"/>
+  <rect x="1000" y="452" width="30" height="8" rx="2" fill="#89b4fa"/>
+
+  <rect x="1000" y="464" width="364" height="8" rx="2" fill="#313244"/>
+  <rect x="1000" y="464" width="80" height="8" rx="2" fill="#89b4fa"/>
+
+  <!-- CPU sparkline -->
+  <polyline points="1000,510 1020,505 1040,508 1060,503 1080,507 1100,502 1120,498 1140,504 1160,500 1180,507 1200,496 1220,493 1240,498 1260,500 1280,494 1300,497 1320,493 1340,501 1360,498 1372,500"
+    fill="none" stroke="#89b4fa" stroke-width="1.5" opacity="0.8"/>
+  <polyline points="1000,510 1020,505 1040,508 1060,503 1080,507 1100,502 1120,498 1140,504 1160,500 1180,507 1200,496 1220,493 1240,498 1260,500 1280,494 1300,497 1320,493 1340,501 1360,498 1372,510"
+    fill="url(#blob2)" opacity="0.3"/>
+
+  <!-- MEM section -->
+  <rect x="1384" y="404" width="230" height="120" rx="6" fill="#181825"/>
+  <rect x="1384" y="404" width="230" height="120" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+  <text x="1392" y="420" font-family="JetBrains Mono, monospace" font-size="10" fill="#cba6f7">MEM  38%</text>
+  <text x="1392" y="438" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">Used: 6.2 GB / 32 GB</text>
+  <rect x="1392" y="448" width="214" height="12" rx="3" fill="#313244"/>
+  <rect x="1392" y="448" width="82" height="12" rx="3" fill="#cba6f7" opacity="0.8"/>
+  <text x="1392" y="478" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">SWAP: 0.1 GB / 8 GB</text>
+  <rect x="1392" y="488" width="214" height="8" rx="3" fill="#313244"/>
+  <rect x="1392" y="488" width="6" height="8" rx="3" fill="#f9e2af" opacity="0.8"/>
+
+  <!-- Disk section -->
+  <rect x="1626" y="404" width="242" height="120" rx="6" fill="#181825"/>
+  <rect x="1626" y="404" width="242" height="120" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+  <text x="1634" y="420" font-family="JetBrains Mono, monospace" font-size="10" fill="#a6e3a1">DISK</text>
+  <text x="1634" y="436" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">/ (nvme0n1p2)</text>
+  <rect x="1634" y="442" width="226" height="10" rx="3" fill="#313244"/>
+  <rect x="1634" y="442" width="158" height="10" rx="3" fill="#a6e3a1" opacity="0.7"/>
+  <text x="1634" y="464" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">420 GB / 1 TB</text>
+
+  <!-- Process list -->
+  <rect x="992" y="536" width="876" height="104" rx="6" fill="#181825"/>
+  <rect x="992" y="536" width="876" height="104" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+
+  <text x="1000" y="552" font-family="JetBrains Mono, monospace" font-size="10" fill="#cba6f7">PROCESSES</text>
+  <text x="1360" y="552" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70" text-anchor="end">Total: 234  Running: 3</text>
+
+  <!-- Process table header -->
+  <rect x="992" y="556" width="876" height="16" fill="#181825"/>
+  <text x="1000" y="568" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">PID</text>
+  <text x="1060" y="568" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">NAME</text>
+  <text x="1240" y="568" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">CPU%</text>
+  <text x="1310" y="568" font-family="JetBrains Mono, monospace" font-size="9" fill="#585b70">MEM%</text>
+
+  <!-- Process row 1 - highlighted -->
+  <rect x="992" y="572" width="876" height="16" fill="#313244" opacity="0.4"/>
+  <text x="1000" y="584" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">12847</text>
+  <text x="1060" y="584" font-family="JetBrains Mono, monospace" font-size="9" fill="#89b4fa">nvim</text>
+  <text x="1240" y="584" font-family="JetBrains Mono, monospace" font-size="9" fill="#a6e3a1">3.2</text>
+  <text x="1310" y="584" font-family="JetBrains Mono, monospace" font-size="9" fill="#cba6f7">2.1</text>
+
+  <!-- Process row 2 -->
+  <text x="1000" y="600" font-family="JetBrains Mono, monospace" font-size="9" fill="#6c7086">11203</text>
+  <text x="1060" y="600" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">Hyprland</text>
+  <text x="1240" y="600" font-family="JetBrains Mono, monospace" font-size="9" fill="#a6e3a1">1.8</text>
+  <text x="1310" y="600" font-family="JetBrains Mono, monospace" font-size="9" fill="#cba6f7">1.4</text>
+
+  <!-- Process row 3 -->
+  <text x="1000" y="616" font-family="JetBrains Mono, monospace" font-size="9" fill="#6c7086">10891</text>
+  <text x="1060" y="616" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">waybar</text>
+  <text x="1240" y="616" font-family="JetBrains Mono, monospace" font-size="9" fill="#f9e2af">0.9</text>
+  <text x="1310" y="616" font-family="JetBrains Mono, monospace" font-size="9" fill="#cba6f7">0.8</text>
+
+  <!-- Process row 4 -->
+  <text x="1000" y="632" font-family="JetBrains Mono, monospace" font-size="9" fill="#6c7086">10234</text>
+  <text x="1060" y="632" font-family="JetBrains Mono, monospace" font-size="9" fill="#cdd6f4">kitty</text>
+  <text x="1240" y="632" font-family="JetBrains Mono, monospace" font-size="9" fill="#f9e2af">0.5</text>
+  <text x="1310" y="632" font-family="JetBrains Mono, monospace" font-size="9" fill="#cba6f7">0.6</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FASTFETCH — BOTTOM LEFT SMALL                      -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <g filter="url(#windowShadow)">
+    <rect x="40" y="670" width="900" height="370" rx="12" fill="#1e1e2e"/>
+    <rect x="40" y="670" width="900" height="370" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+  </g>
+
+  <!-- Fastfetch header -->
+  <rect x="40" y="670" width="900" height="36" rx="12" fill="#181825"/>
+  <rect x="40" y="694" width="900" height="12" fill="#181825"/>
+
+  <!-- Window controls -->
+  <circle cx="62" cy="688" r="6" fill="#f38ba8"/>
+  <circle cx="82" cy="688" r="6" fill="#f9e2af"/>
+  <circle cx="102" cy="688" r="6" fill="#a6e3a1"/>
+
+  <!-- Fastfetch content -->
+  <!-- Catppuccin ASCII art - simplified logo -->
+  <text x="60" y="728" font-family="JetBrains Mono, monospace" font-size="11" fill="#cba6f7">
+    ██████╗ ████████╗
+  </text>
+  <text x="60" y="746" font-family="JetBrains Mono, monospace" font-size="11" fill="#cba6f7">
+    ██╔══██╗╚══██╔══╝
+  </text>
+  <text x="60" y="764" font-family="JetBrains Mono, monospace" font-size="11" fill="#89b4fa">
+    ███████║   ██║
+  </text>
+  <text x="60" y="782" font-family="JetBrains Mono, monospace" font-size="11" fill="#89b4fa">
+    ██╔══██║   ██║
+  </text>
+  <text x="60" y="800" font-family="JetBrains Mono, monospace" font-size="11" fill="#a6e3a1">
+    ██║  ██║   ██║
+  </text>
+  <text x="60" y="818" font-family="JetBrains Mono, monospace" font-size="11" fill="#a6e3a1">
+    ╚═╝  ╚═╝   ╚═╝
+  </text>
+
+  <!-- System info -->
+  <text x="280" y="728" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7" font-weight="600">ash</tspan>
+    <tspan fill="#585b70">@</tspan>
+    <tspan fill="#89b4fa" font-weight="600">arch</tspan>
+  </text>
+  <text x="280" y="742" font-family="JetBrains Mono, monospace" font-size="10" fill="#313244">──────────────────────────────────</text>
+  <text x="280" y="758" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">󰣇 OS</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">Arch Linux x86_64</tspan>
+  </text>
+  <text x="280" y="774" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89b4fa">󰌢 Host</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">Framework Laptop 16</tspan>
+  </text>
+  <text x="280" y="790" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">󰅐 Uptime</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">4 hours, 23 mins</tspan>
+  </text>
+  <text x="280" y="806" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#f9e2af">󰍛 Kernel</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">6.11.0-arch1-1</tspan>
+  </text>
+  <text x="280" y="822" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#fab387">󰖳 WM</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">Hyprland</tspan>
+  </text>
+  <text x="280" y="838" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#f38ba8">󰉼 Theme</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">catppuccin-mocha</tspan>
+  </text>
+  <text x="280" y="854" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#eba0ac">󰛖 Icons</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">Papirus-Dark</tspan>
+  </text>
+  <text x="280" y="870" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#94e2d5">󰆍 Terminal</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">kitty 0.36.2</tspan>
+  </text>
+  <text x="280" y="886" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89dceb">󰻠 CPU</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">AMD Ryzen 9 7950X (32) @ 5.7GHz</tspan>
+  </text>
+  <text x="280" y="902" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#cba6f7">󰊴 GPU</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">AMD Radeon RX 7900 XTX</tspan>
+  </text>
+  <text x="280" y="918" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#89b4fa">󰍛 RAM</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">6.2 GiB / 32 GiB</tspan>
+  </text>
+  <text x="280" y="934" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">󱇣 Disk</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">420 GiB / 1.0 TiB (NVMe)</tspan>
+  </text>
+  <text x="280" y="950" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#f9e2af"> Shell</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">fish 3.7.0</tspan>
+  </text>
+  <text x="280" y="966" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#fab387">󰎐 Packages</tspan>
+    <tspan fill="#585b70">: </tspan>
+    <tspan fill="#cdd6f4">1,847 (pacman), 12 (flatpak)</tspan>
+  </text>
+
+  <!-- Color palette row -->
+  <rect x="280" y="978" width="14" height="14" rx="3" fill="#45475a"/>
+  <rect x="298" y="978" width="14" height="14" rx="3" fill="#f38ba8"/>
+  <rect x="316" y="978" width="14" height="14" rx="3" fill="#a6e3a1"/>
+  <rect x="334" y="978" width="14" height="14" rx="3" fill="#f9e2af"/>
+  <rect x="352" y="978" width="14" height="14" rx="3" fill="#89b4fa"/>
+  <rect x="370" y="978" width="14" height="14" rx="3" fill="#cba6f7"/>
+  <rect x="388" y="978" width="14" height="14" rx="3" fill="#89dceb"/>
+  <rect x="406" y="978" width="14" height="14" rx="3" fill="#cdd6f4"/>
+
+  <rect x="280" y="996" width="14" height="14" rx="3" fill="#585b70"/>
+  <rect x="298" y="996" width="14" height="14" rx="3" fill="#eba0ac"/>
+  <rect x="316" y="996" width="14" height="14" rx="3" fill="#b5f89b"/>
+  <rect x="334" y="996" width="14" height="14" rx="3" fill="#f2cdcd"/>
+  <rect x="352" y="996" width="14" height="14" rx="3" fill="#b4d0fe"/>
+  <rect x="370" y="996" width="14" height="14" rx="3" fill="#d0b0ff"/>
+  <rect x="388" y="996" width="14" height="14" rx="3" fill="#a4f8f8"/>
+  <rect x="406" y="996" width="14" height="14" rx="3" fill="#bac2de"/>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- BTOP BOTTOM SECTION                                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <g filter="url(#windowShadow)">
+    <rect x="980" y="660" width="900" height="380" rx="12" fill="#1e1e2e"/>
+    <rect x="980" y="660" width="900" height="380" rx="12" fill="none" stroke="#313244" stroke-width="1"/>
+  </g>
+
+  <!-- Cava visualizer header -->
+  <rect x="980" y="660" width="900" height="36" rx="12" fill="#181825"/>
+  <rect x="980" y="684" width="900" height="12" fill="#181825"/>
+
+  <circle cx="1002" cy="678" r="6" fill="#f38ba8"/>
+  <circle cx="1022" cy="678" r="6" fill="#f9e2af"/>
+  <circle cx="1042" cy="678" r="6" fill="#a6e3a1"/>
+
+  <text x="1430" y="682" font-family="JetBrains Mono, monospace" font-size="11" fill="#6c7086" text-anchor="middle">
+    <tspan fill="#a6e3a1">󰋎 </tspan>cava — Audio Visualizer
+  </text>
+
+  <!-- Cava bars - music visualizer -->
+  <!-- First half bars heights (random-ish wave) -->
+  <g opacity="0.9">
+    <!-- Bar set with catppuccin gradient colors -->
+    <rect x="992" y="870" width="12" height="140" rx="2" fill="#cba6f7" opacity="0.3"/>
+    <rect x="1008" y="790" width="12" height="220" rx="2" fill="#cba6f7" opacity="0.5"/>
+    <rect x="1024" y="820" width="12" height="190" rx="2" fill="#cba6f7" opacity="0.6"/>
+    <rect x="1040" y="750" width="12" height="260" rx="2" fill="#89b4fa" opacity="0.7"/>
+    <rect x="1056" y="760" width="12" height="250" rx="2" fill="#89b4fa" opacity="0.8"/>
+    <rect x="1072" y="800" width="12" height="210" rx="2" fill="#89b4fa" opacity="0.75"/>
+    <rect x="1088" y="840" width="12" height="170" rx="2" fill="#94e2d5" opacity="0.7"/>
+    <rect x="1104" y="810" width="12" height="200" rx="2" fill="#94e2d5" opacity="0.8"/>
+    <rect x="1120" y="770" width="12" height="240" rx="2" fill="#a6e3a1" opacity="0.85"/>
+    <rect x="1136" y="730" width="12" height="280" rx="2" fill="#a6e3a1" opacity="0.9"/>
+    <rect x="1152" y="760" width="12" height="250" rx="2" fill="#f9e2af" opacity="0.85"/>
+    <rect x="1168" y="800" width="12" height="210" rx="2" fill="#f9e2af" opacity="0.8"/>
+    <rect x="1184" y="830" width="12" height="180" rx="2" fill="#fab387" opacity="0.75"/>
+    <rect x="1200" y="850" width="12" height="160" rx="2" fill="#fab387" opacity="0.7"/>
+    <rect x="1216" y="810" width="12" height="200" rx="2" fill="#f38ba8" opacity="0.75"/>
+    <rect x="1232" y="780" width="12" height="230" rx="2" fill="#f38ba8" opacity="0.8"/>
+    <rect x="1248" y="760" width="12" height="250" rx="2" fill="#eba0ac" opacity="0.85"/>
+    <rect x="1264" y="740" width="12" height="270" rx="2" fill="#eba0ac" opacity="0.9"/>
+    <rect x="1280" y="770" width="12" height="240" rx="2" fill="#cba6f7" opacity="0.85"/>
+    <rect x="1296" y="800" width="12" height="210" rx="2" fill="#cba6f7" opacity="0.8"/>
+    <rect x="1312" y="820" width="12" height="190" rx="2" fill="#89b4fa" opacity="0.75"/>
+    <rect x="1328" y="840" width="12" height="170" rx="2" fill="#89b4fa" opacity="0.7"/>
+    <rect x="1344" y="810" width="12" height="200" rx="2" fill="#89dceb" opacity="0.75"/>
+    <rect x="1360" y="780" width="12" height="230" rx="2" fill="#89dceb" opacity="0.8"/>
+    <rect x="1376" y="760" width="12" height="250" rx="2" fill="#94e2d5" opacity="0.85"/>
+    <rect x="1392" y="740" width="12" height="270" rx="2" fill="#a6e3a1" opacity="0.9"/>
+    <rect x="1408" y="770" width="12" height="240" rx="2" fill="#a6e3a1" opacity="0.85"/>
+    <rect x="1424" y="800" width="12" height="210" rx="2" fill="#f9e2af" opacity="0.8"/>
+    <rect x="1440" y="820" width="12" height="190" rx="2" fill="#f9e2af" opacity="0.75"/>
+    <rect x="1456" y="840" width="12" height="170" rx="2" fill="#fab387" opacity="0.7"/>
+    <rect x="1472" y="810" width="12" height="200" rx="2" fill="#f38ba8" opacity="0.75"/>
+    <rect x="1488" y="780" width="12" height="230" rx="2" fill="#f38ba8" opacity="0.8"/>
+    <rect x="1504" y="750" width="12" height="260" rx="2" fill="#cba6f7" opacity="0.85"/>
+    <rect x="1520" y="770" width="12" height="240" rx="2" fill="#cba6f7" opacity="0.8"/>
+    <rect x="1536" y="800" width="12" height="210" rx="2" fill="#89b4fa" opacity="0.75"/>
+    <rect x="1552" y="830" width="12" height="180" rx="2" fill="#89b4fa" opacity="0.7"/>
+    <rect x="1568" y="850" width="12" height="160" rx="2" fill="#89dceb" opacity="0.65"/>
+    <rect x="1584" y="870" width="12" height="140" rx="2" fill="#89dceb" opacity="0.6"/>
+    <rect x="1600" y="840" width="12" height="170" rx="2" fill="#94e2d5" opacity="0.65"/>
+    <rect x="1616" y="810" width="12" height="200" rx="2" fill="#a6e3a1" opacity="0.7"/>
+    <rect x="1632" y="780" width="12" height="230" rx="2" fill="#a6e3a1" opacity="0.75"/>
+    <rect x="1648" y="760" width="12" height="250" rx="2" fill="#f9e2af" opacity="0.8"/>
+    <rect x="1664" y="740" width="12" height="270" rx="2" fill="#f9e2af" opacity="0.85"/>
+    <rect x="1680" y="760" width="12" height="250" rx="2" fill="#fab387" opacity="0.8"/>
+    <rect x="1696" y="800" width="12" height="210" rx="2" fill="#fab387" opacity="0.75"/>
+    <rect x="1712" y="830" width="12" height="180" rx="2" fill="#f38ba8" opacity="0.7"/>
+    <rect x="1728" y="850" width="12" height="160" rx="2" fill="#f38ba8" opacity="0.65"/>
+    <rect x="1744" y="870" width="12" height="140" rx="2" fill="#cba6f7" opacity="0.6"/>
+    <rect x="1760" y="840" width="12" height="170" rx="2" fill="#cba6f7" opacity="0.55"/>
+    <rect x="1776" y="820" width="12" height="190" rx="2" fill="#89b4fa" opacity="0.5"/>
+    <rect x="1792" y="860" width="12" height="150" rx="2" fill="#89b4fa" opacity="0.45"/>
+    <rect x="1808" y="880" width="12" height="130" rx="2" fill="#89dceb" opacity="0.4"/>
+    <rect x="1824" y="900" width="12" height="110" rx="2" fill="#89dceb" opacity="0.35"/>
+    <rect x="1840" y="880" width="12" height="130" rx="2" fill="#94e2d5" opacity="0.4"/>
+    <rect x="1856" y="860" width="12" height="150" rx="2" fill="#a6e3a1" opacity="0.45"/>
+  </g>
+
+  <!-- Song info overlay on cava -->
+  <text x="992" y="720" font-family="JetBrains Mono, monospace" font-size="11">
+    <tspan fill="#a6e3a1">󰎆 </tspan>
+    <tspan fill="#cdd6f4" font-weight="500">lofi hip hop radio</tspan>
+    <tspan fill="#585b70"> — </tspan>
+    <tspan fill="#a6adc8">beats to relax/study to</tspan>
+  </text>
+  <text x="992" y="738" font-family="JetBrains Mono, monospace" font-size="10" fill="#585b70">
+    <tspan fill="#a6e3a1">▶ </tspan>
+    <tspan>1:23 ─────────────────── 3:47</tspan>
+  </text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ASH WATERMARK / BADGE                              -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="1760" y="1048" width="150" height="24" rx="6" fill="#1e1e2e" opacity="0.8"/>
+  <rect x="1760" y="1048" width="150" height="24" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+  <text x="1835" y="1064" font-family="JetBrains Mono, monospace" font-size="10" fill="#6c7086" text-anchor="middle">
+    <tspan fill="#cba6f7">⚡ </tspan>ASH Dotfiles v5.0
+  </text>
+
+  <!-- Theme badge -->
+  <rect x="20" y="1048" width="160" height="24" rx="6" fill="#1e1e2e" opacity="0.8"/>
+  <rect x="20" y="1048" width="160" height="24" rx="6" fill="none" stroke="#313244" stroke-width="0.5"/>
+  <text x="100" y="1064" font-family="JetBrains Mono, monospace" font-size="10" fill="#6c7086" text-anchor="middle">
+    <tspan fill="#cba6f7">🎨 </tspan>catppuccin-mocha
+  </text>
+
+  <!-- Scanlines overlay for CRT feel -->
+  <rect width="1920" height="1080" fill="url(#scanlines)" opacity="0.3"/>
+</svg>

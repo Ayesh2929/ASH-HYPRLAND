@@ -1,0 +1,663 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- BEFORE & AFTER — Plain Arch → ASH Dotfiles         -->
+    <!-- BEFORE: grey/drab colours (stock)                   -->
+    <!-- AFTER:  Catppuccin Mocha with full ASH treatment    -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&amp;display=swap');
+    </style>
+
+    <!-- ── BEFORE palette (boring stock Arch) ── -->
+    <linearGradient id="beforeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1c1c1c"/>
+      <stop offset="100%" stop-color="#222222"/>
+    </linearGradient>
+
+    <!-- ── AFTER palette (ASH v5 Catppuccin Mocha) ── -->
+    <linearGradient id="afterBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1e1e2e"/>
+      <stop offset="50%"  stop-color="#181825"/>
+      <stop offset="100%" stop-color="#11111b"/>
+    </linearGradient>
+
+    <!-- ASH accent -->
+    <linearGradient id="ashAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="33%"  stop-color="#89b4fa"/>
+      <stop offset="66%"  stop-color="#94e2d5"/>
+      <stop offset="100%" stop-color="#a6e3a1"/>
+    </linearGradient>
+
+    <!-- Divider gradient -->
+    <linearGradient id="dividerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#6c7086" stop-opacity="0"/>
+      <stop offset="30%"  stop-color="#cba6f7" stop-opacity="0.9"/>
+      <stop offset="50%"  stop-color="#f5f5f5" stop-opacity="1"/>
+      <stop offset="70%"  stop-color="#89b4fa" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#6c7086" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- After glow -->
+    <radialGradient id="afterGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Before overlay -->
+    <linearGradient id="beforeDesaturate" x1="0%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%"   stop-color="#333333" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#333333" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- Transformation arrow gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#6c7086"/>
+      <stop offset="50%"  stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+
+    <!-- Glow filters -->
+    <filter id="glowAsh" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="b1"/>
+      <feGaussianBlur stdDeviation="2" result="b2"/>
+      <feMerge><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowBefore" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softBlur"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="panelShadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="0" dy="10" stdDeviation="24" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+    <filter id="labelShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.9"/>
+    </filter>
+
+    <!-- Scanlines -->
+    <pattern id="scanlines" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1" fill="rgba(0,0,0,0.14)"/>
+    </pattern>
+
+    <!-- Dot grid -->
+    <pattern id="dotGrid" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="0.7" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+    <pattern id="afterDotGrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="0.6" fill="rgba(203,166,247,0.055)"/>
+    </pattern>
+    <pattern id="beforeDotGrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="0.5" fill="rgba(108,112,134,0.06)"/>
+    </pattern>
+
+    <!-- Clip paths -->
+    <clipPath id="clipBefore"><rect x="0"    y="0" width="940"  height="1080"/></clipPath>
+    <clipPath id="clipAfter"><rect  x="980"  y="0" width="940"  height="1080"/></clipPath>
+    <clipPath id="clipMain"><rect   x="0"    y="0" width="1920" height="1080"/></clipPath>
+
+    <!-- Vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="45%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.7"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 01 · FULL BACKGROUND                                   -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <rect width="1920" height="1080" fill="#0a0a0f"/>
+  <rect width="1920" height="1080" fill="url(#dotGrid)"/>
+
+  <!-- side glow after -->
+  <ellipse cx="1450" cy="540" rx="600" ry="500" fill="url(#afterGlow)" filter="url(#softBlur)"/>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 02 · BEFORE PANEL (LEFT) — stock Arch desktop         -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#panelShadow)" clip-path="url(#clipBefore)">
+    <!-- main panel -->
+    <rect x="0" y="0" width="940" height="1080" fill="url(#beforeBg)"/>
+    <rect x="0" y="0" width="940" height="1080" fill="url(#beforeDotGrid)"/>
+    <!-- desaturation overlay -->
+    <rect x="0" y="0" width="940" height="1080" fill="url(#beforeDesaturate)"/>
+
+    <!-- ── Stock waybar (boring) ── -->
+    <rect x="0" y="0" width="940" height="38" fill="#171717"/>
+    <rect x="0" y="37" width="940" height="1" fill="#2a2a2a"/>
+
+    <!-- workspaces (plain) -->
+    <rect x="8" y="6" width="26" height="26" rx="2" fill="#2a2a2a"/>
+    <text x="21" y="24" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888" text-anchor="middle">1</text>
+    <text x="48" y="24" font-family="JetBrains Mono,monospace" font-size="11" fill="#444444" text-anchor="middle">2</text>
+    <text x="70" y="24" font-family="JetBrains Mono,monospace" font-size="11" fill="#444444" text-anchor="middle">3</text>
+    <text x="92" y="24" font-family="JetBrains Mono,monospace" font-size="11" fill="#333333" text-anchor="middle">4</text>
+
+    <!-- clock (boring white text) -->
+    <text x="470" y="24" font-family="JetBrains Mono,monospace" font-size="12" fill="#aaaaaa" text-anchor="middle">14:22</text>
+
+    <!-- system tray -->
+    <text x="900" y="24" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666" text-anchor="end">wifi  bat  vol</text>
+
+    <!-- ── Background: plain dark grey wallpaper ── -->
+    <rect x="0" y="38" width="940" height="1042" fill="#1a1a1a"/>
+    <!-- very subtle pattern -->
+    <rect x="0" y="38" width="940" height="1042" fill="url(#scanlines)" opacity="0.5"/>
+
+    <!-- ── Stock terminal window ── -->
+    <g filter="url(#glowBefore)">
+      <rect x="40" y="80" width="560" height="340" rx="4" fill="#1e1e1e"/>
+      <rect x="40" y="80" width="560" height="340" rx="4" fill="none" stroke="#333333" stroke-width="1"/>
+
+      <!-- terminal title bar -->
+      <rect x="40" y="80" width="560" height="28" rx="4" fill="#252525"/>
+      <rect x="40" y="100" width="560" height="8"  fill="#252525"/>
+      <circle cx="56"  cy="94" r="5" fill="#3a3a3a"/>
+      <circle cx="72"  cy="94" r="5" fill="#3a3a3a"/>
+      <circle cx="88"  cy="94" r="5" fill="#3a3a3a"/>
+      <text x="300" y="98" font-family="JetBrains Mono,monospace" font-size="10" fill="#555555" text-anchor="middle">Terminal</text>
+
+      <!-- boring terminal content -->
+      <text x="56" y="130" font-family="JetBrains Mono,monospace" font-size="11" fill="#777777">user@arch:~$</text>
+      <text x="56" y="148" font-family="JetBrains Mono,monospace" font-size="11" fill="#aaaaaa">$ ls -la</text>
+      <text x="56" y="166" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">total 48</text>
+      <text x="56" y="184" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">drwxr-xr-x  4 user user 4096 Jan 1 12:00 .</text>
+      <text x="56" y="202" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">drwxr-xr-x 32 user user 4096 Jan 1 11:00 ..</text>
+      <text x="56" y="220" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">-rw-r--r--  1 user user 1234 Jan 1 10:00 .bashrc</text>
+      <text x="56" y="238" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">-rw-r--r--  1 user user  220 Jan 1 10:00 .bash_profile</text>
+      <text x="56" y="256" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">drwxr-xr-x  2 user user 4096 Jan 1 09:00 Desktop</text>
+      <text x="56" y="274" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">drwxr-xr-x  2 user user 4096 Jan 1 09:00 Documents</text>
+      <text x="56" y="292" font-family="JetBrains Mono,monospace" font-size="11" fill="#888888">$ neofetch</text>
+      <!-- boring neofetch output -->
+      <text x="56" y="310" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">         arch</text>
+      <text x="56" y="326" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">user@arch</text>
+      <text x="56" y="342" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">OS: Arch Linux x86_64</text>
+      <text x="56" y="358" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">Shell: bash</text>
+      <text x="56" y="376" font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">WM: openbox</text>
+      <!-- cursor blink (dull white) -->
+      <rect x="166" y="395" width="8" height="12" fill="#888888" opacity="0.5"/>
+    </g>
+
+    <!-- ── Stock file manager (boring) ── -->
+    <rect x="40" y="440" width="350" height="260" rx="4" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>
+    <rect x="40" y="440" width="350" height="24"  rx="4" fill="#252525"/>
+    <rect x="40" y="456" width="350" height="8"   fill="#252525"/>
+    <text x="215" y="456" font-family="JetBrains Mono,monospace" font-size="10" fill="#555555" text-anchor="middle">Files</text>
+    <!-- file list items (boring grey) -->
+    <g font-family="JetBrains Mono,monospace" font-size="10" fill="#666666">
+      <text x="56" y="482">📁  Desktop</text>
+      <text x="56" y="498">📁  Documents</text>
+      <text x="56" y="514">📁  Downloads</text>
+      <text x="56" y="530">📁  Music</text>
+      <text x="56" y="546">📁  Pictures</text>
+      <text x="56" y="562">📁  Videos</text>
+      <text x="56" y="578">📄  .bashrc</text>
+      <text x="56" y="594">📄  .bash_profile</text>
+      <text x="56" y="610">📄  README</text>
+    </g>
+
+    <!-- ── Stock browser (boring) ── -->
+    <rect x="420" y="440" width="480" height="220" rx="4" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>
+    <rect x="420" y="440" width="480" height="28"  rx="4" fill="#252525"/>
+    <rect x="420" y="460" width="480" height="8"   fill="#252525"/>
+    <!-- url bar -->
+    <rect x="464" y="446" width="380" height="18" rx="3" fill="#2a2a2a"/>
+    <text x="654" y="459" font-family="JetBrains Mono,monospace" font-size="9" fill="#666666" text-anchor="middle">https://archlinux.org</text>
+    <!-- boring webpage content -->
+    <rect x="436" y="472" width="448" height="8"  rx="1" fill="#333333"/>
+    <rect x="436" y="486" width="380" height="6"  rx="1" fill="#2a2a2a"/>
+    <rect x="436" y="498" width="420" height="6"  rx="1" fill="#2a2a2a"/>
+    <rect x="436" y="510" width="300" height="6"  rx="1" fill="#2a2a2a"/>
+    <rect x="436" y="530" width="200" height="80" rx="2" fill="#252525"/>
+    <rect x="648" y="530" width="236" height="80" rx="2" fill="#252525"/>
+
+    <!-- ── Stock system settings ── -->
+    <rect x="40" y="720" width="860" height="200" rx="4" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>
+    <rect x="40" y="720" width="860" height="24"  rx="4" fill="#252525"/>
+    <text x="470" y="736" font-family="JetBrains Mono,monospace" font-size="10" fill="#555555" text-anchor="middle">System Settings</text>
+    <!-- boring settings content -->
+    <g font-family="JetBrains Mono,monospace" font-size="10" fill="#555555">
+      <text x="60" y="760">Display     Resolution: 1920×1080  Refresh: 60Hz</text>
+      <text x="60" y="778">Network     Connected: eth0  IP: 192.168.1.100</text>
+      <text x="60" y="796">Sound       Volume: 75%  Output: Built-in Speakers</text>
+      <text x="60" y="814">Appearance  Theme: Default  Icons: Hicolor  Font: Sans 11</text>
+      <text x="60" y="832">Power       Battery: 87%  Status: Discharging</text>
+      <text x="60" y="850">Updates     Last: 3 days ago  Packages: 1,234</text>
+      <text x="60" y="868">Security    Firewall: inactive  SELinux: disabled</text>
+    </g>
+
+    <!-- Stock bottom taskbar -->
+    <rect x="0" y="960" width="940" height="40" fill="#171717"/>
+    <rect x="0" y="960" width="940" height="1" fill="#2a2a2a"/>
+    <g font-family="JetBrains Mono,monospace" font-size="9" fill="#555555">
+      <text x="20"  y="985">Terminal</text>
+      <text x="90"  y="985">Files</text>
+      <text x="140" y="985">Browser</text>
+      <text x="204" y="985">Settings</text>
+      <text x="274" y="985">Editor</text>
+    </g>
+    <text x="890" y="985" font-family="JetBrains Mono,monospace" font-size="9" fill="#444444" text-anchor="end">Mon Jan  1  14:22</text>
+  </g>
+
+  <!-- BEFORE label badge -->
+  <g transform="translate(470, 42)" filter="url(#labelShadow)">
+    <rect x="-70" y="-18" width="140" height="36" rx="6" fill="#1e1e1e" stroke="#333333" stroke-width="1"/>
+    <rect x="-70" y="-18" width="140" height="3"  rx="1" fill="#555555"/>
+    <text x="0" y="4"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="800" fill="#888888" text-anchor="middle">BEFORE</text>
+    <text x="0" y="14" font-family="JetBrains Mono,monospace" font-size="9"  fill="#555555" text-anchor="middle">Stock Arch Linux</text>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 03 · AFTER PANEL (RIGHT) — ASH v5 full treatment      -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#panelShadow)" clip-path="url(#clipAfter)">
+    <!-- main panel Catppuccin Mocha -->
+    <rect x="980" y="0" width="940" height="1080" fill="url(#afterBg)"/>
+    <rect x="980" y="0" width="940" height="1080" fill="url(#afterDotGrid)"/>
+    <!-- warm purple ambient -->
+    <ellipse cx="1450" cy="540" rx="500" ry="400" fill="#cba6f7" opacity="0.05" filter="url(#softBlur)"/>
+
+    <!-- ── ASH Waybar (stunning) ── -->
+    <rect x="980" y="0" width="940" height="40" fill="#11111b" opacity="0.98"/>
+    <rect x="980" y="0" width="940" height="3" fill="url(#ashAccent)" filter="url(#glowAsh)"/>
+    <rect x="980" y="39" width="940" height="1" fill="#313244" opacity="0.6"/>
+
+    <!-- workspaces (catppuccin styled) -->
+    <rect x="990" y="5" width="46" height="30" rx="7" fill="#cba6f7"/>
+    <text x="1013" y="25" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#1e1e2e" text-anchor="middle">1</text>
+    <!-- occupied -->
+    <rect x="1042" y="5" width="30" height="30" rx="7" fill="#313244"/>
+    <circle cx="1057" cy="20" r="3" fill="#89b4fa" opacity="0.8" filter="url(#glowAsh)"/>
+    <!-- inactive -->
+    <rect x="1078" y="5" width="30" height="30" rx="7" fill="#181825" opacity="0.6"/>
+    <text x="1093" y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#45475a" text-anchor="middle">3</text>
+    <rect x="1114" y="5" width="30" height="30" rx="7" fill="#181825" opacity="0.6"/>
+    <text x="1129" y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#45475a" text-anchor="middle">4</text>
+
+    <!-- window title -->
+    <text x="1200" y="25" font-family="JetBrains Mono,monospace" font-size="10" fill="#6c7086">
+      <tspan fill="#cba6f7">⚡</tspan>  nvim  ·  ~/dotfiles/config.lua
+    </text>
+
+    <!-- clock (centred, beautiful) -->
+    <rect x="1390" y="3" width="180" height="34" rx="9" fill="#313244" opacity="0.7"/>
+    <text x="1480" y="24" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600"
+          fill="#cba6f7" text-anchor="middle" filter="url(#glowAsh)">⚡ 14:22:07</text>
+
+    <!-- right modules -->
+    <text x="1892" y="19" font-family="JetBrains Mono,monospace" font-size="9" fill="#89b4fa" text-anchor="end">
+      <tspan fill="#a6e3a1">󰤨 </tspan>
+      <tspan fill="#7f849c"> WiFi  </tspan>
+      <tspan fill="#f9e2af">󰁹 </tspan>
+      <tspan fill="#7f849c">87%  </tspan>
+      <tspan fill="#89b4fa">󰕾 </tspan>
+      <tspan fill="#7f849c">72%</tspan>
+    </text>
+
+    <!-- ── ASH Catppuccin wallpaper (rich gradient) ── -->
+    <rect x="980" y="40" width="940" height="1040" fill="#1e1e2e"/>
+    <!-- layered gradient backdrop -->
+    <ellipse cx="1450" cy="300" rx="400" ry="300" fill="#cba6f7" opacity="0.06" filter="url(#softBlur)"/>
+    <ellipse cx="1100" cy="700" rx="350" ry="280" fill="#89b4fa" opacity="0.05" filter="url(#softBlur)"/>
+    <ellipse cx="1800" cy="800" rx="300" ry="250" fill="#a6e3a1" opacity="0.04" filter="url(#softBlur)"/>
+    <rect x="980" y="40" width="940" height="1040" fill="url(#afterDotGrid)"/>
+
+    <!-- ── ASH Neovim (beautiful) ── -->
+    <g filter="url(#glowAsh)">
+      <!-- window glow -->
+      <rect x="1000" y="68" width="560" height="370" rx="12" fill="#cba6f7" opacity="0.06"/>
+    </g>
+    <rect x="1002" y="70" width="556" height="366" rx="12" fill="#1e1e2e" filter="url(#panelShadow)"/>
+    <rect x="1002" y="70" width="556" height="3"   rx="1" fill="url(#ashAccent)" filter="url(#glowAsh)"/>
+    <rect x="1002" y="70" width="556" height="366" rx="12" fill="none" stroke="#313244" stroke-width="0.8"/>
+
+    <!-- nvim title bar -->
+    <rect x="1002" y="70"  width="556" height="36" rx="12" fill="#181825"/>
+    <rect x="1002" y="94"  width="556" height="12" fill="#181825"/>
+    <!-- traffic lights (catppuccin) -->
+    <circle cx="1020" cy="88" r="6" fill="#f38ba8"/>
+    <circle cx="1036" cy="88" r="6" fill="#f9e2af"/>
+    <circle cx="1052" cy="88" r="6" fill="#a6e3a1"/>
+    <!-- tabs -->
+    <rect x="1068" y="74" width="110" height="24" rx="6" fill="#1e1e2e"/>
+    <rect x="1068" y="96" width="110" height="2"  fill="#cba6f7" opacity="0.6"/>
+    <text x="1078" y="90" font-family="JetBrains Mono,monospace" font-size="9" fill="#cba6f7">  config.lua</text>
+    <rect x="1184" y="74" width="100" height="24" rx="6" fill="#181825"/>
+    <text x="1194" y="90" font-family="JetBrains Mono,monospace" font-size="9" fill="#45475a">  init.lua</text>
+
+    <!-- nvim file tree -->
+    <rect x="1004" y="107" width="132" height="326" fill="#181825"/>
+    <rect x="1135" y="107" width="1"   height="326" fill="#cba6f7" opacity="0.15"/>
+    <text x="1014" y="124" font-family="JetBrains Mono,monospace" font-size="8" font-weight="700" fill="#cba6f7" filter="url(#glowAsh)">⚡ EXPLORER</text>
+    <g font-family="JetBrains Mono,monospace" font-size="9" fill="#6c7086">
+      <text x="1014" y="144">󰉋 dotfiles</text>
+      <text x="1022" y="160">▾ 󰉋 config</text>
+      <!-- active file highlight -->
+      <rect x="1004" y="166" width="132" height="16" fill="#cba6f7" opacity="0.12"/>
+      <rect x="1004" y="166" width="2"   height="16" fill="#cba6f7" filter="url(#glowAsh)"/>
+      <text x="1030" y="178" fill="#cba6f7">  config.lua</text>
+      <text x="1030" y="194" fill="#585b70">  init.lua</text>
+      <text x="1030" y="210" fill="#585b70">  keymaps.lua</text>
+      <text x="1030" y="226" fill="#585b70">  options.lua</text>
+      <text x="1022" y="242" fill="#585b70">▸ 󰉋 themes</text>
+      <text x="1022" y="258" fill="#585b70">▸ 󰉋 plugins</text>
+      <text x="1014" y="274" fill="#585b70">  Makefile</text>
+      <text x="1014" y="290" fill="#585b70">  README.md</text>
+    </g>
+
+    <!-- nvim code area (beautiful syntax highlighting) -->
+    <rect x="1136" y="107" width="418" height="326" fill="#1e1e2e"/>
+    <rect x="1136" y="107" width="36"  height="326" fill="#181825"/>
+    <!-- current line highlight -->
+    <rect x="1172" y="185" width="382" height="14" fill="#313244" opacity="0.6"/>
+    <!-- code content (rich syntax colours) -->
+    <g font-family="JetBrains Mono,monospace" font-size="10">
+      <text x="1148" y="122" fill="#585b70" text-anchor="middle">1</text>
+      <text x="1182" y="122"><tspan fill="#6c7086">-- </tspan><tspan fill="#6c7086">⚡ ASH Dotfiles v5.0 OMEGA</tspan></text>
+      <text x="1148" y="138" fill="#585b70" text-anchor="middle">2</text>
+      <text x="1148" y="154" fill="#585b70" text-anchor="middle">3</text>
+      <text x="1182" y="154"><tspan fill="#cba6f7">local</tspan><tspan fill="#cdd6f4"> ash </tspan><tspan fill="#89b4fa">=</tspan><tspan fill="#cdd6f4"> {}</tspan></text>
+      <text x="1148" y="170" fill="#585b70" text-anchor="middle">4</text>
+      <text x="1148" y="186" fill="#cba6f7" text-anchor="middle" filter="url(#glowAsh)">5</text>
+      <text x="1182" y="186"><tspan fill="#cba6f7">ash</tspan><tspan fill="#89b4fa">.</tspan><tspan fill="#89b4fa">theme</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#89b4fa">=</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#a6e3a1">"catppuccin-mocha"</tspan></text>
+      <!-- cursor -->
+      <rect x="1182" y="186" width="7" height="12" fill="#cba6f7" opacity="0.9" filter="url(#glowAsh)">
+        <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1s" repeatCount="indefinite"/>
+      </rect>
+      <text x="1148" y="202" fill="#585b70" text-anchor="middle">6</text>
+      <text x="1182" y="202"><tspan fill="#cba6f7">ash</tspan><tspan fill="#89b4fa">.</tspan><tspan fill="#89b4fa">plugins</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#89b4fa">=</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#fab387">150</tspan></text>
+      <text x="1148" y="218" fill="#585b70" text-anchor="middle">7</text>
+      <text x="1182" y="218"><tspan fill="#cba6f7">ash</tspan><tspan fill="#89b4fa">.</tspan><tspan fill="#89b4fa">themes</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#89b4fa">=</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#fab387">250</tspan></text>
+      <text x="1148" y="234" fill="#585b70" text-anchor="middle">8</text>
+      <text x="1148" y="250" fill="#585b70" text-anchor="middle">9</text>
+      <text x="1182" y="250"><tspan fill="#6c7086">-- apply full ASH experience</tspan></text>
+      <text x="1148" y="266" fill="#585b70" text-anchor="middle">10</text>
+      <text x="1182" y="266"><tspan fill="#89b4fa">function</tspan><tspan fill="#cdd6f4"> </tspan><tspan fill="#cba6f7" filter="url(#glowAsh)">ash.setup</tspan><tspan fill="#cdd6f4">()</tspan></text>
+      <text x="1148" y="282" fill="#585b70" text-anchor="middle">11</text>
+      <text x="1182" y="282"><tspan fill="#cdd6f4">  </tspan><tspan fill="#89b4fa">require</tspan><tspan fill="#cdd6f4">(</tspan><tspan fill="#a6e3a1">"theme"</tspan><tspan fill="#cdd6f4">).</tspan><tspan fill="#89b4fa">apply</tspan><tspan fill="#cdd6f4">()</tspan></text>
+      <text x="1148" y="298" fill="#585b70" text-anchor="middle">12</text>
+      <text x="1182" y="298"><tspan fill="#cdd6f4">  </tspan><tspan fill="#89b4fa">require</tspan><tspan fill="#cdd6f4">(</tspan><tspan fill="#a6e3a1">"plugins"</tspan><tspan fill="#cdd6f4">).</tspan><tspan fill="#89b4fa">init</tspan><tspan fill="#cdd6f4">()</tspan></text>
+      <text x="1148" y="314" fill="#585b70" text-anchor="middle">13</text>
+      <text x="1182" y="314"><tspan fill="#cba6f7">end</tspan></text>
+    </g>
+
+    <!-- statusline (catppuccin) -->
+    <rect x="1004" y="433" width="554" height="3" fill="url(#ashAccent)" opacity="0.4"/>
+    <rect x="1004" y="436" width="554" height="22" fill="#181825"/>
+    <rect x="1004" y="436" width="62"  height="22" fill="#cba6f7"/>
+    <text x="1035" y="451" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#1e1e2e" text-anchor="middle">NORMAL</text>
+    <text x="1076" y="451" font-family="JetBrains Mono,monospace" font-size="9" fill="#89b4fa">  main  config.lua</text>
+    <text x="1548" y="451" font-family="JetBrains Mono,monospace" font-size="9" fill="#6c7086" text-anchor="end">lua  utf-8  5:18  22%</text>
+
+    <!-- ── ASH Kitty Terminal (beautiful fish prompt) ── -->
+    <rect x="1002" y="458" width="556" height="280" rx="12" fill="#1e1e2e" filter="url(#panelShadow)"/>
+    <rect x="1002" y="458" width="556" height="3"   rx="1" fill="#a6e3a1" filter="url(#glowAsh)" opacity="0.7"/>
+    <rect x="1002" y="458" width="556" height="280" rx="12" fill="none" stroke="#313244" stroke-width="0.8"/>
+
+    <!-- terminal title bar -->
+    <rect x="1002" y="458" width="556" height="32" rx="12" fill="#181825"/>
+    <rect x="1002" y="478" width="556" height="12" fill="#181825"/>
+    <circle cx="1020" cy="474" r="5" fill="#f38ba8"/>
+    <circle cx="1034" cy="474" r="5" fill="#f9e2af"/>
+    <circle cx="1048" cy="474" r="5" fill="#a6e3a1"/>
+    <text x="1280" y="478" font-family="JetBrains Mono,monospace" font-size="9" fill="#6c7086" text-anchor="middle">fish  ·  ash@catppuccin</text>
+
+    <!-- ASH fish prompt content -->
+    <g font-family="JetBrains Mono,monospace" font-size="10">
+      <text x="1016" y="512">
+        <tspan fill="#cba6f7">╭─ </tspan>
+        <tspan fill="#89b4fa">ash</tspan>
+        <tspan fill="#cdd6f4">@</tspan>
+        <tspan fill="#a6e3a1">catppuccin</tspan>
+        <tspan fill="#585b70"> in </tspan>
+        <tspan fill="#f9e2af">~/dotfiles</tspan>
+        <tspan fill="#585b70"> on </tspan>
+        <tspan fill="#f38ba8">󰊢 main</tspan>
+        <tspan fill="#585b70"> took </tspan>
+        <tspan fill="#a6e3a1">247ms</tspan>
+      </text>
+      <text x="1016" y="530">
+        <tspan fill="#cba6f7">╰─ </tspan>
+        <tspan fill="#89b4fa">❯ </tspan>
+        <tspan fill="#cdd6f4">ash theme apply catppuccin-mocha</tspan>
+      </text>
+      <text x="1016" y="550">
+        <tspan fill="#a6e3a1">  ✓ </tspan><tspan fill="#cdd6f4">Extracting colours from wallpaper…</tspan>
+      </text>
+      <text x="1016" y="566">
+        <tspan fill="#a6e3a1">  ✓ </tspan><tspan fill="#cdd6f4">Generating palette (14 colours)</tspan>
+      </text>
+      <text x="1016" y="582">
+        <tspan fill="#a6e3a1">  ✓ </tspan><tspan fill="#cdd6f4">Applying to Hyprland, Waybar, Kitty…</tspan>
+      </text>
+      <text x="1016" y="598">
+        <tspan fill="#a6e3a1">  ✓ </tspan><tspan fill="#cdd6f4">Hot-reloading all 24 components…</tspan>
+      </text>
+      <!-- colour swatches -->
+      <rect x="1016" y="610" width="14" height="14" rx="3" fill="#1e1e2e"/>
+      <rect x="1034" y="610" width="14" height="14" rx="3" fill="#cba6f7" filter="url(#glowAsh)"/>
+      <rect x="1052" y="610" width="14" height="14" rx="3" fill="#89b4fa"/>
+      <rect x="1070" y="610" width="14" height="14" rx="3" fill="#a6e3a1"/>
+      <rect x="1088" y="610" width="14" height="14" rx="3" fill="#f9e2af"/>
+      <rect x="1106" y="610" width="14" height="14" rx="3" fill="#f38ba8"/>
+      <rect x="1124" y="610" width="14" height="14" rx="3" fill="#89dceb"/>
+      <rect x="1142" y="610" width="14" height="14" rx="3" fill="#fab387"/>
+      <text x="1016" y="642">
+        <tspan fill="#a6e3a1">  🎨 </tspan>
+        <tspan fill="#cba6f7">catppuccin-mocha</tspan>
+        <tspan fill="#cdd6f4"> applied in </tspan>
+        <tspan fill="#f9e2af">247ms</tspan>
+        <tspan fill="#a6e3a1"> !</tspan>
+      </text>
+      <text x="1016" y="660">
+        <tspan fill="#cba6f7">╰─ </tspan>
+        <tspan fill="#89b4fa">❯ </tspan>
+      </text>
+      <rect x="1046" y="648" width="7" height="13" fill="#cba6f7" opacity="0.9" filter="url(#glowAsh)">
+        <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- ── ASH btop (beautiful catppuccin) ── -->
+    <rect x="1004" y="754" width="912" height="248" rx="12" fill="#1e1e2e" filter="url(#panelShadow)"/>
+    <rect x="1004" y="754" width="912" height="3"   rx="1" fill="#89b4fa" filter="url(#glowAsh)" opacity="0.7"/>
+    <rect x="1004" y="754" width="912" height="248" rx="12" fill="none" stroke="#313244" stroke-width="0.8"/>
+    <rect x="1004" y="754" width="912" height="28"  rx="12" fill="#181825"/>
+    <rect x="1004" y="774" width="912" height="8"   fill="#181825"/>
+    <circle cx="1020" cy="768" r="5" fill="#f38ba8"/>
+    <circle cx="1034" cy="768" r="5" fill="#f9e2af"/>
+    <circle cx="1048" cy="768" r="5" fill="#a6e3a1"/>
+    <text x="1460" y="772" font-family="JetBrains Mono,monospace" font-size="9" fill="#6c7086" text-anchor="middle">btop  ·  catppuccin</text>
+
+    <!-- btop content (colourful) -->
+    <g font-family="JetBrains Mono,monospace" font-size="9">
+      <!-- CPU -->
+      <text x="1018" y="800" fill="#cba6f7" font-weight="600">󰻠 CPU  8%</text>
+      <rect x="1018" y="806" width="320" height="8" rx="2" fill="#313244"/>
+      <rect x="1018" y="806" width="26"  height="8" rx="2" fill="#cba6f7" filter="url(#glowAsh)"/>
+      <!-- RAM -->
+      <text x="1018" y="826" fill="#89b4fa" font-weight="600">󰍛 RAM  42%</text>
+      <rect x="1018" y="832" width="320" height="8" rx="2" fill="#313244"/>
+      <rect x="1018" y="832" width="134" height="8" rx="2" fill="#89b4fa"/>
+      <!-- GPU -->
+      <text x="1018" y="852" fill="#a6e3a1" font-weight="600">󰊴 GPU  19%</text>
+      <rect x="1018" y="858" width="320" height="8" rx="2" fill="#313244"/>
+      <rect x="1018" y="858" width="61"  height="8" rx="2" fill="#a6e3a1"/>
+      <!-- DISK -->
+      <text x="1018" y="878" fill="#f9e2af" font-weight="600">󰋊 DISK 62%</text>
+      <rect x="1018" y="884" width="320" height="8" rx="2" fill="#313244"/>
+      <rect x="1018" y="884" width="198" height="8" rx="2" fill="#f9e2af"/>
+
+      <!-- Process list (right) -->
+      <text x="1370" y="800" fill="#cba6f7" font-weight="600">PROCS</text>
+      <text x="1370" y="818" fill="#a6adc8">PID     NAME            CPU%  MEM%</text>
+      <rect x="1364" y="823" width="540" height="1" fill="#313244"/>
+      <rect x="1364" y="824" width="540" height="14" fill="#cba6f7" opacity="0.08"/>
+      <text x="1370" y="835" fill="#cdd6f4">18921   nvim             3.2   2.1</text>
+      <text x="1370" y="851" fill="#6c7086">12340   Hyprland         1.8   2.3</text>
+      <text x="1370" y="867" fill="#6c7086">12890   kitty            0.6   0.8</text>
+      <text x="1370" y="883" fill="#6c7086">13100   waybar           0.4   0.6</text>
+      <text x="1370" y="899" fill="#6c7086">14220   btop             0.3   0.4</text>
+      <text x="1370" y="915" fill="#6c7086">15000   fish             0.1   0.2</text>
+      <text x="1370" y="931" fill="#6c7086">16000   ollama          12.4   8.2</text>
+    </g>
+
+    <!-- ASH bottom dock -->
+    <rect x="1004" y="1006" width="912" height="54" rx="10" fill="#181825" opacity="0.95" filter="url(#panelShadow)"/>
+    <rect x="1004" y="1006" width="912" height="3"  rx="1" fill="url(#ashAccent)" opacity="0.5"/>
+    <rect x="1004" y="1006" width="912" height="54" rx="10" fill="none" stroke="#313244" stroke-width="0.8"/>
+    <!-- dock icons (colourful dots representing apps) -->
+    <g filter="url(#glowAsh)">
+      <circle cx="1040" cy="1033" r="14" fill="#cba6f7" opacity="0.85"/>
+      <circle cx="1076" cy="1033" r="14" fill="#89b4fa" opacity="0.85"/>
+      <circle cx="1112" cy="1033" r="14" fill="#a6e3a1" opacity="0.85"/>
+      <circle cx="1148" cy="1033" r="14" fill="#f9e2af" opacity="0.85"/>
+      <circle cx="1184" cy="1033" r="14" fill="#f38ba8" opacity="0.85"/>
+      <circle cx="1220" cy="1033" r="14" fill="#89dceb" opacity="0.85"/>
+      <circle cx="1256" cy="1033" r="14" fill="#fab387" opacity="0.85"/>
+      <circle cx="1292" cy="1033" r="14" fill="#94e2d5" opacity="0.85"/>
+    </g>
+    <!-- dock app labels -->
+    <g font-family="JetBrains Mono,monospace" font-size="7" fill="#6c7086" text-anchor="middle">
+      <text x="1040" y="1055">nvim</text>
+      <text x="1076" y="1055">term</text>
+      <text x="1112" y="1055">files</text>
+      <text x="1148" y="1055">browser</text>
+      <text x="1184" y="1055">mail</text>
+      <text x="1220" y="1055">music</text>
+      <text x="1256" y="1055">discord</text>
+      <text x="1292" y="1055">settings</text>
+    </g>
+  </g>
+
+  <!-- AFTER label badge -->
+  <g transform="translate(1450, 42)" filter="url(#labelShadow)">
+    <rect x="-80" y="-18" width="160" height="36" rx="6" fill="#1e1e2e" stroke="#313244" stroke-width="0.8"/>
+    <rect x="-80" y="-18" width="160" height="3"  rx="1" fill="url(#ashAccent)" filter="url(#glowAsh)"/>
+    <text x="0" y="4"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="800"
+          fill="#cba6f7" text-anchor="middle" filter="url(#glowAsh)">AFTER</text>
+    <text x="0" y="14" font-family="JetBrains Mono,monospace" font-size="9"
+          fill="#6c7086" text-anchor="middle">ASH Dotfiles v5.0 OMEGA</text>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 04 · CENTER DIVIDER + VS BADGE                        -->
+  <!-- ══════════════════════════════════════════════════════ -->
+
+  <!-- divider line -->
+  <rect x="956" y="90" width="8" height="990" fill="url(#dividerGrad)" opacity="0.75"/>
+
+  <!-- VS badge at center -->
+  <g transform="translate(960, 196)">
+    <!-- outer halo -->
+    <circle cx="0" cy="0" r="68" fill="#000000" opacity="0.55" filter="url(#glowVS)"/>
+    <!-- rings -->
+    <circle cx="0" cy="0" r="58" fill="none" stroke="url(#dividerGrad)" stroke-width="2" opacity="0.65"/>
+    <circle cx="0" cy="0" r="50" fill="none" stroke="url(#dividerGrad)" stroke-width="0.8" opacity="0.30"/>
+    <!-- core -->
+    <circle cx="0" cy="0" r="44" fill="#08080e"/>
+    <!-- BEFORE text (grey) -->
+    <text x="0" y="-6" font-family="JetBrains Mono,monospace" font-size="8" fill="#555555" text-anchor="middle">BEFORE</text>
+    <!-- arrow -->
+    <text x="0" y="6"  font-family="JetBrains Mono,monospace" font-size="14" fill="#6c7086" text-anchor="middle">→</text>
+    <!-- AFTER text (purple) -->
+    <text x="0" y="18" font-family="JetBrains Mono,monospace" font-size="8" fill="#cba6f7"
+          text-anchor="middle" filter="url(#glowAsh)">AFTER</text>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 05 · GLOBAL HEADER                                     -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <rect x="0" y="0" width="1920" height="48" fill="#06060e" opacity="0.96"/>
+  <!-- gradient rule -->
+  <rect x="0" y="47" width="1920" height="2" fill="url(#ashAccent)" opacity="0.25"/>
+
+  <!-- breadcrumb -->
+  <text x="44" y="32" font-family="JetBrains Mono,monospace" font-size="10" fill="#45475a" letter-spacing="1">
+    ASH DOTFILES  /  SCREENSHOTS  /  BEFORE — AFTER
+  </text>
+
+  <!-- centre title area with arrow graphic -->
+  <text x="960" y="30" font-family="JetBrains Mono,monospace" font-size="18" font-weight="800"
+        fill="#cdd6f4" text-anchor="middle" letter-spacing="4">
+    BEFORE  →  AFTER
+  </text>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 06 · STAT DELTA BADGES (improvements shown)           -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g transform="translate(960, 988)">
+    <!-- base strip -->
+    <rect x="-680" y="-26" width="1360" height="52" rx="8" fill="#0a0a14" opacity="0.92"/>
+    <rect x="-680" y="-26" width="1360" height="3"  rx="1" fill="url(#ashAccent)" opacity="0.4"/>
+    <rect x="-680" y="-26" width="1360" height="52" rx="8" fill="none" stroke="#1e1e2e" stroke-width="0.7"/>
+
+    <!-- deltas -->
+    <g font-family="JetBrains Mono,monospace" text-anchor="middle">
+      <!-- delta 1 -->
+      <g transform="translate(-600, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Theme Apply</text>
+        <text y="6"   font-size="10" fill="#f38ba8">~30s</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#a6e3a1" dx="55">250ms</text>
+      </g>
+      <!-- delta 2 -->
+      <g transform="translate(-400, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Themes</text>
+        <text y="6"   font-size="10" fill="#f38ba8">0</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#cba6f7" dx="55" filter="url(#glowAsh)">250+</text>
+      </g>
+      <!-- delta 3 -->
+      <g transform="translate(-200, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Plugins</text>
+        <text y="6"   font-size="10" fill="#f38ba8">0</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#89b4fa" dx="55">150+</text>
+      </g>
+      <!-- delta 4 -->
+      <g transform="translate(0, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Neovim plugins</text>
+        <text y="6"   font-size="10" fill="#f38ba8">0</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#a6e3a1" dx="55">65+</text>
+      </g>
+      <!-- delta 5 -->
+      <g transform="translate(200, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Fish functions</text>
+        <text y="6"   font-size="10" fill="#f38ba8">0</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#94e2d5" dx="55">65+</text>
+      </g>
+      <!-- delta 6 -->
+      <g transform="translate(400, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">CLI commands</text>
+        <text y="6"   font-size="10" fill="#f38ba8">~5</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#fab387" dx="55">115+</text>
+      </g>
+      <!-- delta 7 -->
+      <g transform="translate(600, 0)">
+        <text y="-8"  font-size="10" fill="#45475a">Experience</text>
+        <text y="6"   font-size="10" fill="#f38ba8">😐</text>
+        <text y="18"  font-size="10" fill="#585b70">→</text>
+        <text y="6"   font-size="10" fill="#f9e2af" dx="55">🚀 WOW</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 07 · BOTTOM VERDICT                                    -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <rect x="0" y="1050" width="1920" height="30" fill="#04040e" opacity="0.97"/>
+  <rect x="0" y="1050" width="1920" height="1.5" fill="url(#ashAccent)" opacity="0.2"/>
+  <text x="960" y="1070" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700"
+        fill="#f9e2af" text-anchor="middle" filter="url(#glowAsh)">
+    ⚡  ASH Dotfiles v5.0 OMEGA  ·  From boring stock Arch to stunning production-grade setup in minutes
+  </text>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+
+</svg>

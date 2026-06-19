@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- WiFi OFF — completely disabled, greyed out -->
+    <linearGradient id="offGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#585b70"/>
+      <stop offset="100%" stop-color="#45475a"/>
+    </linearGradient>
+    <linearGradient id="slashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#eba0ac"/>
+      <stop offset="100%" stop-color="#f38ba8"/>
+    </linearGradient>
+    <radialGradient id="dotOff" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#585b70"/>
+      <stop offset="100%" stop-color="#313244"/>
+    </radialGradient>
+    <filter id="glowSlash" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadowOff" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0.5" stdDeviation="0.5"
+                    flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- All arcs — fully greyed out, disabled style -->
+
+  <!-- Arc 3 (outermost) -->
+  <path d="M2.5,9.5 A13.5,13.5 0 0,1 21.5,9.5"
+        fill="none" stroke="#2a2a3e" stroke-width="2"
+        stroke-linecap="round" opacity="0.40"/>
+
+  <!-- Arc 2 (middle) -->
+  <path d="M5,12.2 A10,10 0 0,1 19,12.2"
+        fill="none" stroke="#2a2a3e" stroke-width="2"
+        stroke-linecap="round" opacity="0.40"/>
+
+  <!-- Arc 1 (inner) -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="#2a2a3e" stroke-width="2"
+        stroke-linecap="round" opacity="0.40"/>
+
+  <!-- Centre dot — off/dim -->
+  <circle cx="12" cy="18.5" r="1.5"
+          fill="url(#dotOff)" opacity="0.5"/>
+
+  <!-- ── DIAGONAL SLASH (wifi disabled indicator) ── -->
+  <!-- shadow under slash -->
+  <line x1="3" y1="21" x2="21" y2="3"
+        stroke="#000000" stroke-width="2.8"
+        stroke-linecap="round" opacity="0.25"
+        filter="url(#shadowOff)"/>
+
+  <!-- main slash -->
+  <line x1="3" y1="21" x2="21" y2="3"
+        stroke="url(#slashGrad)" stroke-width="1.8"
+        stroke-linecap="round"
+        filter="url(#glowSlash)"/>
+
+  <!-- slash edge highlight -->
+  <line x1="3.5" y1="21.5" x2="21.5" y2="3.5"
+        stroke="#f38ba8" stroke-width="0.5"
+        stroke-linecap="round" opacity="0.25"/>
+
+  <!-- slash inner highlight -->
+  <line x1="3" y1="21" x2="21" y2="3"
+        stroke="#ffffff" stroke-width="0.5"
+        stroke-linecap="round" opacity="0.08"/>
+</svg>

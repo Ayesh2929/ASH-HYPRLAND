@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="micGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="50%"  stop-color="#94e2d5"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <linearGradient id="micFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#74c7ec" stop-opacity="0.06"/>
+    </linearGradient>
+    <radialGradient id="micAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowMic" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDot" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.0" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient glow -->
+  <ellipse cx="12" cy="10" rx="6" ry="7"
+           fill="url(#micAmbient)" filter="url(#glowMic)"/>
+
+  <!-- Microphone capsule body -->
+  <!-- Fill -->
+  <rect x="8.5" y="3" width="7" height="12" rx="3.5"
+        fill="url(#micFill)"/>
+  <!-- Stroke -->
+  <rect x="8.5" y="3" width="7" height="12" rx="3.5"
+        fill="none" stroke="url(#micGrad)"
+        stroke-width="1.8" filter="url(#glowMic)"/>
+
+  <!-- Centre line detail on capsule -->
+  <line x1="12" y1="5.5" x2="12" y2="12.5"
+        stroke="url(#micGrad)" stroke-width="0.6"
+        opacity="0.40"/>
+  <!-- horizontal band details -->
+  <line x1="9.5" y1="8" x2="14.5" y2="8"
+        stroke="url(#micGrad)" stroke-width="0.6"
+        opacity="0.35"/>
+  <line x1="9.5" y1="10" x2="14.5" y2="10"
+        stroke="url(#micGrad)" stroke-width="0.6"
+        opacity="0.30"/>
+
+  <!-- Arc / stand arm -->
+  <path d="M5.5,11 A6.5,6.5 0 0,0 18.5,11"
+        fill="none" stroke="url(#micGrad)"
+        stroke-width="1.8" stroke-linecap="round"
+        filter="url(#glowMic)"/>
+
+  <!-- Vertical stand -->
+  <line x1="12" y1="17" x2="12" y2="21"
+        stroke="url(#micGrad)" stroke-width="1.8"
+        stroke-linecap="round" filter="url(#glowMic)"/>
+
+  <!-- Base plate -->
+  <line x1="8.5" y1="21" x2="15.5" y2="21"
+        stroke="url(#micGrad)" stroke-width="2"
+        stroke-linecap="round" filter="url(#glowMic)"/>
+
+  <!-- Active indicator dot (top-right, green pulsing) -->
+  <circle cx="17.5" cy="4.5" r="2"
+          fill="url(#micAmbient)" filter="url(#glowDot)"/>
+  <circle cx="17.5" cy="4.5" r="1.3"
+          fill="#a6e3a1" filter="url(#glowDot)"/>
+  <circle cx="17.0" cy="4.0" r="0.45"
+          fill="#ffffff" opacity="0.45"/>
+</svg>
