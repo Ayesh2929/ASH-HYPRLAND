@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <radialGradient id="recGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#e64466"/>
+      <stop offset="100%" stop-color="#cc1133"/>
+    </radialGradient>
+    <radialGradient id="recGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="recPulse" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowRec" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowText" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer pulse ring (recording indicator) -->
+  <circle cx="12" cy="12" r="9"
+          fill="url(#recPulse)" filter="url(#glowRec)"/>
+
+  <!-- Middle pulse ring -->
+  <circle cx="12" cy="12" r="7"
+          fill="none" stroke="#f38ba8"
+          stroke-width="1" opacity="0.25"
+          stroke-dasharray="3 3"/>
+
+  <!-- Inner glow bloom -->
+  <circle cx="12" cy="12" r="5.5"
+          fill="url(#recGlow)" filter="url(#glowRec)"/>
+
+  <!-- Main REC dot -->
+  <circle cx="12" cy="12" r="4.5"
+          fill="url(#recGrad)" filter="url(#glowRec)"/>
+
+  <!-- Specular highlight -->
+  <ellipse cx="10.6" cy="10.6" rx="1.4" ry="0.9"
+           fill="#ffffff" opacity="0.25"
+           transform="rotate(-30,10.6,10.6)"/>
+
+  <!-- REC label text (tiny, below dot in expanded usage) -->
+  <text x="12" y="22.5"
+        font-family="'JetBrains Mono', monospace"
+        font-size="4.5" font-weight="800"
+        fill="#f38ba8" text-anchor="middle"
+        letter-spacing="1" opacity="0.70"
+        filter="url(#glowText)">REC</text>
+</svg>

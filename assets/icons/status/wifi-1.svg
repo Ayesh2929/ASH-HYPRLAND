@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- WiFi 1 — Weak signal (only dot + inner arc) -->
+    <linearGradient id="weakGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#f9e2af"/>
+    </linearGradient>
+    <radialGradient id="dotGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#e8601a"/>
+    </radialGradient>
+    <linearGradient id="activeArc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.6"/>
+      <stop offset="50%"  stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="glowWeak" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDot" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="0.9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Arc 3 (outermost) — no signal, fully dimmed -->
+  <path d="M2.5,9.5 A13.5,13.5 0 0,1 21.5,9.5"
+        fill="none" stroke="#313244" stroke-width="2"
+        stroke-linecap="round" opacity="0.30"/>
+
+  <!-- Arc 2 (middle) — no signal, dimmed -->
+  <path d="M5,12.2 A10,10 0 0,1 19,12.2"
+        fill="none" stroke="#313244" stroke-width="2"
+        stroke-linecap="round" opacity="0.30"/>
+
+  <!-- Arc 1 (inner) — ACTIVE (weak signal) -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="url(#activeArc)"
+        stroke-width="2.2" stroke-linecap="round"
+        filter="url(#glowWeak)"/>
+
+  <!-- Inner arc highlight -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="#fab387"
+        stroke-width="2.2" stroke-linecap="round"
+        opacity="0.55" filter="url(#glowWeak)"/>
+
+  <!-- Centre dot — ACTIVE -->
+  <circle cx="12" cy="18.5" r="1.8"
+          fill="url(#dotGrad)" filter="url(#glowDot)"/>
+
+  <!-- Centre dot inner highlight -->
+  <circle cx="11.4" cy="17.9" r="0.6"
+          fill="#ffffff" opacity="0.30"/>
+
+  <!-- Signal strength label dots (mini indicator below) -->
+  <!-- 3 small bars: only 1 filled -->
+  <g transform="translate(0, 0)" opacity="0.55">
+    <!-- could add a tiny bar indicator here for extra polish -->
+  </g>
+</svg>

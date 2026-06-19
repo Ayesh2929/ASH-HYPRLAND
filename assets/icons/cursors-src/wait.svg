@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="spinGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="50%"  stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <linearGradient id="trackGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#313244" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#45475a" stop-opacity="0.40"/>
+    </linearGradient>
+    <filter id="glowWait" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.0" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Track ring (dim) -->
+  <circle cx="16" cy="16" r="11"
+          fill="none" stroke="url(#trackGrd)"
+          stroke-width="3.5"/>
+
+  <!-- Spinning arc (thick, coloured ~270deg) -->
+  <circle cx="16" cy="16" r="11"
+          fill="none" stroke="url(#spinGrd)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-dasharray="55 17"
+          stroke-dashoffset="0"
+          filter="url(#glowWait)"/>
+
+  <!-- Centre dot -->
+  <circle cx="16" cy="16" r="3"
+          fill="url(#spinGrd)" opacity="0.65"
+          filter="url(#glowWait)"/>
+  <circle cx="16" cy="16" r="1.5"
+          fill="#cba6f7" opacity="0.80"/>
+</svg>

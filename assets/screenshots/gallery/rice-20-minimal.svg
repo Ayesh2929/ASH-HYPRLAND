@@ -1,0 +1,928 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ULTRA MINIMAL MONOCHROME PALETTE                    -->
+    <!-- void:#000000    base:#080808    surface:#101010     -->
+    <!-- overlay:#181818  dim:#242424   mid:#363636          -->
+    <!-- subtle:#484848  muted:#606060  comment:#787878      -->
+    <!-- fg-dim:#909090  fg:#b8b8b8    fg-bright:#d0d0d0    -->
+    <!-- white:#e8e8e8   pure:#f0f0f0  snow:#f8f8f8         -->
+    <!-- accent:#ffffff   red:#cc3333   blue:#3366cc         -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&amp;display=swap');
+    </style>
+
+    <!-- ── Pure black background ── -->
+    <linearGradient id="bgMinimal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="50%"  stop-color="#060606"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+
+    <!-- ── Waybar ── -->
+    <linearGradient id="bgWaybar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#040404" stop-opacity="0.98"/>
+      <stop offset="50%"  stop-color="#080808" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#040404" stop-opacity="0.98"/>
+    </linearGradient>
+
+    <!-- ── Minimal gradients ── -->
+    <linearGradient id="gradWhite" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#606060"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </linearGradient>
+    <linearGradient id="gradSubtle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#242424"/>
+      <stop offset="100%" stop-color="#484848"/>
+    </linearGradient>
+    <linearGradient id="wsActive" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#b8b8b8"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </linearGradient>
+    <linearGradient id="winFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0c0c0c" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#080808" stop-opacity="0.98"/>
+    </linearGradient>
+    <linearGradient id="titleFill" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#080808"/>
+      <stop offset="100%" stop-color="#0c0c0c"/>
+    </linearGradient>
+    <linearGradient id="lineHL" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#f0f0f0" stop-opacity="0.09"/>
+      <stop offset="60%"  stop-color="#b8b8b8" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#b8b8b8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="progBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#484848"/>
+      <stop offset="50%"  stop-color="#b8b8b8"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </linearGradient>
+
+    <!-- ── Accent (single colour accent) ── -->
+    <!-- Only pure white/accent used sparingly -->
+
+    <!-- ── Subtle glow (barely visible) ── -->
+    <filter id="glowWhite" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowSubtle" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="winShadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="0"  stdDeviation="8"  flood-color="#ffffff" flood-opacity="0.04"/>
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.96"/>
+    </filter>
+    <filter id="softBlur"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="midBlur"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="crtFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0 0.5" numOctaves="1" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+
+    <!-- ── Minimal ambient ── -->
+    <radialGradient id="ambientCenter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#161616" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- ── Patterns ── -->
+    <!-- Extremely subtle dot grid -->
+    <pattern id="dotGrid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+      <circle cx="24" cy="24" r="0.7" fill="#181818"/>
+    </pattern>
+    <!-- Fine scanlines -->
+    <pattern id="scanH" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1" fill="rgba(0,0,0,0.18)"/>
+    </pattern>
+    <!-- Horizontal rule pattern -->
+    <pattern id="hrule" x="0" y="0" width="1" height="80" patternUnits="userSpaceOnUse">
+      <rect x="0" y="79" width="1920" height="1" fill="#141414"/>
+    </pattern>
+
+    <!-- ── Vignette (strong corners) ── -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="40%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.88"/>
+    </radialGradient>
+
+    <!-- ── Clip paths ── -->
+    <clipPath id="clipMain"><rect x="0" y="0" width="1920" height="1080"/></clipPath>
+  </defs>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 01 · BACKGROUND — PURE VOID                           -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <rect width="1920" height="1080" fill="#000000"/>
+  <!-- very subtle center gradient -->
+  <rect width="1920" height="1080" fill="url(#ambientCenter)"/>
+  <!-- invisible dot grid for depth -->
+  <rect width="1920" height="1080" fill="url(#dotGrid)"/>
+
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+  <!-- Final scanlines -->
+  <rect width="1920" height="1080" fill="url(#scanH)" opacity="0.40"/>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 02 · WAYBAR — Minimal single line                     -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <rect x="0" y="0" width="1920" height="40" fill="url(#bgWaybar)"/>
+  <!-- single pixel bottom border — the ONLY decoration -->
+  <rect x="0" y="39" width="1920" height="1" fill="#242424"/>
+
+  <!-- workspaces — numbers only, no decoration except active -->
+  <rect x="12" y="7"  width="26" height="26" rx="0" fill="#f0f0f0"/>
+  <text x="25" y="25" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#000000" text-anchor="middle">1</text>
+
+  <text x="52"  y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#363636" text-anchor="middle">2</text>
+  <text x="76"  y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#363636" text-anchor="middle">3</text>
+  <text x="100" y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#242424" text-anchor="middle">4</text>
+  <text x="124" y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#242424" text-anchor="middle">5</text>
+
+  <!-- separator -->
+  <rect x="146" y="14" width="1" height="12" fill="#242424"/>
+
+  <!-- window title — plain text -->
+  <text x="156" y="25" font-family="JetBrains Mono,monospace" font-size="11" fill="#606060">
+    nvim  ~/minimal/src/pure.c
+  </text>
+
+  <!-- clock — centered, clean -->
+  <text x="960" y="25" font-family="JetBrains Mono,monospace" font-size="12" font-weight="400" fill="#909090" text-anchor="middle">
+    14:22:08
+  </text>
+
+  <!-- right modules — text only -->
+  <text x="1640" y="25" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">
+    <tspan fill="#363636">cpu </tspan>8%
+    <tspan fill="#363636">  mem </tspan>4.1G
+    <tspan fill="#363636">  bat </tspan>91%
+  </text>
+  <text x="1820" y="25" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">
+    wifi
+  </text>
+  <text x="1870" y="25" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">
+    vol
+  </text>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 03 · NEOVIM — LEFT (full minimal aesthetic)           -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#winShadow)">
+    <rect x="28"  y="40" width="950" height="640" rx="0" fill="url(#winFill)"/>
+    <!-- single top border line -->
+    <rect x="28"  y="40" width="950" height="1"   fill="#242424"/>
+    <!-- left accent strip — the ONLY colour accent = white 1px -->
+    <rect x="28"  y="40" width="1"   height="640" fill="#f0f0f0" opacity="0.06"/>
+    <!-- right border -->
+    <rect x="977" y="40" width="1"   height="640" fill="#141414"/>
+    <!-- bottom border -->
+    <rect x="28"  y="679" width="950" height="1"  fill="#141414"/>
+  </g>
+
+  <!-- title bar — invisible/minimal -->
+  <rect x="28" y="40"  width="950" height="36" fill="#080808"/>
+  <rect x="28" y="75"  width="950" height="1"  fill="#141414"/>
+
+  <!-- traffic lights — three dots, minimal grey -->
+  <circle cx="48"  cy="58" r="5" fill="#1e1e1e"/>
+  <circle cx="62"  cy="58" r="5" fill="#1e1e1e"/>
+  <circle cx="76"  cy="58" r="5" fill="#1e1e1e"/>
+
+  <!-- tab bar — current file only -->
+  <rect x="90" y="44" width="160" height="28" rx="0" fill="#101010"/>
+  <rect x="90" y="71" width="160" height="1"  fill="#f0f0f0" opacity="0.20"/>
+  <text x="100" y="63" font-family="JetBrains Mono,monospace" font-size="10" fill="#909090">pure.c</text>
+
+  <!-- ── Neo-tree sidebar ── -->
+  <rect x="29"  y="77" width="164" height="601" fill="#060606"/>
+  <rect x="192" y="77" width="1"   height="601" fill="#141414"/>
+
+  <!-- header -->
+  <text x="38" y="96" font-family="JetBrains Mono,monospace" font-size="9" font-weight="600" fill="#484848">FILES</text>
+
+  <!-- tree items — all plain text, no icons except dots -->
+  <text x="38"  y="118" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">minimal/</text>
+  <text x="46"  y="136" font-family="JetBrains Mono,monospace" font-size="10" fill="#606060">src/</text>
+
+  <!-- active file — white highlight -->
+  <rect x="29" y="140" width="164" height="17" fill="#141414"/>
+  <text x="54"  y="153" font-family="JetBrains Mono,monospace" font-size="10" fill="#d0d0d0">pure.c</text>
+  <rect x="29"  y="140" width="2"   height="17" fill="#f0f0f0" opacity="0.35"/>
+
+  <text x="54"  y="170" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">void.c</text>
+  <text x="54"  y="187" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">null.c</text>
+  <text x="54"  y="204" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">zero.h</text>
+  <text x="54"  y="221" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">mono.h</text>
+  <text x="54"  y="238" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">blank.c</text>
+  <text x="46"  y="256" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">tests/</text>
+  <text x="54"  y="273" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">docs/</text>
+  <text x="38"  y="291" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">Makefile</text>
+  <text x="38"  y="308" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">README.md</text>
+  <text x="38"  y="325" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">.gitignore</text>
+
+  <!-- git status at bottom -->
+  <text x="38" y="649" font-family="JetBrains Mono,monospace" font-size="9" fill="#363636">main  ↑1 ~2</text>
+
+  <!-- ── Code area ── -->
+  <rect x="193" y="77" width="784" height="601" fill="#0a0a0a"/>
+  <!-- line number gutter -->
+  <rect x="193" y="77" width="42"  height="601" fill="#080808"/>
+  <!-- gutter right separator -->
+  <rect x="234" y="77" width="1"   height="601" fill="#121212"/>
+
+  <!-- current line highlight — barely visible -->
+  <rect x="235" y="236" width="742" height="16" fill="#111111"/>
+
+  <!-- ── C code — pure minimal aesthetic ── -->
+  <g font-family="JetBrains Mono,monospace" font-size="11">
+
+    <!-- line 1 -->
+    <text x="208" y="100" fill="#363636" text-anchor="middle">1</text>
+    <text x="248" y="100">
+      <tspan fill="#484848">/*</tspan>
+      <tspan fill="#484848"> ─────────────────────────────────────────── </tspan>
+      <tspan fill="#484848">*/</tspan>
+    </text>
+    <!-- line 2 -->
+    <text x="208" y="117" fill="#363636" text-anchor="middle">2</text>
+    <text x="248" y="117">
+      <tspan fill="#484848">/*   minimal — ASH theme engine v5.0          */</tspan>
+    </text>
+    <!-- line 3 -->
+    <text x="208" y="134" fill="#363636" text-anchor="middle">3</text>
+    <text x="248" y="134">
+      <tspan fill="#484848">/*   less is more. silence speaks loudest.    */</tspan>
+    </text>
+    <!-- line 4 -->
+    <text x="208" y="151" fill="#363636" text-anchor="middle">4</text>
+    <text x="248" y="151">
+      <tspan fill="#484848">/* ─────────────────────────────────────────── */</tspan>
+    </text>
+
+    <!-- blank 5 -->
+    <text x="208" y="168" fill="#363636" text-anchor="middle">5</text>
+
+    <!-- line 6 -->
+    <text x="208" y="185" fill="#363636" text-anchor="middle">6</text>
+    <text x="248" y="185">
+      <tspan fill="#606060">#include</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#787878">&lt;stddef.h&gt;</tspan>
+    </text>
+    <!-- line 7 -->
+    <text x="208" y="202" fill="#363636" text-anchor="middle">7</text>
+    <text x="248" y="202">
+      <tspan fill="#606060">#include</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#787878">&lt;stdint.h&gt;</tspan>
+    </text>
+
+    <!-- line 8 — CURRENT LINE (cursor here) -->
+    <text x="208" y="248" fill="#909090" text-anchor="middle" filter="url(#glowSubtle)">8</text>
+    <text x="248" y="248">
+      <tspan fill="#606060">#include</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#787878">"pure.h"</tspan>
+    </text>
+    <!-- cursor block -->
+    <rect x="248" y="234" width="7" height="14" fill="#f0f0f0" opacity="0.85">
+      <animate attributeName="opacity" values="0.85;0.05;0.85" dur="1.2s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- blank 9 -->
+    <text x="208" y="265" fill="#363636" text-anchor="middle">9</text>
+
+    <!-- line 10 -->
+    <text x="208" y="282" fill="#363636" text-anchor="middle">10</text>
+    <text x="248" y="282">
+      <tspan fill="#787878">/* Palette: void black with single white accent */</tspan>
+    </text>
+
+    <!-- line 11 -->
+    <text x="208" y="299" fill="#363636" text-anchor="middle">11</text>
+    <text x="248" y="299">
+      <tspan fill="#606060">typedef</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#606060">struct</tspan>
+      <tspan fill="#b8b8b8"> {</tspan>
+    </text>
+
+    <!-- line 12 -->
+    <text x="208" y="316" fill="#363636" text-anchor="middle">12</text>
+    <text x="248" y="316">
+      <tspan fill="#909090">    uint8_t</tspan>
+      <tspan fill="#b8b8b8"> r</tspan>
+      <tspan fill="#787878">, </tspan>
+      <tspan fill="#b8b8b8">g</tspan>
+      <tspan fill="#787878">, </tspan>
+      <tspan fill="#b8b8b8">b</tspan>
+      <tspan fill="#787878">;</tspan>
+    </text>
+
+    <!-- line 13 -->
+    <text x="208" y="333" fill="#363636" text-anchor="middle">13</text>
+    <text x="248" y="333">
+      <tspan fill="#909090">    char</tspan>
+      <tspan fill="#b8b8b8">     name</tspan>
+      <tspan fill="#787878">[</tspan>
+      <tspan fill="#909090">32</tspan>
+      <tspan fill="#787878">]</tspan>
+      <tspan fill="#b8b8b8">;</tspan>
+    </text>
+
+    <!-- line 14 -->
+    <text x="208" y="350" fill="#363636" text-anchor="middle">14</text>
+    <text x="248" y="350">
+      <tspan fill="#b8b8b8">} </tspan>
+      <tspan fill="#d0d0d0">MonoColor</tspan>
+      <tspan fill="#b8b8b8">;</tspan>
+    </text>
+
+    <!-- blank 15 -->
+    <text x="208" y="367" fill="#363636" text-anchor="middle">15</text>
+
+    <!-- line 16 -->
+    <text x="208" y="384" fill="#363636" text-anchor="middle">16</text>
+    <text x="248" y="384">
+      <tspan fill="#787878">/* Eight shades of grey + pure white */</tspan>
+    </text>
+
+    <!-- line 17 -->
+    <text x="208" y="401" fill="#363636" text-anchor="middle">17</text>
+    <text x="248" y="401">
+      <tspan fill="#606060">static const</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#d0d0d0">MonoColor</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#f0f0f0">PALETTE</tspan>
+      <tspan fill="#b8b8b8">[] = {</tspan>
+    </text>
+
+    <!-- palette colour entries with inline blocks -->
+    <text x="208" y="418" fill="#363636" text-anchor="middle">18</text>
+    <text x="248" y="418">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0x00, 0x00, 0x00</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"void"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="406" width="12" height="12" rx="0" fill="#000000" stroke="#242424" stroke-width="0.5"/>
+
+    <text x="208" y="435" fill="#363636" text-anchor="middle">19</text>
+    <text x="248" y="435">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0x10, 0x10, 0x10</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"surface"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="423" width="12" height="12" rx="0" fill="#101010" stroke="#242424" stroke-width="0.5"/>
+
+    <text x="208" y="452" fill="#363636" text-anchor="middle">20</text>
+    <text x="248" y="452">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0x36, 0x36, 0x36</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"dim"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="440" width="12" height="12" rx="0" fill="#363636"/>
+
+    <text x="208" y="469" fill="#363636" text-anchor="middle">21</text>
+    <text x="248" y="469">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0x60, 0x60, 0x60</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"muted"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="457" width="12" height="12" rx="0" fill="#606060"/>
+
+    <text x="208" y="486" fill="#363636" text-anchor="middle">22</text>
+    <text x="248" y="486">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0x90, 0x90, 0x90</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"subtle"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="474" width="12" height="12" rx="0" fill="#909090"/>
+
+    <text x="208" y="503" fill="#363636" text-anchor="middle">23</text>
+    <text x="248" y="503">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0xb8, 0xb8, 0xb8</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"fg"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="491" width="12" height="12" rx="0" fill="#b8b8b8"/>
+
+    <text x="208" y="520" fill="#363636" text-anchor="middle">24</text>
+    <text x="248" y="520">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0xd0, 0xd0, 0xd0</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"bright"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="508" width="12" height="12" rx="0" fill="#d0d0d0"/>
+
+    <text x="208" y="537" fill="#363636" text-anchor="middle">25</text>
+    <text x="248" y="537">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#909090">0xf0, 0xf0, 0xf0</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#787878">"snow"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+    </text>
+    <rect x="756" y="525" width="12" height="12" rx="0" fill="#f0f0f0"/>
+
+    <!-- WHITE — the single accent, slightly highlighted -->
+    <text x="208" y="554" fill="#787878" text-anchor="middle" filter="url(#glowSubtle)">26</text>
+    <text x="248" y="554">
+      <tspan fill="#b8b8b8">    { </tspan>
+      <tspan fill="#d0d0d0">0xff, 0xff, 0xff</tspan>
+      <tspan fill="#b8b8b8">, </tspan>
+      <tspan fill="#909090">"white"</tspan>
+      <tspan fill="#b8b8b8"> },</tspan>
+      <tspan fill="#484848">  /* accent */</tspan>
+    </text>
+    <rect x="756" y="542" width="12" height="12" rx="0" fill="#ffffff" filter="url(#glowWhite)"/>
+
+    <!-- line 27 -->
+    <text x="208" y="571" fill="#363636" text-anchor="middle">27</text>
+    <text x="248" y="571">
+      <tspan fill="#b8b8b8">};</tspan>
+    </text>
+
+    <!-- blank 28 -->
+    <text x="208" y="588" fill="#363636" text-anchor="middle">28</text>
+
+    <!-- line 29 -->
+    <text x="208" y="605" fill="#363636" text-anchor="middle">29</text>
+    <text x="248" y="605">
+      <tspan fill="#606060">void</tspan>
+      <tspan fill="#b8b8b8"> </tspan>
+      <tspan fill="#d0d0d0">apply_minimal</tspan>
+      <tspan fill="#b8b8b8">(</tspan>
+      <tspan fill="#606060">void</tspan>
+      <tspan fill="#b8b8b8">) {</tspan>
+    </text>
+
+    <!-- line 30 -->
+    <text x="208" y="622" fill="#363636" text-anchor="middle">30</text>
+    <text x="248" y="622">
+      <tspan fill="#787878">    /* nothing. emptiness is the theme. */</tspan>
+    </text>
+
+    <!-- line 31 -->
+    <text x="208" y="639" fill="#363636" text-anchor="middle">31</text>
+    <text x="248" y="639">
+      <tspan fill="#b8b8b8">}</tspan>
+    </text>
+  </g>
+
+  <!-- git gutter markers — minimal dots -->
+  <rect x="232" y="96"  width="2" height="56" fill="#484848" opacity="0.6"/>
+  <rect x="232" y="234" width="2" height="16" fill="#909090" opacity="0.7"/>
+  <rect x="232" y="296" width="2" height="288" fill="#363636" opacity="0.5"/>
+
+  <!-- statusline — single line, pure text -->
+  <rect x="28"  y="678" width="950" height="1"  fill="#1e1e1e"/>
+  <rect x="28"  y="679" width="950" height="22" fill="#060606"/>
+
+  <!-- mode -->
+  <text x="36"  y="694" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600" fill="#d0d0d0">NORMAL</text>
+  <rect x="35"  y="683" width="60" height="12" rx="0" fill="#141414"/>
+  <text x="65"  y="694" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600" fill="#d0d0d0" text-anchor="middle">NORMAL</text>
+
+  <!-- file info -->
+  <text x="104" y="694" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848">  main  pure.c</text>
+
+  <!-- center -->
+  <text x="640" y="694" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636" text-anchor="middle">c  utf-8  lf</text>
+
+  <!-- right -->
+  <text x="968" y="694" font-family="JetBrains Mono,monospace" font-size="10" fill="#484848" text-anchor="end">8:1  25%</text>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 04 · TERMINAL — RIGHT TOP                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#winShadow)">
+    <rect x="988"  y="40" width="904" height="316" rx="0" fill="url(#winFill)"/>
+    <rect x="988"  y="40" width="904" height="1"   fill="#1e1e1e"/>
+    <rect x="988"  y="40" width="1"   height="316" fill="#141414"/>
+    <rect x="1891" y="40" width="1"   height="316" fill="#141414"/>
+    <rect x="988"  y="355" width="904" height="1"  fill="#141414"/>
+  </g>
+
+  <!-- title bar -->
+  <rect x="988" y="40"  width="904" height="32" fill="#080808"/>
+  <rect x="988" y="71"  width="904" height="1"  fill="#141414"/>
+
+  <!-- traffic lights — just outlines -->
+  <circle cx="1004" cy="56" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1018" cy="56" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1032" cy="56" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+
+  <text x="1440" y="61" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636" text-anchor="middle">fish</text>
+
+  <!-- terminal content — monospace text, no colour except minimal syntax -->
+  <g font-family="JetBrains Mono,monospace" font-size="11">
+    <text x="1000" y="98">
+      <tspan fill="#484848">ash</tspan>
+      <tspan fill="#363636">@</tspan>
+      <tspan fill="#606060">minimal</tspan>
+      <tspan fill="#363636">  ~/minimal  </tspan>
+      <tspan fill="#484848">main</tspan>
+    </text>
+    <text x="1000" y="116">
+      <tspan fill="#787878">❯ </tspan>
+      <tspan fill="#b8b8b8">make clean &amp;&amp; make -j$(nproc)</tspan>
+    </text>
+
+    <text x="1000" y="136" fill="#484848">  CC    src/pure.c</text>
+    <text x="1000" y="153" fill="#484848">  CC    src/void.c</text>
+    <text x="1000" y="170" fill="#484848">  CC    src/null.c</text>
+    <text x="1000" y="187" fill="#484848">  LD    build/minimal</text>
+
+    <!-- progress bar — white fill -->
+    <rect x="1000" y="196" width="800" height="4" rx="0" fill="#141414"/>
+    <rect x="1000" y="196" width="800" height="4" rx="0" fill="url(#progBar)"/>
+
+    <text x="1000" y="214" fill="#606060">  done   3.2s  (16 cores)</text>
+    <text x="1000" y="231">
+      <tspan fill="#787878">❯ </tspan>
+      <tspan fill="#d0d0d0">ash theme apply minimal</tspan>
+    </text>
+
+    <text x="1000" y="249" fill="#484848">  applying monochrome palette</text>
+    <text x="1000" y="266" fill="#484848">  loading 8 grey shades</text>
+    <text x="1000" y="283" fill="#484848">  single accent: #ffffff</text>
+    <text x="1000" y="300" fill="#787878">  done   minimal applied   142ms</text>
+
+    <!-- grey swatches row — minimal colour preview -->
+    <rect x="1000" y="311" width="16" height="12" rx="0" fill="#000000" stroke="#242424" stroke-width="0.5"/>
+    <rect x="1020" y="311" width="16" height="12" rx="0" fill="#101010"/>
+    <rect x="1040" y="311" width="16" height="12" rx="0" fill="#181818"/>
+    <rect x="1060" y="311" width="16" height="12" rx="0" fill="#242424"/>
+    <rect x="1080" y="311" width="16" height="12" rx="0" fill="#363636"/>
+    <rect x="1100" y="311" width="16" height="12" rx="0" fill="#484848"/>
+    <rect x="1120" y="311" width="16" height="12" rx="0" fill="#606060"/>
+    <rect x="1140" y="311" width="16" height="12" rx="0" fill="#787878"/>
+    <rect x="1160" y="311" width="16" height="12" rx="0" fill="#909090"/>
+    <rect x="1180" y="311" width="16" height="12" rx="0" fill="#b8b8b8"/>
+    <rect x="1200" y="311" width="16" height="12" rx="0" fill="#d0d0d0"/>
+    <rect x="1220" y="311" width="16" height="12" rx="0" fill="#e8e8e8"/>
+    <rect x="1240" y="311" width="16" height="12" rx="0" fill="#f0f0f0"/>
+    <!-- the one white accent swatch with a subtle glow -->
+    <rect x="1260" y="311" width="16" height="12" rx="0" fill="#ffffff" filter="url(#glowWhite)"/>
+  </g>
+
+  <!-- new prompt -->
+  <text x="1000" y="345" font-family="JetBrains Mono,monospace" font-size="11" fill="#787878">
+    ❯ <tspan fill="#363636"> </tspan>
+  </text>
+  <rect x="1018" y="332" width="8" height="13" fill="#b8b8b8" opacity="0.75" rx="0">
+    <animate attributeName="opacity" values="0.75;0.05;0.75" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 05 · BTOP — RIGHT MIDDLE                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#winShadow)">
+    <rect x="988"  y="360" width="904" height="314" rx="0" fill="url(#winFill)"/>
+    <rect x="988"  y="360" width="904" height="1"   fill="#1e1e1e"/>
+    <rect x="988"  y="673" width="904" height="1"   fill="#141414"/>
+    <rect x="988"  y="360" width="1"   height="314" fill="#141414"/>
+    <rect x="1891" y="360" width="1"   height="314" fill="#141414"/>
+  </g>
+  <rect x="988"  y="360" width="904" height="32" fill="#080808"/>
+  <rect x="988"  y="391" width="904" height="1"  fill="#141414"/>
+
+  <circle cx="1004" cy="376" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1018" cy="376" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1032" cy="376" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <text x="1440" y="381" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636" text-anchor="middle">btop</text>
+
+  <!-- btop content — pure text monochrome -->
+  <g font-family="JetBrains Mono,monospace" font-size="10">
+
+    <!-- CPU section -->
+    <text x="1000" y="412" fill="#606060" font-weight="600">CPU</text>
+    <text x="1040" y="412" fill="#363636">AMD Ryzen 9  8%</text>
+
+    <rect x="1000" y="418" width="500" height="6" rx="0" fill="#141414"/>
+    <rect x="1000" y="418" width="40"  height="6" rx="0" fill="#909090"/>
+    <text x="1505" y="424" fill="#484848" text-anchor="end">8%</text>
+
+    <rect x="1000" y="428" width="500" height="6" rx="0" fill="#141414"/>
+    <rect x="1000" y="428" width="62"  height="6" rx="0" fill="#787878"/>
+    <text x="1505" y="434" fill="#484848" text-anchor="end">12%</text>
+
+    <rect x="1000" y="438" width="500" height="6" rx="0" fill="#141414"/>
+    <rect x="1000" y="438" width="25"  height="6" rx="0" fill="#606060"/>
+    <text x="1505" y="444" fill="#484848" text-anchor="end">5%</text>
+
+    <rect x="1000" y="448" width="500" height="6" rx="0" fill="#141414"/>
+    <rect x="1000" y="448" width="88"  height="6" rx="0" fill="#909090"/>
+    <text x="1505" y="454" fill="#484848" text-anchor="end">17%</text>
+
+    <!-- sparkline -->
+    <polyline points="1000,490 1020,486 1040,489 1060,483 1080,487 1100,482 1120,485 1140,481 1160,484 1180,480 1200,483 1220,479 1240,482 1260,478 1280,481 1300,477 1320,480 1340,476 1360,479 1380,475 1400,478 1420,474 1440,477 1460,473 1480,476 1500,472"
+      fill="none" stroke="#363636" stroke-width="1.5" opacity="0.8"/>
+
+    <!-- separator -->
+    <rect x="1000" y="500" width="870" height="1" fill="#141414"/>
+
+    <!-- MEM section -->
+    <text x="1000" y="518" fill="#606060" font-weight="600">MEM</text>
+    <text x="1040" y="518" fill="#363636">4.1 GB / 16 GB  25%</text>
+
+    <rect x="1000" y="524" width="500" height="8" rx="0" fill="#141414"/>
+    <rect x="1000" y="524" width="125" height="8" rx="0" fill="#606060"/>
+    <text x="1505" y="531" fill="#484848" text-anchor="end">25%</text>
+
+    <text x="1000" y="545" fill="#484848">SWAP  0.0 GB / 8 GB</text>
+    <rect x="1000" y="551" width="500" height="6" rx="0" fill="#141414"/>
+    <text x="1505" y="557" fill="#363636" text-anchor="end">0%</text>
+
+    <!-- separator -->
+    <rect x="1000" y="564" width="870" height="1" fill="#141414"/>
+
+    <!-- Process table -->
+    <text x="1000" y="580" fill="#606060" font-weight="600">PROCS</text>
+    <text x="1060" y="580" fill="#363636">184 total</text>
+
+    <rect x="1000" y="585" width="870" height="12" fill="#0c0c0c"/>
+    <text x="1004" y="594" fill="#484848">PID     NAME              CPU%    MEM%</text>
+    <rect x="1000" y="597" width="870" height="1"  fill="#141414"/>
+
+    <!-- proc row 1 — highlighted -->
+    <rect x="1000" y="598" width="870" height="13" fill="#111111"/>
+    <text x="1004" y="608" fill="#b8b8b8">14221   nvim              3.2     2.1</text>
+
+    <text x="1004" y="621" fill="#484848">11880   Hyprland          1.8     1.9</text>
+    <text x="1004" y="634" fill="#363636">12340   kitty             0.6     0.7</text>
+    <text x="1004" y="647" fill="#363636">12890   make              28.4    4.2</text>
+    <text x="1004" y="660" fill="#363636">13100   waybar            0.4     0.5</text>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 06 · FASTFETCH — BOTTOM LEFT                          -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#winShadow)">
+    <rect x="28"  y="682" width="950" height="358" rx="0" fill="url(#winFill)"/>
+    <rect x="28"  y="682" width="950" height="1"   fill="#1e1e1e"/>
+    <rect x="28"  y="682" width="1"   height="358" fill="#141414"/>
+    <rect x="977" y="682" width="1"   height="358" fill="#141414"/>
+    <rect x="28"  y="1039" width="950" height="1"  fill="#141414"/>
+  </g>
+  <rect x="28"  y="682" width="950" height="32" fill="#080808"/>
+  <rect x="28"  y="713" width="950" height="1"  fill="#141414"/>
+
+  <circle cx="44"  cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="58"  cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="72"  cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <text x="503" y="703" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636" text-anchor="middle">fastfetch</text>
+
+  <!-- Minimal ASCII art — no art, just a single geometric shape -->
+  <g font-family="JetBrains Mono,monospace" font-size="11">
+    <!-- The "minimal" way: a simple box drawn with box chars -->
+    <text x="48" y="742" fill="#242424">┌──────────────┐</text>
+    <text x="48" y="758" fill="#242424">│              │</text>
+    <text x="48" y="774" fill="#363636">│   minimal    │</text>
+    <text x="48" y="790" fill="#242424">│              │</text>
+    <text x="48" y="806" fill="#484848">│  ASH v5.0   │</text>
+    <text x="48" y="822" fill="#242424">│              │</text>
+    <text x="48" y="838" fill="#242424">└──────────────┘</text>
+  </g>
+
+  <!-- sysinfo — just plain text, no colour, no icons -->
+  <g font-family="JetBrains Mono,monospace" font-size="11">
+    <text x="260" y="738">
+      <tspan fill="#787878">user</tspan>
+      <tspan fill="#363636">@</tspan>
+      <tspan fill="#909090">minimal</tspan>
+    </text>
+    <rect x="260" y="742" width="300" height="1" fill="#242424"/>
+
+    <text x="260" y="758">
+      <tspan fill="#484848">os       </tspan>
+      <tspan fill="#b8b8b8">Arch Linux x86_64</tspan>
+    </text>
+    <text x="260" y="774">
+      <tspan fill="#484848">host     </tspan>
+      <tspan fill="#909090">Framework Laptop 16</tspan>
+    </text>
+    <text x="260" y="790">
+      <tspan fill="#484848">kernel   </tspan>
+      <tspan fill="#909090">6.11.0-arch1-1</tspan>
+    </text>
+    <text x="260" y="806">
+      <tspan fill="#484848">uptime   </tspan>
+      <tspan fill="#909090">6h 14m</tspan>
+    </text>
+    <text x="260" y="822">
+      <tspan fill="#484848">wm       </tspan>
+      <tspan fill="#909090">Hyprland 0.45.0</tspan>
+    </text>
+    <text x="260" y="838">
+      <tspan fill="#484848">theme    </tspan>
+      <tspan fill="#b8b8b8">minimal</tspan>
+    </text>
+    <text x="260" y="854">
+      <tspan fill="#484848">cpu      </tspan>
+      <tspan fill="#909090">AMD Ryzen 7 7840U (16) @ 5.1GHz</tspan>
+    </text>
+    <text x="260" y="870">
+      <tspan fill="#484848">gpu      </tspan>
+      <tspan fill="#909090">AMD Radeon 780M</tspan>
+    </text>
+    <text x="260" y="886">
+      <tspan fill="#484848">ram      </tspan>
+      <tspan fill="#909090">4.1 GiB / 16 GiB</tspan>
+    </text>
+    <text x="260" y="902">
+      <tspan fill="#484848">disk     </tspan>
+      <tspan fill="#909090">390 GB / 1 TB</tspan>
+    </text>
+    <text x="260" y="918">
+      <tspan fill="#484848">shell    </tspan>
+      <tspan fill="#909090">fish 3.7.0</tspan>
+    </text>
+    <text x="260" y="934">
+      <tspan fill="#484848">packages </tspan>
+      <tspan fill="#909090">1,642 (pacman)</tspan>
+    </text>
+    <text x="260" y="950">
+      <tspan fill="#484848">terminal </tspan>
+      <tspan fill="#909090">kitty 0.36.2</tspan>
+    </text>
+  </g>
+
+  <!-- Minimal colour swatches — just rectangles, no labels -->
+  <!-- a perfect greyscale gradient strip -->
+  <rect x="260" y="966" width="24" height="20" rx="0" fill="#000000" stroke="#181818" stroke-width="0.5"/>
+  <rect x="287" y="966" width="24" height="20" rx="0" fill="#101010"/>
+  <rect x="314" y="966" width="24" height="20" rx="0" fill="#181818"/>
+  <rect x="341" y="966" width="24" height="20" rx="0" fill="#242424"/>
+  <rect x="368" y="966" width="24" height="20" rx="0" fill="#363636"/>
+  <rect x="395" y="966" width="24" height="20" rx="0" fill="#484848"/>
+  <rect x="422" y="966" width="24" height="20" rx="0" fill="#606060"/>
+  <rect x="449" y="966" width="24" height="20" rx="0" fill="#787878"/>
+  <rect x="476" y="966" width="24" height="20" rx="0" fill="#909090"/>
+  <rect x="503" y="966" width="24" height="20" rx="0" fill="#b8b8b8"/>
+  <rect x="530" y="966" width="24" height="20" rx="0" fill="#d0d0d0"/>
+  <rect x="557" y="966" width="24" height="20" rx="0" fill="#e8e8e8"/>
+  <rect x="584" y="966" width="24" height="20" rx="0" fill="#f0f0f0"/>
+  <!-- white accent — brighter -->
+  <rect x="611" y="966" width="24" height="20" rx="0" fill="#ffffff" filter="url(#glowSubtle)"/>
+
+  <!-- minimal note below swatches -->
+  <text x="260" y="1002" font-family="JetBrains Mono,monospace" font-size="9" fill="#2a2a2a">
+    14 values  ·  0x000000 → 0xffffff  ·  linear
+  </text>
+  <text x="260" y="1016" font-family="JetBrains Mono,monospace" font-size="9" fill="#242424">
+    one accent  ·  pure white  ·  used sparingly
+  </text>
+  <text x="260" y="1030" font-family="JetBrains Mono,monospace" font-size="9" fill="#1e1e1e">
+    no colour  ·  no decoration  ·  only what matters
+  </text>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 07 · CAVA — BOTTOM RIGHT                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <g filter="url(#winShadow)">
+    <rect x="988"  y="682" width="904" height="358" rx="0" fill="url(#winFill)"/>
+    <rect x="988"  y="682" width="904" height="1"   fill="#1e1e1e"/>
+    <rect x="988"  y="682" width="1"   height="358" fill="#141414"/>
+    <rect x="1891" y="682" width="1"   height="358" fill="#141414"/>
+    <rect x="988"  y="1039" width="904" height="1"  fill="#141414"/>
+  </g>
+  <rect x="988"  y="682" width="904" height="32" fill="#080808"/>
+  <rect x="988"  y="713" width="904" height="1"  fill="#141414"/>
+
+  <circle cx="1004" cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1018" cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <circle cx="1032" cy="698" r="5" fill="none" stroke="#242424" stroke-width="1"/>
+  <text x="1440" y="703" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636" text-anchor="middle">cava</text>
+
+  <!-- song info — plain text -->
+  <text x="1000" y="732" font-family="JetBrains Mono,monospace" font-size="10">
+    <tspan fill="#484848">▶  </tspan>
+    <tspan fill="#787878">Brian Eno — Ambient 1: Music for Airports</tspan>
+  </text>
+  <text x="1000" y="748" font-family="JetBrains Mono,monospace" font-size="10" fill="#363636">
+    ────────────────────────────────────────
+  </text>
+
+  <!-- cava bars — PURE GREYSCALE
+       bars from darkest to brightest, no colour whatsoever
+       height variation creates the waveform -->
+  <g>
+    <!-- 55 bars across width 900px, each ~12px wide, 4px gap -->
+    <!-- heights follow a smooth wave pattern for aesthetic -->
+    <!-- colour: varies from #242424 at low to #d0d0d0 at high -->
+
+    <!-- set 1 — rising -->
+    <rect x="1000" y="995" width="12" height="45"  rx="0" fill="#1e1e1e"/>
+    <rect x="1016" y="978" width="12" height="62"  rx="0" fill="#242424"/>
+    <rect x="1032" y="960" width="12" height="80"  rx="0" fill="#2e2e2e"/>
+    <rect x="1048" y="938" width="12" height="102" rx="0" fill="#363636"/>
+    <rect x="1064" y="918" width="12" height="122" rx="0" fill="#404040"/>
+    <rect x="1080" y="896" width="12" height="144" rx="0" fill="#484848"/>
+    <rect x="1096" y="872" width="12" height="168" rx="0" fill="#545454"/>
+    <rect x="1112" y="850" width="12" height="190" rx="0" fill="#606060"/>
+    <rect x="1128" y="828" width="12" height="212" rx="0" fill="#6c6c6c"/>
+    <!-- peak 1 -->
+    <rect x="1144" y="806" width="12" height="234" rx="0" fill="#787878"/>
+    <rect x="1160" y="790" width="12" height="250" rx="0" fill="#848484"/>
+    <rect x="1176" y="778" width="12" height="262" rx="0" fill="#909090"/>
+    <rect x="1192" y="770" width="12" height="270" rx="0" fill="#9c9c9c"/>
+    <!-- mega peak — white accent bar (only one) -->
+    <rect x="1208" y="760" width="12" height="280" rx="0" fill="#c8c8c8"/>
+    <rect x="1208" y="760" width="12" height="4"   fill="#f0f0f0" filter="url(#glowSubtle)"/>
+    <rect x="1224" y="768" width="12" height="272" rx="0" fill="#b4b4b4"/>
+    <rect x="1240" y="778" width="12" height="262" rx="0" fill="#a0a0a0"/>
+    <!-- descending -->
+    <rect x="1256" y="792" width="12" height="248" rx="0" fill="#8c8c8c"/>
+    <rect x="1272" y="808" width="12" height="232" rx="0" fill="#787878"/>
+    <rect x="1288" y="826" width="12" height="214" rx="0" fill="#666666"/>
+    <rect x="1304" y="846" width="12" height="194" rx="0" fill="#545454"/>
+    <rect x="1320" y="868" width="12" height="172" rx="0" fill="#484848"/>
+    <rect x="1336" y="890" width="12" height="150" rx="0" fill="#3c3c3c"/>
+    <rect x="1352" y="912" width="12" height="128" rx="0" fill="#363636"/>
+    <rect x="1368" y="932" width="12" height="108" rx="0" fill="#303030"/>
+    <!-- valley -->
+    <rect x="1384" y="950" width="12" height="90"  rx="0" fill="#2a2a2a"/>
+    <rect x="1400" y="962" width="12" height="78"  rx="0" fill="#242424"/>
+    <rect x="1416" y="972" width="12" height="68"  rx="0" fill="#1e1e1e"/>
+    <rect x="1432" y="978" width="12" height="62"  rx="0" fill="#1a1a1a"/>
+    <rect x="1448" y="984" width="12" height="56"  rx="0" fill="#1a1a1a"/>
+    <!-- second rise -->
+    <rect x="1464" y="974" width="12" height="66"  rx="0" fill="#242424"/>
+    <rect x="1480" y="960" width="12" height="80"  rx="0" fill="#303030"/>
+    <rect x="1496" y="944" width="12" height="96"  rx="0" fill="#3c3c3c"/>
+    <rect x="1512" y="926" width="12" height="114" rx="0" fill="#484848"/>
+    <rect x="1528" y="906" width="12" height="134" rx="0" fill="#545454"/>
+    <rect x="1544" y="884" width="12" height="156" rx="0" fill="#606060"/>
+    <!-- second peak -->
+    <rect x="1560" y="862" width="12" height="178" rx="0" fill="#6c6c6c"/>
+    <rect x="1576" y="842" width="12" height="198" rx="0" fill="#787878"/>
+    <rect x="1592" y="826" width="12" height="214" rx="0" fill="#848484"/>
+    <rect x="1608" y="814" width="12" height="226" rx="0" fill="#909090"/>
+    <rect x="1624" y="806" width="12" height="234" rx="0" fill="#9c9c9c"/>
+    <rect x="1640" y="800" width="12" height="240" rx="0" fill="#a8a8a8"/>
+    <rect x="1656" y="808" width="12" height="232" rx="0" fill="#9c9c9c"/>
+    <rect x="1672" y="820" width="12" height="220" rx="0" fill="#909090"/>
+    <!-- descend again -->
+    <rect x="1688" y="836" width="12" height="204" rx="0" fill="#848484"/>
+    <rect x="1704" y="856" width="12" height="184" rx="0" fill="#787878"/>
+    <rect x="1720" y="878" width="12" height="162" rx="0" fill="#6c6c6c"/>
+    <rect x="1736" y="900" width="12" height="140" rx="0" fill="#606060"/>
+    <rect x="1752" y="922" width="12" height="118" rx="0" fill="#545454"/>
+    <rect x="1768" y="942" width="12" height="98"  rx="0" fill="#484848"/>
+    <rect x="1784" y="958" width="12" height="82"  rx="0" fill="#3c3c3c"/>
+    <rect x="1800" y="970" width="12" height="70"  rx="0" fill="#2e2e2e"/>
+    <rect x="1816" y="979" width="12" height="61"  rx="0" fill="#242424"/>
+    <rect x="1832" y="986" width="12" height="54"  rx="0" fill="#1e1e1e"/>
+    <rect x="1848" y="991" width="12" height="49"  rx="0" fill="#1a1a1a"/>
+    <rect x="1864" y="994" width="12" height="46"  rx="0" fill="#161616"/>
+    <rect x="1880" y="997" width="12" height="43"  rx="0" fill="#141414"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- 08 · FINAL OVERLAY                                    -->
+  <!-- ══════════════════════════════════════════════════════ -->
+
+  <!-- Very subtle overall noise grain for depth -->
+  <rect width="1920" height="1080" fill="url(#scanH)" opacity="0.12"/>
+
+  <!-- Badge bottom-right — pure text, no decoration except a 1px border -->
+  <rect x="1736" y="1048" width="176" height="20" rx="0" fill="#080808"/>
+  <rect x="1736" y="1048" width="176" height="1"  fill="#1e1e1e"/>
+  <rect x="1736" y="1067" width="176" height="1"  fill="#1e1e1e"/>
+  <text x="1824" y="1062" font-family="JetBrains Mono,monospace" font-size="9" fill="#363636" text-anchor="middle">
+    ASH Dotfiles v5.0
+  </text>
+
+  <!-- Badge bottom-left -->
+  <rect x="8"    y="1048" width="176" height="20" rx="0" fill="#080808"/>
+  <rect x="8"    y="1048" width="176" height="1"  fill="#1e1e1e"/>
+  <rect x="8"    y="1067" width="176" height="1"  fill="#1e1e1e"/>
+  <text x="96"   y="1062" font-family="JetBrains Mono,monospace" font-size="9" fill="#363636" text-anchor="middle">
+    minimal
+  </text>
+
+  <!-- The only FINAL decoration: a single horizontal rule at the very bottom -->
+  <rect x="0" y="1074" width="1920" height="1" fill="#141414"/>
+
+</svg>

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="snowflakeGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cdd6f4"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+    <linearGradient id="thermGrd" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <filter id="glowCold" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowTherm" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Large snowflake (left) -->
+  <g transform="translate(9,11)" filter="url(#glowCold)">
+    <g stroke="url(#snowflakeGrd)" stroke-linecap="round">
+      <line x1="0" y1="-7" x2="0"  y2="7"  stroke-width="1.6"/>
+      <line x1="-7" y1="0" x2="7"  y2="0"  stroke-width="1.6"/>
+      <line x1="-5" y1="-5" x2="5" y2="5"  stroke-width="1.6"/>
+      <line x1="5"  y1="-5" x2="-5" y2="5" stroke-width="1.6"/>
+      <!-- branch tips -->
+      <g stroke-width="0.9" opacity="0.65">
+        <line x1="-1.5" y1="-5" x2="0"  y2="-7"/>
+        <line x1="1.5"  y1="-5" x2="0"  y2="-7"/>
+        <line x1="5"    y1="-1.5" x2="7" y2="0"/>
+        <line x1="5"    y1="1.5"  x2="7" y2="0"/>
+        <line x1="1.5"  y1="5" x2="0"  y2="7"/>
+        <line x1="-1.5" y1="5" x2="0"  y2="7"/>
+        <line x1="-5"   y1="1.5" x2="-7" y2="0"/>
+        <line x1="-5"   y1="-1.5" x2="-7" y2="0"/>
+      </g>
+    </g>
+    <!-- centre dot -->
+    <circle r="1.5" fill="url(#snowflakeGrd)" opacity="0.85"/>
+  </g>
+
+  <!-- Thermometer (right) -->
+  <g filter="url(#glowTherm)">
+    <!-- tube -->
+    <rect x="19.5" y="3" width="3" height="14" rx="1.5"
+          fill="none" stroke="#89b4fa" stroke-width="1.3"/>
+    <!-- mercury fill — very low (cold) -->
+    <rect x="20" y="14.5" width="2" height="2.5" rx="1"
+          fill="url(#thermGrd)"/>
+    <!-- bulb -->
+    <circle cx="21" cy="18.5" r="2.5"
+            fill="url(#thermGrd)" filter="url(#glowTherm)"/>
+    <circle cx="20.2" cy="17.7" r="0.8"
+            fill="#ffffff" opacity="0.22"/>
+    <!-- degree marks -->
+    <g stroke="#89b4fa" stroke-width="0.8" opacity="0.50">
+      <line x1="22.8" y1="6"  x2="24" y2="6"/>
+      <line x1="22.8" y1="9"  x2="24" y2="9"/>
+      <line x1="22.8" y1="12" x2="24" y2="12"/>
+      <line x1="22.8" y1="15" x2="24" y2="15"/>
+    </g>
+  </g>
+</svg>

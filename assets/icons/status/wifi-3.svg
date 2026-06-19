@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- WiFi 3 — Good signal (3 arcs active, dot bright) -->
+    <linearGradient id="arc1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.5"/>
+      <stop offset="50%"  stop-color="#a6e3a1"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="arc2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#94e2d5" stop-opacity="0.5"/>
+      <stop offset="50%"  stop-color="#94e2d5"/>
+      <stop offset="100%" stop-color="#94e2d5" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="arc3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.5"/>
+      <stop offset="50%"  stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0.5"/>
+    </linearGradient>
+    <radialGradient id="dotGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="60%"  stop-color="#74c7ec"/>
+      <stop offset="100%" stop-color="#40a870"/>
+    </radialGradient>
+    <radialGradient id="dotGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowGreen" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDot" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Arc 3 (outermost) — ACTIVE -->
+  <!-- bloom -->
+  <path d="M2.5,9.5 A13.5,13.5 0 0,1 21.5,9.5"
+        fill="none" stroke="#89b4fa"
+        stroke-width="3.5" stroke-linecap="round"
+        opacity="0.12" filter="url(#glowGreen)"/>
+  <!-- main -->
+  <path d="M2.5,9.5 A13.5,13.5 0 0,1 21.5,9.5"
+        fill="none" stroke="url(#arc3Grad)"
+        stroke-width="2.2" stroke-linecap="round"
+        filter="url(#glowGreen)"/>
+
+  <!-- Arc 2 (middle) — ACTIVE -->
+  <!-- bloom -->
+  <path d="M5,12.2 A10,10 0 0,1 19,12.2"
+        fill="none" stroke="#94e2d5"
+        stroke-width="3.5" stroke-linecap="round"
+        opacity="0.15" filter="url(#glowGreen)"/>
+  <!-- main -->
+  <path d="M5,12.2 A10,10 0 0,1 19,12.2"
+        fill="none" stroke="url(#arc2Grad)"
+        stroke-width="2.2" stroke-linecap="round"
+        filter="url(#glowGreen)"/>
+
+  <!-- Arc 1 (inner) — ACTIVE, brightest -->
+  <!-- bloom -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="#a6e3a1"
+        stroke-width="3.5" stroke-linecap="round"
+        opacity="0.20" filter="url(#glowGreen)"/>
+  <!-- main -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="url(#arc1Grad)"
+        stroke-width="2.2" stroke-linecap="round"
+        filter="url(#glowGreen)"/>
+
+  <!-- Centre dot — BRIGHT, strong signal -->
+  <!-- ambient halo -->
+  <circle cx="12" cy="18.5" r="4"
+          fill="url(#dotGlow)" filter="url(#glowDot)"/>
+  <!-- outer glow ring -->
+  <circle cx="12" cy="18.5" r="2.6"
+          fill="#a6e3a1" opacity="0.20" filter="url(#glowDot)"/>
+  <!-- main dot -->
+  <circle cx="12" cy="18.5" r="1.8"
+          fill="url(#dotGrad)" filter="url(#glowDot)"/>
+  <!-- inner specular -->
+  <circle cx="11.3" cy="17.8" r="0.65"
+          fill="#ffffff" opacity="0.40"/>
+</svg>

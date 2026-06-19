@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <radialGradient id="sunGrd" cx="40%" cy="38%" r="62%">
+      <stop offset="0%"   stop-color="#fff8e0"/>
+      <stop offset="100%" stop-color="#f9e2af"/>
+    </radialGradient>
+    <linearGradient id="cloudGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cdd6f4"/>
+      <stop offset="100%" stop-color="#9399b2"/>
+    </linearGradient>
+    <linearGradient id="cloudFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cdd6f4" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#9399b2" stop-opacity="0.07"/>
+    </linearGradient>
+    <filter id="glowSun" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowCloud" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="0.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sun (background, peeking) -->
+  <g filter="url(#glowSun)">
+    <circle cx="8.5" cy="8.5" r="4" fill="url(#sunGrd)" opacity="0.90"/>
+    <!-- Rays (short, peeking) -->
+    <g stroke="#f9e2af" stroke-linecap="round" stroke-width="1.4" opacity="0.70">
+      <line x1="8.5" y1="3.5" x2="8.5" y2="5"/>
+      <line x1="3.5" y1="8.5" x2="5"   y2="8.5"/>
+      <line x1="5.4" y1="5.4" x2="6.4" y2="6.4"/>
+      <line x1="11.6" y1="5.4" x2="10.6" y2="6.4"/>
+      <line x1="11.6" y1="11.6" x2="10.6" y2="10.6"/>
+    </g>
+  </g>
+
+  <!-- Cloud body -->
+  <path d="M19,17 L7,17 Q4,17 4,14 Q4,11.5 6.5,11 Q7,8.5 10,8.5 Q12,8.5 13,10 Q14,9 15.5,9.5 Q18.5,10 18.5,13 Q21,13.5 21,16 Q21,17 19,17 Z"
+        fill="url(#cloudFill)"/>
+  <path d="M19,17 L7,17 Q4,17 4,14 Q4,11.5 6.5,11 Q7,8.5 10,8.5 Q12,8.5 13,10 Q14,9 15.5,9.5 Q18.5,10 18.5,13 Q21,13.5 21,16 Q21,17 19,17 Z"
+        fill="none" stroke="url(#cloudGrd)"
+        stroke-width="1.6" stroke-linejoin="round"
+        filter="url(#glowCloud)"/>
+
+  <!-- Cloud specular -->
+  <ellipse cx="9" cy="11.5" rx="2.2" ry="0.8"
+           fill="#ffffff" opacity="0.14"
+           transform="rotate(-20,9,11.5)"/>
+</svg>

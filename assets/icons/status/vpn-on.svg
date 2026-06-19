@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- VPN ON — active, protected, green shield -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="50%"  stop-color="#94e2d5"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <linearGradient id="shieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#94e2d5" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="lockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <radialGradient id="vpnGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowVpn" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowLock" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Ambient shield glow ── -->
+  <path d="M12,2 L20,5.5 L20,12.5 Q20,18 12,22 Q4,18 4,12.5 L4,5.5 Z"
+        fill="url(#vpnGlow)" filter="url(#glowVpn)"/>
+
+  <!-- ── Shield body ── -->
+  <!-- outer edge glow bloom -->
+  <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"
+        fill="none" stroke="#a6e3a1"
+        stroke-width="1.8" stroke-linejoin="round"
+        opacity="0.25" filter="url(#glowVpn)"/>
+
+  <!-- shield fill -->
+  <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"
+        fill="url(#shieldFill)"/>
+
+  <!-- shield main border -->
+  <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"
+        fill="none" stroke="url(#shieldGrad)"
+        stroke-width="1.6" stroke-linejoin="round"
+        filter="url(#glowVpn)"/>
+
+  <!-- ── Lock icon inside shield ── -->
+  <!-- lock shackle -->
+  <path d="M9.5,11 L9.5,9.2 A2.5,2.5 0 0,1 14.5,9.2 L14.5,11"
+        fill="none" stroke="url(#lockGrad)"
+        stroke-width="1.6" stroke-linecap="round"
+        filter="url(#glowLock)"/>
+
+  <!-- lock body -->
+  <rect x="8.5" y="10.8" width="7" height="5.5" rx="1.2"
+        fill="url(#shieldGrad)" opacity="0.90"
+        filter="url(#glowLock)"/>
+
+  <!-- lock body inner -->
+  <rect x="9" y="11.3" width="6" height="4.5" rx="0.8"
+        fill="#1e1e2e" opacity="0.45"/>
+
+  <!-- keyhole circle -->
+  <circle cx="12" cy="13.2" r="1.2"
+          fill="none" stroke="url(#lockGrad)"
+          stroke-width="1.2" filter="url(#glowLock)"/>
+
+  <!-- keyhole stem -->
+  <rect x="11.4" y="13.8" width="1.2" height="1.8" rx="0.4"
+        fill="url(#lockGrad)" filter="url(#glowLock)"/>
+
+  <!-- ── VPN label (tiny) ── -->
+  <text x="12" y="21" font-family="'JetBrains Mono', monospace"
+        font-size="0" fill="#a6e3a1" text-anchor="middle"/>
+  <!-- Note: full label shown in tooltip/title element for accessibility -->
+  <title>VPN Connected</title>
+</svg>

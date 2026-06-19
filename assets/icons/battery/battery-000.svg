@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="shellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#eba0ac"/>
+    </linearGradient>
+    <radialGradient id="critGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowCrit" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Critical pulse glow -->
+  <rect x="1" y="6" width="18" height="12" rx="2.5"
+        fill="url(#critGlow)" filter="url(#glowCrit)"/>
+
+  <!-- Battery shell -->
+  <rect x="1" y="6.5" width="18" height="11" rx="2.2"
+        fill="none" stroke="url(#shellGrad)"
+        stroke-width="1.7" filter="url(#glowCrit)"/>
+
+  <!-- Shell inner (empty) -->
+  <rect x="2.5" y="8" width="15" height="8" rx="1.4"
+        fill="#1e1e2e" opacity="0.65"/>
+
+  <!-- Terminal nub -->
+  <rect x="19" y="9.8" width="2.5" height="4.4" rx="1.2"
+        fill="url(#shellGrad)" opacity="0.80"/>
+
+  <!-- Empty fill indicator line — just a thin sliver at left edge -->
+  <rect x="2.8" y="8.3" width="1.2" height="7.4" rx="0.6"
+        fill="#f38ba8" opacity="0.45"/>
+
+  <!-- Critical X warning inside cell -->
+  <g filter="url(#glowCrit)" opacity="0.85">
+    <line x1="8" y1="9.5" x2="14" y2="14.5"
+          stroke="#f38ba8" stroke-width="1.5"
+          stroke-linecap="round"/>
+    <line x1="14" y1="9.5" x2="8" y2="14.5"
+          stroke="#f38ba8" stroke-width="1.5"
+          stroke-linecap="round"/>
+  </g>
+
+  <!-- Percentage text micro label -->
+  <text x="11" y="21"
+        font-family="'JetBrains Mono', monospace"
+        font-size="4" font-weight="700"
+        fill="#f38ba8" text-anchor="middle"
+        opacity="0.60" letter-spacing="0.3">0%</text>
+</svg>

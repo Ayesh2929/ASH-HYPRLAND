@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- Bluetooth CONNECTED — paired device, bright + connected dots -->
+    <linearGradient id="btConGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="40%"  stop-color="#b4befe"/>
+      <stop offset="100%" stop-color="#cba6f7"/>
+    </linearGradient>
+    <linearGradient id="btConGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="0.5"/>
+      <stop offset="50%"  stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.5"/>
+    </linearGradient>
+    <radialGradient id="connDot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="60%"  stop-color="#74c7ec"/>
+      <stop offset="100%" stop-color="#40a870"/>
+    </radialGradient>
+    <radialGradient id="connDotGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="btAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowBtCon" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDotCon" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowOuter" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowConn" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Strong ambient glow (paired device) ── -->
+  <circle cx="12" cy="12" r="9"
+          fill="url(#btAmbient)" filter="url(#glowOuter)"/>
+
+  <!-- ── Bluetooth symbol — BRIGHT (connected state) ── -->
+
+  <!-- symbol bloom -->
+  <g opacity="0.15" filter="url(#glowOuter)">
+    <line x1="12" y1="3" x2="12" y2="21"
+          stroke="#89b4fa" stroke-width="4" stroke-linecap="round"/>
+    <line x1="12" y1="3" x2="17" y2="7.5"
+          stroke="#89b4fa" stroke-width="4" stroke-linecap="round"/>
+    <line x1="17" y1="7.5" x2="12" y2="12"
+          stroke="#89b4fa" stroke-width="4" stroke-linecap="round"/>
+    <line x1="12" y1="12" x2="17" y2="16.5"
+          stroke="#cba6f7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="17" y1="16.5" x2="12" y2="21"
+          stroke="#cba6f7" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- symbol main strokes -->
+  <g filter="url(#glowBtCon)">
+    <line x1="12" y1="3" x2="12" y2="21"
+          stroke="url(#btConGrad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="12" y1="3" x2="17" y2="7.5"
+          stroke="url(#btConGrad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="17" y1="7.5" x2="12" y2="12"
+          stroke="url(#btConGrad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="12" y1="12" x2="17" y2="16.5"
+          stroke="url(#btConGrad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="17" y1="16.5" x2="12" y2="21"
+          stroke="url(#btConGrad)" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- ── Connected device indicator dots (left side) ── -->
+  <!-- left-upper connection point -->
+  <g filter="url(#glowDotCon)">
+    <!-- dot upper-left (connected device endpoint) -->
+    <circle cx="4.5" cy="7.5" r="1.5"
+            fill="url(#connDotGlow)"/>
+    <circle cx="4.5" cy="7.5" r="1.0"
+            fill="url(#connDot)"/>
+    <circle cx="4.1" cy="7.1" r="0.35"
+            fill="#ffffff" opacity="0.45"/>
+
+    <!-- dot lower-left -->
+    <circle cx="4.5" cy="16.5" r="1.5"
+            fill="url(#connDotGlow)"/>
+    <circle cx="4.5" cy="16.5" r="1.0"
+            fill="url(#connDot)"/>
+    <circle cx="4.1" cy="16.1" r="0.35"
+            fill="#ffffff" opacity="0.45"/>
+  </g>
+
+  <!-- ── Connection lines (from BT symbol to device dots) ── -->
+  <!-- upper connection line -->
+  <line x1="7" y1="7.5" x2="5.5" y2="7.5"
+        stroke="url(#btConGrad2)" stroke-width="1.2"
+        stroke-linecap="round" stroke-dasharray="1.5 1"
+        filter="url(#glowConn)" opacity="0.75"/>
+
+  <!-- lower connection line -->
+  <line x1="7" y1="16.5" x2="5.5" y2="16.5"
+        stroke="url(#btConGrad2)" stroke-width="1.2"
+        stroke-linecap="round" stroke-dasharray="1.5 1"
+        filter="url(#glowConn)" opacity="0.75"/>
+
+  <!-- ── Active connection pulse rings (around dots) ── -->
+  <!-- upper pulse -->
+  <circle cx="4.5" cy="7.5" r="2.4"
+          fill="none" stroke="#a6e3a1"
+          stroke-width="0.8" opacity="0.35"
+          stroke-dasharray="2 2"/>
+  <!-- lower pulse -->
+  <circle cx="4.5" cy="16.5" r="2.4"
+          fill="none" stroke="#a6e3a1"
+          stroke-width="0.8" opacity="0.35"
+          stroke-dasharray="2 2"/>
+
+  <!-- ── Green connected check (bottom-right) ── -->
+  <!-- check circle bg -->
+  <circle cx="19.5" cy="19.5" r="3"
+          fill="#a6e3a1" opacity="0.15" filter="url(#glowDotCon)"/>
+  <!-- check mark -->
+  <path d="M17.8,19.5 L19,20.7 L21.2,18"
+        fill="none" stroke="#a6e3a1"
+        stroke-width="1.4" stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#glowDotCon)"/>
+
+  <title>Bluetooth Connected</title>
+</svg>

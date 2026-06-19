@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- VPN OFF — inactive, no encryption, red/dimmed shield -->
+    <linearGradient id="shieldDim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#eba0ac"/>
+      <stop offset="100%" stop-color="#f38ba8"/>
+    </linearGradient>
+    <linearGradient id="slashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#eba0ac"/>
+    </linearGradient>
+    <filter id="glowOff" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowSlash" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="shieldClip">
+      <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Shield body — dimmed, disconnected ── -->
+  <!-- shield fill (very dim) -->
+  <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"
+        fill="#f38ba8" opacity="0.06"/>
+
+  <!-- shield border (dim grey) -->
+  <path d="M12,2.5 L19.5,5.8 L19.5,12.5 Q19.5,17.5 12,21.5 Q4.5,17.5 4.5,12.5 L4.5,5.8 Z"
+        fill="none" stroke="#45475a"
+        stroke-width="1.5" stroke-linejoin="round" opacity="0.55"/>
+
+  <!-- ── Open lock icon (unlocked = no protection) ── -->
+  <!-- shackle open (right side raised) -->
+  <path d="M9.5,11 L9.5,9.2 A2.5,2.5 0 0,1 14.5,9.2 L14.5,8"
+        fill="none" stroke="#45475a"
+        stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- lock body (dim) -->
+  <rect x="8.5" y="10.8" width="7" height="5.5" rx="1.2"
+        fill="#313244" opacity="0.60"/>
+  <rect x="9" y="11.3" width="6" height="4.5" rx="0.8"
+        fill="#1e1e2e" opacity="0.50"/>
+
+  <!-- keyhole (dim) -->
+  <circle cx="12" cy="13.2" r="1.2"
+          fill="none" stroke="#585b70"
+          stroke-width="1.2" opacity="0.55"/>
+  <rect x="11.4" y="13.8" width="1.2" height="1.8" rx="0.4"
+        fill="#585b70" opacity="0.55"/>
+
+  <!-- ── X / slash overlay (VPN off) ── -->
+  <!-- bottom-right X mark, small -->
+  <g transform="translate(17, 18)" filter="url(#glowSlash)">
+    <!-- X background circle -->
+    <circle r="3.2" fill="#f38ba8" opacity="0.15"/>
+    <!-- X lines -->
+    <line x1="-1.8" y1="-1.8" x2="1.8" y2="1.8"
+          stroke="url(#slashGrad)" stroke-width="1.6"
+          stroke-linecap="round"/>
+    <line x1="1.8" y1="-1.8" x2="-1.8" y2="1.8"
+          stroke="url(#slashGrad)" stroke-width="1.6"
+          stroke-linecap="round"/>
+  </g>
+
+  <title>VPN Disconnected</title>
+</svg>

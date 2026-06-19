@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <!-- WiFi 0 — No signal / disconnected -->
+    <linearGradient id="noSigGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#eba0ac"/>
+    </linearGradient>
+    <radialGradient id="dotGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#cc3355"/>
+    </radialGradient>
+    <filter id="glowRed" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDot" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- All wifi arcs — fully dimmed/disconnected -->
+
+  <!-- Arc 3 (outermost) — very dim, crossed out feel -->
+  <path d="M2.5,9.5 A13.5,13.5 0 0,1 21.5,9.5"
+        fill="none" stroke="#45475a" stroke-width="2"
+        stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Arc 2 (middle) — dim -->
+  <path d="M5,12.2 A10,10 0 0,1 19,12.2"
+        fill="none" stroke="#45475a" stroke-width="2"
+        stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Arc 1 (inner) — dim -->
+  <path d="M7.5,14.9 A6.5,6.5 0 0,1 16.5,14.9"
+        fill="none" stroke="#45475a" stroke-width="2"
+        stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Centre dot -->
+  <circle cx="12" cy="18.5" r="1.5"
+          fill="url(#dotGrad)" filter="url(#glowDot)"/>
+
+  <!-- X mark overlay (disconnected) -->
+  <g filter="url(#glowRed)" opacity="0.90">
+    <!-- X line 1 -->
+    <line x1="16.5" y1="3.5" x2="21.5" y2="8.5"
+          stroke="url(#noSigGrad)" stroke-width="1.8"
+          stroke-linecap="round"/>
+    <!-- X line 2 -->
+    <line x1="21.5" y1="3.5" x2="16.5" y2="8.5"
+          stroke="url(#noSigGrad)" stroke-width="1.8"
+          stroke-linecap="round"/>
+  </g>
+
+  <!-- X background circle (subtle) -->
+  <circle cx="19" cy="6" r="3.5"
+          fill="#f38ba8" opacity="0.12"/>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="stormCloud" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#45475a"/>
+      <stop offset="100%" stop-color="#313244"/>
+    </linearGradient>
+    <linearGradient id="cloudFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#45475a" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#313244" stop-opacity="0.07"/>
+    </linearGradient>
+    <linearGradient id="boltGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f9e2af"/>
+      <stop offset="50%"  stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#f38ba8"/>
+    </linearGradient>
+    <linearGradient id="rainGrd" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <filter id="glowBolt" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.0" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowRain" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark storm cloud -->
+  <path d="M17,12 L6,12 Q3,12 3,9 Q3,6.5 5.5,6 Q6,3.5 9,3.5 Q11.5,3.5 12.5,5 Q14,4 16,4.5 Q19.5,5 19.5,8.5 Q22,9 22,11 Q22,12 17,12 Z"
+        fill="url(#cloudFill)"/>
+  <path d="M17,12 L6,12 Q3,12 3,9 Q3,6.5 5.5,6 Q6,3.5 9,3.5 Q11.5,3.5 12.5,5 Q14,4 16,4.5 Q19.5,5 19.5,8.5 Q22,9 22,11 Q22,12 17,12 Z"
+        fill="none" stroke="url(#stormCloud)"
+        stroke-width="1.6" stroke-linejoin="round"/>
+
+  <!-- Rain drops -->
+  <g stroke="url(#rainGrd)" stroke-linecap="round"
+     stroke-width="1.4" filter="url(#glowRain)" opacity="0.80">
+    <line x1="6"  y1="14.5" x2="5"  y2="17.5"/>
+    <line x1="18" y1="14.5" x2="17" y2="17.5"/>
+  </g>
+
+  <!-- Lightning bolt -->
+  <g filter="url(#glowBolt)">
+    <!-- Bloom -->
+    <path d="M13.5,12 L10,17 L12.5,17 L10.5,22 L16,16 L13,16 Z"
+          fill="#f9e2af" opacity="0.18"/>
+    <!-- Main bolt -->
+    <path d="M13.5,12 L10,17 L12.5,17 L10.5,22 L16,16 L13,16 Z"
+          fill="url(#boltGrd)"/>
+    <!-- Specular -->
+    <path d="M13.2,12.5 L10.5,17 L12.5,17 Z"
+          fill="#ffffff" opacity="0.22"/>
+  </g>
+</svg>

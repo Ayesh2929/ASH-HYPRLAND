@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="camBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa"/>
+      <stop offset="100%" stop-color="#74c7ec"/>
+    </linearGradient>
+    <linearGradient id="camFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#74c7ec" stop-opacity="0.05"/>
+    </linearGradient>
+    <radialGradient id="lensGrad" cx="40%" cy="38%" r="62%">
+      <stop offset="0%"   stop-color="#313244"/>
+      <stop offset="100%" stop-color="#1e1e2e"/>
+    </radialGradient>
+    <radialGradient id="lensCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="recDot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="100%" stop-color="#40a870"/>
+    </radialGradient>
+    <filter id="glowCam" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowLens" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowDot" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.0" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Camera body -->
+  <rect x="1.5" y="7" width="17" height="13" rx="2.5"
+        fill="url(#camFill)"/>
+  <rect x="1.5" y="7" width="17" height="13" rx="2.5"
+        fill="none" stroke="url(#camBodyGrad)"
+        stroke-width="1.7" filter="url(#glowCam)"/>
+
+  <!-- Viewfinder bump (top) -->
+  <path d="M7,7 L7,4.5 Q7,3.5 8,3.5 L12,3.5 Q13,3.5 13,4.5 L13,7 Z"
+        fill="url(#camFill)"/>
+  <path d="M7,7 L7,4.5 Q7,3.5 8,3.5 L12,3.5 Q13,3.5 13,4.5 L13,7"
+        fill="none" stroke="url(#camBodyGrad)"
+        stroke-width="1.6" stroke-linecap="round"
+        stroke-linejoin="round" filter="url(#glowCam)"/>
+
+  <!-- Video recording triangle (right) -->
+  <path d="M18.5,10 L22.5,8 L22.5,16 L18.5,14 Z"
+        fill="url(#camFill)"/>
+  <path d="M18.5,10 L22.5,8 L22.5,16 L18.5,14"
+        fill="none" stroke="url(#camBodyGrad)"
+        stroke-width="1.5" stroke-linecap="round"
+        stroke-linejoin="round" filter="url(#glowCam)"/>
+
+  <!-- Lens assembly -->
+  <!-- outer barrel -->
+  <circle cx="9.5" cy="13.5" r="4.5"
+          fill="none" stroke="url(#camBodyGrad)"
+          stroke-width="1.4" filter="url(#glowLens)"/>
+  <!-- lens body -->
+  <circle cx="9.5" cy="13.5" r="3.5"
+          fill="url(#lensGrad)"/>
+  <!-- lens core glow -->
+  <circle cx="9.5" cy="13.5" r="3.5"
+          fill="url(#lensCore)"/>
+  <!-- lens inner ring -->
+  <circle cx="9.5" cy="13.5" r="2.2"
+          fill="none" stroke="#89b4fa"
+          stroke-width="0.7" opacity="0.45"/>
+  <!-- lens specular -->
+  <ellipse cx="8.4" cy="12.5" rx="1.0" ry="0.65"
+           fill="#ffffff" opacity="0.15"
+           transform="rotate(-30,8.4,12.5)"/>
+
+  <!-- Live/REC indicator dot (top-right of body) -->
+  <circle cx="16.5" cy="9.5" r="1.8"
+          fill="url(#recDot)" opacity="0.15" filter="url(#glowDot)"/>
+  <circle cx="16.5" cy="9.5" r="1.2"
+          fill="url(#recDot)" filter="url(#glowDot)"/>
+  <circle cx="16.0" cy="9.0" r="0.40"
+          fill="#ffffff" opacity="0.45"/>
+</svg>

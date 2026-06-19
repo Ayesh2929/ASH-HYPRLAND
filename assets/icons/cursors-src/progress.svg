@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="cursorGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cdd6f4"/>
+      <stop offset="100%" stop-color="#9399b2"/>
+    </linearGradient>
+    <linearGradient id="spinGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a6e3a1"/>
+      <stop offset="100%" stop-color="#94e2d5"/>
+    </linearGradient>
+    <filter id="dropShadow">
+      <feDropShadow dx="1" dy="1.5" stdDeviation="1.2"
+                    flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="glowSpin" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Arrow cursor (dimmed, busy) -->
+  <path d="M4,2 L4,20 L8,16 L11,22 L13.5,21 L10.5,15 L16,15 Z"
+        fill="url(#cursorGrd)" opacity="0.70"
+        filter="url(#dropShadow)"/>
+  <path d="M4,2 L4,20 L8,16 L11,22 L13.5,21 L10.5,15 L16,15 Z"
+        fill="none" stroke="#1e1e2e" stroke-width="1.2"
+        stroke-linejoin="round"/>
+
+  <!-- Small spinning indicator (bottom-right) -->
+  <!-- Track -->
+  <circle cx="23" cy="24" r="6"
+          fill="none" stroke="#313244"
+          stroke-width="2.5" opacity="0.50"/>
+  <!-- Progress arc -->
+  <circle cx="23" cy="24" r="6"
+          fill="none" stroke="url(#spinGrd)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-dasharray="28 10"
+          filter="url(#glowSpin)"/>
+
+  <!-- Spinner centre -->
+  <circle cx="23" cy="24" r="1.8"
+          fill="url(#spinGrd)" opacity="0.70"
+          filter="url(#glowSpin)"/>
+</svg>

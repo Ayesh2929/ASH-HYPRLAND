@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="videoGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="50%"  stop-color="#eba0ac"/>
+      <stop offset="100%" stop-color="#fab387"/>
+    </linearGradient>
+    <linearGradient id="videoFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#fab387" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="playGrd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f9e2af"/>
+      <stop offset="100%" stop-color="#fab387"/>
+    </linearGradient>
+    <filter id="glowVid" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowPlay" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Clapperboard body -->
+  <rect x="2" y="7" width="16" height="15" rx="2.5"
+        fill="url(#videoFill)" stroke="url(#videoGrd)"
+        stroke-width="1.4" filter="url(#glowVid)"/>
+
+  <!-- Clapperboard top bar -->
+  <rect x="2" y="7" width="16" height="5" rx="2.5"
+        fill="url(#videoFill)" stroke="url(#videoGrd)"
+        stroke-width="1.2"/>
+  <rect x="2" y="10" width="16" height="2" fill="url(#videoFill)"/>
+
+  <!-- Clapper stripes -->
+  <g clip-path="url(#stripClip)">
+    <rect x="2" y="7" width="16" height="4.5" fill="#181825" opacity="0.5"/>
+    <g fill="#f38ba8" opacity="0.75">
+      <path d="M2,7 L5,7 L2,11.5 Z"/>
+      <path d="M5,7 L9,7 L5,11.5 L1,11.5 L5,7 Z" opacity="0.4"/>
+      <path d="M9,7 L13,7 L9,11.5 L5,11.5 Z" opacity="0.6"/>
+      <path d="M13,7 L17,7 L13,11.5 L9,11.5 Z" opacity="0.4"/>
+      <path d="M17,7 L18,7 L18,11.5 L13,11.5 Z" opacity="0.6"/>
+    </g>
+  </g>
+
+  <!-- Camera triangle -->
+  <path d="M18,10 L22,8 L22,16 L18,14 Z"
+        fill="url(#videoFill)" stroke="url(#videoGrd)"
+        stroke-width="1.2" stroke-linejoin="round"/>
+
+  <!-- Play button inside -->
+  <g filter="url(#glowPlay)">
+    <circle cx="10" cy="16.5" r="3.5"
+            fill="#f38ba8" opacity="0.15"/>
+    <path d="M8.5,15 L13,16.5 L8.5,18 Z"
+          fill="url(#playGrd)"/>
+  </g>
+</svg>
