@@ -1,0 +1,942 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1920 1080" width="1920" height="1080">
+
+  <defs>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GRADIENTS — WAYBAR FLOATING
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <linearGradient id="wf-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#050810"/>
+      <stop offset="40%"  stop-color="#080c16"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+
+    <linearGradient id="wf-desktop-mid" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0a1628"/>
+      <stop offset="50%"  stop-color="#060e1c"/>
+      <stop offset="100%" stop-color="#040810"/>
+    </linearGradient>
+
+    <!-- Bar base gradients -->
+    <linearGradient id="wf-bar-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#111c2e" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#0c1525" stop-opacity="0.92"/>
+    </linearGradient>
+
+    <!-- Left segment — workspaces -->
+    <linearGradient id="wf-seg-left-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#151f35" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0f1828" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Center segment — clock -->
+    <linearGradient id="wf-seg-center-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d1a30" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#09121e" stop-opacity="0.96"/>
+    </linearGradient>
+
+    <!-- Right segment — system -->
+    <linearGradient id="wf-seg-right-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#12203a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0c1828" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Workspace active -->
+    <linearGradient id="wf-ws-active" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#5b21b6" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Workspace occupied -->
+    <linearGradient id="wf-ws-occupied" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1e3a60" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#142840" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Border gradients for each segment -->
+    <linearGradient id="wf-border-left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <linearGradient id="wf-border-center" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.3"/>
+      <stop offset="50%"  stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="wf-border-right" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#10b981" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Battery -->
+    <linearGradient id="wf-batt-good" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06d6a0"/>
+    </linearGradient>
+
+    <linearGradient id="wf-batt-charging" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+
+    <!-- CPU/Memory bars -->
+    <linearGradient id="wf-cpu-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+
+    <linearGradient id="wf-mem-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <linearGradient id="wf-music-prog" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+
+    <!-- Clock glow -->
+    <linearGradient id="wf-clock-glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Desktop ambient glow -->
+    <radialGradient id="wf-desk-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#1a2840" stop-opacity="0.4"/>
+      <stop offset="60%"  stop-color="#0a1428" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#050810" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="wf-ws-active-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="wf-vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.6"/>
+    </radialGradient>
+
+    <radialGradient id="wf-bar-glow" cx="50%" cy="0%" r="80%">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="black"   stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FILTERS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <filter id="wf-glow-purple" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#7c3aed" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="wf-glow-cyan" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#38bdf8" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="wf-glow-green" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="wf-glow-orange" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#f97316" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="wf-glow-white" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feFlood flood-color="white" flood-opacity="0.6" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Glassmorphism blur filter for the bar -->
+    <filter id="wf-glass">
+      <feGaussianBlur stdDeviation="16" result="backdrop"/>
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 22 -11"
+        in="backdrop" result="alpha"/>
+      <feMerge>
+        <feMergeNode in="alpha"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="wf-bar-shadow"
+            x="-2%" y="-50%" width="104%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="16"
+                    flood-color="#000000" flood-opacity="0.7"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="30"
+                    flood-color="#7c3aed" flood-opacity="0.12"/>
+    </filter>
+
+    <filter id="wf-blur-heavy" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+
+    <filter id="wf-blur-med" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+
+    <filter id="wf-blur-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PATTERNS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <pattern id="wf-dot-grid" x="0" y="0" width="32" height="32"
+             patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.55"
+              fill="#4f46e5" fill-opacity="0.06"/>
+    </pattern>
+
+    <!-- Stars in desktop bg -->
+    <pattern id="wf-stars" x="0" y="0" width="200" height="200"
+             patternUnits="userSpaceOnUse">
+      <circle cx="40"  cy="30"  r="0.7" fill="white" fill-opacity="0.4"/>
+      <circle cx="120" cy="15"  r="0.5" fill="white" fill-opacity="0.3"/>
+      <circle cx="170" cy="80"  r="0.8" fill="#c8e8ff" fill-opacity="0.4"/>
+      <circle cx="60"  cy="120" r="0.6" fill="white" fill-opacity="0.35"/>
+      <circle cx="150" cy="140" r="0.7" fill="white" fill-opacity="0.3"/>
+      <circle cx="20"  cy="160" r="0.5" fill="#ffccee" fill-opacity="0.4"/>
+      <circle cx="90"  cy="190" r="0.6" fill="white" fill-opacity="0.35"/>
+      <circle cx="180" cy="50"  r="0.5" fill="#ccffee" fill-opacity="0.35"/>
+    </pattern>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CLIP PATHS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="wf-screen">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+
+    <clipPath id="wf-bar-left-clip">
+      <rect x="16" y="14" width="480" height="52" rx="16"/>
+    </clipPath>
+
+    <clipPath id="wf-bar-center-clip">
+      <rect x="686" y="14" width="548" height="52" rx="16"/>
+    </clipPath>
+
+    <clipPath id="wf-bar-right-clip">
+      <rect x="1424" y="14" width="480" height="52" rx="16"/>
+    </clipPath>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SYMBOLS — FLOATING WAYBAR
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <symbol id="wf-icon-wifi" viewBox="0 0 24 24">
+      <path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-volume-2" viewBox="0 0 24 24">
+      <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"
+               fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"/>
+      <path d="M15.54 8.46a5 5 0 010 7.07"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-music" viewBox="0 0 24 24">
+      <path d="M9 18V5l12-2v13"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <circle cx="6"  cy="18" r="3" fill="none"
+              stroke="currentColor" stroke-width="2"/>
+      <circle cx="18" cy="16" r="3" fill="none"
+              stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="wf-icon-power" viewBox="0 0 24 24">
+      <path d="M12 2v6M6.3 5.3A8 8 0 1 0 17.7 5.3"
+            fill="none" stroke="currentColor"
+            stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-bell" viewBox="0 0 24 24">
+      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <path d="M13.73 21a2 2 0 01-3.46 0"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="wf-icon-cpu" viewBox="0 0 24 24">
+      <rect x="4" y="4" width="16" height="16" rx="2"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <rect x="9" y="9" width="6" height="6"
+            fill="currentColor" fill-opacity="0.4"/>
+      <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-memory" viewBox="0 0 24 24">
+      <rect x="2" y="6" width="20" height="12" rx="2"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M6 6V4M10 6V4M14 6V4M18 6V4M6 18v2M10 18v2M14 18v2M18 18v2"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+               M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-moon" viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="wf-icon-gear" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+               M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-shield" viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-temp" viewBox="0 0 24 24">
+      <path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="wf-icon-nvim" viewBox="0 0 100 100">
+      <polygon points="10,85 10,15 35,15 65,65 65,15 90,15 90,85 65,85 35,35 35,85"
+               fill="#7c3aed"/>
+    </symbol>
+
+    <symbol id="wf-icon-github" viewBox="0 0 24 24">
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MASTER RENDER — WAYBAR FLOATING
+  ═══════════════════════════════════════════════════════════════════ -->
+
+  <g clip-path="url(#wf-screen)">
+
+    <!-- ══════════════════════════
+         L00 — DESKTOP BACKGROUND
+    ══════════════════════════ -->
+
+    <!-- Deep space wallpaper simulation -->
+    <rect width="1920" height="1080" fill="url(#wf-bg)"/>
+    <rect width="1920" height="1080" fill="url(#wf-desk-glow)"/>
+    <rect width="1920" height="1080" fill="url(#wf-stars)"/>
+    <rect width="1920" height="1080" fill="url(#wf-dot-grid)"/>
+
+    <!-- Nebula-like ambient shapes -->
+    <ellipse cx="400"  cy="400" rx="300" ry="200"
+             fill="#7c3aed" fill-opacity="0.04"
+             filter="url(#wf-blur-heavy)"/>
+    <ellipse cx="1500" cy="600" rx="250" ry="180"
+             fill="#0ea5e9" fill-opacity="0.04"
+             filter="url(#wf-blur-heavy)"/>
+    <ellipse cx="960"  cy="700" rx="400" ry="150"
+             fill="#10b981" fill-opacity="0.03"
+             filter="url(#wf-blur-heavy)"/>
+
+    <!-- Subtle grid lines on desktop -->
+    <g stroke="#0ea5e9" stroke-opacity="0.03" stroke-width="1">
+      <line x1="0"    y1="270" x2="1920" y2="270"/>
+      <line x1="0"    y1="540" x2="1920" y2="540"/>
+      <line x1="0"    y1="810" x2="1920" y2="810"/>
+      <line x1="480"  y1="0"   x2="480"  y2="1080"/>
+      <line x1="960"  y1="0"   x2="960"  y2="1080"/>
+      <line x1="1440" y1="0"   x2="1440" y2="1080"/>
+    </g>
+
+    <!-- Desktop content placeholder (app windows) -->
+    <!-- Terminal window (dim/blurred) -->
+    <g opacity="0.15" filter="url(#wf-blur-soft)">
+      <rect x="200" y="180" width="680" height="440" rx="12"
+            fill="#111827" stroke="#1e2d40" stroke-width="1"/>
+      <rect x="200" y="180" width="680" height="36"  rx="12"
+            fill="#1e2d40"/>
+      <circle cx="224" cy="198" r="7" fill="#ff5f57"/>
+      <circle cx="244" cy="198" r="7" fill="#febc2e"/>
+      <circle cx="264" cy="198" r="7" fill="#28c840"/>
+    </g>
+
+    <!-- Code editor window (dim/blurred) -->
+    <g opacity="0.12" filter="url(#wf-blur-soft)">
+      <rect x="960" y="200" width="780" height="500" rx="12"
+            fill="#0d1117" stroke="#1e2d40" stroke-width="1"/>
+      <rect x="960" y="200" width="780" height="36" rx="12"
+            fill="#1e2d40"/>
+      <circle cx="984" cy="218" r="7" fill="#ff5f57"/>
+      <circle cx="1004" cy="218" r="7" fill="#febc2e"/>
+      <circle cx="1024" cy="218" r="7" fill="#28c840"/>
+    </g>
+
+    <!-- Desktop label -->
+    <text x="960" y="820" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="22" fill="#1a2840"
+          letter-spacing="10" opacity="0.6">
+      ASH DOTFILES v5.0 · WAYBAR FLOATING
+    </text>
+
+    <!-- ══════════════════════════
+         L01 — FLOATING BAR GLOW BACKDROP
+    ══════════════════════════ -->
+
+    <!-- Glow under bar (for floating effect) -->
+    <rect x="16" y="14" width="1888" height="52"
+          fill="url(#wf-bar-glow)"
+          filter="url(#wf-blur-heavy)" opacity="0.6"/>
+
+    <!-- ══════════════════════════
+         L02 — LEFT SEGMENT (Workspaces)
+    ══════════════════════════ -->
+
+    <g id="wf-seg-left" filter="url(#wf-bar-shadow)">
+
+      <!-- Glassmorphism backdrop blur simulation -->
+      <rect x="16" y="14" width="480" height="52" rx="16"
+            fill="url(#wf-bg)" fill-opacity="0.3"
+            filter="url(#wf-blur-med)"/>
+
+      <!-- Segment body -->
+      <rect x="16" y="14" width="480" height="52" rx="16"
+            fill="url(#wf-seg-left-bg)"/>
+
+      <!-- Segment border (gradient purple) -->
+      <rect x="16" y="14" width="480" height="52" rx="16"
+            fill="none" stroke="url(#wf-border-left)"
+            stroke-width="1.2"/>
+
+      <!-- Top glass highlight line -->
+      <path d="M32 15 Q256 13 480 15"
+            fill="none" stroke="white"
+            stroke-width="0.8" stroke-opacity="0.12"/>
+
+      <!-- Inner content -->
+      <g transform="translate(28, 14)">
+
+        <!-- HYPR logo (tiny) -->
+        <use href="#wf-icon-nvim" x="4" y="8"
+             width="34" height="34" color="#7c3aed"/>
+
+        <!-- Vertical separator -->
+        <line x1="44" y1="8" x2="44" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.7"/>
+
+        <!-- Workspaces cluster -->
+        <g transform="translate(52, 10)">
+
+          <!-- WS 1 — ACTIVE -->
+          <g transform="translate(0, 0)">
+            <rect x="0" y="0" width="34" height="34" rx="10"
+                  fill="url(#wf-ws-active)"
+                  stroke="#7c3aed" stroke-width="1.5"/>
+            <!-- Glow effect -->
+            <rect x="2" y="2" width="30" height="30" rx="8"
+                  fill="url(#wf-ws-active-glow)"
+                  filter="url(#wf-blur-soft)" opacity="0.5"/>
+            <text x="17" y="22" text-anchor="middle"
+                  font-family="'JetBrains Mono',monospace"
+                  font-size="14" font-weight="bold"
+                  fill="#c4b5fd" filter="url(#wf-glow-purple)">1</text>
+            <!-- Active indicator -->
+            <rect x="4" y="34" width="26" height="2" rx="1"
+                  fill="#7c3aed" filter="url(#wf-glow-purple)"/>
+          </g>
+
+          <!-- WS 2 — occupied (has windows) -->
+          <g transform="translate(40, 0)">
+            <rect x="0" y="0" width="34" height="34" rx="10"
+                  fill="url(#wf-ws-occupied)"
+                  stroke="#2a4060" stroke-width="1"/>
+            <text x="17" y="22" text-anchor="middle"
+                  font-family="'JetBrains Mono',monospace"
+                  font-size="14" fill="#60a5fa">2</text>
+            <circle cx="17" cy="38" r="2.5" fill="#3b82f6"/>
+          </g>
+
+          <!-- WS 3 — occupied -->
+          <g transform="translate(80, 0)">
+            <rect x="0" y="0" width="34" height="34" rx="10"
+                  fill="url(#wf-ws-occupied)"
+                  stroke="#2a4060" stroke-width="1"/>
+            <text x="17" y="22" text-anchor="middle"
+                  font-family="'JetBrains Mono',monospace"
+                  font-size="14" fill="#60a5fa">3</text>
+            <circle cx="17" cy="38" r="2.5" fill="#3b82f6"/>
+          </g>
+
+          <!-- WS 4 — empty dot -->
+          <g transform="translate(124, 13)">
+            <circle cx="8" cy="8" r="6" fill="#1a2840"/>
+            <circle cx="8" cy="8" r="4" fill="#0f1520"/>
+          </g>
+
+          <!-- WS 5 — empty dot -->
+          <g transform="translate(150, 13)">
+            <circle cx="8" cy="8" r="6" fill="#1a2840"/>
+            <circle cx="8" cy="8" r="4" fill="#0f1520"/>
+          </g>
+
+          <!-- WS 6 — empty dot -->
+          <g transform="translate(176, 13)">
+            <circle cx="8" cy="8" r="6" fill="#1a2840"/>
+            <circle cx="8" cy="8" r="4" fill="#0f1520"/>
+          </g>
+
+          <!-- WS 7 — URGENT (pulsing red) -->
+          <g transform="translate(202, 0)">
+            <rect x="0" y="0" width="34" height="34" rx="10"
+                  fill="#2a0808" fill-opacity="0.5"
+                  stroke="#f43f5e" stroke-width="1.2">
+              <animate attributeName="stroke-opacity"
+                       values="0.3;1;0.3" dur="2s"
+                       repeatCount="indefinite"/>
+            </rect>
+            <text x="17" y="22" text-anchor="middle"
+                  font-family="'JetBrains Mono',monospace"
+                  font-size="14" fill="#fca5a5">7</text>
+          </g>
+
+          <!-- WS 8-10 empty dots -->
+          <g transform="translate(248, 13)">
+            <circle cx="8" cy="8" r="5" fill="#1a2840"/>
+          </g>
+          <g transform="translate(270, 13)">
+            <circle cx="8" cy="8" r="5" fill="#1a2840"/>
+          </g>
+          <g transform="translate(292, 13)">
+            <circle cx="8" cy="8" r="5" fill="#1a2840"/>
+          </g>
+        </g>
+
+        <!-- Separator before title -->
+        <line x1="360" y1="8" x2="360" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- Active window title (truncated) -->
+        <g transform="translate(368, 0)">
+          <!-- App icon dot -->
+          <circle cx="8" cy="26" r="6"
+                  fill="#7c3aed" fill-opacity="0.3"/>
+          <circle cx="8" cy="26" r="4"
+                  fill="#a78bfa" fill-opacity="0.6"/>
+          <text x="20" y="22"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" fill="#94a3b8">NVIM · init.lua</text>
+          <!-- Modified dot -->
+          <circle cx="99" cy="19" r="3.5" fill="#f59e0b"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════
+         L03 — CENTER SEGMENT (Clock + Date + Weather)
+    ══════════════════════════ -->
+
+    <g id="wf-seg-center" filter="url(#wf-bar-shadow)">
+
+      <!-- Glassmorphism backdrop -->
+      <rect x="686" y="14" width="548" height="52" rx="16"
+            fill="url(#wf-bg)" fill-opacity="0.3"
+            filter="url(#wf-blur-med)"/>
+
+      <!-- Segment body -->
+      <rect x="686" y="14" width="548" height="52" rx="16"
+            fill="url(#wf-seg-center-bg)"/>
+
+      <!-- Cyan border -->
+      <rect x="686" y="14" width="548" height="52" rx="16"
+            fill="none" stroke="url(#wf-border-center)"
+            stroke-width="1.2"/>
+
+      <!-- Clock glow background -->
+      <rect x="686" y="14" width="548" height="52" rx="16"
+            fill="url(#wf-clock-glow)"/>
+
+      <!-- Top glass highlight -->
+      <path d="M702 15 Q960 12 1218 15"
+            fill="none" stroke="white"
+            stroke-width="0.8" stroke-opacity="0.12"/>
+
+      <!-- Center content -->
+      <g transform="translate(686, 14)">
+
+        <!-- Weather left -->
+        <g transform="translate(16, 8)">
+          <use href="#wf-icon-sun" x="0" y="0"
+               width="22" height="22" color="#fbbf24"
+               filter="url(#wf-glow-orange)"/>
+          <text x="28" y="15"
+                font-family="'JetBrains Mono',monospace"
+                font-size="14" font-weight="bold"
+                fill="#fbbf24">23°</text>
+          <text x="28" y="30"
+                font-family="'JetBrains Mono',monospace"
+                font-size="9" fill="#475569">Sunny</text>
+        </g>
+
+        <!-- Separator -->
+        <line x1="80" y1="8" x2="80" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- Main clock (center of center segment) -->
+        <g transform="translate(88, 0)">
+          <!-- Time -->
+          <text x="184" y="32" text-anchor="middle"
+                font-family="'JetBrains Mono',monospace"
+                font-size="26" font-weight="bold"
+                fill="#e2e8f0" letter-spacing="4"
+                filter="url(#wf-glow-cyan)">22:47:38</text>
+          <!-- Tiny date below -->
+          <text x="184" y="44" text-anchor="middle"
+                font-family="'JetBrains Mono',monospace"
+                font-size="10" fill="#475569"
+                letter-spacing="3">Mon · 15 Jan 2024</text>
+        </g>
+
+        <!-- Separator right -->
+        <line x1="456" y1="8" x2="456" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- Moon/Night light right -->
+        <g transform="translate(464, 8)">
+          <use href="#wf-icon-moon" x="0" y="0"
+               width="22" height="22" color="#7c3aed"
+               filter="url(#wf-glow-purple)"/>
+          <text x="28" y="15"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" fill="#a78bfa">Night</text>
+          <text x="28" y="28"
+                font-family="'JetBrains Mono',monospace"
+                font-size="10" fill="#475569">5400K</text>
+        </g>
+
+        <!-- Live pulse dot -->
+        <circle cx="530" cy="26" r="4" fill="#38bdf8"
+                filter="url(#wf-glow-cyan)">
+          <animate attributeName="fill-opacity"
+                   values="0.4;1;0.4" dur="1s"
+                   repeatCount="indefinite"/>
+          <animate attributeName="r"
+                   values="3;5;3" dur="1s"
+                   repeatCount="indefinite"/>
+        </circle>
+
+      </g>
+    </g>
+
+    <!-- ══════════════════════════
+         L04 — RIGHT SEGMENT (System + Tray)
+    ══════════════════════════ -->
+
+    <g id="wf-seg-right" filter="url(#wf-bar-shadow)">
+
+      <!-- Glassmorphism backdrop -->
+      <rect x="1424" y="14" width="480" height="52" rx="16"
+            fill="url(#wf-bg)" fill-opacity="0.3"
+            filter="url(#wf-blur-med)"/>
+
+      <!-- Segment body -->
+      <rect x="1424" y="14" width="480" height="52" rx="16"
+            fill="url(#wf-seg-right-bg)"/>
+
+      <!-- Green border (right) -->
+      <rect x="1424" y="14" width="480" height="52" rx="16"
+            fill="none" stroke="url(#wf-border-right)"
+            stroke-width="1.2"/>
+
+      <!-- Top glass highlight -->
+      <path d="M1440 15 Q1664 12 1888 15"
+            fill="none" stroke="white"
+            stroke-width="0.8" stroke-opacity="0.12"/>
+
+      <!-- Right content -->
+      <g transform="translate(1436, 14)">
+
+        <!-- ── Media player mini ── -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="140" height="36" rx="8"
+                fill="#0a0f20" fill-opacity="0.6"
+                stroke="#2a1a4a" stroke-width="0.8"/>
+          <use href="#wf-icon-music" x="6" y="6"
+               width="18" height="18" color="#a78bfa" opacity="0.9"/>
+          <text x="30" y="14"
+                font-family="'JetBrains Mono',monospace"
+                font-size="10" fill="#c4b5fd">Nujabes - Feather</text>
+          <!-- Progress bar -->
+          <rect x="30" y="20" width="102" height="3" rx="1.5"
+                fill="#1e1040"/>
+          <rect x="30" y="20" width="60"  height="3" rx="1.5"
+                fill="url(#wf-music-prog)"/>
+          <!-- Play indicator -->
+          <text x="6" y="30"
+                font-family="monospace" font-size="10"
+                fill="#a78bfa">▶</text>
+          <text x="30" y="32"
+                font-family="'JetBrains Mono',monospace"
+                font-size="8" fill="#475569">2:34 / 4:18</text>
+        </g>
+
+        <!-- Separator -->
+        <line x1="148" y1="6" x2="148" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- ── CPU ── -->
+        <g transform="translate(156, 6)">
+          <use href="#wf-icon-cpu" x="0" y="0"
+               width="18" height="18" color="#8b5cf6" opacity="0.8"/>
+          <text x="22" y="13"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" font-weight="bold"
+                fill="#a78bfa">12%</text>
+          <rect x="22" y="20" width="36" height="4" rx="2"
+                fill="#0a0f20"/>
+          <rect x="22" y="20" width="4"  height="4" rx="2"
+                fill="url(#wf-cpu-grad)"/>
+          <text x="54" y="27"
+                font-family="'JetBrains Mono',monospace"
+                font-size="7" fill="#334155">3.8G</text>
+        </g>
+
+        <!-- ── RAM ── -->
+        <g transform="translate(224, 6)">
+          <use href="#wf-icon-memory" x="0" y="0"
+               width="18" height="18" color="#0ea5e9" opacity="0.8"/>
+          <text x="22" y="13"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" font-weight="bold"
+                fill="#38bdf8">7.2G</text>
+          <rect x="22" y="20" width="36" height="4" rx="2"
+                fill="#0a0f20"/>
+          <rect x="22" y="20" width="10" height="4" rx="2"
+                fill="url(#wf-mem-grad)"/>
+          <text x="54" y="27"
+                font-family="'JetBrains Mono',monospace"
+                font-size="7" fill="#334155">32G</text>
+        </g>
+
+        <!-- Separator -->
+        <line x1="296" y1="6" x2="296" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- ── Volume + WiFi ── -->
+        <g transform="translate(304, 10)">
+          <use href="#wf-icon-volume-2" x="0" y="0"
+               width="18" height="18" color="#a78bfa" opacity="0.8"/>
+          <text x="22" y="13"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" fill="#a78bfa">72%</text>
+        </g>
+        <g transform="translate(360, 10)">
+          <use href="#wf-icon-wifi" x="0" y="0"
+               width="18" height="18" color="#10b981"
+               filter="url(#wf-glow-green)"/>
+        </g>
+
+        <!-- Separator -->
+        <line x1="388" y1="6" x2="388" y2="44"
+              stroke="#1e2d40" stroke-width="1" stroke-opacity="0.6"/>
+
+        <!-- ── Battery ── -->
+        <g transform="translate(396, 10)">
+          <!-- Battery shell -->
+          <rect x="0" y="2" width="32" height="16" rx="3"
+                fill="none" stroke="#10b981"
+                stroke-width="1.4" stroke-opacity="0.8"/>
+          <rect x="32" y="6" width="3" height="8" rx="1.5"
+                fill="#10b981" fill-opacity="0.6"/>
+          <!-- Fill (87%) -->
+          <rect x="2" y="4" width="25" height="12" rx="2"
+                fill="url(#wf-batt-good)" fill-opacity="0.8"/>
+          <!-- Charging bolt -->
+          <path d="M15 2 L11 12 L15 12 L11 20"
+                fill="#60a5fa" opacity="0.9"
+                transform="scale(0.6) translate(12, -2)"/>
+          <text x="38" y="18"
+                font-family="'JetBrains Mono',monospace"
+                font-size="11" font-weight="bold"
+                fill="#10b981">87%</text>
+        </g>
+
+        <!-- ── Power ── -->
+        <g transform="translate(448, 10)">
+          <use href="#wf-icon-power" x="0" y="0"
+               width="20" height="20" color="#f43f5e"
+               opacity="0.75"/>
+        </g>
+
+      </g>
+    </g>
+
+    <!-- ══════════════════════════
+         L05 — BAR LABEL (Bottom center annotation)
+    ══════════════════════════ -->
+
+    <!-- Floating bar annotation arrows (connecting to each segment) -->
+    <g opacity="0.6">
+      <!-- Left arrow -->
+      <line x1="256" y1="80" x2="256" y2="130"
+            stroke="#7c3aed" stroke-width="1"
+            stroke-dasharray="4,3"/>
+      <circle cx="256" cy="80" r="3" fill="#7c3aed"/>
+
+      <!-- Center arrow -->
+      <line x1="960" y1="80" x2="960" y2="130"
+            stroke="#38bdf8" stroke-width="1"
+            stroke-dasharray="4,3"/>
+      <circle cx="960" cy="80" r="3" fill="#38bdf8"/>
+
+      <!-- Right arrow -->
+      <line x1="1664" y1="80" x2="1664" y2="130"
+            stroke="#10b981" stroke-width="1"
+            stroke-dasharray="4,3"/>
+      <circle cx="1664" cy="80" r="3" fill="#10b981"/>
+    </g>
+
+    <!-- Annotation labels below bar -->
+    <g transform="translate(0, 130)">
+      <!-- Left label -->
+      <rect x="156" y="0" width="200" height="30" rx="6"
+            fill="#0d1117" fill-opacity="0.9"
+            stroke="#7c3aed" stroke-width="0.8" stroke-opacity="0.5"/>
+      <text x="256" y="19" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#a78bfa">Workspaces + Title</text>
+
+      <!-- Center label -->
+      <rect x="780" y="0" width="360" height="30" rx="6"
+            fill="#0d1117" fill-opacity="0.9"
+            stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.5"/>
+      <text x="960" y="19" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#67e8f9">
+        Clock · Date · Weather · Night Light
+      </text>
+
+      <!-- Right label -->
+      <rect x="1524" y="0" width="280" height="30" rx="6"
+            fill="#0d1117" fill-opacity="0.9"
+            stroke="#10b981" stroke-width="0.8" stroke-opacity="0.5"/>
+      <text x="1664" y="19" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#6ee7b7">Media · System · Battery</text>
+    </g>
+
+    <!-- ══════════════════════════
+         L06 — TITLE CARD
+    ══════════════════════════ -->
+
+    <g transform="translate(660, 700)">
+      <rect x="0" y="0" width="600" height="100" rx="16"
+            fill="#070b14" fill-opacity="0.95"
+            stroke="#4f46e5" stroke-width="1.2"
+            stroke-opacity="0.6"/>
+      <!-- Top line glow -->
+      <rect x="2" y="2" width="596" height="2" rx="1"
+            fill="#7c3aed" fill-opacity="0.6"/>
+      <!-- Bottom line -->
+      <rect x="2" y="96" width="596" height="1" rx="0.5"
+            fill="#0ea5e9" fill-opacity="0.3"/>
+
+      <!-- Left purple accent bar -->
+      <rect x="0" y="2" width="4" height="96" rx="2"
+            fill="#7c3aed" fill-opacity="0.8"/>
+
+      <text x="300" y="36" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="20" font-weight="bold"
+            fill="#a78bfa" letter-spacing="3"
+            filter="url(#wf-glow-purple)">
+        WAYBAR · FLOATING
+      </text>
+      <text x="300" y="58" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#475569" letter-spacing="1">
+        Three Independent Floating Segments
+      </text>
+      <text x="300" y="78" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155">
+        glassmorphism · neon-border · gap layout · Hyprland
+      </text>
+
+      <!-- ASH badge -->
+      <rect x="420" y="84" width="170" height="14" rx="4"
+            fill="#7c3aed" fill-opacity="0.15"/>
+      <text x="505" y="95" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#7c3aed">ASH Dotfiles v5.0 Ω</text>
+    </g>
+
+    <!-- Gap indicators between segments -->
+    <g opacity="0.4">
+      <!-- Gap 1 annotation (between left and center) -->
+      <line x1="496" y1="40" x2="686" y2="40"
+            stroke="#334155" stroke-width="1"
+            stroke-dasharray="3,3"/>
+      <text x="591" y="36"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#334155"
+            text-anchor="middle">190px gap</text>
+      <!-- Gap 2 annotation (between center and right) -->
+      <line x1="1234" y1="40" x2="1424" y2="40"
+            stroke="#334155" stroke-width="1"
+            stroke-dasharray="3,3"/>
+      <text x="1329" y="36"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#334155"
+            text-anchor="middle">190px gap</text>
+    </g>
+
+    <!-- Vignette -->
+    <ellipse cx="960" cy="540" rx="1920" ry="1080"
+             fill="url(#wf-vignette)" pointer-events="none"/>
+
+  </g>
+
+</svg>

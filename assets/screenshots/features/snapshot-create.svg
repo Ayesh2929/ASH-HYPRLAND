@@ -1,0 +1,986 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1920 1080" width="1920" height="1080">
+
+  <defs>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GRADIENTS — SNAPSHOT CREATE
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <linearGradient id="sc-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#040610"/>
+      <stop offset="100%" stop-color="#060818"/>
+    </linearGradient>
+
+    <linearGradient id="sc-terminal-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#090c12"/>
+    </linearGradient>
+
+    <linearGradient id="sc-titlebar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#131c2c"/>
+      <stop offset="100%" stop-color="#0e1525"/>
+    </linearGradient>
+
+    <linearGradient id="sc-statusline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="22%"  stop-color="#0284c7"/>
+      <stop offset="55%"  stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+
+    <!-- Snapshot card backgrounds -->
+    <linearGradient id="sc-card-new" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0a1e30" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#06141e" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="sc-card-old" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c1220" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#08101a" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Progress animation gradient -->
+    <linearGradient id="sc-progress-bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="50%"  stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <linearGradient id="sc-progress-complete" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- File type colors in snapshot manifest -->
+    <linearGradient id="sc-file-config" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="sc-file-theme" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+
+    <linearGradient id="sc-file-script" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Snapshot hash display -->
+    <linearGradient id="sc-hash-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0a1828" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#06101e" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Modal border -->
+    <linearGradient id="sc-border-main" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.8"/>
+      <stop offset="40%"  stop-color="#38bdf8" stop-opacity="0.6"/>
+      <stop offset="80%"  stop-color="#7c3aed" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Accent lines -->
+    <linearGradient id="sc-cyan-h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#0ea5e9" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="sc-section-div" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0"/>
+      <stop offset="30%"  stop-color="#0ea5e9" stop-opacity="0.4"/>
+      <stop offset="70%"  stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Tag pill colors -->
+    <linearGradient id="sc-tag-active"   x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- Checksum ring -->
+    <linearGradient id="sc-checksum-ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="50%"  stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <!-- Size chart -->
+    <linearGradient id="sc-size-bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+
+    <!-- Desktop bg -->
+    <linearGradient id="sc-desk-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#06090f"/>
+    </linearGradient>
+
+    <radialGradient id="sc-center-glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.08"/>
+      <stop offset="60%"  stop-color="#0284c7" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="black"   stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.55"/>
+    </radialGradient>
+
+    <radialGradient id="sc-success-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#10b981" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-panel-glow" cx="50%" cy="25%" r="60%">
+      <stop offset="0%"   stop-color="#0ea5e9" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="black"   stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FILTERS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <filter id="sc-glow-cyan" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feFlood flood-color="#0ea5e9" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-glow-green" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-glow-purple" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#7c3aed" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-glow-amber" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#f59e0b" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sc-win-shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="24"
+                    flood-color="black" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="40"
+                    flood-color="#0ea5e9" flood-opacity="0.12"/>
+    </filter>
+
+    <filter id="sc-card-shadow" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12"
+                    flood-color="black" flood-opacity="0.7"/>
+    </filter>
+
+    <filter id="sc-success-shadow"
+            x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="18"
+                    flood-color="#10b981" flood-opacity="0.4"/>
+    </filter>
+
+    <filter id="sc-blur-heavy" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+
+    <filter id="sc-blur-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PATTERNS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <pattern id="sc-dot-grid" x="0" y="0" width="28" height="28"
+             patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="0.55"
+              fill="#0ea5e9" fill-opacity="0.055"/>
+    </pattern>
+
+    <pattern id="sc-circuit" x="0" y="0" width="60" height="60"
+             patternUnits="userSpaceOnUse">
+      <path d="M8 8 H28 V22 H42 V8 H56 M8 40 H18 V50 H48 V40 H56"
+            fill="none" stroke="#0ea5e9"
+            stroke-width="0.4" stroke-opacity="0.06"/>
+      <circle cx="28" cy="8"  r="1.5" fill="#0ea5e9" fill-opacity="0.1"/>
+      <circle cx="42" cy="22" r="1.5" fill="#38bdf8" fill-opacity="0.08"/>
+      <circle cx="18" cy="50" r="1.5" fill="#0ea5e9" fill-opacity="0.08"/>
+    </pattern>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CLIP PATHS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="sc-screen">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+
+    <clipPath id="sc-win-clip">
+      <rect x="48" y="44" width="1824" height="988" rx="14"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MASTER RENDER — SNAPSHOT CREATE
+  ═══════════════════════════════════════════════════════════════════ -->
+
+  <g clip-path="url(#sc-screen)">
+
+    <!-- L00 — BACKGROUND -->
+    <rect width="1920" height="1080" fill="url(#sc-bg)"/>
+    <rect width="1920" height="1080" fill="url(#sc-dot-grid)"/>
+    <rect width="1920" height="1080" fill="url(#sc-circuit)"/>
+    <rect width="1920" height="1080" fill="url(#sc-center-glow)"/>
+
+    <!-- Blurred desktop behind -->
+    <g opacity="0.18" filter="url(#sc-blur-heavy)">
+      <rect x="60"   y="60"  width="700" height="450" rx="12" fill="#111827"/>
+      <rect x="860"  y="80"  width="900" height="560" rx="12" fill="#0d1117"/>
+    </g>
+    <rect width="1920" height="1080" fill="black" fill-opacity="0.5"/>
+
+    <!-- ══════════════════════════
+         L01 — TERMINAL WINDOW
+    ══════════════════════════ -->
+
+    <g id="sc-terminal" filter="url(#sc-win-shadow)">
+      <rect x="48" y="44" width="1824" height="988" rx="14"
+            fill="url(#sc-terminal-bg)"
+            stroke="url(#sc-border-main)" stroke-width="1.5"/>
+      <rect x="50" y="46" width="1820" height="1.5" rx="1"
+            fill="#0ea5e9" fill-opacity="0.35"/>
+
+      <!-- Titlebar -->
+      <rect x="48" y="44" width="1824" height="44" rx="14"
+            fill="url(#sc-titlebar)"/>
+      <rect x="48" y="76" width="1824" height="12" fill="url(#sc-titlebar)"/>
+      <rect x="48" y="86" width="1824" height="2"
+            fill="url(#sc-cyan-h)" opacity="0.6"/>
+
+      <!-- Traffic lights -->
+      <circle cx="80"  cy="66" r="7" fill="#ff5f57"/>
+      <circle cx="102" cy="66" r="7" fill="#febc2e"/>
+      <circle cx="124" cy="66" r="7" fill="#28c840"/>
+
+      <!-- Title -->
+      <text x="960" y="71" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#475569" letter-spacing="2">
+        ash snapshot create · /home/ash/.config
+      </text>
+
+      <!-- Right: version -->
+      <text x="1838" y="71" text-anchor="end"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155">v5.0 Ω</text>
+
+      <!-- ══════════════════════════
+           MAIN CONTENT AREA
+      ══════════════════════════ -->
+
+      <!-- ── LEFT: Terminal output ── -->
+      <rect x="48" y="90" width="860" height="942"
+            fill="#09101a" fill-opacity="0.6"/>
+      <rect x="906" y="90" width="1" height="942"
+            fill="#1e2d40" fill-opacity="0.6"/>
+
+      <!-- Terminal content -->
+      <g transform="translate(68, 114)"
+         font-family="'JetBrains Mono',monospace" font-size="13.5">
+
+        <!-- Command that was run -->
+        <text y="0">
+          <tspan fill="#0ea5e9" filter="url(#sc-glow-cyan)">❯ </tspan>
+          <tspan fill="#e2e8f0">ash snapshot create </tspan>
+          <tspan fill="#a3e635">"catppuccin-omega"</tspan>
+          <tspan fill="#64748b"> --tag stable</tspan>
+        </text>
+
+        <!-- Output lines -->
+        <text y="28" fill="#0ea5e9" fill-opacity="0.7">
+          📸 ASH Snapshot Engine v5.0
+        </text>
+        <text y="46" fill="#334155">
+          ─────────────────────────────────────────
+        </text>
+
+        <text y="70">
+          <tspan fill="#64748b">Snapshot ID  </tspan>
+          <tspan fill="#0ea5e9"
+                 filter="url(#sc-glow-cyan)">snap_20240115_224738_a3f8bc2</tspan>
+        </text>
+        <text y="90">
+          <tspan fill="#64748b">Label        </tspan>
+          <tspan fill="#fbbf24">catppuccin-omega</tspan>
+        </text>
+        <text y="110">
+          <tspan fill="#64748b">Tag          </tspan>
+          <tspan fill="#10b981">stable</tspan>
+        </text>
+        <text y="130">
+          <tspan fill="#64748b">Timestamp    </tspan>
+          <tspan fill="#94a3b8">2024-01-15 22:47:38 UTC</tspan>
+        </text>
+
+        <!-- blank -->
+
+        <text y="162" fill="#334155">
+          Scanning configuration directories...
+        </text>
+
+        <!-- Progress steps -->
+        <g transform="translate(0, 180)">
+          <!-- Step 1 — Hyprland -->
+          <text y="0">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/hypr/</tspan>
+            <tspan fill="#475569">         </tspan>
+            <tspan fill="#10b981">84 files</tspan>
+            <tspan fill="#334155"> · 2.1MB</tspan>
+          </text>
+
+          <!-- Step 2 — Waybar -->
+          <text y="20">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/waybar/</tspan>
+            <tspan fill="#475569">      </tspan>
+            <tspan fill="#10b981">23 files</tspan>
+            <tspan fill="#334155"> · 148KB</tspan>
+          </text>
+
+          <!-- Step 3 — Neovim -->
+          <text y="40">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/nvim/</tspan>
+            <tspan fill="#475569">        </tspan>
+            <tspan fill="#10b981">247 files</tspan>
+            <tspan fill="#334155"> · 8.4MB</tspan>
+          </text>
+
+          <!-- Step 4 — Fish -->
+          <text y="60">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/fish/</tspan>
+            <tspan fill="#475569">        </tspan>
+            <tspan fill="#10b981">86 files</tspan>
+            <tspan fill="#334155"> · 312KB</tspan>
+          </text>
+
+          <!-- Step 5 — Kitty -->
+          <text y="80">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/kitty/</tspan>
+            <tspan fill="#475569">       </tspan>
+            <tspan fill="#10b981">12 files</tspan>
+            <tspan fill="#334155"> · 44KB</tspan>
+          </text>
+
+          <!-- Step 6 — AGS -->
+          <text y="100">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/ags/</tspan>
+            <tspan fill="#475569">         </tspan>
+            <tspan fill="#10b981">38 files</tspan>
+            <tspan fill="#334155"> · 892KB</tspan>
+          </text>
+
+          <!-- Step 7 — Rofi -->
+          <text y="120">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.config/rofi/</tspan>
+            <tspan fill="#475569">        </tspan>
+            <tspan fill="#10b981">44 files</tspan>
+            <tspan fill="#334155"> · 218KB</tspan>
+          </text>
+
+          <!-- Step 8 — Themes -->
+          <text y="140">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.local/share/ash/themes/</tspan>
+            <tspan fill="#10b981">  62 files</tspan>
+            <tspan fill="#334155"> · 4.8MB</tspan>
+          </text>
+
+          <!-- Step 9 — Scripts -->
+          <text y="160">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/dotfiles/scripts/</tspan>
+            <tspan fill="#475569">    </tspan>
+            <tspan fill="#10b981">127 files</tspan>
+            <tspan fill="#334155"> · 892KB</tspan>
+          </text>
+
+          <!-- Step 10 — Plugins -->
+          <text y="180">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#60a5fa">~/.local/share/ash/plugins/</tspan>
+            <tspan fill="#10b981">43 files</tspan>
+            <tspan fill="#334155"> · 1.2MB</tspan>
+          </text>
+
+          <!-- blank -->
+
+          <!-- Hashing section -->
+          <text y="220">
+            <tspan fill="#0ea5e9">⟳ </tspan>
+            <tspan fill="#475569">Computing SHA-256 checksums...</tspan>
+          </text>
+
+          <!-- Progress bar for hashing -->
+          <rect x="0" y="230" width="800" height="10" rx="5"
+                fill="#0a1828"/>
+          <rect x="0" y="230" width="800" height="10" rx="5"
+                fill="url(#sc-progress-complete)">
+            <animate attributeName="width"
+                     values="0;800" dur="1.5s"
+                     fill="freeze"/>
+          </rect>
+          <!-- Shimmer -->
+          <rect x="0" y="230" width="800" height="10" rx="5"
+                fill="url(#sc-cyan-h)" fill-opacity="0.3">
+            <animate attributeName="x"
+                     values="-800;800" dur="1.5s"
+                     repeatCount="indefinite"/>
+          </rect>
+          <text y="258" font-size="11">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#64748b">766 files hashed in 0.84s</tspan>
+          </text>
+
+          <!-- Compression -->
+          <text y="280">
+            <tspan fill="#0ea5e9">⟳ </tspan>
+            <tspan fill="#475569">Compressing snapshot (zstd-12)...</tspan>
+          </text>
+          <text y="300">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#64748b">18.9MB → 4.2MB (77.8% reduction)</tspan>
+          </text>
+
+          <!-- Encryption -->
+          <text y="320">
+            <tspan fill="#10b981">✓ </tspan>
+            <tspan fill="#64748b">AES-256-GCM encryption applied</tspan>
+          </text>
+
+          <!-- blank -->
+
+          <!-- Final success message -->
+          <g transform="translate(-4, 342)">
+            <rect x="0" y="0" width="820" height="62" rx="10"
+                  fill="#10b981" fill-opacity="0.1"
+                  stroke="#10b981" stroke-width="1.2"
+                  stroke-opacity="0.6"
+                  filter="url(#sc-success-shadow)"/>
+            <rect x="2" y="2" width="816" height="1.5" rx="1"
+                  fill="#10b981" fill-opacity="0.5"/>
+            <text x="20" y="24" font-size="15" font-weight="bold"
+                  fill="#10b981"
+                  filter="url(#sc-glow-green)">
+              ✓ Snapshot created successfully!
+            </text>
+            <text x="20" y="44" font-size="12" fill="#475569">
+              ID: snap_20240115_224738_a3f8bc2
+            </text>
+            <text x="20" y="58" font-size="11" fill="#334155">
+              Size: 4.2MB · 766 files · SHA256: a3f8bc2e...
+            </text>
+          </g>
+
+          <!-- Restore command hint -->
+          <text y="432" font-size="12" fill="#334155">
+            To restore: ash snapshot restore snap_20240115_224738
+          </text>
+
+          <!-- Next prompt -->
+          <text y="460">
+            <tspan fill="#0ea5e9"
+                   filter="url(#sc-glow-cyan)">❯ </tspan>
+            <tspan fill="#e2e8f0">ash snapshot list</tspan>
+          </text>
+
+          <!-- Snapshot list output -->
+          <text y="488" fill="#0ea5e9" fill-opacity="0.6"
+                font-size="10">
+            ─── SNAPSHOTS (48 total · 198MB) ─────────────────────
+          </text>
+
+          <g transform="translate(0, 496)" font-size="11.5">
+            <!-- Headers -->
+            <text y="0" fill="#334155">
+              <tspan x="0">ID</tspan>
+              <tspan x="200">LABEL</tspan>
+              <tspan x="380">TAG</tspan>
+              <tspan x="480">SIZE</tspan>
+              <tspan x="560">DATE</tspan>
+            </text>
+            <line x1="0" y1="6" x2="800" y2="6"
+                  stroke="#1e2d40" stroke-width="1"/>
+
+            <!-- Latest snapshot (CURRENT) -->
+            <g transform="translate(0, 14)">
+              <rect x="-4" y="-4" width="820" height="22" rx="4"
+                    fill="#0ea5e9" fill-opacity="0.08"/>
+              <text y="12">
+                <tspan x="0" fill="#0ea5e9">▶ a3f8bc2</tspan>
+                <tspan x="200" fill="#fbbf24">catppuccin-omega</tspan>
+                <tspan x="380" fill="#10b981">stable</tspan>
+                <tspan x="480" fill="#94a3b8">4.2MB</tspan>
+                <tspan x="560" fill="#64748b">just now</tspan>
+                <tspan x="720" fill="#0ea5e9">← NEW</tspan>
+              </text>
+            </g>
+
+            <!-- Previous snapshots -->
+            <text y="46">
+              <tspan x="0" fill="#475569">  d91c4e7</tspan>
+              <tspan x="200" fill="#94a3b8">tokyo-night-focus</tspan>
+              <tspan x="380" fill="#64748b">work</tspan>
+              <tspan x="480" fill="#64748b">3.8MB</tspan>
+              <tspan x="560" fill="#334155">2h ago</tspan>
+            </text>
+            <text y="64">
+              <tspan x="0" fill="#475569">  7b2a1f0</tspan>
+              <tspan x="200" fill="#94a3b8">gruvbox-stable</tspan>
+              <tspan x="380" fill="#10b981">stable</tspan>
+              <tspan x="480" fill="#64748b">4.1MB</tspan>
+              <tspan x="560" fill="#334155">1d ago</tspan>
+            </text>
+            <text y="82">
+              <tspan x="0" fill="#475569">  c55e892</tspan>
+              <tspan x="200" fill="#94a3b8">nord-morning</tspan>
+              <tspan x="380" fill="#64748b">daily</tspan>
+              <tspan x="480" fill="#64748b">3.9MB</tspan>
+              <tspan x="560" fill="#334155">3d ago</tspan>
+            </text>
+            <text y="100">
+              <tspan x="0" fill="#334155">  f13a6d4</tspan>
+              <tspan x="200" fill="#475569">dracula-gaming</tspan>
+              <tspan x="380" fill="#f43f5e">gaming</tspan>
+              <tspan x="480" fill="#334155">4.4MB</tspan>
+              <tspan x="560" fill="#1e2d40">1w ago</tspan>
+            </text>
+            <text y="118" fill="#334155">
+              ... 43 more snapshots
+            </text>
+          </g>
+
+          <!-- Active cursor -->
+          <text y="660">
+            <tspan fill="#0ea5e9"
+                   filter="url(#sc-glow-cyan)">❯ </tspan>
+            <tspan fill="#e2e8f0">█</tspan>
+          </text>
+        </g>
+
+      </g>
+
+      <!-- ── RIGHT: Snapshot info panel ── -->
+      <rect x="907" y="90" width="965" height="942"
+            fill="#080e1a" fill-opacity="0.7"/>
+
+      <g id="sc-right-panel" transform="translate(926, 108)"
+         font-family="'JetBrains Mono',monospace">
+
+        <!-- Panel title -->
+        <text x="0" y="16" font-size="10" fill="#334155"
+              letter-spacing="2">SNAPSHOT DETAILS</text>
+        <rect x="0" y="22" width="924" height="1"
+              fill="url(#sc-section-div)" opacity="0.6"/>
+
+        <!-- ── SNAPSHOT CARD (New) ── -->
+        <g transform="translate(0, 30)"
+           filter="url(#sc-card-shadow)">
+          <!-- Success glow behind card -->
+          <rect x="-6" y="-6" width="936" height="254" rx="18"
+                fill="url(#sc-success-glow)"
+                filter="url(#sc-blur-soft)"/>
+
+          <rect x="0" y="0" width="924" height="242" rx="14"
+                fill="url(#sc-card-new)"
+                stroke="#10b981" stroke-width="2"
+                stroke-opacity="0.7"/>
+          <rect x="2" y="2" width="920" height="1.5" rx="1"
+                fill="#10b981" fill-opacity="0.4"/>
+
+          <!-- NEW badge -->
+          <rect x="16" y="14" width="66" height="24" rx="6"
+                fill="#10b981" fill-opacity="0.9"/>
+          <text x="49" y="30" text-anchor="middle"
+                font-size="10" font-weight="bold" fill="white">✦ NEW</text>
+
+          <!-- Snapshot ID with copy button -->
+          <text x="96" y="26" font-size="11"
+                fill="#0ea5e9" filter="url(#sc-glow-cyan)">
+            snap_20240115_224738_a3f8bc2
+          </text>
+          <rect x="770" y="12" width="60" height="24" rx="6"
+                fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+          <text x="800" y="28" text-anchor="middle"
+                font-size="9" fill="#64748b">Copy ID</text>
+
+          <!-- Snapshot metadata rows -->
+          <g transform="translate(16, 48)" font-size="12">
+
+            <!-- Label row -->
+            <g transform="translate(0, 0)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="#0a1828" fill-opacity="0.6"/>
+              <text x="12" y="20" fill="#475569">Label</text>
+              <text x="130" y="20" fill="#fbbf24"
+                    font-weight="bold">catppuccin-omega</text>
+              <rect x="750" y="6" width="46" height="20" rx="5"
+                    fill="#1e2d40"/>
+              <text x="773" y="20" text-anchor="middle"
+                    font-size="9" fill="#475569">Edit</text>
+            </g>
+
+            <!-- Tag row -->
+            <g transform="translate(0, 36)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="#0a1828" fill-opacity="0.5"/>
+              <text x="12" y="20" fill="#475569">Tag</text>
+              <rect x="130" y="4" width="56" height="22" rx="6"
+                    fill="#10b981" fill-opacity="0.2"
+                    stroke="#10b981" stroke-width="0.8" stroke-opacity="0.5"/>
+              <text x="158" y="19" text-anchor="middle"
+                    font-size="10" fill="#10b981">stable</text>
+            </g>
+
+            <!-- Timestamp -->
+            <g transform="translate(0, 72)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="#0a1828" fill-opacity="0.6"/>
+              <text x="12" y="20" fill="#475569">Created</text>
+              <text x="130" y="20" fill="#94a3b8">
+                2024-01-15 22:47:38 UTC
+              </text>
+              <text x="660" y="20" fill="#334155">
+                (just now)
+              </text>
+            </g>
+
+            <!-- Hash/checksum -->
+            <g transform="translate(0, 108)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="url(#sc-hash-bg)"
+                    stroke="#0ea5e9" stroke-width="0.5"
+                    stroke-opacity="0.3"/>
+              <text x="12" y="20" fill="#475569">SHA-256</text>
+              <text x="130" y="20" fill="#0ea5e9" fill-opacity="0.7"
+                    font-size="11">
+                a3f8bc2e4d1f9087c3b25aa6e8b4c92f1d0e7...
+              </text>
+            </g>
+
+            <!-- Size row -->
+            <g transform="translate(0, 144)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="#0a1828" fill-opacity="0.5"/>
+              <text x="12" y="20" fill="#475569">Size</text>
+              <text x="130" y="20" fill="#94a3b8">
+                4.2MB compressed
+              </text>
+              <text x="320" y="20" fill="#334155">
+                (18.9MB raw · 77.8% ratio)
+              </text>
+            </g>
+
+            <!-- Files count row -->
+            <g transform="translate(0, 180)">
+              <rect x="0" y="0" width="892" height="32" rx="6"
+                    fill="#0a1828" fill-opacity="0.6"/>
+              <text x="12" y="20" fill="#475569">Files</text>
+              <text x="130" y="20" fill="#0ea5e9">766</text>
+              <text x="176" y="20" fill="#334155">
+                files across 10 directories
+              </text>
+            </g>
+          </g>
+        </g>
+
+        <!-- ── FILE BREAKDOWN CHART ── -->
+        <g transform="translate(0, 296)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="2">FILE BREAKDOWN</text>
+          <rect x="0" y="8" width="924" height="1"
+                fill="url(#sc-section-div)" opacity="0.5"/>
+
+          <g transform="translate(0, 18)">
+            <!-- Bar chart for file types -->
+            <g font-size="11">
+
+              <!-- nvim configs -->
+              <text x="0" y="16" fill="#64748b">nvim</text>
+              <rect x="90" y="5" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="5" width="193" height="14" rx="7"
+                    fill="#7c3aed" fill-opacity="0.7"/>
+              <text x="696" y="16" fill="#a78bfa">247 files</text>
+              <text x="800" y="16" fill="#334155">8.4MB</text>
+
+              <!-- hypr configs -->
+              <text x="0" y="40" fill="#64748b">hypr</text>
+              <rect x="90" y="29" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="29" width="66" height="14" rx="7"
+                    fill="url(#sc-size-bar)" fill-opacity="0.7"/>
+              <text x="696" y="40" fill="#38bdf8">84 files</text>
+              <text x="800" y="40" fill="#334155">2.1MB</text>
+
+              <!-- themes -->
+              <text x="0" y="64" fill="#64748b">themes</text>
+              <rect x="90" y="53" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="53" width="152" height="14" rx="7"
+                    fill="#f97316" fill-opacity="0.6"/>
+              <text x="696" y="64" fill="#fb923c">62 files</text>
+              <text x="800" y="64" fill="#334155">4.8MB</text>
+
+              <!-- scripts -->
+              <text x="0" y="88" fill="#64748b">scripts</text>
+              <rect x="90" y="77" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="77" width="40" height="14" rx="7"
+                    fill="#10b981" fill-opacity="0.7"/>
+              <text x="696" y="88" fill="#34d399">127 files</text>
+              <text x="800" y="88" fill="#334155">892KB</text>
+
+              <!-- fish -->
+              <text x="0" y="112" fill="#64748b">fish</text>
+              <rect x="90" y="101" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="101" width="27" height="14" rx="7"
+                    fill="#06b6d4" fill-opacity="0.7"/>
+              <text x="696" y="112" fill="#22d3ee">86 files</text>
+              <text x="800" y="112" fill="#334155">312KB</text>
+
+              <!-- plugins -->
+              <text x="0" y="136" fill="#64748b">plugins</text>
+              <rect x="90" y="125" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="125" width="38" height="14" rx="7"
+                    fill="#f59e0b" fill-opacity="0.6"/>
+              <text x="696" y="136" fill="#fbbf24">43 files</text>
+              <text x="800" y="136" fill="#334155">1.2MB</text>
+
+              <!-- other -->
+              <text x="0" y="160" fill="#64748b">other</text>
+              <rect x="90" y="149" width="600" height="14" rx="7"
+                    fill="#0a1828"/>
+              <rect x="90" y="149" width="63" height="14" rx="7"
+                    fill="#475569" fill-opacity="0.5"/>
+              <text x="696" y="160" fill="#64748b">117 files</text>
+              <text x="800" y="160" fill="#334155">1.2MB</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- ── SNAPSHOT HISTORY MINI TIMELINE ── -->
+        <g transform="translate(0, 498)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="2">RECENT SNAPSHOTS (48 total)</text>
+          <rect x="0" y="8" width="924" height="1"
+                fill="url(#sc-section-div)" opacity="0.5"/>
+
+          <g transform="translate(0, 18)">
+            <!-- Timeline visualization -->
+            <line x1="20" y1="0" x2="20" y2="220"
+                  stroke="#1e2d40" stroke-width="2"/>
+
+            <!-- Latest snapshot (CURRENT) -->
+            <g transform="translate(0, 0)">
+              <circle cx="20" cy="16" r="10"
+                      fill="#10b981"
+                      filter="url(#sc-glow-green)">
+                <animate attributeName="r" values="8;11;8"
+                         dur="2s" repeatCount="indefinite"/>
+              </circle>
+              <text x="44" y="12" font-size="11"
+                    font-weight="bold" fill="#10b981">
+                catppuccin-omega
+              </text>
+              <text x="44" y="26" font-size="10" fill="#334155">
+                snap_a3f8bc2 · 4.2MB · just now
+              </text>
+              <rect x="300" y="4" width="52" height="20" rx="5"
+                    fill="#10b981" fill-opacity="0.2"
+                    stroke="#10b981" stroke-width="0.7" stroke-opacity="0.5"/>
+              <text x="326" y="18" text-anchor="middle"
+                    font-size="9" fill="#10b981">stable ✓</text>
+            </g>
+
+            <!-- Previous snapshots -->
+            <g transform="translate(0, 44)">
+              <circle cx="20" cy="16" r="7" fill="#0ea5e9" fill-opacity="0.6"/>
+              <text x="44" y="12" font-size="11" fill="#94a3b8">
+                tokyo-night-focus
+              </text>
+              <text x="44" y="26" font-size="10" fill="#334155">
+                snap_d91c4e7 · 3.8MB · 2h ago
+              </text>
+            </g>
+            <g transform="translate(0, 88)">
+              <circle cx="20" cy="16" r="7" fill="#10b981" fill-opacity="0.5"/>
+              <text x="44" y="12" font-size="11" fill="#94a3b8">
+                gruvbox-stable
+              </text>
+              <text x="44" y="26" font-size="10" fill="#334155">
+                snap_7b2a1f0 · 4.1MB · 1d ago
+              </text>
+              <rect x="300" y="4" width="52" height="20" rx="5"
+                    fill="#10b981" fill-opacity="0.12"/>
+              <text x="326" y="18" text-anchor="middle"
+                    font-size="9" fill="#10b981">stable</text>
+            </g>
+            <g transform="translate(0, 132)">
+              <circle cx="20" cy="16" r="7" fill="#0ea5e9" fill-opacity="0.4"/>
+              <text x="44" y="12" font-size="11" fill="#64748b">
+                nord-morning
+              </text>
+              <text x="44" y="26" font-size="10" fill="#334155">
+                snap_c55e892 · 3.9MB · 3d ago
+              </text>
+            </g>
+            <g transform="translate(0, 176)">
+              <circle cx="20" cy="16" r="7" fill="#334155"/>
+              <text x="44" y="12" font-size="11" fill="#475569">
+                dracula-gaming
+              </text>
+              <text x="44" y="26" font-size="10" fill="#1e2d40">
+                snap_f13a6d4 · 4.4MB · 1w ago
+              </text>
+              <rect x="300" y="4" width="52" height="20" rx="5"
+                    fill="#f43f5e" fill-opacity="0.12"/>
+              <text x="326" y="18" text-anchor="middle"
+                    font-size="9" fill="#f43f5e">gaming</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- ── ACTION BUTTONS ── -->
+        <g transform="translate(0, 740)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="2">QUICK ACTIONS</text>
+          <rect x="0" y="8" width="924" height="1"
+                fill="url(#sc-section-div)" opacity="0.4"/>
+
+          <g transform="translate(0, 18)">
+            <!-- Restore button -->
+            <rect x="0" y="0" width="218" height="44" rx="10"
+                  fill="#10b981" fill-opacity="0.2"
+                  stroke="#10b981" stroke-width="1.2"
+                  stroke-opacity="0.7"/>
+            <text x="109" y="27" text-anchor="middle"
+                  font-size="13" font-weight="bold"
+                  fill="#10b981">↺ Restore</text>
+
+            <!-- Diff button -->
+            <rect x="230" y="0" width="218" height="44" rx="10"
+                  fill="#0ea5e9" fill-opacity="0.15"
+                  stroke="#0ea5e9" stroke-width="1.2"
+                  stroke-opacity="0.6"/>
+            <text x="339" y="27" text-anchor="middle"
+                  font-size="13" fill="#0ea5e9">⊕ Diff</text>
+
+            <!-- Tag button -->
+            <rect x="460" y="0" width="218" height="44" rx="10"
+                  fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+            <text x="569" y="27" text-anchor="middle"
+                  font-size="13" fill="#64748b">🏷 Edit Tag</text>
+
+            <!-- Delete button -->
+            <rect x="690" y="0" width="218" height="44" rx="10"
+                  fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+            <text x="799" y="27" text-anchor="middle"
+                  font-size="13" fill="#475569">🗑 Delete</text>
+          </g>
+
+          <!-- Export / share row -->
+          <g transform="translate(0, 72)">
+            <rect x="0" y="0" width="452" height="38" rx="10"
+                  fill="#7c3aed" fill-opacity="0.1"
+                  stroke="#7c3aed" stroke-width="0.8"
+                  stroke-opacity="0.4"/>
+            <text x="226" y="24" text-anchor="middle"
+                  font-size="12" fill="#a78bfa">
+              ⤓ Export snapshot.tar.zst.enc
+            </text>
+
+            <rect x="464" y="0" width="460" height="38" rx="10"
+                  fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+            <text x="694" y="24" text-anchor="middle"
+                  font-size="12" fill="#64748b">
+              ☁ Push to cloud backup
+            </text>
+          </g>
+        </g>
+
+        <!-- Keybind footer -->
+        <g transform="translate(0, 870)"
+           font-size="10" fill="#1e2d40">
+          <text x="0" y="0">
+            q close · r restore · d diff ·  t tag · Del delete
+          </text>
+        </g>
+
+      </g>
+
+      <!-- Statusline -->
+      <rect x="48" y="1004" width="1824" height="28"
+            fill="url(#sc-statusline)"/>
+      <rect x="48" y="1004" width="90" height="28" fill="#0ea5e9"/>
+      <text x="93" y="1021" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold" fill="white">NORMAL</text>
+      <text x="960" y="1021" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#e2e8f0">
+        ash snapshot create · 766 files · 4.2MB
+      </text>
+      <text x="1800" y="1021"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#334155">ASH v5.0 Ω</text>
+
+    </g>
+
+    <!-- Title card -->
+    <g transform="translate(660, 8)">
+      <rect x="0" y="0" width="600" height="28" rx="8"
+            fill="#030508" fill-opacity="0.96"
+            stroke="#0ea5e9" stroke-width="1" stroke-opacity="0.5"/>
+      <rect x="2" y="2" width="596" height="1.5" rx="1"
+            fill="#0ea5e9" fill-opacity="0.4"/>
+      <text x="300" y="19" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" font-weight="bold"
+            fill="#38bdf8" letter-spacing="3">
+        ASH SNAPSHOT CREATE · v5.0 OMEGA
+      </text>
+    </g>
+
+    <!-- Vignette -->
+    <ellipse cx="960" cy="540" rx="1920" ry="1080"
+             fill="url(#sc-vignette)" pointer-events="none"/>
+
+  </g>
+
+</svg>
