@@ -1,0 +1,1294 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1920 1080" width="1920" height="1080">
+
+  <defs>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GRADIENTS — DUNST NOTIFICATION SHOWCASE
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <linearGradient id="dn-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#04060e"/>
+      <stop offset="100%" stop-color="#06080f"/>
+    </linearGradient>
+
+    <!-- Notification base backgrounds -->
+    <linearGradient id="dn-notif-bg-normal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#111827" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#0d1520" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-low" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d1525" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#09101e" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-critical" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a0808" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#110404" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-warning" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#161008" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#0e0a04" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-success" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#081612" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#050e0a" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-info" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#080e1c" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#050a14" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-music" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0e0820" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#08051a" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <linearGradient id="dn-notif-bg-ash" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c0818" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#080612" stop-opacity="0.97"/>
+    </linearGradient>
+
+    <!-- Progress bar fills -->
+    <linearGradient id="dn-prog-volume" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+
+    <linearGradient id="dn-prog-brightness" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+
+    <linearGradient id="dn-prog-battery" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="dn-prog-music" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+
+    <!-- Panel bg for showcase -->
+    <linearGradient id="dn-panel-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#08101e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#05080e" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Desktop bg simulation -->
+    <linearGradient id="dn-desk-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0a1428"/>
+      <stop offset="50%"  stop-color="#060a18"/>
+      <stop offset="100%" stop-color="#04060f"/>
+    </linearGradient>
+
+    <radialGradient id="dn-vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.58"/>
+    </radialGradient>
+
+    <radialGradient id="dn-desk-glow" cx="80%" cy="20%" r="50%">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="black"   stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dn-critical-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f43f5e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FILTERS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <filter id="dn-glow-red" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feFlood flood-color="#f43f5e" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-glow-amber" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#f59e0b" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-glow-green" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-glow-blue" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#3b82f6" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-glow-purple" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#7c3aed" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-glow-pink" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#ec4899" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dn-notif-shadow" x="-10%" y="-20%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="20"
+                    flood-color="black" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="30"
+                    flood-color="#7c3aed" flood-opacity="0.06"/>
+    </filter>
+
+    <filter id="dn-critical-shadow" x="-10%" y="-20%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="20"
+                    flood-color="black" flood-opacity="0.9"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="40"
+                    flood-color="#f43f5e" flood-opacity="0.3"/>
+    </filter>
+
+    <filter id="dn-blur-heavy" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="25"/>
+    </filter>
+
+    <filter id="dn-blur-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PATTERNS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <pattern id="dn-dot-grid" x="0" y="0" width="28" height="28"
+             patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="0.55"
+              fill="#7c3aed" fill-opacity="0.055"/>
+    </pattern>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CLIP PATHS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="dn-screen">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+
+    <clipPath id="dn-notif-clip">
+      <rect x="0" y="0" width="460" height="120" rx="16"/>
+    </clipPath>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SYMBOLS — DUNST
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    <symbol id="dn-icon-volume" viewBox="0 0 24 24">
+      <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"
+               fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"/>
+      <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-volume-mute" viewBox="0 0 24 24">
+      <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"
+               fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"/>
+      <line x1="23" y1="9" x2="17" y2="15"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <line x1="17" y1="9" x2="23" y2="15"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-brightness" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+               M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-battery" viewBox="0 0 24 24">
+      <rect x="1" y="6" width="18" height="12" rx="2"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <rect x="23" y="9" width="2" height="6" rx="1"
+            fill="currentColor" fill-opacity="0.5"/>
+      <path d="M6 12h6M9 9v6"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-battery-low" viewBox="0 0 24 24">
+      <rect x="1" y="6" width="18" height="12" rx="2"
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <rect x="23" y="9" width="2" height="6" rx="1"
+            fill="currentColor" fill-opacity="0.5"/>
+      <rect x="3" y="8" width="4" height="8" rx="1"
+            fill="currentColor" fill-opacity="0.5"/>
+    </symbol>
+
+    <symbol id="dn-icon-wifi" viewBox="0 0 24 24">
+      <path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+    </symbol>
+
+    <symbol id="dn-icon-wifi-off" viewBox="0 0 24 24">
+      <line x1="1" y1="1" x2="23" y2="23"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a11 11 0 0110.76-2.88M1.42 9a15.91 15.91 0 014.7-2.88M22.58 9a16 16 0 00-2.79-2M8.53 16.11a6 6 0 016.95 0"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+    </symbol>
+
+    <symbol id="dn-icon-music" viewBox="0 0 24 24">
+      <path d="M9 18V5l12-2v13"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <circle cx="6"  cy="18" r="3" fill="none"
+              stroke="currentColor" stroke-width="2"/>
+      <circle cx="18" cy="16" r="3" fill="none"
+              stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="dn-icon-alarm" viewBox="0 0 24 24">
+      <circle cx="12" cy="13" r="8"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 9v4l3 3"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 3L2 6M22 6l-3-3"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-shield" viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <path d="M9 12l2 2 4-4"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-fire" viewBox="0 0 24 24">
+      <path d="M8.5 14.5A5 5 0 0 0 12 19a5 5 0 0 0 5-5c0-4-4-8-5-8s-5 4-5 8a5 5 0 0 0 1.5 2.5z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-update" viewBox="0 0 24 24">
+      <path d="M21.5 2v6h-6M2.5 22v-6h6"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <path d="M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-camera" viewBox="0 0 24 24">
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="13" r="4"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="dn-icon-docker" viewBox="0 0 24 24">
+      <rect x="2"  y="10" width="5" height="4" rx="1"
+            fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="9"  y="6"  width="5" height="4" rx="1"
+            fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="9"  y="10" width="5" height="4" rx="1"
+            fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="16" y="10" width="5" height="4" rx="1"
+            fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M2 15s1 3 7 3c5 0 9-2 14-1"
+            fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="dn-icon-ash" viewBox="0 0 24 24">
+      <polygon points="12,2 22,7 22,17 12,22 2,17 2,7"
+               fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"/>
+      <polygon points="12,7 17,9.5 17,14.5 12,17 7,14.5 7,9.5"
+               fill="none" stroke="currentColor"
+               stroke-width="1.2" opacity="0.7"/>
+      <circle cx="12" cy="12" r="2" fill="currentColor" fill-opacity="0.5"/>
+    </symbol>
+
+    <symbol id="dn-icon-close" viewBox="0 0 16 16">
+      <line x1="12" y1="4" x2="4" y2="12"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="4" y1="4" x2="12" y2="12"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MASTER RENDER — DUNST NOTIFICATION SHOWCASE
+  ═══════════════════════════════════════════════════════════════════ -->
+
+  <g clip-path="url(#dn-screen)">
+
+    <!-- ══════════════════════════
+         L00 — DESKTOP BACKGROUND
+    ══════════════════════════ -->
+
+    <rect width="1920" height="1080" fill="url(#dn-desk-bg)"/>
+    <rect width="1920" height="1080" fill="url(#dn-dot-grid)"/>
+    <rect width="1920" height="1080" fill="url(#dn-desk-glow)"/>
+
+    <!-- Blurred desktop content -->
+    <g opacity="0.2" filter="url(#dn-blur-heavy)">
+      <rect x="60"   y="60"  width="700" height="450" rx="12" fill="#111827"/>
+      <rect x="840"  y="90"  width="800" height="550" rx="12" fill="#0d1117"/>
+      <rect x="120"  y="580" width="600" height="380" rx="12" fill="#141e30"/>
+      <rect x="1350" y="150" width="500" height="700" rx="12" fill="#0a1020"/>
+    </g>
+
+    <!-- Desktop label (very dim) -->
+    <text x="960" y="540" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="20" fill="#0a1020"
+          letter-spacing="8" opacity="0.7">
+      ASH DOTFILES v5.0 · DUNST NOTIFICATIONS
+    </text>
+
+    <!-- ══════════════════════════
+         L01 — DUNST NOTIFICATIONS STACK (Top-right corner)
+    ══════════════════════════ -->
+
+    <!-- ── NOTIFICATION 1: Volume OSD (Normal) ── -->
+    <g id="dn-vol-notif" transform="translate(1440, 54)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="90" rx="16"
+            fill="url(#dn-notif-bg-normal)"/>
+      <!-- Left accent bar -->
+      <rect x="0" y="0" width="4" height="90" rx="2"
+            fill="#7c3aed" filter="url(#dn-glow-purple)"/>
+      <!-- Top gloss line -->
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="white" fill-opacity="0.06"/>
+      <!-- Border -->
+      <rect x="0" y="0" width="460" height="90" rx="16"
+            fill="none" stroke="#7c3aed"
+            stroke-width="1" stroke-opacity="0.4"/>
+
+      <!-- App icon -->
+      <rect x="14" y="13" width="48" height="48" rx="12"
+            fill="#7c3aed" fill-opacity="0.2"
+            stroke="#7c3aed" stroke-width="0.8" stroke-opacity="0.4"/>
+      <use href="#dn-icon-volume" x="23" y="22"
+           width="30" height="30" color="#a78bfa" opacity="0.9"/>
+
+      <!-- App name + content -->
+      <text x="74" y="30"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#a78bfa" letter-spacing="1">Volume</text>
+      <text x="74" y="48"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#e2e8f0">Set to 72%</text>
+
+      <!-- Progress bar -->
+      <rect x="74" y="58" width="350" height="6" rx="3"
+            fill="#1e1040"/>
+      <rect x="74" y="58" width="252" height="6" rx="3"
+            fill="url(#dn-prog-volume)"
+            filter="url(#dn-glow-purple)"/>
+      <!-- Progress dot -->
+      <circle cx="326" cy="61" r="5" fill="#7c3aed"
+              filter="url(#dn-glow-purple)"/>
+      <!-- Progress label -->
+      <text x="432" y="66"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#7c3aed">72%</text>
+
+      <!-- Close button -->
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+
+      <!-- Timestamp -->
+      <text x="74" y="80"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#334155">now · dunst 1.9.2</text>
+    </g>
+
+    <!-- ── NOTIFICATION 2: Brightness OSD ── -->
+    <g id="dn-bright-notif" transform="translate(1440, 156)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="90" rx="16"
+            fill="url(#dn-notif-bg-warning)"/>
+      <rect x="0" y="0" width="4" height="90" rx="2"
+            fill="#f59e0b" filter="url(#dn-glow-amber)"/>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="white" fill-opacity="0.06"/>
+      <rect x="0" y="0" width="460" height="90" rx="16"
+            fill="none" stroke="#f59e0b"
+            stroke-width="1" stroke-opacity="0.35"/>
+
+      <rect x="14" y="13" width="48" height="48" rx="12"
+            fill="#f59e0b" fill-opacity="0.15"
+            stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.35"/>
+      <use href="#dn-icon-brightness" x="23" y="22"
+           width="30" height="30" color="#fbbf24" opacity="0.9"/>
+
+      <text x="74" y="30"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#fbbf24" letter-spacing="1">Brightness</text>
+      <text x="74" y="48"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#e2e8f0">Set to 85%</text>
+
+      <rect x="74" y="58" width="350" height="6" rx="3"
+            fill="#1a1000"/>
+      <rect x="74" y="58" width="297" height="6" rx="3"
+            fill="url(#dn-prog-brightness)"/>
+      <circle cx="371" cy="61" r="5" fill="#f59e0b"
+              filter="url(#dn-glow-amber)"/>
+      <text x="432" y="66"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#f59e0b">85%</text>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 3: Battery Low (CRITICAL) ── -->
+    <g id="dn-batt-critical" transform="translate(1440, 258)"
+       filter="url(#dn-critical-shadow)">
+      <!-- Critical halo -->
+      <rect x="-8" y="-8" width="476" height="124" rx="20"
+            fill="url(#dn-critical-halo)"
+            filter="url(#dn-blur-soft)"/>
+
+      <rect x="0" y="0" width="460" height="108" rx="16"
+            fill="url(#dn-notif-bg-critical)"/>
+      <!-- Animated pulsing border for critical -->
+      <rect x="0" y="0" width="460" height="108" rx="16"
+            fill="none" stroke="#f43f5e" stroke-width="2">
+        <animate attributeName="stroke-opacity"
+                 values="0.4;0.9;0.4" dur="1.5s"
+                 repeatCount="indefinite"/>
+      </rect>
+      <rect x="0" y="0" width="4" height="108" rx="2"
+            fill="#f43f5e" filter="url(#dn-glow-red)">
+        <animate attributeName="fill-opacity"
+                 values="0.6;1;0.6" dur="1.5s"
+                 repeatCount="indefinite"/>
+      </rect>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="#f43f5e" fill-opacity="0.3"/>
+
+      <rect x="14" y="13" width="48" height="48" rx="12"
+            fill="#f43f5e" fill-opacity="0.2"
+            stroke="#f43f5e" stroke-width="1" stroke-opacity="0.6"/>
+      <use href="#dn-icon-battery-low" x="23" y="22"
+           width="30" height="30" color="#f43f5e"
+           filter="url(#dn-glow-red)"/>
+
+      <!-- CRITICAL badge -->
+      <rect x="70" y="12" width="62" height="18" rx="5"
+            fill="#f43f5e" fill-opacity="0.9"/>
+      <text x="101" y="24" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="8" font-weight="bold"
+            fill="white">CRITICAL</text>
+
+      <text x="140" y="24"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#fca5a5">Battery</text>
+      <text x="74" y="46"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" fill="#e2e8f0"
+            font-weight="bold">⚠ Battery Critical — 8%</text>
+      <text x="74" y="62"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#94a3b8">
+        Connect power immediately!
+      </text>
+
+      <!-- Battery bar (very low) -->
+      <rect x="74" y="72" width="350" height="6" rx="3"
+            fill="#2a0808"/>
+      <rect x="74" y="72" width="28" height="6" rx="3"
+            fill="#f43f5e" fill-opacity="0.9">
+        <animate attributeName="fill-opacity"
+                 values="0.4;0.9;0.4" dur="1.5s"
+                 repeatCount="indefinite"/>
+      </rect>
+      <text x="432" y="78"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#f43f5e">8%</text>
+
+      <!-- Action buttons -->
+      <rect x="74"  y="82" width="90" height="22" rx="6"
+            fill="#f43f5e" fill-opacity="0.2"
+            stroke="#f43f5e" stroke-width="0.8" stroke-opacity="0.6"/>
+      <text x="119" y="97" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#fca5a5">Power Saver</text>
+
+      <rect x="170" y="82" width="66" height="22" rx="6"
+            fill="#1e2d40"/>
+      <text x="203" y="97" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#64748b">Dismiss</text>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#2a0808" fill-opacity="0.8"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#f43f5e" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 4: Now Playing / Spotify (Normal, with image) ── -->
+    <g id="dn-music-notif" transform="translate(1440, 378)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="110" rx="16"
+            fill="url(#dn-notif-bg-music)"/>
+      <rect x="0" y="0" width="4" height="110" rx="2"
+            fill="#ec4899" filter="url(#dn-glow-pink)"/>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="white" fill-opacity="0.06"/>
+      <rect x="0" y="0" width="460" height="110" rx="16"
+            fill="none" stroke="#ec4899"
+            stroke-width="1" stroke-opacity="0.4"/>
+
+      <!-- Album art (square) -->
+      <rect x="14" y="13" width="84" height="84" rx="10"
+            fill="#1a0a30"/>
+      <ellipse cx="56" cy="55" rx="30" ry="25"
+               fill="#ec4899" fill-opacity="0.3"/>
+      <ellipse cx="56" cy="55" rx="15" ry="12"
+               fill="#a855f7" fill-opacity="0.4"/>
+      <circle cx="56" cy="55" r="4"
+              fill="white" fill-opacity="0.3"/>
+      <!-- Spotify green mark -->
+      <rect x="14" y="13" width="84" height="84" rx="10"
+            fill="none" stroke="#1db954"
+            stroke-width="1" stroke-opacity="0.4"/>
+      <text x="22" y="26" font-size="8"
+            font-family="monospace" fill="#1db954" opacity="0.8">♫ spotify</text>
+
+      <!-- Music info -->
+      <text x="110" y="32"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#f9a8d4" letter-spacing="1">Now Playing</text>
+      <text x="110" y="52"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" font-weight="bold" fill="#e2e8f0">Feather</text>
+      <text x="110" y="70"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#94a3b8">Nujabes · Modal Soul</text>
+
+      <!-- Music progress bar -->
+      <rect x="110" y="80" width="306" height="4" rx="2"
+            fill="#1a0a30"/>
+      <rect x="110" y="80" width="168" height="4" rx="2"
+            fill="url(#dn-prog-music)"/>
+      <circle cx="278" cy="82" r="4" fill="#ec4899"
+              filter="url(#dn-glow-pink)"/>
+      <text x="422" y="86"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#ec4899">2:34</text>
+
+      <!-- Controls -->
+      <g transform="translate(110, 88)"
+         font-family="monospace" font-size="16" fill="#94a3b8">
+        <text x="0"  y="18">⏮</text>
+        <text x="28" y="18" fill="#ec4899" font-size="18">⏸</text>
+        <text x="60" y="18">⏭</text>
+        <text x="96" y="18" font-size="14">🔀</text>
+        <text x="126" y="18" font-size="14">♥</text>
+      </g>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 5: WiFi Connected (Success) ── -->
+    <g id="dn-wifi-notif" transform="translate(1440, 500)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="88" rx="16"
+            fill="url(#dn-notif-bg-success)"/>
+      <rect x="0" y="0" width="4" height="88" rx="2"
+            fill="#10b981" filter="url(#dn-glow-green)"/>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="white" fill-opacity="0.06"/>
+      <rect x="0" y="0" width="460" height="88" rx="16"
+            fill="none" stroke="#10b981"
+            stroke-width="1" stroke-opacity="0.4"/>
+
+      <rect x="14" y="14" width="48" height="48" rx="12"
+            fill="#10b981" fill-opacity="0.15"
+            stroke="#10b981" stroke-width="0.8" stroke-opacity="0.4"/>
+      <use href="#dn-icon-wifi" x="23" y="23"
+           width="30" height="30" color="#34d399"/>
+
+      <!-- Success badge -->
+      <rect x="74" y="14" width="16" height="16" rx="4"
+            fill="#10b981" fill-opacity="0.9"/>
+      <text x="82" y="25" text-anchor="middle"
+            font-family="monospace" font-size="10" fill="white">✓</text>
+
+      <text x="96" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#34d399">Connected</text>
+      <text x="74" y="46"
+            font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#e2e8f0">ASH-HomeNet-5G</text>
+      <text x="74" y="62"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#475569">
+        192.168.1.142 · 867 Mbps · WPA3
+      </text>
+      <text x="74" y="78"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#334155">
+        Signal: ████████░░ 85%
+      </text>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 6: Screenshot (Info / Action) ── -->
+    <g id="dn-shot-notif" transform="translate(1440, 600)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="96" rx="16"
+            fill="url(#dn-notif-bg-info)"/>
+      <rect x="0" y="0" width="4" height="96" rx="2"
+            fill="#3b82f6" filter="url(#dn-glow-blue)"/>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="white" fill-opacity="0.06"/>
+      <rect x="0" y="0" width="460" height="96" rx="16"
+            fill="none" stroke="#3b82f6"
+            stroke-width="1" stroke-opacity="0.4"/>
+
+      <rect x="14" y="14" width="48" height="48" rx="12"
+            fill="#3b82f6" fill-opacity="0.15"
+            stroke="#3b82f6" stroke-width="0.8" stroke-opacity="0.4"/>
+      <use href="#dn-icon-camera" x="23" y="23"
+           width="30" height="30" color="#60a5fa"/>
+
+      <!-- Tiny screenshot preview box -->
+      <rect x="14" y="68" width="48" height="22" rx="4"
+            fill="#1e2d40"/>
+      <!-- Mini screenshot preview (color blocks) -->
+      <rect x="16" y="70" width="20" height="18" rx="2"
+            fill="#1e1e2e"/>
+      <rect x="38" y="70" width="22" height="18" rx="2"
+            fill="#111827"/>
+
+      <text x="74" y="30"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#60a5fa">Screenshot Captured</text>
+      <text x="74" y="48"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#e2e8f0">
+        ~/Pictures/2024-01-15_22-47.png
+      </text>
+      <text x="74" y="63"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#475569">
+        1920×1080 · 2.3MB · slurp area
+      </text>
+
+      <!-- Action buttons -->
+      <g transform="translate(74, 72)">
+        <rect x="0" y="0" width="56" height="20" rx="5"
+              fill="#3b82f6" fill-opacity="0.2"
+              stroke="#3b82f6" stroke-width="0.8" stroke-opacity="0.5"/>
+        <text x="28" y="14" text-anchor="middle"
+              font-family="'JetBrains Mono',monospace"
+              font-size="9" fill="#60a5fa">View</text>
+
+        <rect x="62" y="0" width="56" height="20" rx="5"
+              fill="#1e2d40"/>
+        <text x="90" y="14" text-anchor="middle"
+              font-family="'JetBrains Mono',monospace"
+              font-size="9" fill="#64748b">Upload</text>
+
+        <rect x="124" y="0" width="56" height="20" rx="5"
+              fill="#1e2d40"/>
+        <text x="152" y="14" text-anchor="middle"
+              font-family="'JetBrains Mono',monospace"
+              font-size="9" fill="#64748b">Delete</text>
+      </g>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 7: ASH Update (Special branded) ── -->
+    <g id="dn-ash-notif" transform="translate(1440, 708)"
+       filter="url(#dn-notif-shadow)">
+      <rect x="0" y="0" width="460" height="112" rx="16"
+            fill="url(#dn-notif-bg-ash)"/>
+      <!-- Rainbow gradient border for special ASH notif -->
+      <rect x="0" y="0" width="460" height="112" rx="16"
+            fill="none"
+            stroke="url(#dn-grad-rainbow)"
+            stroke-width="1.5" stroke-opacity="0.7"/>
+      <defs>
+        <linearGradient id="dn-grad-rainbow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#7c3aed"/>
+          <stop offset="25%"  stop-color="#ec4899"/>
+          <stop offset="50%"  stop-color="#f59e0b"/>
+          <stop offset="75%"  stop-color="#10b981"/>
+          <stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="4" height="112" rx="2"
+            fill="url(#dn-grad-rainbow)"/>
+      <rect x="4" y="0" width="456" height="1" rx="0.5"
+            fill="url(#dn-grad-rainbow)" fill-opacity="0.5"/>
+
+      <rect x="14" y="14" width="48" height="48" rx="12"
+            fill="url(#dn-grad-rainbow)" fill-opacity="0.2"/>
+      <use href="#dn-icon-ash" x="23" y="23"
+           width="30" height="30" color="#a78bfa"
+           filter="url(#dn-glow-purple)"/>
+
+      <!-- ASH branding -->
+      <text x="74" y="30"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#a78bfa" letter-spacing="2">ASH DOTFILES</text>
+      <text x="74" y="48"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" font-weight="bold"
+            fill="#e2e8f0">Theme Applied Successfully</text>
+      <text x="74" y="65"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#94a3b8">
+        catppuccin-mocha · 14 components
+      </text>
+      <text x="74" y="80"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#60a5fa">
+        Hot-reload complete in 294ms
+      </text>
+
+      <!-- Color palette swatches inline -->
+      <g transform="translate(74, 88)">
+        <circle cx="8"   cy="6" r="6" fill="#1e1e2e"/>
+        <circle cx="22"  cy="6" r="6" fill="#cba6f7"/>
+        <circle cx="36"  cy="6" r="6" fill="#89b4fa"/>
+        <circle cx="50"  cy="6" r="6" fill="#a6e3a1"/>
+        <circle cx="64"  cy="6" r="6" fill="#f38ba8"/>
+        <circle cx="78"  cy="6" r="6" fill="#fab387"/>
+        <circle cx="92"  cy="6" r="6" fill="#f9e2af"/>
+        <text x="110" y="11"
+              font-family="'JetBrains Mono',monospace"
+              font-size="9" fill="#334155">+8 more colors</text>
+      </g>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#475569" opacity="0.6"/>
+    </g>
+
+    <!-- ── NOTIFICATION 8: Docker container started (Low urgency) ── -->
+    <g id="dn-docker-notif" transform="translate(1440, 832)"
+       filter="url(#dn-notif-shadow)" opacity="0.9">
+      <rect x="0" y="0" width="460" height="80" rx="16"
+            fill="url(#dn-notif-bg-low)"/>
+      <rect x="0" y="0" width="4" height="80" rx="2"
+            fill="#0ea5e9" fill-opacity="0.6"/>
+      <rect x="0" y="0" width="460" height="80" rx="16"
+            fill="none" stroke="#0ea5e9"
+            stroke-width="0.8" stroke-opacity="0.3"/>
+
+      <rect x="14" y="14" width="40" height="40" rx="10"
+            fill="#0ea5e9" fill-opacity="0.12"/>
+      <use href="#dn-icon-docker" x="22" y="22"
+           width="24" height="24" color="#38bdf8" opacity="0.8"/>
+
+      <text x="66" y="28"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#38bdf8" fill-opacity="0.8">Docker</text>
+      <text x="66" y="46"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#94a3b8">
+        ash-api:latest started
+      </text>
+      <text x="66" y="62"
+            font-family="'JetBrains Mono',monospace"
+            font-size="10" fill="#334155">
+        Port 3000 · 5 containers running
+      </text>
+
+      <rect x="420" y="8" width="28" height="28" rx="8"
+            fill="#1e2d40" fill-opacity="0.6"/>
+      <use href="#dn-icon-close" x="426" y="14"
+           width="16" height="16" color="#334155" opacity="0.5"/>
+    </g>
+
+    <!-- ── NOTIFICATION COUNT BADGE ── -->
+    <g transform="translate(1440, 928)">
+      <rect x="0" y="0" width="460" height="36" rx="10"
+            fill="#0a1020" fill-opacity="0.8"
+            stroke="#1e2d40" stroke-width="0.8"/>
+      <text x="230" y="23" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155">
+        8 notifications · scroll to dismiss · D=dismiss all
+      </text>
+    </g>
+
+    <!-- ══════════════════════════
+         L02 — SHOWCASE PANEL (Left side)
+    ══════════════════════════ -->
+
+    <g id="dn-showcase-panel">
+      <rect x="60" y="60" width="1340" height="960" rx="20"
+            fill="url(#dn-panel-bg)"
+            stroke="#1e2d40" stroke-width="1"/>
+      <rect x="62" y="62" width="1336" height="1.5" rx="1"
+            fill="white" fill-opacity="0.04"/>
+
+      <!-- Panel header -->
+      <rect x="60" y="60" width="1340" height="72" rx="20"
+            fill="#06090f" fill-opacity="0.95"/>
+      <rect x="60" y="120" width="1340" height="12" fill="#06090f"/>
+      <rect x="60" y="130" width="1340" height="2"
+            fill="#1e2d40" fill-opacity="0.6"/>
+
+      <!-- Panel title -->
+      <text x="96" y="90"
+            font-family="'JetBrains Mono',monospace"
+            font-size="22" font-weight="bold"
+            fill="#e2e8f0" letter-spacing="4">DUNST</text>
+      <text x="196" y="90"
+            font-family="'JetBrains Mono',monospace"
+            font-size="22" fill="#475569" letter-spacing="2">·</text>
+      <text x="218" y="90"
+            font-family="'JetBrains Mono',monospace"
+            font-size="22" fill="#64748b" letter-spacing="2">
+        Notification Daemon
+      </text>
+      <text x="96" y="112"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155" letter-spacing="2">
+        v1.9.2 · ASH Dotfiles v5.0 OMEGA · 8 notification types demonstrated
+      </text>
+
+      <!-- ASH badge -->
+      <rect x="1228" y="74" width="154" height="48" rx="10"
+            fill="#7c3aed" fill-opacity="0.15"
+            stroke="#7c3aed" stroke-width="0.8" stroke-opacity="0.5"/>
+      <use href="#dn-icon-ash" x="1240" y="82"
+           width="30" height="30" color="#a78bfa" opacity="0.8"/>
+      <text x="1278" y="96"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#a78bfa">ASH v5.0 Ω</text>
+      <text x="1278" y="112"
+            font-family="'JetBrains Mono',monospace"
+            font-size="9" fill="#475569">dunst config</text>
+
+      <!-- Content: notification type legend + config -->
+      <g transform="translate(80, 148)"
+         font-family="'JetBrains Mono',monospace">
+
+        <!-- Left column: Type descriptions -->
+        <g transform="translate(0, 0)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="3">URGENCY LEVELS</text>
+          <rect x="0" y="8" width="380" height="1"
+                fill="#1e2d40" fill-opacity="0.5"/>
+
+          <!-- Low urgency -->
+          <g transform="translate(0, 20)">
+            <rect x="0" y="0" width="8" height="60" rx="2"
+                  fill="#64748b" fill-opacity="0.6"/>
+            <text x="16" y="16" font-size="13" font-weight="bold"
+                  fill="#64748b">LOW</text>
+            <text x="16" y="32" font-size="11" fill="#334155">
+              Informational · Docker · System
+            </text>
+            <text x="16" y="48" font-size="10" fill="#2a3a50">
+              Timeout: 5s · No urgency frame
+            </text>
+          </g>
+
+          <!-- Normal urgency -->
+          <g transform="translate(0, 92)">
+            <rect x="0" y="0" width="8" height="60" rx="2"
+                  fill="#4f46e5" fill-opacity="0.8"/>
+            <text x="16" y="16" font-size="13" font-weight="bold"
+                  fill="#a5b4fc">NORMAL</text>
+            <text x="16" y="32" font-size="11" fill="#334155">
+              Volume · Brightness · WiFi
+            </text>
+            <text x="16" y="48" font-size="10" fill="#2a3a50">
+              Timeout: 3s · Default style
+            </text>
+          </g>
+
+          <!-- Critical urgency -->
+          <g transform="translate(0, 164)">
+            <rect x="0" y="0" width="8" height="68" rx="2"
+                  fill="#f43f5e" fill-opacity="0.9">
+              <animate attributeName="fill-opacity"
+                       values="0.5;0.9;0.5" dur="1.8s"
+                       repeatCount="indefinite"/>
+            </rect>
+            <text x="16" y="16" font-size="13" font-weight="bold"
+                  fill="#f43f5e">CRITICAL</text>
+            <text x="16" y="32" font-size="11" fill="#334155">
+              Battery low · Security alerts
+            </text>
+            <text x="16" y="48" font-size="10" fill="#2a3a50">
+              No timeout · Pulsing border
+            </text>
+            <text x="16" y="64" font-size="10" fill="#2a3a50">
+              Red glow shadow effect
+            </text>
+          </g>
+        </g>
+
+        <!-- Middle column: Features list -->
+        <g transform="translate(430, 0)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="3">FEATURES</text>
+          <rect x="0" y="8" width="380" height="1"
+                fill="#1e2d40" fill-opacity="0.5"/>
+
+          <g transform="translate(0, 20)" font-size="11">
+            <g transform="translate(0, 0)">
+              <circle cx="6" cy="6" r="5" fill="#7c3aed" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Glassmorphism backgrounds</text>
+            </g>
+            <g transform="translate(0, 24)">
+              <circle cx="6" cy="6" r="5" fill="#10b981" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Per-urgency color theming</text>
+            </g>
+            <g transform="translate(0, 48)">
+              <circle cx="6" cy="6" r="5" fill="#f59e0b" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">OSD progress bars</text>
+            </g>
+            <g transform="translate(0, 72)">
+              <circle cx="6" cy="6" r="5" fill="#3b82f6" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Inline action buttons</text>
+            </g>
+            <g transform="translate(0, 96)">
+              <circle cx="6" cy="6" r="5" fill="#ec4899" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Music player widget</text>
+            </g>
+            <g transform="translate(0, 120)">
+              <circle cx="6" cy="6" r="5" fill="#a78bfa" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">App icon / album art</text>
+            </g>
+            <g transform="translate(0, 144)">
+              <circle cx="6" cy="6" r="5" fill="#06d6a0" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Neon accent left bar</text>
+            </g>
+            <g transform="translate(0, 168)">
+              <circle cx="6" cy="6" r="5" fill="#f43f5e" fill-opacity="0.8"
+                      filter="url(#dn-glow-red)"/>
+              <text x="18" y="10" fill="#64748b">Critical pulse animation</text>
+            </g>
+            <g transform="translate(0, 192)">
+              <circle cx="6" cy="6" r="5" fill="#fbbf24" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Dismiss on click/scroll</text>
+            </g>
+            <g transform="translate(0, 216)">
+              <circle cx="6" cy="6" r="5" fill="#60a5fa" fill-opacity="0.8"/>
+              <text x="18" y="10" fill="#64748b">Sound effects per type</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Right column: dunstrc config snippet -->
+        <g transform="translate(860, 0)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="3">~/.config/dunst/dunstrc</text>
+          <rect x="0" y="8" width="440" height="1"
+                fill="#1e2d40" fill-opacity="0.5"/>
+
+          <rect x="0" y="16" width="440" height="560" rx="10"
+                fill="#06090f" fill-opacity="0.8"
+                stroke="#1e2d40" stroke-width="1"/>
+
+          <!-- Config code -->
+          <g transform="translate(16, 32)" font-size="11">
+            <text y="0" fill="#475569" font-style="italic">
+              # ASH Dotfiles dunstrc
+            </text>
+            <text y="22" fill="#334155">[global]</text>
+            <text y="40">
+              <tspan fill="#64748b">  corner_radius </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">16</tspan>
+            </text>
+            <text y="58">
+              <tspan fill="#64748b">  gap_size      </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">8</tspan>
+            </text>
+            <text y="76">
+              <tspan fill="#64748b">  width         </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">460</tspan>
+            </text>
+            <text y="94">
+              <tspan fill="#64748b">  origin        </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"top-right"</tspan>
+            </text>
+            <text y="112">
+              <tspan fill="#64748b">  offset        </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"18x54"</tspan>
+            </text>
+            <text y="130">
+              <tspan fill="#64748b">  font          </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"JetBrains Mono 11"</tspan>
+            </text>
+            <text y="148">
+              <tspan fill="#64748b">  transparency  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">3</tspan>
+            </text>
+            <text y="166">
+              <tspan fill="#64748b">  separator_height</tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">2</tspan>
+            </text>
+            <text y="184">
+              <tspan fill="#64748b">  padding       </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">14</tspan>
+            </text>
+
+            <text y="214" fill="#334155">[urgency_low]</text>
+            <text y="232">
+              <tspan fill="#64748b">  timeout  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">5</tspan>
+            </text>
+            <text y="250">
+              <tspan fill="#64748b">  bg  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#09101e"</tspan>
+            </text>
+            <text y="268">
+              <tspan fill="#64748b">  fg  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#94a3b8"</tspan>
+            </text>
+            <text y="286">
+              <tspan fill="#64748b">  frame_color</tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#1e2d40"</tspan>
+            </text>
+
+            <text y="316" fill="#334155">[urgency_critical]</text>
+            <text y="334">
+              <tspan fill="#64748b">  timeout  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">0</tspan>
+            </text>
+            <text y="352">
+              <tspan fill="#64748b">  bg  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#1a0808"</tspan>
+            </text>
+            <text y="370">
+              <tspan fill="#64748b">  fg  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#fca5a5"</tspan>
+            </text>
+            <text y="388">
+              <tspan fill="#64748b">  frame_color</tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#f43f5e"</tspan>
+            </text>
+            <text y="406">
+              <tspan fill="#64748b">  script  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"critical.sh"</tspan>
+            </text>
+
+            <text y="436" fill="#334155">[rule=volume_osd]</text>
+            <text y="454">
+              <tspan fill="#64748b">  appname  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"Volume"</tspan>
+            </text>
+            <text y="472">
+              <tspan fill="#64748b">  frame_color</tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"#7c3aed"</tspan>
+            </text>
+            <text y="490">
+              <tspan fill="#64748b">  script  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#a3e635">"osd.sh"</tspan>
+            </text>
+            <text y="508">
+              <tspan fill="#64748b">  timeout  </tspan>
+              <tspan fill="#475569">= </tspan>
+              <tspan fill="#fb923c">2</tspan>
+            </text>
+          </g>
+        </g>
+
+        <!-- Keybinds section at bottom -->
+        <g transform="translate(0, 286)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="2">KEYBINDS</text>
+          <rect x="0" y="8" width="380" height="1"
+                fill="#1e2d40" fill-opacity="0.4"/>
+
+          <g transform="translate(0, 18)" font-size="11">
+            <g transform="translate(0, 0)">
+              <rect x="0" y="0" width="28" height="20" rx="4"
+                    fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+              <text x="14" y="14" text-anchor="middle"
+                    fill="#64748b">D</text>
+              <text x="34" y="14" fill="#475569">Dismiss notification</text>
+            </g>
+            <g transform="translate(0, 28)">
+              <rect x="0" y="0" width="44" height="20" rx="4"
+                    fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+              <text x="22" y="14" text-anchor="middle"
+                    fill="#64748b">Ctrl+D</text>
+              <text x="50" y="14" fill="#475569">Dismiss all</text>
+            </g>
+            <g transform="translate(0, 56)">
+              <rect x="0" y="0" width="44" height="20" rx="4"
+                    fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+              <text x="22" y="14" text-anchor="middle"
+                    fill="#64748b">Ctrl+Z</text>
+              <text x="50" y="14" fill="#475569">History pop</text>
+            </g>
+            <g transform="translate(0, 84)">
+              <rect x="0" y="0" width="44" height="20" rx="4"
+                    fill="#1e2d40" stroke="#334155" stroke-width="0.8"/>
+              <text x="22" y="14" text-anchor="middle"
+                    fill="#64748b">Ctrl+C</text>
+              <text x="50" y="14" fill="#475569">Context menu</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Color palette preview bottom -->
+        <g transform="translate(430, 286)">
+          <text x="0" y="0" font-size="10" fill="#334155"
+                letter-spacing="2">DUNST COLOR PALETTE</text>
+          <rect x="0" y="8" width="380" height="1"
+                fill="#1e2d40" fill-opacity="0.4"/>
+
+          <g transform="translate(0, 18)">
+            <!-- Color swatches grid -->
+            <g font-size="9" fill="#475569">
+              <rect x="0"   y="0" width="60" height="36" rx="6" fill="#111827"/>
+              <text x="30"  y="52" text-anchor="middle">Normal</text>
+
+              <rect x="68"  y="0" width="60" height="36" rx="6" fill="#1a0808"/>
+              <text x="98"  y="52" text-anchor="middle">Critical</text>
+
+              <rect x="136" y="0" width="60" height="36" rx="6" fill="#161008"/>
+              <text x="166" y="52" text-anchor="middle">Warning</text>
+
+              <rect x="204" y="0" width="60" height="36" rx="6" fill="#081612"/>
+              <text x="234" y="52" text-anchor="middle">Success</text>
+
+              <rect x="272" y="0" width="60" height="36" rx="6" fill="#080e1c"/>
+              <text x="302" y="52" text-anchor="middle">Info</text>
+
+              <rect x="340" y="0" width="60" height="36" rx="6" fill="#0e0820"/>
+              <text x="370" y="52" text-anchor="middle">Music</text>
+            </g>
+
+            <!-- Accent colors row -->
+            <g transform="translate(0, 64)" font-size="9" fill="#475569">
+              <circle cx="12"  cy="12" r="11" fill="#7c3aed"/>
+              <text x="12"  y="38" text-anchor="middle">Vol</text>
+              <circle cx="50"  cy="12" r="11" fill="#f59e0b"/>
+              <text x="50"  y="38" text-anchor="middle">Bright</text>
+              <circle cx="88"  cy="12" r="11" fill="#f43f5e"/>
+              <text x="88"  y="38" text-anchor="middle">Crit</text>
+              <circle cx="126" cy="12" r="11" fill="#10b981"/>
+              <text x="126" y="38" text-anchor="middle">WiFi</text>
+              <circle cx="164" cy="12" r="11" fill="#ec4899"/>
+              <text x="164" y="38" text-anchor="middle">Music</text>
+              <circle cx="202" cy="12" r="11" fill="#3b82f6"/>
+              <text x="202" y="38" text-anchor="middle">Info</text>
+              <circle cx="240" cy="12" r="11" fill="#0ea5e9"/>
+              <text x="240" y="38" text-anchor="middle">Docker</text>
+              <circle cx="278" cy="12" r="11" fill="url(#dn-grad-rainbow)"/>
+              <text x="278" y="38" text-anchor="middle">ASH</text>
+            </g>
+          </g>
+        </g>
+
+      </g>
+
+    </g>
+
+    <!-- Title card -->
+    <g transform="translate(660, 18)">
+      <rect x="0" y="0" width="600" height="32" rx="10"
+            fill="#02030a" fill-opacity="0.95"
+            stroke="#7c3aed" stroke-width="1" stroke-opacity="0.5"/>
+      <rect x="2" y="2" width="596" height="1.5" rx="1"
+            fill="#7c3aed" fill-opacity="0.4"/>
+      <text x="300" y="22" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" font-weight="bold"
+            fill="#a78bfa" letter-spacing="3">
+        DUNST · NOTIFICATION DAEMON · ASH v5.0
+      </text>
+    </g>
+
+    <!-- Vignette -->
+    <ellipse cx="960" cy="540" rx="1920" ry="1080"
+             fill="url(#dn-vignette)" pointer-events="none"/>
+
+  </g>
+
+</svg>

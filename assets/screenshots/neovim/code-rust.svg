@@ -1,0 +1,1694 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1920 1080" width="1920" height="1080">
+
+  <defs>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         GRADIENTS — NEOVIM RUST CODE VIEW
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <linearGradient id="rs-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#080c12"/>
+    </linearGradient>
+
+    <linearGradient id="rs-sidebar-bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0a0f18"/>
+      <stop offset="100%" stop-color="#0c1220"/>
+    </linearGradient>
+
+    <linearGradient id="rs-statusline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#b7410e"/>
+      <stop offset="25%"  stop-color="#9a3912"/>
+      <stop offset="55%"  stop-color="#7c2d12"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+
+    <linearGradient id="rs-cursorline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#1c1f26"/>
+      <stop offset="100%" stop-color="#141720"/>
+    </linearGradient>
+
+    <linearGradient id="rs-selection" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#2d4a6e"/>
+      <stop offset="100%" stop-color="#1e3a5f"/>
+    </linearGradient>
+
+    <linearGradient id="rs-tabline" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0f1520"/>
+      <stop offset="100%" stop-color="#0c1118"/>
+    </linearGradient>
+
+    <linearGradient id="rs-header-active" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1c2030"/>
+      <stop offset="100%" stop-color="#141820"/>
+    </linearGradient>
+
+    <linearGradient id="rs-orange-h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f97316" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#f97316" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="rs-indent-scope" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.4"/>
+      <stop offset="50%"  stop-color="#7c3aed" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <linearGradient id="rs-lsp-hover-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a2035"/>
+      <stop offset="100%" stop-color="#141828"/>
+    </linearGradient>
+
+    <linearGradient id="rs-diag-error" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f43f5e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="rs-diag-warn" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f59e0b" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="rs-minimap-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c1018"/>
+      <stop offset="100%" stop-color="#08090f"/>
+    </linearGradient>
+
+    <linearGradient id="rs-scrollbar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#f97316" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ea6212" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <radialGradient id="rs-cursor-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#f97316" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="rs-vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FILTERS
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <filter id="rs-glow-orange" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#f97316" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="rs-glow-red" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#f43f5e" flood-opacity="0.8" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="rs-glow-green" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.8" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="rs-glow-blue" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feFlood flood-color="#38bdf8" flood-opacity="0.8" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="rs-blur-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+
+    <filter id="rs-blur-med" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PATTERNS
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <pattern id="rs-indent-guide" x="0" y="0"
+             width="2" height="1080"
+             patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1" height="1080"
+            fill="#1e2433" fill-opacity="0.5"/>
+    </pattern>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CLIP PATHS
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <clipPath id="rs-screen">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+
+    <clipPath id="rs-code-area">
+      <rect x="314" y="82" width="1446" height="958"/>
+    </clipPath>
+
+    <clipPath id="rs-neotree-clip">
+      <rect x="62" y="42" width="252" height="1000"/>
+    </clipPath>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SYMBOLS — CODE VIEW
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <symbol id="rs-icon-nvim" viewBox="0 0 100 100">
+      <polygon points="10,85 10,15 35,15 65,65 65,15 90,15 90,85 65,85 35,35 35,85"
+               fill="#f97316"/>
+    </symbol>
+
+    <symbol id="rs-icon-rust" viewBox="0 0 24 24">
+      <path d="M23.83 11.67l-1.06-.65a.28.28 0 0 0-.05-.33l.45-.99a.28.28 0 0 0-.33-.38l-1.09.28a.28.28 0 0 0-.27-.12l-.22-1.1a.28.28 0 0 0-.42-.18l-.9.59a.28.28 0 0 0-.29-.06l-.52-1a.28.28 0 0 0-.45 0l-.52 1a.28.28 0 0 0-.29.06l-.9-.59a.28.28 0 0 0-.42.18l-.22 1.1a.28.28 0 0 0-.27.12l-1.09-.28a.28.28 0 0 0-.33.38l.45.99a.28.28 0 0 0-.05.33l-1.06.65a.28.28 0 0 0 0 .48l1.06.65a.28.28 0 0 0 .05.33l-.45.99a.28.28 0 0 0 .33.38l1.09-.28a.28.28 0 0 0 .27.12l.22 1.1a.28.28 0 0 0 .42.18l.9-.59a.28.28 0 0 0 .29.06l.52 1a.28.28 0 0 0 .45 0l.52-1a.28.28 0 0 0 .29-.06l.9.59a.28.28 0 0 0 .42-.18l.22-1.1a.28.28 0 0 0 .27-.12l1.09.28a.28.28 0 0 0 .33-.38l-.45-.99a.28.28 0 0 0 .05-.33l1.06-.65a.28.28 0 0 0 0-.48z"
+            fill="#b7410e" stroke="#f97316" stroke-width="0.5"/>
+      <circle cx="12" cy="12" r="3.5" fill="#f97316"/>
+    </symbol>
+
+    <symbol id="rs-icon-folder-open" viewBox="0 0 24 24">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="rs-icon-file-rs" viewBox="0 0 24 24">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+            fill="none" stroke="currentColor"
+            stroke-width="2"/>
+      <polyline points="13,2 13,9 20,9"
+                fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="rs-icon-chevron" viewBox="0 0 24 24">
+      <polyline points="9,18 15,12 9,6"
+                fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="rs-icon-chevron-down" viewBox="0 0 24 24">
+      <polyline points="6,9 12,15 18,9"
+                fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MASTER RENDER — NEOVIM RUST CODE VIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+
+  <g clip-path="url(#rs-screen)">
+
+    <!-- ══════════════════════════════════
+         L00 — BACKGROUND
+    ══════════════════════════════════ -->
+
+    <rect width="1920" height="1080" fill="url(#rs-bg)"/>
+
+    <!-- ══════════════════════════════════
+         L01 — ICON BAR (Leftmost)
+    ══════════════════════════════════ -->
+
+    <g id="rs-iconbar">
+      <rect x="0" y="0" width="62" height="1080"
+            fill="#0a0f18"/>
+      <rect x="60" y="0" width="2" height="1080"
+            fill="#1e2433"/>
+
+      <!-- Neovim logo -->
+      <use href="#rs-icon-nvim" x="11" y="8"
+           width="40" height="40" color="#f97316"/>
+
+      <!-- Active: Explorer -->
+      <rect x="0" y="56" width="62" height="52"
+            fill="#f97316" fill-opacity="0.1"/>
+      <rect x="60" y="56" width="2" height="52"
+            fill="#f97316"/>
+      <use href="#rs-icon-file-rs" x="14" y="70"
+           width="24" height="24" color="#f97316" opacity="0.9"/>
+
+      <!-- Git -->
+      <use href="#rs-icon-rust" x="14" y="132"
+           width="24" height="24" color="#64748b" opacity="0.6"/>
+
+      <!-- Search -->
+      <use href="#rs-icon-folder-open" x="14" y="182"
+           width="24" height="24" color="#64748b" opacity="0.6"/>
+
+      <!-- Debug -->
+      <use href="#rs-icon-rust" x="14" y="232"
+           width="24" height="24" color="#64748b" opacity="0.6"/>
+
+      <!-- Bottom -->
+      <use href="#rs-icon-rust" x="14" y="966"
+           width="24" height="24" color="#64748b" opacity="0.5"/>
+      <use href="#rs-icon-folder-open" x="14" y="1016"
+           width="24" height="24" color="#64748b" opacity="0.5"/>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L02 — NEO-TREE SIDEBAR
+    ══════════════════════════════════ -->
+
+    <g id="rs-neotree">
+      <!-- Sidebar bg -->
+      <rect x="62" y="0" width="252" height="1080"
+            fill="url(#rs-sidebar-bg)"/>
+      <!-- Right border -->
+      <rect x="312" y="0" width="2" height="1080"
+            fill="#1e2433"/>
+
+      <!-- Neo-tree header -->
+      <rect x="62" y="42" width="252" height="40"
+            fill="#0e1420"/>
+      <rect x="62" y="42" width="252" height="1"
+            fill="#1e2433"/>
+      <text x="78" y="66"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#64748b" letter-spacing="2">
+        EXPLORER
+      </text>
+      <!-- Close / options icons -->
+      <text x="280" y="66"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" fill="#334155">···</text>
+
+      <!-- Tree content -->
+      <g transform="translate(62, 84)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="12">
+
+        <!-- Root folder -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="252" height="26"
+                fill="#f97316" fill-opacity="0.08"/>
+          <use href="#rs-icon-chevron-down" x="8" y="4"
+               width="16" height="16" color="#f97316" opacity="0.7"/>
+          <use href="#rs-icon-folder-open" x="28" y="4"
+               width="16" height="16" color="#f97316"/>
+          <text x="50" y="18" fill="#f97316"
+                font-weight="bold">ash-dotfiles</text>
+        </g>
+
+        <!-- src/ folder -->
+        <g transform="translate(16, 30)">
+          <use href="#rs-icon-chevron-down" x="4" y="4"
+               width="14" height="14" color="#64748b" opacity="0.7"/>
+          <use href="#rs-icon-folder-open" x="22" y="4"
+               width="14" height="14" color="#60a5fa"/>
+          <text x="42" y="17" fill="#94a3b8">src</text>
+        </g>
+
+        <!-- main.rs - active -->
+        <g transform="translate(32, 56)">
+          <rect x="-32" y="-2" width="220" height="24"
+                fill="#f97316" fill-opacity="0.12"
+                stroke="#f97316" stroke-width="1"
+                stroke-opacity="0.3"/>
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#f97316"/>
+          <text x="24" y="15" fill="#f97316"
+                font-weight="bold">main.rs</text>
+          <!-- Modified indicator -->
+          <circle cx="198" cy="9" r="4" fill="#f59e0b"/>
+        </g>
+
+        <!-- lib.rs -->
+        <g transform="translate(32, 84)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#64748b">lib.rs</text>
+        </g>
+
+        <!-- handlers.rs -->
+        <g transform="translate(32, 108)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#64748b">handlers.rs</text>
+          <!-- Error indicator -->
+          <circle cx="198" cy="9" r="4" fill="#f43f5e"/>
+        </g>
+
+        <!-- models.rs -->
+        <g transform="translate(32, 132)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#64748b">models.rs</text>
+        </g>
+
+        <!-- config.rs -->
+        <g transform="translate(32, 156)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#64748b">config.rs</text>
+        </g>
+
+        <!-- error.rs -->
+        <g transform="translate(32, 180)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#64748b">error.rs</text>
+        </g>
+
+        <!-- tests/ folder -->
+        <g transform="translate(16, 210)">
+          <use href="#rs-icon-chevron-down" x="4" y="4"
+               width="14" height="14" color="#64748b" opacity="0.7"/>
+          <use href="#rs-icon-folder-open" x="22" y="4"
+               width="14" height="14" color="#60a5fa"/>
+          <text x="42" y="17" fill="#64748b">tests</text>
+        </g>
+
+        <!-- Cargo.toml -->
+        <g transform="translate(16, 238)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#f59e0b"/>
+          <text x="24" y="15" fill="#64748b">Cargo.toml</text>
+        </g>
+
+        <!-- Cargo.lock -->
+        <g transform="translate(16, 262)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#475569">Cargo.lock</text>
+        </g>
+
+        <!-- .env -->
+        <g transform="translate(16, 286)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#64748b"/>
+          <text x="24" y="15" fill="#475569">.env</text>
+        </g>
+
+        <!-- README.md -->
+        <g transform="translate(16, 310)">
+          <use href="#rs-icon-file-rs" x="4" y="2"
+               width="14" height="14" color="#60a5fa"/>
+          <text x="24" y="15" fill="#64748b">README.md</text>
+        </g>
+
+        <!-- Git status summary at bottom of tree -->
+        <g transform="translate(0, 620)">
+          <line x1="0" y1="0" x2="252" y2="0"
+                stroke="#1e2433" stroke-width="1"/>
+          <text x="8" y="20"
+                font-size="10" fill="#334155"
+                letter-spacing="1">GIT STATUS</text>
+          <g transform="translate(4, 28)" font-size="11">
+            <text x="0" y="0" fill="#10b981">M main.rs</text>
+            <text x="0" y="18" fill="#f43f5e">! handlers.rs</text>
+            <text x="0" y="36" fill="#38bdf8">+ utils.rs</text>
+            <text x="0" y="54" fill="#f59e0b">? .env</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L03 — TABLINE
+    ══════════════════════════════════ -->
+
+    <g id="rs-tabline">
+      <rect x="62" y="0" width="1858" height="42"
+            fill="url(#rs-tabline)"/>
+      <rect x="62" y="40" width="1858" height="2"
+            fill="#1e2433"/>
+
+      <!-- Active tab: main.rs -->
+      <rect x="314" y="0" width="148" height="42"
+            fill="url(#rs-header-active)"/>
+      <rect x="314" y="40" width="148" height="2"
+            fill="#f97316"/>
+      <use href="#rs-icon-rust" x="322" y="10"
+           width="20" height="20" color="#f97316" opacity="0.9"/>
+      <text x="348" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#e2e8f0">main.rs</text>
+      <circle cx="450" cy="21" r="4" fill="#f59e0b"/>
+      <text x="460" y="27"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" fill="#334155">×</text>
+
+      <!-- Tab: handlers.rs with error dot -->
+      <rect x="468" y="0" width="168" height="42"
+            fill="transparent"/>
+      <use href="#rs-icon-rust" x="476" y="10"
+           width="20" height="20" color="#f43f5e" opacity="0.7"/>
+      <text x="502" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#64748b">handlers.rs</text>
+      <circle cx="624" cy="12" r="4" fill="#f43f5e"/>
+
+      <!-- Tab: lib.rs -->
+      <rect x="644" y="0" width="120" height="42"
+            fill="transparent"/>
+      <use href="#rs-icon-rust" x="652" y="10"
+           width="20" height="20" color="#64748b" opacity="0.6"/>
+      <text x="678" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#475569">lib.rs</text>
+
+      <!-- + New tab -->
+      <text x="790" y="27"
+            font-family="'JetBrains Mono',monospace"
+            font-size="18" fill="#1e2433">+</text>
+
+      <!-- Right: mode badge, encoding -->
+      <rect x="1580" y="8" width="100" height="24" rx="4"
+            fill="#b7410e" fill-opacity="0.3"
+            stroke="#f97316" stroke-width="1"
+            stroke-opacity="0.6"/>
+      <text x="1630" y="24" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" font-weight="bold"
+            fill="#fb923c">INSERT</text>
+
+      <text x="1700" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155">NVIM 0.10.3</text>
+
+      <text x="1840" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#334155">UTF-8</text>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L04 — BREADCRUMB / WINBAR
+    ══════════════════════════════════ -->
+
+    <g id="rs-winbar">
+      <rect x="314" y="42" width="1606" height="36"
+            fill="#0e1520" fill-opacity="0.8"/>
+      <rect x="314" y="76" width="1606" height="1"
+            fill="#1e2433"/>
+
+      <!-- Breadcrumb with navic -->
+      <g transform="translate(328, 52)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="12">
+        <!-- src -->
+        <text x="0" y="16" fill="#475569">src</text>
+        <text x="28" y="16" fill="#334155"> / </text>
+        <!-- main.rs -->
+        <use href="#rs-icon-rust" x="44" y="2"
+             width="14" height="14" color="#f97316" opacity="0.8"/>
+        <text x="62" y="16" fill="#94a3b8">main.rs</text>
+        <text x="116" y="16" fill="#334155"> › </text>
+        <!-- Function name -->
+        <text x="128" y="16" fill="#f97316">fn</text>
+        <text x="146" y="16" fill="#fbbf24">handle_connection</text>
+        <text x="338" y="16" fill="#334155"> › </text>
+        <!-- Current scope -->
+        <text x="350" y="16" fill="#60a5fa">match</text>
+        <text x="400" y="16" fill="#475569"> stream</text>
+      </g>
+
+      <!-- Right side: lsp diagnostics summary in winbar -->
+      <g transform="translate(1400, 52)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="11">
+        <circle cx="0" cy="10" r="5" fill="#f43f5e"/>
+        <text x="14" y="14" fill="#f43f5e">2</text>
+        <circle cx="44" cy="10" r="5" fill="#f59e0b"/>
+        <text x="58" y="14" fill="#f59e0b">1</text>
+        <circle cx="88" cy="10" r="5" fill="#38bdf8"/>
+        <text x="102" y="14" fill="#38bdf8">3</text>
+        <circle cx="132" cy="10" r="5" fill="#10b981"/>
+        <text x="146" y="14" fill="#10b981">0</text>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L05 — CODE EDITOR MAIN AREA
+    ══════════════════════════════════ -->
+
+    <g id="rs-code-editor">
+
+      <!-- Editor background -->
+      <rect x="314" y="78" width="1526" height="964"
+            fill="#0d1117"/>
+
+      <!-- Line numbers gutter -->
+      <rect x="314" y="78" width="58" height="964"
+            fill="#0a0f18" fill-opacity="0.5"/>
+      <rect x="370" y="78" width="1" height="964"
+            fill="#1e2433" fill-opacity="0.6"/>
+
+      <!-- Sign column (gutter icons) -->
+      <rect x="371" y="78" width="22" height="964"
+            fill="#0b1019" fill-opacity="0.4"/>
+
+      <!-- Indent guides (vertical lines at each indent level) -->
+      <g opacity="0.25" stroke="#1e2433" stroke-width="1">
+        <line x1="434" y1="78" x2="434" y2="1042"/>
+        <line x1="472" y1="78" x2="472" y2="1042"/>
+        <line x1="510" y1="78" x2="510" y2="1042"/>
+        <line x1="548" y1="78" x2="548" y2="1042"/>
+        <line x1="586" y1="78" x2="586" y2="1042"/>
+        <line x1="624" y1="78" x2="624" y2="1042"/>
+        <line x1="662" y1="78" x2="662" y2="1042"/>
+        <line x1="700" y1="78" x2="700" y2="1042"/>
+      </g>
+
+      <!-- Active indent scope highlight (purple) -->
+      <rect x="472" y="242" width="1" height="418"
+            fill="url(#rs-indent-scope)"/>
+
+      <!-- Cursor line highlight -->
+      <rect x="394" y="498" width="1446" height="20"
+            fill="url(#rs-cursorline)"/>
+
+      <!-- Selection highlight block -->
+      <rect x="510" y="362" width="320" height="20"
+            fill="url(#rs-selection)" opacity="0.7"/>
+
+      <!-- Diagnostic error line underlay -->
+      <rect x="394" y="602" width="600" height="20"
+            fill="url(#rs-diag-error)"/>
+      <!-- Diagnostic warning line underlay -->
+      <rect x="394" y="662" width="420" height="20"
+            fill="url(#rs-diag-warn)"/>
+
+      <!-- ── LINE NUMBERS ── -->
+      <g font-family="'JetBrains Mono',monospace"
+         font-size="13" text-anchor="end">
+
+        <!-- Relative line numbers (current = absolute, rest = relative) -->
+        <text x="360" y="100"  fill="#1e2d40">12</text>
+        <text x="360" y="120"  fill="#1e2d40">11</text>
+        <text x="360" y="140"  fill="#1e2d40">10</text>
+        <text x="360" y="160"  fill="#334155"> 9</text>
+        <text x="360" y="180"  fill="#334155"> 8</text>
+        <text x="360" y="200"  fill="#334155"> 7</text>
+        <text x="360" y="220"  fill="#334155"> 6</text>
+        <text x="360" y="240"  fill="#334155"> 5</text>
+        <text x="360" y="260"  fill="#334155"> 4</text>
+        <text x="360" y="280"  fill="#334155"> 3</text>
+        <text x="360" y="300"  fill="#334155"> 2</text>
+        <text x="360" y="320"  fill="#334155"> 1</text>
+        <text x="360" y="340"  fill="#475569">67</text>
+        <text x="360" y="360"  fill="#475569">68</text>
+        <text x="360" y="380"  fill="#475569">69</text>
+        <text x="360" y="400"  fill="#475569">70</text>
+        <text x="360" y="420"  fill="#475569">71</text>
+        <text x="360" y="440"  fill="#475569">72</text>
+        <text x="360" y="460"  fill="#475569">73</text>
+        <text x="360" y="480"  fill="#475569">74</text>
+        <!-- Current line — absolute, bright -->
+        <text x="360" y="500"  fill="#f97316"
+              filter="url(#rs-glow-orange)" font-weight="bold">75</text>
+        <text x="360" y="520"  fill="#475569">76</text>
+        <text x="360" y="540"  fill="#475569">77</text>
+        <text x="360" y="560"  fill="#475569">78</text>
+        <text x="360" y="580"  fill="#475569">79</text>
+        <text x="360" y="600"  fill="#475569">80</text>
+        <text x="360" y="620"  fill="#475569">81</text>
+        <text x="360" y="640"  fill="#475569">82</text>
+        <text x="360" y="660"  fill="#475569">83</text>
+        <text x="360" y="680"  fill="#475569">84</text>
+        <text x="360" y="700"  fill="#475569">85</text>
+        <text x="360" y="720"  fill="#475569">86</text>
+        <text x="360" y="740"  fill="#475569">87</text>
+        <text x="360" y="760"  fill="#475569">88</text>
+        <text x="360" y="780"  fill="#475569">89</text>
+        <text x="360" y="800"  fill="#475569">90</text>
+        <text x="360" y="820"  fill="#475569">91</text>
+        <text x="360" y="840"  fill="#475569">92</text>
+        <text x="360" y="860"  fill="#475569">93</text>
+        <text x="360" y="880"  fill="#475569">94</text>
+        <text x="360" y="900"  fill="#475569">95</text>
+        <text x="360" y="920"  fill="#475569">96</text>
+        <text x="360" y="940"  fill="#475569">97</text>
+        <text x="360" y="960"  fill="#475569">98</text>
+        <text x="360" y="980"  fill="#475569">99</text>
+        <text x="360" y="1000" fill="#475569">100</text>
+        <text x="360" y="1020" fill="#475569">101</text>
+        <text x="360" y="1040" fill="#475569">102</text>
+      </g>
+
+      <!-- ── GUTTER SIGNS ── -->
+      <g transform="translate(374, 0)">
+        <!-- Git added signs -->
+        <rect x="0" y="320" width="3" height="18"
+              rx="1" fill="#10b981"/>
+        <rect x="0" y="340" width="3" height="18"
+              rx="1" fill="#10b981"/>
+        <rect x="0" y="360" width="3" height="18"
+              rx="1" fill="#10b981"/>
+        <!-- Git modified signs -->
+        <rect x="0" y="380" width="3" height="18"
+              rx="1" fill="#f97316"/>
+        <rect x="0" y="400" width="3" height="18"
+              rx="1" fill="#f97316"/>
+        <!-- Error sign -->
+        <text x="2" y="618"
+              font-family="'JetBrains Mono',monospace"
+              font-size="14" fill="#f43f5e">●</text>
+        <!-- Warning sign -->
+        <text x="2" y="678"
+              font-family="'JetBrains Mono',monospace"
+              font-size="14" fill="#f59e0b">▲</text>
+        <!-- Info sign -->
+        <text x="2" y="738"
+              font-family="'JetBrains Mono',monospace"
+              font-size="14" fill="#38bdf8">ℹ</text>
+        <!-- Bookmark -->
+        <text x="2" y="758"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#7c3aed">⊙</text>
+      </g>
+
+      <!-- ── RUST SYNTAX HIGHLIGHTED CODE ── -->
+      <g transform="translate(396, 0)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="13.5" line-height="20">
+
+        <!-- Line 64 — use statement -->
+        <text x="0" y="100">
+          <tspan fill="#c084fc">use </tspan>
+          <tspan fill="#e2e8f0">std::</tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+          <tspan fill="#60a5fa">collections</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#60a5fa">HashMap</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#60a5fa">sync</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#60a5fa">Arc</tspan>
+          <tspan fill="#e2e8f0">};</tspan>
+        </text>
+
+        <!-- Line 65 — use statement -->
+        <text x="0" y="120">
+          <tspan fill="#c084fc">use </tspan>
+          <tspan fill="#60a5fa">tokio</tspan>
+          <tspan fill="#e2e8f0">::{</tspan>
+          <tspan fill="#60a5fa">net</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#60a5fa">TcpListener</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#60a5fa">sync</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#60a5fa">Mutex</tspan>
+          <tspan fill="#e2e8f0">};</tspan>
+        </text>
+
+        <!-- Line 66 — blank -->
+
+        <!-- Line 67 — derive macro -->
+        <text x="0" y="160">
+          <tspan fill="#f59e0b">#</tspan>
+          <tspan fill="#f59e0b">[</tspan>
+          <tspan fill="#60a5fa">derive</tspan>
+          <tspan fill="#f59e0b">(</tspan>
+          <tspan fill="#4ade80">Debug</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#4ade80">Clone</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#4ade80">Serialize</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#4ade80">Deserialize</tspan>
+          <tspan fill="#f59e0b">)</tspan>
+          <tspan fill="#f59e0b">]</tspan>
+        </text>
+
+        <!-- Line 68 — struct declaration -->
+        <text x="0" y="180">
+          <tspan fill="#c084fc">pub struct </tspan>
+          <tspan fill="#fbbf24">AppState</tspan>
+          <tspan fill="#e2e8f0"> {</tspan>
+        </text>
+
+        <!-- Line 69 — field -->
+        <text x="38" y="200">
+          <tspan fill="#c084fc">pub </tspan>
+          <tspan fill="#e2e8f0">connections</tspan>
+          <tspan fill="#e2e8f0">: </tspan>
+          <tspan fill="#c084fc">Arc</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#c084fc">Mutex</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#c084fc">HashMap</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#fbbf24">String</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#fbbf24">Vec</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#fbbf24">u64</tspan>
+          <tspan fill="#e2e8f0">&gt;&gt;&gt;&gt;,</tspan>
+        </text>
+
+        <!-- Line 70 — field -->
+        <text x="38" y="220">
+          <tspan fill="#c084fc">pub </tspan>
+          <tspan fill="#e2e8f0">config</tspan>
+          <tspan fill="#e2e8f0">: </tspan>
+          <tspan fill="#fbbf24">Config</tspan>
+          <tspan fill="#e2e8f0">,</tspan>
+        </text>
+
+        <!-- Line 71 — closing brace -->
+        <text x="0" y="240">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 72 — blank -->
+
+        <!-- Line 73 — impl block -->
+        <text x="0" y="280">
+          <tspan fill="#c084fc">impl </tspan>
+          <tspan fill="#fbbf24">AppState</tspan>
+          <tspan fill="#e2e8f0"> {</tspan>
+        </text>
+
+        <!-- Line 74 — doc comment -->
+        <text x="38" y="300">
+          <tspan fill="#4b5563" font-style="italic">
+            /// Creates a new AppState with default configuration
+          </tspan>
+        </text>
+
+        <!-- Line 75 — fn (CURRENT LINE) -->
+        <text x="38" y="500">
+          <!-- #[instrument] attribute -->
+        </text>
+
+        <!-- Reorder — show lines in visual order -->
+
+        <!-- Line 75 fn signature (actual cursor line) -->
+        <text x="38" y="320">
+          <tspan fill="#c084fc">pub async fn </tspan>
+          <tspan fill="#fbbf24">new</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#e2e8f0">config</tspan>
+          <tspan fill="#e2e8f0">: </tspan>
+          <tspan fill="#fbbf24">Config</tspan>
+          <tspan fill="#e2e8f0">) -&gt; </tspan>
+          <tspan fill="#fbbf24">Result</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#c084fc">Self</tspan>
+          <tspan fill="#e2e8f0">, </tspan>
+          <tspan fill="#fbbf24">AppError</tspan>
+          <tspan fill="#e2e8f0">&gt; {</tspan>
+        </text>
+
+        <!-- Line 76 — let binding -->
+        <text x="76" y="340">
+          <tspan fill="#c084fc">let </tspan>
+          <tspan fill="#e2e8f0">connections </tspan>
+          <tspan fill="#c084fc">= </tspan>
+          <tspan fill="#fbbf24">Arc</tspan>
+          <tspan fill="#e2e8f0">::new(</tspan>
+          <tspan fill="#fbbf24">Mutex</tspan>
+          <tspan fill="#e2e8f0">::new(</tspan>
+          <tspan fill="#fbbf24">HashMap</tspan>
+          <tspan fill="#e2e8f0">::new()));</tspan>
+        </text>
+
+        <!-- Line 77 — blank -->
+
+        <!-- Line 78 — if let with selection -->
+        <text x="76" y="380">
+          <tspan fill="#c084fc">if let </tspan>
+          <tspan fill="#fbbf24">Ok</tspan>
+          <tspan fill="#e2e8f0">(listener) = </tspan>
+          <tspan fill="#fbbf24">TcpListener</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">bind</tspan>
+          <tspan fill="#e2e8f0">(&amp;</tspan>
+          <tspan fill="#a3e635">"0.0.0.0:8080"</tspan>
+          <tspan fill="#e2e8f0">).</tspan>
+          <tspan fill="#4ade80">await</tspan>
+          <tspan fill="#e2e8f0"> {</tspan>
+        </text>
+
+        <!-- Line 79 — tracing/logging -->
+        <text x="114" y="400">
+          <tspan fill="#4b5563" font-style="italic">
+            // Initialize connection pool
+          </tspan>
+        </text>
+
+        <!-- Line 80 — info! macro -->
+        <text x="114" y="420">
+          <tspan fill="#f59e0b">tracing</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">info!</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">"Server listening on {}"</tspan>
+          <tspan fill="#e2e8f0">, config.</tspan>
+          <tspan fill="#60a5fa">addr</tspan>
+          <tspan fill="#e2e8f0">);</tspan>
+        </text>
+
+        <!-- Line 81 — return Ok -->
+        <text x="114" y="440">
+          <tspan fill="#c084fc">return </tspan>
+          <tspan fill="#fbbf24">Ok</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#c084fc">Self </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 82 — struct init field -->
+        <text x="152" y="460">
+          <tspan fill="#60a5fa">connections</tspan>
+          <tspan fill="#e2e8f0">,</tspan>
+        </text>
+
+        <!-- Line 83 — struct init field — CURRENT CURSOR LINE -->
+        <text x="152" y="500">
+          <tspan fill="#60a5fa">config</tspan>
+          <tspan fill="#e2e8f0">,</tspan>
+          <!-- Cursor block -->
+          <tspan fill="#f97316" filter="url(#rs-glow-orange)">█</tspan>
+        </text>
+
+        <!-- Cursor glow at line 83 -->
+        <ellipse cx="228" cy="492" rx="12" ry="10"
+                 fill="url(#rs-cursor-glow)"
+                 filter="url(#rs-blur-soft)" opacity="0.6"/>
+
+        <!-- Line 84 -->
+        <text x="114" y="520">
+          <tspan fill="#e2e8f0">}</tspan>
+          <tspan fill="#e2e8f0">));</tspan>
+        </text>
+
+        <!-- Line 85 — closing if let -->
+        <text x="76" y="540">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 86 — Err case -->
+        <text x="76" y="560">
+          <tspan fill="#c084fc">else </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 87 — error with diagnostic annotation -->
+        <text x="114" y="580">
+          <tspan fill="#c084fc">return </tspan>
+          <tspan fill="#fbbf24">Err</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#fbbf24">AppError</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#fb7185">BindError</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+        </text>
+
+        <!-- Error wavy underline on this line -->
+        <path d="M 114,592 Q 134,588 154,592 Q 174,596 194,592 Q 214,588 234,592
+                 Q 254,596 274,592 Q 294,588 314,592 Q 334,596 354,592
+                 Q 374,588 394,592 Q 414,596 434,592"
+              fill="none" stroke="#f43f5e"
+              stroke-width="1.5" stroke-opacity="0.8"/>
+
+        <!-- Line 88 — string literal (errored line) -->
+        <text x="152" y="600">
+          <tspan fill="#a3e635">"Failed to bind to address"</tspan>
+          <tspan fill="#e2e8f0">.</tspan>
+          <tspan fill="#4ade80">to_string</tspan>
+          <tspan fill="#e2e8f0">(),</tspan>
+        </text>
+
+        <!-- Wavy error underline line 88 -->
+        <path d="M 152,612 Q 172,608 192,612 Q 212,616 232,612 Q 252,608 272,612
+                 Q 292,616 312,612 Q 332,608 352,612 Q 372,616 392,612"
+              fill="none" stroke="#f43f5e"
+              stroke-width="1.5" stroke-opacity="0.7"/>
+
+        <!-- Line 89 — closing parens -->
+        <text x="114" y="620">
+          <tspan fill="#e2e8f0">);</tspan>
+        </text>
+
+        <!-- Line 90 — closing else -->
+        <text x="76" y="640">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 91 — warn -->
+        <text x="76" y="660">
+          <tspan fill="#f59e0b">tracing</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">warn!</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">"Retrying connection... attempt {}"</tspan>
+          <tspan fill="#e2e8f0">, attempts);</tspan>
+        </text>
+
+        <!-- Warning underline -->
+        <path d="M 76,672 Q 96,668 116,672 Q 136,676 156,672 Q 176,668 196,672
+                 Q 216,676 236,672"
+              fill="none" stroke="#f59e0b"
+              stroke-width="1.5" stroke-opacity="0.7"/>
+
+        <!-- Line 92 — tokio::time::sleep -->
+        <text x="76" y="680">
+          <tspan fill="#fbbf24">tokio</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#60a5fa">time</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">sleep</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#fbbf24">Duration</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">from_secs</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">2</tspan>
+          <tspan fill="#e2e8f0">)).</tspan>
+          <tspan fill="#4ade80">await</tspan>
+          <tspan fill="#e2e8f0">;</tspan>
+        </text>
+
+        <!-- Line 93 — closing fn brace -->
+        <text x="76" y="700">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 94 — closing impl brace -->
+        <text x="38" y="720">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 95 — blank -->
+
+        <!-- Line 96 — async fn -->
+        <text x="0" y="760">
+          <tspan fill="#c084fc">pub async fn </tspan>
+          <tspan fill="#fbbf24">handle_connection</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+        </text>
+
+        <!-- Line 97 — param -->
+        <text x="38" y="780">
+          <tspan fill="#e2e8f0">state</tspan>
+          <tspan fill="#e2e8f0">: </tspan>
+          <tspan fill="#c084fc">Arc</tspan>
+          <tspan fill="#e2e8f0">&lt;</tspan>
+          <tspan fill="#fbbf24">AppState</tspan>
+          <tspan fill="#e2e8f0">&gt;,</tspan>
+        </text>
+
+        <!-- Line 98 — param 2 -->
+        <text x="38" y="800">
+          <tspan fill="#e2e8f0">mut stream</tspan>
+          <tspan fill="#e2e8f0">: </tspan>
+          <tspan fill="#fbbf24">TcpStream</tspan>
+          <tspan fill="#e2e8f0">,</tspan>
+        </text>
+
+        <!-- Line 99 — closing paren + return type -->
+        <text x="0" y="820">
+          <tspan fill="#e2e8f0">) -&gt; </tspan>
+          <tspan fill="#fbbf24">Result</tspan>
+          <tspan fill="#e2e8f0">&lt;(), </tspan>
+          <tspan fill="#fbbf24">AppError</tspan>
+          <tspan fill="#e2e8f0">&gt; {</tspan>
+        </text>
+
+        <!-- Line 100 — buffer declaration -->
+        <text x="38" y="840">
+          <tspan fill="#c084fc">let mut </tspan>
+          <tspan fill="#e2e8f0">buf </tspan>
+          <tspan fill="#c084fc">= </tspan>
+          <tspan fill="#fbbf24">BytesMut</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">with_capacity</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">1024</tspan>
+          <tspan fill="#e2e8f0">);</tspan>
+        </text>
+
+        <!-- Line 101 — loop -->
+        <text x="38" y="860">
+          <tspan fill="#c084fc">loop </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 102 — match on read_buf -->
+        <text x="76" y="880">
+          <tspan fill="#c084fc">match </tspan>
+          <tspan fill="#e2e8f0">stream.</tspan>
+          <tspan fill="#4ade80">read_buf</tspan>
+          <tspan fill="#e2e8f0">(&amp;mut buf).</tspan>
+          <tspan fill="#4ade80">await </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 103 — Ok(0) case -->
+        <text x="114" y="900">
+          <tspan fill="#fbbf24">Ok</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">0</tspan>
+          <tspan fill="#e2e8f0">) </tspan>
+          <tspan fill="#c084fc">=&gt; </tspan>
+          <tspan fill="#c084fc">break</tspan>
+          <tspan fill="#e2e8f0">,</tspan>
+          <tspan fill="#4b5563" font-style="italic">
+            // Connection closed
+          </tspan>
+        </text>
+
+        <!-- Line 104 — Ok(n) case -->
+        <text x="114" y="920">
+          <tspan fill="#fbbf24">Ok</tspan>
+          <tspan fill="#e2e8f0">(n) </tspan>
+          <tspan fill="#c084fc">=&gt; </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 105 — process -->
+        <text x="152" y="940">
+          <tspan fill="#c084fc">let </tspan>
+          <tspan fill="#e2e8f0">data </tspan>
+          <tspan fill="#c084fc">= </tspan>
+          <tspan fill="#e2e8f0">buf.</tspan>
+          <tspan fill="#4ade80">split_to</tspan>
+          <tspan fill="#e2e8f0">(n);</tspan>
+        </text>
+
+        <!-- Line 106 — process data -->
+        <text x="152" y="960">
+          <tspan fill="#c084fc">if let </tspan>
+          <tspan fill="#fbbf24">Err</tspan>
+          <tspan fill="#e2e8f0">(e) = </tspan>
+          <tspan fill="#4ade80">process_data</tspan>
+          <tspan fill="#e2e8f0">(&amp;state, data).</tspan>
+          <tspan fill="#4ade80">await </tspan>
+          <tspan fill="#e2e8f0">{</tspan>
+        </text>
+
+        <!-- Line 107 -->
+        <text x="190" y="980">
+          <tspan fill="#f59e0b">tracing</tspan>
+          <tspan fill="#e2e8f0">::</tspan>
+          <tspan fill="#4ade80">error!</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#a3e635">"Process error: {:?}"</tspan>
+          <tspan fill="#e2e8f0">, e);</tspan>
+        </text>
+
+        <!-- Line 108 -->
+        <text x="190" y="1000">
+          <tspan fill="#c084fc">return </tspan>
+          <tspan fill="#fbbf24">Err</tspan>
+          <tspan fill="#e2e8f0">(e);</tspan>
+        </text>
+
+        <!-- Line 109 -->
+        <text x="152" y="1020">
+          <tspan fill="#e2e8f0">}</tspan>
+        </text>
+
+        <!-- Line 110 — Err arm -->
+        <text x="114" y="1040">
+          <tspan fill="#fbbf24">Err</tspan>
+          <tspan fill="#e2e8f0">(e) </tspan>
+          <tspan fill="#c084fc">=&gt; </tspan>
+          <tspan fill="#c084fc">return </tspan>
+          <tspan fill="#fbbf24">Err</tspan>
+          <tspan fill="#e2e8f0">(</tspan>
+          <tspan fill="#fbbf24">AppError</tspan>
+          <tspan fill="#e2e8f0">::from(e)),</tspan>
+        </text>
+      </g>
+
+    </g>
+
+    <!-- ══════════════════════════════════
+         L06 — LSP HOVER POPUP
+    ══════════════════════════════════ -->
+
+    <g id="rs-lsp-hover" transform="translate(580, 210)">
+
+      <!-- Hover popup shadow -->
+      <rect x="3" y="4" width="580" height="220" rx="10"
+            fill="black" fill-opacity="0.5"
+            filter="url(#rs-blur-med)"/>
+
+      <!-- Hover popup body -->
+      <rect x="0" y="0" width="580" height="220" rx="10"
+            fill="url(#rs-lsp-hover-bg)"
+            stroke="#2d3748" stroke-width="1.5"/>
+
+      <!-- Header separator -->
+      <rect x="0" y="38" width="580" height="1"
+            fill="#2d3748"/>
+
+      <!-- Rust icon in header -->
+      <use href="#rs-icon-rust" x="12" y="9"
+           width="20" height="20" color="#f97316"/>
+
+      <!-- Type signature header -->
+      <text x="38" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" font-weight="bold"
+            fill="#94a3b8">
+        pub async fn
+      </text>
+      <text x="148" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" font-weight="bold"
+            fill="#fbbf24" filter="url(#rs-glow-orange)">new</text>
+      <text x="182" y="26"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" fill="#94a3b8">
+        (config: Config) → Result&lt;Self, AppError&gt;
+      </text>
+
+      <!-- Parameter section -->
+      <text x="14" y="56"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#64748b"
+            letter-spacing="2">PARAMETERS</text>
+
+      <g transform="translate(14, 68)" font-family="'JetBrains Mono',monospace">
+        <!-- config param -->
+        <rect x="0" y="0" width="552" height="28" rx="4"
+              fill="#334155" fill-opacity="0.3"/>
+        <text x="10" y="18" font-size="12">
+          <tspan fill="#e2e8f0">config</tspan>
+          <tspan fill="#94a3b8">: </tspan>
+          <tspan fill="#fbbf24">Config</tspan>
+        </text>
+        <text x="200" y="18" font-size="11"
+              fill="#64748b">
+          — Application configuration struct
+        </text>
+      </g>
+
+      <!-- Returns section -->
+      <text x="14" y="118"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#64748b"
+            letter-spacing="2">RETURNS</text>
+      <g transform="translate(14, 128)" font-family="'JetBrains Mono',monospace">
+        <rect x="0" y="0" width="552" height="28" rx="4"
+              fill="#334155" fill-opacity="0.3"/>
+        <text x="10" y="18" font-size="12">
+          <tspan fill="#4ade80">Ok</tspan>
+          <tspan fill="#94a3b8">(</tspan>
+          <tspan fill="#fbbf24">AppState</tspan>
+          <tspan fill="#94a3b8">)</tspan>
+          <tspan fill="#64748b"> or </tspan>
+          <tspan fill="#fb7185">Err</tspan>
+          <tspan fill="#94a3b8">(</tspan>
+          <tspan fill="#fbbf24">AppError</tspan>
+          <tspan fill="#94a3b8">)</tspan>
+        </text>
+      </g>
+
+      <!-- Doc comment -->
+      <text x="14" y="178"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#4b5563"
+            font-style="italic">
+        Creates a new AppState with the provided configuration.
+      </text>
+      <text x="14" y="196"
+            font-family="'JetBrains Mono',monospace"
+            font-size="11" fill="#4b5563"
+            font-style="italic">
+        Binds to TCP socket and initializes connection pool.
+      </text>
+
+      <!-- Footer links -->
+      <line x1="0" y1="205" x2="580" y2="205"
+            stroke="#2d3748" stroke-width="1"/>
+      <g transform="translate(14, 212)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="10">
+        <text fill="#334155">
+          gd → definition ·
+          <tspan>gr → references ·</tspan>
+          <tspan>K → hover ·</tspan>
+          <tspan>ca → code action ·</tspan>
+          <tspan>rn → rename</tspan>
+        </text>
+      </g>
+
+      <!-- Close indicator -->
+      <text x="565" y="22"
+            font-family="'JetBrains Mono',monospace"
+            font-size="14" fill="#334155">×</text>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L07 — DIAGNOSTICS PANEL (Bottom)
+    ══════════════════════════════════ -->
+
+    <g id="rs-diagnostics-panel" transform="translate(314, 920)">
+
+      <!-- Panel background -->
+      <rect x="0" y="0" width="1526" height="120"
+            fill="#0a0f18" fill-opacity="0.95"/>
+      <rect x="0" y="0" width="1526" height="1"
+            fill="#2d3748"/>
+
+      <!-- Panel tabs -->
+      <g font-family="'JetBrains Mono',monospace" font-size="12">
+        <!-- PROBLEMS tab active -->
+        <rect x="0" y="0" width="110" height="36"
+              fill="#0d1117"/>
+        <rect x="0" y="34" width="110" height="2"
+              fill="#f97316"/>
+        <text x="14" y="23" fill="#e2e8f0">PROBLEMS</text>
+        <rect x="88" y="8" width="18" height="18" rx="9"
+              fill="#f43f5e" fill-opacity="0.2"
+              stroke="#f43f5e" stroke-width="1"/>
+        <text x="97" y="21" text-anchor="middle"
+              fill="#f43f5e" font-size="10">3</text>
+
+        <!-- OUTPUT tab -->
+        <text x="126" y="23" fill="#475569">OUTPUT</text>
+        <!-- TERMINAL tab -->
+        <text x="210" y="23" fill="#475569">TERMINAL</text>
+        <!-- DEBUG CONSOLE tab -->
+        <text x="306" y="23" fill="#475569">DEBUG</text>
+      </g>
+
+      <!-- Filter bar -->
+      <rect x="0" y="36" width="1526" height="1"
+            fill="#1e2433"/>
+      <g transform="translate(8, 44)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="11" fill="#475569">
+        <text x="0" y="16">Filter</text>
+        <rect x="46" y="0" width="200" height="24" rx="4"
+              fill="#1e2433"/>
+        <text x="54" y="16" fill="#334155">Search errors...</text>
+        <!-- Counts -->
+        <text x="280" y="16">
+          <tspan fill="#f43f5e">● 2 errors</tspan>
+          <tspan fill="#475569"> · </tspan>
+          <tspan fill="#f59e0b">▲ 1 warning</tspan>
+          <tspan fill="#475569"> · </tspan>
+          <tspan fill="#38bdf8">ℹ 3 infos</tspan>
+        </text>
+      </g>
+
+      <!-- Diagnostic entries -->
+      <g transform="translate(8, 72)"
+         font-family="'JetBrains Mono',monospace"
+         font-size="11">
+
+        <!-- Error 1 -->
+        <g transform="translate(0, 0)">
+          <rect x="-4" y="-2" width="700" height="20" rx="3"
+                fill="#f43f5e" fill-opacity="0.06"/>
+          <text x="0" y="14" fill="#f43f5e">●</text>
+          <text x="18" y="14">
+            <tspan fill="#94a3b8">main.rs</tspan>
+            <tspan fill="#475569">:88:12</tspan>
+            <tspan fill="#64748b">  </tspan>
+            <tspan fill="#e2e8f0">
+              cannot find value `attempts` in scope
+            </tspan>
+          </text>
+          <text x="590" y="14" fill="#334155">
+            E0425 [rust-analyzer]
+          </text>
+        </g>
+
+        <!-- Error 2 -->
+        <g transform="translate(0, 22)">
+          <rect x="-4" y="-2" width="700" height="20" rx="3"
+                fill="#f43f5e" fill-opacity="0.04"/>
+          <text x="0" y="14" fill="#f43f5e">●</text>
+          <text x="18" y="14">
+            <tspan fill="#94a3b8">main.rs</tspan>
+            <tspan fill="#475569">:87:44</tspan>
+            <tspan fill="#64748b">  </tspan>
+            <tspan fill="#e2e8f0">
+              expected `AppError`, found `&amp;str`
+            </tspan>
+          </text>
+          <text x="590" y="14" fill="#334155">
+            E0308 [rust-analyzer]
+          </text>
+        </g>
+
+        <!-- Warning -->
+        <g transform="translate(0, 44)">
+          <text x="0" y="14" fill="#f59e0b">▲</text>
+          <text x="18" y="14">
+            <tspan fill="#94a3b8">main.rs</tspan>
+            <tspan fill="#475569">:91:5</tspan>
+            <tspan fill="#64748b">  </tspan>
+            <tspan fill="#e2e8f0">
+              unused variable: `attempts` — consider `_attempts`
+            </tspan>
+          </text>
+          <text x="590" y="14" fill="#334155">
+            unused_variables [rustc]
+          </text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L08 — MINIMAP (Right edge)
+    ══════════════════════════════════ -->
+
+    <g id="rs-minimap">
+      <!-- Minimap background -->
+      <rect x="1840" y="42" width="80" height="978"
+            fill="url(#rs-minimap-bg)"/>
+      <rect x="1840" y="42" width="1" height="978"
+            fill="#1e2433"/>
+
+      <!-- Minimap viewport indicator -->
+      <rect x="1840" y="180" width="80" height="200"
+            fill="#ffffff" fill-opacity="0.04"
+            stroke="#ffffff" stroke-width="0.5"
+            stroke-opacity="0.15"/>
+
+      <!-- Scrollbar -->
+      <rect x="1834" y="180" width="6" height="200" rx="3"
+            fill="url(#rs-scrollbar)"/>
+
+      <!-- Minimap code representation (tiny colored lines) -->
+      <g opacity="0.6">
+        <!-- Purple keyword lines -->
+        <g fill="#c084fc" fill-opacity="0.6">
+          <rect x="1846" y="55"  width="48" height="2" rx="1"/>
+          <rect x="1846" y="62"  width="52" height="2" rx="1"/>
+          <rect x="1846" y="75"  width="38" height="2" rx="1"/>
+          <rect x="1846" y="82"  width="44" height="2" rx="1"/>
+          <rect x="1846" y="96"  width="60" height="2" rx="1"/>
+          <rect x="1846" y="116" width="50" height="2" rx="1"/>
+          <rect x="1846" y="130" width="34" height="2" rx="1"/>
+        </g>
+        <!-- Orange type lines -->
+        <g fill="#f97316" fill-opacity="0.5">
+          <rect x="1852" y="59"  width="32" height="2" rx="1"/>
+          <rect x="1852" y="79"  width="36" height="2" rx="1"/>
+          <rect x="1852" y="100" width="28" height="2" rx="1"/>
+          <rect x="1852" y="120" width="40" height="2" rx="1"/>
+          <rect x="1852" y="135" width="24" height="2" rx="1"/>
+        </g>
+        <!-- Green function lines -->
+        <g fill="#4ade80" fill-opacity="0.4">
+          <rect x="1858" y="65"  width="24" height="2" rx="1"/>
+          <rect x="1858" y="88"  width="28" height="2" rx="1"/>
+          <rect x="1858" y="105" width="20" height="2" rx="1"/>
+          <rect x="1858" y="125" width="32" height="2" rx="1"/>
+        </g>
+        <!-- Error indicator on minimap -->
+        <rect x="1840" y="225" width="6" height="8" rx="1"
+              fill="#f43f5e" fill-opacity="0.8"/>
+        <rect x="1840" y="238" width="6" height="8" rx="1"
+              fill="#f43f5e" fill-opacity="0.6"/>
+        <!-- Warning indicator -->
+        <rect x="1840" y="255" width="6" height="8" rx="1"
+              fill="#f59e0b" fill-opacity="0.8"/>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L09 — STATUSLINE
+    ══════════════════════════════════ -->
+
+    <g id="rs-statusline">
+      <!-- Statusline bar -->
+      <rect x="62" y="1044" width="1858" height="36"
+            fill="url(#rs-statusline)"/>
+
+      <!-- Mode section (orange for INSERT) -->
+      <rect x="62" y="1044" width="96" height="36"
+            fill="#b7410e"/>
+      <text x="110" y="1066" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace"
+            font-size="12" font-weight="bold"
+            fill="#ffffff" letter-spacing="1">INSERT</text>
+
+      <!-- Git branch section -->
+      <g transform="translate(168, 1050)">
+        <use href="#rs-icon-rust" x="0" y="0"
+             width="18" height="18" color="#fbbf24" opacity="0.9"/>
+        <text x="24" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#fbbf24">omega</text>
+        <text x="78" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#4ade80">+147</text>
+        <text x="120" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#f43f5e">-23</text>
+        <text x="162" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#f59e0b">~8</text>
+      </g>
+
+      <!-- LSP status -->
+      <g transform="translate(380, 1050)">
+        <circle cx="0" cy="9" r="5"
+                fill="#10b981" filter="url(#rs-glow-green)"/>
+        <text x="14" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#e2e8f0" fill-opacity="0.7">
+          rust-analyzer
+        </text>
+        <!-- Spinner / loading indicator when LSP is processing -->
+        <text x="136" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#38bdf8">⟳</text>
+      </g>
+
+      <!-- Diagnostics in statusline -->
+      <g transform="translate(580, 1050)">
+        <text x="0" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12">
+          <tspan fill="#f43f5e">● 2</tspan>
+          <tspan fill="#475569"> </tspan>
+          <tspan fill="#f59e0b">▲ 1</tspan>
+          <tspan fill="#475569"> </tspan>
+          <tspan fill="#38bdf8">ℹ 3</tspan>
+        </text>
+      </g>
+
+      <!-- Center: filename + modified -->
+      <g transform="translate(960, 1050)">
+        <use href="#rs-icon-rust" x="-90" y="0"
+             width="16" height="16" color="#f97316" opacity="0.8"/>
+        <text x="-70" y="14" text-anchor="start"
+              font-family="'JetBrains Mono',monospace"
+              font-size="13" fill="#e2e8f0" fill-opacity="0.9">
+          src/main.rs
+        </text>
+        <circle cx="62" cy="8" r="5" fill="#f59e0b"/>
+      </g>
+
+      <!-- Right section -->
+      <g transform="translate(1360, 1050)">
+        <!-- Copilot / AI -->
+        <text x="0" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#10b981">⬡ AI</text>
+
+        <!-- Filetype -->
+        <rect x="50" y="-2" width="50" height="22" rx="4"
+              fill="#1e293b"/>
+        <text x="75" y="13" text-anchor="middle"
+              font-family="'JetBrains Mono',monospace"
+              font-size="11" fill="#f97316">rust</text>
+
+        <!-- Encoding -->
+        <text x="108" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="11" fill="#475569">UTF-8 · LF</text>
+
+        <!-- Cursor position -->
+        <text x="210" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="12" fill="#94a3b8">83:8</text>
+        <text x="256" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="11" fill="#475569">67%</text>
+
+        <!-- Clock -->
+        <text x="306" y="14"
+              font-family="'JetBrains Mono',monospace"
+              font-size="11" fill="#475569">22:47</text>
+
+        <!-- ASH badge -->
+        <rect x="360" y="-4" width="100" height="26" rx="5"
+              fill="#b7410e" fill-opacity="0.25"
+              stroke="#f97316" stroke-width="1"
+              stroke-opacity="0.5"/>
+        <text x="410" y="13" text-anchor="middle"
+              font-family="'JetBrains Mono',monospace"
+              font-size="10" font-weight="bold"
+              fill="#fb923c">ASH v5.0 Ω</text>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L10 — COMPLETION POPUP (nvim-cmp)
+    ══════════════════════════════════ -->
+
+    <g id="rs-cmp-popup" transform="translate(510, 520)">
+
+      <!-- CMP popup background -->
+      <rect x="0" y="0" width="380" height="200" rx="8"
+            fill="#111827" fill-opacity="0.98"
+            stroke="#2d3748" stroke-width="1.5"/>
+
+      <!-- Scrollbar on right -->
+      <rect x="366" y="4" width="6" height="192" rx="3"
+            fill="#1e2433"/>
+      <rect x="366" y="4" width="6" height="60" rx="3"
+            fill="#475569" fill-opacity="0.6"/>
+
+      <!-- Completion items -->
+      <g font-family="'JetBrains Mono',monospace" font-size="12">
+
+        <!-- Selected item -->
+        <rect x="0" y="0" width="360" height="26" rx="8"
+              fill="#7c3aed" fill-opacity="0.25"/>
+        <text x="10" y="18" fill="#a78bfa">⬡</text>
+        <text x="30" y="18" fill="#e2e8f0" font-weight="bold">
+          config
+        </text>
+        <text x="180" y="18" fill="#64748b">Config</text>
+        <text x="340" y="18" text-anchor="end"
+              fill="#475569" font-size="10">field</text>
+
+        <!-- Item 2 -->
+        <text x="10" y="46" fill="#60a5fa">ƒ</text>
+        <text x="30" y="46" fill="#94a3b8">config_path</text>
+        <text x="180" y="46" fill="#475569">String</text>
+        <text x="340" y="46" text-anchor="end"
+              fill="#334155" font-size="10">method</text>
+
+        <!-- Item 3 -->
+        <text x="10" y="68" fill="#fbbf24">◈</text>
+        <text x="30" y="68" fill="#94a3b8">Config</text>
+        <text x="180" y="68" fill="#475569">struct</text>
+        <text x="340" y="68" text-anchor="end"
+              fill="#334155" font-size="10">struct</text>
+
+        <!-- Item 4 -->
+        <text x="10" y="90" fill="#4ade80">ƒ</text>
+        <text x="30" y="90" fill="#94a3b8">connection_pool</text>
+        <text x="200" y="90" fill="#475569">Pool</text>
+        <text x="340" y="90" text-anchor="end"
+              fill="#334155" font-size="10">fn</text>
+
+        <!-- Item 5 -->
+        <text x="10" y="112" fill="#fb7185">⬡</text>
+        <text x="30" y="112" fill="#94a3b8">connections</text>
+        <text x="180" y="112" fill="#475569">Arc&lt;Mutex&gt;</text>
+        <text x="340" y="112" text-anchor="end"
+              fill="#334155" font-size="10">field</text>
+
+        <!-- Item 6 -->
+        <text x="10" y="134" fill="#60a5fa">ƒ</text>
+        <text x="30" y="134" fill="#94a3b8">clone</text>
+        <text x="180" y="134" fill="#475569">Self</text>
+        <text x="340" y="134" text-anchor="end"
+              fill="#334155" font-size="10">method</text>
+
+        <!-- Item 7 -->
+        <text x="10" y="156" fill="#4ade80">ƒ</text>
+        <text x="30" y="156" fill="#94a3b8">connect</text>
+        <text x="180" y="156" fill="#475569">Result&lt;&gt;</text>
+        <text x="340" y="156" text-anchor="end"
+              fill="#334155" font-size="10">async fn</text>
+
+        <!-- Item 8 (Copilot) -->
+        <rect x="0" y="170" width="360" height="26"
+              fill="#10b981" fill-opacity="0.05"/>
+        <text x="10" y="186" fill="#10b981">⬡</text>
+        <text x="30" y="186" fill="#64748b" font-style="italic">
+          config, // Copilot suggestion
+        </text>
+        <text x="340" y="186" text-anchor="end"
+              fill="#10b981" font-size="10">AI</text>
+      </g>
+
+      <!-- Documentation panel (right of CMP) -->
+      <rect x="382" y="0" width="340" height="200" rx="8"
+            fill="#0f1520" fill-opacity="0.98"
+            stroke="#2d3748" stroke-width="1.5"/>
+      <g transform="translate(396, 14)"
+         font-family="'JetBrains Mono',monospace">
+        <text x="0" y="0" font-size="12" font-weight="bold"
+              fill="#fbbf24">Config</text>
+        <text x="0" y="16" font-size="10" fill="#64748b"
+              letter-spacing="2">STRUCT</text>
+        <line x1="0" y1="22" x2="312" y2="22"
+              stroke="#2d3748" stroke-width="1"/>
+        <text x="0" y="38" font-size="11"
+              fill="#94a3b8" font-style="italic">
+          Application configuration.
+        </text>
+        <text x="0" y="54" font-size="11"
+              fill="#64748b" font-style="italic">
+          Loaded from config.toml or environment
+        </text>
+        <text x="0" y="70" font-size="11"
+              fill="#64748b" font-style="italic">
+          variables on startup.
+        </text>
+        <line x1="0" y1="82" x2="312" y2="82"
+              stroke="#2d3748" stroke-width="1"/>
+        <text x="0" y="98" font-size="11" fill="#64748b"
+              letter-spacing="2">FIELDS</text>
+        <text x="0" y="116" font-size="11">
+          <tspan fill="#60a5fa">addr</tspan>
+          <tspan fill="#64748b">: </tspan>
+          <tspan fill="#fbbf24">String</tspan>
+        </text>
+        <text x="0" y="134" font-size="11">
+          <tspan fill="#60a5fa">port</tspan>
+          <tspan fill="#64748b">: </tspan>
+          <tspan fill="#fbbf24">u16</tspan>
+        </text>
+        <text x="0" y="152" font-size="11">
+          <tspan fill="#60a5fa">max_connections</tspan>
+          <tspan fill="#64748b">: </tspan>
+          <tspan fill="#fbbf24">usize</tspan>
+        </text>
+        <text x="0" y="170" font-size="11">
+          <tspan fill="#60a5fa">timeout_ms</tspan>
+          <tspan fill="#64748b">: </tspan>
+          <tspan fill="#fbbf24">u64</tspan>
+        </text>
+      </g>
+    </g>
+
+    <!-- ══════════════════════════════════
+         L11 — FINAL VIGNETTE
+    ══════════════════════════════════ -->
+
+    <ellipse cx="960" cy="540" rx="1920" ry="1080"
+             fill="url(#rs-vignette)" pointer-events="none"/>
+
+  </g>
+
+</svg>

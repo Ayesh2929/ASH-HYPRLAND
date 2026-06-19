@@ -1,0 +1,776 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1920 1080" width="1920" height="1080">
+
+  <defs>
+    <linearGradient id="lg-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#080c12"/>
+    </linearGradient>
+    <linearGradient id="lg-term-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c1420"/>
+      <stop offset="100%" stop-color="#080e18"/>
+    </linearGradient>
+    <linearGradient id="lg-header" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#142030"/>
+      <stop offset="100%" stop-color="#0e1828"/>
+    </linearGradient>
+    <linearGradient id="lg-selected" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#1e3a5f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#1e3a5f" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="lg-staged-bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0d3320" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#0d3320" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="lg-unstaged-bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#3a1010" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#3a1010" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="lg-diff-add" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0d3320" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0a2818" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="lg-diff-del" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#3a1010" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#280c0c" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="lg-statusline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f97316"/>
+      <stop offset="25%"  stop-color="#ea6012"/>
+      <stop offset="55%"  stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="lg-branch-badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#162c48"/>
+    </linearGradient>
+    <linearGradient id="lg-orange-h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f97316" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#f97316" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="lg-commit-graph-a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea6012"/>
+    </linearGradient>
+    <linearGradient id="lg-commit-graph-b" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="lg-commit-graph-c" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <radialGradient id="lg-vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.4"/>
+    </radialGradient>
+    <radialGradient id="lg-center-glow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%"   stop-color="#f97316" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="black"   stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="lg-glow-orange" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#f97316" flood-opacity="1" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lg-glow-green" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lg-glow-red" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#f43f5e" flood-opacity="0.9" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lg-blur-med" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+
+    <pattern id="lg-dot-grid" x="0" y="0" width="28" height="28"
+             patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="0.6"
+              fill="#f97316" fill-opacity="0.05"/>
+    </pattern>
+
+    <clipPath id="lg-screen">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+    <clipPath id="lg-main-clip">
+      <rect x="0" y="42" width="1920" height="1002"/>
+    </clipPath>
+
+    <symbol id="lg-nvim-logo" viewBox="0 0 100 100">
+      <polygon points="10,85 10,15 35,15 65,65 65,15 90,15 90,85 65,85 35,35 35,85"
+               fill="#f97316"/>
+    </symbol>
+    <symbol id="lg-icon-git" viewBox="0 0 24 24">
+      <circle cx="18" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="6"  cy="6"  r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M13 6h3a2 2 0 012 2v7"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+      <line x1="6" y1="9" x2="6" y2="21"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+
+  <g clip-path="url(#lg-screen)">
+    <rect width="1920" height="1080" fill="url(#lg-bg)"/>
+    <rect width="1920" height="1080" fill="url(#lg-dot-grid)"/>
+    <rect width="1920" height="1080" fill="url(#lg-center-glow)"/>
+
+    <!-- NVIM context bar (above lazygit) -->
+    <rect x="0" y="0" width="1920" height="42" fill="#0d1117"/>
+    <rect x="0" y="40" width="1920" height="2" fill="#1a2030"/>
+    <use href="#lg-nvim-logo" x="6" y="6" width="30" height="30"/>
+    <text x="44" y="26"
+          font-family="'JetBrains Mono',monospace"
+          font-size="11" fill="#475569">
+      NVIM · toggleterm · lazygit
+    </text>
+    <rect x="1600" y="8" width="120" height="24" rx="4"
+          fill="#f97316" fill-opacity="0.2"
+          stroke="#f97316" stroke-width="1" stroke-opacity="0.6"/>
+    <text x="1660" y="24" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="11" font-weight="bold" fill="#fb923c">LAZYGIT</text>
+    <rect x="1740" y="8" width="92" height="24" rx="4"
+          fill="#475569" fill-opacity="0.15"
+          stroke="#475569" stroke-width="1" stroke-opacity="0.4"/>
+    <text x="1786" y="24" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="9" fill="#94a3b8">v0.40.2</text>
+    <text x="1856" y="26"
+          font-family="'JetBrains Mono',monospace"
+          font-size="11" fill="#334155">q quit</text>
+
+    <!-- LAZYGIT MAIN LAYOUT -->
+    <!-- Background terminal area -->
+    <rect x="0" y="42" width="1920" height="1002"
+          fill="url(#lg-term-bg)"/>
+
+    <!-- ══ LEFT PANEL: STATUS (Files) ══ -->
+    <rect x="0" y="42" width="480" height="490" fill="#0b1520"/>
+    <rect x="0" y="42" width="480" height="32" fill="url(#lg-header)"/>
+    <rect x="0" y="74" width="480" height="1" fill="#1a2030"/>
+
+    <!-- Status panel header tabs -->
+    <g font-family="'JetBrains Mono',monospace" font-size="12">
+      <!-- Status tab (active) -->
+      <rect x="2" y="44" width="80" height="28"
+            fill="#f97316" fill-opacity="0.15"/>
+      <text x="42" y="62" text-anchor="middle" fill="#f97316"
+            font-weight="bold">Status</text>
+      <rect x="2" y="70" width="80" height="2" fill="#f97316"/>
+
+      <!-- Files tab -->
+      <text x="118" y="62" fill="#475569">Files</text>
+      <!-- Branches tab -->
+      <text x="196" y="62" fill="#475569">Branches</text>
+      <!-- Commits tab -->
+      <text x="290" y="62" fill="#475569">Commits</text>
+      <!-- Stash tab -->
+      <text x="386" y="62" fill="#475569">Stash</text>
+    </g>
+
+    <!-- Staged files section -->
+    <rect x="0" y="76" width="480" height="24"
+          fill="#0d3320" fill-opacity="0.5"/>
+    <text x="8" y="92"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#10b981">
+      Staged Changes (3)
+    </text>
+    <text x="454" y="92"
+          font-family="'JetBrains Mono',monospace"
+          font-size="10" fill="#10b981">↵ unstage</text>
+
+    <!-- Staged file list -->
+    <g transform="translate(0, 102)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+      <!-- SELECTED item -->
+      <rect x="0" y="0" width="480" height="26"
+            fill="url(#lg-selected)"/>
+      <text x="8" y="17">
+        <tspan fill="#10b981">A </tspan>
+        <tspan fill="#e2e8f0">src/hooks/useAuth.ts</tspan>
+      </text>
+      <text x="380" y="17" fill="#10b981">+147</text>
+      <text x="420" y="17" fill="#f43f5e">-0</text>
+
+      <g transform="translate(0, 28)">
+        <text x="8" y="17">
+          <tspan fill="#f59e0b">M </tspan>
+          <tspan fill="#94a3b8">src/services/UserService.ts</tspan>
+        </text>
+        <text x="380" y="17" fill="#10b981">+23</text>
+        <text x="420" y="17" fill="#f43f5e">-8</text>
+      </g>
+      <g transform="translate(0, 56)">
+        <text x="8" y="17">
+          <tspan fill="#f59e0b">M </tspan>
+          <tspan fill="#94a3b8">package.json</tspan>
+        </text>
+        <text x="380" y="17" fill="#10b981">+4</text>
+        <text x="420" y="17" fill="#f43f5e">-1</text>
+      </g>
+    </g>
+
+    <!-- Unstaged files section -->
+    <rect x="0" y="186" width="480" height="24"
+          fill="#3a1010" fill-opacity="0.3"/>
+    <text x="8" y="202"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#f43f5e">
+      Unstaged Changes (5)
+    </text>
+
+    <g transform="translate(0, 212)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+      <g transform="translate(0, 0)">
+        <text x="8" y="17">
+          <tspan fill="#f59e0b">M </tspan>
+          <tspan fill="#94a3b8">src/lib/apiClient.ts</tspan>
+        </text>
+        <text x="380" y="17" fill="#10b981">+12</text>
+        <text x="420" y="17" fill="#f43f5e">-5</text>
+      </g>
+      <g transform="translate(0, 24)">
+        <text x="8" y="17">
+          <tspan fill="#f59e0b">M </tspan>
+          <tspan fill="#94a3b8">lua/plugins/lazy.lua</tspan>
+        </text>
+        <text x="380" y="17" fill="#10b981">+8</text>
+        <text x="420" y="17" fill="#f43f5e">-2</text>
+      </g>
+      <g transform="translate(0, 48)">
+        <text x="8" y="17">
+          <tspan fill="#f59e0b">M </tspan>
+          <tspan fill="#94a3b8">scripts/install.sh</tspan>
+        </text>
+        <text x="380" y="17" fill="#10b981">+3</text>
+        <text x="420" y="17" fill="#f43f5e">-1</text>
+      </g>
+      <g transform="translate(0, 72)">
+        <text x="8" y="17">
+          <tspan fill="#38bdf8">? </tspan>
+          <tspan fill="#475569">src/hooks/useForm.ts</tspan>
+        </text>
+      </g>
+      <g transform="translate(0, 96)">
+        <text x="8" y="17">
+          <tspan fill="#38bdf8">? </tspan>
+          <tspan fill="#475569">CHANGELOG.md</tspan>
+        </text>
+      </g>
+    </g>
+
+    <!-- Vertical divider -->
+    <rect x="480" y="42" width="1" height="490" fill="#1a2030"/>
+
+    <!-- ══ CENTER PANEL: BRANCHES ══ -->
+    <rect x="481" y="42" width="480" height="490" fill="#0b1520"/>
+    <rect x="481" y="42" width="480" height="32" fill="url(#lg-header)"/>
+    <rect x="481" y="74" width="480" height="1" fill="#1a2030"/>
+
+    <!-- Branches header -->
+    <text x="497" y="62"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold"
+          fill="#f97316" filter="url(#lg-glow-orange)">Branches</text>
+    <rect x="481" y="70" width="480" height="2" fill="#f97316"/>
+
+    <!-- Branch list -->
+    <g transform="translate(481, 78)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+
+      <!-- Current branch (selected) -->
+      <rect x="0" y="0" width="480" height="30"
+            fill="url(#lg-selected)"/>
+      <text x="8" y="19">
+        <tspan fill="#f97316">* </tspan>
+        <tspan fill="#e2e8f0" font-weight="bold">feature/auth</tspan>
+        <tspan fill="#475569">  →  origin/feature/auth</tspan>
+      </text>
+      <text x="400" y="19" fill="#10b981">↑3 ↓0</text>
+
+      <g transform="translate(0, 32)">
+        <text x="8" y="17">
+          <tspan fill="#475569">  main</tspan>
+          <tspan fill="#334155">                  →  origin/main</tspan>
+        </text>
+        <text x="400" y="17" fill="#475569">↑0 ↓5</text>
+      </g>
+      <g transform="translate(0, 56)">
+        <text x="8" y="17">
+          <tspan fill="#475569">  develop</tspan>
+          <tspan fill="#334155">              →  origin/develop</tspan>
+        </text>
+        <text x="400" y="17" fill="#475569">↑1 ↓2</text>
+      </g>
+      <g transform="translate(0, 80)">
+        <text x="8" y="17">
+          <tspan fill="#334155">  fix/token-refresh</tspan>
+        </text>
+        <text x="400" y="17" fill="#475569">local</text>
+      </g>
+      <g transform="translate(0, 104)">
+        <text x="8" y="17">
+          <tspan fill="#334155">  chore/update-deps</tspan>
+        </text>
+        <text x="400" y="17" fill="#475569">local</text>
+      </g>
+
+      <!-- Remote branches separator -->
+      <rect x="0" y="130" width="480" height="20"
+            fill="#1a2030" fill-opacity="0.5"/>
+      <text x="8" y="144" font-size="10"
+            fill="#334155" letter-spacing="2">REMOTE</text>
+
+      <g transform="translate(0, 152)">
+        <text x="8" y="17">
+          <tspan fill="#334155">  origin/main</tspan>
+        </text>
+      </g>
+      <g transform="translate(0, 172)">
+        <text x="8" y="17">
+          <tspan fill="#334155">  origin/develop</tspan>
+        </text>
+      </g>
+      <g transform="translate(0, 192)">
+        <text x="8" y="17">
+          <tspan fill="#334155">  origin/feature/auth</tspan>
+        </text>
+      </g>
+    </g>
+
+    <!-- Vertical divider -->
+    <rect x="961" y="42" width="1" height="490" fill="#1a2030"/>
+
+    <!-- ══ RIGHT PANEL: COMMITS ══ -->
+    <rect x="962" y="42" width="958" height="490" fill="#0b1520"/>
+    <rect x="962" y="42" width="958" height="32" fill="url(#lg-header)"/>
+    <rect x="962" y="74" width="958" height="1" fill="#1a2030"/>
+
+    <!-- Commits header -->
+    <text x="978" y="62"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#475569">Commits</text>
+
+    <!-- Commit list with graph -->
+    <g transform="translate(962, 78)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+
+      <!-- Commit graph lines -->
+      <!-- Main branch line (orange) -->
+      <line x1="28" y1="0" x2="28" y2="490"
+            stroke="#f97316" stroke-width="2" stroke-opacity="0.6"/>
+      <!-- Feature branch line (purple) -->
+      <line x1="52" y1="0" x2="52" y2="200"
+            stroke="#7c3aed" stroke-width="2" stroke-opacity="0.5"/>
+      <!-- Develop branch line (blue) -->
+      <line x1="76" y1="0" x2="76" y2="120"
+            stroke="#3b82f6" stroke-width="2" stroke-opacity="0.4"/>
+
+      <!-- COMMIT 1 — HEAD (selected) -->
+      <rect x="0" y="0" width="958" height="32"
+            fill="url(#lg-selected)"/>
+      <!-- Graph dot -->
+      <circle cx="28" cy="16" r="6" fill="#f97316"
+              filter="url(#lg-glow-orange)"/>
+      <!-- Branch labels -->
+      <rect x="38" y="6" width="80" height="20" rx="3"
+            fill="url(#lg-branch-badge)"/>
+      <text x="78" y="20" text-anchor="middle"
+            font-size="9" fill="#60a5fa">feature/auth</text>
+      <rect x="124" y="6" width="78" height="20" rx="3"
+            fill="#f97316" fill-opacity="0.2"/>
+      <text x="163" y="20" text-anchor="middle"
+            font-size="9" fill="#fb923c">HEAD</text>
+      <!-- Commit hash -->
+      <text x="210" y="20" font-size="11" fill="#fb923c">a3f82bc</text>
+      <!-- Commit message -->
+      <text x="280" y="20" font-size="12" fill="#e2e8f0">
+        feat: add useAuth hook with token refresh
+      </text>
+      <!-- Author + time -->
+      <text x="750" y="20" font-size="10" fill="#334155">ash</text>
+      <text x="800" y="20" font-size="10" fill="#334155">2h ago</text>
+
+      <!-- COMMIT 2 -->
+      <g transform="translate(0, 34)">
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.8"/>
+        <text x="38" y="20" font-size="11" fill="#475569">d91c4e7</text>
+        <text x="104" y="20" font-size="12" fill="#94a3b8">
+          fix: resolve token expiry edge case
+        </text>
+        <text x="800" y="20" font-size="10" fill="#334155">5h ago</text>
+      </g>
+
+      <!-- COMMIT 3 (merge) -->
+      <g transform="translate(0, 68)">
+        <!-- Merge connection line -->
+        <path d="M52 0 Q52 16 28 16" fill="none"
+              stroke="#7c3aed" stroke-width="2" stroke-opacity="0.5"/>
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.7"/>
+        <circle cx="52" cy="0" r="4" fill="#7c3aed" fill-opacity="0.8"/>
+        <text x="38" y="20" font-size="11" fill="#475569">7b2a1f0</text>
+        <text x="104" y="20" font-size="12" fill="#94a3b8">
+          chore: update dependencies to latest
+        </text>
+        <text x="800" y="20" font-size="10" fill="#334155">1d ago</text>
+      </g>
+
+      <!-- COMMIT 4 -->
+      <g transform="translate(0, 102)">
+        <!-- Branch fork connection -->
+        <path d="M76 0 Q76 16 28 16" fill="none"
+              stroke="#3b82f6" stroke-width="2" stroke-opacity="0.4"/>
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.6"/>
+        <circle cx="76" cy="0" r="4" fill="#3b82f6" fill-opacity="0.7"/>
+        <text x="38" y="20" font-size="11" fill="#475569">c55e892</text>
+        <text x="104" y="20" font-size="12" fill="#94a3b8">
+          docs: update README with new API docs
+        </text>
+        <text x="800" y="20" font-size="10" fill="#334155">2d ago</text>
+      </g>
+
+      <!-- COMMIT 5 -->
+      <g transform="translate(0, 136)">
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.5"/>
+        <text x="38" y="20" font-size="11" fill="#475569">f13a6d4</text>
+        <text x="104" y="20" font-size="12" fill="#64748b">
+          test: add UserService unit tests
+        </text>
+        <text x="800" y="20" font-size="10" fill="#334155">3d ago</text>
+      </g>
+
+      <!-- COMMIT 6 -->
+      <g transform="translate(0, 170)">
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.4"/>
+        <text x="38" y="20" font-size="11" fill="#475569">882bc41</text>
+        <text x="104" y="20" font-size="12" fill="#64748b">
+          refactor: extract auth logic to service
+        </text>
+        <text x="800" y="20" font-size="10" fill="#334155">4d ago</text>
+      </g>
+
+      <!-- COMMIT 7 -->
+      <g transform="translate(0, 204)">
+        <circle cx="28" cy="16" r="5" fill="#f97316" fill-opacity="0.35"/>
+        <text x="38" y="20" font-size="11" fill="#334155">a1b2c3d</text>
+        <text x="104" y="20" font-size="12" fill="#475569">
+          feat: initial project setup
+        </text>
+        <rect x="890" y="4" width="52" height="20" rx="3"
+              fill="#10b981" fill-opacity="0.15"
+              stroke="#10b981" stroke-width="1" stroke-opacity="0.4"/>
+        <text x="916" y="18" text-anchor="middle"
+              font-size="9" fill="#10b981">main</text>
+        <text x="800" y="20" font-size="10" fill="#334155">1w ago</text>
+      </g>
+    </g>
+
+    <!-- ══ BOTTOM PANELS ══ -->
+    <!-- Horizontal divider -->
+    <rect x="0" y="532" width="1920" height="1" fill="#1a2030"/>
+
+    <!-- BOTTOM LEFT: Commit message / stash -->
+    <rect x="0" y="534" width="480" height="510" fill="#0b1520"/>
+    <rect x="0" y="534" width="480" height="32" fill="url(#lg-header)"/>
+    <rect x="0" y="565" width="480" height="1" fill="#1a2030"/>
+    <text x="8" y="554"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#475569">Stash</text>
+
+    <g transform="translate(8, 580)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+      <text x="0" y="0" fill="#64748b">
+        stash@{'{'}0{'}'}: WIP on feature/auth: a3f82bc feat...
+      </text>
+      <text x="0" y="22" fill="#334155">
+        stash@{'{'}1{'}'}: WIP on main: 7b2a1f0 chore...
+      </text>
+    </g>
+
+    <!-- BOTTOM CENTER: Command log -->
+    <rect x="481" y="534" width="480" height="510" fill="#0b1520"/>
+    <rect x="481" y="534" width="480" height="32" fill="url(#lg-header)"/>
+    <rect x="481" y="565" width="480" height="1" fill="#1a2030"/>
+    <text x="497" y="554"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#475569">Command Log</text>
+
+    <g transform="translate(497, 576)"
+       font-family="'JetBrains Mono',monospace" font-size="11">
+      <text x="0" y="0" fill="#334155">
+        $ git status --porcelain=v2 --branch
+      </text>
+      <text x="0" y="18" fill="#334155">
+        $ git log --oneline --graph --decorate
+      </text>
+      <text x="0" y="36" fill="#10b981">
+        ✓ git add src/hooks/useAuth.ts
+      </text>
+      <text x="0" y="54" fill="#10b981">
+        ✓ git add src/services/UserService.ts
+      </text>
+      <text x="0" y="72" fill="#334155">
+        $ git diff HEAD -- src/lib/apiClient.ts
+      </text>
+    </g>
+
+    <!-- BOTTOM RIGHT: DIFF VIEW -->
+    <rect x="962" y="534" width="958" height="510" fill="#09111e"/>
+    <rect x="962" y="534" width="958" height="32" fill="url(#lg-header)"/>
+    <rect x="962" y="565" width="958" height="1" fill="#1a2030"/>
+
+    <!-- Diff header -->
+    <text x="978" y="554"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="#f97316">
+      src/hooks/useAuth.ts  (staged)
+    </text>
+    <text x="1248" y="554"
+          font-family="'JetBrains Mono',monospace"
+          font-size="10" fill="#10b981">+147 lines</text>
+
+    <!-- Diff content -->
+    <g transform="translate(962, 570)"
+       font-family="'JetBrains Mono',monospace" font-size="12">
+
+      <!-- Diff hunk header -->
+      <rect x="0" y="0" width="958" height="20"
+            fill="#0a1828" fill-opacity="0.7"/>
+      <text x="8" y="14" fill="#60a5fa" font-size="11">
+        @@ -0,0 +1,147 @@ // New file
+      </text>
+
+      <!-- Diff lines (added) -->
+      <g transform="translate(0, 22)">
+        <rect x="0" y="0"   width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="13" font-size="11">
+          <tspan fill="#10b981">+ </tspan>
+          <tspan fill="#c084fc">import </tspan>
+          <tspan fill="#86efac">{ useState, useCallback } </tspan>
+          <tspan fill="#c084fc">from </tspan>
+          <tspan fill="#a3e635">'react'</tspan>
+        </text>
+
+        <rect x="0" y="18"  width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="31" font-size="11">
+          <tspan fill="#10b981">+ </tspan>
+          <tspan fill="#c084fc">import </tspan>
+          <tspan fill="#86efac">{ apiClient } </tspan>
+          <tspan fill="#c084fc">from </tspan>
+          <tspan fill="#a3e635">'@/lib/api'</tspan>
+        </text>
+
+        <rect x="0" y="36"  width="958" height="18" fill="url(#lg-diff-add)" fill-opacity="0.3"/>
+        <!-- blank -->
+
+        <rect x="0" y="54"  width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="67" font-size="11">
+          <tspan fill="#10b981">+ </tspan>
+          <tspan fill="#c084fc">interface </tspan>
+          <tspan fill="#86efac">AuthState </tspan>
+          <tspan fill="#34d399">{'{'}</tspan>
+        </text>
+
+        <rect x="0" y="72"  width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="85" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#60a5fa">user</tspan>
+          <tspan fill="#34d399">: </tspan>
+          <tspan fill="#86efac">User | null;</tspan>
+        </text>
+
+        <rect x="0" y="90"  width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="103" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#60a5fa">token</tspan>
+          <tspan fill="#34d399">: </tspan>
+          <tspan fill="#86efac">AuthToken | null;</tspan>
+        </text>
+
+        <rect x="0" y="108" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="121" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#60a5fa">isLoading</tspan>
+          <tspan fill="#34d399">: </tspan>
+          <tspan fill="#86efac">boolean;</tspan>
+        </text>
+
+        <rect x="0" y="126" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="139" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#60a5fa">signIn</tspan>
+          <tspan fill="#34d399">: (c: Credentials) =&gt; Promise&lt;AuthToken&gt;;</tspan>
+        </text>
+
+        <rect x="0" y="144" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="157" font-size="11">
+          <tspan fill="#10b981">+ </tspan>
+          <tspan fill="#34d399">{'}'}</tspan>
+        </text>
+
+        <!-- Hunk 2 header -->
+        <rect x="0" y="162" width="958" height="20"
+              fill="#0a1828" fill-opacity="0.7"/>
+        <text x="8" y="176" font-size="11" fill="#60a5fa">
+          @@ -0,0 +12,35 @@ // export function useAuth
+        </text>
+
+        <rect x="0" y="184" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="197" font-size="11">
+          <tspan fill="#10b981">+ </tspan>
+          <tspan fill="#c084fc">export function </tspan>
+          <tspan fill="#86efac">useAuth</tspan>
+          <tspan fill="#34d399">(): AuthState {'{'}</tspan>
+        </text>
+
+        <rect x="0" y="202" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="215" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#c084fc">const </tspan>
+          <tspan fill="#34d399">[user, setUser] = </tspan>
+          <tspan fill="#86efac">useState&lt;User | null&gt;(null)</tspan>
+        </text>
+
+        <rect x="0" y="220" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="233" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#c084fc">const </tspan>
+          <tspan fill="#34d399">[token, setToken] = </tspan>
+          <tspan fill="#86efac">useState&lt;AuthToken | null&gt;(null)</tspan>
+        </text>
+
+        <rect x="0" y="238" width="958" height="18" fill="url(#lg-diff-add)"/>
+        <text x="30" y="251" font-size="11">
+          <tspan fill="#10b981">+   </tspan>
+          <tspan fill="#c084fc">const </tspan>
+          <tspan fill="#34d399">[isLoading, setLoading] = </tspan>
+          <tspan fill="#86efac">useState(false)</tspan>
+        </text>
+
+        <!-- Continue marker -->
+        <rect x="0" y="260" width="958" height="24"
+              fill="#0a1520" fill-opacity="0.8"/>
+        <text x="8" y="276" font-size="11" fill="#334155">
+          ↓ 112 more added lines...
+        </text>
+      </g>
+
+      <!-- Line numbers in diff -->
+      <g fill="#334155" font-size="11" text-anchor="end">
+        <text x="26" y="37">1</text>
+        <text x="26" y="55">2</text>
+        <text x="26" y="89">3</text>
+        <text x="26" y="107">4</text>
+        <text x="26" y="125">5</text>
+        <text x="26" y="143">6</text>
+        <text x="26" y="161">7</text>
+        <text x="26" y="199">12</text>
+        <text x="26" y="217">13</text>
+        <text x="26" y="235">14</text>
+        <text x="26" y="253">15</text>
+      </g>
+    </g>
+
+    <!-- ══ KEYBIND HELP BAR ══ -->
+    <rect x="0" y="1044" width="1920" height="36" fill="#0a0f18"/>
+    <rect x="0" y="1044" width="1920" height="1" fill="#1a2030"/>
+    <g transform="translate(12, 1050)"
+       font-family="'JetBrains Mono',monospace" font-size="10">
+      <g fill="#334155">
+        <rect x="0"   y="4" width="22" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="11"  y="17" text-anchor="middle" fill="#64748b">↑↓</text>
+        <text x="28"  y="17">nav ·</text>
+
+        <rect x="60"  y="4" width="20" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="70"  y="17" text-anchor="middle" fill="#64748b">s</text>
+        <text x="86"  y="17">stage ·</text>
+
+        <rect x="128" y="4" width="20" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="138" y="17" text-anchor="middle" fill="#64748b">u</text>
+        <text x="154" y="17">unstage ·</text>
+
+        <rect x="204" y="4" width="22" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="215" y="17" text-anchor="middle" fill="#64748b">cc</text>
+        <text x="232" y="17">commit ·</text>
+
+        <rect x="278" y="4" width="22" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="289" y="17" text-anchor="middle" fill="#64748b">gp</text>
+        <text x="306" y="17">push ·</text>
+
+        <rect x="344" y="4" width="22" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="355" y="17" text-anchor="middle" fill="#64748b">gP</text>
+        <text x="372" y="17">pull ·</text>
+
+        <rect x="406" y="4" width="16" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="414" y="17" text-anchor="middle" fill="#64748b">d</text>
+        <text x="428" y="17">diff ·</text>
+
+        <rect x="458" y="4" width="16" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="466" y="17" text-anchor="middle" fill="#64748b">D</text>
+        <text x="480" y="17">word diff ·</text>
+
+        <rect x="526" y="4" width="16" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="534" y="17" text-anchor="middle" fill="#64748b">X</text>
+        <text x="548" y="17">discard ·</text>
+
+        <rect x="590" y="4" width="16" height="18" rx="3"
+              fill="#1e2d40" stroke="#334155" stroke-width="1"/>
+        <text x="598" y="17" text-anchor="middle" fill="#64748b">z</text>
+        <text x="612" y="17">stash ·</text>
+
+        <rect x="648" y="4" width="16" height="18" rx="3"
+              fill="#f97316" fill-opacity="0.2"
+              stroke="#f97316" stroke-width="1" stroke-opacity="0.5"/>
+        <text x="656" y="17" text-anchor="middle" fill="#fb923c">q</text>
+        <text x="670" y="17" fill="#f97316">quit</text>
+      </g>
+
+      <!-- Right: branch + repo info -->
+      <text x="1600" y="17" fill="#f97316">⎇ feature/auth</text>
+      <text x="1760" y="17" fill="#334155">ash-dotfiles</text>
+      <text x="1870" y="17" fill="#334155">git</text>
+    </g>
+
+    <!-- NVIM statusline at very bottom -->
+    <rect x="0" y="1046" width="1920" height="34"
+          fill="url(#lg-statusline)" opacity="0.7"/>
+    <rect x="0" y="1046" width="90" height="34" fill="#f97316" opacity="0.8"/>
+    <text x="45" y="1067" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" font-weight="bold" fill="white">TERMINAL</text>
+    <text x="960" y="1067" text-anchor="middle"
+          font-family="'JetBrains Mono',monospace"
+          font-size="12" fill="#e2e8f0" fill-opacity="0.7">lazygit</text>
+    <text x="1740" y="1067"
+          font-family="'JetBrains Mono',monospace"
+          font-size="10" font-weight="bold"
+          fill="#fb923c">ASH v5.0 Ω</text>
+
+    <ellipse cx="960" cy="540" rx="1920" ry="1080"
+             fill="url(#lg-vignette)" pointer-events="none"/>
+  </g>
+
+</svg>
