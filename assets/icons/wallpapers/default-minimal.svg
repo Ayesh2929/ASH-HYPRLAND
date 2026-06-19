@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 3840 2160"
+  width="3840"
+  height="2160"
+  shape-rendering="geometricPrecision"
+  text-rendering="optimizeLegibility"
+>
+  <defs>
+
+    <!-- ═══════════════════════════════════════════════
+         MINIMAL PALETTE — Near-pure tones with
+         single accent (Catppuccin Mauve on Crust)
+    ═══════════════════════════════════════════════ -->
+
+    <!-- Primary background — absolute deep -->
+    <linearGradient id="bgMinimal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0d0d14"/>
+      <stop offset="100%" stop-color="#11111b"/>
+    </linearGradient>
+
+    <!-- Single accent gradient — restrained -->
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#cba4f7"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+
+    <!-- Subtle center radial -->
+    <radialGradient id="centerAura" cx="50%" cy="50%" r="40%">
+      <stop offset="0%"   stop-color="#cba4f7" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#0d0d14" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Very fine dot pattern -->
+    <pattern id="minimalDots" x="0" y="0" width="40" height="40"
+             patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="0.5"
+              fill="#313244" opacity="0.50"/>
+    </pattern>
+
+    <!-- Micro grid -->
+    <pattern id="microGrid" x="0" y="0" width="120" height="120"
+             patternUnits="userSpaceOnUse">
+      <path d="M 120 0 L 0 0 0 120" fill="none"
+            stroke="#1e1e2e" stroke-width="0.8" opacity="0.8"/>
+    </pattern>
+
+    <!-- Accent line gradient (horizontal) -->
+    <linearGradient id="accentLineH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#cba4f7" stop-opacity="0"/>
+      <stop offset="20%"  stop-color="#cba4f7" stop-opacity="0.60"/>
+      <stop offset="50%"  stop-color="#89b4fa" stop-opacity="0.80"/>
+      <stop offset="80%"  stop-color="#cba4f7" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#cba4f7" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Accent line gradient (vertical) -->
+    <linearGradient id="accentLineV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba4f7" stop-opacity="0"/>
+      <stop offset="30%"  stop-color="#cba4f7" stop-opacity="0.40"/>
+      <stop offset="50%"  stop-color="#89b4fa" stop-opacity="0.55"/>
+      <stop offset="70%"  stop-color="#cba4f7" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#cba4f7" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Ring minimal gradient -->
+    <radialGradient id="ringM1" cx="50%" cy="50%" r="50%">
+      <stop offset="88%"  stop-color="#cba4f7" stop-opacity="0"/>
+      <stop offset="93%"  stop-color="#cba4f7" stop-opacity="0.30"/>
+      <stop offset="97%"  stop-color="#89b4fa" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="ringM2" cx="50%" cy="50%" r="50%">
+      <stop offset="91%"  stop-color="#313244" stop-opacity="0"/>
+      <stop offset="95%"  stop-color="#45475a" stop-opacity="0.50"/>
+      <stop offset="98%"  stop-color="#45475a" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#45475a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Logo gradient minimal -->
+    <linearGradient id="logoMin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#cba4f7"/>
+      <stop offset="50%"  stop-color="#b4befe"/>
+      <stop offset="100%" stop-color="#89b4fa"/>
+    </linearGradient>
+
+    <!-- Blur filters minimal -->
+    <filter id="blurM8"  x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="blurM16" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="blurM32" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="32"/>
+    </filter>
+    <filter id="blurM64" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="64"/>
+    </filter>
+
+    <!-- Minimal glow -->
+    <filter id="glowMin" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Vignette minimal -->
+    <radialGradient id="vigMin" cx="50%" cy="50%" r="70%">
+      <stop offset="40%"  stop-color="#0d0d14" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0d0d14" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <!-- Clip -->
+    <clipPath id="screenClipM">
+      <rect width="3840" height="2160"/>
+    </clipPath>
+
+    <!-- ASH mark minimal -->
+    <symbol id="ashMarkMin" viewBox="0 0 80 80">
+      <circle cx="40" cy="40" r="37" fill="none"
+              stroke="url(#accentGrad)" stroke-width="1.5"
+              opacity="0.70"/>
+      <path d="M22,62 L40,22 L58,62 M28,48 L52,48"
+            fill="none" stroke="url(#accentGrad)" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+
+  </defs>
+
+  <g clip-path="url(#screenClipM)">
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 1 — PURE DARK BASE
+    ═══════════════════════════════════════════════════════ -->
+    <rect width="3840" height="2160" fill="url(#bgMinimal)"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 2 — MICRO GRID TEXTURE
+    ═══════════════════════════════════════════════════════ -->
+    <rect width="3840" height="2160"
+          fill="url(#microGrid)" opacity="0.60"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 3 — FINE DOT MATRIX
+    ═══════════════════════════════════════════════════════ -->
+    <rect width="3840" height="2160"
+          fill="url(#minimalDots)" opacity="0.30"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 4 — SINGLE CENTER AURA
+    ═══════════════════════════════════════════════════════ -->
+    <ellipse cx="1920" cy="1080" rx="1400" ry="900"
+             fill="url(#centerAura)" filter="url(#blurM64)"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 5 — SINGLE GOLDEN RATIO COMPOSITION LINE
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Horizontal center line — ultra thin, accent -->
+    <line x1="0" y1="1080" x2="3840" y2="1080"
+          stroke="url(#accentLineH)"
+          stroke-width="0.8" opacity="0.35"/>
+
+    <!-- Vertical center line -->
+    <line x1="1920" y1="0" x2="1920" y2="2160"
+          stroke="url(#accentLineV)"
+          stroke-width="0.8" opacity="0.25"/>
+
+    <!-- Rule of thirds guides — barely visible -->
+    <line x1="1280" y1="0" x2="1280" y2="2160"
+          stroke="#313244" stroke-width="0.4" opacity="0.35"/>
+    <line x1="2560" y1="0" x2="2560" y2="2160"
+          stroke="#313244" stroke-width="0.4" opacity="0.35"/>
+    <line x1="0" y1="720"  x2="3840" y2="720"
+          stroke="#313244" stroke-width="0.4" opacity="0.35"/>
+    <line x1="0" y1="1440" x2="3840" y2="1440"
+          stroke="#313244" stroke-width="0.4" opacity="0.35"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 6 — MINIMAL CONCENTRIC RINGS
+    ═══════════════════════════════════════════════════════ -->
+    <g transform="translate(1920, 1080)">
+
+      <!-- Outer grey ring -->
+      <circle cx="0" cy="0" r="600" fill="url(#ringM2)"
+              filter="url(#blurM8)" opacity="0.7"/>
+      <circle cx="0" cy="0" r="600"
+              fill="none" stroke="#313244" stroke-width="0.8"
+              opacity="0.40"/>
+
+      <!-- Mid accent ring glow -->
+      <circle cx="0" cy="0" r="360" fill="url(#ringM1)"
+              filter="url(#blurM16)" opacity="0.80"/>
+
+      <!-- Mid accent ring solid -->
+      <circle cx="0" cy="0" r="360"
+              fill="none" stroke="#cba4f7" stroke-width="0.8"
+              opacity="0.35"/>
+
+      <!-- Inner grey ring -->
+      <circle cx="0" cy="0" r="180"
+              fill="none" stroke="#45475a" stroke-width="0.6"
+              opacity="0.50"/>
+
+      <!-- Tiny core ring -->
+      <circle cx="0" cy="0" r="60"
+              fill="none" stroke="#cba4f7" stroke-width="1.0"
+              opacity="0.55"/>
+
+      <!-- Center dot -->
+      <circle cx="0" cy="0" r="3"
+              fill="#cba4f7" opacity="0.80"/>
+      <!-- Center dot glow -->
+      <circle cx="0" cy="0" r="16"
+              fill="#cba4f7" opacity="0.06"
+              filter="url(#blurM8)"/>
+
+      <!-- Minimal tick marks on mid ring -->
+      <g stroke="#cba4f7" stroke-width="1" opacity="0.35">
+        <g transform="rotate(0)">   <line x1="360" y1="0" x2="372" y2="0"/></g>
+        <g transform="rotate(90)">  <line x1="360" y1="0" x2="372" y2="0"/></g>
+        <g transform="rotate(180)"> <line x1="360" y1="0" x2="372" y2="0"/></g>
+        <g transform="rotate(270)"> <line x1="360" y1="0" x2="372" y2="0"/></g>
+        <g transform="rotate(45)">  <line x1="360" y1="0" x2="368" y2="0"/></g>
+        <g transform="rotate(135)"> <line x1="360" y1="0" x2="368" y2="0"/></g>
+        <g transform="rotate(225)"> <line x1="360" y1="0" x2="368" y2="0"/></g>
+        <g transform="rotate(315)"> <line x1="360" y1="0" x2="368" y2="0"/></g>
+      </g>
+
+      <!-- Cardinal axis lines — very faint -->
+      <g stroke="#cba4f7" stroke-width="0.4" opacity="0.08">
+        <line x1="-600" y1="0" x2="600" y2="0"/>
+        <line x1="0" y1="-600" x2="0" y2="600"/>
+      </g>
+
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 7 — ASH LOGO MARK
+    ═══════════════════════════════════════════════════════ -->
+    <g transform="translate(1920, 1080)" filter="url(#glowMin)">
+      <use href="#ashMarkMin" x="-40" y="-40" width="80" height="80"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 8 — FOUR MINIMAL CORNER MARKS
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Top Left -->
+    <g stroke="#cba4f7" stroke-width="1.5" fill="none" opacity="0.25">
+      <polyline points="80,160 80,80 160,80"/>
+    </g>
+    <!-- Top Right -->
+    <g stroke="#cba4f7" stroke-width="1.5" fill="none" opacity="0.25">
+      <polyline points="3760,160 3760,80 3680,80"/>
+    </g>
+    <!-- Bottom Left -->
+    <g stroke="#cba4f7" stroke-width="1.5" fill="none" opacity="0.25">
+      <polyline points="80,2000 80,2080 160,2080"/>
+    </g>
+    <!-- Bottom Right -->
+    <g stroke="#cba4f7" stroke-width="1.5" fill="none" opacity="0.25">
+      <polyline points="3760,2000 3760,2080 3680,2080"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 9 — WORDMARK (ULTRA MINIMAL)
+    ═══════════════════════════════════════════════════════ -->
+    <g transform="translate(1920, 1080)">
+      <!-- Main wordmark -->
+      <text x="0" y="160"
+            font-family="'JetBrains Mono', 'Courier New', monospace"
+            font-size="60" font-weight="300" letter-spacing="40"
+            text-anchor="middle"
+            fill="url(#logoMin)" opacity="0.65">ASH</text>
+      <!-- Version tag -->
+      <text x="0" y="200"
+            font-family="'JetBrains Mono', 'Courier New', monospace"
+            font-size="14" font-weight="300" letter-spacing="8"
+            text-anchor="middle"
+            fill="#585b70" opacity="0.50">v5.0 OMEGA</text>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 10 — SINGLE ACCENT HORIZONTAL BAR
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Top edge accent line -->
+    <rect x="0" y="0" width="3840" height="2"
+          fill="url(#accentLineH)" opacity="0.55"/>
+    <!-- Bottom edge accent line -->
+    <rect x="0" y="2158" width="3840" height="2"
+          fill="url(#accentLineH)" opacity="0.55"/>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 11 — SPARSE STAR FIELD (3 ONLY)
+    ═══════════════════════════════════════════════════════ -->
+    <!-- Three bright singular stars only -->
+    <circle cx="800"  cy="400"  r="1.5" fill="#cba4f7" opacity="0.70"/>
+    <circle cx="3040" cy="300"  r="1.5" fill="#89b4fa" opacity="0.65"/>
+    <circle cx="1400" cy="1700" r="1.2" fill="#cba4f7" opacity="0.55"/>
+    <!-- 4-point sparkle on brightest -->
+    <g fill="#cba4f7" opacity="0.50" transform="translate(800,400)">
+      <path d="M0,-8 L1,-1 L8,0 L1,1 L0,8 L-1,1 L-8,0 L-1,-1 Z"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LAYER 12 — DEEP VIGNETTE
+    ═══════════════════════════════════════════════════════ -->
+    <rect width="3840" height="2160" fill="url(#vigMin)"/>
+
+  </g>
+</svg>
