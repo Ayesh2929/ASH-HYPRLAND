@@ -385,7 +385,7 @@ jobs:
           esac
 
       - name: "🔬 Initialize CodeQL"
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build_mode }}
@@ -430,13 +430,12 @@ jobs:
 
       - name: "🔬 Perform CodeQL Analysis"
         id: analyze
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
-          output: "codeql-results-${{ matrix.language }}.sarif"
-          upload: true
-          wait-for-processing: true
-          add-snippet: true
+          output: "codeql-results-${{ matrix.language }}"
+          upload: never
+          upload-database: false
         continue-on-error: true
 
       - name: "📊 Process CodeQL Results"
@@ -446,9 +445,9 @@ jobs:
           echo "║  📊 CodeQL [${{ matrix.language }}] Results                  ║"
           echo "╚══════════════════════════════════════════════════════════════╝"
 
-          sarif_file="codeql-results-${{ matrix.language }}.sarif"
+          sarif_file="$(find "codeql-results-${{ matrix.language }}" -name "*.sarif" -print -quit 2>/dev/null || true)"
 
-          if [[ ! -f "${sarif_file}" ]]; then
+          if [[ -z "${sarif_file}" || ! -f "${sarif_file}" ]]; then
             echo "  ℹ️  SARIF file not found — CodeQL may still be processing"
             echo "alerts=0" >> "${GITHUB_OUTPUT}"
             echo "passed=true" >> "${GITHUB_OUTPUT}"
@@ -521,6 +520,15 @@ jobs:
 
           echo "alerts=${total_alerts}" >> "${GITHUB_OUTPUT}"
           echo "passed=${passed}"       >> "${GITHUB_OUTPUT}"
+
+      - name: "📤 Upload CodeQL SARIF artifact"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "codeql-${{ matrix.language }}-${{ github.run_id }}"
+          path: "codeql-results-${{ matrix.language }}/"
+          retention-days: 30
+          if-no-files-found: ignore
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 04: GATE
