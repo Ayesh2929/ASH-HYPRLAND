@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⚫ ASH DOTFILES v5.0 OMEGA — DESKTOP SCREENSHOT: DARK ONE DARK                          ║
+║                                                                                          ║
+║  Atom's legendary One Dark theme — clean, balanced, universally beloved.               ║
+║  The theme that started the modern dark theme revolution.                               ║
+║  "One theme to rule them all." — Atom team                                              ║
+║                                                                                          ║
+║  Resolution: 2560 × 1440px (QHD)                                                        ║
+║  Theme: One Dark Pro (enhanced variant)                                                  ║
+║                                                                                          ║
+║  One Dark Palette:                                                                       ║
+║    Hue 1  (cyan):    #56b6c2  — strings, tags                                          ║
+║    Hue 2  (blue):    #61afef  — functions, keywords                                    ║
+║    Hue 3  (purple):  #c678dd  — constants, types                                       ║
+║    Hue 4  (green):   #98c379  — strings, success                                       ║
+║    Hue 5  (red):     #e06c75  — regex, warnings                                        ║
+║    Hue 5-2 (orange): #be5046  — deprecated                                             ║
+║    Hue 6  (orange):  #d19a66  — numbers, attributes                                   ║
+║    Hue 6-2 (yellow): #e5c07b  — classes, variables                                    ║
+║    Mono 1 (fg):      #abb2bf  — primary text                                           ║
+║    Mono 2 (dim):     #828997  — comments                                               ║
+║    Mono 3 (muted):   #5c6370  — invisible                                              ║
+║    BG:               #282c34  (base background)                                         ║
+║    BG-1:             #21252b  (darker bg)                                               ║
+║    BG-2:             #2c313a  (lighter bg)                                              ║
+║    Accent:           #528bff  (selection accent)                                        ║
+╚══════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  viewBox="0 0 2560 1440"
+  width="2560"
+  height="1440"
+  shape-rendering="geometricPrecision"
+  text-rendering="geometricPrecision"
+  color-interpolation="linearRGB"
+  role="img"
+  aria-label="ASH Dotfiles desktop screenshot — One Dark theme">
+
+  <title>ASH Dotfiles — Dark One Dark Desktop</title>
+  <desc>
+    Full desktop screenshot with One Dark Pro theme. Clean balanced dark
+    palette with blue, purple, green, orange accents. Shows Hyprland WM,
+    Waybar, Neovim editor with code, and terminal with Fish shell.
+  </desc>
+
+  <defs>
+
+    <style><![CDATA[
+
+      /* ── Animation system ──────────────────────────────────── */
+      .od-cursor    { animation: od-blink    1.0s step-end infinite; }
+      .od-bar       { animation: od-breathe  5s   ease-in-out infinite; }
+      .od-ws-active { animation: od-ws-pulse 3s   ease-in-out infinite; }
+      .od-border    { animation: od-border   5s   ease-in-out infinite; }
+      .od-gauge     { animation: od-fill     2s   ease-out 0.5s 1 both; transform-origin: left center; }
+      .od-rain-1    { animation: od-code-rain 4s  linear 0s   infinite; }
+      .od-rain-2    { animation: od-code-rain 5.5s linear 1.5s infinite; }
+      .od-rain-3    { animation: od-code-rain 3.8s linear 3s   infinite; }
+      .od-rain-4    { animation: od-code-rain 6s  linear 0.8s  infinite; }
+      .od-rain-5    { animation: od-code-rain 4.5s linear 2.5s infinite; }
+      .od-notif     { animation: od-notif-drop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s 1 both; }
+      .od-shimmer   { animation: od-shimmer   7s  ease-in-out infinite; }
+      .od-particle  { animation: od-particle-float 4s ease-in-out infinite; }
+      .od-p1  { animation-delay: 0.0s; animation-duration: 4.2s; }
+      .od-p2  { animation-delay: 0.8s; animation-duration: 3.8s; }
+      .od-p3  { animation-delay: 1.6s; animation-duration: 4.6s; }
+      .od-p4  { animation-delay: 2.4s; animation-duration: 3.5s; }
+      .od-p5  { animation-delay: 3.2s; animation-duration: 4.9s; }
+      .od-p6  { animation-delay: 4.0s; animation-duration: 4.1s; }
+      .od-grid  { animation: od-grid-breathe 6s ease-in-out infinite; }
+      .od-blue-glow { animation: od-blue-pulse 4s ease-in-out infinite; }
+      .od-accent-line { animation: od-accent-scan 3s ease-in-out infinite; transform-origin: 0 0; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; }
+      }
+
+      @keyframes od-blink {
+        0%,100% { opacity: 1; }
+        50%      { opacity: 0; }
+      }
+      @keyframes od-breathe {
+        0%,100% { opacity: 0.93; }
+        50%      { opacity: 1; }
+      }
+      @keyframes od-ws-pulse {
+        0%,100% { r: 7; opacity: 0.9; }
+        50%      { r: 8; opacity: 1; }
+      }
+      @keyframes od-border {
+        0%,100% { stroke: #61afef; stroke-opacity: 0.75; }
+        33%      { stroke: #c678dd; stroke-opacity: 0.9; }
+        66%      { stroke: #98c379; stroke-opacity: 0.7; }
+      }
+      @keyframes od-fill {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+      @keyframes od-code-rain {
+        0%   { transform: translateY(-1440px); opacity: 0; }
+        5%   { opacity: 0.7; }
+        95%  { opacity: 0.4; }
+        100% { transform: translateY(0);       opacity: 0; }
+      }
+      @keyframes od-notif-drop {
+        from { transform: translateY(-20px); opacity: 0; }
+        to   { transform: translateY(0);     opacity: 1; }
+      }
+      @keyframes od-shimmer {
+        0%   { transform: translateX(-400px) skewX(-5deg); opacity: 0; }
+        12%  { opacity: 0.3; }
+        88%  { opacity: 0.3; }
+        100% { transform: translateX(1800px) skewX(-5deg); opacity: 0; }
+      }
+      @keyframes od-particle-float {
+        0%,100% { transform: translate(0,0)    scale(1);    opacity: 0.5; }
+        33%      { transform: translate(6px,-8px) scale(1.2); opacity: 0.8; }
+        66%      { transform: translate(-4px,5px) scale(0.9); opacity: 0.6; }
+      }
+      @keyframes od-grid-breathe {
+        0%,100% { opacity: 0.06; }
+        50%      { opacity: 0.12; }
+      }
+      @keyframes od-blue-pulse {
+        0%,100% { filter: brightness(1); }
+        50%      { filter: brightness(1.2); }
+      }
+      @keyframes od-accent-scan {
+        0%,100% { opacity: 0.7; transform: scaleX(1); }
+        50%      { opacity: 1;   transform: scaleX(0.98); }
+      }
+
+    ]]></style>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         ONE DARK GRADIENT LIBRARY
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Wallpaper: Deep dark space with code matrix -->
+    <linearGradient id="od-g-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0E1015"/>
+      <stop offset="25%"  stop-color="#13171E"/>
+      <stop offset="55%"  stop-color="#1A1E27"/>
+      <stop offset="85%"  stop-color="#21252B"/>
+      <stop offset="100%" stop-color="#282c34"/>
+    </linearGradient>
+
+    <!-- Blue accent glow (left) -->
+    <radialGradient id="od-g-glow-l" cx="15%" cy="45%" r="40%">
+      <stop offset="0%"   stop-color="#61afef" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#61afef" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Purple accent glow (right) -->
+    <radialGradient id="od-g-glow-r" cx="85%" cy="55%" r="38%">
+      <stop offset="0%"   stop-color="#c678dd" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#c678dd" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Center depth glow -->
+    <radialGradient id="od-g-glow-c" cx="50%" cy="50%" r="30%">
+      <stop offset="0%"   stop-color="#528bff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#528bff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Waybar -->
+    <linearGradient id="od-g-bar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#21252b" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#1a1e27" stop-opacity="0.93"/>
+    </linearGradient>
+
+    <!-- Window -->
+    <linearGradient id="od-g-win" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#282c34" stop-opacity="0.97"/>
+      <stop offset="100%" stop-color="#21252b" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Titlebar -->
+    <linearGradient id="od-g-titlebar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#2c313a"/>
+      <stop offset="100%" stop-color="#282c34"/>
+    </linearGradient>
+
+    <!-- Active border -->
+    <linearGradient id="od-g-active" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#61afef">
+        <animate attributeName="stop-color"
+          values="#61afef;#c678dd;#98c379;#56b6c2;#61afef"
+          dur="5s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%"  stop-color="#c678dd">
+        <animate attributeName="stop-color"
+          values="#c678dd;#98c379;#56b6c2;#61afef;#c678dd"
+          dur="5s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#98c379">
+        <animate attributeName="stop-color"
+          values="#98c379;#56b6c2;#61afef;#c678dd;#98c379"
+          dur="5s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Gauge fills -->
+    <linearGradient id="od-g-cpu" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#61afef"/>
+      <stop offset="100%" stop-color="#56b6c2"/>
+    </linearGradient>
+    <linearGradient id="od-g-ram" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#98c379"/>
+      <stop offset="100%" stop-color="#56b6c2"/>
+    </linearGradient>
+    <linearGradient id="od-g-gpu" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#e06c75"/>
+      <stop offset="100%" stop-color="#d19a66"/>
+    </linearGradient>
+
+    <!-- Code rain gradient -->
+    <linearGradient id="od-g-rain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#61afef" stop-opacity="0"/>
+      <stop offset="30%"  stop-color="#61afef" stop-opacity="0.5"/>
+      <stop offset="60%"  stop-color="#98c379" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#c678dd" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Shimmer -->
+    <linearGradient id="od-g-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#61afef" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#61afef" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#61afef" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="od-f-shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="10" stdDeviation="28"
+        flood-color="#000000" flood-opacity="0.65"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="16"
+        flood-color="#61afef" flood-opacity="0.1"/>
+    </filter>
+    <filter id="od-f-bar-shadow" x="0%" y="0%" width="100%" height="300%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12"
+        flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="od-f-blue-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#61afef" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="od-f-purple-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#c678dd" flood-opacity="0.45" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="od-f-code-rain" x="-10%" y="-5%" width="120%" height="110%">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+
+    <clipPath id="od-clip">
+      <rect x="0" y="0" width="2560" height="1440"/>
+    </clipPath>
+    <clipPath id="od-clip-win1">
+      <rect x="40" y="62" width="1520" height="900"/>
+    </clipPath>
+
+    <!-- Grid pattern -->
+    <pattern id="od-pat-grid" x="0" y="0" width="48" height="48"
+      patternUnits="userSpaceOnUse">
+      <line x1="48" y1="0" x2="48" y2="48"
+        stroke="#61afef" stroke-width="0.5" opacity="0.12"/>
+      <line x1="0" y1="48" x2="48" y2="48"
+        stroke="#61afef" stroke-width="0.5" opacity="0.12"/>
+    </pattern>
+
+    <!-- Dot pattern -->
+    <pattern id="od-pat-dots" x="0" y="0" width="32" height="32"
+      patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="1" fill="#61afef" opacity="0.1"/>
+    </pattern>
+
+  </defs>
+
+  <g clip-path="url(#od-clip)">
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 00 — ONE DARK WALLPAPER: DEEP SPACE CODE MATRIX
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Base background -->
+  <rect x="0" y="0" width="2560" height="1440" fill="url(#od-g-bg)"/>
+  <rect x="0" y="0" width="2560" height="1440" fill="url(#od-g-glow-l)"/>
+  <rect x="0" y="0" width="2560" height="1440" fill="url(#od-g-glow-r)"/>
+  <rect x="0" y="0" width="2560" height="1440" fill="url(#od-g-glow-c)"/>
+
+  <!-- Grid overlay -->
+  <rect class="od-grid" x="0" y="0" width="2560" height="1440"
+    fill="url(#od-pat-grid)" opacity="0.8"/>
+
+  <!-- Dot overlay -->
+  <rect class="od-grid" x="0" y="0" width="2560" height="1440"
+    fill="url(#od-pat-dots)" opacity="0.7"/>
+
+  <!-- ── CODE RAIN EFFECT (matrix-style falling code) ────────── -->
+  <!-- Each column has different speed and content -->
+  <g filter="url(#od-f-code-rain)" opacity="0.4">
+
+    <!-- Code rain column 1: blue keywords -->
+    <g class="od-rain-1">
+      <text x="180" y="0"
+        font-family="'SF Mono','Fira Code',monospace"
+        font-size="13" fill="url(#od-g-rain)" writing-mode="vertical-rl">
+        const async function import export class extends implements interface
+      </text>
+    </g>
+
+    <!-- Code rain column 2: green strings -->
+    <g class="od-rain-2">
+      <text x="420" y="-200"
+        font-family="'SF Mono','Fira Code',monospace"
+        font-size="12" fill="#98c379" opacity="0.5" writing-mode="vertical-rl">
+        "dracula" "catppuccin" "nord" "gruvbox" "onedark" "rose-pine"
+      </text>
+    </g>
+
+    <!-- Code rain column 3: purple types -->
+    <g class="od-rain-3">
+      <text x="780" y="-100"
+        font-family="'SF Mono','Fira Code',monospace"
+        font-size="13" fill="#c678dd" opacity="0.4" writing-mode="vertical-rl">
+        Theme Plugin Snapshot Mode Config WallpaperEngine ColorExtractor
+      </text>
+    </g>
+
+    <!-- Code rain column 4: orange numbers -->
+    <g class="od-rain-4">
+      <text x="1200" y="-300"
+        font-family="'SF Mono','Fira Code',monospace"
+        font-size="12" fill="#d19a66" opacity="0.45" writing-mode="vertical-rl">
+        250 150 5000 450000 900 12 32 1440 2560 8 40
+      </text>
+    </g>
+
+    <!-- Code rain column 5: cyan tags -->
+    <g class="od-rain-5">
+      <text x="1800" y="-150"
+        font-family="'SF Mono','Fira Code',monospace"
+        font-size="13" fill="#56b6c2" opacity="0.4" writing-mode="vertical-rl">
+        &lt;Theme&gt; &lt;Plugin&gt; &lt;Config&gt; &lt;ASH&gt; &lt;Omega&gt;
+      </text>
+    </g>
+
+  </g>
+
+  <!-- ── GEOMETRIC BACKGROUND SHAPES ─────────────────────────── -->
+  <!-- Large overlapping circles — subtle depth -->
+  <circle cx="400"  cy="700" r="400"
+    fill="none" stroke="#61afef" stroke-width="0.5" opacity="0.08"/>
+  <circle cx="400"  cy="700" r="300"
+    fill="none" stroke="#61afef" stroke-width="0.5" opacity="0.05"/>
+  <circle cx="2200" cy="800" r="500"
+    fill="none" stroke="#c678dd" stroke-width="0.5" opacity="0.06"/>
+  <circle cx="2200" cy="800" r="380"
+    fill="none" stroke="#c678dd" stroke-width="0.5" opacity="0.04"/>
+
+  <!-- Diagonal accent lines -->
+  <g opacity="0.05" stroke="#61afef" stroke-width="1">
+    <line x1="0"    y1="200" x2="600"  y2="800"/>
+    <line x1="0"    y1="400" x2="800"  y2="1200"/>
+    <line x1="1960" y1="200" x2="2560" y2="800"/>
+    <line x1="1760" y1="400" x2="2560" y2="1100"/>
+  </g>
+
+  <!-- "ONE DARK" large watermark -->
+  <text x="1280" y="820" text-anchor="middle"
+    font-family="'SF Mono',monospace"
+    font-size="220" font-weight="900" letter-spacing="16"
+    fill="#61afef" opacity="0.018">ONE DARK</text>
+
+  <!-- ── FLOATING PARTICLES ─────────────────────────────────── -->
+  <g filter="url(#od-f-blue-glow)">
+    <circle class="od-particle od-p1" cx="300"  cy="400" r="3"
+      fill="#61afef" opacity="0.5"/>
+    <circle class="od-particle od-p2" cx="800"  cy="250" r="2.5"
+      fill="#c678dd" opacity="0.4"/>
+    <circle class="od-particle od-p3" cx="1600" cy="350" r="3"
+      fill="#98c379" opacity="0.45"/>
+    <circle class="od-particle od-p4" cx="2100" cy="500" r="2.5"
+      fill="#56b6c2" opacity="0.4"/>
+    <circle class="od-particle od-p5" cx="600"  cy="1100" r="3"
+      fill="#d19a66" opacity="0.4"/>
+    <circle class="od-particle od-p6" cx="1900" cy="1050" r="2.5"
+      fill="#e06c75" opacity="0.35"/>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 01 — WAYBAR: ONE DARK CLEAN STYLE
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Bar shadow -->
+  <rect x="0" y="0" width="2560" height="48"
+    fill="#000000" opacity="0.35"
+    filter="url(#od-f-bar-shadow)"/>
+
+  <!-- Bar body -->
+  <rect x="0" y="0" width="2560" height="48"
+    fill="url(#od-g-bar)"
+    class="od-bar"/>
+
+  <!-- Bar top accent line — animated gradient -->
+  <rect class="od-accent-line" x="0" y="0" width="2560" height="2"
+    fill="url(#od-g-active)" opacity="0.7"
+    style="transform-origin:0 0"/>
+
+  <!-- Bar bottom line -->
+  <rect x="0" y="47" width="2560" height="1.5"
+    fill="#61afef" opacity="0.2"/>
+
+  <!-- ── LEFT: Workspaces ─────────────────────────────────────── -->
+  <g transform="translate(20, 24)">
+    <!-- Active — blue -->
+    <circle class="od-ws-active" cx="0"  cy="0" r="7" fill="#61afef" opacity="0.9"
+      filter="url(#od-f-blue-glow)"/>
+    <!-- Occupied — green -->
+    <circle cx="22" cy="0" r="5" fill="#2c313a"/>
+    <circle cx="22" cy="0" r="3" fill="#98c379" opacity="0.7"/>
+    <!-- Occupied — purple -->
+    <circle cx="40" cy="0" r="5" fill="#2c313a"/>
+    <circle cx="40" cy="0" r="3" fill="#c678dd" opacity="0.6"/>
+    <!-- Empty -->
+    <circle cx="58"  cy="0" r="3" fill="#2c313a" opacity="0.5"/>
+    <circle cx="72"  cy="0" r="3" fill="#2c313a" opacity="0.5"/>
+    <circle cx="86"  cy="0" r="3" fill="#2c313a" opacity="0.5"/>
+    <circle cx="100" cy="0" r="3" fill="#2c313a" opacity="0.5"/>
+    <circle cx="114" cy="0" r="3" fill="#2c313a" opacity="0.5"/>
+  </g>
+
+  <!-- Separator -->
+  <line x1="156" y1="12" x2="156" y2="36" stroke="#2c313a" stroke-width="1"/>
+
+  <!-- Active window title -->
+  <text x="172" y="29"
+    font-family="'SF Mono','JetBrains Mono',monospace"
+    font-size="13" fill="#abb2bf" opacity="0.85">
+    <tspan fill="#61afef" filter="url(#od-f-blue-glow)"> </tspan>
+    <tspan fill="#abb2bf"> NVIM — ash-cli/commands/theme/apply.sh</tspan>
+  </text>
+
+  <!-- CENTER: Clock -->
+  <g transform="translate(1280, 24)">
+    <text x="0" y="4" text-anchor="middle"
+      font-family="'SF Mono',monospace"
+      font-size="16" font-weight="700"
+      fill="#61afef" filter="url(#od-f-blue-glow)">18:24</text>
+    <text x="0" y="18" text-anchor="middle"
+      font-family="'SF Mono',monospace"
+      font-size="10" fill="#5c6370">Sun 15 Dec 2024</text>
+  </g>
+
+  <!-- RIGHT: Modules -->
+  <g transform="translate(2540, 24)" text-anchor="end"
+    font-family="'SF Mono',monospace">
+    <text x="0"    y="4" font-size="15" fill="#e06c75">⏻</text>
+    <line x1="-20"  y1="-10" x2="-20"  y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-28"  y="4" font-size="14" fill="#c678dd"> </text>
+    <text x="-50"  y="4" font-size="11" fill="#abb2bf">71%</text>
+    <line x1="-84"  y1="-10" x2="-84"  y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-92"  y="4" font-size="13" fill="#98c379"> </text>
+    <text x="-114" y="4" font-size="11" fill="#abb2bf">89%</text>
+    <line x1="-148" y1="-10" x2="-148" y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-156" y="4" font-size="14" fill="#56b6c2"> </text>
+    <text x="-180" y="4" font-size="11" fill="#abb2bf">OD-NET</text>
+    <line x1="-222" y1="-10" x2="-222" y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-230" y="-2" font-size="9" fill="#61afef">CPU 22%</text>
+    <text x="-230" y="10" font-size="9" fill="#98c379">MEM 9.8G</text>
+    <line x1="-294" y1="-10" x2="-294" y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-302" y="4" font-size="15" fill="#e5c07b">󰂚</text>
+    <circle cx="-296" cy="-8" r="6" fill="#e06c75"/>
+    <text x="-296" y="-4" font-size="8" font-weight="700" fill="#f8f8f2" text-anchor="middle">2</text>
+    <line x1="-322" y1="-10" x2="-322" y2="14" stroke="#2c313a" stroke-width="1"/>
+    <text x="-330" y="4" font-size="14" fill="#5c6370"> </text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 02 — NEOVIM WINDOW (LEFT LARGE)
+       One Dark: realistic Bash script with all 8 accent colors
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Shadow -->
+  <rect x="40" y="62" width="1520" height="900" rx="10"
+    fill="#000000" opacity="0.6" filter="url(#od-f-shadow)"/>
+
+  <!-- Active border — animated color cycle -->
+  <rect x="40" y="62" width="1520" height="900" rx="10"
+    fill="none"
+    stroke="url(#od-g-active)"
+    stroke-width="2.5"
+    class="od-border"/>
+
+  <!-- Window body -->
+  <rect x="41" y="63" width="1518" height="898" rx="9"
+    fill="url(#od-g-win)"/>
+
+  <!-- Titlebar -->
+  <rect x="41" y="63" width="1518" height="38" rx="9" fill="url(#od-g-titlebar)"/>
+  <rect x="41" y="89" width="1518" height="12" fill="url(#od-g-titlebar)"/>
+
+  <!-- Window buttons — One Dark colors -->
+  <circle cx="65"  cy="82" r="8" fill="#e06c75"/>
+  <circle cx="88"  cy="82" r="8" fill="#e5c07b"/>
+  <circle cx="111" cy="82" r="8" fill="#98c379"/>
+
+  <!-- Title -->
+  <text x="800" y="87" text-anchor="middle"
+    font-family="'SF Mono',monospace"
+    font-size="13" fill="#5c6370">
+    <tspan fill="#61afef" filter="url(#od-f-blue-glow)">NVIM</tspan>
+    <tspan fill="#2c313a"> — </tspan>
+    <tspan fill="#abb2bf">ash-cli/commands/theme/apply.sh</tspan>
+    <tspan fill="#2c313a"> [+]</tspan>
+  </text>
+
+  <!-- ── TABLINE ────────────────────────────────────────────────── -->
+  <rect x="41"  y="101" width="1518" height="26" fill="#21252b"/>
+  <rect x="41"  y="101" width="230"  height="26" fill="#282c34"/>
+  <rect x="41"  y="101" width="230"  height="3"  fill="#61afef"
+    filter="url(#od-f-blue-glow)"/>
+  <text x="132" y="119"
+    font-family="'SF Mono',monospace" font-size="11" fill="#abb2bf">
+    <tspan fill="#98c379">• </tspan>commands/theme/apply.sh</text>
+  <rect x="271"  y="101" width="180" height="26" fill="#21252b"/>
+  <text x="331"  y="119"
+    font-family="'SF Mono',monospace" font-size="11" fill="#5c6370">theme/pick.sh</text>
+  <rect x="451"  y="101" width="180" height="26" fill="#21252b"/>
+  <text x="501"  y="119"
+    font-family="'SF Mono',monospace" font-size="11" fill="#5c6370">theme/colors.sh</text>
+  <rect x="631"  y="101" width="160" height="26" fill="#21252b"/>
+  <text x="671"  y="119"
+    font-family="'SF Mono',monospace" font-size="11" fill="#5c6370">color-engine/</text>
+
+  <!-- ── FILE TREE ──────────────────────────────────────────────── -->
+  <rect x="41"  y="127" width="220" height="772" fill="#21252b"/>
+  <rect x="41"  y="127" width="220" height="28" fill="#2c313a"/>
+  <text x="151" y="147" text-anchor="middle"
+    font-family="'SF Mono',monospace" font-size="11" font-weight="600"
+    fill="#61afef" filter="url(#od-f-blue-glow)">  ONE DARK</text>
+
+  <g transform="translate(52, 170)"
+    font-family="'SF Mono',monospace" font-size="11">
+    <text y="0"   fill="#61afef">󰉋 ash-cli</text>
+    <text y="20"  fill="#abb2bf" dx="12">󰉋 commands</text>
+    <text y="40"  fill="#61afef" dx="24">󰉋 theme</text>
+    <text y="60"  fill="#61afef" dx="36" font-weight="600">󰈮 apply.sh</text>
+    <text y="80"  fill="#5c6370" dx="36">󰈮 pick.sh</text>
+    <text y="100" fill="#5c6370" dx="36">󰈮 colors.sh</text>
+    <text y="120" fill="#5c6370" dx="36">󰈮 create.sh</text>
+    <text y="140" fill="#5c6370" dx="36">󰈮 ai-generate.sh</text>
+    <text y="160" fill="#5c6370" dx="36">󰈮 schedule.sh</text>
+    <text y="188" fill="#5c6370" dx="24">󰉋 plugin</text>
+    <text y="208" fill="#5c6370" dx="24">󰉋 snapshot</text>
+    <text y="228" fill="#5c6370" dx="24">󰉋 mode</text>
+    <text y="248" fill="#5c6370" dx="24">󰉋 doctor</text>
+    <text y="268" fill="#5c6370" dx="12">󰉋 lib</text>
+    <text y="288" fill="#5c6370" dx="12">󰉋 engines</text>
+    <text y="316" fill="#5c6370">󰉋 config</text>
+    <text y="336" fill="#5c6370">󰉋 themes</text>
+    <text y="356" fill="#5c6370">󰉋 plugins</text>
+    <text y="376" fill="#5c6370">󰉋 tests</text>
+    <text y="396" fill="#5c6370">󰈮 setup.sh</text>
+    <text y="416" fill="#5c6370">󰈮 Makefile</text>
+  </g>
+
+  <!-- ── CODE AREA: One Dark apply.sh ─────────────────────────── -->
+  <rect x="261" y="127" width="1298" height="772" fill="#282c34"/>
+
+  <!-- Line gutter strip -->
+  <rect x="261" y="127" width="52" height="772" fill="#21252b" opacity="0.5"/>
+
+  <g transform="translate(286, 152)"
+    font-family="'JetBrainsMono Nerd Font','Fira Code',monospace"
+    font-size="13.5">
+
+    <!-- Line numbers -->
+    <g font-size="12" fill="#5c6370" text-anchor="end">
+      <text x="-8" y="0">1</text>
+      <text x="-8" y="20">2</text>
+      <text x="-8" y="40">3</text>
+      <text x="-8" y="60">4</text>
+      <text x="-8" y="80">5</text>
+      <text x="-8" y="100">6</text>
+      <text x="-8" y="120">7</text>
+      <text x="-8" y="140">8</text>
+      <text x="-8" y="160">9</text>
+      <text x="-8" y="180">10</text>
+      <text x="-8" y="200">11</text>
+      <text x="-8" y="220">12</text>
+      <text x="-8" y="240">13</text>
+      <text x="-8" y="260">14</text>
+      <text x="-8" y="280">15</text>
+      <text x="-8" y="300">16</text>
+      <text x="-8" y="320">17</text>
+      <text x="-8" y="340">18</text>
+      <text x="-8" y="360">19</text>
+      <text x="-8" y="380">20</text>
+      <text x="-8" y="400">21</text>
+      <text x="-8" y="420">22</text>
+      <text x="-8" y="440">23</text>
+      <text x="-8" y="460">24</text>
+      <text x="-8" y="480">25</text>
+      <text x="-8" y="500">26</text>
+      <text x="-8" y="520">27</text>
+      <text x="-8" y="540">28</text>
+      <text x="-8" y="560">29</text>
+      <text x="-8" y="580">30</text>
+      <text x="-8" y="600">31</text>
+      <text x="-8" y="620">32</text>
+      <text x="-8" y="640">33</text>
+      <text x="-8" y="660">34</text>
+      <text x="-8" y="680">35</text>
+      <text x="-8" y="700">36</text>
+      <text x="-8" y="720">37</text>
+    </g>
+
+    <!-- One Dark apply.sh with FULL color diversity -->
+
+    <!-- L1: shebang — red keyword -->
+    <text y="0" fill="#828997">#!/usr/bin/env bash</text>
+
+    <!-- L3: comment -->
+    <text y="40" fill="#5c6370">
+      # ─── apply.sh — ASH Theme Application Engine ──────────────
+    </text>
+
+    <!-- L4: set -->
+    <text y="60">
+      <tspan fill="#c678dd">set</tspan>
+      <tspan fill="#abb2bf"> -euo pipefail</tspan>
+    </text>
+
+    <!-- L6: function declaration -->
+    <text y="100">
+      <tspan fill="#61afef">apply_theme</tspan>
+      <tspan fill="#abb2bf">() {</tspan>
+    </text>
+
+    <!-- L7: local with type annotation comment -->
+    <text y="120">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">local</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e06c75">-r</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">theme_name</tspan>
+      <tspan fill="#abb2bf">=</tspan>
+      <tspan fill="#98c379">"${1:?'theme name required'}"</tspan>
+    </text>
+
+    <!-- L8 -->
+    <text y="140">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">local</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">theme_dir</tspan>
+      <tspan fill="#abb2bf">=</tspan>
+      <tspan fill="#98c379">"${ASH_ROOT}/themes/presets"</tspan>
+    </text>
+
+    <!-- L9 -->
+    <text y="160">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">local</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">theme_path</tspan>
+      <tspan fill="#abb2bf">=</tspan>
+      <tspan fill="#98c379">"${theme_dir}/**/${theme_name}"</tspan>
+    </text>
+
+    <!-- Current line highlight -->
+    <rect x="-8" y="171" width="1274" height="22" fill="#2c313a" rx="2" opacity="0.7"/>
+
+    <!-- L10: if statement -->
+    <text y="188">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">if</tspan>
+      <tspan fill="#abb2bf"> [[ ! </tspan>
+      <tspan fill="#e06c75">-d</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${theme_path}"</tspan>
+      <tspan fill="#abb2bf"> ]]; </tspan>
+      <tspan fill="#c678dd">then</tspan>
+    </text>
+
+    <!-- L11 -->
+    <text y="208">
+      <tspan fill="#abb2bf">        </tspan>
+      <tspan fill="#61afef">log_error</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"Theme not found: ${theme_name}"</tspan>
+      <tspan fill="#d19a66"> 2</tspan>
+    </text>
+
+    <!-- L12 -->
+    <text y="228" fill="#c678dd">    fi</text>
+
+    <!-- L14: color extraction call -->
+    <text y="268">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#5c6370"># Step 1: Extract color palette</tspan>
+    </text>
+
+    <!-- L15 -->
+    <text y="288">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">local</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">colors_json</tspan>
+      <tspan fill="#abb2bf">=</tspan>
+      <tspan fill="#98c379">"${theme_path}/colors.json"</tspan>
+    </text>
+
+    <!-- L16 -->
+    <text y="308">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#61afef">validate_theme_json</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${colors_json}"</tspan>
+      <tspan fill="#abb2bf"> || </tspan>
+      <tspan fill="#c678dd">return</tspan>
+      <tspan fill="#d19a66"> 1</tspan>
+    </text>
+
+    <!-- L18: template rendering section -->
+    <text y="348">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#5c6370"># Step 2: Apply to all components</tspan>
+    </text>
+
+    <!-- L19: declare array -->
+    <text y="368">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">declare</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e06c75">-a</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">TARGETS</tspan>
+      <tspan fill="#abb2bf">=(</tspan>
+    </text>
+
+    <!-- L20-27: array items -->
+    <text y="388" fill="#98c379">        "hyprland"</text>
+    <text y="408" fill="#98c379">        "waybar"</text>
+    <text y="428" fill="#98c379">        "kitty"</text>
+    <text y="448" fill="#98c379">        "rofi"</text>
+    <text y="468" fill="#98c379">        "dunst"</text>
+    <text y="488" fill="#98c379">        "neovim"</text>
+    <text y="508" fill="#98c379">        "gtk"</text>
+    <text y="528" fill="#98c379">        "spicetify"</text>
+    <text y="548" fill="#abb2bf">    )</text>
+
+    <!-- L29: for loop -->
+    <text y="588">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#c678dd">for</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#e5c07b">target</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#c678dd">in</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${TARGETS[@]}"</tspan>
+      <tspan fill="#abb2bf">; </tspan>
+      <tspan fill="#c678dd">do</tspan>
+    </text>
+
+    <!-- L30 -->
+    <text y="608">
+      <tspan fill="#abb2bf">        </tspan>
+      <tspan fill="#61afef">_apply_target</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${target}"</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${colors_json}"</tspan>
+    </text>
+
+    <!-- L31 -->
+    <text y="628">
+      <tspan fill="#abb2bf">        </tspan>
+      <tspan fill="#61afef">log_pass</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"Applied: ${target}"</tspan>
+    </text>
+
+    <!-- L32 -->
+    <text y="648" fill="#c678dd">    done</text>
+
+    <!-- L34: wallpaper -->
+    <text y="688">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#5c6370"># Step 3: Set wallpaper</tspan>
+    </text>
+
+    <!-- L35 -->
+    <text y="708">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#61afef">_apply_wallpaper</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"${theme_path}"</tspan>
+    </text>
+
+    <!-- L36: return -->
+    <text y="728">
+      <tspan fill="#abb2bf">    </tspan>
+      <tspan fill="#61afef">log_success</tspan>
+      <tspan fill="#abb2bf"> </tspan>
+      <tspan fill="#98c379">"Theme applied: ${theme_name}"</tspan>
+    </text>
+
+    <!-- Cursor on line 10 -->
+    <rect class="od-cursor" x="-6" y="171" width="2" height="22"
+      fill="#61afef" filter="url(#od-f-blue-glow)"/>
+
+  </g>
+
+  <!-- ── INLAY HINTS (virtual text) ─────────────────────────── -->
+  <!-- Show type hints inline — a Neovim modern feature -->
+  <g transform="translate(926, 274)" font-family="monospace" font-size="10"
+    fill="#5c6370" opacity="0.8">
+    <text>: string</text>
+  </g>
+  <g transform="translate(1010, 294)" font-family="monospace" font-size="10"
+    fill="#5c6370" opacity="0.8">
+    <text>: path</text>
+  </g>
+
+  <!-- ── STATUSLINE ────────────────────────────────────────────── -->
+  <rect x="261" y="871" width="1298" height="28" fill="#21252b"/>
+  <rect x="261" y="871" width="90"  height="28" fill="#61afef"
+    filter="url(#od-f-blue-glow)"/>
+  <text x="306" y="890" text-anchor="middle"
+    font-family="'SF Mono',monospace"
+    font-size="12" font-weight="800" fill="#282c34"> NORMAL</text>
+  <text x="368" y="890"
+    font-family="'SF Mono',monospace" font-size="12" fill="#98c379">
+     main</text>
+  <text x="466" y="890"
+    font-family="'SF Mono',monospace" font-size="11" fill="#5c6370">
+    bash-lsp · 0 errors · 0 warnings</text>
+  <text x="1554" y="890" text-anchor="end"
+    font-family="'SF Mono',monospace"
+    font-size="11" fill="#5c6370">
+    Ln 10, Col 1 · bash · UTF-8 · LF · One Dark
+  </text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 03 — KITTY TERMINAL (top right)
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Shadow -->
+  <rect x="1600" y="62" width="920" height="540" rx="10"
+    fill="#000000" opacity="0.55" filter="url(#od-f-shadow)"/>
+  <rect x="1600" y="62" width="920" height="540" rx="10"
+    fill="none" stroke="#2c313a" stroke-width="1.5"/>
+  <rect x="1601" y="63" width="918" height="538" rx="9"
+    fill="url(#od-g-win)"/>
+
+  <!-- Titlebar -->
+  <rect x="1601" y="63" width="918" height="36" rx="9" fill="url(#od-g-titlebar)"/>
+  <rect x="1601" y="87" width="918" height="12" fill="url(#od-g-titlebar)"/>
+  <circle cx="1622" cy="81" r="7" fill="#e06c75"/>
+  <circle cx="1645" cy="81" r="7" fill="#e5c07b"/>
+  <circle cx="1668" cy="81" r="7" fill="#98c379"/>
+  <text x="2060" y="86" text-anchor="middle"
+    font-family="'SF Mono',monospace" font-size="13" fill="#5c6370">
+     kitty — fish
+  </text>
+
+  <!-- Terminal content -->
+  <g transform="translate(1618, 112)"
+    font-family="'JetBrainsMono Nerd Font','Fira Code',monospace"
+    font-size="13">
+
+    <!-- Welcome -->
+    <text y="0" fill="#61afef" font-size="14" font-weight="700"
+      filter="url(#od-f-blue-glow)">
+       ASH Dotfiles · One Dark Pro
+    </text>
+
+    <!-- Prompt 1 -->
+    <g transform="translate(0, 32)">
+      <rect x="0" y="-12" width="46" height="18" rx="3" fill="#2c313a"/>
+      <text y="0" fill="#61afef"> ~</text>
+      <rect x="48" y="-12" width="82" height="18" rx="3" fill="#2c313a"/>
+      <text x="50" y="0" fill="#98c379"> main</text>
+      <rect x="132" y="-12" width="126" height="18" rx="3" fill="#2c313a"/>
+      <text x="134" y="0" fill="#c678dd"> one-dark</text>
+      <text x="266" y="0" fill="#61afef" font-size="16" font-weight="700"
+        filter="url(#od-f-blue-glow)"> ❯</text>
+      <text x="288" y="0">
+        <tspan fill="#61afef">ash</tspan>
+        <tspan fill="#abb2bf"> </tspan>
+        <tspan fill="#98c379">theme</tspan>
+        <tspan fill="#abb2bf"> </tspan>
+        <tspan fill="#d19a66">pick</tspan>
+        <tspan fill="#abb2bf"> </tspan>
+        <tspan fill="#56b6c2">--preview</tspan>
+        <tspan fill="#abb2bf"> </tspan>
+        <tspan fill="#e5c07b">--fuzzy</tspan>
+      </text>
+    </g>
+
+    <!-- Theme picker output (fzf-style preview) -->
+    <g transform="translate(0, 65)" font-size="12">
+      <!-- fzf header -->
+      <rect x="0" y="-4" width="880" height="28" rx="4" fill="#2c313a" opacity="0.7"/>
+      <text y="12" fill="#61afef" font-weight="600" font-size="11">
+         THEME PICKER · 250 themes · fuzzy search
+      </text>
+
+      <!-- Search box -->
+      <rect x="0" y="30" width="880" height="22" rx="3" fill="#21252b" stroke="#61afef" stroke-width="1"/>
+      <text x="8" y="46" fill="#abb2bf" font-size="11">
+        <tspan fill="#61afef">❯ </tspan>one
+        <rect class="od-cursor" x="0" y="-13" width="2" height="16" fill="#61afef"/>
+      </text>
+      <rect class="od-cursor" x="66" y="34" width="2" height="16" fill="#61afef"
+        filter="url(#od-f-blue-glow)"/>
+
+      <!-- Results list -->
+      <!-- Selected item -->
+      <rect x="0" y="58" width="880" height="22" rx="3" fill="#2c313a"/>
+      <text x="8" y="74" font-size="11">
+        <tspan fill="#61afef">▶ </tspan>
+        <tspan fill="#abb2bf">one-dark      </tspan>
+        <tspan fill="#98c379">active</tspan>
+        <tspan fill="#5c6370">  dark · balanced · blue-purple</tspan>
+      </text>
+
+      <!-- Other matches -->
+      <text x="8" y="96" font-size="11" fill="#5c6370">  one-dark-pro    dark · enhanced one dark</text>
+      <text x="8" y="112" font-size="11" fill="#5c6370">  one-dark-vivid  dark · increased saturation</text>
+
+      <line x1="0" y1="118" x2="880" y2="118" stroke="#2c313a" stroke-width="1"/>
+
+      <!-- Non-matching results dimmed -->
+      <text x="8" y="132" font-size="11" fill="#5c6370">  catppuccin-mocha   Catppuccin dark</text>
+      <text x="8" y="148" font-size="11" fill="#5c6370">  tokyo-night        Deep midnight blue</text>
+      <text x="8" y="164" font-size="11" fill="#5c6370">  dracula            Gothic purple vampire</text>
+      <text x="8" y="180" font-size="11" fill="#5c6370">  gruvbox-dark-hard  Warm retro amber</text>
+      <text x="8" y="196" font-size="11" fill="#5c6370">  nord               Arctic polar night</text>
+      <text x="8" y="212" font-size="11" fill="#5c6370">  rose-pine          Soft natural tones</text>
+      <text x="8" y="228" font-size="11" fill="#5c6370">  kanagawa-wave      Japanese ink wash</text>
+      <text x="8" y="244" font-size="11" fill="#5c6370">  everforest-dark    Deep forest greens</text>
+      <text x="8" y="260" font-size="11" fill="#5c6370">  oxocarbon          IBM-inspired mono</text>
+      <text x="8" y="276" font-size="11" fill="#5c6370">  vesper             Warm amber tones</text>
+
+      <!-- Footer -->
+      <rect x="0" y="284" width="880" height="20" rx="3" fill="#21252b"/>
+      <text x="8" y="298" font-size="10" fill="#5c6370">
+        <tspan fill="#61afef">250</tspan>
+        <tspan> matches · </tspan>
+        <tspan fill="#98c379">↑↓</tspan>
+        <tspan> navigate · </tspan>
+        <tspan fill="#98c379">⏎</tspan>
+        <tspan> apply · </tspan>
+        <tspan fill="#98c379">ctrl-p</tspan>
+        <tspan> preview · </tspan>
+        <tspan fill="#e06c75">esc</tspan>
+        <tspan> cancel</tspan>
+      </text>
+
+    </g>
+
+    <!-- PREVIEW PANEL (right side of fzf) -->
+    <rect x="450" y="58" width="430" height="248" rx="4" fill="#21252b"/>
+    <text x="466" y="80" font-size="10" fill="#5c6370" font-weight="600">
+      PREVIEW: one-dark
+    </text>
+    <!-- Mini color palette in preview -->
+    <g transform="translate(466, 90)">
+      <rect x="0"  y="0" width="16" height="16" rx="3" fill="#282c34"/>
+      <rect x="20" y="0" width="16" height="16" rx="3" fill="#2c313a"/>
+      <rect x="40" y="0" width="16" height="16" rx="3" fill="#21252b"/>
+      <rect x="0"  y="20" width="16" height="16" rx="3" fill="#e06c75"/>
+      <rect x="20" y="20" width="16" height="16" rx="3" fill="#98c379"/>
+      <rect x="40" y="20" width="16" height="16" rx="3" fill="#e5c07b"/>
+      <rect x="60" y="20" width="16" height="16" rx="3" fill="#61afef"/>
+      <rect x="80" y="20" width="16" height="16" rx="3" fill="#c678dd"/>
+      <rect x="100" y="20" width="16" height="16" rx="3" fill="#56b6c2"/>
+      <rect x="120" y="20" width="16" height="16" rx="3" fill="#d19a66"/>
+      <!-- Preview code snippet -->
+      <g font-size="10.5" font-family="monospace" transform="translate(0, 50)">
+        <text fill="#c678dd">function</text>
+        <text x="68" fill="#61afef"> hello</text>
+        <text x="108" fill="#abb2bf">(</text>
+        <text x="116" fill="#d19a66">name</text>
+        <text x="148" fill="#abb2bf">) {</text>
+        <text y="16" fill="#abb2bf">  </text>
+        <text x="16" y="16" fill="#c678dd">const</text>
+        <text x="54" y="16" fill="#e5c07b"> msg</text>
+        <text x="80" y="16" fill="#abb2bf"> =</text>
+        <text y="32" x="16" fill="#98c379"> "Hello,</text>
+        <text x="72" y="32" fill="#56b6c2"> ${name}"</text>
+        <text x="128" y="32" fill="#abb2bf">;</text>
+        <text y="48" fill="#abb2bf">  </text>
+        <text x="16" y="48" fill="#61afef">console</text>
+        <text x="64" y="48" fill="#abb2bf">.</text>
+        <text x="70" y="48" fill="#61afef">log</text>
+        <text x="90" y="48" fill="#abb2bf">(msg);</text>
+        <text y="64" fill="#abb2bf">}</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Statusline for terminal -->
+  <rect x="1601" y="575" width="918" height="26" fill="#21252b"/>
+  <rect x="1601" y="575" width="88"  height="26" fill="#c678dd"
+    filter="url(#od-f-purple-glow)"/>
+  <text x="1645" y="593" text-anchor="middle"
+    font-family="'SF Mono',monospace"
+    font-size="12" font-weight="700" fill="#282c34"> INSERT</text>
+  <text x="1706" y="593"
+    font-family="'SF Mono',monospace" font-size="12" fill="#98c379">
+     main</text>
+  <text x="2514" y="593" text-anchor="end"
+    font-family="'SF Mono',monospace" font-size="11" fill="#5c6370">
+    fish 3.7.0 · One Dark</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 04 — SYSTEM MONITOR (bottom right)
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <rect x="1600" y="642" width="920" height="320" rx="10"
+    fill="#000000" opacity="0.5" filter="url(#od-f-shadow)"/>
+  <rect x="1600" y="642" width="920" height="320" rx="10"
+    fill="none" stroke="#2c313a" stroke-width="1"/>
+  <rect x="1601" y="643" width="918" height="318" rx="9"
+    fill="url(#od-g-win)"/>
+
+  <rect x="1601" y="643" width="918" height="36" rx="9" fill="url(#od-g-titlebar)"/>
+  <rect x="1601" y="667" width="918" height="12" fill="url(#od-g-titlebar)"/>
+  <circle cx="1622" cy="661" r="7" fill="#e06c75"/>
+  <circle cx="1645" cy="661" r="7" fill="#e5c07b"/>
+  <circle cx="1668" cy="661" r="7" fill="#98c379"/>
+  <text x="2060" y="666" text-anchor="middle"
+    font-family="'SF Mono',monospace" font-size="13" fill="#5c6370">
+    btop — system monitor
+  </text>
+
+  <!-- Btop One Dark styled -->
+  <g transform="translate(1618, 692)"
+    font-family="'JetBrainsMono Nerd Font',monospace"
+    font-size="12">
+
+    <text y="0" fill="#61afef" font-weight="700" font-size="11"
+      filter="url(#od-f-blue-glow)">
+       CPU ── 22% ──────────────────────────────────────
+    </text>
+
+    <!-- CPU graph with One Dark colors -->
+    <text y="18" fill="#2c313a">100│</text>
+    <text y="36" fill="#2c313a">
+      50│<tspan fill="#c678dd">              ▃▄▃            ▂▃▄▃  </tspan>
+    </text>
+    <text y="54" fill="#2c313a">
+      0│<tspan fill="#61afef">  ▁▁▂▁▁▂▁▁▁▂▄█████▄▂▁▁▁  ▁▂▃████▃▂▁</tspan>
+    </text>
+
+    <text y="80" fill="#c678dd" font-weight="700" font-size="11"
+      filter="url(#od-f-purple-glow)">
+       MEMORY ── 9.8G/32G (31%) ──────────────────────────
+    </text>
+
+    <g transform="translate(0, 96)" font-size="11">
+      <text fill="#5c6370">Physical:</text>
+      <rect x="84" y="-10" width="380" height="12" rx="3" fill="#2c313a"/>
+      <rect x="84" y="-10" width="118" height="12" rx="3" fill="url(#od-g-ram)"/>
+      <text x="474" fill="#abb2bf">9.8G / 32G</text>
+
+      <text fill="#5c6370" y="20">Swap:</text>
+      <rect x="84" y="10" width="380" height="12" rx="3" fill="#2c313a"/>
+      <rect x="84" y="10" width="30" height="12" rx="3" fill="#56b6c2"/>
+      <text x="474" y="20" fill="#abb2bf">1.0G / 8G</text>
+    </g>
+
+    <text y="144" fill="#98c379" font-weight="700" font-size="11">
+       PROCESSES ─────────────────────────────────────────
+    </text>
+
+    <g transform="translate(0, 160)" font-size="11">
+      <text fill="#5c6370">   PID NAME          CPU%  MEM%   MEM    STATUS</text>
+      <text y="18">
+        <tspan fill="#abb2bf">   9124 </tspan>
+        <tspan x="64" fill="#61afef">nvim          </tspan>
+        <tspan x="240" fill="#abb2bf">5.2   2.8   </tspan>
+        <tspan x="368" fill="#abb2bf">896M  </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+      <text y="34">
+        <tspan fill="#abb2bf">   8901 </tspan>
+        <tspan x="64" fill="#c678dd">ollama        </tspan>
+        <tspan x="240" fill="#abb2bf">3.4   4.9   </tspan>
+        <tspan x="368" fill="#abb2bf">1.6G  </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+      <text y="50">
+        <tspan fill="#abb2bf">   8845 </tspan>
+        <tspan x="64" fill="#56b6c2">kitty         </tspan>
+        <tspan x="240" fill="#abb2bf">2.1   1.7   </tspan>
+        <tspan x="368" fill="#abb2bf">544M  </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+      <text y="66">
+        <tspan fill="#abb2bf">   8211 </tspan>
+        <tspan x="64" fill="#98c379">Hyprland      </tspan>
+        <tspan x="240" fill="#abb2bf">1.8   1.2   </tspan>
+        <tspan x="368" fill="#abb2bf">384M  </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+      <text y="82">
+        <tspan fill="#abb2bf">   8238 </tspan>
+        <tspan x="64" fill="#e5c07b">waybar        </tspan>
+        <tspan x="240" fill="#abb2bf">0.6   0.8   </tspan>
+        <tspan x="368" fill="#abb2bf">256M  </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+      <text y="98">
+        <tspan fill="#abb2bf">   8901 </tspan>
+        <tspan x="64" fill="#d19a66">ash-hot-reload</tspan>
+        <tspan x="240" fill="#abb2bf">0.2   0.3   </tspan>
+        <tspan x="368" fill="#abb2bf">96M   </tspan>
+        <tspan x="432" fill="#98c379">running</tspan>
+      </text>
+    </g>
+
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LAYER 05 — FLOATING WIDGETS
+       ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- System monitor widget (bottom left) -->
+  <rect x="40" y="980" width="300" height="200" rx="10"
+    fill="#282c34" opacity="0.94"
+    filter="url(#od-f-shadow)"/>
+  <rect x="40" y="980" width="300" height="200" rx="10"
+    fill="none" stroke="#2c313a" stroke-width="1"/>
+  <!-- Blue top accent -->
+  <rect x="40" y="980" width="300" height="3" rx="1"
+    fill="#61afef" opacity="0.7"
+    filter="url(#od-f-blue-glow)"/>
+
+  <text x="56" y="1002"
+    font-family="'SF Mono',monospace" font-size="12" font-weight="600"
+    fill="#61afef" filter="url(#od-f-blue-glow)"> MONITOR</text>
+  <line x1="40" y1="1010" x2="340" y2="1010" stroke="#2c313a" stroke-width="1"/>
+
+  <g transform="translate(56, 1028)" font-family="'SF Mono',monospace" font-size="11">
+    <text fill="#61afef" y="0">CPU</text>
+    <text fill="#abb2bf" y="0" x="228" text-anchor="end">22%</text>
+    <rect x="0" y="6" width="228" height="8" rx="4" fill="#2c313a"/>
+    <rect class="od-gauge" x="0" y="6" width="50" height="8" rx="4"
+      fill="url(#od-g-cpu)" style="transform-origin:0 10px"
+      filter="url(#od-f-blue-glow)"/>
+
+    <text fill="#98c379" y="32">RAM</text>
+    <text fill="#abb2bf" y="32" x="228" text-anchor="end">9.8G</text>
+    <rect x="0" y="38" width="228" height="8" rx="4" fill="#2c313a"/>
+    <rect class="od-gauge" x="0" y="38" width="71" height="8" rx="4"
+      fill="url(#od-g-ram)" style="transform-origin:0 42px"/>
+
+    <text fill="#e06c75" y="64">GPU</text>
+    <text fill="#abb2bf" y="64" x="228" text-anchor="end">38%</text>
+    <rect x="0" y="70" width="228" height="8" rx="4" fill="#2c313a"/>
+    <rect class="od-gauge" x="0" y="70" width="87" height="8" rx="4"
+      fill="url(#od-g-gpu)" style="transform-origin:0 74px"/>
+
+    <text fill="#56b6c2" y="96">DISK</text>
+    <text fill="#abb2bf" y="96" x="228" text-anchor="end">388G/2TB</text>
+    <rect x="0" y="102" width="228" height="8" rx="4" fill="#2c313a"/>
+    <rect x="0" y="102" width="44" height="8" rx="4" fill="#56b6c2" opacity="0.6"/>
+
+    <g font-size="10" y="128">
+      <text fill="#e06c75" y="128">CPU: 58°C</text>
+      <text x="80"  fill="#d19a66" y="128">GPU: 72°C</text>
+      <text x="162" fill="#98c379" y="128">OK ✓</text>
+    </g>
+  </g>
+
+  <!-- One Dark notification toast -->
+  <g class="od-notif" transform="translate(2360, 0)">
+    <rect x="0" y="68" width="180" height="80" rx="10"
+      fill="#2c313a" opacity="0.97"
+      filter="url(#od-f-shadow)"/>
+    <rect x="0" y="68" width="180" height="80" rx="10"
+      fill="none" stroke="#2c313a" stroke-width="1.5"/>
+    <!-- Blue left bar -->
+    <rect x="0" y="68" width="4" height="80" rx="2"
+      fill="#61afef" filter="url(#od-f-blue-glow)"/>
+    <circle cx="22" cy="97" r="12" fill="#21252b"/>
+    <text x="22" y="102" text-anchor="middle"
+      font-family="monospace" font-size="14" fill="#61afef"> </text>
+    <text x="40" y="90"
+      font-family="'SF Mono',monospace" font-size="11" font-weight="600"
+      fill="#abb2bf">ASH Dotfiles</text>
+    <text x="40" y="104"
+      font-family="'SF Mono',monospace" font-size="10"
+      fill="#5c6370">Picked: one-dark</text>
+    <text x="40" y="118"
+      font-family="'SF Mono',monospace" font-size="10"
+      fill="#5c6370">Applied in 312ms</text>
+    <text x="40" y="140"
+      font-family="'SF Mono',monospace" font-size="9"
+      fill="#5c6370">now · theme applied</text>
+  </g>
+
+  <!-- ── SCREEN BORDER ───────────────────────────────────────── -->
+  <!-- Blue corner brackets -->
+  <path d="M 0 22 L 0 0 L 22 0"
+    fill="none" stroke="#61afef" stroke-width="2.5" opacity="0.5"
+    filter="url(#od-f-blue-glow)"/>
+  <path d="M 2538 0 L 2560 0 L 2560 22"
+    fill="none" stroke="#61afef" stroke-width="2.5" opacity="0.5"
+    filter="url(#od-f-blue-glow)"/>
+  <path d="M 0 1418 L 0 1440 L 22 1440"
+    fill="none" stroke="#c678dd" stroke-width="2.5" opacity="0.35"/>
+  <path d="M 2538 1440 L 2560 1440 L 2560 1418"
+    fill="none" stroke="#c678dd" stroke-width="2.5" opacity="0.35"/>
+
+  <!-- Shimmer overlay -->
+  <rect class="od-shimmer" x="-400" y="0" width="300" height="1440"
+    fill="url(#od-g-shimmer)" opacity="0.5"/>
+
+  <!-- Metadata -->
+  <text x="1280" y="1430" text-anchor="middle"
+    font-family="'SF Mono',monospace"
+    font-size="11" fill="#2c313a" opacity="0.85">
+    ASH Dotfiles v5.0 OMEGA · One Dark Pro · Hyprland 0.44.2 · 2560×1440 ·  Atom lives on
+  </text>
+
+  </g>
+
+</svg>
