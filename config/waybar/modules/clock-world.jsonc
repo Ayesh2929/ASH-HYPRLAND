@@ -1,0 +1,55 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: World Clock (Multi-Timezone)      ║
+// ║                                                                              ║
+// ║  Cycles through multiple timezones on scroll/click.                       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "clock": {
+
+        // ── Format shows timezone name + local time ───────────────────────────
+        "format":       "  {:%H:%M} <span color='#89dceb' size='8pt'>{:%Z}</span>",
+        "format-alt":   "  {:%A, %B %d  ·  %H:%M}",
+
+        // ── Tooltip shows all configured timezones ────────────────────────────
+        "tooltip-format": "<span size='10pt' font='JetBrainsMono Nerd Font'><b>World Clock</b>\n\n<span color='#cba4f7'>Local:     </span>{:%H:%M %Z}\n<span color='#89b4fa'>UTC:       </span><span tz='UTC'>{:%H:%M}</span>\n<span color='#89dceb'>New York:  </span><span tz='America/New_York'>{:%H:%M}</span>\n<span color='#a6e3a1'>London:    </span><span tz='Europe/London'>{:%H:%M}</span>\n<span color='#f9e2af'>Tokyo:     </span><span tz='Asia/Tokyo'>{:%H:%M}</span>\n<span color='#f5c2e7'>Sydney:    </span><span tz='Australia/Sydney'>{:%H:%M}</span>\n\n<tt><small>{calendar}</small></tt></span>",
+
+        // ── Timezone list (cycles on scroll-up/click-right) ───────────────────
+        "timezones": [
+            "",                         // Local system timezone (first = default)
+            "UTC",
+            "America/New_York",
+            "America/Los_Angeles",
+            "America/Chicago",
+            "Europe/London",
+            "Europe/Paris",
+            "Europe/Berlin",
+            "Asia/Tokyo",
+            "Asia/Shanghai",
+            "Asia/Kolkata",
+            "Australia/Sydney"
+        ],
+
+        "calendar": {
+            "mode":             "month",
+            "mode-mon-col":     3,
+            "weeks-pos":        "right",
+            "on-scroll":        1,
+            "format": {
+                "months":   "<span color='#cba4f7'><b>{}</b></span>",
+                "days":     "<span color='#cdd6f4'>{}</span>",
+                "weeks":    "<span color='#89dceb'><b>W{}</b></span>",
+                "weekdays": "<span color='#a6e3a1'><b>{}</b></span>",
+                "today":    "<span color='#f38ba8'><u><b>{}</b></u></span>"
+            }
+        },
+
+        "actions": {
+            "on-click":         "tz_up",
+            "on-click-right":   "tz_down",
+            "on-scroll-up":     "tz_up",
+            "on-scroll-down":   "tz_down"
+        },
+
+        "interval":     1
+    }
+}

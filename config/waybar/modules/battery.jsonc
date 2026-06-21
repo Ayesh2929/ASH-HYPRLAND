@@ -1,0 +1,42 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Battery                           ║
+// ║                                                                              ║
+// ║  Multi-state battery indicator with charging animation, precise icon       ║
+// ║  mapping, power draw readout and ASH battery-mode integration.             ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "battery": {
+
+        // ── State thresholds ──────────────────────────────────────────────────
+        "states": {
+            "full":         100,
+            "good":         80,
+            "warning":      30,
+            "critical":     15,
+            "danger":       5
+        },
+
+        // ── Display formats per state ─────────────────────────────────────────
+        "format":           "{icon} {capacity}%",
+        "format-full":      "󰁹 {capacity}%",
+        "format-charging":  "󰂄 {capacity}%",
+        "format-plugged":   "󰚥 {capacity}%",
+        "format-not-charging": "{icon} {capacity}% ⊘",
+
+        // ── Alt format: show time remaining ───────────────────────────────────
+        "format-alt":       "{icon} {time} ({power:.1f}W)",
+
+        // ── Icon progression (0–100% in 10 steps) ────────────────────────────
+        "format-icons":     ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":   "Battery: {capacity}%\nStatus:   {status}\nTime:     {time}\nPower:    {power:.2f}W\nCycles:   {cycles}",
+
+        // ── Update interval (seconds) ─────────────────────────────────────────
+        "interval":         30,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":         "ash mode battery",
+        "on-click-right":   "powerprofilesctl set balanced"
+    }
+}

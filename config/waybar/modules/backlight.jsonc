@@ -1,0 +1,36 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Backlight / Screen Brightness     ║
+// ║                                                                              ║
+// ║  Backlight control for laptop screens with scroll-to-adjust,              ║
+// ║  icon progression and DDC/CI support for external monitors.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "backlight": {
+
+        // ── Backlight device (empty = auto-detect) ────────────────────────────
+        // Common values: "intel_backlight", "amdgpu_bl0", "acpi_video0"
+        "device":           "intel_backlight",
+
+        // ── Display format ────────────────────────────────────────────────────
+        "format":           "{icon} {percent}%",
+
+        // ── Alt format: just icon ──────────────────────────────────────────────
+        // "format-alt":    "{icon}",
+
+        // ── Icon progression (0% → 100%, 8 steps) ────────────────────────────
+        "format-icons":     ["󰋙", "󰋘", "󰋗", "󰋖", "󰃝", "󰃞", "󰃟", "󰃠"],
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-scroll-up":     "brightnessctl set 5%+",
+        "on-scroll-down":   "brightnessctl set 5%-",
+        "on-click":         "brightnessctl set 100%",
+        "on-click-right":   "brightnessctl set 30%",
+        "on-click-middle":  "brightnessctl set 50%",
+
+        // ── Smooth scrolling ──────────────────────────────────────────────────
+        "smooth-scrolling-threshold": 1,
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":   "Brightness: {percent}%\n\nScroll to adjust\nLeft-click: 100%\nRight-click: 30%\nMiddle-click: 50%"
+    }
+}

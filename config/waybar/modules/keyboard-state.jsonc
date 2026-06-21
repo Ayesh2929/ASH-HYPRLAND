@@ -1,0 +1,38 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Keyboard State                    ║
+// ║                                                                              ║
+// ║  Shows keyboard modifier lock states: CapsLock, NumLock, ScrollLock.      ║
+// ║  Only visible when locks are active — hidden in normal typing state.       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "keyboard-state": {
+
+        // ── Display format ────────────────────────────────────────────────────
+        // {name}   — lock name (e.g. "caps lock", "num lock")
+        // {icon}   — icon based on state
+        // {class}  — CSS class (locked/unlocked)
+        "capslock":             true,
+        "numlock":              true,
+        "scrolllock":           false,
+
+        // ── Display format ────────────────────────────────────────────────────
+        "format": {
+            "capslock":     "<span color='#f38ba8'>󰪛 CAPS</span>",
+            "numlock":      "󰎹",
+            "scrolllock":   "󱧬"
+        },
+
+        // ── Icons for locked/unlocked ─────────────────────────────────────────
+        "format-icons": {
+            "locked":       "󰌓",
+            "unlocked":     ""
+        },
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip":              true,
+        "tooltip-format":       "Caps Lock: {capslock}\nNum Lock: {numlock}",
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":             "hyprctl dispatch exec xdotool key Caps_Lock"
+    }
+}

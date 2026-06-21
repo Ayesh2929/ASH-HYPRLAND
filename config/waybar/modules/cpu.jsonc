@@ -1,0 +1,33 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: CPU                               ║
+// ║                                                                              ║
+// ║  CPU usage and frequency monitor with thermal-state coloring,             ║
+// ║  per-core tooltip breakdown and btop integration.                          ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "cpu": {
+
+        // ── Display format ────────────────────────────────────────────────────
+        "format":           "󰻠 {usage}%",
+
+        // ── Alt format: frequency ─────────────────────────────────────────────
+        "format-alt":       "󰻠 {avg_frequency}GHz",
+
+        // ── Tooltip: full system load breakdown ───────────────────────────────
+        "tooltip-format":   "CPU Usage: {usage}%\nAvg Freq:  {avg_frequency}GHz\nMax Freq:  {max_frequency}GHz\nLoad avg:  {load1} {load5} {load15}\n\nClick to open system monitor",
+
+        // ── State thresholds (CSS class applied at these levels) ──────────────
+        "states": {
+            "good":         0,
+            "warning":      70,
+            "critical":     90
+        },
+
+        // ── Update interval ───────────────────────────────────────────────────
+        "interval":         3,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":         "kitty --class monitoring -e btop",
+        "on-click-right":   "kitty --class monitoring -e htop"
+    }
+}

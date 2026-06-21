@@ -1,0 +1,104 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Hyprland Active Window            ║
+// ║                                                                              ║
+// ║  Shows active window title with app-specific icon rewrites,               ║
+// ║  truncation, per-output tracking and context-aware tooltips.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "hyprland/window": {
+
+        // ── Title format ──────────────────────────────────────────────────────
+        "format":                   "{}",
+
+        // ── Maximum title length before ellipsis ──────────────────────────────
+        "max-length":               55,
+
+        // ── Separate tracking per monitor ────────────────────────────────────
+        "separate-outputs":         true,
+
+        // ── Title rewrites (regex → replacement) ─────────────────────────────
+        // Adds app-specific icons and cleans up verbose titles
+        "rewrite": {
+            // ── Browsers ──────────────────────────────────────────────────────
+            "(.*) — Mozilla Firefox":               "󰈹  $1",
+            "(.*) — Mozilla Firefox Private.*":     "󰕑  $1 (Private)",
+            "(.*) - Chromium":                      "󰊯  $1",
+            "(.*) - Google Chrome":                 "󰊯  $1",
+            "(.*) - Brave":                         "󱙳  $1",
+
+            // ── Terminals ─────────────────────────────────────────────────────
+            "(.*)kitty(.*)":                        "󰆍  Terminal",
+            "(.*)foot(.*)":                         "󰆍  Terminal",
+            "(.*)alacritty(.*)":                    "󰆍  Terminal",
+            "(.*)wezterm(.*)":                      "󰆍  WezTerm",
+
+            // ── Editors ───────────────────────────────────────────────────────
+            "(.+) [\\[\\(]NeoVim[\\]\\)](.*)":     "󰅩  Neovim — $1",
+            "(.*)nvim(.*)":                         "󰅩  Neovim",
+            "(.*)Neovim(.*)":                       "󰅩  Neovim",
+            "(.*)Visual Studio Code(.*)":           "󰨞  VS Code",
+            "(.*)code-oss(.*)":                     "󰨞  VS Code",
+            "(.*)Zed(.*)":                          "󰅩  Zed",
+            "(.*)Helix(.*)":                        "󰅩  Helix",
+
+            // ── File managers ─────────────────────────────────────────────────
+            "(.*)yazi(.*)":                         "󱁉  Files — $1",
+            "(.*)Thunar(.*)":                       "󱁉  Thunar",
+            "(.*)Dolphin(.*)":                      "󱁉  Dolphin",
+            "(.*)Nemo(.*)":                         "󱁉  Nemo",
+
+            // ── System tools ──────────────────────────────────────────────────
+            "(.*)btop(.*)":                         "󰓅  System Monitor",
+            "(.*)htop(.*)":                         "󰓅  System Monitor",
+            "(.*)nvtop(.*)":                        "󰾲  GPU Monitor",
+            "(.*)lazygit(.*)":                      "󰊢  Git",
+            "(.*)lazydocker(.*)":                   "󰡨  Docker",
+            "(.*)k9s(.*)":                          "󸀀  Kubernetes",
+
+            // ── Communication ─────────────────────────────────────────────────
+            "(.*)discord(.*)":                      "󰙯  Discord",
+            "(.*)Discord(.*)":                      "󰙯  Discord",
+            "(.*)Vesktop(.*)":                      "󰙯  Discord",
+            "(.*)Slack(.*)":                        "󰒱  Slack",
+            "(.*)Telegram(.*)":                     "󰍦  Telegram",
+            "(.*)Signal(.*)":                       "󰍦  Signal",
+            "(.*)Thunderbird(.*)":                  "󰍡  Thunderbird",
+
+            // ── Media ─────────────────────────────────────────────────────────
+            "(.*)mpv(.*)":                          "󰎈  MPV",
+            "(.*)vlc(.*)":                          "󰎈  VLC",
+            "(.*)Spotify(.*)":                      "󰝚  Spotify",
+            "(.*)ncmpcpp(.*)":                      "󰝚  Music",
+
+            // ── Development ───────────────────────────────────────────────────
+            "(.*)JetBrains(.*)":                    "󱈏  JetBrains IDE",
+            "(.*)IntelliJ(.*)":                     "󱈏  IntelliJ IDEA",
+            "(.*)PyCharm(.*)":                      "󱈏  PyCharm",
+            "(.*)Postman(.*)":                      "󰖟  Postman",
+            "(.*)DBeaver(.*)":                      "󰆼  DBeaver",
+
+            // ── Games ─────────────────────────────────────────────────────────
+            "(.*)Steam(.*)":                        "󰓓  Steam",
+            "(.*)Lutris(.*)":                       "󰊗  Lutris",
+
+            // ── Productivity ──────────────────────────────────────────────────
+            "(.*)Obsidian(.*)":                     "󰎞  Obsidian",
+            "(.*)LibreOffice(.*)":                  "󰏆  LibreOffice",
+            "(.*)GIMP(.*)":                         "󰋩  GIMP",
+            "(.*)Inkscape(.*)":                     "󰋩  Inkscape",
+            "(.*)OBS(.*)":                          "󰑋  OBS Studio",
+
+            // ── Settings ──────────────────────────────────────────────────────
+            "(.*)Settings(.*)":                     "󰒓  Settings",
+            "(.*)Preferences(.*)":                  "󰒓  Preferences",
+            "(.*)pavucontrol(.*)":                  "󰎛  Audio Mixer",
+
+            // ── Empty / unknown ───────────────────────────────────────────────
+            "^$":                                   "󰇘  Desktop"
+        },
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip":                  true,
+        "tooltip-format":           "{title}"
+    }
+}

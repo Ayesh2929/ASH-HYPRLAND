@@ -1,0 +1,32 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: PipeWire                          ║
+// ║                                                                              ║
+// ║  PipeWire-native audio module using wireplumber for volume control.        ║
+// ║  Use instead of pulseaudio module when running pure PipeWire stack.        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "wireplumber": {
+
+        // ── Display format ────────────────────────────────────────────────────
+        "format":           "{icon} {volume}%",
+        "format-muted":     "󰖁  muted",
+
+        // ── Icons ─────────────────────────────────────────────────────────────
+        "format-icons":     ["󰕿", "󰖀", "󰕾"],
+
+        // ── Max volume cap ────────────────────────────────────────────────────
+        "max-volume":       150,
+
+        // ── Scroll ────────────────────────────────────────────────────────────
+        "scroll-step":      2,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":         "pavucontrol",
+        "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up":     "wpctl set-volume -l 1.5 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-",
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":   "PipeWire / WirePlumber\nDevice: {node_name}\nVolume: {volume}%"
+    }
+}
