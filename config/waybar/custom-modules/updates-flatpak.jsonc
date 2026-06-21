@@ -1,0 +1,17 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Flatpak Updates                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/updates-flatpak": {
+        "format":           "󰏔 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/updates-flatpak.sh",
+        "exec-if":          "which flatpak &>/dev/null",
+        "interval":         3600,
+        "signal":           21,
+        "on-click":         "kitty --class floating -e bash -c 'flatpak update; read -p \"Press Enter\"'",
+        "on-click-right":   "pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           true
+    }
+}

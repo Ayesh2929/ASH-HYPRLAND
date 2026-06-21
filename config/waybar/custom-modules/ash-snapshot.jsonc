@@ -1,0 +1,19 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: ASH Snapshot                      ║
+// ║                                                                              ║
+// ║  Quick snapshot creation/restore with latest snapshot info.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/ash-snapshot": {
+        "format":           "󰆙 {}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nCOUNT=$(ls ~/.local/share/ash-dotfiles/snapshots/ 2>/dev/null | wc -l)\nLATEST=$(ls -t ~/.local/share/ash-dotfiles/snapshots/ 2>/dev/null | head -1 || echo none)\nTOOLTIP=\"Snapshots: ${COUNT}\\\nLatest: ${LATEST}\\\n\\\nLeft: create snapshot\\\nRight: restore latest\\\nMiddle: list snapshots\"\necho \"{\\\"text\\\":\\\"${COUNT}\\\",\\\"tooltip\\\":\\\"${TOOLTIP}\\\",\\\"class\\\":\\\"snapshot\\\"}\"\n'",
+        "interval":         60,
+        "signal":           11,
+        "on-click":         "ash snapshot create && notify-send 'ASH' 'Snapshot created' && pkill -SIGUSR1 waybar",
+        "on-click-right":   "ash snapshot restore",
+        "on-click-middle":  "kitty --class floating -e ash snapshot list",
+        "tooltip":          true,
+        "escape":           false
+    }
+}

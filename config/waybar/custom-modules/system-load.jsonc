@@ -1,0 +1,27 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: System Load Average               ║
+// ║                                                                              ║
+// ║  1m/5m/15m load averages with per-core normalization and color states.    ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/sysload": {
+        "format":           "󰊚 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/system-load.sh",
+        "interval":         5,
+        "on-click":         "kitty --class monitoring -e btop",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// read L1 L5 L15 _ < /proc/loadavg
+// CORES=$(nproc)
+// NORM=$(echo "$L1 $CORES" | awk '{printf "%.0f", ($1/$2)*100}')
+// CLASS="good"
+// [ "$NORM" -gt 70 ] && CLASS="warning"
+// [ "$NORM" -gt 90 ] && CLASS="critical"
+// TOOLTIP="System Load\n\n1 min:  ${L1} (${NORM}% of ${CORES} cores)\n5 min:  ${L5}\n15 min: ${L15}\n\nCPU cores: ${CORES}"
+// echo "{\"text\":\"${L1}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"

@@ -1,0 +1,26 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Screen Recording Indicator        ║
+// ║                                                                              ║
+// ║  Shows a pulsing red indicator when wf-recorder is active.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/recording": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/recording.sh",
+        "interval":         3,
+        "signal":           30,
+        "on-click":         "pkill --signal SIGINT wf-recorder && pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// if pgrep -x wf-recorder > /dev/null; then
+//     DURATION=$(ps -o etimes= -p $(pgrep wf-recorder) | xargs printf "%02d:%02d" $((${SECONDS:-0}/60)) $((${SECONDS:-0}%60)) 2>/dev/null || echo "??:??")
+//     echo "{\"text\":\"<span color='#f38ba8'>󰑊 REC</span>\",\"tooltip\":\"Recording in progress\nClick to stop\",\"class\":\"recording\"}"
+// else
+//     echo "{\"text\":\"\",\"tooltip\":\"\",\"class\":\"idle\"}"
+// fi

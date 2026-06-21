@@ -1,0 +1,16 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Todo Count                        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/todo": {
+        "format":           "󰄴 {}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nif which task &>/dev/null; then\n  PENDING=$(task +PENDING count 2>/dev/null || echo 0)\n  TODAY=$(task due:today count 2>/dev/null || echo 0)\n  CLASS=\"normal\"; [ \"$TODAY\" -gt 0 ] && CLASS=\"today\"\n  echo \"{\\\"text\\\":\\\"${PENDING}\\\",\\\"tooltip\\\":\\\"${PENDING} pending tasks\\\n${TODAY} due today\\\",\\\"class\\\":\\\"${CLASS}\\\"}\"\nelif [ -f ~/todo.txt ]; then\n  C=$(grep -c . ~/todo.txt 2>/dev/null || echo 0)\n  echo \"{\\\"text\\\":\\\"${C}\\\",\\\"tooltip\\\":\\\"${C} items in todo.txt\\\",\\\"class\\\":\\\"normal\\\"}\"\nelse\n  echo \"{}\"\nfi\n'",
+        "interval":         300,
+        "signal":           28,
+        "on-click":         "kitty --class floating -e task list",
+        "on-click-right":   "kitty --class floating -e bash -c 'TASK=$(rofi -dmenu -p \"Add task:\"); task add \"$TASK\"'",
+        "tooltip":          true,
+        "escape":           false
+    }
+}

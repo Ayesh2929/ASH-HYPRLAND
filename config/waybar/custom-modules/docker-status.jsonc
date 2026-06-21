@@ -1,0 +1,30 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Docker Status                     ║
+// ║                                                                              ║
+// ║  Running container count with detailed tooltip of active containers.       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/docker": {
+        "format":           "󰡨 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/docker-status.sh",
+        "exec-if":          "systemctl is-active --quiet docker",
+        "interval":         30,
+        "signal":           23,
+        "on-click":         "kitty --class docker -e lazydocker",
+        "on-click-right":   "kitty --class docker -e watch -n2 docker ps",
+        "on-click-middle":  "pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           true
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// RUNNING=$(docker ps -q 2>/dev/null | wc -l)
+// TOTAL=$(docker ps -aq 2>/dev/null | wc -l)
+// CONTAINERS=$(docker ps --format "• {{.Names}} ({{.Status}})" 2>/dev/null | head -8)
+// CLASS="stopped"
+// [ "$RUNNING" -gt 0 ] && CLASS="running"
+// TOOLTIP="Docker: ${RUNNING}/${TOTAL} containers\n\n${CONTAINERS:-No containers}"
+// echo "{\"text\":\"${RUNNING}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"

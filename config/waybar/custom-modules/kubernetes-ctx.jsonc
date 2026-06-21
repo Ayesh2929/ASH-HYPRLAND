@@ -1,0 +1,32 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Kubernetes Context               ║
+// ║                                                                              ║
+// ║  Active kubectl context with namespace and cluster info.                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/kubectl-ctx": {
+        "format":           "󸀀 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/kubectl-context.sh",
+        "exec-if":          "which kubectl &>/dev/null && [ -f ~/.kube/config ]",
+        "interval":         30,
+        "signal":           24,
+        "on-click":         "kitty --class k9s -e k9s",
+        "on-click-right":   "kitty --class floating -e bash -c 'kubectl config get-contexts; read -p \"\"'",
+        "on-click-middle":  "pkill -SIGUSR1 waybar",
+        "max-length":       25,
+        "tooltip":          true,
+        "escape":           true
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// CTX=$(kubectl config current-context 2>/dev/null || echo "none")
+// NS=$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null || echo "default")
+// CLUSTER=$(kubectl config view --minify --output 'jsonpath={..cluster}' 2>/dev/null || echo "")
+// CLASS="default"
+// [[ "$CTX" =~ prod ]] && CLASS="production"
+// [[ "$CTX" =~ staging ]] && CLASS="staging"
+// TOOLTIP="Kubernetes Context\n\nContext:   ${CTX}\nNamespace: ${NS}\nCluster:   ${CLUSTER}\n\nClick: k9s  Right: list contexts"
+// echo "{\"text\":\"${CTX}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"

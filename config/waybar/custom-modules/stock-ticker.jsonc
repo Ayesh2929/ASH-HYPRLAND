@@ -1,0 +1,55 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Stock Ticker                      ║
+// ║                                                                              ║
+// ║  Real-time stock price via Yahoo Finance API. Color-coded by movement.    ║
+// ║  Configure tickers in the script. Updates every 5 minutes.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/stocks": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/stock-ticker.sh",
+        "exec-if":          "ping -c1 -W2 finance.yahoo.com &>/dev/null",
+        "interval":         300,
+        "signal":           33,
+        "on-click":         "xdg-open https://finance.yahoo.com",
+        "on-click-right":   "pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/stock-ticker.sh ─────────────────────────
+// #!/usr/bin/env bash
+// # Configure your tickers here
+// TICKERS=("AAPL" "GOOGL" "BTC-USD")
+//
+// OUTPUT=""
+// TOOLTIP="Stock Prices\n"
+//
+// for TICKER in "${TICKERS[@]}"; do
+//     DATA=$(curl -sf --max-time 5 \
+//         "https://query1.finance.yahoo.com/v8/finance/chart/${TICKER}?interval=1d&range=1d" \
+//         | jq -r '.chart.result[0] | "\(.meta.regularMarketPrice) \(.meta.regularMarketChangePercent)"' \
+//         2>/dev/null)
+//
+//     [ -z "$DATA" ] && continue
+//
+//     PRICE=$(awk '{printf "%.2f", $1}' <<< "$DATA")
+//     PCT=$(awk '{printf "%.2f", $2}' <<< "$DATA")
+//
+//     if (( $(echo "$PCT >= 0" | bc -l) )); then
+//         COLOR="#a6e3a1"
+//         ARROW="▲"
+//     else
+//         COLOR="#f38ba8"
+//         ARROW="▼"
+//     fi
+//
+//     OUTPUT+="<span color='${COLOR}'>${TICKER} ${ARROW}${PCT}%</span>  "
+//     TOOLTIP+="${TICKER}: \$${PRICE} (${PCT}%)\n"
+// done
+//
+// [ -z "$OUTPUT" ] && echo "{}" && exit 0
+//
+// echo "{\"text\":\"${OUTPUT% }\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"stocks\"}"

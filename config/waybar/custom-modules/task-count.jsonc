@@ -1,0 +1,35 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Task Count (Taskwarrior/Todo)     ║
+// ║                                                                              ║
+// ║  Pending task count via taskwarrior or todo.txt with urgency breakdown.   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/tasks": {
+        "format":           "󰄳 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/task-count.sh",
+        "exec-if":          "which task &>/dev/null || [ -f ~/todo.txt ]",
+        "interval":         300,
+        "signal":           28,
+        "on-click":         "kitty --class floating -e task list",
+        "on-click-right":   "kitty --class floating -e bash -c 'task add \"$(rofi -dmenu -p \"Add task\")\"'",
+        "on-click-middle":  "pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           true
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// if which task &>/dev/null; then
+//     PENDING=$(task +PENDING count 2>/dev/null || echo 0)
+//     TODAY=$(task due:today count 2>/dev/null || echo 0)
+//     OVERDUE=$(task +OVERDUE count 2>/dev/null || echo 0)
+//     CLASS="normal"
+//     [ "$OVERDUE" -gt 0 ] && CLASS="urgent"
+//     TOOLTIP="Tasks: ${PENDING} pending\nToday: ${TODAY}\nOverdue: ${OVERDUE}"
+//     echo "{\"text\":\"${PENDING}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"
+// elif [ -f ~/todo.txt ]; then
+//     PENDING=$(grep -c '^(.' ~/todo.txt 2>/dev/null || echo 0)
+//     echo "{\"text\":\"${PENDING}\",\"tooltip\":\"Todo: ${PENDING} tasks\",\"class\":\"normal\"}"
+// fi

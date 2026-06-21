@@ -1,0 +1,40 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: VPN Status                        ║
+// ║                                                                              ║
+// ║  VPN connection state via nmcli/wg-quick/openvpn detection.               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/vpn": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/vpn-status.sh",
+        "interval":         15,
+        "signal":           25,
+        "on-click":         "~/.config/rofi/menus/vpn-manager/vpn-manager.sh 2>/dev/null || nmtui",
+        "on-click-right":   "nmcli connection down $(nmcli -g NAME,TYPE connection show --active | grep vpn | cut -d: -f1 | head -1) 2>/dev/null",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/vpn-status.sh ───────────────────────────
+// #!/usr/bin/env bash
+// # Check WireGuard
+// if ip link show wg0 &>/dev/null; then
+//     IP=$(ip addr show wg0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
+//     echo "{\"text\":\"󰌿 WG\",\"tooltip\":\"WireGuard: CONNECTED\nIP: ${IP}\n\nRight-click: disconnect\",\"class\":\"connected\"}"
+//     exit 0
+// fi
+// # Check OpenVPN/NM VPN
+// VPN=$(nmcli -g NAME,TYPE connection show --active 2>/dev/null | grep vpn | cut -d: -f1 | head -1)
+// if [ -n "$VPN" ]; then
+//     echo "{\"text\":\"󰌾 ${VPN}\",\"tooltip\":\"VPN: CONNECTED\n${VPN}\",\"class\":\"connected\"}"
+//     exit 0
+// fi
+// # Check tun0 (any VPN tunnel)
+// if ip link show tun0 &>/dev/null; then
+//     IP=$(ip addr show tun0 | grep 'inet ' | awk '{print $2}')
+//     echo "{\"text\":\"󰌾 VPN\",\"tooltip\":\"VPN: CONNECTED (tun0)\nIP: ${IP}\",\"class\":\"connected\"}"
+//     exit 0
+// fi
+// echo "{\"text\":\"󰌿\",\"tooltip\":\"VPN: Disconnected\nClick to connect\",\"class\":\"disconnected\"}"

@@ -1,0 +1,66 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Media Player (MPRIS2)             ║
+// ║                                                                              ║
+// ║  Universal media player via playerctl. Works with Spotify, mpv, VLC,      ║
+// ║  Firefox, Chromium and any MPRIS2-compatible player.                       ║
+// ║  Shows: status icon, track title, artist, album art thumbnail in tooltip.  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/media": {
+
+        // ── JSON output from script ───────────────────────────────────────────
+        "format":           "{icon} {}",
+        "return-type":      "json",
+
+        // ── Status icons mapped by JSON "class" field ─────────────────────────
+        "format-icons": {
+            "Playing":      "󰎇",    // Music note
+            "Paused":       "󰏤",    // Pause bars
+            "Stopped":      "󰓛",    // Stop square
+            "default":      "󰎵"
+        },
+
+        // ── Truncation ────────────────────────────────────────────────────────
+        "max-length":       40,
+
+        // ── Script: outputs {text, tooltip, class, percentage} ────────────────
+        "exec":             "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+        "exec-if":          "playerctl status &>/dev/null",
+        "exec-on-event":    true,
+
+        // ── Refresh on MPRIS signal ───────────────────────────────────────────
+        "signal":           7,
+        "interval":         2,
+
+        // ── Mouse controls ────────────────────────────────────────────────────
+        "on-click":         "playerctl play-pause",
+        "on-click-right":   "playerctl next",
+        "on-click-middle":  "playerctl previous",
+        "on-scroll-up":     "playerctl next",
+        "on-scroll-down":   "playerctl previous",
+
+        // ── Smooth scrolling ──────────────────────────────────────────────────
+        "smooth-scrolling-threshold": 5,
+
+        // ── Escape Pango markup ───────────────────────────────────────────────
+        "escape":           true,
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip":          true
+    }
+}
+
+// ── Script skeleton: ~/.config/waybar/scripts/media-player.sh ────────────────
+// #!/usr/bin/env bash
+// STATUS=$(playerctl status 2>/dev/null) || { echo "{}"; exit 0; }
+// TITLE=$(playerctl metadata title 2>/dev/null  | head -c 45)
+// ARTIST=$(playerctl metadata artist 2>/dev/null | head -c 35)
+// PLAYER=$(playerctl metadata --format "{{playerName}}" 2>/dev/null)
+//
+// [ -z "$TITLE" ] && { echo "{}"; exit 0; }
+//
+// DISPLAY="${TITLE}"
+// [ -n "$ARTIST" ] && DISPLAY="${ARTIST} — ${TITLE}"
+// TOOLTIP="${PLAYER^}\n${TITLE}\n${ARTIST}\n\nLeft: play/pause  Right: next  Middle: prev"
+//
+// echo "{\"text\":\"${DISPLAY}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${STATUS}\"}"

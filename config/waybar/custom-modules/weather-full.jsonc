@@ -1,0 +1,77 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Weather (Full)                    ║
+// ║                                                                              ║
+// ║  Full weather display with condition icon, temperature, feels-like,        ║
+// ║  humidity, wind speed, UV index and 3-day forecast in tooltip.             ║
+// ║  Backend: wttr.in (no API key required)                                    ║
+// ║                                                                              ║
+// ║  Script: ~/.config/waybar/scripts/weather.sh                               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/weather-full": {
+
+        // ── Script output (JSON with text + tooltip + class) ──────────────────
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/weather.sh --full",
+        "exec-if":          "ping -c1 -W2 wttr.in &>/dev/null",
+        "exec-on-event":    false,
+
+        // ── Interval: 30 minutes ──────────────────────────────────────────────
+        "interval":         1800,
+
+        // ── Signal to force refresh ───────────────────────────────────────────
+        // pkill -SIGUSR1 waybar triggers module refresh
+        "signal":           8,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":         "xdg-open https://wttr.in",
+        "on-click-right":   "~/.config/waybar/scripts/weather.sh --refresh && pkill -SIGUSR1 waybar",
+        "on-click-middle":  "xdg-open https://weather.com",
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip":          true,
+        "tooltip-format":   "{}",
+
+        // ── Max display length ────────────────────────────────────────────────
+        "max-length":       60,
+
+        // ── Escape Pango markup in output ─────────────────────────────────────
+        "escape":           false
+    }
+}
+
+// ── Required script: ~/.config/waybar/scripts/weather.sh ─────────────────────
+// #!/usr/bin/env bash
+// # Fetches weather from wttr.in and formats for Waybar JSON
+// LOCATION="${WEATHER_LOCATION:-}"   # Empty = auto-detect by IP
+// FORMAT="j1"                        # JSON format
+// URL="https://wttr.in/${LOCATION}?format=${FORMAT}"
+//
+// WEATHER=$(curl -sf --max-time 10 "$URL") || exit 1
+//
+// # Extract fields
+// CONDITION=$(echo "$WEATHER" | jq -r '.current_condition[0].weatherDesc[0].value')
+// TEMP_C=$(echo "$WEATHER"   | jq -r '.current_condition[0].temp_C')
+// FEELS_C=$(echo "$WEATHER"  | jq -r '.current_condition[0].FeelsLikeC')
+// HUMIDITY=$(echo "$WEATHER" | jq -r '.current_condition[0].humidity')
+// WIND_KMH=$(echo "$WEATHER" | jq -r '.current_condition[0].windspeedKmph')
+// UV_INDEX=$(echo "$WEATHER" | jq -r '.current_condition[0].uvIndex')
+// AREA=$(echo "$WEATHER"     | jq -r '.nearest_area[0].areaName[0].value')
+// COUNTRY=$(echo "$WEATHER"  | jq -r '.nearest_area[0].country[0].value')
+//
+// # Map condition to icon
+// ICON=$(case "${CONDITION,,}" in
+//     *sunny*|*clear*)  echo "☀" ;;
+//     *cloud*|*overcast*) echo "☁" ;;
+//     *rain*|*drizzle*)  echo "🌧" ;;
+//     *thunder*|*storm*) echo "⛈" ;;
+//     *snow*|*sleet*)    echo "❄" ;;
+//     *fog*|*mist*)      echo "🌫" ;;
+//     *)                 echo "🌡" ;;
+// esac)
+//
+// TEXT="${ICON} ${TEMP_C}°C"
+// TOOLTIP="${AREA}, ${COUNTRY}\n${CONDITION}\nTemp: ${TEMP_C}°C (feels ${FEELS_C}°C)\nHumidity: ${HUMIDITY}%\nWind: ${WIND_KMH} km/h\nUV: ${UV_INDEX}"
+//
+// echo "{\"text\":\"${TEXT}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"weather\"}"

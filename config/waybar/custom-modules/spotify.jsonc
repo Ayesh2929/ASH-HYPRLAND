@@ -1,0 +1,23 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Spotify                           ║
+// ║                                                                              ║
+// ║  Spotify-specific player with artist, track and playback controls.        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/spotify": {
+        "format":           "󰝚 {}",
+        "return-type":      "json",
+        "max-length":       40,
+        "exec":             "~/.config/waybar/scripts/spotify-status.sh",
+        "exec-if":          "pgrep -x spotify || pgrep -x Spotify",
+        "interval":         3,
+        "signal":           7,
+        "on-click":         "playerctl --player=spotify play-pause",
+        "on-click-right":   "playerctl --player=spotify next",
+        "on-click-middle":  "playerctl --player=spotify previous",
+        "on-scroll-up":     "playerctl --player=spotify next",
+        "on-scroll-down":   "playerctl --player=spotify previous",
+        "escape":           true,
+        "tooltip":          true
+    }
+}

@@ -1,0 +1,19 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: ASH Mode Indicator                ║
+// ║                                                                              ║
+// ║  Shows current ASH desktop mode with icon. CSS class drives theming.      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/ash-mode": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nMODE=$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo default)\ncase \"$MODE\" in\n  game)    ICON=\"󰊗\"; LABEL=\"Game\"    ;;\n  work)    ICON=\"󰃮\"; LABEL=\"Work\"    ;;\n  focus)   ICON=\"󰁵\"; LABEL=\"Focus\"   ;;\n  cinema)  ICON=\"󰄄\"; LABEL=\"Cinema\"  ;;\n  battery) ICON=\"󰁹\"; LABEL=\"Battery\" ;;\n  stream)  ICON=\"󰑋\"; LABEL=\"Stream\"  ;;\n  privacy) ICON=\"󰻿\"; LABEL=\"Privacy\" ;;\n  present) ICON=\"󰐯\"; LABEL=\"Present\" ;;\n  *)       ICON=\"󰒲\"; LABEL=\"\"        ;;\nesac\nTEXT=\"${ICON}${LABEL:+ ${LABEL}}\"\necho \"{\\\"text\\\":\\\"${TEXT}\\\",\\\"tooltip\\\":\\\"ASH Mode: ${MODE}\\\nClick: mode picker\\\nRight: reset to default\\\",\\\"class\\\":\\\"${MODE}\\\"}\"\n'",
+        "interval":         5,
+        "signal":           9,
+        "on-click":         "ash mode pick",
+        "on-click-right":   "ash mode default && pkill -SIGUSR1 waybar",
+        "on-click-middle":  "kitty --class floating -e ash mode list",
+        "tooltip":          true,
+        "escape":           false
+    }
+}

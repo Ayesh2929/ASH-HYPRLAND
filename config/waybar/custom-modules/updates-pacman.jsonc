@@ -1,0 +1,34 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Pacman/AUR Updates               ║
+// ║                                                                              ║
+// ║  Pending system updates count with urgent badge on critical count.        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/updates-pacman": {
+        "format":           "󰀠 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/updates-pacman.sh",
+        "exec-if":          "which checkupdates &>/dev/null",
+        "interval":         3600,
+        "signal":           20,
+        "on-click":         "kitty --class floating -e bash -c 'paru -Syu; read -p \"Press Enter to close\"'",
+        "on-click-right":   "~/.config/waybar/scripts/updates-pacman.sh --refresh && pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           true
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/updates-pacman.sh ───────────────────────
+// #!/usr/bin/env bash
+// UPDATES=$(checkupdates 2>/dev/null | wc -l)
+// AUR_UPDATES=$(paru -Qua 2>/dev/null | wc -l)
+// TOTAL=$((UPDATES + AUR_UPDATES))
+//
+// if [ "$TOTAL" -eq 0 ]; then
+//     echo "{\"text\":\"󰀕 up to date\",\"tooltip\":\"System is up to date\",\"class\":\"updated\"}"
+// else
+//     CLASS="updates"
+//     [ "$TOTAL" -ge 20 ] && CLASS="many-updates"
+//     TOOLTIP="Pacman: ${UPDATES} update(s)\nAUR: ${AUR_UPDATES} update(s)\n\nClick to update system"
+//     echo "{\"text\":\"${TOTAL}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"
+// fi

@@ -1,0 +1,26 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Screen Share Indicator            ║
+// ║                                                                              ║
+// ║  Detects active XDG portal screen capture sessions.                       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/screenshare": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/screenshare.sh",
+        "interval":         5,
+        "signal":           31,
+        "on-click":         "pkill -f 'xdg-desktop-portal' && pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script ────────────────────────────────────────────────────────────────────
+// #!/usr/bin/env bash
+// # Check for active screenshare via pipewire
+// if pw-cli list-objects Node 2>/dev/null | grep -q "xdg-desktop-portal"; then
+//     echo "{\"text\":\"<span color='#f38ba8'>󰻃 SHARE</span>\",\"tooltip\":\"Screen sharing active\nClick to stop\",\"class\":\"active\"}"
+// else
+//     echo "{\"text\":\"\",\"tooltip\":\"\",\"class\":\"idle\"}"
+// fi
