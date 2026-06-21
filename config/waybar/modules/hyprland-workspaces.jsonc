@@ -1,0 +1,81 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Hyprland Workspaces               ║
+// ║                                                                              ║
+// ║  Full-featured workspace indicator with persistent workspaces,             ║
+// ║  semantic icons, urgent highlighting, scroll navigation and                ║
+// ║  per-workspace window count badges.                                         ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "hyprland/workspaces": {
+
+        // ── Display format ────────────────────────────────────────────────────
+        // {icon}        — workspace icon from format-icons map
+        // {name}        — workspace name/number
+        // {windows}     — number of open windows
+        // {id}          — workspace ID
+        "format":                   "{icon}",
+        // "format":              "{icon} {windows}",  // Show window count badge
+
+        // ── Icon mapping by workspace number/name/state ───────────────────────
+        "format-icons": {
+            // ── Named workspace icons ─────────────────────────────────────────
+            "1":        "󰆍",   // Terminal
+            "2":        "󰖟",   // Browser
+            "3":        "󰅩",   // Code / IDE
+            "4":        "󱁉",   // Files
+            "5":        "󰝚",   // Music
+            "6":        "󰊗",   // Gaming
+            "7":        "󰙯",   // Social / Chat
+            "8":        "󰍡",   // Mail
+            "9":        "󰙺",   // Media / Video
+            "10":       "󰓅",   // System / Monitoring
+
+            // ── State icons ───────────────────────────────────────────────────
+            "urgent":   "󰀦",   // Has urgent window
+            "active":   "󰮯",   // Currently focused (dot)
+            "default":  "󰊠",   // Empty / unfocused
+
+            // ── Special workspace icons ───────────────────────────────────────
+            "special:scratch":      "󰆍",
+            "special:music":        "󰝚",
+            "special:notes":        "󰎞",
+            "special:monitoring":   "󰓅",
+            "special:docker":       "󰡨",
+            "special:calc":         "󱖦",
+            "special:pass":         "󰌋"
+        },
+
+        // ── Sorting ───────────────────────────────────────────────────────────
+        "sort-by-number":           true,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":                 "activate",
+        "on-click-middle":          "closewindow",
+        "on-scroll-up":             "hyprctl dispatch workspace -1",
+        "on-scroll-down":           "hyprctl dispatch workspace +1",
+        "smooth-scrolling-threshold": 3,
+
+        // ── Scope ─────────────────────────────────────────────────────────────
+        "all-outputs":              false,    // Only show ws on current monitor
+        "active-only":              false,    // Show all workspaces
+        "show-special":             false,    // Hide special workspaces
+
+        // ── Ignore patterns (regex) ───────────────────────────────────────────
+        "ignore-workspaces":        ["special"],
+
+        // ── Persistent workspaces ─────────────────────────────────────────────
+        // Always show these workspaces even when empty
+        "persistent-workspaces": {
+            "1":    [],     // Show on all monitors
+            "2":    [],
+            "3":    [],
+            "4":    [],
+            "5":    []
+            // "6": ["DP-1"]  // Show only on DP-1
+        },
+
+        // ── Tooltips ──────────────────────────────────────────────────────────
+        "tooltip":                  true,
+        "tooltip-format":           "Workspace {name}\n{windows} window(s)"
+    }
+}

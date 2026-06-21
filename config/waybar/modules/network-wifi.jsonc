@@ -1,0 +1,43 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Network (WiFi)                    ║
+// ║                                                                              ║
+// ║  WiFi-optimized network indicator with signal strength bars,               ║
+// ║  SSID display, bandwidth monitoring and rofi WiFi menu integration.        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "network": {
+
+        // ── Display formats ───────────────────────────────────────────────────
+        // WiFi signal icons (0-4 bars based on signal strength)
+        "format-wifi":          "{icon} {essid} ({signalStrength}%)",
+        "format-ethernet":      "󰈀 {ipaddr}",
+        "format-disconnected":  "󰤭 Offline",
+        "format-linked":        "󰈁 {ifname} (No IP)",
+        "format-disabled":      "󰤮 Disabled",
+
+        // ── Alt format: bandwidth stats ────────────────────────────────────────
+        "format-alt":           "{icon} ↓{bandwidthDownBits} ↑{bandwidthUpBits}",
+
+        // ── Signal strength icons ─────────────────────────────────────────────
+        "format-icons":         ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":       "󰤨 {essid}\n\nSignal:   {signalStrength}%\nFrequency: {frequency}GHz\nIP:       {ipaddr}/{cidr}\nGateway:  {gwaddr}\n\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
+        "tooltip-format-ethernet": "󰈀 {ifname}\n\nIP:      {ipaddr}/{cidr}\nGateway: {gwaddr}\n\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
+        "tooltip-format-disconnected": "󰤭 Not connected",
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":             "~/.config/rofi/menus/wifi/wifi.sh",
+        "on-click-right":       "nm-connection-editor",
+        "on-click-middle":      "nmcli radio wifi toggle",
+
+        // ── Update interval ───────────────────────────────────────────────────
+        "interval":             5,
+
+        // ── Maximum displayed length ──────────────────────────────────────────
+        "max-length":           30,
+
+        // ── Interface filter (empty = auto-detect) ────────────────────────────
+        "interface":            "*"
+    }
+}

@@ -1,0 +1,34 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Bluetooth                         ║
+// ║                                                                              ║
+// ║  Full bluetooth status with connected device display, battery level,      ║
+// ║  device type icons and quick-connect menu integration.                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "bluetooth": {
+
+        // ── Display formats ───────────────────────────────────────────────────
+        "format":                   "󰂯",
+        "format-disabled":          "󰂲",
+        "format-off":               "󰂲",
+        "format-on":                "󰂯",
+        "format-connected":         "󰂱 {device_alias}",
+        "format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
+
+        // ── Max length for device name ────────────────────────────────────────
+        "max-length":               25,
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":                   "Bluetooth: {status}\nController: {controller_alias} ({controller_address})\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "  {device_alias}\n    {device_address}",
+        "tooltip-format-enumerate-connected-battery": "  {device_alias} ({device_battery_percentage}%)\n    {device_address}",
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":                 "~/.config/rofi/menus/bluetooth/bluetooth.sh",
+        "on-click-right":           "blueman-manager",
+        "on-click-middle":          "bluetoothctl power toggle",
+
+        // ── Update interval ───────────────────────────────────────────────────
+        "interval":                 30
+    }
+}

@@ -1,0 +1,69 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: PulseAudio / WirePlumber         ║
+// ║                                                                              ║
+// ║  Volume control with device-type icons, mute state, bluetooth audio,      ║
+// ║  microphone channel, scroll-to-adjust and pavucontrol integration.         ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "pulseaudio": {
+
+        // ── Volume format ─────────────────────────────────────────────────────
+        "format":               "{icon} {volume}%",
+        "format-muted":         "󰖁  muted",
+
+        // ── Bluetooth audio output ────────────────────────────────────────────
+        "format-bluetooth":         "󰂯 {volume}%",
+        "format-bluetooth-muted":   "󰂲  muted",
+
+        // ── Source (microphone) channel ───────────────────────────────────────
+        "format-source":            "󰍬 {volume}%",
+        "format-source-muted":      "󰍭",
+
+        // ── Icons by device type ──────────────────────────────────────────────
+        "format-icons": {
+            "headphone":    "󰋋",
+            "hands-free":   "󰋌",
+            "headset":      "󰋎",
+            "phone":        "󰏲",
+            "portable":     "󰏲",
+            "car":          "󰄋",
+            "hifi":         "󰎚",
+            "hdmi":         "󰘚",
+            "speaker":      "󰓃",
+            "default":      ["󰕿", "󰖀", "󰕾"]
+        },
+
+        // ── Scroll step (percent per scroll event) ────────────────────────────
+        "scroll-step":          2,
+
+        // ── Smooth scrolling threshold ────────────────────────────────────────
+        "smooth-scrolling-threshold": 1,
+
+        // ── Mouse interaction ─────────────────────────────────────────────────
+        "on-click":             "pavucontrol",
+        "on-click-right":       "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-click-middle":      "~/.config/rofi/menus/audio-switcher/audio-switcher.sh",
+        "on-scroll-up":         "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":       "wpctl set-volume @DEFAULT_SINK@ 2%-",
+
+        // ── Max volume cap ────────────────────────────────────────────────────
+        "max-volume":           150,
+
+        // ── Tooltip ───────────────────────────────────────────────────────────
+        "tooltip-format":       "{desc}\nVolume: {volume}%\n\nScroll to adjust\nRight-click to mute\nMiddle-click to switch device"
+    },
+
+    // ── Separate microphone module ────────────────────────────────────────────
+    "pulseaudio#microphone": {
+        "format":               "{format_source}",
+        "format-source":        "󰍬 {volume}%",
+        "format-source-muted":  "󰍭",
+        "on-click":             "pavucontrol --tab=4",
+        "on-click-right":       "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+        "on-scroll-up":         "wpctl set-volume @DEFAULT_SOURCE@ 5%+",
+        "on-scroll-down":       "wpctl set-volume @DEFAULT_SOURCE@ 5%-",
+        "scroll-step":          5,
+        "smooth-scrolling-threshold": 1,
+        "tooltip-format":       "Microphone: {source_desc}\nVolume: {source_volume}%"
+    }
+}

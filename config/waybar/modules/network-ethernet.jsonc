@@ -1,0 +1,27 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Module: Network (Ethernet)                ║
+// ║                                                                              ║
+// ║  Ethernet-optimized with link speed, duplex info and IP display.           ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "network": {
+
+        "format-wifi":          "󰤨 {essid}",
+        "format-ethernet":      "󰈀 {ipaddr}",
+        "format-disconnected":  "󰤭 Offline",
+        "format-linked":        "󰈁 {ifname}",
+
+        // ── Alt: show bandwidth ────────────────────────────────────────────────
+        "format-alt":           "󰈀 ↓{bandwidthDownBits} ↑{bandwidthUpBits}",
+
+        "tooltip-format":           "󰈀 Ethernet\n\nInterface: {ifname}\nIP:        {ipaddr}/{cidr}\nGateway:   {gwaddr}\nSpeed:     {bandwidthDownBits}↓ {bandwidthUpBits}↑",
+        "tooltip-format-wifi":      "󰤨 WiFi\n\nSSID:   {essid}\nSignal: {signalStrength}%\nIP:     {ipaddr}/{cidr}",
+        "tooltip-format-disconnected": "󰤭 No network connection",
+
+        "on-click":             "nm-connection-editor",
+        "on-click-right":       "nmcli networking toggle",
+
+        "interval":             5,
+        "max-length":           25
+    }
+}
