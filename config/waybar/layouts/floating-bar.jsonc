@@ -1,0 +1,217 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Floating Island Bar Layout                       ║
+// ║                                                                              ║
+// ║  Three independent floating islands centered at top with gaps.            ║
+// ║  Does NOT use exclusive zone — windows can go underneath.                 ║
+// ║  macOS-style aesthetic: left pill, center pill, right pill.               ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout floating-bar                                    ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[
+    // ── Left island: Workspaces + Window ─────────────────────────────────────
+    {
+        "name":             "floating-left",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "top",
+        "height":           34,
+        "width":            400,
+        "margin-top":       8,
+        "margin-left":      12,
+        "margin-right":     0,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        false,
+        "passthrough":      false,
+        "gtk-layer-shell":  true,
+        "spacing":          3,
+        "ipc":              true,
+
+        "modules-left": [
+            "hyprland/workspaces"
+        ],
+
+        "modules-center": [],
+
+        "modules-right": [
+            "hyprland/submap",
+            "hyprland/window"
+        ],
+
+        "hyprland/workspaces": {
+            "format":           "{icon}",
+            "format-icons": {
+                "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+                "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+                "urgent":"󰀦","default":"󰊠"
+            },
+            "sort-by-number":   true,
+            "on-click":         "activate",
+            "on-scroll-up":     "hyprctl dispatch workspace -1",
+            "on-scroll-down":   "hyprctl dispatch workspace +1"
+        },
+
+        "hyprland/submap": {
+            "format":   "󰌌 {}",
+            "always-on": false
+        },
+
+        "hyprland/window": {
+            "format":       "{}",
+            "max-length":   25,
+            "separate-outputs": true
+        }
+    },
+
+    // ── Center island: Clock + Weather + Media ────────────────────────────────
+    {
+        "name":             "floating-center",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "top",
+        "height":           34,
+        "width":            380,
+        "margin-top":       8,
+        "margin-left":      0,
+        "margin-right":     0,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        false,
+        "passthrough":      false,
+        "gtk-layer-shell":  true,
+        "spacing":          3,
+        "ipc":              true,
+
+        "modules-left": [
+            "custom/weather"
+        ],
+
+        "modules-center": [
+            "clock"
+        ],
+
+        "modules-right": [
+            "custom/media"
+        ],
+
+        "clock": {
+            "format":       "  {:%H:%M}",
+            "format-alt":   "  {:%A, %B %d  ·  %H:%M:%S}",
+            "tooltip-format": "<big>{:%A, %B %d %Y}</big>\n<tt><small>{calendar}</small></tt>",
+            "interval":     1
+        },
+
+        "custom/weather": {
+            "format":       "{}",
+            "tooltip":      true,
+            "interval":     1800,
+            "exec":         "~/.config/waybar/scripts/weather.sh --waybar",
+            "return-type":  "json",
+            "signal":       8
+        },
+
+        "custom/media": {
+            "format":       "{icon} {}",
+            "return-type":  "json",
+            "max-length":   20,
+            "format-icons": {"Playing":"󰎇","Paused":"󰏤"},
+            "exec":         "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+            "on-click":     "playerctl play-pause",
+            "signal":       7,
+            "interval":     2
+        }
+    },
+
+    // ── Right island: System controls ─────────────────────────────────────────
+    {
+        "name":             "floating-right",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "top",
+        "height":           34,
+        "width":            460,
+        "margin-top":       8,
+        "margin-left":      0,
+        "margin-right":     12,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        false,
+        "passthrough":      false,
+        "gtk-layer-shell":  true,
+        "spacing":          3,
+        "ipc":              true,
+
+        "modules-left": [
+            "pulseaudio",
+            "battery",
+            "network"
+        ],
+
+        "modules-center": [],
+
+        "modules-right": [
+            "cpu",
+            "memory",
+            "custom/separator-dot",
+            "tray",
+            "custom/notifications",
+            "custom/power"
+        ],
+
+        "pulseaudio": {
+            "format":           "{icon} {volume}%",
+            "format-muted":     "󰖁",
+            "format-icons":     {"default":["󰕿","󰖀","󰕾"]},
+            "on-click":         "pavucontrol",
+            "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+            "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+            "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-"
+        },
+
+        "battery": {
+            "states":           {"warning":30,"critical":15},
+            "format":           "{icon} {capacity}%",
+            "format-charging":  "󰂄 {capacity}%",
+            "format-icons":     ["󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"],
+            "interval":         30
+        },
+
+        "network": {
+            "format-wifi":          "󰤨 {signalStrength}%",
+            "format-ethernet":      "󰈀",
+            "format-disconnected":  "󰤭",
+            "interval":             5
+        },
+
+        "cpu": {
+            "format":   "󰻠 {usage}%",
+            "interval": 3
+        },
+
+        "memory": {
+            "format":   "󰍛 {percentage}%",
+            "interval": 5
+        },
+
+        "tray": {
+            "icon-size": 16,
+            "spacing":   8
+        },
+
+        "custom/notifications": {
+            "format":       "{icon}",
+            "return-type":  "json",
+            "exec":         "swaync-client -swb",
+            "format-icons": ["󰂚","󱏧"],
+            "on-click":     "swaync-client --toggle-panel",
+            "signal":       2
+        },
+
+        "custom/power": {
+            "format":   "󰐥",
+            "on-click": "~/.config/rofi/menus/powermenu/powermenu.sh"
+        },
+
+        "custom/separator-dot": {
+            "format":   "  ",
+            "tooltip":  false
+        }
+    }
+]

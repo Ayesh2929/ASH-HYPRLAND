@@ -1,0 +1,561 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Master Stylesheet                         ║
+   ║                                                                              ║
+   ║  Full compositor-aware glassmorphism bar with:                             ║
+   ║  • GPU-accelerated blur background                                          ║
+   ║  • Catppuccin Mocha color system via CSS variables                         ║
+   ║  • Per-module hover animations with cubic-bezier easing                   ║
+   ║  • State-based theming (warning/critical/active/inactive)                  ║
+   ║  • Responsive typography with JetBrainsMono Nerd Font                     ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── Import subsystems ───────────────────────────────────────────────────────── */
+@import "colors.css";
+@import "variables.css";
+@import "animations.css";
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  GLOBAL RESET & BASE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+* {
+    border:             none;
+    border-radius:      0;
+    font-family:        var(--font-mono);
+    font-size:          var(--font-size-base);
+    font-weight:        var(--font-weight-normal);
+    min-height:         0;
+    margin:             0;
+    padding:            0;
+    box-sizing:         border-box;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  BAR CONTAINER (window)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window#waybar {
+    /* ── Glassmorphism background ─────────────────────────────────────────── */
+    background-color:   var(--bar-bg);
+    border:             var(--bar-border-width) solid var(--bar-border-color);
+    border-radius:      var(--bar-radius);
+
+    /* ── Shadow ───────────────────────────────────────────────────────────── */
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.45),
+        0 1px 4px  rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    /* ── Typography ───────────────────────────────────────────────────────── */
+    color:              var(--color-text);
+
+    /* ── Transition ───────────────────────────────────────────────────────── */
+    transition:
+        background-color var(--dur-normal) var(--ease-smooth),
+        border-color     var(--dur-normal) var(--ease-smooth),
+        box-shadow       var(--dur-normal) var(--ease-smooth);
+}
+
+/* ── Secondary bar ────────────────────────────────────────────────────────── */
+window#waybar.secondary {
+    background-color:   var(--bar-bg-secondary);
+    border-color:       var(--bar-border-color-secondary);
+}
+
+/* ── Bar states set by ASH mode engine ───────────────────────────────────── */
+window#waybar.game    { border-color: var(--color-green);   }
+window#waybar.work    { border-color: var(--color-blue);    }
+window#waybar.focus   { border-color: var(--color-mauve);   }
+window#waybar.cinema  { border-color: var(--color-red);     }
+window#waybar.battery { border-color: var(--color-yellow);  }
+window#waybar.stream  { border-color: var(--color-peach);   }
+window#waybar.privacy { border-color: var(--color-overlay0);}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  TOOLTIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tooltip {
+    background-color:   var(--color-mantle);
+    border:             1px solid var(--color-surface1);
+    border-radius:      var(--radius-md);
+    padding:            8px 12px;
+    color:              var(--color-text);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.50),
+        0 2px 8px  rgba(0, 0, 0, 0.25);
+}
+
+tooltip label {
+    color:              var(--color-text);
+    font-family:        var(--font-mono);
+    font-size:          var(--font-size-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  MODULE BASE STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background:         transparent;
+}
+
+/* ── Generic module pill ───────────────────────────────────────────────────── */
+#workspaces,
+#clock,
+#pulseaudio,
+#network,
+#bluetooth,
+#battery,
+#backlight,
+#cpu,
+#memory,
+#tray,
+#privacy,
+#idle-inhibitor,
+#submap,
+#window,
+#custom-weather,
+#custom-media,
+#custom-gpu,
+#custom-ash-mode,
+#custom-do-not-disturb,
+#custom-notifications,
+#custom-power {
+    padding:            var(--module-padding-y) var(--module-padding-x);
+    border-radius:      var(--module-radius);
+    background:         var(--module-bg);
+    color:              var(--color-text);
+    margin:             var(--module-margin);
+
+    transition:
+        background      var(--dur-fast) var(--ease-smooth),
+        color           var(--dur-fast) var(--ease-smooth),
+        box-shadow      var(--dur-fast) var(--ease-smooth),
+        transform       var(--dur-fast) var(--ease-bounce),
+        border-color    var(--dur-fast) var(--ease-smooth);
+}
+
+/* ── Module hover: lift + glow ────────────────────────────────────────────── */
+#workspaces button:hover,
+#clock:hover,
+#pulseaudio:hover,
+#network:hover,
+#bluetooth:hover,
+#battery:hover,
+#backlight:hover,
+#cpu:hover,
+#memory:hover,
+#custom-weather:hover,
+#custom-media:hover,
+#custom-gpu:hover,
+#custom-ash-mode:hover,
+#custom-do-not-disturb:hover,
+#custom-notifications:hover,
+#custom-power:hover {
+    background:         var(--module-bg-hover);
+    box-shadow:         0 0 12px var(--color-accent-glow);
+    transform:          translateY(-1px);
+    cursor:             pointer;
+}
+
+/* ── Module active: pressed state ─────────────────────────────────────────── */
+#workspaces button:active,
+#custom-power:active {
+    transform:          translateY(0px) scale(0.97);
+    background:         var(--module-bg-active);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  WORKSPACE MODULE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#workspaces {
+    background:         var(--module-bg);
+    border-radius:      var(--module-radius);
+    padding:            2px 4px;
+    gap:                2px;
+}
+
+#workspaces button {
+    padding:            4px 8px;
+    border-radius:      var(--radius-sm);
+    color:              var(--color-subtext0);
+    font-size:          var(--font-size-icon);
+    background:         transparent;
+    min-width:          28px;
+    animation:          none;
+
+    transition:
+        background      var(--dur-fast) var(--ease-smooth),
+        color           var(--dur-fast) var(--ease-smooth),
+        transform       var(--dur-fast) var(--ease-bounce),
+        box-shadow      var(--dur-fast) var(--ease-smooth),
+        min-width       var(--dur-fast) var(--ease-smooth);
+}
+
+/* ── Active workspace ─────────────────────────────────────────────────────── */
+#workspaces button.active {
+    background:         var(--ws-active-bg);
+    color:              var(--color-base);
+    font-weight:        var(--font-weight-bold);
+    box-shadow:
+        0 0 16px var(--color-accent-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    min-width:          36px;
+    transform:          translateY(-1px);
+}
+
+/* ── Occupied workspace (has windows) ─────────────────────────────────────── */
+#workspaces button.occupied {
+    color:              var(--color-subtext1);
+    background:         var(--color-surface0);
+}
+
+/* ── Urgent workspace ─────────────────────────────────────────────────────── */
+#workspaces button.urgent {
+    background:         var(--color-red);
+    color:              var(--color-base);
+    animation:          ws-urgent-pulse var(--dur-slow) var(--ease-smooth) infinite;
+}
+
+/* ── Hover ────────────────────────────────────────────────────────────────── */
+#workspaces button:hover {
+    background:         var(--ws-hover-bg);
+    color:              var(--color-text);
+    transform:          translateY(-2px);
+    box-shadow:         0 4px 12px rgba(0, 0, 0, 0.30);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  CLOCK
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#clock {
+    font-weight:        var(--font-weight-semibold);
+    color:              var(--color-text);
+    letter-spacing:     0.03em;
+}
+
+#clock:hover {
+    color:              var(--color-mauve);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  AUDIO MODULES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#pulseaudio {
+    color:              var(--color-sky);
+}
+
+#pulseaudio.muted {
+    color:              var(--color-overlay0);
+    background:         var(--module-bg-muted);
+}
+
+#pulseaudio.bluetooth {
+    color:              var(--color-blue);
+}
+
+#pulseaudio-microphone {
+    color:              var(--color-teal);
+}
+
+#pulseaudio-microphone.muted {
+    color:              var(--color-red);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  NETWORK
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#network {
+    color:              var(--color-green);
+}
+
+#network.disconnected {
+    color:              var(--color-red);
+    animation:          blink-warning var(--dur-slow) var(--ease-smooth) infinite;
+}
+
+#network.ethernet {
+    color:              var(--color-sapphire);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  BLUETOOTH
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#bluetooth {
+    color:              var(--color-blue);
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+    color:              var(--color-overlay0);
+}
+
+#bluetooth.connected {
+    color:              var(--color-sapphire);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  BATTERY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#battery {
+    color:              var(--color-green);
+}
+
+#battery.charging,
+#battery.plugged {
+    color:              var(--color-teal);
+    animation:          charge-pulse var(--dur-slow) var(--ease-smooth) infinite;
+}
+
+#battery.full {
+    color:              var(--color-green);
+}
+
+#battery.good {
+    color:              var(--color-green);
+}
+
+#battery.warning {
+    color:              var(--color-yellow);
+}
+
+#battery.critical {
+    color:              var(--color-peach);
+    animation:          blink-warning var(--dur-normal) var(--ease-smooth) infinite;
+}
+
+#battery.danger {
+    color:              var(--color-red);
+    animation:          blink-critical 0.8s var(--ease-smooth) infinite;
+    background:         rgba(243, 139, 168, 0.12);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  BACKLIGHT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#backlight {
+    color:              var(--color-yellow);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §12  CPU & MEMORY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#cpu {
+    color:              var(--color-peach);
+}
+
+#cpu.warning {
+    color:              var(--color-yellow);
+}
+
+#cpu.critical {
+    color:              var(--color-red);
+    animation:          blink-warning var(--dur-normal) var(--ease-smooth) infinite;
+}
+
+#memory {
+    color:              var(--color-mauve);
+}
+
+#memory.warning {
+    color:              var(--color-yellow);
+}
+
+#memory.critical {
+    color:              var(--color-red);
+    animation:          blink-warning var(--dur-normal) var(--ease-smooth) infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §13  PRIVACY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#privacy {
+    padding:            var(--module-padding-y) var(--module-padding-x);
+}
+
+#privacy-item {
+    padding:            2px 6px;
+    color:              var(--color-red);
+    animation:          privacy-pulse var(--dur-slow) var(--ease-smooth) infinite;
+}
+
+#privacy-item.screenshare {
+    color:              var(--color-peach);
+}
+
+#privacy-item.audio-in {
+    color:              var(--color-red);
+}
+
+#privacy-item.audio-out {
+    color:              var(--color-yellow);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §14  IDLE INHIBITOR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#idle-inhibitor.activated {
+    color:              var(--color-peach);
+    background:         rgba(250, 179, 135, 0.15);
+}
+
+#idle-inhibitor.deactivated {
+    color:              var(--color-overlay0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §15  TRAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#tray {
+    background:         transparent;
+}
+
+#tray > .passive {
+    -gtk-icon-effect:   dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect:   highlight;
+    background:         var(--color-red);
+    border-radius:      var(--radius-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §16  SUBMAP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#submap {
+    background:         var(--color-mauve);
+    color:              var(--color-base);
+    font-weight:        var(--font-weight-bold);
+    border-radius:      var(--module-radius);
+    padding:            3px 10px;
+    animation:          submap-indicator var(--dur-normal) var(--ease-bounce) infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §17  WINDOW TITLE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#window {
+    color:              var(--color-subtext1);
+    font-weight:        var(--font-weight-normal);
+    background:         transparent;
+    padding:            var(--module-padding-y) 6px;
+}
+
+#window.empty {
+    background:         transparent;
+    padding:            0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §18  CUSTOM MODULES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Weather ──────────────────────────────────────────────────────────────── */
+#custom-weather {
+    color:              var(--color-sky);
+    letter-spacing:     0.02em;
+}
+
+/* ── Media player ─────────────────────────────────────────────────────────── */
+#custom-media {
+    color:              var(--color-teal);
+    max-width:          220px;
+    overflow:           hidden;
+    text-overflow:      ellipsis;
+    white-space:        nowrap;
+}
+
+#custom-media.Playing {
+    color:              var(--color-green);
+}
+
+#custom-media.Paused {
+    color:              var(--color-overlay1);
+}
+
+#custom-media.Stopped {
+    color:              var(--color-overlay0);
+}
+
+/* ── GPU ──────────────────────────────────────────────────────────────────── */
+#custom-gpu {
+    color:              var(--color-lavender);
+}
+
+/* ── ASH mode indicator ───────────────────────────────────────────────────── */
+#custom-ash-mode {
+    color:              var(--color-mauve);
+    font-weight:        var(--font-weight-semibold);
+    padding-right:      10px;
+}
+
+#custom-ash-mode.game    { color: var(--color-green);   }
+#custom-ash-mode.work    { color: var(--color-blue);    }
+#custom-ash-mode.focus   { color: var(--color-mauve);   }
+#custom-ash-mode.cinema  { color: var(--color-red);     }
+#custom-ash-mode.battery { color: var(--color-yellow);  }
+#custom-ash-mode.stream  { color: var(--color-peach);   }
+#custom-ash-mode.privacy { color: var(--color-teal);    }
+
+/* ── Do not disturb ───────────────────────────────────────────────────────── */
+#custom-do-not-disturb {
+    color:              var(--color-overlay1);
+}
+
+#custom-do-not-disturb.active {
+    color:              var(--color-red);
+    background:         rgba(243, 139, 168, 0.12);
+}
+
+/* ── Notifications ─────────────────────────────────────────────────────────── */
+#custom-notifications {
+    color:              var(--color-sky);
+    font-size:          var(--font-size-icon);
+}
+
+#custom-notifications.dnd {
+    color:              var(--color-overlay0);
+}
+
+/* ── Power button ─────────────────────────────────────────────────────────── */
+#custom-power {
+    color:              var(--color-red);
+    font-size:          var(--font-size-icon);
+    border-radius:      var(--module-radius);
+    background:         rgba(243, 139, 168, 0.08);
+    padding:            var(--module-padding-y) 10px;
+}
+
+#custom-power:hover {
+    background:         rgba(243, 139, 168, 0.20);
+    box-shadow:
+        0 0 16px rgba(243, 139, 168, 0.40),
+        0 0 8px  rgba(243, 139, 168, 0.20);
+    transform:          translateY(-1px) scale(1.05);
+}
+
+/* ── Separator dot ─────────────────────────────────────────────────────────── */
+#custom-separator-dot {
+    color:              var(--color-surface2);
+    background:         transparent;
+    padding:            0;
+    margin:             0;
+    font-size:          8px;
+}

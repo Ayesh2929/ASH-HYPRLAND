@@ -1,0 +1,99 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Vertical Right Bar Layout                        ║
+// ║                                                                              ║
+// ║  Mirror of vertical-left, docked to the right edge.                       ║
+// ║  Workspaces on right, natural for right-handed mouse users.               ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout vertical-right                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "vertical-right",
+    "output":           ["DP-1","eDP-1"],
+    "position":         "right",
+    "width":            50,
+    "margin-top":       12,
+    "margin-left":      0,
+    "margin-right":     8,
+    "margin-bottom":    12,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          2,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap"
+    ],
+
+    "modules-center": [
+        "clock#vertical"
+    ],
+
+    "modules-right": [
+        "cpu",
+        "memory",
+        "custom/separator-dot",
+        "pulseaudio",
+        "battery",
+        "network",
+        "custom/separator-dot",
+        "custom/notifications",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+            "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+            "urgent":"󰀦","active":"󰮯","default":"󰊠"
+        },
+        "sort-by-number":   true,
+        "on-click":         "activate",
+        "on-scroll-up":     "hyprctl dispatch workspace -1",
+        "on-scroll-down":   "hyprctl dispatch workspace +1",
+        "orientation":      "vertical"
+    },
+
+    "hyprland/submap": { "format":"{}","always-on":false },
+
+    "clock#vertical": {
+        "format":   "{:%H\n%M}",
+        "interval": 60,
+        "tooltip-format": "{:%A, %B %d %Y}"
+    },
+
+    "cpu":    { "format":"󰻠\n{usage}%","interval":5,"states":{"warning":70,"critical":90} },
+    "memory": { "format":"󰍛\n{percentage}%","interval":5 },
+
+    "pulseaudio": {
+        "format":"{ icon}","format-muted":"󰖁",
+        "format-icons":{"default":["󰕿","󰖀","󰕾"]},
+        "on-click":"pavucontrol",
+        "on-click-right":"wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up":"wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":"wpctl set-volume @DEFAULT_SINK@ 2%-"
+    },
+
+    "battery": {
+        "states":{"warning":30,"critical":15},
+        "format":"{icon}","format-charging":"󰂄",
+        "format-icons":["󰁺","󰁼","󰁾","󰂀","󰁹"],
+        "tooltip-format":"{capacity}%","interval":30
+    },
+
+    "network": {
+        "format-wifi":"󰤨","format-ethernet":"󰈀","format-disconnected":"󰤭",
+        "tooltip-format":"{essid} {signalStrength}%","interval":10
+    },
+
+    "custom/notifications": {
+        "format":"{icon}","return-type":"json","exec":"swaync-client -swb",
+        "format-icons":["󰂚","󱏧"],"on-click":"swaync-client --toggle-panel","signal":2
+    },
+
+    "custom/power": { "format":"󰐥","on-click":"~/.config/rofi/menus/powermenu/powermenu.sh" },
+    "custom/separator-dot": { "format":"·","tooltip":false }
+}]

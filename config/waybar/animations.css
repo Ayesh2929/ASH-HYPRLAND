@@ -1,0 +1,235 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Animations                                ║
+   ║                                                                              ║
+   ║  All CSS keyframe animations, transition utilities and motion tokens       ║
+   ║  used throughout the Waybar stylesheet. Performance-optimized using        ║
+   ║  transform and opacity only where possible (GPU-composited layers).        ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  KEYFRAME DEFINITIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Workspace urgent pulse ───────────────────────────────────────────────── */
+@keyframes ws-urgent-pulse {
+    0%, 100% {
+        background-color:   var(--color-red);
+        box-shadow:         0 0 8px  rgba(243, 139, 168, 0.50);
+        transform:          scale(1.00);
+    }
+    50% {
+        background-color:   var(--color-maroon);
+        box-shadow:         0 0 20px rgba(243, 139, 168, 0.80);
+        transform:          scale(1.08);
+    }
+}
+
+/* ── Battery charging pulse ───────────────────────────────────────────────── */
+@keyframes charge-pulse {
+    0%, 100% {
+        color:              var(--color-teal);
+        text-shadow:        0 0 8px rgba(148, 226, 213, 0.40);
+    }
+    50% {
+        color:              var(--color-green);
+        text-shadow:        0 0 16px rgba(166, 227, 161, 0.70);
+    }
+}
+
+/* ── Warning blink (battery critical / network down) ─────────────────────── */
+@keyframes blink-warning {
+    0%, 100% {
+        opacity:            1.0;
+        color:              var(--color-yellow);
+    }
+    50% {
+        opacity:            0.45;
+        color:              var(--color-peach);
+    }
+}
+
+/* ── Critical blink (battery danger) ─────────────────────────────────────── */
+@keyframes blink-critical {
+    0%, 100% {
+        opacity:            1.0;
+        color:              var(--color-red);
+        text-shadow:        0 0 12px rgba(243, 139, 168, 0.60);
+    }
+    50% {
+        opacity:            0.30;
+        color:              var(--color-maroon);
+        text-shadow:        none;
+    }
+}
+
+/* ── Privacy indicator pulse ─────────────────────────────────────────────── */
+@keyframes privacy-pulse {
+    0%, 100% {
+        opacity:            1.0;
+        text-shadow:        0 0 8px rgba(243, 139, 168, 0.50);
+    }
+    50% {
+        opacity:            0.65;
+        text-shadow:        0 0 4px rgba(243, 139, 168, 0.20);
+    }
+}
+
+/* ── Submap mode indicator bounce ────────────────────────────────────────── */
+@keyframes submap-indicator {
+    0%, 100% {
+        box-shadow:
+            0 0 8px  rgba(203, 164, 247, 0.40),
+            0 0 2px  rgba(203, 164, 247, 0.20);
+        transform:          translateY(-1px);
+    }
+    50% {
+        box-shadow:
+            0 0 16px rgba(203, 164, 247, 0.70),
+            0 0 4px  rgba(203, 164, 247, 0.40);
+        transform:          translateY(-3px);
+    }
+}
+
+/* ── Smooth reveal (bar startup) ─────────────────────────────────────────── */
+@keyframes bar-reveal {
+    from {
+        opacity:            0;
+        transform:          translateY(-8px);
+        filter:             blur(4px);
+    }
+    to {
+        opacity:            1;
+        transform:          translateY(0);
+        filter:             blur(0px);
+    }
+}
+
+/* ── Module pop-in ────────────────────────────────────────────────────────── */
+@keyframes module-popin {
+    from {
+        opacity:            0;
+        transform:          scale(0.85) translateY(-4px);
+    }
+    to {
+        opacity:            1;
+        transform:          scale(1.0) translateY(0);
+    }
+}
+
+/* ── Gradient shimmer (for active elements) ──────────────────────────────── */
+@keyframes gradient-shimmer {
+    0%   { background-position: 0%   50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0%   50%; }
+}
+
+/* ── Spin (loading states) ─────────────────────────────────────────────────── */
+@keyframes spin {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
+}
+
+/* ── Fade in ──────────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Slide down ───────────────────────────────────────────────────────────── */
+@keyframes slide-down {
+    from {
+        opacity:    0;
+        transform:  translateY(-12px);
+    }
+    to {
+        opacity:    1;
+        transform:  translateY(0);
+    }
+}
+
+/* ── Slide right ──────────────────────────────────────────────────────────── */
+@keyframes slide-right {
+    from {
+        opacity:    0;
+        transform:  translateX(-12px);
+    }
+    to {
+        opacity:    1;
+        transform:  translateX(0);
+    }
+}
+
+/* ── Glow pulse (active accents) ─────────────────────────────────────────── */
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px  var(--color-accent-glow);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--color-accent-glow),
+                    0 0 40px var(--color-accent-glow);
+    }
+}
+
+/* ── Number count-up (used for stats modules via JS) ─────────────────────── */
+@keyframes count-up {
+    from { transform: translateY(8px);  opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  BAR STARTUP ANIMATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window#waybar {
+    animation: bar-reveal 0.5s cubic-bezier(0.16, 1.0, 0.30, 1.0) both;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MODULE ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── All modules: slide in on bar startup ────────────────────────────────── */
+#workspaces   { animation: slide-right 0.4s 0.05s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#clock        { animation: fade-in     0.4s 0.10s ease-out both; }
+#pulseaudio   { animation: slide-down  0.4s 0.12s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#network      { animation: slide-down  0.4s 0.14s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#battery      { animation: slide-down  0.4s 0.16s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#cpu          { animation: slide-down  0.4s 0.18s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#memory       { animation: slide-down  0.4s 0.20s cubic-bezier(0.16, 1.0, 0.30, 1.0) both; }
+#tray         { animation: fade-in     0.4s 0.25s ease-out both; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  ACTIVE STATE ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Active workspace: persistent glow ───────────────────────────────────── */
+#workspaces button.active {
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ── Submap: bounce indicator ────────────────────────────────────────────── */
+#submap {
+    animation: submap-indicator 1.5s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  TRANSITION UTILITIES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Applied to elements that need state-change transitions */
+.transition-color {
+    transition: color var(--dur-fast) var(--ease-smooth);
+}
+
+.transition-bg {
+    transition: background-color var(--dur-fast) var(--ease-smooth);
+}
+
+.transition-all {
+    transition:
+        color           var(--dur-fast) var(--ease-smooth),
+        background-color var(--dur-fast) var(--ease-smooth),
+        box-shadow      var(--dur-fast) var(--ease-smooth),
+        transform       var(--dur-fast) var(--ease-bounce),
+        opacity         var(--dur-fast) var(--ease-smooth);
+}

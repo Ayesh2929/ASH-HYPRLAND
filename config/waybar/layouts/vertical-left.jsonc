@@ -1,0 +1,134 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Vertical Left Bar Layout                         ║
+// ║                                                                              ║
+// ║  Vertical sidebar docked to left edge. Workspaces stack top-to-bottom.   ║
+// ║  Icons only — no text labels to maximize vertical density.               ║
+// ║  Ideal for ultrawide monitors, portrait setups and tiling workflows.      ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout vertical-left                                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "vertical-left",
+    "output":           ["DP-1","eDP-1"],
+    "position":         "left",
+    "width":            50,
+    "margin-top":       12,
+    "margin-left":      8,
+    "margin-right":     0,
+    "margin-bottom":    12,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          2,
+    "ipc":              true,
+
+    // Vertical bars use top/center/bottom instead of left/center/right
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap"
+    ],
+
+    "modules-center": [
+        "clock#vertical"
+    ],
+
+    "modules-right": [
+        "cpu",
+        "memory",
+        "custom/separator-dot",
+        "pulseaudio",
+        "battery",
+        "network",
+        "custom/separator-dot",
+        "custom/notifications",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+            "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+            "urgent":"󰀦","active":"󰮯","default":"󰊠"
+        },
+        "sort-by-number":   true,
+        "on-click":         "activate",
+        "on-scroll-up":     "hyprctl dispatch workspace -1",
+        "on-scroll-down":   "hyprctl dispatch workspace +1",
+        "orientation":      "vertical"
+    },
+
+    "hyprland/submap": {
+        "format":   "{}",
+        "always-on": false,
+        "rotate":   90
+    },
+
+    "clock#vertical": {
+        "format":   "{:%H\n%M}",
+        "interval": 60,
+        "rotate":   0,
+        "tooltip-format": "{:%A, %B %d %Y}"
+    },
+
+    "cpu": {
+        "format":   "󰻠\n{usage}%",
+        "interval": 5,
+        "states":   {"warning":70,"critical":90},
+        "rotate":   0
+    },
+
+    "memory": {
+        "format":   "󰍛\n{percentage}%",
+        "interval": 5,
+        "rotate":   0
+    },
+
+    "pulseaudio": {
+        "format":       "{icon}",
+        "format-muted": "󰖁",
+        "format-icons": {"default":["󰕿","󰖀","󰕾"]},
+        "on-click":     "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_SINK@ 2%-",
+        "tooltip-format": "{volume}%"
+    },
+
+    "battery": {
+        "states":           {"warning":30,"critical":15},
+        "format":           "{icon}",
+        "format-charging":  "󰂄",
+        "format-icons":     ["󰁺","󰁼","󰁾","󰂀","󰁹"],
+        "tooltip-format":   "{capacity}%",
+        "interval":         30
+    },
+
+    "network": {
+        "format-wifi":          "󰤨",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "tooltip-format":       "{essid}\n{signalStrength}%\n{ipaddr}",
+        "interval":             10
+    },
+
+    "custom/notifications": {
+        "format":       "{icon}",
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",
+        "format-icons": ["󰂚","󱏧"],
+        "on-click":     "swaync-client --toggle-panel",
+        "signal":       2
+    },
+
+    "custom/power": {
+        "format":   "󰐥",
+        "on-click": "~/.config/rofi/menus/powermenu/powermenu.sh"
+    },
+
+    "custom/separator-dot": {
+        "format":   "·",
+        "tooltip":  false
+    }
+}]
