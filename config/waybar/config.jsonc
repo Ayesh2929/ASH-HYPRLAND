@@ -1,0 +1,548 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Waybar Master Configuration                      ║
+// ║                                                                              ║
+// ║  Layout: top bar with workspace indicators, system tray, media,           ║
+// ║  network, audio, battery, clock and ASH-specific custom modules            ║
+// ║                                                                              ║
+// ║  Reload:  pkill -SIGUSR2 waybar                                            ║
+// ║  Restart: pkill -x waybar && waybar &                                      ║
+// ║  Debug:   waybar --log-level debug                                         ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[
+    // ══════════════════════════════════════════════════════════════════════════
+    // PRIMARY BAR — Top bar (main monitor DP-1)
+    // ══════════════════════════════════════════════════════════════════════════
+    {
+        // ── Bar identity ──────────────────────────────────────────────────────
+        "name":             "primary",
+        "output":           ["DP-1", "eDP-1"],
+
+        // ── Position ──────────────────────────────────────────────────────────
+        "position":         "top",
+        "height":           36,
+        "margin-top":       6,
+        "margin-left":      12,
+        "margin-right":     12,
+        "margin-bottom":    0,
+
+        // ── Layer ─────────────────────────────────────────────────────────────
+        // "overlay" = above windows  │  "top" = above tiled, below float
+        "layer":            "top",
+
+        // ── Exclusivity ───────────────────────────────────────────────────────
+        // true = reserve space (bar doesn't overlap windows)
+        "exclusive":        true,
+
+        // ── Passthrough ───────────────────────────────────────────────────────
+        // true = click-through (transparent to input) when no module hit
+        "passthrough":      false,
+
+        // ── GTK Layer Shell ───────────────────────────────────────────────────
+        "gtk-layer-shell":  true,
+
+        // ── Spacing ───────────────────────────────────────────────────────────
+        "spacing":          4,
+
+        // ── Ipc ───────────────────────────────────────────────────────────────
+        "ipc":              true,
+
+        // ══════════════════════════════════════════════════════════════════════
+        // MODULE LAYOUT
+        // ══════════════════════════════════════════════════════════════════════
+
+        "modules-left": [
+            "hyprland/workspaces",
+            "hyprland/submap",
+            "hyprland/window",
+            "custom/separator-dot"
+        ],
+
+        "modules-center": [
+            "clock",
+            "custom/separator-dot",
+            "custom/weather"
+        ],
+
+        "modules-right": [
+            "custom/ash-mode",
+            "custom/separator-dot",
+            "custom/media",
+            "custom/separator-dot",
+            "pulseaudio",
+            "pulseaudio#microphone",
+            "backlight",
+            "battery",
+            "network",
+            "bluetooth",
+            "custom/separator-dot",
+            "cpu",
+            "memory",
+            "custom/gpu",
+            "custom/separator-dot",
+            "privacy",
+            "idle_inhibitor",
+            "custom/do-not-disturb",
+            "custom/separator-dot",
+            "tray",
+            "custom/separator-dot",
+            "custom/notifications",
+            "custom/power"
+        ],
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §01  HYPRLAND MODULES
+        // ══════════════════════════════════════════════════════════════════════
+
+        "hyprland/workspaces": {
+            "format":               "{icon}",
+            "format-icons": {
+                "1":   "󰆍",   // terminal
+                "2":   "󰖟",   // browser
+                "3":   "󰅩",   // code
+                "4":   "󱁉",   // files
+                "5":   "󰝚",   // music
+                "6":   "󰊗",   // gaming
+                "7":   "󰙯",   // social
+                "8":   "󰍡",   // mail
+                "9":   "󰙺",   // media
+                "10":  "󰓅",   // system
+                "urgent":   "󰀦",
+                "active":   "󰮯",
+                "default":  "󰊠"
+            },
+            "sort-by-number":       true,
+            "on-click":             "activate",
+            "on-scroll-up":         "hyprctl dispatch workspace -1",
+            "on-scroll-down":       "hyprctl dispatch workspace +1",
+            "all-outputs":          false,
+            "active-only":          false,
+            "ignore-workspaces":    ["special"],
+            "show-special":         false,
+            "persistent-workspaces": {
+                "1": [],
+                "2": [],
+                "3": [],
+                "4": [],
+                "5": []
+            },
+            "tooltip":              true,
+            "tooltip-format":       "Workspace {name}"
+        },
+
+        "hyprland/submap": {
+            "format":               "󰌌 {}",
+            "always-on":            false,
+            "tooltip":              true,
+            "tooltip-format":       "Mode: {}"
+        },
+
+        "hyprland/window": {
+            "format":               "{}",
+            "max-length":           45,
+            "separate-outputs":     true,
+            "rewrite": {
+                "(.*) — Mozilla Firefox":        "󰈹 $1",
+                "(.*) — Chromium":              "󰊯 $1",
+                "(.*)kitty(.*)":                "󰆍 Terminal",
+                "(.*)nvim(.*)":                 "󰅩 Neovim",
+                "(.*)yazi(.*)":                 "󱁉 Files",
+                "(.*)btop(.*)":                 "󰓅 System Monitor",
+                "(.*)lazygit(.*)":              "󰊢 Git",
+                "(.*)discord(.*)":              "󰙯 Discord",
+                "(.*)spotify(.*)":              "󰝚 Spotify"
+            },
+            "tooltip":              true,
+            "tooltip-format":       "{title}"
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §02  CLOCK
+        // ══════════════════════════════════════════════════════════════════════
+
+        "clock": {
+            "format":           "  {:%H:%M}",
+            "format-alt":       "  {:%A, %B %d %Y  ·  %H:%M:%S}",
+            "tooltip-format":   "<span size='10pt' font='JetBrainsMono Nerd Font'><big>{:%A, %B %d %Y}</big>\nWeek {:%W}  ·  Day {:%j}/365\n\n<tt><small>{calendar}</small></tt></span>",
+            "calendar": {
+                "mode":          "month",
+                "mode-mon-col":  3,
+                "weeks-pos":     "right",
+                "on-scroll":     1,
+                "format": {
+                    "months":     "<span color='#cba4f7'><b>{}</b></span>",
+                    "days":       "<span color='#cdd6f4'>{}</span>",
+                    "weeks":      "<span color='#89dceb'>W{}</span>",
+                    "weekdays":   "<span color='#a6e3a1'><b>{}</b></span>",
+                    "today":      "<span color='#f38ba8' font_weight='bold'><u>{}</u></span>"
+                }
+            },
+            "actions": {
+                "on-click-right":   "mode",
+                "on-scroll-up":     "shift_up",
+                "on-scroll-down":   "shift_down"
+            },
+            "interval":         1
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §03  AUDIO MODULES
+        // ══════════════════════════════════════════════════════════════════════
+
+        "pulseaudio": {
+            "format":           "{icon} {volume}%",
+            "format-muted":     "󰖁 muted",
+            "format-bluetooth": "󰂯 {volume}%",
+            "format-bluetooth-muted": "󰂲 muted",
+            "format-icons": {
+                "headphone":    "󰋋",
+                "hands-free":   "󰋌",
+                "headset":      "󰋎",
+                "phone":        "󰏲",
+                "portable":     "󰏲",
+                "car":          "󰄋",
+                "default":      ["󰕿", "󰖀", "󰕾"]
+            },
+            "scroll-step":      2,
+            "on-click":         "pavucontrol",
+            "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+            "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+            "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-",
+            "smooth-scrolling-threshold": 1,
+            "tooltip-format":   "{desc}\nVolume: {volume}%",
+            "max-volume":       150
+        },
+
+        "pulseaudio#microphone": {
+            "format":           "{format_source}",
+            "format-source":    "󰍬 {volume}%",
+            "format-source-muted": "󰍭",
+            "on-click":         "pavucontrol --tab=4",
+            "on-click-right":   "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+            "on-scroll-up":     "wpctl set-volume @DEFAULT_SOURCE@ 5%+",
+            "on-scroll-down":   "wpctl set-volume @DEFAULT_SOURCE@ 5%-",
+            "scroll-step":      5,
+            "tooltip-format":   "Microphone: {source_volume}%",
+            "smooth-scrolling-threshold": 1
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §04  DISPLAY & POWER MODULES
+        // ══════════════════════════════════════════════════════════════════════
+
+        "backlight": {
+            "device":           "intel_backlight",
+            "format":           "{icon} {percent}%",
+            "format-icons":     ["󰋙", "󰋘", "󰋗", "󰋖", "󰃝", "󰃞", "󰃟", "󰃠"],
+            "on-scroll-up":     "brightnessctl set 5%+",
+            "on-scroll-down":   "brightnessctl set 5%-",
+            "smooth-scrolling-threshold": 1,
+            "tooltip-format":   "Brightness: {percent}%"
+        },
+
+        "battery": {
+            "states": {
+                "full":         100,
+                "good":         80,
+                "warning":      30,
+                "critical":     15,
+                "danger":       5
+            },
+            "format":           "{icon} {capacity}%",
+            "format-full":      "󰁹 {capacity}%",
+            "format-charging":  "󰂄 {capacity}%",
+            "format-plugged":   "󰚥 {capacity}%",
+            "format-alt":       "{icon} {time}",
+            "format-icons":     ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+            "tooltip-format":   "Battery: {capacity}%\nStatus: {status}\nTime: {time}\nPower: {power}W",
+            "interval":         30,
+            "on-click-right":   "ash mode battery"
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §05  NETWORK & CONNECTIVITY
+        // ══════════════════════════════════════════════════════════════════════
+
+        "network": {
+            "format-wifi":          "󰤨 {signalStrength}%",
+            "format-ethernet":      "󰈀 {ipaddr}",
+            "format-disconnected":  "󰤭 offline",
+            "format-alt":           "󰤨 {essid} ({signalStrength}%)  {ipaddr}/{cidr}",
+            "tooltip-format":       "󰤨 {essid}\nStrength: {signalStrength}%\nIP: {ipaddr}\nGateway: {gwaddr}\nDown: {bandwidthDownBits}  Up: {bandwidthUpBits}",
+            "tooltip-format-ethernet": "󰈀 Ethernet\nIP: {ipaddr}\nGateway: {gwaddr}\nDown: {bandwidthDownBits}  Up: {bandwidthUpBits}",
+            "tooltip-format-disconnected": "󰤭 No connection",
+            "on-click":             "~/.config/rofi/menus/wifi/wifi.sh",
+            "on-click-right":       "nm-connection-editor",
+            "interval":             5,
+            "max-length":           30
+        },
+
+        "bluetooth": {
+            "format":           "󰂯",
+            "format-disabled":  "󰂲",
+            "format-off":       "󰂲",
+            "format-on":        "󰂯",
+            "format-connected": "󰂱 {device_alias}",
+            "format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
+            "tooltip-format":   "Bluetooth: {status}\n{controller_alias}\n{device_enumerate}",
+            "tooltip-format-enumerate-connected": "  {device_alias}",
+            "tooltip-format-enumerate-connected-battery": "  {device_alias} ({device_battery_percentage}%)",
+            "on-click":         "~/.config/rofi/menus/bluetooth/bluetooth.sh",
+            "on-click-right":   "blueman-manager",
+            "interval":         30
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §06  SYSTEM RESOURCE MODULES
+        // ══════════════════════════════════════════════════════════════════════
+
+        "cpu": {
+            "format":           "󰻠 {usage}%",
+            "format-alt":       "󰻠 {avg_frequency}GHz",
+            "tooltip-format":   "CPU Usage: {usage}%\nAvg Freq: {avg_frequency}GHz\nMax Freq: {max_frequency}GHz\nLoad: {load1} {load5} {load15}",
+            "interval":         3,
+            "on-click":         "kitty --class monitoring -e btop",
+            "states": {
+                "warning":      70,
+                "critical":     90
+            }
+        },
+
+        "memory": {
+            "format":           "󰍛 {percentage}%",
+            "format-alt":       "󰍛 {used:0.1f}G/{total:0.1f}G",
+            "tooltip-format":   "RAM: {used:0.2f}G / {total:0.2f}G ({percentage}%)\nSwap: {swapUsed:0.2f}G / {swapTotal:0.2f}G ({swapPercentage}%)",
+            "interval":         5,
+            "on-click":         "kitty --class monitoring -e btop",
+            "states": {
+                "warning":      75,
+                "critical":     90
+            }
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §07  PRIVACY & SYSTEM STATE
+        // ══════════════════════════════════════════════════════════════════════
+
+        "privacy": {
+            "icon-spacing":     4,
+            "icon-size":        14,
+            "transition-duration": 250,
+            "modules": [
+                {
+                    "type":     "screenshare",
+                    "tooltip":  true,
+                    "tooltip-icon-size": 24
+                },
+                {
+                    "type":     "audio-in",
+                    "tooltip":  true,
+                    "tooltip-icon-size": 24
+                },
+                {
+                    "type":     "audio-out",
+                    "tooltip":  true,
+                    "tooltip-icon-size": 24
+                }
+            ]
+        },
+
+        "idle_inhibitor": {
+            "format":           "{icon}",
+            "format-icons": {
+                "activated":    "󰒳",
+                "deactivated":  "󰒲"
+            },
+            "tooltip-format-activated":   "Idle inhibitor: ON\nScreen will not sleep",
+            "tooltip-format-deactivated": "Idle inhibitor: OFF\nScreen will sleep normally",
+            "start-activated":  false
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §08  SYSTEM TRAY
+        // ══════════════════════════════════════════════════════════════════════
+
+        "tray": {
+            "icon-size":        16,
+            "spacing":          8,
+            "show-passive-items": false,
+            "reverse-direction": false
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        // §09  CUSTOM MODULES
+        // ══════════════════════════════════════════════════════════════════════
+
+        "custom/separator-dot": {
+            "format":           "  ",
+            "tooltip":          false
+        },
+
+        "custom/weather": {
+            "format":           "{}",
+            "tooltip":          true,
+            "interval":         1800,
+            "exec":             "~/.config/waybar/scripts/weather.sh --waybar",
+            "exec-if":          "ping -c1 wttr.in &>/dev/null",
+            "return-type":      "json",
+            "on-click":         "xdg-open https://wttr.in",
+            "signal":           8
+        },
+
+        "custom/media": {
+            "format":           "{icon} {}",
+            "return-type":      "json",
+            "max-length":       35,
+            "format-icons": {
+                "Playing":      "󰎇",
+                "Paused":       "󰏤",
+                "Stopped":      "󰓛"
+            },
+            "smooth-scrolling-threshold": 5,
+            "exec":             "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+            "exec-if":          "playerctl status &>/dev/null",
+            "on-click":         "playerctl play-pause",
+            "on-click-right":   "playerctl next",
+            "on-click-middle":  "playerctl previous",
+            "on-scroll-up":     "playerctl next",
+            "on-scroll-down":   "playerctl previous",
+            "escape":           true,
+            "signal":           7,
+            "interval":         2
+        },
+
+        "custom/gpu": {
+            "format":           "󰾲 {}%",
+            "return-type":      "json",
+            "exec":             "~/.config/waybar/scripts/gpu-amd.sh",
+            "interval":         3,
+            "on-click":         "kitty --class monitoring -e nvtop 2>/dev/null || kitty --class monitoring -e btop",
+            "tooltip":          true
+        },
+
+        "custom/ash-mode": {
+            "format":           "{}",
+            "return-type":      "json",
+            "exec":             "echo \"{\\\"text\\\":\\\"$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null | sed 's/default/󰒲 /;s/game/󰊗 game/;s/work/󰃮 work/;s/focus/󰁵 focus/;s/cinema/󰄄 cinema/;s/battery/󰁹 save/;s/stream/󰑋 stream/;s/privacy/󰻿 priv/')\\\",\\\"tooltip\\\":\\\"ASH Mode: $(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo default)\\\",\\\"class\\\":\\\"$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo default)\\\"}\"",
+            "interval":         5,
+            "on-click":         "ash mode pick",
+            "on-click-right":   "ash mode default",
+            "signal":           9
+        },
+
+        "custom/do-not-disturb": {
+            "format":           "{icon}",
+            "return-type":      "json",
+            "exec":             "~/.config/waybar/scripts/do-not-disturb.sh",
+            "interval":         5,
+            "format-icons":     ["󰂞", "󰂛"],
+            "on-click":         "swaync-client --toggle-dnd && pkill -SIGUSR1 waybar",
+            "signal":           4
+        },
+
+        "custom/notifications": {
+            "format":           "{icon}",
+            "return-type":      "json",
+            "exec":             "swaync-client -swb",
+            "format-icons":     ["󰂚", "󱏧"],
+            "on-click":         "swaync-client --toggle-panel",
+            "on-click-right":   "swaync-client --close-all",
+            "tooltip":          true,
+            "escape":           true,
+            "signal":           2
+        },
+
+        "custom/power": {
+            "format":           "󰐥",
+            "tooltip":          true,
+            "tooltip-format":   "Power menu",
+            "on-click":         "~/.config/rofi/menus/powermenu/powermenu.sh",
+            "on-click-right":   "ash mode power"
+        }
+    },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // SECONDARY BAR — Bottom or second monitor
+    // ══════════════════════════════════════════════════════════════════════════
+    {
+        "name":             "secondary",
+        "output":           ["HDMI-A-1", "DP-2"],
+        "position":         "top",
+        "height":           32,
+        "margin-top":       6,
+        "margin-left":      12,
+        "margin-right":     12,
+        "layer":            "top",
+        "exclusive":        true,
+        "passthrough":      false,
+        "gtk-layer-shell":  true,
+        "spacing":          4,
+        "ipc":              true,
+
+        "modules-left": [
+            "hyprland/workspaces"
+        ],
+
+        "modules-center": [
+            "clock"
+        ],
+
+        "modules-right": [
+            "cpu",
+            "memory",
+            "custom/separator-dot",
+            "network",
+            "custom/separator-dot",
+            "clock#secondary"
+        ],
+
+        "hyprland/workspaces": {
+            "format":               "{icon}",
+            "format-icons": {
+                "1":  "󰆍", "2":  "󰖟", "3":  "󰅩",
+                "4":  "󱁉", "5":  "󰝚", "6":  "󰊗",
+                "7":  "󰙯", "8":  "󰍡", "9":  "󰙺",
+                "10": "󰓅", "urgent": "󰀦", "default": "󰊠"
+            },
+            "sort-by-number":   true,
+            "on-click":         "activate",
+            "all-outputs":      false
+        },
+
+        "clock": {
+            "format":       "  {:%H:%M}",
+            "tooltip":      false,
+            "interval":     60
+        },
+
+        "clock#secondary": {
+            "format":       "  {:%H:%M}",
+            "tooltip":      false,
+            "interval":     60
+        },
+
+        "cpu": {
+            "format":       "󰻠 {usage}%",
+            "interval":     5,
+            "tooltip":      true
+        },
+
+        "memory": {
+            "format":       "󰍛 {percentage}%",
+            "interval":     5,
+            "tooltip":      true
+        },
+
+        "network": {
+            "format-wifi":          "󰤨 {signalStrength}%",
+            "format-ethernet":      "󰈀",
+            "format-disconnected":  "󰤭",
+            "tooltip-format":       "{essid} {signalStrength}%\n{ipaddr}",
+            "interval":             10
+        },
+
+        "custom/separator-dot": {
+            "format":   "  ",
+            "tooltip":  false
+        }
+    }
+]

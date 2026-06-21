@@ -1,0 +1,143 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Gaming Bar Layout                                ║
+// ║                                                                              ║
+// ║  Minimal HUD-style bar for gaming sessions. Thin, unobtrusive, low        ║
+// ║  GPU footprint. Shows only: clock, FPS indicator, GPU%, CPU%, temps,     ║
+// ║  and emergency power. No animations, no blur, no transparency effects.    ║
+// ║  Maximizes GPU headroom for games.                                         ║
+// ║                                                                              ║
+// ║  Activate: ash mode game  (auto-switches to this layout)                  ║
+// ║  Direct:   ash bar layout gaming-bar                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "gaming-bar",
+    "output":           ["DP-1","eDP-1"],
+    "position":         "top",
+    "height":           22,
+    "margin-top":       0,
+    "margin-left":      0,
+    "margin-right":     0,
+    "margin-bottom":    0,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          2,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/separator",
+        "hyprland/window"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "cpu",
+        "custom/gpu",
+        "memory",
+        "temperature",
+        "custom/separator",
+        "network",
+        "battery",
+        "custom/separator",
+        "custom/power"
+    ],
+
+    // ── Minimal workspace display ─────────────────────────────────────────────
+    "hyprland/workspaces": {
+        "format":           "{name}",
+        "sort-by-number":   true,
+        "on-click":         "activate",
+        "on-scroll-up":     "hyprctl dispatch workspace -1",
+        "on-scroll-down":   "hyprctl dispatch workspace +1",
+        "all-outputs":      false,
+        "active-only":      false
+    },
+
+    // ── Game title display ────────────────────────────────────────────────────
+    "hyprland/window": {
+        "format":       "{}",
+        "max-length":   30,
+        "separate-outputs": true,
+        "rewrite": {
+            "(.*) steam_app_(.*)": "🎮 $1"
+        }
+    },
+
+    // ── 24h clock, no date ────────────────────────────────────────────────────
+    "clock": {
+        "format":       "{:%H:%M}",
+        "interval":     60,
+        "tooltip":      false
+    },
+
+    // ── CPU — minimal format ──────────────────────────────────────────────────
+    "cpu": {
+        "format":   "CPU {usage}%",
+        "interval": 2,
+        "states":   {"warning":80,"critical":95},
+        "tooltip":  false
+    },
+
+    // ── GPU usage (AMD/NVIDIA) ────────────────────────────────────────────────
+    "custom/gpu": {
+        "format":       "GPU {}%",
+        "return-type":  "json",
+        "exec":         "~/.config/waybar/scripts/gpu-amd.sh",
+        "interval":     2,
+        "tooltip":      false
+    },
+
+    // ── Memory ────────────────────────────────────────────────────────────────
+    "memory": {
+        "format":   "RAM {percentage}%",
+        "interval": 5,
+        "states":   {"critical":90},
+        "tooltip":  false
+    },
+
+    // ── Temperature ───────────────────────────────────────────────────────────
+    "temperature": {
+        "critical-threshold":   85,
+        "format":               "{temperatureC}°",
+        "format-critical":      "⚠{temperatureC}°",
+        "interval":             3,
+        "tooltip":              false
+    },
+
+    // ── Network: minimal ──────────────────────────────────────────────────────
+    "network": {
+        "format-wifi":          "󰤨",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "tooltip":              false,
+        "interval":             30
+    },
+
+    // ── Battery: icon only ────────────────────────────────────────────────────
+    "battery": {
+        "states":           {"critical":15},
+        "format":           "{icon}",
+        "format-charging":  "󰂄",
+        "format-icons":     ["󰁺","󰁼","󰁾","󰂀","󰁹"],
+        "tooltip-format":   "{capacity}%",
+        "interval":         60
+    },
+
+    // ── Emergency power button ────────────────────────────────────────────────
+    "custom/power": {
+        "format":   "󰐥",
+        "tooltip":  false,
+        "on-click": "ash mode default && ~/.config/rofi/menus/powermenu/powermenu.sh"
+    },
+
+    // ── Plain separator ───────────────────────────────────────────────────────
+    "custom/separator": {
+        "format":   "│",
+        "tooltip":  false
+    }
+}]

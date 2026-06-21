@@ -1,0 +1,256 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Dual Bar Top Layout                              ║
+// ║                                                                              ║
+// ║  Two bars at the top: primary info bar + secondary quick-action strip.    ║
+// ║  Bar 1 (top): workspaces, window title, clock, system stats              ║
+// ║  Bar 2 (below): media, quick toggles, mode indicators                    ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout dual-bar-top                                    ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[
+    // ── Primary bar ──────────────────────────────────────────────────────────
+    {
+        "name":             "dual-top-primary",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "top",
+        "height":           34,
+        "margin-top":       0,
+        "margin-left":      0,
+        "margin-right":     0,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        true,
+        "gtk-layer-shell":  true,
+        "spacing":          4,
+        "ipc":              true,
+
+        "modules-left": [
+            "hyprland/workspaces",
+            "hyprland/submap",
+            "custom/separator-dot",
+            "hyprland/window"
+        ],
+
+        "modules-center": [
+            "clock"
+        ],
+
+        "modules-right": [
+            "cpu",
+            "memory",
+            "custom/separator-dot",
+            "network",
+            "battery",
+            "custom/separator-dot",
+            "tray",
+            "custom/power"
+        ],
+
+        "hyprland/workspaces": {
+            "format":           "{icon}",
+            "format-icons": {
+                "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+                "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+                "urgent":"󰀦","default":"󰊠"
+            },
+            "sort-by-number":   true,
+            "on-click":         "activate",
+            "on-scroll-up":     "hyprctl dispatch workspace -1",
+            "on-scroll-down":   "hyprctl dispatch workspace +1"
+        },
+
+        "hyprland/submap": {
+            "format":   "󰌌 {}",
+            "always-on": false
+        },
+
+        "hyprland/window": {
+            "format":       "{}",
+            "max-length":   55,
+            "separate-outputs": true
+        },
+
+        "clock": {
+            "format":       "  {:%H:%M}",
+            "format-alt":   "  {:%A, %B %d  ·  %H:%M:%S}",
+            "interval":     1
+        },
+
+        "cpu": {
+            "format":   "󰻠 {usage}%",
+            "interval": 3,
+            "states":   {"warning":70,"critical":90}
+        },
+
+        "memory": {
+            "format":   "󰍛 {percentage}%",
+            "interval": 5,
+            "states":   {"warning":75,"critical":90}
+        },
+
+        "network": {
+            "format-wifi":          "󰤨 {signalStrength}%",
+            "format-ethernet":      "󰈀",
+            "format-disconnected":  "󰤭",
+            "interval":             5
+        },
+
+        "battery": {
+            "states":           {"warning":30,"critical":15},
+            "format":           "{icon} {capacity}%",
+            "format-charging":  "󰂄 {capacity}%",
+            "format-icons":     ["󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"],
+            "interval":         30
+        },
+
+        "tray": {
+            "icon-size": 16,
+            "spacing":   8
+        },
+
+        "custom/power": {
+            "format":   "󰐥",
+            "on-click": "~/.config/rofi/menus/powermenu/powermenu.sh"
+        },
+
+        "custom/separator-dot": {
+            "format":   "  ",
+            "tooltip":  false
+        }
+    },
+
+    // ── Secondary action strip ────────────────────────────────────────────────
+    {
+        "name":             "dual-top-secondary",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "top",
+        "height":           28,
+        "margin-top":       34,
+        "margin-left":      0,
+        "margin-right":     0,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        true,
+        "gtk-layer-shell":  true,
+        "spacing":          3,
+        "ipc":              true,
+
+        "modules-left": [
+            "custom/ash-mode",
+            "custom/separator-dot",
+            "custom/weather"
+        ],
+
+        "modules-center": [
+            "custom/media"
+        ],
+
+        "modules-right": [
+            "pulseaudio",
+            "pulseaudio#microphone",
+            "backlight",
+            "bluetooth",
+            "custom/separator-dot",
+            "privacy",
+            "idle_inhibitor",
+            "custom/do-not-disturb",
+            "custom/notifications"
+        ],
+
+        "custom/ash-mode": {
+            "format":       "{}",
+            "return-type":  "json",
+            "exec":         "echo \"{\\\"text\\\":\\\"$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo '󰒲 default')\\\"}\"",
+            "interval":     5,
+            "signal":       9
+        },
+
+        "custom/weather": {
+            "format":       "{}",
+            "tooltip":      true,
+            "interval":     1800,
+            "exec":         "~/.config/waybar/scripts/weather.sh --waybar",
+            "return-type":  "json",
+            "signal":       8
+        },
+
+        "custom/media": {
+            "format":       "{icon} {}",
+            "return-type":  "json",
+            "max-length":   40,
+            "format-icons": {"Playing":"󰎇","Paused":"󰏤","Stopped":"󰓛"},
+            "exec":         "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+            "on-click":     "playerctl play-pause",
+            "on-click-right": "playerctl next",
+            "on-click-middle": "playerctl previous",
+            "signal":       7,
+            "interval":     2
+        },
+
+        "pulseaudio": {
+            "format":           "{icon} {volume}%",
+            "format-muted":     "󰖁",
+            "format-icons":     {"default":["󰕿","󰖀","󰕾"]},
+            "on-click":         "pavucontrol",
+            "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+            "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+            "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-"
+        },
+
+        "pulseaudio#microphone": {
+            "format":               "{format_source}",
+            "format-source":        "󰍬 {volume}%",
+            "format-source-muted":  "󰍭",
+            "on-click-right":       "wpctl set-mute @DEFAULT_SOURCE@ toggle"
+        },
+
+        "backlight": {
+            "format":       "{icon} {percent}%",
+            "format-icons": ["󰋙","󰋘","󰋗","󰋖","󰃝","󰃞","󰃟","󰃠"],
+            "on-scroll-up": "brightnessctl set 5%+",
+            "on-scroll-down": "brightnessctl set 5%-"
+        },
+
+        "bluetooth": {
+            "format":           "󰂯",
+            "format-connected": "󰂱 {device_alias}",
+            "on-click":         "blueman-manager"
+        },
+
+        "privacy": {
+            "icon-size": 12,
+            "modules": [
+                {"type":"screenshare"},
+                {"type":"audio-in"}
+            ]
+        },
+
+        "idle_inhibitor": {
+            "format":       "{icon}",
+            "format-icons": {"activated":"󰒳","deactivated":"󰒲"}
+        },
+
+        "custom/do-not-disturb": {
+            "format":       "{icon}",
+            "return-type":  "json",
+            "exec":         "~/.config/waybar/scripts/do-not-disturb.sh",
+            "format-icons": ["󰂞","󰂛"],
+            "on-click":     "swaync-client --toggle-dnd && pkill -SIGUSR1 waybar",
+            "signal":       4
+        },
+
+        "custom/notifications": {
+            "format":       "{icon}",
+            "return-type":  "json",
+            "exec":         "swaync-client -swb",
+            "format-icons": ["󰂚","󱏧"],
+            "on-click":     "swaync-client --toggle-panel",
+            "signal":       2
+        },
+
+        "custom/separator-dot": {
+            "format":   "  ",
+            "tooltip":  false
+        }
+    }
+]

@@ -1,0 +1,126 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Island Bar Layout (macOS Dynamic Island style)   ║
+// ║                                                                              ║
+// ║  Single centered floating island at top. Compact, asymmetric.            ║
+// ║  Expands on hover to show additional info. Clean aesthetic.               ║
+// ║  Inspirations: macOS Dynamic Island, Apple MacBook notch bar.             ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout island-bar                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "island-bar",
+    "output":           ["DP-1","eDP-1"],
+    "position":         "top",
+    "height":           34,
+    "width":            750,
+    "margin-top":       8,
+    "margin-left":      0,
+    "margin-right":     0,
+    "margin-bottom":    0,
+    "layer":            "top",
+    "exclusive":        false,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          4,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap"
+    ],
+
+    "modules-center": [
+        "clock",
+        "custom/separator-dot",
+        "custom/media"
+    ],
+
+    "modules-right": [
+        "pulseaudio",
+        "battery",
+        "network",
+        "custom/separator-dot",
+        "custom/notifications",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+            "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+            "urgent":"󰀦","active":"󰮯","default":"󰊠"
+        },
+        "sort-by-number":       true,
+        "on-click":             "activate",
+        "on-scroll-up":         "hyprctl dispatch workspace -1",
+        "on-scroll-down":       "hyprctl dispatch workspace +1",
+        "all-outputs":          false
+    },
+
+    "hyprland/submap": { "format":"󰌌 {}","always-on":false },
+
+    "clock": {
+        "format":       "  {:%H:%M}",
+        "format-alt":   "  {:%A, %B %d}",
+        "interval":     60,
+        "tooltip-format": "<big>{:%A, %B %d %Y}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "custom/media": {
+        "format":       "{icon} {}",
+        "return-type":  "json",
+        "max-length":   25,
+        "format-icons": {"Playing":"󰎇","Paused":"󰏤"},
+        "exec":         "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+        "on-click":     "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "signal":       7,
+        "interval":     2
+    },
+
+    "pulseaudio": {
+        "format":           "{icon} {volume}%",
+        "format-muted":     "󰖁",
+        "format-icons":     {"default":["󰕿","󰖀","󰕾"]},
+        "on-click":         "pavucontrol",
+        "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-"
+    },
+
+    "battery": {
+        "states":           {"warning":30,"critical":15},
+        "format":           "{icon} {capacity}%",
+        "format-charging":  "󰂄 {capacity}%",
+        "format-icons":     ["󰁺","󰁼","󰁾","󰂀","󰁹"],
+        "interval":         60
+    },
+
+    "network": {
+        "format-wifi":          "󰤨",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "tooltip-format":       "{essid} {signalStrength}%",
+        "interval":             10
+    },
+
+    "custom/notifications": {
+        "format":       "{icon}",
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",
+        "format-icons": ["󰂚","󱏧"],
+        "on-click":     "swaync-client --toggle-panel",
+        "signal":       2
+    },
+
+    "custom/power": {
+        "format":   "󰐥",
+        "on-click": "~/.config/rofi/menus/powermenu/powermenu.sh"
+    },
+
+    "custom/separator-dot": {
+        "format":   "  ",
+        "tooltip":  false
+    }
+}]

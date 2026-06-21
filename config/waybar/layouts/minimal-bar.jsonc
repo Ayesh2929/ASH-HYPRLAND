@@ -1,0 +1,98 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Minimal Bar Layout                               ║
+// ║                                                                              ║
+// ║  Ultra-stripped essentials only. Clock + Workspaces + Battery.            ║
+// ║  Maximum screen real estate. Perfect for focus / writing / reading modes.  ║
+// ║  Auto-hides when not hovered (via CSS opacity transition).                ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout minimal-bar                                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "minimal-bar",
+    "output":           ["DP-1","eDP-1"],
+    "position":         "top",
+    "height":           28,
+    "margin-top":       0,
+    "margin-left":      0,
+    "margin-right":     0,
+    "margin-bottom":    0,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          2,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "battery",
+        "network",
+        "pulseaudio",
+        "custom/notifications"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "urgent":   "󰀦",
+            "active":   "●",
+            "default":  "○"
+        },
+        "sort-by-number":   true,
+        "on-click":         "activate",
+        "on-scroll-up":     "hyprctl dispatch workspace -1",
+        "on-scroll-down":   "hyprctl dispatch workspace +1",
+        "all-outputs":      false
+    },
+
+    "clock": {
+        "format":       "{:%H:%M}",
+        "format-alt":   "{:%A, %B %d}",
+        "interval":     60
+    },
+
+    "battery": {
+        "states":           {"critical":15},
+        "format":           "{icon}",
+        "format-charging":  "󰂄",
+        "format-icons":     ["󰁺","󰁼","󰁾","󰂀","󰁹"],
+        "tooltip-format":   "{capacity}% {status}",
+        "interval":         60
+    },
+
+    "network": {
+        "format-wifi":          "󰤨",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "tooltip-format":       "{essid} {signalStrength}%",
+        "interval":             30
+    },
+
+    "pulseaudio": {
+        "format":       "{icon}",
+        "format-muted": "󰖁",
+        "format-icons": {"default":["󰕿","󰖀","󰕾"]},
+        "on-click":     "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_SINK@ 2%-",
+        "tooltip-format": "{volume}%"
+    },
+
+    "custom/notifications": {
+        "format":       "{icon}",
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",
+        "format-icons": ["󰂚","󱏧"],
+        "on-click":     "swaync-client --toggle-panel",
+        "tooltip":      false,
+        "signal":       2
+    }
+}]

@@ -1,0 +1,185 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Dual Bar Bottom Layout                           ║
+// ║                                                                              ║
+// ║  Two bars at the bottom: info strip above dock-like workspace bar.        ║
+// ║  Bar 1 (higher): system stats, media, clock, network, audio              ║
+// ║  Bar 2 (dock):   workspaces, window title, tray, power                   ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout dual-bar-bottom                                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[
+    // ── System info bar (upper of the two, positioned lower) ─────────────────
+    {
+        "name":             "dual-bottom-info",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "bottom",
+        "height":           28,
+        "margin-top":       0,
+        "margin-left":      0,
+        "margin-right":     0,
+        "margin-bottom":    30,
+        "layer":            "top",
+        "exclusive":        true,
+        "gtk-layer-shell":  true,
+        "spacing":          3,
+        "ipc":              true,
+
+        "modules-left": [
+            "custom/ash-mode",
+            "custom/separator-dot",
+            "custom/weather"
+        ],
+
+        "modules-center": [
+            "custom/media",
+            "custom/separator-dot",
+            "clock"
+        ],
+
+        "modules-right": [
+            "cpu",
+            "memory",
+            "custom/separator-dot",
+            "network",
+            "pulseaudio",
+            "battery",
+            "custom/separator-dot",
+            "privacy",
+            "idle_inhibitor",
+            "custom/do-not-disturb"
+        ],
+
+        "custom/ash-mode": {
+            "format":"{}","return-type":"json",
+            "exec":"echo \"{\\\"text\\\":\\\"$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo '󰒲 default')\\\"}\"",
+            "interval":5,"signal":9
+        },
+
+        "custom/weather": {
+            "format":"{}","tooltip":true,"interval":1800,
+            "exec":"~/.config/waybar/scripts/weather.sh --waybar",
+            "return-type":"json","signal":8
+        },
+
+        "custom/media": {
+            "format":"{icon} {}","return-type":"json","max-length":35,
+            "format-icons":{"Playing":"󰎇","Paused":"󰏤","Stopped":"󰓛"},
+            "exec":"~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+            "on-click":"playerctl play-pause","signal":7,"interval":2
+        },
+
+        "clock": {
+            "format":   "  {:%H:%M}",
+            "format-alt": "  {:%A, %B %d  ·  %H:%M:%S}",
+            "interval": 1
+        },
+
+        "cpu":    { "format":"󰻠 {usage}%","interval":3,"states":{"warning":70,"critical":90} },
+        "memory": { "format":"󰍛 {percentage}%","interval":5 },
+
+        "network": {
+            "format-wifi":"󰤨 {signalStrength}%","format-ethernet":"󰈀",
+            "format-disconnected":"󰤭","interval":5
+        },
+
+        "pulseaudio": {
+            "format":"{icon} {volume}%","format-muted":"󰖁",
+            "format-icons":{"default":["󰕿","󰖀","󰕾"]},
+            "on-click":"pavucontrol",
+            "on-click-right":"wpctl set-mute @DEFAULT_SINK@ toggle",
+            "on-scroll-up":"wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+            "on-scroll-down":"wpctl set-volume @DEFAULT_SINK@ 2%-"
+        },
+
+        "battery": {
+            "states":{"warning":30,"critical":15},
+            "format":"{icon} {capacity}%","format-charging":"󰂄 {capacity}%",
+            "format-icons":["󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"],
+            "interval":30
+        },
+
+        "privacy": {
+            "icon-size":12,
+            "modules":[{"type":"screenshare"},{"type":"audio-in"}]
+        },
+
+        "idle_inhibitor": {
+            "format":"{icon}",
+            "format-icons":{"activated":"󰒳","deactivated":"󰒲"}
+        },
+
+        "custom/do-not-disturb": {
+            "format":"{icon}","return-type":"json",
+            "exec":"~/.config/waybar/scripts/do-not-disturb.sh",
+            "format-icons":["󰂞","󰂛"],
+            "on-click":"swaync-client --toggle-dnd && pkill -SIGUSR1 waybar",
+            "signal":4
+        },
+
+        "custom/separator-dot": {"format":"  ","tooltip":false}
+    },
+
+    // ── Dock bar (bottom of the two) ──────────────────────────────────────────
+    {
+        "name":             "dual-bottom-dock",
+        "output":           ["DP-1","eDP-1"],
+        "position":         "bottom",
+        "height":           34,
+        "margin-top":       0,
+        "margin-left":      0,
+        "margin-right":     0,
+        "margin-bottom":    0,
+        "layer":            "top",
+        "exclusive":        true,
+        "gtk-layer-shell":  true,
+        "spacing":          4,
+        "ipc":              true,
+
+        "modules-left": [
+            "hyprland/workspaces"
+        ],
+
+        "modules-center": [
+            "hyprland/window"
+        ],
+
+        "modules-right": [
+            "tray",
+            "custom/separator-dot",
+            "custom/notifications",
+            "custom/power"
+        ],
+
+        "hyprland/workspaces": {
+            "format":           "{icon}",
+            "format-icons": {
+                "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+                "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+                "urgent":"󰀦","active":"󰮯","default":"󰊠"
+            },
+            "sort-by-number":   true,
+            "on-click":         "activate",
+            "on-scroll-up":     "hyprctl dispatch workspace -1",
+            "on-scroll-down":   "hyprctl dispatch workspace +1"
+        },
+
+        "hyprland/window": {
+            "format":       "{}",
+            "max-length":   55,
+            "separate-outputs": true
+        },
+
+        "tray": { "icon-size":16,"spacing":8 },
+
+        "custom/notifications": {
+            "format":"{icon}","return-type":"json","exec":"swaync-client -swb",
+            "format-icons":["󰂚","󱏧"],"on-click":"swaync-client --toggle-panel","signal":2
+        },
+
+        "custom/power": {
+            "format":"󰐥","on-click":"~/.config/rofi/menus/powermenu/powermenu.sh"
+        },
+
+        "custom/separator-dot": { "format":"  ","tooltip":false }
+    }
+]

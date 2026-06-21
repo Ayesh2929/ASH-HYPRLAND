@@ -1,0 +1,173 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Bottom Bar Layout                                ║
+// ║                                                                              ║
+// ║  Full-width bottom bar. Workspaces at bottom-left, system controls        ║
+// ║  at bottom-right. Dock-like feel with upward-opening tooltips.            ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout bottom-bar                                       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "bottom-bar",
+    "output":           ["DP-1", "eDP-1"],
+    "position":         "bottom",
+    "height":           36,
+    "margin-top":       0,
+    "margin-left":      0,
+    "margin-right":     0,
+    "margin-bottom":    0,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          4,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap",
+        "custom/separator-dot",
+        "hyprland/window"
+    ],
+
+    "modules-center": [
+        "custom/media",
+        "custom/separator-dot",
+        "clock"
+    ],
+
+    "modules-right": [
+        "cpu",
+        "memory",
+        "custom/separator-dot",
+        "pulseaudio",
+        "backlight",
+        "battery",
+        "network",
+        "bluetooth",
+        "custom/separator-dot",
+        "idle_inhibitor",
+        "tray",
+        "custom/separator-dot",
+        "custom/notifications",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+            "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+            "urgent":"󰀦","default":"󰊠"
+        },
+        "sort-by-number":       true,
+        "on-click":             "activate",
+        "on-scroll-up":         "hyprctl dispatch workspace -1",
+        "on-scroll-down":       "hyprctl dispatch workspace +1"
+    },
+
+    "hyprland/submap": {
+        "format":       "󰌌 {}",
+        "always-on":    false
+    },
+
+    "hyprland/window": {
+        "format":       "{}",
+        "max-length":   45,
+        "separate-outputs": true
+    },
+
+    "clock": {
+        "format":       "  {:%H:%M}",
+        "format-alt":   "  {:%A %d %B  ·  %H:%M}",
+        "interval":     60
+    },
+
+    "custom/media": {
+        "format":       "{icon} {}",
+        "return-type":  "json",
+        "max-length":   35,
+        "format-icons": {"Playing":"󰎇","Paused":"󰏤"},
+        "exec":         "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+        "on-click":     "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "signal":       7,
+        "interval":     2
+    },
+
+    "pulseaudio": {
+        "format":           "{icon} {volume}%",
+        "format-muted":     "󰖁",
+        "format-icons":     {"default":["󰕿","󰖀","󰕾"]},
+        "on-click":         "pavucontrol",
+        "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-"
+    },
+
+    "backlight": {
+        "format":       "{icon} {percent}%",
+        "format-icons": ["󰋙","󰋘","󰋗","󰋖","󰃝","󰃞","󰃟","󰃠"],
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+
+    "battery": {
+        "states":           {"warning":30,"critical":15},
+        "format":           "{icon} {capacity}%",
+        "format-charging":  "󰂄 {capacity}%",
+        "format-icons":     ["󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"],
+        "interval":         30
+    },
+
+    "network": {
+        "format-wifi":          "󰤨 {signalStrength}%",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "interval":             5
+    },
+
+    "bluetooth": {
+        "format":           "󰂯",
+        "format-connected": "󰂱",
+        "interval":         30
+    },
+
+    "cpu": {
+        "format":   "󰻠 {usage}%",
+        "interval": 3
+    },
+
+    "memory": {
+        "format":   "󰍛 {percentage}%",
+        "interval": 5
+    },
+
+    "idle_inhibitor": {
+        "format":       "{icon}",
+        "format-icons": {"activated":"󰒳","deactivated":"󰒲"}
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing":   8
+    },
+
+    "custom/notifications": {
+        "format":       "{icon}",
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",
+        "format-icons": ["󰂚","󱏧"],
+        "on-click":     "swaync-client --toggle-panel",
+        "signal":       2
+    },
+
+    "custom/power": {
+        "format":   "󰐥",
+        "on-click": "~/.config/rofi/menus/powermenu/powermenu.sh"
+    },
+
+    "custom/separator-dot": {
+        "format":   "  ",
+        "tooltip":  false
+    }
+}]
