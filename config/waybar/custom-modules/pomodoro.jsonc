@@ -1,0 +1,44 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Pomodoro Timer                    ║
+// ║                                                                              ║
+// ║  Pomodoro focus timer with work/break cycle tracking, session count       ║
+// ║  and visual progress. Runs via ash plugin pomodoro-plus.                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/pomodoro": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/pomodoro.sh --status",
+        "interval":         1,
+        "signal":           27,
+        "on-click":         "~/.config/waybar/scripts/pomodoro.sh --toggle && pkill -SIGUSR1 waybar",
+        "on-click-right":   "~/.config/waybar/scripts/pomodoro.sh --reset && pkill -SIGUSR1 waybar",
+        "on-click-middle":  "~/.config/waybar/scripts/pomodoro.sh --skip && pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script skeleton: ~/.config/waybar/scripts/pomodoro.sh ────────────────────
+// #!/usr/bin/env bash
+// STATE_FILE="$XDG_RUNTIME_DIR/ash-pomodoro-state"
+// # States: idle | work | short-break | long-break
+// STATE=$(cat "$STATE_FILE/state" 2>/dev/null || echo "idle")
+// REMAINING=$(cat "$STATE_FILE/remaining" 2>/dev/null || echo "0")
+// SESSION=$(cat "$STATE_FILE/session" 2>/dev/null || echo "0")
+//
+// case "$STATE" in
+//     work)        ICON="🍅"; COLOR="#f38ba8" ;;
+//     short-break) ICON="☕"; COLOR="#a6e3a1" ;;
+//     long-break)  ICON="🌴"; COLOR="#89dceb" ;;
+//     *)           ICON="⏸"; COLOR="#6c7086" ;;
+// esac
+//
+// MINS=$((REMAINING / 60))
+// SECS=$((REMAINING % 60))
+// TIME=$(printf "%02d:%02d" $MINS $SECS)
+//
+// TEXT="<span color='${COLOR}'>${ICON} ${TIME}</span>"
+// TOOLTIP="Pomodoro Timer\n\nState:    ${STATE}\nRemaining: ${TIME}\nSessions: ${SESSION}/4\n\nLeft-click: start/pause\nRight-click: reset\nMiddle: skip"
+//
+// echo "{\"text\":\"${TEXT}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${STATE}\"}"

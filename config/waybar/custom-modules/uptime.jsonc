@@ -1,0 +1,13 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: System Uptime                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/uptime": {
+        "format":           "󰅐 {}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nUPTIME=$(uptime -p | sed \"s/up //;s/ hours*/h/;s/ minutes*/m/;s/ days*/d/;s/,//g\")\nBOOT=$(uptime -s 2>/dev/null || who -b | awk \"{print \\$3, \\$4}\")\nLOAD=$(uptime | awk -F\"load average:\" \"{print \\$2}\" | xargs)\necho \"{\\\"text\\\":\\\"${UPTIME}\\\",\\\"tooltip\\\":\\\"System Uptime\\\n\\\nUp: ${UPTIME}\\\nBooted: ${BOOT}\\\nLoad: ${LOAD}\\\",\\\"class\\\":\\\"uptime\\\"}\"\n'",
+        "interval":         60,
+        "tooltip":          true,
+        "escape":           false
+    }
+}

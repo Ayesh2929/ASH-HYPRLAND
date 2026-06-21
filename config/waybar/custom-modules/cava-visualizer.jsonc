@@ -1,0 +1,43 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: CAVA Audio Visualizer             ║
+// ║                                                                              ║
+// ║  Real-time audio spectrum visualizer in the bar using CAVA's pipe output.  ║
+// ║  Requires: cava configured with output raw mode piped to a named pipe.    ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/cava": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/cava-pipe.sh",
+        "exec-if":          "which cava &>/dev/null && playerctl status 2>/dev/null | grep -q Playing",
+        "interval":         "once",
+        "signal":           29,
+        "tooltip":          false,
+        "escape":           false
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/cava-pipe.sh ────────────────────────────
+// #!/usr/bin/env bash
+// # Launches cava in raw mode and translates output to bar characters
+// BARS=8
+// BAR_CHARS=("▁" "▂" "▃" "▄" "▅" "▆" "▇" "█")
+//
+// cava -p <(cat << 'CAVA_CFG'
+// [general]
+// bars = 8
+// [output]
+// method = raw
+// raw_target = /dev/stdout
+// data_format = ascii
+// ascii_max_range = 7
+// CAVA_CFG
+// ) 2>/dev/null | while IFS=';' read -ra VALUES; do
+//     DISPLAY=""
+//     for VAL in "${VALUES[@]}"; do
+//         [ -z "$VAL" ] && continue
+//         IDX=$((VAL < 0 ? 0 : VAL > 7 ? 7 : VAL))
+//         DISPLAY+="${BAR_CHARS[$IDX]}"
+//     done
+//     [ -n "$DISPLAY" ] && echo "{\"text\":\"${DISPLAY}\",\"class\":\"cava\"}"
+// done

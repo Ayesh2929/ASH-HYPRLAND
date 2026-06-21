@@ -1,0 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Clipboard Manager                 ║
+// ║                                                                              ║
+// ║  Shows clipboard history count, opens rofi cliphist picker on click.      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/clipboard": {
+        "format":           "󰅌 {}",
+        "return-type":      "json",
+        "exec":             "bash -c 'COUNT=$(cliphist list 2>/dev/null | wc -l); echo \"{\\\"text\\\":\\\"${COUNT}\\\",\\\"tooltip\\\":\\\"Clipboard history: ${COUNT} entries\\\",\\\"class\\\":\\\"clipboard\\\"}\"'",
+        "exec-if":          "which cliphist &>/dev/null",
+        "interval":         30,
+        "signal":           26,
+        "on-click":         "cliphist list | rofi -dmenu -p '󰅌 Clipboard' | cliphist decode | wl-copy",
+        "on-click-right":   "cliphist wipe && pkill -SIGUSR1 waybar",
+        "on-click-middle":  "cliphist list | tail -1 | cliphist decode | wl-copy",
+        "tooltip":          true,
+        "escape":           false
+    }
+}

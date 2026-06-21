@@ -1,0 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Weather (Compact)                 ║
+// ║                                                                              ║
+// ║  Single icon + temperature only. Minimal bar footprint.                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/weather-compact": {
+        "format":           "{}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/weather.sh --compact",
+        "exec-if":          "ping -c1 -W2 wttr.in &>/dev/null",
+        "interval":         1800,
+        "signal":           8,
+        "on-click":         "xdg-open https://wttr.in",
+        "on-click-right":   "pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "max-length":       12,
+        "escape":           false
+    }
+}

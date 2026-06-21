@@ -1,0 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: Khal Calendar Events              ║
+// ║                                                                              ║
+// ║  Shows next calendar event from khal CLI. Urgent when event is soon.      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/khal": {
+        "format":           "󰃸 {}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nif ! which khal &>/dev/null; then echo \"{}\"; exit 0; fi\nNEXT=$(khal list now 24h 2>/dev/null | head -3 | grep -v \"^$\" | head -1)\nif [ -z \"$NEXT\" ]; then\n  echo \"{\\\"text\\\":\\\"free\\\",\\\"tooltip\\\":\\\"No events in the next 24 hours\\\",\\\"class\\\":\\\"free\\\"}\"\nelse\n  SHORT=$(echo \"$NEXT\" | head -c 30)\n  ALL=$(khal list now 24h 2>/dev/null | head -10)\n  echo \"{\\\"text\\\":\\\"${SHORT}\\\",\\\"tooltip\\\":\\\"Upcoming events:\\\n${ALL}\\\",\\\"class\\\":\\\"event\\\"}\"\nfi\n'",
+        "exec-if":          "which khal &>/dev/null",
+        "interval":         300,
+        "signal":           32,
+        "on-click":         "kitty --class calendar -e khal interactive",
+        "on-click-right":   "pkill -SIGUSR1 waybar",
+        "max-length":       30,
+        "tooltip":          true,
+        "escape":           true
+    }
+}

@@ -1,0 +1,30 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: GitHub Notifications              ║
+// ║                                                                              ║
+// ║  Unread GitHub notification count via GitHub CLI (gh).                    ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/github-notif": {
+        "format":           "󰊤 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/github-notif.sh",
+        "exec-if":          "gh auth status &>/dev/null",
+        "interval":         300,
+        "signal":           22,
+        "on-click":         "xdg-open https://github.com/notifications",
+        "on-click-right":   "gh api /notifications --method PATCH --field read=true &>/dev/null && pkill -SIGUSR1 waybar",
+        "tooltip":          true,
+        "escape":           true
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/github-notif.sh ─────────────────────────
+// #!/usr/bin/env bash
+// COUNT=$(gh api /notifications --jq 'length' 2>/dev/null || echo 0)
+// if [ "$COUNT" -eq 0 ]; then
+//     echo "{\"text\":\"\",\"tooltip\":\"No GitHub notifications\",\"class\":\"no-notif\"}"
+// else
+//     DETAILS=$(gh api /notifications --jq '.[0:5] | .[] | "• \(.subject.type): \(.subject.title | .[0:50])"' 2>/dev/null | head -5)
+//     TOOLTIP="GitHub Notifications: ${COUNT}\n\n${DETAILS}"
+//     echo "{\"text\":\"${COUNT}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"has-notif\"}"
+// fi

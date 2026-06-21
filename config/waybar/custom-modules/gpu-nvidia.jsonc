@@ -1,0 +1,39 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: NVIDIA GPU Monitor                ║
+// ║                                                                              ║
+// ║  NVIDIA GPU utilization, VRAM usage, temperature and power draw           ║
+// ║  via nvidia-smi. Updates every 3 seconds.                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/gpu-nvidia": {
+        "format":           "󰾲 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/gpu-nvidia.sh",
+        "exec-if":          "which nvidia-smi &>/dev/null",
+        "interval":         3,
+        "on-click":         "kitty --class monitoring -e nvtop",
+        "on-click-right":   "nvidia-settings",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/gpu-nvidia.sh ───────────────────────────
+// #!/usr/bin/env bash
+// DATA=$(nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw \
+//     --format=csv,noheader,nounits 2>/dev/null | head -1)
+// [ -z "$DATA" ] && echo "{}" && exit 0
+//
+// IFS=',' read -r UTIL MEM_USED MEM_TOTAL TEMP POWER <<< "$DATA"
+// UTIL="${UTIL// /}"; MEM_USED="${MEM_USED// /}"; MEM_TOTAL="${MEM_TOTAL// /}"
+// TEMP="${TEMP// /}"; POWER="${POWER// /}"
+//
+// CLASS="good"
+// [ "${UTIL%.*}" -ge 80 ] && CLASS="warning"
+// [ "${UTIL%.*}" -ge 95 ] && CLASS="critical"
+// [ "${TEMP%.*}" -ge 85 ] && CLASS="hot"
+//
+// TEXT="${UTIL}% ${TEMP}°"
+// TOOLTIP="NVIDIA GPU\n\nUtil:  ${UTIL}%\nVRAM:  ${MEM_USED}/${MEM_TOTAL} MiB\nTemp:  ${TEMP}°C\nPower: ${POWER}W"
+//
+// echo "{\"text\":\"${TEXT}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"

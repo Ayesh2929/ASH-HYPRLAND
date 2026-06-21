@@ -1,0 +1,20 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: ASH Theme Indicator               ║
+// ║                                                                              ║
+// ║  Shows active theme name with palette preview on hover.                   ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/ash-theme": {
+        "format":           "󰌁 {}",
+        "return-type":      "json",
+        "exec":             "bash -c '\nTHEME=$(cat ~/.local/state/ash-dotfiles/current-theme 2>/dev/null || echo \"catppuccin-mocha\")\nSHORT=$(echo \"$THEME\" | sed \"s/catppuccin-/cat-/;s/tokyo-night/tn/;s/gruvbox/grv/\" | head -c 12)\nTOOLTIP=\"Active theme: ${THEME}\\\nClick: theme picker\\\nRight: random theme\\\nMiddle: toggle dark/light\"\necho \"{\\\"text\\\":\\\"${SHORT}\\\",\\\"tooltip\\\":\\\"${TOOLTIP}\\\",\\\"class\\\":\\\"${THEME}\\\"}\"\n'",
+        "interval":         30,
+        "signal":           10,
+        "on-click":         "ash theme pick",
+        "on-click-right":   "ash theme random && pkill -SIGUSR1 waybar",
+        "on-click-middle":  "ash theme toggle-dark-light && pkill -SIGUSR1 waybar",
+        "max-length":       16,
+        "tooltip":          true,
+        "escape":           false
+    }
+}

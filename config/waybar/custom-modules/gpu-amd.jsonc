@@ -1,0 +1,48 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Custom Module: AMD GPU Monitor                   ║
+// ║                                                                              ║
+// ║  AMD GPU via radeontop / amdgpu_top / sysfs. Shows utilization, VRAM,    ║
+// ║  temperature and clock speed.                                               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+{
+    "custom/gpu-amd": {
+        "format":           "󰾲 {}",
+        "return-type":      "json",
+        "exec":             "~/.config/waybar/scripts/gpu-amd.sh",
+        "exec-if":          "ls /sys/class/drm/card*/device/gpu_busy_percent &>/dev/null",
+        "interval":         3,
+        "on-click":         "kitty --class monitoring -e radeontop",
+        "tooltip":          true,
+        "escape":           false
+    }
+}
+
+// ── Script: ~/.config/waybar/scripts/gpu-amd.sh ──────────────────────────────
+// #!/usr/bin/env bash
+// GPU_PATH="/sys/class/drm/card0/device"
+//
+// # GPU utilization
+// UTIL=$(cat "${GPU_PATH}/gpu_busy_percent" 2>/dev/null || echo 0)
+//
+// # VRAM usage
+// VRAM_USED=$(cat "${GPU_PATH}/mem_info_vram_used"  2>/dev/null || echo 0)
+// VRAM_TOTAL=$(cat "${GPU_PATH}/mem_info_vram_total" 2>/dev/null || echo 1)
+// VRAM_MB=$((VRAM_USED / 1024 / 1024))
+// VRAM_TOTAL_MB=$((VRAM_TOTAL / 1024 / 1024))
+//
+// # Temperature (hwmon)
+// TEMP_RAW=$(cat "${GPU_PATH}/hwmon/hwmon*/temp1_input" 2>/dev/null | head -1 || echo 0)
+// TEMP=$((TEMP_RAW / 1000))
+//
+// # GPU clock
+// CLOCK=$(cat "${GPU_PATH}/pp_dpm_sclk" 2>/dev/null | grep '*' | awk '{print $2}' || echo "?")
+//
+// CLASS="good"
+// [ "$UTIL" -ge 80 ] && CLASS="warning"
+// [ "$UTIL" -ge 95 ] && CLASS="critical"
+// [ "$TEMP" -ge 85 ] && CLASS="hot"
+//
+// TEXT="${UTIL}% ${TEMP}°"
+// TOOLTIP="AMD GPU\n\nUtil:  ${UTIL}%\nVRAM:  ${VRAM_MB}/${VRAM_TOTAL_MB} MiB\nTemp:  ${TEMP}°C\nClock: ${CLOCK}"
+//
+// echo "{\"text\":\"${TEXT}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"${CLASS}\"}"
