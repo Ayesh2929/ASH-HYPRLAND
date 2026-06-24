@@ -1,0 +1,510 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Audio Device Switcher                            ║
+   ║                                                                              ║
+   ║  Full PipeWire/PulseAudio device management via wpctl/pactl. Switch        ║
+   ║  output/input devices, control volume per-device, manage profiles,         ║
+   ║  create virtual sinks, monitor active streams and configure EQ.            ║
+   ║                                                                              ║
+   ║  Device type icons:                                                          ║
+   ║  󰋋  Headphones      󰋌  Hands-free     󰋎  Headset                           ║
+   ║  󰓃  Speaker         󰘚  HDMI/Display   󰐻  Bluetooth                          ║
+   ║  󰍬  Microphone      󰻂  Line-in        󰑗  Virtual/Loop                       ║
+   ║  󰕾  High volume     󰖀  Med volume     󰕿  Low volume                         ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰎛 Audio Manager               [Playback] [Record] [Streams]     ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  PipeWire  ·  sample: 48000Hz  ·  latency: 256/48000            ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Filter devices…                           6 sinks · 4 sources ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  OUTPUT DEVICES                                                   ║      ║
+   ║  ║  ▶ 󰋋 Sony WH-1000XM5          ████████░░  80%  ● Default  BT     ║      ║
+   ║  ║    󰓃 Built-in Audio Speakers   ██████░░░░  60%  Analog           ║      ║
+   ║  ║    󰘚 HDMI Audio Output          ░░░░░░░░░░   0%  HDMI            ║      ║
+   ║  ║  INPUT DEVICES                                                    ║      ║
+   ║  ║  ▶ 󰍬 Rode NT-USB              ████████░░  80%  ● Default  USB    ║      ║
+   ║  ║    󰍬 Built-in Microphone       █████░░░░░  50%  Analog           ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ↩ set default  ⌥↩ adjust vol  ^M mute  ^P profile  Esc cancel  ║      ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/audio-switcher/audio-switcher.sh             ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "au:~/.config/rofi/menus/audio-switcher/audio-switcher.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-au:         "";
+
+    kb-custom-1:        "ctrl+m";         /* Mute/unmute focused device */
+    kb-custom-2:        "ctrl+p";         /* Profile switcher */
+    kb-custom-3:        "ctrl+e";         /* EQ / effects */
+    kb-custom-4:        "ctrl+r";         /* Refresh device list */
+    kb-custom-5:        "ctrl+s";         /* Active streams view */
+    kb-custom-6:        "ctrl+v";         /* Virtual sink create */
+    kb-custom-7:        "alt+Return";     /* Adjust volume inline */
+    kb-custom-8:        "ctrl+shift+m";   /* Mute ALL outputs */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @au-width;
+    height:             @au-height;
+    x-offset:           0px;
+    y-offset:           @au-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @au-win-bg;
+    border-color:       @au-win-border;
+    border:             @au-win-border-width;
+    border-radius:      @au-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [au-header, au-server-bar, au-searchbar, listview, au-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + VIEW TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+au-header {
+    background-color:   @au-header-bg;
+    border:             0px 0px @au-header-border-width 0px;
+    border-color:       @au-header-border;
+    border-radius:      @au-win-radius @au-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [au-title-icon, au-title-text, au-header-spacer, au-tab-playback, au-tab-record, au-tab-streams];
+}
+
+au-title-icon {
+    background-color:   transparent;
+    text-color:         @au-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰎛";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-title-text {
+    background-color:   transparent;
+    text-color:         @au-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Audio Manager";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+au-tab-playback {
+    background-color:   @au-tab-active-bg;
+    text-color:         @au-tab-active-fg;
+    border:             1px;
+    border-color:       @au-tab-active-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰕾 Playback";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+au-tab-record {
+    background-color:   @au-tab-bg;
+    text-color:         @au-tab-fg;
+    border:             1px;
+    border-color:       @au-tab-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰍬 Recording";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+au-tab-streams {
+    background-color:   @au-tab-bg;
+    text-color:         @au-tab-fg;
+    border:             1px;
+    border-color:       @au-tab-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰝚 Streams";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  SERVER INFO BAR — PIPEWIRE/PULSEAUDIO STATS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+au-server-bar {
+    background-color:   @au-server-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @au-server-border;
+    padding:            6px 18px;
+    spacing:            6px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [au-server-icon, au-server-name, au-server-sep-1, au-server-rate, au-server-sep-2, au-server-latency, au-server-spacer, au-server-status];
+}
+
+au-server-icon {
+    background-color:   transparent;
+    text-color:         @au-accent;
+    font:               "Symbols Nerd Font Mono 12";
+    str:                "󰐻";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-server-name {
+    background-color:   transparent;
+    text-color:         @au-server-fg;
+    font:               "JetBrainsMono Nerd Font Bold 11";
+    str:                "PipeWire";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-server-sep-1, au-server-sep-2 {
+    background-color:   transparent;
+    text-color:         @au-sep-color;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-server-rate {
+    background-color:   transparent;
+    text-color:         @au-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "48000 Hz";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-server-latency {
+    background-color:   transparent;
+    text-color:         @au-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "256/48000";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-server-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+au-server-status {
+    background-color:   @au-status-bg;
+    text-color:         @au-status-fg;
+    border:             1px;
+    border-color:       @au-status-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "● Running";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+au-searchbar {
+    background-color:   @au-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @au-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [au-search-icon, entry, num-filtered-rows, au-device-counts];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+au-search-icon {
+    background-color:   transparent;
+    text-color:         @au-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @au-text;
+    placeholder-color:  @au-muted;
+    placeholder:        "Filter audio devices by name or type…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @au-count-bg;
+    text-color:         @au-count-fg;
+    border:             1px;
+    border-color:       @au-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-device-counts {
+    background-color:   transparent;
+    text-color:         @au-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "sinks · sources";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — DEVICE LIST
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @au-listview-bg;
+    border:             0px;
+    padding:            @au-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @au-list-spacing;
+    columns:            1;
+    lines:              @au-list-lines;
+    fixed-height:       false;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  DEVICE ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @au-element-radius;
+    padding:            @au-element-padding-v @au-element-padding-h;
+    margin:             0px @au-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal: non-default device ───────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @au-element-fg;
+}
+
+/* ── Active: currently default device ────────────────────────────────────── */
+element normal.active {
+    background-color:   @au-default-bg;
+    text-color:         @au-default-fg;
+}
+
+/* ── Urgent: muted device ────────────────────────────────────────────────── */
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.08);
+    text-color:         rgba(108, 112, 134, 0.65);
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @au-selected-bg;
+    text-color:         @au-selected-fg;
+}
+
+element selected.active {
+    background-color:   @au-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   rgba(243, 139, 168, 0.20);
+    text-color:         @red;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @au-alt-bg;
+    text-color:         @au-alt-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @au-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  MESSAGE — VOLUME ADJUST / DEVICE INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @au-msg-bg;
+    border:             1px;
+    border-color:       @au-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @au-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — KEYBOARD HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+au-footer {
+    background-color:   @au-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @au-footer-border;
+    border-radius:      0px 0px @au-win-radius @au-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [au-hint-default, au-hint-sep-1, au-hint-vol, au-hint-sep-2, au-hint-mute, au-hint-sep-3, au-hint-profile, au-footer-spacer, au-backend-label];
+}
+
+au-hint-default {
+    background-color:   transparent;
+    text-color:         @au-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ set default";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-hint-sep-1, au-hint-sep-2, au-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @au-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-hint-vol {
+    background-color:   transparent;
+    text-color:         @au-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ volume";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-hint-mute {
+    background-color:   transparent;
+    text-color:         @au-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^M mute";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-hint-profile {
+    background-color:   transparent;
+    text-color:         @au-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^P profile";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+au-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+au-backend-label {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.40);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "PipeWire  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

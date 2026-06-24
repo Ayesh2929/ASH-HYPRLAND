@@ -1,0 +1,559 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Color Picker & Palette Manager                   ║
+   ║                                                                              ║
+   ║  Full-featured color tool: pick from screen, browse palettes, convert      ║
+   ║  between color spaces, generate harmonies and manage color history.         ║
+   ║                                                                              ║
+   ║  Color spaces supported:                                                     ║
+   ║  HEX #RRGGBB   RGB(r,g,b)   HSL(h,s%,l%)   OKLCH(l,c,h)                  ║
+   ║  HSV(h,s%,v%)  CMYK(c,m,y,k)  CSS names     CSS variables                 ║
+   ║                                                                              ║
+   ║  Harmony generators:                                                         ║
+   ║  Complementary  Analogous  Triadic  Split-comp  Tetradic  Monochromatic    ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰌁 Color Picker              [Pick] [Palette] [Harmony] [History] ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ████  #cba4f7  RGB(203,164,247)  HSL(270,86%,81%)  OKLCH(77,..) ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Search color name or hex…                        Catppuccin   ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  CATPPUCCIN MOCHA                                                 ║      ║
+   ║  ║  ████ rosewater  #f5e0dc  rgb(245,224,220)  HSL(10,56%,91%)      ║      ║
+   ║  ║  ████ flamingo   #f2cdcd  rgb(242,205,205)  HSL(0,58%,88%)       ║      ║
+   ║  ║  ████ mauve      #cba4f7  rgb(203,164,247)  HSL(270,86%,81%)  ★  ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ↩ copy HEX  ⌥↩ copy RGB  ^H HSL  ^O OKLCH  ^P pick  ^F favorite ║     ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/color-picker/color-picker.sh                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "cp:~/.config/rofi/menus/color-picker/color-picker.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-cp:         "";
+
+    kb-custom-1:        "ctrl+p";         /* Hyprpicker — pick from screen */
+    kb-custom-2:        "ctrl+h";         /* Copy as HSL */
+    kb-custom-3:        "ctrl+o";         /* Copy as OKLCH */
+    kb-custom-4:        "ctrl+r";         /* Copy as RGB */
+    kb-custom-5:        "ctrl+f";         /* Toggle favorite */
+    kb-custom-6:        "ctrl+g";         /* Generate harmony */
+    kb-custom-7:        "ctrl+s";         /* Save to palette */
+    kb-custom-8:        "ctrl+e";         /* Edit color (manual input) */
+    kb-custom-9:        "ctrl+l";         /* Copy as HSL CSS */
+    kb-custom-10:       "ctrl+k";         /* Copy as OKLCH CSS */
+    kb-custom-11:       "ctrl+n";         /* Copy as CSS name (if available) */
+    kb-custom-12:       "ctrl+v";         /* Copy as CSS var (--color-name) */
+    kb-custom-13:       "ctrl+b";         /* Browse palettes */
+    kb-custom-14:       "alt+Return";     /* Copy as RGB css function */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @cp-width;
+    height:             @cp-height;
+    x-offset:           0px;
+    y-offset:           @cp-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @cp-win-bg;
+    border-color:       @cp-win-border;
+    border:             @cp-win-border-width;
+    border-radius:      @cp-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [cp-header, cp-preview-bar, cp-searchbar, listview, cp-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cp-header {
+    background-color:   @cp-header-bg;
+    border:             0px 0px @cp-header-border-width 0px;
+    border-color:       @cp-header-border;
+    border-radius:      @cp-win-radius @cp-win-radius 0px 0px;
+    padding:            11px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cp-title-icon, cp-title-text, cp-header-spacer, cp-btn-pick, cp-btn-palette, cp-btn-harmony, cp-btn-history];
+}
+
+cp-title-icon {
+    background-color:   transparent;
+    text-color:         @cp-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰌁";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-title-text {
+    background-color:   transparent;
+    text-color:         @cp-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Color Picker";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+cp-btn-pick {
+    background-color:   @cp-pick-bg;
+    text-color:         @cp-pick-fg;
+    border:             1px;
+    border-color:       @cp-pick-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰈋 Pick";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+cp-btn-palette {
+    background-color:   @cp-btn-bg;
+    text-color:         @cp-btn-fg;
+    border:             1px;
+    border-color:       @cp-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰱫 Palette";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+cp-btn-harmony {
+    background-color:   @cp-btn-bg;
+    text-color:         @cp-btn-fg;
+    border:             1px;
+    border-color:       @cp-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  Harmony";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+cp-btn-history {
+    background-color:   @cp-btn-bg;
+    text-color:         @cp-btn-fg;
+    border:             1px;
+    border-color:       @cp-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰋚 History";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  COLOR PREVIEW BAR — SELECTED COLOR MULTI-FORMAT DISPLAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cp-preview-bar {
+    background-color:   @cp-preview-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @cp-preview-border;
+    padding:            10px 18px;
+    spacing:            12px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cp-color-swatch, cp-preview-formats, cp-preview-spacer, cp-contrast-info];
+}
+
+cp-color-swatch {
+    background-color:   @cp-swatch-color;     /* Updated by script */
+    border:             1px;
+    border-color:       rgba(255, 255, 255, 0.15);
+    border-radius:      @radius-md;
+    width:              64px;
+    expand:             false;
+}
+
+cp-preview-formats {
+    background-color:   transparent;
+    orientation:        vertical;
+    spacing:            3px;
+    expand:             true;
+    children:           [cp-fmt-hex, cp-fmt-rgb, cp-fmt-hsl, cp-fmt-oklch];
+}
+
+cp-fmt-hex {
+    background-color:   transparent;
+    text-color:         @cp-fmt-hex-fg;
+    font:               "JetBrainsMono Nerd Font Bold 12";
+    str:                "#000000";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-fmt-rgb {
+    background-color:   transparent;
+    text-color:         @cp-fmt-secondary-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "rgb(0, 0, 0)";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-fmt-hsl {
+    background-color:   transparent;
+    text-color:         @cp-fmt-secondary-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "hsl(0, 0%, 0%)";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-fmt-oklch {
+    background-color:   transparent;
+    text-color:         @cp-fmt-tertiary-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "oklch(0 0 0)";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-preview-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+cp-contrast-info {
+    background-color:   transparent;
+    orientation:        vertical;
+    spacing:            3px;
+    expand:             false;
+    children:           [cp-contrast-white, cp-contrast-black];
+}
+
+cp-contrast-white {
+    background-color:   transparent;
+    text-color:         @cp-contrast-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "vs ⬜ ─:1";
+    expand:             false;
+    horizontal-align:   1.0;
+}
+
+cp-contrast-black {
+    background-color:   transparent;
+    text-color:         @cp-contrast-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "vs ⬛ ─:1";
+    expand:             false;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cp-searchbar {
+    background-color:   @cp-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @cp-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cp-search-icon, entry, num-filtered-rows, cp-palette-name];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+cp-search-icon {
+    background-color:   transparent;
+    text-color:         @cp-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @cp-text;
+    placeholder-color:  @cp-muted;
+    placeholder:        "Search by name, hex (#ff0000) or hsl…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @cp-count-bg;
+    text-color:         @cp-count-fg;
+    border:             1px;
+    border-color:       @cp-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-palette-name {
+    background-color:   transparent;
+    text-color:         @cp-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "Catppuccin";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — COLOR ENTRIES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @cp-listview-bg;
+    border:             0px;
+    padding:            @cp-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @cp-list-spacing;
+    columns:            1;
+    lines:              @cp-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  COLOR ENTRY ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @cp-element-radius;
+    padding:            @cp-element-padding-v @cp-element-padding-h;
+    margin:             0px @cp-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal: regular color entry ─────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @cp-element-fg;
+}
+
+/* ── Active: favorite color ───────────────────────────────────────────────── */
+element normal.active {
+    background-color:   @cp-fav-bg;
+    text-color:         @cp-fav-fg;
+}
+
+/* ── Urgent: recently picked / active ────────────────────────────────────── */
+element normal.urgent {
+    background-color:   @cp-recent-bg;
+    text-color:         @cp-recent-fg;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @cp-selected-bg;
+    text-color:         @cp-selected-fg;
+}
+
+element selected.active {
+    background-color:   @cp-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @teal;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @cp-alt-bg;
+    text-color:         @cp-alt-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @cp-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  MESSAGE — COLOR DETAIL / HARMONY PREVIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @cp-msg-bg;
+    border:             1px;
+    border-color:       @cp-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @cp-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cp-footer {
+    background-color:   @cp-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @cp-footer-border;
+    border-radius:      0px 0px @cp-win-radius @cp-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cp-hint-hex, cp-hint-sep-1, cp-hint-rgb, cp-hint-sep-2, cp-hint-hsl, cp-hint-sep-3, cp-hint-pick, cp-hint-sep-4, cp-hint-fav, cp-footer-spacer, cp-format-note];
+}
+
+cp-hint-hex {
+    background-color:   transparent;
+    text-color:         @cp-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ copy HEX";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-hint-sep-1, cp-hint-sep-2,
+cp-hint-sep-3, cp-hint-sep-4 {
+    background-color:   transparent;
+    text-color:         @cp-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-hint-rgb {
+    background-color:   transparent;
+    text-color:         @cp-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ RGB";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-hint-hsl {
+    background-color:   transparent;
+    text-color:         @cp-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^H HSL";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-hint-pick {
+    background-color:   transparent;
+    text-color:         @cp-hint-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^P pick screen";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-hint-fav {
+    background-color:   transparent;
+    text-color:         @cp-hint-fav;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^F favorite";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cp-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+cp-format-note {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.38);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "^O OKLCH  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

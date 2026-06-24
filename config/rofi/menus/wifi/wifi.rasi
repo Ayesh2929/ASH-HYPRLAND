@@ -1,0 +1,525 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — WiFi Network Manager Menu                        ║
+   ║                                                                              ║
+   ║  Full WiFi management via nmcli integration. Scan nearby networks,         ║
+   ║  connect with password prompt, manage saved connections, hotspot,          ║
+   ║  VPN control and real-time signal strength bars.                           ║
+   ║                                                                              ║
+   ║  Signal strength icons:                                                      ║
+   ║  󰤟  Excellent (80-100%)    󰤢  Good (60-80%)                                 ║
+   ║  󰤥  Fair (40-60%)          󰤨  Poor (20-40%)    󰤯  Minimal (<20%)            ║
+   ║                                                                              ║
+   ║  Security icons:                                                             ║
+   ║    WPA2/WPA3 secured      ○  Open network                                  ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════╗              ║
+   ║  ║  󰤨 WiFi Manager                         [On/Off] [Scan]  ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  Connected: HomeNetwork-5G  ·  IP: 192.168.1.42  ·  ↓↑   ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  󰍉 Filter networks…                              12/24   ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  CONNECTED                                                ║              ║
+   ║  ║  ▶ 󰤨  HomeNetwork-5G     ████████░░  87%   WPA2  5GHz   ║              ║
+   ║  ║  SAVED NETWORKS                                           ║              ║
+   ║  ║    󰤥  Office-WiFi        ██████░░░░  68%   WPA2  2.4GHz  ║              ║
+   ║  ║  NEARBY NETWORKS                                          ║              ║
+   ║  ║    󰤢  NeighborNet        ████░░░░░░  45%   WPA2  5GHz    ║              ║
+   ║  ║    ○  PublicHotspot       ██░░░░░░░░  22%   Open  2.4GHz  ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  ↩ connect  ⌥↩ forget  Ctrl+R scan  Ctrl+D disconnect   ║              ║
+   ║  ╚═══════════════════════════════════════════════════════════╝              ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/wifi/wifi.sh                                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "wifi:~/.config/rofi/menus/wifi/wifi.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-wifi:       "";
+
+    /* Custom key bindings */
+    kb-custom-1:        "ctrl+r";    /* Refresh / rescan */
+    kb-custom-2:        "ctrl+d";    /* Disconnect */
+    kb-custom-3:        "ctrl+t";    /* Toggle WiFi */
+    kb-custom-4:        "ctrl+h";    /* Toggle hotspot */
+    kb-custom-5:        "ctrl+e";    /* Edit connection */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — NETWORK BROWSER DIALOG
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @wifi-width;
+    height:             0px;
+    x-offset:           0px;
+    y-offset:           @wifi-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @wifi-win-bg;
+    border-color:       @wifi-win-border;
+    border:             @wifi-win-border-width;
+    border-radius:      @wifi-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [wifi-header, wifi-status-bar, wifi-searchbar, listview, wifi-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + WIFI CONTROLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wifi-header {
+    background-color:   @wifi-header-bg;
+    border:             0px 0px @wifi-header-border-width 0px;
+    border-color:       @wifi-header-border;
+    border-radius:      @wifi-win-radius @wifi-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wifi-title-icon, wifi-title-text, wifi-freq-badge, wifi-header-spacer, wifi-toggle-btn, wifi-scan-btn, wifi-hotspot-btn];
+}
+
+wifi-title-icon {
+    background-color:   transparent;
+    text-color:         @wifi-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰤨";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-title-text {
+    background-color:   transparent;
+    text-color:         @wifi-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "WiFi Networks";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-freq-badge {
+    background-color:   @wifi-badge-bg;
+    text-color:         @wifi-badge-fg;
+    border:             1px;
+    border-color:       @wifi-badge-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "5 GHz";
+    padding:            2px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wifi-toggle-btn {
+    background-color:   @wifi-toggle-bg;
+    text-color:         @wifi-toggle-fg;
+    border:             1px;
+    border-color:       @wifi-toggle-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰤫  On/Off";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+wifi-scan-btn {
+    background-color:   @wifi-scan-bg;
+    text-color:         @wifi-scan-fg;
+    border:             1px;
+    border-color:       @wifi-scan-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰓻  Scan";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+wifi-hotspot-btn {
+    background-color:   @wifi-hotspot-bg;
+    text-color:         @wifi-hotspot-fg;
+    border:             1px;
+    border-color:       @wifi-hotspot-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰀝  Hotspot";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  STATUS BAR — CURRENT CONNECTION INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wifi-status-bar {
+    background-color:   @wifi-status-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @wifi-status-border;
+    padding:            7px 18px;
+    spacing:            6px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wifi-conn-icon, wifi-conn-ssid, wifi-conn-sep-1, wifi-conn-ip, wifi-conn-sep-2, wifi-conn-speed, wifi-status-spacer, wifi-conn-badge];
+}
+
+wifi-conn-icon {
+    background-color:   transparent;
+    text-color:         @wifi-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰤨";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-conn-ssid {
+    background-color:   transparent;
+    text-color:         @wifi-conn-fg;
+    font:               "JetBrainsMono Nerd Font Bold 11";
+    str:                "Not connected";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-conn-sep-1, wifi-conn-sep-2 {
+    background-color:   transparent;
+    text-color:         @wifi-sep-color;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-conn-ip {
+    background-color:   transparent;
+    text-color:         @wifi-muted;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "–";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-conn-speed {
+    background-color:   transparent;
+    text-color:         @wifi-muted;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "–";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wifi-conn-badge {
+    background-color:   @wifi-badge-off-bg;
+    text-color:         @wifi-badge-off-fg;
+    border:             1px;
+    border-color:       @wifi-badge-off-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "󰤭 Disconnected";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wifi-searchbar {
+    background-color:   @wifi-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @wifi-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wifi-search-icon, entry, num-filtered-rows, case-indicator];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+wifi-search-icon {
+    background-color:   transparent;
+    text-color:         @wifi-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @wifi-text;
+    placeholder-color:  @wifi-muted;
+    placeholder:        "Filter networks by name (SSID)…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @wifi-count-bg;
+    text-color:         @wifi-count-fg;
+    border:             1px;
+    border-color:       @wifi-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @wifi-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — NETWORK LIST
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @wifi-listview-bg;
+    border:             0px;
+    padding:            @wifi-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @wifi-list-spacing;
+    columns:            1;
+    lines:              @wifi-list-lines;
+    fixed-height:       false;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  NETWORK ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @wifi-element-radius;
+    padding:            @wifi-element-padding-v @wifi-element-padding-h;
+    margin:             0px @wifi-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @wifi-element-fg;
+}
+
+element normal.active {
+    /* Currently connected network */
+    background-color:   @wifi-connected-bg;
+    text-color:         @wifi-connected-fg;
+}
+
+element normal.urgent {
+    /* Network with authentication error */
+    background-color:   rgba(243, 139, 168, 0.08);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @wifi-selected-bg;
+    text-color:         @wifi-selected-fg;
+}
+
+element selected.active {
+    /* Selected + connected */
+    background-color:   @wifi-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @wifi-alt-bg;
+    text-color:         @wifi-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @wifi-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — ACTION HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wifi-footer {
+    background-color:   @wifi-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @wifi-footer-border;
+    border-radius:      0px 0px @wifi-win-radius @wifi-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wifi-hint-connect, wifi-hint-sep-1, wifi-hint-forget, wifi-hint-sep-2, wifi-hint-scan, wifi-hint-sep-3, wifi-hint-disc, wifi-footer-spacer, wifi-footer-iface];
+}
+
+wifi-hint-connect {
+    background-color:   transparent;
+    text-color:         @wifi-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ connect";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-hint-sep-1, wifi-hint-sep-2, wifi-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @wifi-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-hint-forget {
+    background-color:   transparent;
+    text-color:         @wifi-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ forget";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-hint-scan {
+    background-color:   transparent;
+    text-color:         @wifi-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R rescan";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-hint-disc {
+    background-color:   transparent;
+    text-color:         @wifi-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^D disconnect";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wifi-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wifi-footer-iface {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.45);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "wlan0  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @wifi-msg-bg;
+    border:             1px;
+    border-color:       @wifi-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @wifi-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

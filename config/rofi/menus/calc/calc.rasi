@@ -1,0 +1,475 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Calculator Menu                                  ║
+   ║                                                                              ║
+   ║  Scientific calculator with live evaluation, history, unit conversion,     ║
+   ║  currency rates, constants library and expression memory.                  ║
+   ║                                                                              ║
+   ║  Supported operations:                                                       ║
+   ║  • Basic:       + - * / % ^  (power)  sqrt()  abs()                        ║
+   ║  • Trig:        sin() cos() tan() asin() acos() atan()                     ║
+   ║  • Logarithm:   log() ln() log2() log10()                                  ║
+   ║  • Constants:   pi e phi tau c G h                                         ║
+   ║  • Units:       42 km to miles  100 F to C  1 BTC to USD                  ║
+   ║  • Bitwise:     0xFF & 0x0F  | ^ ~ << >>                                   ║
+   ║  • Statistics:  mean(1,2,3)  sum(1..10)  factorial(n)                      ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔══════════════════════════════════════════════════════════╗               ║
+   ║  ║  󱖦 Calculator                        [History] [Clear]  ║               ║
+   ║  ╠══════════════════════════════════════════════════════════╣               ║
+   ║  ║  ┌──────────────────────────────────────────────────┐   ║               ║
+   ║  ║  │  2 + 2 * sin(pi/6)                              │   ║               ║
+   ║  ║  └──────────────────────────────────────────────────┘   ║               ║
+   ║  ╠══════════════════════════════════════════════════════════╣               ║
+   ║  ║  ┌──────────────────────────────────────────────────┐   ║               ║
+   ║  ║  │                                              = 3  │   ║               ║
+   ║  ║  └──────────────────────────────────────────────────┘   ║               ║
+   ║  ╠══════════════════════════════════════════════════════════╣               ║
+   ║  ║  HISTORY                                                 ║               ║
+   ║  ║  󰒓  2 + 2 * sin(pi/6)  =  3                           ║               ║
+   ║  ║  󰒓  sqrt(144) + 5       =  17                          ║               ║
+   ║  ║  󰒓  42 km to miles      =  26.0977 mi                  ║               ║
+   ║  ╠══════════════════════════════════════════════════════════╣               ║
+   ║  ║  ↩ copy result  ⌥↩ copy expr  Ctrl+H history  Esc exit ║               ║
+   ║  ╚══════════════════════════════════════════════════════════╝               ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/calc/calc.sh                                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "calc:~/.config/rofi/menus/calc/calc.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 13";
+    case-sensitive:     false;
+    matching:           "normal";
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    true;
+    display-calc:       "";
+
+    /* Custom bindings */
+    kb-custom-1:        "ctrl+h";         /* Toggle history */
+    kb-custom-2:        "ctrl+c";         /* Copy expression */
+    kb-custom-3:        "ctrl+x";         /* Clear current */
+    kb-custom-4:        "ctrl+m";         /* Store in memory */
+    kb-custom-5:        "ctrl+r";         /* Recall memory */
+    kb-custom-6:        "ctrl+u";         /* Unit converter mode */
+    kb-custom-7:        "ctrl+k";         /* Constants browser */
+    kb-custom-8:        "alt+Return";     /* Copy expression only */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — CALCULATOR INTERFACE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @ca-width;
+    height:             @ca-height;
+    x-offset:           0px;
+    y-offset:           @ca-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @ca-win-bg;
+    border-color:       @ca-win-border;
+    border:             @ca-win-border-width;
+    border-radius:      @ca-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [ca-header, ca-display, ca-result-display, listview, ca-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + CONTROLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ca-header {
+    background-color:   @ca-header-bg;
+    border:             0px 0px @ca-header-border-width 0px;
+    border-color:       @ca-header-border;
+    border-radius:      @ca-win-radius @ca-win-radius 0px 0px;
+    padding:            11px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ca-title-icon, ca-title-text, ca-header-spacer, ca-mode-badge, ca-history-btn, ca-clear-btn];
+}
+
+ca-title-icon {
+    background-color:   transparent;
+    text-color:         @ca-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "󱖦";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-title-text {
+    background-color:   transparent;
+    text-color:         @ca-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Calculator";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ca-mode-badge {
+    background-color:   @ca-badge-bg;
+    text-color:         @ca-badge-fg;
+    border:             1px;
+    border-color:       @ca-badge-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "BASIC";           /* Updated by script: BASIC|SCI|UNIT|BIT */
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-history-btn {
+    background-color:   @ca-btn-bg;
+    text-color:         @ca-btn-fg;
+    border:             1px;
+    border-color:       @ca-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰋚 History";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+ca-clear-btn {
+    background-color:   @ca-danger-bg;
+    text-color:         @ca-danger-fg;
+    border:             1px;
+    border-color:       @ca-danger-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰩹 Clear";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  INPUT DISPLAY — EXPRESSION ENTRY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ca-display {
+    background-color:   @ca-display-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @ca-display-border;
+    padding:            @ca-display-padding-v @ca-display-padding-h;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ca-expr-prefix, entry, ca-expr-suffix];
+}
+
+ca-expr-prefix {
+    background-color:   transparent;
+    text-color:         @ca-expr-prefix-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "󱓻";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @ca-expr-fg;
+    placeholder-color:  @ca-muted;
+    placeholder:        "Enter expression…  e.g. 2 + 2 * sin(pi/6)";
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+ca-expr-suffix {
+    background-color:   transparent;
+    text-color:         @ca-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "=";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  RESULT DISPLAY — LIVE ANSWER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ca-result-display {
+    background-color:   @ca-result-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @ca-result-border;
+    padding:            @ca-result-padding-v @ca-result-padding-h;
+    spacing:            12px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ca-result-label, ca-result-value, ca-result-spacer, ca-result-extra];
+}
+
+ca-result-label {
+    background-color:   transparent;
+    text-color:         @ca-result-label-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "=";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-result-value {
+    background-color:   transparent;
+    text-color:         @ca-result-fg;
+    font:               "JetBrainsMono Nerd Font Bold 22";
+    str:                "0";               /* Updated by script */
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-result-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ca-result-extra {
+    background-color:   transparent;
+    text-color:         @ca-result-extra-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "";               /* Shows alt formats: hex, binary, sci notation */
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — HISTORY + SUGGESTIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @ca-listview-bg;
+    border:             0px;
+    padding:            @ca-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @ca-list-spacing;
+    columns:            1;
+    lines:              @ca-list-lines;
+    fixed-height:       true;
+    dynamic:            false;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  HISTORY & SUGGESTION ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @ca-element-radius;
+    padding:            @ca-element-padding-v @ca-element-padding-h;
+    margin:             0px @ca-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @ca-element-fg;
+}
+
+element normal.active {
+    /* Memory slot / special entries */
+    background-color:   @ca-memory-bg;
+    text-color:         @ca-memory-fg;
+}
+
+element normal.urgent {
+    /* Error entry */
+    background-color:   rgba(243, 139, 168, 0.08);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @ca-selected-bg;
+    text-color:         @ca-selected-fg;
+}
+
+element selected.active {
+    background-color:   @ca-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @ca-alt-bg;
+    text-color:         @ca-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @ca-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE — FORMULA HELPER / ERROR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @ca-msg-bg;
+    border:             1px;
+    border-color:       @ca-msg-border;
+    border-radius:      @radius-sm;
+    padding:            5px 14px;
+    margin:             0px 6px 3px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @ca-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  FOOTER — KEYBOARD HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ca-footer {
+    background-color:   @ca-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @ca-footer-border;
+    border-radius:      0px 0px @ca-win-radius @ca-win-radius;
+    padding:            7px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ca-hint-copy, ca-hint-sep-1, ca-hint-expr, ca-hint-sep-2, ca-hint-hist, ca-hint-sep-3, ca-hint-mem, ca-footer-spacer, ca-precision-display];
+}
+
+ca-hint-copy {
+    background-color:   transparent;
+    text-color:         @ca-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ copy result";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-hint-sep-1, ca-hint-sep-2, ca-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @ca-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-hint-expr {
+    background-color:   transparent;
+    text-color:         @ca-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ copy expr";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-hint-hist {
+    background-color:   transparent;
+    text-color:         @ca-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^H history";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-hint-mem {
+    background-color:   transparent;
+    text-color:         @ca-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^M store";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ca-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ca-precision-display {
+    background-color:   transparent;
+    text-color:         @ca-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "precision: 15  ·  bc/python";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

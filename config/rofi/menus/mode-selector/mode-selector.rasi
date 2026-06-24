@@ -1,0 +1,506 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Desktop Mode Selector                            ║
+   ║                                                                              ║
+   ║  Full desktop mode switcher with live preview of mode effects,             ║
+   ║  animated mode cards, hardware-aware recommendations, mode scheduling      ║
+   ║  and per-mode customization.                                                ║
+   ║                                                                              ║
+   ║  Available Modes:                                                            ║
+   ║  󰒲  Default     🎮  Game        💼  Work        🎯  Focus                    ║
+   ║  🎬  Cinema     🔋  Battery     📡  Stream      🔒  Privacy                  ║
+   ║  🎤  Present    ♿  Accessible                                               ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰒲 Desktop Mode                        [Schedule] [Custom]        ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐            ║      ║
+   ║  ║  │  󰒲      │  │  🎮      │  │  💼      │  │  🎯      │            ║      ║
+   ║  ║  │ Default │  │  Game   │  │  Work   │  │  Focus  │            ║      ║
+   ║  ║  │ Active  │  │ Max FPS │  │  DND    │  │  Dim    │            ║      ║
+   ║  ║  └─────────┘  └─────────┘  └─────────┘  └─────────┘            ║      ║
+   ║  ║  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐            ║      ║
+   ║  ║  │  🎬      │  │  🔋      │  │  📡      │  │  🔒      │            ║      ║
+   ║  ║  │ Cinema  │  │ Battery │  │ Stream  │  │ Privacy │            ║      ║
+   ║  ║  │ Borders │  │ Save    │  │ OBS     │  │ Blur    │            ║      ║
+   ║  ║  └─────────┘  └─────────┘  └─────────┘  └─────────┘            ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  Active: Default  ·  Blur: ON  ·  Anim: Smooth  ·  DND: OFF     ║      ║
+   ║  ║  ↩ switch  ⌥↩ preview  ^S schedule  ^I info  Esc cancel         ║      ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/mode-selector/mode-selector.sh               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "ms:~/.config/rofi/menus/mode-selector/mode-selector.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "normal";
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    true;
+    display-ms:         "";
+
+    kb-custom-1:        "ctrl+s";         /* Schedule mode */
+    kb-custom-2:        "ctrl+i";         /* Mode info */
+    kb-custom-3:        "ctrl+c";         /* Custom mode config */
+    kb-custom-4:        "ctrl+r";         /* Reset to default */
+    kb-custom-5:        "alt+Return";     /* Preview mode */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — MODE SELECTOR GRID
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @ms-width;
+    height:             @ms-height;
+    x-offset:           0px;
+    y-offset:           @ms-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @ms-win-bg;
+    border-color:       @ms-win-border;
+    border:             @ms-win-border-width;
+    border-radius:      @ms-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [ms-header, ms-searchbar, listview, ms-status-bar, ms-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ms-header {
+    background-color:   @ms-header-bg;
+    border:             0px 0px @ms-header-border-width 0px;
+    border-color:       @ms-header-border;
+    border-radius:      @ms-win-radius @ms-win-radius 0px 0px;
+    padding:            12px 20px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ms-title-icon, ms-title-text, ms-active-badge, ms-header-spacer, ms-btn-schedule, ms-btn-custom];
+}
+
+ms-title-icon {
+    background-color:   transparent;
+    text-color:         @ms-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰒲";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-title-text {
+    background-color:   transparent;
+    text-color:         @ms-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Desktop Mode";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-active-badge {
+    background-color:   @ms-badge-bg;
+    text-color:         @ms-badge-fg;
+    border:             1px;
+    border-color:       @ms-badge-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font Bold 9";
+    str:                "● DEFAULT";
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ms-btn-schedule {
+    background-color:   @ms-btn-bg;
+    text-color:         @ms-btn-fg;
+    border:             1px;
+    border-color:       @ms-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰕰 Schedule";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+ms-btn-custom {
+    background-color:   @ms-btn-bg;
+    text-color:         @ms-btn-fg;
+    border:             1px;
+    border-color:       @ms-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  Custom";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  SEARCH BAR (doubles as mode filter)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ms-searchbar {
+    background-color:   @ms-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @ms-search-border;
+    padding:            8px 20px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ms-search-icon, entry, ms-search-hint];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+ms-search-icon {
+    background-color:   transparent;
+    text-color:         @ms-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @ms-text;
+    placeholder-color:  @ms-muted;
+    placeholder:        "Filter modes… or type mode name to switch";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+ms-search-hint {
+    background-color:   transparent;
+    text-color:         @ms-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↵ to switch";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST VIEW — MODE CARDS GRID
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @ms-listview-bg;
+    border:             0px;
+    padding:            @ms-list-padding-v @ms-list-padding-h;
+    margin:             0px;
+    spacing:            @ms-card-spacing;
+    columns:            @ms-columns;
+    lines:              @ms-lines;
+    fixed-height:       true;
+    fixed-columns:      true;
+    dynamic:            false;
+    layout:             vertical;
+    flow:               horizontal;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  MODE CARD ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   @ms-card-bg;
+    border-color:       @ms-card-border;
+    border:             @ms-card-border-width;
+    border-radius:      @ms-card-radius;
+    padding:            @ms-card-padding-v @ms-card-padding-h;
+    margin:             0px;
+    spacing:            0px;
+    orientation:        vertical;
+    cursor:             pointer;
+}
+
+/* ── Normal: inactive mode card ──────────────────────────────────────────── */
+element normal.normal {
+    background-color:   @ms-card-bg;
+    text-color:         @ms-card-fg;
+    border-color:       @ms-card-border;
+}
+
+/* ── Active: currently applied mode (special highlight) ──────────────────── */
+element normal.active {
+    background-color:   @ms-card-active-bg;
+    text-color:         @ms-card-active-fg;
+    border-color:       @ms-card-active-border;
+    border:             @ms-card-active-border-width;
+}
+
+/* ── Urgent: scheduled/recommended mode ──────────────────────────────────── */
+element normal.urgent {
+    background-color:   @ms-card-urgent-bg;
+    text-color:         @ms-card-urgent-fg;
+    border-color:       @ms-card-urgent-border;
+}
+
+/* ── Selected: hovered mode ──────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @ms-card-selected-bg;
+    text-color:         @ms-card-selected-fg;
+    border-color:       @ms-card-selected-border;
+    border:             @ms-card-selected-border-width;
+}
+
+element selected.active {
+    background-color:   @ms-accent;
+    text-color:         @base;
+    border-color:       @ms-accent;
+    border:             2px;
+}
+
+element selected.urgent {
+    background-color:   @yellow;
+    text-color:         @base;
+    border-color:       @yellow;
+}
+
+element alternate.normal {
+    background-color:   @ms-card-alt-bg;
+    text-color:         @ms-card-alt-fg;
+    border-color:       @ms-card-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  ELEMENT ICON & TEXT (card icon + label)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+    highlight:          none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  STATUS BAR — CURRENT MODE DETAILS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ms-status-bar {
+    background-color:   @ms-status-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @ms-status-border;
+    padding:            7px 20px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ms-status-mode, ms-status-sep-1, ms-status-blur, ms-status-sep-2, ms-status-anim, ms-status-sep-3, ms-status-dnd, ms-status-spacer, ms-status-uptime];
+}
+
+ms-status-mode {
+    background-color:   transparent;
+    text-color:         @ms-accent;
+    font:               "JetBrainsMono Nerd Font Bold 11";
+    str:                "Active: default";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-status-sep-1, ms-status-sep-2, ms-status-sep-3 {
+    background-color:   transparent;
+    text-color:         @ms-sep-color;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-status-blur {
+    background-color:   transparent;
+    text-color:         @ms-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Blur: ON";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-status-anim {
+    background-color:   transparent;
+    text-color:         @ms-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Anim: smooth";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-status-dnd {
+    background-color:   transparent;
+    text-color:         @ms-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "DND: OFF";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ms-status-uptime {
+    background-color:   transparent;
+    text-color:         @ms-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "in mode: 00:00";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — ACTION HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+ms-footer {
+    background-color:   @ms-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @ms-footer-border;
+    border-radius:      0px 0px @ms-win-radius @ms-win-radius;
+    padding:            8px 20px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [ms-hint-switch, ms-hint-sep-1, ms-hint-preview, ms-hint-sep-2, ms-hint-schedule, ms-hint-sep-3, ms-hint-reset, ms-footer-spacer, ms-footer-version];
+}
+
+ms-hint-switch {
+    background-color:   transparent;
+    text-color:         @ms-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ switch";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-hint-sep-1, ms-hint-sep-2, ms-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @ms-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-hint-preview {
+    background-color:   transparent;
+    text-color:         @ms-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ preview";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-hint-schedule {
+    background-color:   transparent;
+    text-color:         @ms-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^S schedule";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-hint-reset {
+    background-color:   transparent;
+    text-color:         @ms-hint-danger;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R reset";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+ms-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+ms-footer-version {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.40);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "ASH Mode Engine v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE — MODE INFO / PREVIEW NOTICE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @ms-msg-bg;
+    border:             1px;
+    border-color:       @ms-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @ms-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

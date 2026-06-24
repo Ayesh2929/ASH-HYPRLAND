@@ -1,0 +1,229 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Clipboard Menu Style: Indigo Crystal             ║
+   ║                                                                              ║
+   ║  Deep indigo/lavender accent on near-black glass. Clipboard = memory,     ║
+   ║  so indigo/purple feels right: thoughtful, organized, data-oriented.       ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Lavender (#b4befe)  — primary accent, URL/link entries                  ║
+   ║  • Mauve (#cba4f7)     — secondary, pinned entries                         ║
+   ║  • Blue (#89b4fa)      — code/JSON entries                                 ║
+   ║  • Teal (#94e2d5)      — count badge, copy action                          ║
+   ║  • Red (#f38ba8)       — delete/clear actions (danger)                     ║
+   ║  • Yellow (#f9e2af)    — password/sensitive entries                        ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  TOKEN SYSTEM
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    cb-width:                       740px;
+    cb-height:                      0px;
+    cb-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    cb-win-bg:                      rgba(17, 17, 27, 0.95);
+    cb-win-border:                  rgba(180, 190, 254, 0.28);
+    cb-win-border-width:            1px;
+    cb-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    cb-header-bg:                   rgba(20, 20, 32, 0.75);
+    cb-header-border:               rgba(49, 50, 68, 0.80);
+    cb-header-border-width:         1px;
+
+    /* ── Primary accent (lavender/indigo) ─────────────────────────────────────── */
+    cb-accent:                      #b4befe;
+
+    /* ── Count badge ──────────────────────────────────────────────────────────── */
+    cb-badge-bg:                    rgba(180, 190, 254, 0.12);
+    cb-badge-fg:                    #b4befe;
+    cb-badge-border:                rgba(180, 190, 254, 0.28);
+
+    /* ── Pin button ───────────────────────────────────────────────────────────── */
+    cb-pin-bg:                      rgba(203, 164, 247, 0.12);
+    cb-pin-fg:                      #cba4f7;
+    cb-pin-border:                  rgba(203, 164, 247, 0.28);
+
+    /* ── Clear button (danger) ───────────────────────────────────────────────── */
+    cb-clear-bg:                    rgba(243, 139, 168, 0.10);
+    cb-clear-fg:                    #f38ba8;
+    cb-clear-border:                rgba(243, 139, 168, 0.28);
+
+    /* ── Search bar ───────────────────────────────────────────────────────────── */
+    cb-search-bg:                   rgba(30, 30, 46, 0.58);
+    cb-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    cb-text:                        #cdd6f4;
+    cb-subtext:                     #a6adc8;
+    cb-muted:                       rgba(108, 112, 134, 0.65);
+    cb-highlight:                   #b4befe;
+    cb-sep-color:                   rgba(69, 71, 90, 0.55);
+
+    /* ── Count badge (filter count) ──────────────────────────────────────────── */
+    cb-count-bg:                    rgba(148, 226, 213, 0.10);
+    cb-count-fg:                    #94e2d5;
+    cb-count-border:                rgba(148, 226, 213, 0.25);
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    cb-listview-bg:                 transparent;
+    cb-list-padding-v:              6px;
+    cb-list-spacing:                1px;
+    cb-list-lines:                  13;
+
+    /* ── Elements ────────────────────────────────────────────────────────────── */
+    cb-element-radius:              @radius-sm;
+    cb-element-padding-v:           7px;
+    cb-element-padding-h:           16px;
+    cb-element-margin-h:            6px;
+    cb-element-fg:                  #cdd6f4;
+
+    /* ── Pinned entries ──────────────────────────────────────────────────────── */
+    cb-pinned-bg:                   rgba(203, 164, 247, 0.10);
+    cb-pinned-fg:                   #cba4f7;
+
+    /* ── Selected ────────────────────────────────────────────────────────────── */
+    cb-selected-bg:                 rgba(180, 190, 254, 0.88);
+    cb-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate rows ──────────────────────────────────────────────────────── */
+    cb-alt-bg:                      rgba(30, 30, 46, 0.28);
+    cb-alt-fg:                      #9399b2;
+
+    /* ── Preview panel ────────────────────────────────────────────────────────── */
+    cb-preview-bg:                  rgba(30, 30, 46, 0.50);
+    cb-preview-fg:                  #a6adc8;
+    cb-preview-border:              rgba(69, 71, 90, 0.60);
+
+    /* ── Footer ──────────────────────────────────────────────────────────────── */
+    cb-footer-bg:                   rgba(17, 17, 27, 0.78);
+    cb-footer-border:               rgba(49, 50, 68, 0.70);
+    cb-hint-primary:                #b4befe;
+    cb-hint-accent:                 #cba4f7;
+    cb-hint-fg:                     rgba(108, 112, 134, 0.70);
+    cb-hint-danger:                 rgba(243, 139, 168, 0.75);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.95);
+    border-color:       rgba(180, 190, 254, 0.28);
+    border:             1px;
+    border-radius:      18px;
+}
+
+cb-header {
+    background-color:   rgba(20, 20, 32, 0.75);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+cb-title-icon   { text-color: #b4befe; }
+cb-title-text   { text-color: #cdd6f4; }
+
+cb-count-badge {
+    background-color:   rgba(180, 190, 254, 0.12);
+    text-color:         #b4befe;
+    border-color:       rgba(180, 190, 254, 0.28);
+}
+
+cb-pin-btn {
+    background-color:   rgba(203, 164, 247, 0.12);
+    text-color:         #cba4f7;
+    border-color:       rgba(203, 164, 247, 0.28);
+}
+
+cb-clear-btn {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         #f38ba8;
+    border-color:       rgba(243, 139, 168, 0.28);
+}
+
+cb-searchbar {
+    background-color:   rgba(30, 30, 46, 0.58);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+cb-search-icon  { text-color: #b4befe; }
+cb-time-display { text-color: rgba(108, 112, 134, 0.55); }
+entry           { text-color: #cdd6f4; placeholder-color: rgba(108, 112, 134, 0.55); }
+
+num-filtered-rows {
+    background-color:   rgba(148, 226, 213, 0.10);
+    text-color:         #94e2d5;
+    border-color:       rgba(148, 226, 213, 0.25);
+}
+
+/* ── Clipboard entry states ───────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         #cdd6f4;
+}
+
+element normal.active {
+    /* Pinned */
+    background-color:   rgba(203, 164, 247, 0.10);
+    text-color:         #cba4f7;
+}
+
+element normal.urgent {
+    /* Binary/sensitive */
+    background-color:   rgba(249, 226, 175, 0.08);
+    text-color:         #f9e2af;
+}
+
+element selected.normal {
+    background-color:   rgba(180, 190, 254, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #b4befe;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #f9e2af;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.28);
+    text-color:         #9399b2;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         #cba4f7;
+}
+
+element-text { highlight: bold #b4befe; }
+
+/* ── Preview / message ────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(30, 30, 46, 0.50);
+    border-color:       rgba(69, 71, 90, 0.60);
+}
+textbox { text-color: #a6adc8; font: "JetBrainsMono Nerd Font 11"; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+cb-footer {
+    background-color:   rgba(17, 17, 27, 0.78);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+cb-hint-paste  { text-color: #b4befe; }
+cb-hint-del    { text-color: rgba(243, 139, 168, 0.75); }
+cb-hint-pin    { text-color: #cba4f7; }
+cb-hint-copy   { text-color: rgba(108, 112, 134, 0.70); }
+cb-hint-clear  { text-color: rgba(243, 139, 168, 0.65); }
+
+cb-hint-sep-1, cb-hint-sep-2,
+cb-hint-sep-3, cb-hint-sep-4 { text-color: rgba(49, 50, 68, 0.70); }
+
+cb-entry-count { text-color: rgba(69, 71, 90, 0.40); }

@@ -1,0 +1,546 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Docker Manager Menu                              ║
+   ║                                                                              ║
+   ║  Full Docker/Podman container management via Rofi. View containers,        ║
+   ║  images, volumes and networks. Start/stop/exec into containers, pull       ║
+   ║  images, monitor resource usage and manage compose stacks.                 ║
+   ║                                                                              ║
+   ║  Container status indicators:                                                ║
+   ║  ● Running    ○ Stopped    ⏸ Paused    ⟳ Restarting    ✗ Exited           ║
+   ║                                                                              ║
+   ║  View sections:                                                              ║
+   ║  󰡨 Containers   󰋩 Images    󰋊 Volumes    󰛳 Networks    󰕨 Compose           ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰡨 Docker Manager             [All] [Running] [Images] [Compose]  ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  Engine: Docker 24.0.7  ·  Containers: 8  ·  Running: 5  ·  󰌜 OK ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Search containers, images, volumes…                   8 items  ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  RUNNING                                                          ║      ║
+   ║  ║  ● 󰡨  nginx-proxy     nginx:alpine    Up 2d   ↓12MB  80,443→80   ║      ║
+   ║  ║  ● 󰡨  postgres-db     postgres:15     Up 5h   ↓840MB 5432        ║      ║
+   ║  ║  STOPPED                                                          ║      ║
+   ║  ║  ○ 󰡨  redis-cache     redis:7         Exited  ↓30MB  6379        ║      ║
+   ║  ║  IMAGES                                                           ║      ║
+   ║  ║  󰋩   nginx:alpine     5.57MB          linux/amd64  3d ago        ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ↩ exec  ⌥↩ logs  ^S start/stop  ^P pull  ^R remove  ^L lazydocker ║    ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/docker-manager/docker-manager.sh             ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "dk:~/.config/rofi/menus/docker-manager/docker-manager.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-dk:         "";
+
+    kb-custom-1:        "ctrl+s";         /* Start/stop container */
+    kb-custom-2:        "ctrl+p";         /* Pull image */
+    kb-custom-3:        "ctrl+r";         /* Remove container/image */
+    kb-custom-4:        "ctrl+l";         /* Open lazydocker */
+    kb-custom-5:        "ctrl+n";         /* Create new container */
+    kb-custom-6:        "ctrl+e";         /* Edit compose file */
+    kb-custom-7:        "ctrl+i";         /* Inspect container */
+    kb-custom-8:        "ctrl+f";         /* Follow logs */
+    kb-custom-9:        "ctrl+k";         /* Kill container */
+    kb-custom-10:       "ctrl+t";         /* Top (stats) */
+    kb-custom-11:       "ctrl+c";         /* Copy container ID */
+    kb-custom-12:       "ctrl+x";         /* Export container */
+    kb-custom-13:       "ctrl+u";         /* Update image */
+    kb-custom-14:       "alt+Return";     /* View logs */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @dk-width;
+    height:             @dk-height;
+    x-offset:           0px;
+    y-offset:           @dk-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @dk-win-bg;
+    border-color:       @dk-win-border;
+    border:             @dk-win-border-width;
+    border-radius:      @dk-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [dk-header, dk-engine-bar, dk-searchbar, listview, dk-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+dk-header {
+    background-color:   @dk-header-bg;
+    border:             0px 0px @dk-header-border-width 0px;
+    border-color:       @dk-header-border;
+    border-radius:      @dk-win-radius @dk-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [dk-title-icon, dk-title-text, dk-header-spacer, dk-tab-all, dk-tab-running, dk-tab-images, dk-tab-compose];
+}
+
+dk-title-icon {
+    background-color:   transparent;
+    text-color:         @dk-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰡨";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-title-text {
+    background-color:   transparent;
+    text-color:         @dk-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Docker Manager";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+dk-tab-all {
+    background-color:   @dk-tab-active-bg;
+    text-color:         @dk-tab-active-fg;
+    border:             1px;
+    border-color:       @dk-tab-active-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰡨 All";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+dk-tab-running {
+    background-color:   @dk-tab-bg;
+    text-color:         @dk-tab-fg;
+    border:             1px;
+    border-color:       @dk-tab-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "● Running";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+dk-tab-images {
+    background-color:   @dk-tab-bg;
+    text-color:         @dk-tab-fg;
+    border:             1px;
+    border-color:       @dk-tab-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰋩 Images";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+dk-tab-compose {
+    background-color:   @dk-tab-bg;
+    text-color:         @dk-tab-fg;
+    border:             1px;
+    border-color:       @dk-tab-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰕨 Compose";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  ENGINE INFO BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+dk-engine-bar {
+    background-color:   @dk-engine-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @dk-engine-border;
+    padding:            6px 18px;
+    spacing:            6px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [dk-engine-icon, dk-engine-name, dk-engine-sep-1, dk-engine-containers, dk-engine-sep-2, dk-engine-running, dk-engine-spacer, dk-engine-status];
+}
+
+dk-engine-icon {
+    background-color:   transparent;
+    text-color:         @dk-accent;
+    font:               "Symbols Nerd Font Mono 12";
+    str:                "󰡨";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-engine-name {
+    background-color:   transparent;
+    text-color:         @dk-engine-fg;
+    font:               "JetBrainsMono Nerd Font Bold 11";
+    str:                "Docker";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-engine-sep-1, dk-engine-sep-2 {
+    background-color:   transparent;
+    text-color:         @dk-sep-color;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-engine-containers {
+    background-color:   transparent;
+    text-color:         @dk-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "0 containers";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-engine-running {
+    background-color:   transparent;
+    text-color:         @dk-running-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "● 0 running";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-engine-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+dk-engine-status {
+    background-color:   @dk-status-bg;
+    text-color:         @dk-status-fg;
+    border:             1px;
+    border-color:       @dk-status-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "󰌜 Engine OK";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+dk-searchbar {
+    background-color:   @dk-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @dk-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [dk-search-icon, entry, num-filtered-rows, dk-resource-hint];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+dk-search-icon {
+    background-color:   transparent;
+    text-color:         @dk-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @dk-text;
+    placeholder-color:  @dk-muted;
+    placeholder:        "Search containers, images, volumes…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @dk-count-bg;
+    text-color:         @dk-count-fg;
+    border:             1px;
+    border-color:       @dk-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-resource-hint {
+    background-color:   transparent;
+    text-color:         @dk-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "name  image  id";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @dk-listview-bg;
+    border:             0px;
+    padding:            @dk-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @dk-list-spacing;
+    columns:            1;
+    lines:              @dk-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  CONTAINER / IMAGE ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @dk-element-radius;
+    padding:            @dk-element-padding-v @dk-element-padding-h;
+    margin:             0px @dk-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Running container ────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @dk-element-fg;
+}
+
+element normal.active {
+    /* Running container */
+    background-color:   @dk-running-bg;
+    text-color:         @dk-running-item-fg;
+}
+
+element normal.urgent {
+    /* Image entry */
+    background-color:   @dk-image-bg;
+    text-color:         @dk-image-fg;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @dk-selected-bg;
+    text-color:         @dk-selected-fg;
+}
+
+element selected.active {
+    background-color:   @dk-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @blue;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @dk-alt-bg;
+    text-color:         @dk-alt-fg;
+}
+
+element alternate.active {
+    background-color:   @dk-running-alt-bg;
+    text-color:         @dk-running-item-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @dk-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  MESSAGE — CONTAINER DETAILS / ERROR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @dk-msg-bg;
+    border:             1px;
+    border-color:       @dk-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @dk-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+dk-footer {
+    background-color:   @dk-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @dk-footer-border;
+    border-radius:      0px 0px @dk-win-radius @dk-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [dk-hint-exec, dk-hint-sep-1, dk-hint-logs, dk-hint-sep-2, dk-hint-startstop, dk-hint-sep-3, dk-hint-remove, dk-hint-sep-4, dk-hint-lazy, dk-footer-spacer, dk-engine-version];
+}
+
+dk-hint-exec {
+    background-color:   transparent;
+    text-color:         @dk-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ exec";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-hint-sep-1, dk-hint-sep-2,
+dk-hint-sep-3, dk-hint-sep-4 {
+    background-color:   transparent;
+    text-color:         @dk-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-hint-logs {
+    background-color:   transparent;
+    text-color:         @dk-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ logs";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-hint-startstop {
+    background-color:   transparent;
+    text-color:         @dk-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^S start/stop";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-hint-remove {
+    background-color:   transparent;
+    text-color:         @dk-hint-danger;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R remove";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-hint-lazy {
+    background-color:   transparent;
+    text-color:         @dk-hint-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^L lazydocker";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+dk-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+dk-engine-version {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.38);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "Docker  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

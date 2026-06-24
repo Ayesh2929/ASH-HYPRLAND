@@ -1,0 +1,244 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Process Killer Style: Alert Red                  ║
+   ║                                                                              ║
+   ║  Red/orange alert palette for process management. High CPU = red warning,  ║
+   ║  normal processes = neutral, system processes = yellow caution.            ║
+   ║  Designed for quick identification of resource-heavy processes.            ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Red (#f38ba8)     — primary accent, kill action, high CPU warning        ║
+   ║  • Peach (#fab387)   — secondary, renice, high memory                       ║
+   ║  • Yellow (#f9e2af)  — system processes, stop/freeze                        ║
+   ║  • Green (#a6e3a1)   — resume action, normal status                         ║
+   ║  • Sapphire (#74c7ec)— PID/info, count badges                               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    pk-width:                       800px;
+    pk-height:                      0px;
+    pk-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    pk-win-bg:                      rgba(17, 17, 27, 0.97);
+    pk-win-border:                  rgba(243, 139, 168, 0.25);
+    pk-win-border-width:            1px;
+    pk-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    pk-header-bg:                   rgba(20, 20, 32, 0.82);
+    pk-header-border:               rgba(49, 50, 68, 0.80);
+    pk-header-border-width:         1px;
+
+    /* ── Primary accent (alert red) ───────────────────────────────────────────── */
+    pk-accent:                      #f38ba8;
+
+    /* ── Sort buttons: active ────────────────────────────────────────────────── */
+    pk-sort-active-bg:              rgba(243, 139, 168, 0.85);
+    pk-sort-active-fg:              #1e1e2e;
+    pk-sort-active-border:          rgba(243, 139, 168, 1.0);
+
+    /* ── Sort buttons: inactive ──────────────────────────────────────────────── */
+    pk-sort-bg:                     rgba(49, 50, 68, 0.45);
+    pk-sort-fg:                     #a6adc8;
+    pk-sort-border:                 rgba(69, 71, 90, 0.45);
+
+    /* ── User filter button ──────────────────────────────────────────────────── */
+    pk-user-bg:                     rgba(137, 180, 250, 0.12);
+    pk-user-fg:                     #89b4fa;
+    pk-user-border:                 rgba(137, 180, 250, 0.28);
+
+    /* ── System resource bar ─────────────────────────────────────────────────── */
+    pk-sys-bg:                      rgba(22, 22, 34, 0.72);
+    pk-sys-border:                  rgba(49, 50, 68, 0.80);
+
+    /* ── Resource indicators ─────────────────────────────────────────────────── */
+    pk-cpu-fg:                      #fab387;
+    pk-ram-fg:                      #cba4f7;
+
+    /* ── Search bar ──────────────────────────────────────────────────────────── */
+    pk-search-bg:                   rgba(30, 30, 46, 0.62);
+    pk-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Count badge ──────────────────────────────────────────────────────────── */
+    pk-count-bg:                    rgba(116, 199, 236, 0.10);
+    pk-count-fg:                    #74c7ec;
+    pk-count-border:                rgba(116, 199, 236, 0.25);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    pk-text:                        #cdd6f4;
+    pk-muted:                       rgba(108, 112, 134, 0.65);
+    pk-sep-color:                   rgba(69, 71, 90, 0.55);
+    pk-highlight:                   #f38ba8;
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    pk-listview-bg:                 transparent;
+    pk-list-padding-v:              4px;
+    pk-list-spacing:                1px;
+    pk-list-lines:                  13;
+
+    /* ── Elements ─────────────────────────────────────────────────────────────── */
+    pk-element-radius:              @radius-sm;
+    pk-element-padding-v:           6px;
+    pk-element-padding-h:           16px;
+    pk-element-margin-h:            5px;
+    pk-element-fg:                  #cdd6f4;
+
+    /* ── High CPU process ─────────────────────────────────────────────────────── */
+    pk-high-cpu-bg:                 rgba(243, 139, 168, 0.08);
+    pk-high-cpu-fg:                 #f38ba8;
+    pk-high-cpu-alt-bg:             rgba(243, 139, 168, 0.05);
+
+    /* ── System/root process ──────────────────────────────────────────────────── */
+    pk-system-bg:                   rgba(249, 226, 175, 0.07);
+    pk-system-fg:                   #f9e2af;
+
+    /* ── Selected ─────────────────────────────────────────────────────────────── */
+    pk-selected-bg:                 rgba(243, 139, 168, 0.88);
+    pk-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate ────────────────────────────────────────────────────────────── */
+    pk-alt-bg:                      rgba(30, 30, 46, 0.25);
+    pk-alt-fg:                      #9399b2;
+
+    /* ── Message ──────────────────────────────────────────────────────────────── */
+    pk-msg-bg:                      rgba(243, 139, 168, 0.08);
+    pk-msg-fg:                      #a6adc8;
+    pk-msg-border:                  rgba(243, 139, 168, 0.25);
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    pk-footer-bg:                   rgba(17, 17, 27, 0.82);
+    pk-footer-border:               rgba(49, 50, 68, 0.70);
+    pk-hint-primary:                #a6e3a1;      /* Green = terminate (safer) */
+    pk-hint-danger:                 #f38ba8;      /* Red = force kill */
+    pk-hint-fg:                     rgba(108, 112, 134, 0.65);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.97);
+    border-color:       rgba(243, 139, 168, 0.25);
+    border:             1px;
+    border-radius:      18px;
+}
+
+pk-header {
+    background-color:   rgba(20, 20, 32, 0.82);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+pk-title-icon   { text-color: #f38ba8; }
+pk-title-text   { text-color: #cdd6f4; }
+
+pk-sort-cpu {
+    background-color:   rgba(243, 139, 168, 0.85);
+    text-color:         #1e1e2e;
+    border-color:       rgba(243, 139, 168, 1.0);
+}
+
+pk-sort-mem, pk-sort-pid, pk-sort-name {
+    background-color:   rgba(49, 50, 68, 0.45);
+    text-color:         #a6adc8;
+    border-color:       rgba(69, 71, 90, 0.45);
+}
+
+pk-user-filter {
+    background-color:   rgba(137, 180, 250, 0.12);
+    text-color:         #89b4fa;
+    border-color:       rgba(137, 180, 250, 0.28);
+}
+
+pk-sys-bar {
+    background-color:   rgba(22, 22, 34, 0.72);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+pk-sys-cpu     { text-color: #fab387; }
+pk-sys-ram     { text-color: #cba4f7; }
+pk-sys-tasks,
+pk-sys-load    { text-color: rgba(108, 112, 134, 0.60); }
+pk-sys-sep-1,
+pk-sys-sep-2,
+pk-sys-sep-3   { text-color: rgba(69, 71, 90, 0.55); }
+pk-sys-uptime  { text-color: rgba(88, 91, 112, 0.50); }
+
+pk-searchbar {
+    background-color:   rgba(30, 30, 46, 0.62);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+pk-search-icon   { text-color: #f38ba8; }
+pk-process-count { text-color: rgba(88, 91, 112, 0.50); }
+entry            { text-color: #cdd6f4; placeholder-color: rgba(108,112,134,0.55); font: "JetBrainsMono Nerd Font 12"; }
+
+num-filtered-rows {
+    background-color:   rgba(116, 199, 236, 0.10);
+    text-color:         #74c7ec;
+    border-color:       rgba(116, 199, 236, 0.25);
+}
+
+/* ── Process element states ───────────────────────────────────────────────── */
+element normal.normal { background-color: transparent; text-color: #cdd6f4; }
+element normal.active { /* High CPU */ background-color: rgba(243,139,168,0.08); text-color: #f38ba8; }
+element normal.urgent { /* System */ background-color: rgba(249,226,175,0.07); text-color: #f9e2af; }
+
+element selected.normal {
+    background-color:   rgba(243, 139, 168, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #f38ba8;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #f9e2af;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.25);
+    text-color:         #9399b2;
+}
+
+element alternate.active {
+    background-color:   rgba(243, 139, 168, 0.05);
+    text-color:         #f38ba8;
+}
+
+/* Monospace for column alignment */
+element-text {
+    font:               "JetBrainsMono Nerd Font 12";
+    highlight:          bold #f38ba8;
+    text-color:         inherit;
+}
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(243, 139, 168, 0.08);
+    border-color:       rgba(243, 139, 168, 0.25);
+}
+textbox { text-color: #a6adc8; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+pk-footer {
+    background-color:   rgba(17, 17, 27, 0.82);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+pk-hint-term     { text-color: #a6e3a1; }   /* Green = safe action */
+pk-hint-kill     { text-color: #f38ba8; }   /* Red = dangerous */
+pk-hint-stop,
+pk-hint-renice,
+pk-hint-info     { text-color: rgba(108, 112, 134, 0.65); }
+
+pk-hint-sep-1,
+pk-hint-sep-2,
+pk-hint-sep-3,
+pk-hint-sep-4    { text-color: rgba(49, 50, 68, 0.70); }
+
+pk-htop-hint { text-color: rgba(69, 71, 90, 0.40); }

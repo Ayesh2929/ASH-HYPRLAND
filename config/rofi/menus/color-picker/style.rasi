@@ -1,0 +1,231 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Color Picker Style: Rainbow Prism               ║
+   ║                                                                              ║
+   ║  Prismatic multi-color aesthetic. The color picker itself should feel      ║
+   ║  colorful without being overwhelming. Gradient accent with mauve→pink      ║
+   ║  primary, preview bar shows the actual picked color as background.         ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Mauve (#cba4f7)   — primary accent, HEX format label                   ║
+   ║  • Pink (#f5c2e7)    — secondary, favorite star                            ║
+   ║  • Peach (#fab387)   — tertiary, hsl/rgb formats                           ║
+   ║  • Teal (#94e2d5)    — oklch format, harmony                               ║
+   ║  • Yellow (#f9e2af)  — warnings, CMYK                                      ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    cp-width:                       820px;
+    cp-height:                      0px;
+    cp-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    cp-win-bg:                      rgba(17, 17, 27, 0.96);
+    cp-win-border:                  rgba(203, 164, 247, 0.28);
+    cp-win-border-width:            1px;
+    cp-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    cp-header-bg:                   rgba(20, 20, 32, 0.80);
+    cp-header-border:               rgba(49, 50, 68, 0.80);
+    cp-header-border-width:         1px;
+
+    /* ── Primary accent (mauve) ──────────────────────────────────────────────── */
+    cp-accent:                      #cba4f7;
+
+    /* ── Screen picker button ────────────────────────────────────────────────── */
+    cp-pick-bg:                     rgba(245, 194, 231, 0.15);
+    cp-pick-fg:                     #f5c2e7;
+    cp-pick-border:                 rgba(245, 194, 231, 0.30);
+
+    /* ── Generic buttons ──────────────────────────────────────────────────────── */
+    cp-btn-bg:                      rgba(49, 50, 68, 0.45);
+    cp-btn-fg:                      #a6adc8;
+    cp-btn-border:                  rgba(69, 71, 90, 0.45);
+
+    /* ── Preview bar ─────────────────────────────────────────────────────────── */
+    cp-preview-bg:                  rgba(22, 22, 34, 0.70);
+    cp-preview-border:              rgba(49, 50, 68, 0.80);
+
+    /* ── Color swatch (updated dynamically) ──────────────────────────────────── */
+    cp-swatch-color:                #cba4f7;   /* Replaced by script */
+
+    /* ── Format display colors ───────────────────────────────────────────────── */
+    cp-fmt-hex-fg:                  #cba4f7;
+    cp-fmt-secondary-fg:            #fab387;
+    cp-fmt-tertiary-fg:             #94e2d5;
+    cp-contrast-fg:                 rgba(108, 112, 134, 0.65);
+
+    /* ── Search bar ──────────────────────────────────────────────────────────── */
+    cp-search-bg:                   rgba(30, 30, 46, 0.60);
+    cp-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Count badge ──────────────────────────────────────────────────────────── */
+    cp-count-bg:                    rgba(203, 164, 247, 0.10);
+    cp-count-fg:                    #cba4f7;
+    cp-count-border:                rgba(203, 164, 247, 0.25);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    cp-text:                        #cdd6f4;
+    cp-muted:                       rgba(108, 112, 134, 0.65);
+    cp-sep-color:                   rgba(69, 71, 90, 0.55);
+    cp-highlight:                   #f5c2e7;
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    cp-listview-bg:                 transparent;
+    cp-list-padding-v:              5px;
+    cp-list-spacing:                1px;
+    cp-list-lines:                  11;
+
+    /* ── Elements ─────────────────────────────────────────────────────────────── */
+    cp-element-radius:              @radius-sm;
+    cp-element-padding-v:           6px;
+    cp-element-padding-h:           16px;
+    cp-element-margin-h:            5px;
+    cp-element-fg:                  #cdd6f4;
+
+    /* ── Favorite color ───────────────────────────────────────────────────────── */
+    cp-fav-bg:                      rgba(249, 226, 175, 0.07);
+    cp-fav-fg:                      #f9e2af;
+
+    /* ── Recent/picked color ──────────────────────────────────────────────────── */
+    cp-recent-bg:                   rgba(148, 226, 213, 0.07);
+    cp-recent-fg:                   #94e2d5;
+
+    /* ── Selected ─────────────────────────────────────────────────────────────── */
+    cp-selected-bg:                 rgba(203, 164, 247, 0.88);
+    cp-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate ────────────────────────────────────────────────────────────── */
+    cp-alt-bg:                      rgba(30, 30, 46, 0.25);
+    cp-alt-fg:                      #9399b2;
+
+    /* ── Message ──────────────────────────────────────────────────────────────── */
+    cp-msg-bg:                      rgba(203, 164, 247, 0.08);
+    cp-msg-fg:                      #a6adc8;
+    cp-msg-border:                  rgba(203, 164, 247, 0.25);
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    cp-footer-bg:                   rgba(17, 17, 27, 0.80);
+    cp-footer-border:               rgba(49, 50, 68, 0.70);
+    cp-hint-primary:                #cba4f7;
+    cp-hint-fg:                     rgba(108, 112, 134, 0.65);
+    cp-hint-accent:                 #f5c2e7;
+    cp-hint-fav:                    #f9e2af;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.96);
+    border-color:       rgba(203, 164, 247, 0.28);
+    border:             1px;
+    border-radius:      18px;
+}
+
+cp-header {
+    background-color:   rgba(20, 20, 32, 0.80);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+cp-title-icon   { text-color: #cba4f7; }
+cp-title-text   { text-color: #cdd6f4; }
+
+cp-btn-pick {
+    background-color:   rgba(245, 194, 231, 0.15);
+    text-color:         #f5c2e7;
+    border-color:       rgba(245, 194, 231, 0.30);
+}
+
+cp-btn-palette, cp-btn-harmony, cp-btn-history {
+    background-color:   rgba(49, 50, 68, 0.45);
+    text-color:         #a6adc8;
+    border-color:       rgba(69, 71, 90, 0.45);
+}
+
+cp-preview-bar {
+    background-color:   rgba(22, 22, 34, 0.70);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+cp-fmt-hex      { text-color: #cba4f7; font: "JetBrainsMono Nerd Font Bold 12"; }
+cp-fmt-rgb      { text-color: #fab387; font: "JetBrainsMono Nerd Font 10"; }
+cp-fmt-hsl      { text-color: #f5c2e7; font: "JetBrainsMono Nerd Font 10"; }
+cp-fmt-oklch    { text-color: #94e2d5; font: "JetBrainsMono Nerd Font 10"; }
+cp-contrast-white,
+cp-contrast-black { text-color: rgba(108, 112, 134, 0.60); }
+
+cp-searchbar {
+    background-color:   rgba(30, 30, 46, 0.60);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+cp-search-icon  { text-color: #cba4f7; }
+cp-palette-name { text-color: rgba(88, 91, 112, 0.50); }
+entry           { text-color: #cdd6f4; placeholder-color: rgba(108,112,134,0.55); font: "JetBrainsMono Nerd Font 12"; }
+
+num-filtered-rows {
+    background-color:   rgba(203, 164, 247, 0.10);
+    text-color:         #cba4f7;
+    border-color:       rgba(203, 164, 247, 0.25);
+}
+
+/* ── Color element states ─────────────────────────────────────────────────── */
+element normal.normal  { background-color: transparent; text-color: #cdd6f4; }
+element normal.active  { background-color: rgba(249,226,175,0.07); text-color: #f9e2af; }
+element normal.urgent  { background-color: rgba(148,226,213,0.07); text-color: #94e2d5; }
+
+element selected.normal {
+    background-color:   rgba(203, 164, 247, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #f9e2af;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #94e2d5;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.25);
+    text-color:         #9399b2;
+}
+
+/* Monospace critical for color value alignment */
+element-text {
+    font:               "JetBrainsMono Nerd Font 12";
+    highlight:          bold #f5c2e7;
+    text-color:         inherit;
+}
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(203, 164, 247, 0.08);
+    border-color:       rgba(203, 164, 247, 0.25);
+}
+textbox { text-color: #a6adc8; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+cp-footer {
+    background-color:   rgba(17, 17, 27, 0.80);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+cp-hint-hex     { text-color: #cba4f7; }
+cp-hint-rgb,
+cp-hint-hsl     { text-color: rgba(108, 112, 134, 0.65); }
+cp-hint-pick    { text-color: #f5c2e7; }
+cp-hint-fav     { text-color: #f9e2af; }
+
+cp-hint-sep-1,
+cp-hint-sep-2,
+cp-hint-sep-3,
+cp-hint-sep-4   { text-color: rgba(49, 50, 68, 0.70); }
+
+cp-format-note  { text-color: rgba(69, 71, 90, 0.40); }

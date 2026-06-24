@@ -1,0 +1,241 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Docker Manager Style: Container Blue             ║
+   ║                                                                              ║
+   ║  Docker brand blue with green running indicator, red stopped, yellow       ║
+   ║  paused. Dark terminal-inspired base for DevOps aesthetic.                 ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Blue (#89b4fa)    — primary accent, Docker brand                         ║
+   ║  • Sapphire (#74c7ec)— secondary, image entries                            ║
+   ║  • Green (#a6e3a1)   — running containers, engine OK                        ║
+   ║  • Yellow (#f9e2af)  — paused containers, warnings                          ║
+   ║  • Red (#f38ba8)     — stopped/exited, remove action                       ║
+   ║  • Teal (#94e2d5)    — volumes, networks                                   ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    dk-width:                       780px;
+    dk-height:                      0px;
+    dk-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    dk-win-bg:                      rgba(17, 17, 27, 0.96);
+    dk-win-border:                  rgba(137, 180, 250, 0.28);
+    dk-win-border-width:            1px;
+    dk-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    dk-header-bg:                   rgba(20, 20, 32, 0.80);
+    dk-header-border:               rgba(49, 50, 68, 0.80);
+    dk-header-border-width:         1px;
+
+    /* ── Primary accent (Docker blue) ────────────────────────────────────────── */
+    dk-accent:                      #89b4fa;
+
+    /* ── Tab buttons ─────────────────────────────────────────────────────────── */
+    dk-tab-active-bg:               rgba(137, 180, 250, 0.85);
+    dk-tab-active-fg:               #1e1e2e;
+    dk-tab-active-border:           rgba(137, 180, 250, 1.0);
+    dk-tab-bg:                      rgba(49, 50, 68, 0.45);
+    dk-tab-fg:                      #a6adc8;
+    dk-tab-border:                  rgba(69, 71, 90, 0.45);
+
+    /* ── Engine bar ──────────────────────────────────────────────────────────── */
+    dk-engine-bg:                   rgba(22, 22, 34, 0.70);
+    dk-engine-border:               rgba(49, 50, 68, 0.80);
+    dk-engine-fg:                   #a6adc8;
+
+    /* ── Engine status badge ─────────────────────────────────────────────────── */
+    dk-status-bg:                   rgba(166, 227, 161, 0.12);
+    dk-status-fg:                   #a6e3a1;
+    dk-status-border:               rgba(166, 227, 161, 0.28);
+
+    /* ── Running indicator ───────────────────────────────────────────────────── */
+    dk-running-fg:                  #a6e3a1;
+
+    /* ── Search bar ──────────────────────────────────────────────────────────── */
+    dk-search-bg:                   rgba(30, 30, 46, 0.60);
+    dk-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Count badge ──────────────────────────────────────────────────────────── */
+    dk-count-bg:                    rgba(137, 180, 250, 0.10);
+    dk-count-fg:                    #89b4fa;
+    dk-count-border:                rgba(137, 180, 250, 0.25);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    dk-text:                        #cdd6f4;
+    dk-muted:                       rgba(108, 112, 134, 0.65);
+    dk-sep-color:                   rgba(69, 71, 90, 0.55);
+    dk-highlight:                   #89b4fa;
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    dk-listview-bg:                 transparent;
+    dk-list-padding-v:              5px;
+    dk-list-spacing:                1px;
+    dk-list-lines:                  11;
+
+    /* ── Elements ─────────────────────────────────────────────────────────────── */
+    dk-element-radius:              @radius-sm;
+    dk-element-padding-v:           7px;
+    dk-element-padding-h:           16px;
+    dk-element-margin-h:            5px;
+    dk-element-fg:                  #cdd6f4;
+
+    /* ── Running container ────────────────────────────────────────────────────── */
+    dk-running-bg:                  rgba(166, 227, 161, 0.07);
+    dk-running-item-fg:             #a6e3a1;
+    dk-running-alt-bg:              rgba(166, 227, 161, 0.04);
+
+    /* ── Image entry ──────────────────────────────────────────────────────────── */
+    dk-image-bg:                    rgba(116, 199, 236, 0.07);
+    dk-image-fg:                    #74c7ec;
+
+    /* ── Selected ─────────────────────────────────────────────────────────────── */
+    dk-selected-bg:                 rgba(137, 180, 250, 0.88);
+    dk-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate ────────────────────────────────────────────────────────────── */
+    dk-alt-bg:                      rgba(30, 30, 46, 0.25);
+    dk-alt-fg:                      #9399b2;
+
+    /* ── Message ──────────────────────────────────────────────────────────────── */
+    dk-msg-bg:                      rgba(137, 180, 250, 0.08);
+    dk-msg-fg:                      #a6adc8;
+    dk-msg-border:                  rgba(137, 180, 250, 0.25);
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    dk-footer-bg:                   rgba(17, 17, 27, 0.80);
+    dk-footer-border:               rgba(49, 50, 68, 0.70);
+    dk-hint-primary:                #89b4fa;
+    dk-hint-fg:                     rgba(108, 112, 134, 0.65);
+    dk-hint-danger:                 rgba(243, 139, 168, 0.70);
+    dk-hint-accent:                 #94e2d5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.96);
+    border-color:       rgba(137, 180, 250, 0.28);
+    border:             1px;
+    border-radius:      18px;
+}
+
+dk-header {
+    background-color:   rgba(20, 20, 32, 0.80);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+dk-title-icon   { text-color: #89b4fa; }
+dk-title-text   { text-color: #cdd6f4; }
+
+dk-tab-all {
+    background-color:   rgba(137, 180, 250, 0.85);
+    text-color:         #1e1e2e;
+    border-color:       rgba(137, 180, 250, 1.0);
+}
+
+dk-tab-running, dk-tab-images, dk-tab-compose {
+    background-color:   rgba(49, 50, 68, 0.45);
+    text-color:         #a6adc8;
+    border-color:       rgba(69, 71, 90, 0.45);
+}
+
+dk-engine-bar {
+    background-color:   rgba(22, 22, 34, 0.70);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+dk-engine-icon      { text-color: #89b4fa; }
+dk-engine-name      { text-color: #a6adc8; }
+dk-engine-sep-1,
+dk-engine-sep-2     { text-color: rgba(69, 71, 90, 0.55); }
+dk-engine-containers { text-color: rgba(108, 112, 134, 0.60); }
+dk-engine-running   { text-color: #a6e3a1; }
+
+dk-engine-status {
+    background-color:   rgba(166, 227, 161, 0.12);
+    text-color:         #a6e3a1;
+    border-color:       rgba(166, 227, 161, 0.28);
+}
+
+dk-searchbar {
+    background-color:   rgba(30, 30, 46, 0.60);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+dk-search-icon   { text-color: #89b4fa; }
+dk-resource-hint { text-color: rgba(88, 91, 112, 0.45); }
+entry            { text-color: #cdd6f4; placeholder-color: rgba(108,112,134,0.55); font: "JetBrainsMono Nerd Font 12"; }
+
+num-filtered-rows {
+    background-color:   rgba(137, 180, 250, 0.10);
+    text-color:         #89b4fa;
+    border-color:       rgba(137, 180, 250, 0.25);
+}
+
+/* ── Container/image element states ──────────────────────────────────────── */
+element normal.normal { background-color: transparent; text-color: #cdd6f4; }
+element normal.active { /* Running */ background-color: rgba(166,227,161,0.07); text-color: #a6e3a1; }
+element normal.urgent { /* Image */ background-color: rgba(116,199,236,0.07); text-color: #74c7ec; }
+
+element selected.normal {
+    background-color:   rgba(137, 180, 250, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #a6e3a1;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #74c7ec;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.25);
+    text-color:         #9399b2;
+}
+
+element alternate.active {
+    background-color:   rgba(166, 227, 161, 0.04);
+    text-color:         #a6e3a1;
+}
+
+/* Monospace critical for column alignment */
+element-text {
+    font:               "JetBrainsMono Nerd Font 12";
+    highlight:          bold #89b4fa;
+    text-color:         inherit;
+}
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(137, 180, 250, 0.08);
+    border-color:       rgba(137, 180, 250, 0.25);
+}
+textbox { text-color: #a6adc8; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+dk-footer {
+    background-color:   rgba(17, 17, 27, 0.80);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+dk-hint-exec     { text-color: #89b4fa; }
+dk-hint-logs,
+dk-hint-startstop { text-color: rgba(108, 112, 134, 0.65); }
+dk-hint-remove   { text-color: rgba(243, 139, 168, 0.65); }
+dk-hint-lazy     { text-color: #94e2d5; }
+
+dk-hint-sep-1,
+dk-hint-sep-2,
+dk-hint-sep-3,
+dk-hint-sep-4    { text-color: rgba(49, 50, 68, 0.70); }
+
+dk-engine-version { text-color: rgba(69, 71, 90, 0.38); }

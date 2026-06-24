@@ -1,0 +1,487 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Emoji & Symbol Picker                            ║
+   ║                                                                              ║
+   ║  Full Unicode emoji browser with category navigation, skin tone            ║
+   ║  selector, ZWJ sequence support, symbol picker and recently used.          ║
+   ║  Copy or type emoji directly into focused window.                          ║
+   ║                                                                              ║
+   ║  Categories:                                                                 ║
+   ║  😀 Faces   ✋ Hands   ❤️ Hearts   🐶 Animals   🍎 Food                     ║
+   ║  🌍 Travel  ⚽ Sports  🔮 Objects  🔣 Symbols   🏳 Flags                    ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔══════════════════════════════════════════════════════════════════╗       ║
+   ║  ║  😀 Emoji Picker                       [Skin] [Recent] [Sym]    ║       ║
+   ║  ╠══════════════════════════════════════════════════════════════════╣       ║
+   ║  ║  [All] [😀] [✋] [❤️] [🐶] [🍎] [🌍] [⚽] [🔮] [🔣] [🏳]   ║       ║
+   ║  ╠══════════════════════════════════════════════════════════════════╣       ║
+   ║  ║  󰍉 Search emoji by name or code…                   1234/3600   ║       ║
+   ║  ╠══════════════════════════════════════════════════════════════════╣       ║
+   ║  ║  😀 grinning face                            :grinning:  U+1F600 ║       ║
+   ║  ║  😁 beaming face with smiling eyes          :grin:      U+1F601 ║       ║
+   ║  ║  😂 face with tears of joy                  :joy:       U+1F602 ║       ║
+   ║  ║  🤣 rolling on the floor laughing           :rofl:      U+1F923 ║       ║
+   ║  ╠══════════════════════════════════════════════════════════════════╣       ║
+   ║  ║  ↩ copy & type   ^C copy only   ^T type   ^R recent   Esc exit  ║       ║
+   ║  ╚══════════════════════════════════════════════════════════════════╝       ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/emoji/emoji.sh                               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "emoji:~/.config/rofi/menus/emoji/emoji.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-emoji:      "";
+
+    /* Custom bindings */
+    kb-custom-1:        "ctrl+c";      /* Copy only (no type) */
+    kb-custom-2:        "ctrl+t";      /* Type only (no copy) */
+    kb-custom-3:        "ctrl+r";      /* Show recent */
+    kb-custom-4:        "ctrl+s";      /* Toggle skin tone */
+    kb-custom-5:        "ctrl+y";      /* Show symbols */
+    kb-custom-6:        "ctrl+k";      /* Show shortcodes */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — EMOJI BROWSER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @em-width;
+    height:             @em-height;
+    x-offset:           0px;
+    y-offset:           @em-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @em-win-bg;
+    border-color:       @em-win-border;
+    border:             @em-win-border-width;
+    border-radius:      @em-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [em-header, em-category-strip, em-searchbar, listview, em-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + SKIN TONE + RECENT + SYMBOLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+em-header {
+    background-color:   @em-header-bg;
+    border:             0px 0px @em-header-border-width 0px;
+    border-color:       @em-header-border;
+    border-radius:      @em-win-radius @em-win-radius 0px 0px;
+    padding:            11px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [em-title-emoji, em-title-text, em-header-spacer, em-skin-btn, em-recent-btn, em-sym-btn];
+}
+
+em-title-emoji {
+    background-color:   transparent;
+    text-color:         @em-text;
+    font:               "JetBrainsMono Nerd Font 18";
+    str:                "😀";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-title-text {
+    background-color:   transparent;
+    text-color:         @em-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Emoji Picker";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+em-skin-btn {
+    background-color:   @em-btn-bg;
+    text-color:         @em-btn-fg;
+    border:             1px;
+    border-color:       @em-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "✋ Skin";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+em-recent-btn {
+    background-color:   @em-btn-bg;
+    text-color:         @em-btn-fg;
+    border:             1px;
+    border-color:       @em-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "🕐 Recent";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+em-sym-btn {
+    background-color:   @em-sym-bg;
+    text-color:         @em-sym-fg;
+    border:             1px;
+    border-color:       @em-sym-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "✨ Symbols";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  CATEGORY STRIP — EMOJI CATEGORY TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+em-category-strip {
+    background-color:   @em-cat-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @em-cat-border;
+    padding:            5px 14px;
+    spacing:            2px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, em-cat-spacer, em-total-count];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            2px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @em-cat-btn-bg;
+    text-color:         @em-cat-btn-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 10px;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @em-cat-btn-selected-bg;
+    text-color:         @em-cat-btn-selected-fg;
+    border:             1px;
+    border-color:       @em-cat-btn-selected-border;
+}
+
+em-cat-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+em-total-count {
+    background-color:   transparent;
+    text-color:         @em-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "3600 emoji";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR — EMOJI FILTER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+em-searchbar {
+    background-color:   @em-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @em-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [em-search-icon, entry, num-filtered-rows, em-shortcode-hint];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+em-search-icon {
+    background-color:   transparent;
+    text-color:         @em-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @em-text;
+    placeholder-color:  @em-muted;
+    placeholder:        "Search emoji by name, keyword or :shortcode:…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @em-count-bg;
+    text-color:         @em-count-fg;
+    border:             1px;
+    border-color:       @em-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-shortcode-hint {
+    background-color:   transparent;
+    text-color:         @em-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                ":code:";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — EMOJI RESULTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @em-listview-bg;
+    border:             0px;
+    padding:            @em-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @em-list-spacing;
+    columns:            1;
+    lines:              @em-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  EMOJI ENTRY ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @em-element-radius;
+    padding:            @em-element-padding-v @em-element-padding-h;
+    margin:             0px @em-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @em-element-fg;
+}
+
+element normal.active {
+    /* Recently used */
+    background-color:   @em-recent-bg;
+    text-color:         @em-recent-fg;
+}
+
+element normal.urgent {
+    /* Zwj/compound emoji */
+    background-color:   rgba(249, 226, 175, 0.08);
+    text-color:         @yellow;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @em-selected-bg;
+    text-color:         @em-selected-fg;
+}
+
+element selected.active {
+    background-color:   @em-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @yellow;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @em-alt-bg;
+    text-color:         @em-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 13";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @em-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE — UNICODE INFO / SKIN TONE PREVIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @em-preview-bg;
+    border:             1px;
+    border-color:       @em-preview-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @em-preview-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  FOOTER — KEYBOARD SHORTCUT HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+em-footer {
+    background-color:   @em-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @em-footer-border;
+    border-radius:      0px 0px @em-win-radius @em-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [em-hint-type, em-hint-sep-1, em-hint-copy, em-hint-sep-2, em-hint-typeonly, em-hint-sep-3, em-hint-recent, em-footer-spacer, em-unicode-display];
+}
+
+em-hint-type {
+    background-color:   transparent;
+    text-color:         @em-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ copy + type";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-hint-sep-1, em-hint-sep-2, em-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @em-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-hint-copy {
+    background-color:   transparent;
+    text-color:         @em-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^C copy";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-hint-typeonly {
+    background-color:   transparent;
+    text-color:         @em-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^T type";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-hint-recent {
+    background-color:   transparent;
+    text-color:         @em-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R recent";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+em-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+em-unicode-display {
+    background-color:   transparent;
+    text-color:         @em-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "Unicode 15.1  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

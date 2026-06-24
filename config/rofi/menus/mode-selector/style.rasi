@@ -1,0 +1,262 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Mode Selector Style: Dynamic Identity           ║
+   ║                                                                              ║
+   ║  The mode selector shifts its own accent color to match the currently      ║
+   ║  active mode — a self-reflecting UI that demonstrates the mode system.     ║
+   ║                                                                              ║
+   ║  Mode → Accent color:                                                        ║
+   ║  default  → Mauve (#cba4f7)    game    → Green (#a6e3a1)                   ║
+   ║  work     → Blue (#89b4fa)     focus   → Mauve (#cba4f7)                   ║
+   ║  cinema   → Red (#f38ba8)      battery → Yellow (#f9e2af)                  ║
+   ║  stream   → Peach (#fab387)    privacy → Teal (#94e2d5)                    ║
+   ║  present  → Sapphire (#74c7ec) access  → Lavender (#b4befe)               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    ms-width:                       680px;
+    ms-height:                      0px;
+    ms-y-offset:                    -50px;
+
+    /* ── Grid layout ─────────────────────────────────────────────────────────── */
+    ms-columns:                     5;
+    ms-lines:                       2;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    ms-win-bg:                      rgba(17, 17, 27, 0.96);
+    ms-win-border:                  rgba(203, 164, 247, 0.28);
+    ms-win-border-width:            1px;
+    ms-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    ms-header-bg:                   rgba(20, 20, 32, 0.78);
+    ms-header-border:               rgba(49, 50, 68, 0.80);
+    ms-header-border-width:         1px;
+
+    /* ── Primary accent (changes per mode — mauve = default) ──────────────────── */
+    ms-accent:                      #cba4f7;
+
+    /* ── Active mode badge ────────────────────────────────────────────────────── */
+    ms-badge-bg:                    rgba(166, 227, 161, 0.12);
+    ms-badge-fg:                    #a6e3a1;
+    ms-badge-border:                rgba(166, 227, 161, 0.30);
+
+    /* ── Generic buttons ──────────────────────────────────────────────────────── */
+    ms-btn-bg:                      rgba(49, 50, 68, 0.45);
+    ms-btn-fg:                      #a6adc8;
+    ms-btn-border:                  rgba(69, 71, 90, 0.45);
+
+    /* ── Search bar ───────────────────────────────────────────────────────────── */
+    ms-search-bg:                   rgba(30, 30, 46, 0.55);
+    ms-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    ms-text:                        #cdd6f4;
+    ms-muted:                       rgba(108, 112, 134, 0.65);
+    ms-sep-color:                   rgba(69, 71, 90, 0.55);
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    ms-listview-bg:                 transparent;
+    ms-list-padding-v:              16px;
+    ms-list-padding-h:              16px;
+    ms-card-spacing:                10px;
+
+    /* ── Mode cards: default ──────────────────────────────────────────────────── */
+    ms-card-bg:                     rgba(30, 30, 46, 0.55);
+    ms-card-fg:                     #cdd6f4;
+    ms-card-border:                 rgba(49, 50, 68, 0.60);
+    ms-card-border-width:           1px;
+    ms-card-radius:                 14px;
+    ms-card-padding-v:              18px;
+    ms-card-padding-h:              10px;
+
+    /* ── Mode cards: alternate ────────────────────────────────────────────────── */
+    ms-card-alt-bg:                 rgba(24, 24, 37, 0.55);
+    ms-card-alt-fg:                 #9399b2;
+
+    /* ── Mode cards: active (currently applied) ───────────────────────────────── */
+    ms-card-active-bg:              rgba(166, 227, 161, 0.14);
+    ms-card-active-fg:              #a6e3a1;
+    ms-card-active-border:          rgba(166, 227, 161, 0.55);
+    ms-card-active-border-width:    2px;
+
+    /* ── Mode cards: urgent (scheduled/recommended) ───────────────────────────── */
+    ms-card-urgent-bg:              rgba(249, 226, 175, 0.10);
+    ms-card-urgent-fg:              #f9e2af;
+    ms-card-urgent-border:          rgba(249, 226, 175, 0.35);
+
+    /* ── Mode cards: selected (hovered) ──────────────────────────────────────── */
+    ms-card-selected-bg:            rgba(203, 164, 247, 0.85);
+    ms-card-selected-fg:            #1e1e2e;
+    ms-card-selected-border:        rgba(203, 164, 247, 1.0);
+    ms-card-selected-border-width:  2px;
+
+    /* ── Status bar ───────────────────────────────────────────────────────────── */
+    ms-status-bg:                   rgba(22, 22, 34, 0.70);
+    ms-status-border:               rgba(49, 50, 68, 0.75);
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    ms-footer-bg:                   rgba(17, 17, 27, 0.78);
+    ms-footer-border:               rgba(49, 50, 68, 0.70);
+    ms-hint-primary:                #cba4f7;
+    ms-hint-fg:                     rgba(108, 112, 134, 0.65);
+    ms-hint-danger:                 rgba(243, 139, 168, 0.70);
+
+    /* ── Message ──────────────────────────────────────────────────────────────── */
+    ms-msg-bg:                      rgba(203, 164, 247, 0.08);
+    ms-msg-fg:                      #a6adc8;
+    ms-msg-border:                  rgba(203, 164, 247, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.96);
+    border-color:       rgba(203, 164, 247, 0.28);
+    border:             1px;
+    border-radius:      18px;
+}
+
+ms-header {
+    background-color:   rgba(20, 20, 32, 0.78);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+ms-title-icon   { text-color: #cba4f7; }
+ms-title-text   { text-color: #cdd6f4; }
+
+ms-active-badge {
+    background-color:   rgba(166, 227, 161, 0.12);
+    text-color:         #a6e3a1;
+    border-color:       rgba(166, 227, 161, 0.30);
+}
+
+ms-btn-schedule, ms-btn-custom {
+    background-color:   rgba(49, 50, 68, 0.45);
+    text-color:         #a6adc8;
+    border-color:       rgba(69, 71, 90, 0.45);
+}
+
+ms-searchbar {
+    background-color:   rgba(30, 30, 46, 0.55);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+ms-search-icon  { text-color: #cba4f7; }
+ms-search-hint  { text-color: rgba(88, 91, 112, 0.50); }
+entry           { text-color: #cdd6f4; placeholder-color: rgba(108,112,134,0.55); }
+
+/* ── Mode card states ─────────────────────────────────────────────────────── */
+element {
+    background-color:   rgba(30, 30, 46, 0.55);
+    border-color:       rgba(49, 50, 68, 0.60);
+    border:             1px;
+    border-radius:      14px;
+}
+
+element normal.normal {
+    background-color:   rgba(30, 30, 46, 0.55);
+    text-color:         #cdd6f4;
+    border-color:       rgba(49, 50, 68, 0.60);
+}
+
+element normal.active {
+    /* Active mode: green glow card */
+    background-color:   rgba(166, 227, 161, 0.14);
+    text-color:         #a6e3a1;
+    border-color:       rgba(166, 227, 161, 0.55);
+    border:             2px;
+}
+
+element normal.urgent {
+    background-color:   rgba(249, 226, 175, 0.10);
+    text-color:         #f9e2af;
+    border-color:       rgba(249, 226, 175, 0.35);
+}
+
+element selected.normal {
+    background-color:   rgba(203, 164, 247, 0.85);
+    text-color:         #1e1e2e;
+    border-color:       rgba(203, 164, 247, 1.0);
+    border:             2px;
+}
+
+element selected.active {
+    background-color:   #a6e3a1;
+    text-color:         #1e1e2e;
+    border-color:       #a6e3a1;
+    border:             2px;
+}
+
+element selected.urgent {
+    background-color:   #f9e2af;
+    text-color:         #1e1e2e;
+    border-color:       #f9e2af;
+}
+
+element alternate.normal {
+    background-color:   rgba(24, 24, 37, 0.55);
+    text-color:         #9399b2;
+    border-color:       rgba(49, 50, 68, 0.50);
+}
+
+element-text {
+    font:               "JetBrainsMono Nerd Font 11";
+    horizontal-align:   0.5;
+    text-color:         inherit;
+}
+
+/* ── Status bar ───────────────────────────────────────────────────────────── */
+ms-status-bar {
+    background-color:   rgba(22, 22, 34, 0.70);
+    border-color:       rgba(49, 50, 68, 0.75);
+}
+
+ms-status-mode   { text-color: #cba4f7; }
+ms-status-sep-1,
+ms-status-sep-2,
+ms-status-sep-3  { text-color: rgba(69, 71, 90, 0.55); }
+ms-status-blur,
+ms-status-anim,
+ms-status-dnd    { text-color: rgba(108, 112, 134, 0.65); }
+ms-status-uptime { text-color: rgba(88, 91, 112, 0.50); }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+ms-footer {
+    background-color:   rgba(17, 17, 27, 0.78);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+ms-hint-switch   { text-color: #cba4f7; }
+ms-hint-preview,
+ms-hint-schedule { text-color: rgba(108, 112, 134, 0.65); }
+ms-hint-reset    { text-color: rgba(243, 139, 168, 0.65); }
+
+ms-hint-sep-1,
+ms-hint-sep-2,
+ms-hint-sep-3    { text-color: rgba(49, 50, 68, 0.70); }
+
+ms-footer-version { text-color: rgba(69, 71, 90, 0.40); }
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(203, 164, 247, 0.08);
+    border-color:       rgba(203, 164, 247, 0.25);
+}
+textbox { text-color: #a6adc8; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MODE-SPECIFIC ACCENT OVERRIDES
+   Applied dynamically via body class set by mode-selector.sh
+   e.g. window#waybar.game → different accent throughout
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* When game mode is active — override accent to green */
+/* (Applied via: rofi -theme-str "* { ms-accent: #a6e3a1; }" dynamically) */
+
+/* When battery mode is active — yellow */
+/* When work mode — blue */
+/* When cinema mode — red */
+/* These are set by the script passing -theme-str overrides */
