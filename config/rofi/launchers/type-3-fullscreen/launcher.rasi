@@ -1,0 +1,463 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-3: Fullscreen Immersive            ║
+   ║                                                                              ║
+   ║  True fullscreen application launcher. Covers entire display with a       ║
+   ║  centered search field, large icon grid, category strip and background    ║
+   ║  blur overlay. Maximum visual impact — inspired by GNOME Activities,      ║
+   ║  KDE's full-screen search, and iOS Spotlight.                             ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════════╗   ║
+   ║  ║                      [ASH Logo + Title]                              ║   ║
+   ║  ║              ╔══════════════════════════════╗                        ║   ║
+   ║  ║              ║  󰍜  Search applications…     ║                        ║   ║
+   ║  ║              ╚══════════════════════════════╝                        ║   ║
+   ║  ║   [Category] [Category] [Category] [Category] [Category]            ║   ║
+   ║  ║  ─────────────────────────────────────────────────────────          ║   ║
+   ║  ║   ┌──┐ App    ┌──┐ App    ┌──┐ App    ┌──┐ App    ┌──┐ App         ║   ║
+   ║  ║   └──┘        └──┘        └──┘        └──┘        └──┘             ║   ║
+   ║  ║   ┌──┐ App    ┌──┐ App    ┌──┐ App    ┌──┐ App    ┌──┐ App         ║   ║
+   ║  ║   └──┘        └──┘        └──┘        └──┘        └──┘             ║   ║
+   ║  ║                  [Esc] Cancel    [Enter] Launch                     ║   ║
+   ║  ╚═══════════════════════════════════════════════════════════════════════╝   ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    rofi -show drun -config ~/.config/rofi/launchers/type-3-fullscreen/launcher.rasi ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                          "drun,run,window";
+    show-icons:                     true;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 12";
+
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name}";
+    drun-show-actions:              false;
+    drun-url-launcher:              "xdg-open";
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    disable-history:                false;
+    max-history-size:               25;
+
+    click-to-exit:                  true;
+    steal-focus:                    false;
+
+    display-drun:                   " Applications";
+    display-run:                    "󰨡 Run Command";
+    display-window:                 "󰖯 Switch Window";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW — TRUE FULLSCREEN OVERLAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              100%;
+    height:             100%;
+    location:           center;
+    anchor:             center;
+    fullscreen:         true;
+
+    background-color:   @fs-window-bg;
+    border:             0px;
+    border-radius:      0px;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — VERTICALLY CENTERED CONTENT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [spacer-top, hero, inputbar-wrapper, category-strip, divider, listview, footer-strip, spacer-bottom];
+}
+
+/* ── Spacers to vertically center content ────────────────────────────────── */
+spacer-top {
+    background-color:   transparent;
+    expand:             true;
+    height:             80px;
+}
+
+spacer-bottom {
+    background-color:   transparent;
+    expand:             true;
+    height:             40px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HERO — BRAND / TITLE SECTION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+hero {
+    background-color:   transparent;
+    orientation:        vertical;
+    spacing:            6px;
+    padding:            0px 0px 28px 0px;
+    expand:             false;
+    children:           [hero-icon, hero-title, hero-subtitle];
+}
+
+hero-icon {
+    background-color:   transparent;
+    text-color:         @fs-accent;
+    font:               "JetBrainsMono Nerd Font 56";
+    str:                "󰍜";
+    expand:             false;
+    horizontal-align:   0.5;
+    padding:            0px 0px 4px 0px;
+}
+
+hero-title {
+    background-color:   transparent;
+    text-color:         @fs-text;
+    font:               "JetBrainsMono Nerd Font Bold 28";
+    str:                "Application Launcher";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+hero-subtitle {
+    background-color:   transparent;
+    text-color:         @fs-subtext;
+    font:               "JetBrainsMono Nerd Font 13";
+    str:                "Start typing to search your applications";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  INPUT BAR WRAPPER — CENTERED PILL SEARCH BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar-wrapper {
+    background-color:   transparent;
+    orientation:        horizontal;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    children:           [inputbar-left-spacer, inputbar, inputbar-right-spacer];
+}
+
+inputbar-left-spacer, inputbar-right-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+inputbar {
+    background-color:   @fs-inputbar-bg;
+    border-color:       @fs-inputbar-border;
+    border:             @fs-inputbar-border-width;
+    border-radius:      @radius-pill;
+    padding:            14px 24px;
+    spacing:            12px;
+    expand:             false;
+    width:              580px;
+    margin:             0px;
+    children:           [prompt, textbox-prompt-colon, entry, num-filtered-rows, case-indicator];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @fs-accent;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    expand:             false;
+}
+
+textbox-prompt-colon {
+    background-color:   transparent;
+    text-color:         @fs-muted;
+    str:                "·";
+    expand:             false;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @fs-text;
+    placeholder-color:  @fs-muted;
+    placeholder:        "Search applications…";
+    font:               "JetBrainsMono Nerd Font 14";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @fs-muted;
+    font:               "JetBrainsMono Nerd Font 11";
+    expand:             false;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @fs-accent;
+    font:               "JetBrainsMono Nerd Font 11";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  CATEGORY STRIP — MODE SWITCHER AS HORIZONTAL PILL BUTTONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+category-strip {
+    background-color:   transparent;
+    orientation:        horizontal;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    children:           [strip-left, mode-switcher, strip-right];
+}
+
+strip-left, strip-right {
+    background-color:   transparent;
+    expand:             true;
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            6px;
+    padding:            16px 0px 14px 0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @fs-btn-bg;
+    text-color:         @fs-btn-fg;
+    border:             @fs-btn-border-width;
+    border-color:       @fs-btn-border;
+    border-radius:      @radius-pill;
+    padding:            6px 20px;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @fs-btn-selected-bg;
+    text-color:         @fs-btn-selected-fg;
+    border-color:       @fs-btn-selected-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  DIVIDER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+divider {
+    background-color:   @fs-divider;
+    height:             1px;
+    margin:             0px 120px 2px 120px;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  LIST VIEW — WIDE GRID OF APPLICATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            12px 100px;
+    margin:             0px;
+    spacing:            8px;
+    columns:            7;
+    lines:              3;
+    fixed-height:       true;
+    fixed-columns:      true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               horizontal;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  GRID ELEMENTS — LARGE ICON CARDS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   @fs-element-bg;
+    border-color:       @fs-element-border;
+    border:             @fs-element-border-width;
+    border-radius:      @fs-element-radius;
+    padding:            18px 8px 14px 8px;
+    margin:             0px;
+    spacing:            6px;
+    orientation:        vertical;
+    cursor:             pointer;
+}
+
+/* Normal states */
+element normal.normal {
+    background-color:   @fs-element-bg;
+    text-color:         @fs-text;
+    border-color:       @fs-element-border;
+}
+
+element normal.active {
+    background-color:   @fs-element-active-bg;
+    text-color:         @fs-accent;
+    border-color:       @fs-element-active-border;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         @red;
+    border-color:       rgba(243, 139, 168, 0.25);
+}
+
+/* Selected states */
+element selected.normal {
+    background-color:   @fs-element-selected-bg;
+    text-color:         @fs-element-selected-fg;
+    border-color:       @fs-element-selected-border;
+    border:             @fs-element-selected-border-width;
+}
+
+element selected.active {
+    background-color:   @fs-accent;
+    text-color:         @base;
+    border-color:       @fs-accent;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* Alternate row states */
+element alternate.normal {
+    background-color:   @fs-element-alt-bg;
+    text-color:         @fs-alt-text;
+    border-color:       @fs-element-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               54px;
+    padding:            0px;
+    margin:             0px auto;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 10";
+    cursor:             inherit;
+    expand:             true;
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+    highlight:          bold @peach;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  FOOTER STRIP — KEYBOARD HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+footer-strip {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            0px;
+    padding:            16px 0px 0px 0px;
+    expand:             false;
+    children:           [footer-left, footer-hints, footer-right];
+}
+
+footer-left, footer-right {
+    background-color:   transparent;
+    expand:             true;
+}
+
+footer-hints {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            24px;
+    padding:            0px;
+    expand:             false;
+    children:           [hint-escape, hint-enter, hint-tab, hint-mode];
+}
+
+hint-escape {
+    background-color:   transparent;
+    text-color:         @fs-hint;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "Esc  Cancel";
+    expand:             false;
+}
+
+hint-enter {
+    background-color:   transparent;
+    text-color:         @fs-hint;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "↵  Launch";
+    expand:             false;
+}
+
+hint-tab {
+    background-color:   transparent;
+    text-color:         @fs-hint;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "⇥  Navigate";
+    expand:             false;
+}
+
+hint-mode {
+    background-color:   transparent;
+    text-color:         @fs-hint;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "Ctrl+Tab  Mode";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §12  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-md;
+    padding:            8px 20px;
+    margin:             0px auto;
+    width:              400px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+    horizontal-align:   0.5;
+}

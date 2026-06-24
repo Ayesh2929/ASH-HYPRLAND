@@ -1,0 +1,617 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-5: Spotlight (macOS Inspired)      ║
+   ║                                                                              ║
+   ║  The most polished launcher variant. Dual-panel spotlight design:          ║
+   ║  left = search input + categorized results list                            ║
+   ║  right = live preview panel (icon, description, metadata, actions)         ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════╗          ║
+   ║  ║  ┌─────────────────────────────┐  ┌────────────────────────┐ ║          ║
+   ║  ║  │  󰍜 › Search…              │  │                        │ ║          ║
+   ║  ║  ├─────────────────────────────┤  │    ╔═══╗               │ ║          ║
+   ║  ║  │  APPLICATIONS               │  │    ║   ║  App Name     │ ║          ║
+   ║  ║  │  ▶ 󰖟  Firefox               │  │    ╚═══╝               │ ║          ║
+   ║  ║  │   󰅩  VS Code               │  │  Description of app   │ ║          ║
+   ║  ║  │   󰆍  Kitty                  │  │                        │ ║          ║
+   ║  ║  ├─────────────────────────────┤  │  Category: Internet   │ ║          ║
+   ║  ║  │  RECENT                     │  │  Version: 120.0        │ ║          ║
+   ║  ║  │   󱁉  ~/Documents            │  │                        │ ║          ║
+   ║  ║  └─────────────────────────────┘  │  [Open]  [Copy Path]  │ ║          ║
+   ║  ║                                   └────────────────────────┘ ║          ║
+   ║  ╚═══════════════════════════════════════════════════════════════╝          ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    rofi -show drun -config ~/.config/rofi/launchers/type-5-spotlight/launcher.rasi ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                          "drun,run,window,ssh,filebrowser,combi";
+    combi-modes:                    "drun,run";
+    show-icons:                     true;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 12";
+
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name}";
+    drun-show-actions:              true;           /* Show sub-actions */
+    drun-url-launcher:              "xdg-open";
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    normalize-match:                true;
+    tokenize:                       true;
+
+    disable-history:                false;
+    max-history-size:               25;
+
+    click-to-exit:                  true;
+    steal-focus:                    false;
+    auto-select:                    false;
+
+    /* Sidebar mode for preview panel */
+    sidebar-mode:                   true;
+
+    display-drun:                   " Applications";
+    display-run:                    "󰨡 Run";
+    display-window:                 "󰖯 Windows";
+    display-ssh:                    "󰢹 SSH";
+    display-filebrowser:            "󱁉 Files";
+    display-combi:                  "󰍜 All";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @sp-width;
+    height:             @sp-height;
+    x-offset:           0px;
+    y-offset:           @sp-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @sp-win-bg;
+    border-color:       @sp-win-border;
+    border:             @sp-win-border-width;
+    border-radius:      @sp-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — SEARCH BAR ABOVE + SPLIT PANEL BELOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [inputbar, split-panel];
+}
+
+/* ── Split panel: left list + right preview ──────────────────────────────── */
+split-panel {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            0px;
+    padding:            0px;
+    children:           [left-panel, panel-divider, right-panel];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  INPUT BAR — FULL-WIDTH SEARCH
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @sp-inputbar-bg;
+    border-color:       @sp-inputbar-border;
+    border:             0px 0px @sp-inputbar-border-width 0px;
+    border-radius:      @sp-win-radius @sp-win-radius 0px 0px;
+    padding:            16px 20px;
+    spacing:            10px;
+    expand:             false;
+    children:           [prompt, textbox-prompt-colon, entry, num-filtered-rows, case-indicator, search-icon];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @sp-accent;
+    font:               "JetBrainsMono Nerd Font Bold 15";
+    expand:             false;
+}
+
+textbox-prompt-colon {
+    background-color:   transparent;
+    text-color:         @sp-muted;
+    str:                "›";
+    font:               "JetBrainsMono Nerd Font Bold 15";
+    expand:             false;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @sp-text;
+    placeholder-color:  @sp-placeholder;
+    placeholder:        "Search applications, files, commands…";
+    font:               "JetBrainsMono Nerd Font 14";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @sp-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @sp-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+search-icon {
+    background-color:   transparent;
+    text-color:         @sp-muted;
+    font:               "Symbols Nerd Font Mono 14";
+    str:                "󰍉";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  LEFT PANEL — CATEGORY HEADERS + RESULT LIST
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+left-panel {
+    background-color:   @sp-left-bg;
+    border:             0px;
+    border-radius:      0px 0px 0px @sp-win-radius;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    width:              @sp-left-width;
+    orientation:        vertical;
+    children:           [left-header, listview, left-footer];
+}
+
+left-header {
+    background-color:   transparent;
+    border:             0px;
+    padding:            10px 12px 6px 12px;
+    orientation:        vertical;
+    spacing:            0px;
+    expand:             false;
+    children:           [category-label];
+}
+
+category-label {
+    background-color:   transparent;
+    text-color:         @sp-category-fg;
+    font:               "JetBrainsMono Nerd Font Bold 9";
+    str:                "APPLICATIONS";
+    expand:             false;
+    horizontal-align:   0.0;
+    letter-spacing:     0.12em;
+}
+
+left-footer {
+    background-color:   @sp-left-footer-bg;
+    border:             @sp-left-footer-border 0px 0px 0px;
+    border-color:       @sp-left-footer-border-color;
+    border-radius:      0px 0px 0px @sp-win-radius;
+    padding:            6px 12px;
+    orientation:        horizontal;
+    spacing:            0px;
+    expand:             false;
+    children:           [mode-switcher];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST VIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            4px 0px;
+    margin:             0px;
+    spacing:            1px;
+    columns:            1;
+    lines:              @sp-list-lines;
+    fixed-height:       true;
+    dynamic:            false;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @sp-element-radius;
+    padding:            @sp-element-padding-v @sp-element-padding-h;
+    margin:             0px 6px;
+    spacing:            10px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @sp-element-fg;
+}
+
+element normal.active {
+    background-color:   @sp-element-active-bg;
+    text-color:         @sp-accent;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @sp-element-selected-bg;
+    text-color:         @sp-element-selected-fg;
+}
+
+element selected.active {
+    background-color:   @sp-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @sp-element-alt-bg;
+    text-color:         @sp-element-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               @sp-icon-size;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @sp-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  PANEL DIVIDER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+panel-divider {
+    background-color:   @sp-divider;
+    width:              1px;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  RIGHT PREVIEW PANEL
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+right-panel {
+    background-color:   @sp-right-bg;
+    border:             0px;
+    border-radius:      0px 0px @sp-win-radius 0px;
+    padding:            0px;
+    spacing:            0px;
+    expand:             true;
+    orientation:        vertical;
+    children:           [preview-header, preview-spacer-1, preview-icon-row, preview-spacer-2, preview-info, preview-spacer-3, preview-actions, preview-spacer-4];
+}
+
+/* ── Preview header: mode indicator ─────────────────────────────────────── */
+preview-header {
+    background-color:   transparent;
+    orientation:        horizontal;
+    padding:            12px 16px 8px 16px;
+    spacing:            0px;
+    expand:             false;
+    children:           [preview-mode-label];
+}
+
+preview-mode-label {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "QUICK PREVIEW";
+    expand:             false;
+    letter-spacing:     0.10em;
+}
+
+/* ── Large icon area ─────────────────────────────────────────────────────── */
+preview-icon-row {
+    background-color:   transparent;
+    orientation:        vertical;
+    padding:            0px 20px;
+    spacing:            12px;
+    expand:             false;
+    children:           [preview-app-icon, preview-app-name, preview-app-category];
+}
+
+preview-app-icon {
+    background-color:   @sp-preview-icon-bg;
+    border:             1px;
+    border-color:       @sp-preview-icon-border;
+    border-radius:      @radius-xl;
+    padding:            18px;
+    margin:             0px auto;
+    expand:             false;
+    children:           [dummy-icon-placeholder];
+}
+
+dummy-icon-placeholder {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "Symbols Nerd Font Mono 48";
+    str:                "󰍜";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+preview-app-name {
+    background-color:   transparent;
+    text-color:         @sp-preview-title;
+    font:               "JetBrainsMono Nerd Font Bold 15";
+    str:                "Select an app";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+preview-app-category {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Start typing to search";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+/* ── Info section ────────────────────────────────────────────────────────── */
+preview-info {
+    background-color:   @sp-preview-info-bg;
+    border:             1px;
+    border-color:       @sp-preview-info-border;
+    border-radius:      @radius-md;
+    padding:            12px 14px;
+    margin:             0px 16px;
+    orientation:        vertical;
+    spacing:            6px;
+    expand:             false;
+    children:           [preview-info-type, preview-info-exec, preview-info-version];
+}
+
+preview-info-type {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            8px;
+    expand:             false;
+    children:           [info-type-label, info-type-value];
+}
+
+info-type-label {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Type:";
+    expand:             false;
+    width:              60px;
+}
+
+info-type-value {
+    background-color:   transparent;
+    text-color:         @sp-preview-text;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Application";
+    expand:             true;
+}
+
+preview-info-exec {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            8px;
+    expand:             false;
+    children:           [info-exec-label, info-exec-value];
+}
+
+info-exec-label {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Exec:";
+    expand:             false;
+    width:              60px;
+}
+
+info-exec-value {
+    background-color:   transparent;
+    text-color:         @sp-preview-text;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "—";
+    expand:             true;
+}
+
+preview-info-version {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            8px;
+    expand:             false;
+    children:           [info-ver-label, info-ver-value];
+}
+
+info-ver-label {
+    background-color:   transparent;
+    text-color:         @sp-preview-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Source:";
+    expand:             false;
+    width:              60px;
+}
+
+info-ver-value {
+    background-color:   transparent;
+    text-color:         @sp-preview-text;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                ".desktop";
+    expand:             true;
+}
+
+/* ── Action buttons ──────────────────────────────────────────────────────── */
+preview-actions {
+    background-color:   transparent;
+    orientation:        horizontal;
+    spacing:            8px;
+    padding:            0px 16px;
+    expand:             false;
+    children:           [action-open, action-copy, action-info];
+}
+
+action-open {
+    background-color:   @sp-action-primary-bg;
+    text-color:         @sp-action-primary-fg;
+    border:             1px;
+    border-color:       @sp-action-primary-border;
+    border-radius:      @radius-pill;
+    padding:            7px 16px;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "󰏌 Open";
+    expand:             true;
+    horizontal-align:   0.5;
+    cursor:             pointer;
+}
+
+action-copy {
+    background-color:   @sp-action-secondary-bg;
+    text-color:         @sp-action-secondary-fg;
+    border:             1px;
+    border-color:       @sp-action-secondary-border;
+    border-radius:      @radius-pill;
+    padding:            7px 14px;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "󰆏 Copy";
+    expand:             true;
+    horizontal-align:   0.5;
+    cursor:             pointer;
+}
+
+action-info {
+    background-color:   @sp-action-secondary-bg;
+    text-color:         @sp-action-secondary-fg;
+    border:             1px;
+    border-color:       @sp-action-secondary-border;
+    border-radius:      @radius-pill;
+    padding:            7px 12px;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "󰋼";
+    expand:             false;
+    horizontal-align:   0.5;
+    cursor:             pointer;
+}
+
+/* ── Spacers ──────────────────────────────────────────────────────────────── */
+preview-spacer-1, preview-spacer-2,
+preview-spacer-3, preview-spacer-4 {
+    background-color:   transparent;
+    expand:             false;
+    height:             16px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MODE SWITCHER (inside left footer)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             true;
+}
+
+button {
+    background-color:   @sp-btn-bg;
+    text-color:         @sp-btn-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 10px;
+    font:               "JetBrainsMono Nerd Font 10";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @sp-btn-selected-bg;
+    text-color:         @sp-btn-selected-fg;
+    border:             1px;
+    border-color:       @sp-btn-selected-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §12  MESSAGE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

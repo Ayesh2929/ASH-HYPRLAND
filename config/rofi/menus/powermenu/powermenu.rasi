@@ -1,0 +1,350 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Rofi Power Menu                                  ║
+   ║                                                                              ║
+   ║  Full-featured system power management overlay. Six action buttons         ║
+   ║  with confirmation dialog, countdown timer, session state display and      ║
+   ║  ASH integration for snapshot-before-shutdown.                             ║
+   ║                                                                              ║
+   ║  Actions:                                                                    ║
+   ║  ⏻  Shutdown    ↺  Reboot     󰤄  Hibernate                                  ║
+   ║  󰒲  Suspend     󰍃  Logout      Lock Screen                                  ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔════════════════════════════════════════════════════════════╗             ║
+   ║  ║                  ┌───────────┐                             ║             ║
+   ║  ║                  │  User     │  username@hostname          ║             ║
+   ║  ║                  │  Avatar   │  Wed 15 Jan  •  14:32       ║             ║
+   ║  ║                  └───────────┘  Uptime: 3h 24m            ║             ║
+   ║  ║  ────────────────────────────────────────────────────────  ║             ║
+   ║  ║    ⏻        ↺       󰤄        󰒲       󰍃                  ║             ║
+   ║  ║  Shutdown  Reboot  Hibernate  Suspend  Logout  Lock        ║             ║
+   ║  ║  ────────────────────────────────────────────────────────  ║             ║
+   ║  ║  [Cancel]                                                   ║             ║
+   ║  ╚════════════════════════════════════════════════════════════╝             ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    ~/.config/rofi/menus/powermenu/powermenu.sh                             ║
+   ║    rofi -show p -modi "p:~/.config/rofi/menus/powermenu/powermenu.sh"      ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                  "p:~/.config/rofi/menus/powermenu/powermenu.sh";
+    show-icons:             false;
+    font:                   "JetBrainsMono Nerd Font 13";
+    case-sensitive:         false;
+    click-to-exit:          true;
+    steal-focus:            false;
+    fixed-num-lines:        true;
+    display-p:              "";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @pm-width;
+    height:             @pm-height;
+    x-offset:           0px;
+    y-offset:           @pm-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @pm-win-bg;
+    border-color:       @pm-win-border;
+    border:             @pm-win-border-width;
+    border-radius:      @pm-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — VERTICALLY STACKED LAYOUT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [user-section, pm-divider-1, button-section, pm-divider-2, pm-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  USER SECTION — IDENTITY HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+user-section {
+    background-color:   @pm-header-bg;
+    border:             0px;
+    border-radius:      @pm-win-radius @pm-win-radius 0px 0px;
+    padding:            24px 28px 20px 28px;
+    spacing:            16px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [user-avatar, user-info];
+}
+
+user-avatar {
+    background-color:   @pm-avatar-bg;
+    border-color:       @pm-avatar-border;
+    border:             2px;
+    border-radius:      @radius-pill;
+    padding:            14px;
+    expand:             false;
+    children:           [avatar-icon];
+}
+
+avatar-icon {
+    background-color:   transparent;
+    text-color:         @pm-avatar-fg;
+    font:               "Symbols Nerd Font Mono 28";
+    str:                "󰀄";
+    expand:             false;
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+}
+
+user-info {
+    background-color:   transparent;
+    orientation:        vertical;
+    spacing:            4px;
+    expand:             true;
+    vertical-align:     0.5;
+    children:           [user-name, user-host, user-datetime, user-uptime];
+}
+
+user-name {
+    background-color:   transparent;
+    text-color:         @pm-username-fg;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "user";          /* Populated by powermenu.sh */
+    expand:             false;
+}
+
+user-host {
+    background-color:   transparent;
+    text-color:         @pm-hostname-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "hostname";      /* Populated by powermenu.sh */
+    expand:             false;
+}
+
+user-datetime {
+    background-color:   transparent;
+    text-color:         @pm-datetime-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "Loading…";      /* Updated by script */
+    expand:             false;
+}
+
+user-uptime {
+    background-color:   transparent;
+    text-color:         @pm-uptime-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Uptime: …";     /* Updated by script */
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  DIVIDERS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+pm-divider-1 {
+    background-color:   @pm-divider;
+    height:             1px;
+    expand:             false;
+}
+
+pm-divider-2 {
+    background-color:   @pm-divider;
+    height:             1px;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  BUTTON SECTION — ACTION GRID
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+button-section {
+    background-color:   @pm-button-section-bg;
+    border:             0px;
+    padding:            @pm-button-section-padding;
+    spacing:            0px;
+    expand:             false;
+    children:           [listview];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — HORIZONTAL BUTTON GRID
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    margin:             0px;
+    spacing:            @pm-button-spacing;
+    columns:            @pm-columns;
+    lines:              1;
+    fixed-height:       true;
+    fixed-columns:      true;
+    dynamic:            false;
+    layout:             horizontal;
+    flow:               horizontal;
+    cycle:              true;
+    scrollbar:          false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  POWER ACTION ELEMENTS — LARGE ICON BUTTONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   @pm-btn-bg;
+    border-color:       @pm-btn-border;
+    border:             @pm-btn-border-width;
+    border-radius:      @pm-btn-radius;
+    padding:            @pm-btn-padding-v @pm-btn-padding-h;
+    margin:             0px;
+    spacing:            0px;
+    orientation:        vertical;
+    cursor:             pointer;
+}
+
+/* ── Default state ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   @pm-btn-bg;
+    text-color:         @pm-btn-fg;
+    border-color:       @pm-btn-border;
+}
+
+/* ── Hover / selected state ──────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @pm-btn-selected-bg;
+    text-color:         @pm-btn-selected-fg;
+    border-color:       @pm-btn-selected-border;
+    border:             @pm-btn-selected-border-width;
+}
+
+/* ── Alternate (even-numbered) buttons ────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @pm-btn-alt-bg;
+    text-color:         @pm-btn-fg;
+    border-color:       @pm-btn-border;
+}
+
+element alternate.selected {
+    background-color:   @pm-btn-selected-bg;
+    text-color:         @pm-btn-selected-fg;
+    border-color:       @pm-btn-selected-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT TEXT (icon + label stacked)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               @pm-btn-font;
+    cursor:             inherit;
+    expand:             true;
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+    highlight:          none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — CANCEL + HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+pm-footer {
+    background-color:   @pm-footer-bg;
+    border:             0px;
+    border-radius:      0px 0px @pm-win-radius @pm-win-radius;
+    padding:            @pm-footer-padding-v @pm-footer-padding-h;
+    spacing:            12px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cancel-btn, pm-footer-spacer, pm-footer-hint];
+}
+
+cancel-btn {
+    background-color:   @pm-cancel-bg;
+    text-color:         @pm-cancel-fg;
+    border:             @pm-cancel-border-width;
+    border-color:       @pm-cancel-border;
+    border-radius:      @radius-pill;
+    padding:            6px 20px;
+    font:               "JetBrainsMono Nerd Font 12";
+    str:                "󰅖  Cancel";
+    expand:             false;
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+pm-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+pm-footer-hint {
+    background-color:   transparent;
+    text-color:         @pm-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↵ confirm  Esc cancel  ↑↓ navigate";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE (confirmation prompt)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @pm-confirm-bg;
+    border:             @pm-confirm-border-width;
+    border-color:       @pm-confirm-border;
+    border-radius:      @radius-md;
+    padding:            10px 16px;
+    margin:             0px 0px 8px 0px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @pm-confirm-fg;
+    font:               "JetBrainsMono Nerd Font 12";
+    highlight:          none;
+    markup:             true;
+    horizontal-align:   0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §12  INPUTBAR (hidden in power menu — no search needed)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    children:           [];
+}

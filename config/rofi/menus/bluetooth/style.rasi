@@ -1,0 +1,236 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Bluetooth Menu Style: Electric Blue             ║
+   ║                                                                              ║
+   ║  Sapphire/blue accent on deep dark glass. Matches Bluetooth brand color.   ║
+   ║  Connected devices shown in green, trusted in blue, unpaired in grey.      ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Blue (#89b4fa)     — primary accent, Bluetooth brand                    ║
+   ║  • Sapphire (#74c7ec) — secondary accent, info states                      ║
+   ║  • Green (#a6e3a1)    — connected device indicator                         ║
+   ║  • Yellow (#f9e2af)   — pairing state                                      ║
+   ║  • Red (#f38ba8)      — error / power-off                                  ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  TOKEN SYSTEM
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    bt-width:                       640px;
+    bt-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    bt-win-bg:                      rgba(17, 17, 27, 0.94);
+    bt-win-border:                  rgba(137, 180, 250, 0.30);
+    bt-win-border-width:            1px;
+    bt-win-radius:                  18px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    bt-header-bg:                   rgba(20, 20, 32, 0.72);
+    bt-header-border:               rgba(49, 50, 68, 0.80);
+    bt-header-border-width:         1px;
+
+    /* ── Primary accent (Bluetooth blue) ─────────────────────────────────────── */
+    bt-accent:                      #89b4fa;
+
+    /* ── Power button ────────────────────────────────────────────────────────── */
+    bt-power-bg:                    rgba(243, 139, 168, 0.12);
+    bt-power-fg:                    #f38ba8;
+    bt-power-border:                rgba(243, 139, 168, 0.30);
+
+    /* ── Scan button ─────────────────────────────────────────────────────────── */
+    bt-scan-bg:                     rgba(137, 180, 250, 0.12);
+    bt-scan-fg:                     #89b4fa;
+    bt-scan-border:                 rgba(137, 180, 250, 0.30);
+
+    /* ── Controller info bar ─────────────────────────────────────────────────── */
+    bt-controller-bg:               rgba(22, 22, 34, 0.60);
+    bt-controller-border:           rgba(49, 50, 68, 0.80);
+    bt-controller-fg:               #a6adc8;
+
+    /* ── Status badge ────────────────────────────────────────────────────────── */
+    bt-status-bg:                   rgba(166, 227, 161, 0.12);
+    bt-status-fg:                   #a6e3a1;
+    bt-status-border:               rgba(166, 227, 161, 0.30);
+
+    /* ── Search bar ──────────────────────────────────────────────────────────── */
+    bt-search-bg:                   rgba(30, 30, 46, 0.55);
+    bt-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    bt-text:                        #cdd6f4;
+    bt-muted:                       rgba(108, 112, 134, 0.65);
+    bt-sep-color:                   rgba(69, 71, 90, 0.60);
+    bt-highlight:                   #74c7ec;
+
+    /* ── Count badge ──────────────────────────────────────────────────────────── */
+    bt-count-bg:                    rgba(137, 180, 250, 0.12);
+    bt-count-fg:                    #89b4fa;
+    bt-count-border:                rgba(137, 180, 250, 0.28);
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    bt-listview-bg:                 transparent;
+    bt-list-padding-v:              6px;
+    bt-list-spacing:                1px;
+    bt-list-lines:                  10;
+
+    /* ── Elements ────────────────────────────────────────────────────────────── */
+    bt-element-radius:              @radius-sm;
+    bt-element-padding-v:           8px;
+    bt-element-padding-h:           16px;
+    bt-element-margin-h:            6px;
+    bt-element-fg:                  #cdd6f4;
+
+    /* ── Connected device indicator ──────────────────────────────────────────── */
+    bt-connected-bg:                rgba(166, 227, 161, 0.08);
+    bt-connected-fg:                #a6e3a1;
+
+    /* ── Selected ────────────────────────────────────────────────────────────── */
+    bt-selected-bg:                 rgba(137, 180, 250, 0.88);
+    bt-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate rows ──────────────────────────────────────────────────────── */
+    bt-alt-bg:                      rgba(30, 30, 46, 0.25);
+    bt-alt-fg:                      #9399b2;
+
+    /* ── Footer ──────────────────────────────────────────────────────────────── */
+    bt-footer-bg:                   rgba(17, 17, 27, 0.75);
+    bt-footer-border:               rgba(49, 50, 68, 0.70);
+    bt-hint-fg:                     rgba(88, 91, 112, 0.65);
+
+    /* ── Message ─────────────────────────────────────────────────────────────── */
+    bt-msg-bg:                      rgba(137, 180, 250, 0.08);
+    bt-msg-fg:                      #a6adc8;
+    bt-msg-border:                  rgba(137, 180, 250, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.94);
+    border-color:       rgba(137, 180, 250, 0.30);
+    border:             1px;
+    border-radius:      18px;
+}
+
+bt-header {
+    background-color:   rgba(20, 20, 32, 0.72);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+bt-title-icon   { text-color: #89b4fa; }
+bt-title-text   { text-color: #cdd6f4; }
+bt-signal-bars  { text-color: rgba(137, 180, 250, 0.60); }
+
+bt-power-btn {
+    background-color:   rgba(243, 139, 168, 0.12);
+    text-color:         #f38ba8;
+    border-color:       rgba(243, 139, 168, 0.30);
+}
+
+bt-scan-btn {
+    background-color:   rgba(137, 180, 250, 0.12);
+    text-color:         #89b4fa;
+    border-color:       rgba(137, 180, 250, 0.30);
+}
+
+bt-controller-bar {
+    background-color:   rgba(22, 22, 34, 0.60);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+bt-ctrl-icon     { text-color: #89b4fa; }
+bt-ctrl-name     { text-color: #a6adc8; }
+bt-ctrl-sep,
+bt-ctrl-sep-2    { text-color: rgba(69, 71, 90, 0.55); }
+bt-ctrl-addr     { text-color: rgba(108, 112, 134, 0.60); }
+bt-ctrl-discoverable { text-color: rgba(108, 112, 134, 0.55); }
+
+bt-ctrl-status {
+    background-color:   rgba(166, 227, 161, 0.12);
+    text-color:         #a6e3a1;
+    border-color:       rgba(166, 227, 161, 0.30);
+}
+
+bt-searchbar {
+    background-color:   rgba(30, 30, 46, 0.55);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+bt-search-icon  { text-color: #89b4fa; }
+entry           { text-color: #cdd6f4; placeholder-color: rgba(108, 112, 134, 0.55); }
+
+num-filtered-rows {
+    background-color:   rgba(137, 180, 250, 0.12);
+    text-color:         #89b4fa;
+    border-color:       rgba(137, 180, 250, 0.28);
+}
+
+/* ── Device elements ──────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         #cdd6f4;
+}
+
+element normal.active {
+    /* Connected device highlight */
+    background-color:   rgba(166, 227, 161, 0.08);
+    text-color:         #a6e3a1;
+}
+
+element normal.urgent {
+    /* Pairing state */
+    background-color:   rgba(249, 226, 175, 0.08);
+    text-color:         #f9e2af;
+}
+
+element selected.normal {
+    background-color:   rgba(137, 180, 250, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #89b4fa;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #f9e2af;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.25);
+    text-color:         #9399b2;
+}
+
+element-text { highlight: bold #74c7ec; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+bt-footer {
+    background-color:   rgba(17, 17, 27, 0.75);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+bt-hint-connect,
+bt-hint-pair,
+bt-hint-scan,
+bt-hint-disc   { text-color: rgba(88, 91, 112, 0.65); }
+
+bt-hint-sep-1,
+bt-hint-sep-2,
+bt-hint-sep-3  { text-color: rgba(49, 50, 68, 0.70); }
+
+bt-footer-version { text-color: rgba(69, 71, 90, 0.40); }
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(137, 180, 250, 0.08);
+    border-color:       rgba(137, 180, 250, 0.25);
+}
+
+textbox { text-color: #a6adc8; }
