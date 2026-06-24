@@ -1,0 +1,408 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Rofi Global Theme Foundation                     ║
+   ║                                                                              ║
+   ║  Base element definitions used across ALL Rofi launchers and menus.        ║
+   ║  Provides the glassmorphism window, inputbar, prompt, listview,            ║
+   ║  element states and message bar using the token system from                 ║
+   ║  colors.rasi and fonts.rasi.                                               ║
+   ║                                                                              ║
+   ║  Import this file in launcher/menu .rasi files after colors + fonts:       ║
+   ║    @import "../../global.rasi"                                              ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "colors.rasi"
+@import "fonts.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  ROOT WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    width:              680px;
+    x-offset:           0px;
+    y-offset:           0px;
+
+    /* ── Positioning ─────────────────────────────────────────────────────────── */
+    location:           center;
+    anchor:             center;
+
+    /* ── Appearance ──────────────────────────────────────────────────────────── */
+    background-color:   @base-85;
+    border-color:       @window-border;
+    border:             @border-base;
+    border-radius:      @radius-lg;
+
+    /* ── Shadow ──────────────────────────────────────────────────────────────── */
+    /* Rofi uses box-shadow via its own rendering, not CSS */
+
+    /* ── Padding ─────────────────────────────────────────────────────────────── */
+    padding:            0px;
+
+    /* ── Cursor ──────────────────────────────────────────────────────────────── */
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  MAIN BOX (contains all sections)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            0px;
+    padding:            0px;
+    children:           [inputbar, message, listview, mode-switcher];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  INPUT BAR (prompt + textbox + case-indicator + num-rows + num-filtered)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @surface0-60;
+    border-color:       @surface1-50;
+    border:             0px 0px @border-thin 0px;   /* bottom border only */
+    border-radius:      @radius-lg @radius-lg 0px 0px;
+    padding:            12px 16px;
+    spacing:            8px;
+    children:           [prompt, textbox-prompt-colon, entry, num-filtered-rows, case-indicator];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  PROMPT (mode name: "Apps", "Run", etc.)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+prompt {
+    background-color:   transparent;
+    text-color:         @accent;
+    font:               @font-prompt;
+    enabled:            true;
+    padding:            0px 4px 0px 0px;
+}
+
+/* ── Colon separator between prompt and entry ────────────────────────────── */
+textbox-prompt-colon {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    str:                "▸";        /* Custom separator icon */
+    padding:            0px 4px 0px 0px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  TEXT ENTRY (search / type-to-filter)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+entry {
+    background-color:   transparent;
+    text-color:         @entry-fg;
+    placeholder-color:  @placeholder-fg;
+    placeholder:        "Search…";
+    font:               @font-input;
+    cursor:             text;
+    padding:            0px;
+    expand:             true;
+    blink:              true;
+    cursor-color:       @accent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  NUM-FILTERED-ROWS & CASE-INDICATOR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               @font-mono-sm;
+    expand:             false;
+}
+
+num-rows {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               @font-mono-sm;
+    expand:             false;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @case-fg;
+    font:               @font-mono-sm;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW (the results container)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            8px 0px;
+    margin:             0px;
+    spacing:            2px;
+    columns:            1;
+    lines:              8;              /* Visible rows */
+    fixed-height:       true;
+    fixed-columns:      true;
+    dynamic:            false;
+    layout:             vertical;
+    reverse:            false;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    scroll-method:      0;
+}
+
+/* ── Scrollbar (disabled by default) ────────────────────────────────────── */
+scrollbar {
+    background-color:   @scrollbar-bg;
+    handle-color:       @handle-bg;
+    border:             0px;
+    border-color:       transparent;
+    handle-width:       4px;
+    width:              6px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  LIST ELEMENT (individual result items)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @radius-md;
+    padding:            8px 12px;
+    margin:             0px 6px 0px 6px;
+    spacing:            12px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal (default) state ──────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @normal-fg;
+}
+
+element normal.urgent {
+    background-color:   @urgent-bg;
+    text-color:         @urgent-fg;
+}
+
+element normal.active {
+    background-color:   @active-bg;
+    text-color:         @active-fg;
+}
+
+/* ── Selected state ───────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @selected-bg;
+    text-color:         @selected-fg;
+}
+
+element selected.urgent {
+    background-color:   @selected-urgent-bg;
+    text-color:         @selected-urgent-fg;
+}
+
+element selected.active {
+    background-color:   @selected-active-bg;
+    text-color:         @selected-active-fg;
+}
+
+/* ── Alternate rows (zebra striping) ─────────────────────────────────────── */
+element alternate.normal {
+    background-color:   transparent;
+    text-color:         @alternate-fg;
+}
+
+element alternate.urgent {
+    background-color:   @urgent-bg;
+    text-color:         @urgent-fg;
+}
+
+element alternate.active {
+    background-color:   @active-bg;
+    text-color:         @active-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT ICON
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               @icon-size-md;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  ELEMENT TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               @font-mono;
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;        /* Vertically center text */
+    highlight:          bold @match-fg;    /* Bold + accent color for matches */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MODE SWITCHER (sidebar with mode buttons)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mode-switcher {
+    background-color:   @surface0-40;
+    border:             @border-thin 0px 0px 0px;
+    border-color:       @surface1-50;
+    border-radius:      0px 0px @radius-lg @radius-lg;
+    padding:            6px 8px;
+    spacing:            4px;
+    orientation:        horizontal;
+    expand:             true;
+}
+
+button {
+    background-color:   transparent;
+    text-color:         @mode-button-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            4px 10px;
+    font:               @font-mono-sm;
+    cursor:             pointer;
+}
+
+button.selected {
+    background-color:   @mode-button-active-bg;
+    text-color:         @mode-button-active-fg;
+    border:             @border-thin;
+    border-color:       @accent-15;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §12  MESSAGE BAR (error / info messages)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            8px 12px;
+    margin:             0px 6px;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @message-fg;
+    font:               @font-message;
+    padding:            0px;
+    border:             0px;
+    highlight:          none;
+    markup:             true;
+}
+
+error-message {
+    background-color:   rgba(243, 139, 168, 0.12);
+    border:             @border-thin;
+    border-color:       @red;
+    border-radius:      @radius-sm;
+    padding:            8px 12px;
+    margin:             6px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §13  OVERLAY (background dim when rofi is open)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+overlay {
+    background-color:   rgba(0, 0, 0, 0.60);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §14  HEADER (used in some custom menus)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Not a built-in Rofi element — used in custom scripts */
+header-box {
+    background-color:   @surface0-60;
+    padding:            16px 20px;
+    spacing:            8px;
+    border-radius:      @radius-lg @radius-lg 0px 0px;
+    orientation:        vertical;
+    expand:             false;
+    children:           [header-title, header-subtitle];
+}
+
+header-title {
+    background-color:   transparent;
+    text-color:         @text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+}
+
+header-subtitle {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               @font-mono-sm;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §15  DUMMY ELEMENT (spacer / filler)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+dummy {
+    background-color:   transparent;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §16  SPECIAL STYLES — Shared across multiple launchers
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Divider line ─────────────────────────────────────────────────────────── */
+separatorbox {
+    background-color:   @surface1-50;
+    border:             0px;
+    height:             1px;
+    margin:             0px 8px;
+}
+
+/* ── Icon-only compact button (for grid menus) ───────────────────────────── */
+element.icon-only {
+    padding:            12px;
+    spacing:            0px;
+    orientation:        vertical;
+    border-radius:      @radius-md;
+}
+
+/* ── With subtitle layout (for menus with description) ──────────────────── */
+element.with-desc {
+    children:           [element-icon, element-desc-box];
+}
+
+element-desc-box {
+    orientation:        vertical;
+    spacing:            2px;
+}
+
+element-desc {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               @font-mono-sm;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §17  ACCESSIBILITY & MOTION PREFERENCES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Rofi doesn't have built-in prefers-reduced-motion support.
+   For accessibility, the configuration {} sets animation = false:
+   rofi -no-plugins -animation false ...
+   
+   High contrast override (applied via: rofi -theme high-contrast):
+   element selected.normal { background-color: #ffffff; text-color: #000000; }
+   element-text { highlight: bold; }
+*/

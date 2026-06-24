@@ -1,0 +1,335 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Screenshot Menu                                   ║
+   ║                                                                              ║
+   ║  Full-featured screenshot management overlay with capture modes,           ║
+   ║  annotation tools, OCR, upload, timer and recording options.               ║
+   ║                                                                              ║
+   ║  Capture Modes:                                                              ║
+   ║  󰹑  Fullscreen      󱂬  Region/Area      󰖯  Active Window                    ║
+   ║  󰍹  Monitor        󱨜  Scrolling        ⏱  Timed (3s/5s/10s)               ║
+   ║                                                                              ║
+   ║  Post-Capture Actions:                                                       ║
+   ║  ✏  Annotate       󰆏  Copy            󰏉  Save to file                      ║
+   ║  󰒔  Upload          OCR Text         󰗠  Share                               ║
+   ║                                                                              ║
+   ║  Extras:                                                                     ║
+   ║   Record Screen   󰴒  Record GIF      󰉋  History                            ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═════════════════════════════════════════════════════════╗                ║
+   ║  ║  󰹑 Screenshot                              ASH v5.0    ║                ║
+   ║  ╠═════════════════════════════════════════════════════════╣                ║
+   ║  ║  CAPTURE                                                ║                ║
+   ║  ║  [Fullscreen] [Region] [Window] [Monitor] [Timer] ...  ║                ║
+   ║  ╠═════════════════════════════════════════════════════════╣                ║
+   ║  ║  ACTIONS                                                ║                ║
+   ║  ║  [Annotate] [Copy] [Save] [Upload] [OCR] [Share]       ║                ║
+   ║  ╠═════════════════════════════════════════════════════════╣                ║
+   ║  ║  RECORDING                                              ║                ║
+   ║  ║  [Record Screen] [Record GIF] [History]                ║                ║
+   ║  ╠═════════════════════════════════════════════════════════╣                ║
+   ║  ║  ↩ Execute    Esc Cancel    Last: ~/Pictures/...        ║                ║
+   ║  ╚═════════════════════════════════════════════════════════╝                ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/screenshot/screenshot.sh                      ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "sc:~/.config/rofi/menus/screenshot/screenshot.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    true;
+    display-sc:         "";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — CENTERED COMPACT OVERLAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @sc-width;
+    height:             0px;
+    x-offset:           0px;
+    y-offset:           @sc-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @sc-win-bg;
+    border-color:       @sc-win-border;
+    border:             @sc-win-border-width;
+    border-radius:      @sc-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [sc-header, sc-inputbar, listview, sc-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sc-header {
+    background-color:   @sc-header-bg;
+    border:             0px 0px @sc-header-border-width 0px;
+    border-color:       @sc-header-border;
+    border-radius:      @sc-win-radius @sc-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [sc-title-icon, sc-title-text, sc-header-spacer, sc-version-badge];
+}
+
+sc-title-icon {
+    background-color:   transparent;
+    text-color:         @sc-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "󰹑";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sc-title-text {
+    background-color:   transparent;
+    text-color:         @sc-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Screenshot";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sc-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+sc-version-badge {
+    background-color:   @sc-badge-bg;
+    text-color:         @sc-badge-fg;
+    border:             1px;
+    border-color:       @sc-badge-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "ASH v5.0";
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  SEARCH / FILTER INPUT (optional — hidden in screenshot menu)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sc-inputbar {
+    background-color:   @sc-inputbar-bg;
+    border:             0px 0px @sc-inputbar-border-width 0px;
+    border-color:       @sc-inputbar-border;
+    padding:            8px 16px;
+    spacing:            8px;
+    expand:             false;
+    children:           [prompt, entry, num-filtered-rows];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [prompt, entry];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @sc-accent;
+    font:               "JetBrainsMono Nerd Font 11";
+    expand:             false;
+    str:                "󰍉";
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @sc-text;
+    placeholder-color:  @sc-muted;
+    placeholder:        "Filter options…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @sc-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST VIEW — SCREENSHOT OPTIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @sc-listview-bg;
+    border:             0px;
+    padding:            @sc-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @sc-list-spacing;
+    columns:            1;
+    lines:              @sc-list-lines;
+    fixed-height:       false;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @sc-element-radius;
+    padding:            @sc-element-padding-v @sc-element-padding-h;
+    margin:             0px @sc-element-margin-h;
+    spacing:            12px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @sc-element-fg;
+}
+
+element normal.active {
+    background-color:   @sc-active-bg;
+    text-color:         @sc-accent;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @sc-selected-bg;
+    text-color:         @sc-selected-fg;
+}
+
+element selected.active {
+    background-color:   @sc-accent;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @sc-alt-bg;
+    text-color:         @sc-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               20px;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @sc-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  FOOTER — HINTS + LAST SCREENSHOT PATH
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sc-footer {
+    background-color:   @sc-footer-bg;
+    border:             @sc-footer-border-width 0px 0px 0px;
+    border-color:       @sc-footer-border;
+    border-radius:      0px 0px @sc-win-radius @sc-win-radius;
+    padding:            8px 16px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [sc-footer-actions, sc-footer-spacer, sc-footer-path];
+}
+
+sc-footer-actions {
+    background-color:   transparent;
+    text-color:         @sc-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ capture  ⌥↩ + annotate  Esc cancel";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sc-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+sc-footer-path {
+    background-color:   transparent;
+    text-color:         @sc-path-fg;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "󰉔 ~/Pictures/Screenshots/";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE (status / error)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @sc-msg-bg;
+    border:             1px;
+    border-color:       @sc-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 14px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @sc-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

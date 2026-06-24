@@ -1,0 +1,320 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-6: DMMenu / Inline Bar             ║
+   ║                                                                              ║
+   ║  Horizontal top-of-screen strip launcher. Ultra-compact single-line UI.   ║
+   ║  Input on the left, results scroll horizontally to the right.             ║
+   ║  Zero screen real estate. Keyboard-native. Power-user focused.            ║
+   ║                                                                              ║
+   ║  Layout (top of screen, full width):                                         ║
+   ║  ╔════════════════════════════════════════════════════════════════════════╗  ║
+   ║  ║  󰍜 › Search…  │  Firefox  │ VS Code  │ Kitty  │ Thunar  │ Spotify   ║  ║
+   ║  ╚════════════════════════════════════════════════════════════════════════╝  ║
+   ║                                                                              ║
+   ║  Alternatively with results below (dropdown mode):                          ║
+   ║  ╔════════════════════════════════════════════════════════════════════════╗  ║
+   ║  ║  󰍜 › Type to search applications…                               12   ║  ║
+   ║  ╠════════════════════════════════════════════════════════════════════════╣  ║
+   ║  ║  ▶ Firefox   ║  VS Code  ║  Kitty  ║  Thunar  ║  Spotify  ║  Discord ║  ║
+   ║  ╚════════════════════════════════════════════════════════════════════════╝  ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    # Pure dmenu strip (horizontal items)                                    ║
+   ║    rofi -show drun -config ~/.config/rofi/launchers/type-6-dmenu/launcher.rasi ║
+   ║                                                                              ║
+   ║    # Classic dmenu replacement for scripts                                  ║
+   ║    echo -e "opt1\nopt2\nopt3" | rofi -dmenu -config PATH/launcher.rasi     ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                          "drun,run,window,combi";
+    combi-modes:                    "drun,run";
+    show-icons:                     @dm-show-icons;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 12";
+
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name}";
+    drun-show-actions:              false;
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    normalize-match:                true;
+    tokenize:                       true;
+
+    /* DMMenu specific */
+    disable-history:                false;
+    max-history-size:               15;
+
+    click-to-exit:                  true;
+    steal-focus:                    false;
+    auto-select:                    false;
+
+    /* Horizontal scroll with arrow keys */
+    scroll-method:                  0;
+
+    display-drun:                   " Apps";
+    display-run:                    "󰨡 Run";
+    display-window:                 "󰖯 Win";
+    display-combi:                  "󰍜 All";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — FULL-WIDTH TOP STRIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @dm-width;
+    height:             0px;            /* Auto-height based on content */
+    x-offset:           @dm-x-offset;
+    y-offset:           @dm-y-offset;
+    location:           @dm-location;   /* 1 = top-left, 2 = top-center */
+    anchor:             north;
+    fullscreen:         false;
+
+    background-color:   @dm-win-bg;
+    border-color:       @dm-win-border;
+    border:             @dm-win-border-width;
+    border-radius:      @dm-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — SINGLE ROW OR STACKED
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           @dm-mainbox-children;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  INPUT BAR — COMPACT INLINE ENTRY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @dm-inputbar-bg;
+    border-color:       @dm-inputbar-border;
+    border:             @dm-inputbar-border-sides;
+    border-radius:      @dm-inputbar-radius;
+    padding:            @dm-inputbar-padding-v @dm-inputbar-padding-h;
+    spacing:            8px;
+    expand:             @dm-inputbar-expand;
+    orientation:        horizontal;
+    children:           [prompt, textbox-prompt-sep, entry, num-filtered-rows, case-indicator];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @dm-accent;
+    font:               "JetBrainsMono Nerd Font Bold 12";
+    expand:             false;
+    padding:            0px;
+}
+
+textbox-prompt-sep {
+    background-color:   transparent;
+    text-color:         @dm-sep-color;
+    str:                @dm-sep-char;
+    expand:             false;
+    font:               "JetBrainsMono Nerd Font 12";
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @dm-text;
+    placeholder-color:  @dm-placeholder;
+    placeholder:        @dm-placeholder-text;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @dm-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @dm-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  LIST VIEW — HORIZONTAL SCROLLING RESULTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @dm-listview-bg;
+    border-color:       @dm-listview-border;
+    border:             @dm-listview-border-sides;
+    border-radius:      @dm-listview-radius;
+    padding:            @dm-list-padding-v @dm-list-padding-h;
+    margin:             0px;
+    spacing:            @dm-list-spacing;
+    columns:            @dm-list-columns;
+    lines:              @dm-list-lines;
+    fixed-height:       false;
+    fixed-columns:      true;
+    dynamic:            true;
+    layout:             @dm-list-layout;
+    flow:               @dm-list-flow;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST ELEMENTS — COMPACT PILLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @dm-element-radius;
+    padding:            @dm-element-padding-v @dm-element-padding-h;
+    margin:             0px;
+    spacing:            6px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @dm-element-fg;
+}
+
+element normal.active {
+    background-color:   @dm-active-bg;
+    text-color:         @dm-accent;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.12);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @dm-selected-bg;
+    text-color:         @dm-selected-fg;
+}
+
+element selected.active {
+    background-color:   @dm-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @dm-alt-bg;
+    text-color:         @dm-alt-fg;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         @dm-accent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  ELEMENT ICON & TEXT — TINY FOR BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               @dm-icon-size;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             @dm-text-expand;
+    vertical-align:     0.5;
+    horizontal-align:   @dm-text-align;
+    highlight:          bold @dm-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  MODE SWITCHER — COMPACT TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mode-switcher {
+    background-color:   @dm-mode-bg;
+    border-color:       @dm-mode-border;
+    border:             @dm-mode-border-sides;
+    border-radius:      @dm-mode-radius;
+    padding:            @dm-mode-padding-v @dm-mode-padding-h;
+    spacing:            2px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   transparent;
+    text-color:         @dm-btn-fg;
+    border:             0px;
+    border-radius:      4px;
+    padding:            2px 10px;
+    font:               "JetBrainsMono Nerd Font 10";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @dm-btn-selected-bg;
+    text-color:         @dm-btn-selected-fg;
+    border:             1px;
+    border-color:       @dm-btn-selected-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @dm-win-bg;
+    border:             0px;
+    padding:            4px 12px;
+    margin:             0px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

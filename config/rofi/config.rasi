@@ -1,0 +1,196 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Rofi Master Configuration                        ║
+   ║                                                                              ║
+   ║  Global Rofi settings applying to all modes: drun, window, run,           ║
+   ║  ssh, file-browser, custom scripts and all menu overlays.                  ║
+   ║                                                                              ║
+   ║  Architecture:                                                               ║
+   ║  config.rasi → colors.rasi + fonts.rasi + global.rasi                     ║
+   ║             → launchers/TYPE/launcher.rasi                                 ║
+   ║             → menus/NAME/NAME.rasi                                         ║
+   ║                                                                              ║
+   ║  Reload:     pkill -x rofi  (auto-reloads on next invocation)             ║
+   ║  Test:       rofi -show drun -config ~/.config/rofi/config.rasi           ║
+   ║  Theme:      rofi-theme-selector (interactive picker)                     ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CORE CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+
+    /* ── Display mode ────────────────────────────────────────────────────────── */
+    /* modes:   comma-separated list of active modes                             */
+    /* "drun"   = desktop application launcher                                   */
+    /* "run"    = command runner                                                  */
+    /* "window" = window switcher                                                 */
+    /* "ssh"    = SSH host completion                                             */
+    /* "filebrowser" = file system browser                                       */
+    /* "combi"  = combined multiple modes                                         */
+    modes:                          "drun,run,window,ssh,filebrowser,combi";
+    combi-modes:                    "drun,run";
+
+    /* ── Appearance ──────────────────────────────────────────────────────────── */
+    font:                           "JetBrainsMono Nerd Font 12";
+    location:                       0;            /* 0=center, 1-8=compass directions */
+    yoffset:                        0;
+    xoffset:                        0;
+    fullscreen:                     false;
+    sidebar-mode:                   false;
+    show-icons:                     true;
+
+    /* ── Icon theming ────────────────────────────────────────────────────────── */
+    icon-theme:                     "Papirus-Dark";
+    text-icon-padding:              6;
+
+    /* ── Matching & search ───────────────────────────────────────────────────── */
+    case-sensitive:                 false;
+    sort:                           false;
+    sorting-method:                 "fzf";         /* fzf | normal | levenshtein */
+    matching:                       "fuzzy";        /* fuzzy | normal | regex | glob */
+    tokenize:                       true;
+    normalize-match:                true;
+
+    /* ── Scrollbar ───────────────────────────────────────────────────────────── */
+    scrollbar:                      false;
+    scroll-method:                  0;             /* 0=per-page 1=continuous */
+
+    /* ── Behavior ────────────────────────────────────────────────────────────── */
+    click-to-exit:                  true;          /* Click outside = close */
+    steal-focus:                    false;
+    auto-select:                    false;          /* Auto-select when 1 match */
+    parse-hosts:                    true;           /* SSH: parse /etc/hosts */
+    parse-known-hosts:              true;           /* SSH: parse ~/.ssh/known_hosts */
+
+    /* ── Terminal (for "run in terminal" action) ─────────────────────────────── */
+    terminal:                       "kitty";
+
+    /* ── SSH ─────────────────────────────────────────────────────────────────── */
+    ssh-client:                     "ssh";
+    ssh-command:                    "{terminal} -e {ssh-client} {host} [-p {port}]";
+
+    /* ── Run mode ────────────────────────────────────────────────────────────── */
+    run-command:                    "{cmd}";
+    run-list-command:               "";
+    run-shell-command:              "{terminal} -e {cmd}";
+
+    /* ── Window mode ─────────────────────────────────────────────────────────── */
+    window-command:                 "wmctrl -i -R {window}";
+    window-format:                  "{w} · {c} · {t:0}";  /* workspace · class · title */
+    window-thumbnail:               false;
+
+    /* ── File browser ────────────────────────────────────────────────────────── */
+    filebrowser-command:            "xdg-open";
+    filebrowser-directory:          "~";
+    filebrowser-show-hidden:        false;
+    filebrowser-sort-by:            "name";        /* name | mtime | atime */
+
+    /* ── DMeNU compatibility ─────────────────────────────────────────────────── */
+    drun-use-desktop-cache:         false;
+    drun-reload-desktop-cache:      false;
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
+    drun-show-actions:              false;
+    drun-url-launcher:              "xdg-open";
+
+    /* ── History & cache ─────────────────────────────────────────────────────── */
+    disable-history:                false;
+    max-history-size:               25;
+    cache-dir:                      "~/.cache/rofi";
+
+    /* ── Timeout ─────────────────────────────────────────────────────────────── */
+    timeout {
+        delay:                      10;            /* seconds before action */
+        action:                     "kb-cancel";   /* action after delay */
+    }
+
+    /* ── Keyboard bindings ───────────────────────────────────────────────────── */
+    kb-primary-paste:               "Control+V,Shift+Insert";
+    kb-secondary-paste:             "Control+v";
+    kb-clear-line:                  "Control+w";
+    kb-move-front:                  "Control+a";
+    kb-move-end:                    "Control+e";
+    kb-move-word-back:              "Alt+b,Control+Left";
+    kb-move-word-forward:           "Alt+f,Control+Right";
+    kb-move-char-back:              "Left,Control+b";
+    kb-move-char-forward:           "Right,Control+f";
+    kb-remove-word-back:            "Control+Alt+h,Control+BackSpace";
+    kb-remove-word-forward:         "Control+Alt+d";
+    kb-remove-char-forward:         "Delete,Control+d";
+    kb-remove-char-back:            "BackSpace,Shift+BackSpace,Control+h";
+    kb-remove-to-eol:               "Control+k";
+    kb-remove-to-sol:               "Control+u";
+    kb-accept-entry:                "Control+j,Control+m,Return,KP_Enter";
+    kb-accept-custom:               "Control+Return";
+    kb-accept-custom-alt:           "Control+Shift+Return";
+    kb-accept-alt:                  "Shift+Return";
+    kb-delete-entry:                "Shift+Delete";
+    kb-mode-next:                   "Shift+Right,Control+Tab";
+    kb-mode-previous:               "Shift+Left,Control+Shift+Tab";
+    kb-mode-complete:               "Control+l";
+    kb-row-left:                    "Control+Page_Up";
+    kb-row-right:                   "Control+Page_Down";
+    kb-row-up:                      "Up,Control+p";
+    kb-row-down:                    "Down,Control+n";
+    kb-row-tab:                     "";
+    kb-element-next:                "Tab";
+    kb-element-prev:                "Shift+Tab";
+    kb-page-prev:                   "Page_Up";
+    kb-page-next:                   "Page_Down";
+    kb-row-first:                   "Home,KP_Home";
+    kb-row-last:                    "End,KP_End";
+    kb-row-select:                  "Control+space";
+    kb-screenshot:                  "Alt+S";
+    kb-ellipsize:                   "Alt+period";
+    kb-toggle-case-sensitivity:     "grave,dead_grave";
+    kb-toggle-sort:                 "Alt+grave";
+    kb-cancel:                      "Escape,Control+g,Control+bracketleft";
+    kb-custom-1:                    "Alt+1";
+    kb-custom-2:                    "Alt+2";
+    kb-custom-3:                    "Alt+3";
+    kb-custom-4:                    "Alt+4";
+    kb-custom-5:                    "Alt+5";
+    kb-custom-6:                    "Alt+6";
+    kb-custom-7:                    "Alt+7";
+    kb-custom-8:                    "Alt+8";
+    kb-custom-9:                    "Alt+9";
+    kb-custom-10:                   "Alt+0";
+    kb-custom-11:                   "Alt+exclam";
+    kb-custom-12:                   "Alt+at";
+    kb-custom-13:                   "Alt+numbersign";
+    kb-custom-14:                   "Alt+dollar";
+    kb-custom-15:                   "Alt+percent";
+    kb-custom-16:                   "Alt+dead_circumflex";
+    kb-custom-17:                   "Alt+ampersand";
+    kb-custom-18:                   "Alt+asterisk";
+    kb-custom-19:                   "Alt+parenleft";
+    kb-select-1:                    "Super+1";
+    kb-select-2:                    "Super+2";
+    kb-select-3:                    "Super+3";
+    kb-select-4:                    "Super+4";
+    kb-select-5:                    "Super+5";
+    kb-select-6:                    "Super+6";
+    kb-select-7:                    "Super+7";
+    kb-select-8:                    "Super+8";
+    kb-select-9:                    "Super+9";
+    kb-select-10:                   "Super+0";
+
+    /* ── Mouse bindings ──────────────────────────────────────────────────────── */
+    ml-row-left:                    "ScrollLeft";
+    ml-row-right:                   "ScrollRight";
+    ml-row-up:                      "ScrollUp";
+    ml-row-down:                    "ScrollDown";
+
+    me-select-entry:                "MousePrimary";
+    me-accept-entry:                "MouseDPrimary";
+    me-accept-custom:               "Control+MouseDPrimary";
+
+    /* ── Display strings ─────────────────────────────────────────────────────── */
+    display-drun:                   " Apps";
+    display-run:                    "󰨡 Run";
+    display-window:                 "󰖯 Windows";
+    display-ssh:                    "󰢹 SSH";
+    display-filebrowser:            "󱁉 Files";
+    display-combi:                  "󰍜 Search";
+}

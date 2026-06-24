@@ -1,0 +1,243 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Default                            ║
+   ║                                                                              ║
+   ║  The reference visual theme. Catppuccin Mocha palette with subtle          ║
+   ║  frosted-glass bar, smooth module transitions, natural shadows and         ║
+   ║  state-reactive color coding. The baseline from which all others derive.   ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── Activate: ash bar theme default ─────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  BAR CONTAINER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+   window#waybar {
+    background-color:   rgba(24, 24, 37, 0.88);
+    border:             1px solid rgba(203, 164, 247, 0.18);
+    border-radius:      12px;
+    color:              #cdd6f4;
+    font-family:        "JetBrainsMono Nerd Font", monospace;
+    font-size:          12px;
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.45),
+        0 1px 4px  rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: all 250ms cubic-bezier(0.16, 1.0, 0.30, 1.0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  TOOLTIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tooltip {
+    background:     #181825;
+    border:         1px solid #45475a;
+    border-radius:  8px;
+    color:          #cdd6f4;
+    padding:        8px 12px;
+    box-shadow:     0 8px 32px rgba(0, 0, 0, 0.50);
+}
+
+tooltip label {
+    color:          #cdd6f4;
+    font-size:      11px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MODULE PILLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* All modules share this base style */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-weather-compact,
+#custom-media, #custom-spotify, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-gpu-intel, #custom-sysload,
+#custom-ash-mode, #custom-ash-theme, #custom-ash-snapshot,
+#custom-docker, #custom-vpn, #custom-pomodoro,
+#custom-recording, #custom-screenshare, #custom-updates-pacman,
+#custom-updates-flatpak, #custom-github-notif, #custom-tasks,
+#custom-uptime, #custom-notifications, #custom-power,
+#custom-do-not-disturb, #custom-separator-dot,
+#power-profiles-daemon, #gamemode, #keyboard-state,
+#wireplumber, #mpd {
+    background:         rgba(49, 50, 68, 0.55);
+    border-radius:      8px;
+    color:              #cdd6f4;
+    margin:             2px 1px;
+    padding:            4px 10px;
+    transition:
+        background      150ms cubic-bezier(0.16, 1.0, 0.30, 1.0),
+        color           150ms cubic-bezier(0.16, 1.0, 0.30, 1.0),
+        box-shadow      150ms cubic-bezier(0.16, 1.0, 0.30, 1.0),
+        transform       150ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+/* ── Hover: lift with accent glow ─────────────────────────────────────────── */
+#clock:hover,
+#pulseaudio:hover,
+#network:hover,
+#bluetooth:hover,
+#battery:hover,
+#backlight:hover,
+#cpu:hover,
+#memory:hover,
+#custom-media:hover,
+#custom-ash-mode:hover,
+#custom-power:hover,
+#custom-notifications:hover {
+    background:         rgba(69, 71, 90, 0.75);
+    box-shadow:         0 0 12px rgba(203, 164, 247, 0.25);
+    transform:          translateY(-1px);
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  WORKSPACE BUTTONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#workspaces {
+    padding:        2px 4px;
+    gap:            2px;
+    background:     rgba(49, 50, 68, 0.55);
+    border-radius:  8px;
+    margin:         2px 1px;
+}
+
+#workspaces button {
+    padding:        4px 8px;
+    border-radius:  6px;
+    color:          #6c7086;
+    background:     transparent;
+    min-width:      28px;
+    font-size:      14px;
+    transition:
+        all 150ms cubic-bezier(0.16, 1.0, 0.30, 1.0),
+        transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+#workspaces button.active {
+    background:     #cba4f7;
+    color:          #1e1e2e;
+    font-weight:    700;
+    min-width:      36px;
+    transform:      translateY(-1px);
+    box-shadow:
+        0 0 16px rgba(203, 164, 247, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+#workspaces button.occupied {
+    background:     rgba(49, 50, 68, 0.80);
+    color:          #bac2de;
+}
+
+#workspaces button.urgent {
+    background:     #f38ba8;
+    color:          #1e1e2e;
+    animation:      urgent-pulse 1.5s ease-in-out infinite;
+}
+
+#workspaces button:hover {
+    background:     rgba(203, 164, 247, 0.18);
+    color:          #cdd6f4;
+    transform:      translateY(-2px);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  MODULE COLOR CODING
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#clock                          { color: #cdd6f4; font-weight: 500; }
+#clock:hover                    { color: #cba4f7; }
+
+#pulseaudio                     { color: #89dceb; }
+#pulseaudio.muted               { color: #6c7086; }
+#pulseaudio.bluetooth           { color: #89b4fa; }
+
+#network                        { color: #a6e3a1; }
+#network.disconnected           { color: #f38ba8; animation: blink 2s ease infinite; }
+#network.ethernet               { color: #74c7ec; }
+
+#bluetooth                      { color: #89b4fa; }
+#bluetooth.off, #bluetooth.disabled { color: #6c7086; }
+#bluetooth.connected            { color: #74c7ec; }
+
+#battery                        { color: #a6e3a1; }
+#battery.charging, #battery.plugged { color: #94e2d5; animation: charge 2s ease infinite; }
+#battery.warning                { color: #f9e2af; }
+#battery.critical               { color: #fab387; animation: blink 1s ease infinite; }
+#battery.danger                 { color: #f38ba8; background: rgba(243,139,168,0.12); animation: blink 0.8s ease infinite; }
+
+#backlight                      { color: #f9e2af; }
+#cpu                            { color: #fab387; }
+#cpu.warning                    { color: #f9e2af; }
+#cpu.critical                   { color: #f38ba8; animation: blink 1s ease infinite; }
+#memory                         { color: #cba4f7; }
+#memory.warning                 { color: #f9e2af; }
+#memory.critical                { color: #f38ba8; animation: blink 1s ease infinite; }
+#temperature                    { color: #89dceb; }
+#temperature.critical           { color: #f38ba8; animation: blink 1s ease infinite; }
+#disk                           { color: #b4befe; }
+#disk.warning                   { color: #f9e2af; }
+#disk.critical                  { color: #f38ba8; }
+
+#custom-gpu-amd,
+#custom-gpu-nvidia,
+#custom-gpu-intel               { color: #b4befe; }
+#custom-sysload                 { color: #94e2d5; }
+#custom-media                   { color: #94e2d5; }
+#custom-media.Playing           { color: #a6e3a1; }
+#custom-media.Paused            { color: #6c7086; }
+#custom-recording               { color: #f38ba8; }
+#custom-screenshare             { color: #fab387; }
+#custom-vpn.connected           { color: #a6e3a1; }
+#custom-vpn.disconnected        { color: #6c7086; }
+#custom-docker.running          { color: #89b4fa; }
+#custom-pomodoro.work           { color: #f38ba8; }
+#custom-pomodoro.short-break    { color: #a6e3a1; }
+#custom-pomodoro.long-break     { color: #89dceb; }
+#custom-ash-mode.game           { color: #a6e3a1; }
+#custom-ash-mode.work           { color: #89b4fa; }
+#custom-ash-mode.focus          { color: #cba4f7; }
+#custom-ash-mode.battery        { color: #f9e2af; }
+#custom-ash-mode.stream         { color: #fab387; }
+#custom-ash-mode.privacy        { color: #94e2d5; }
+#custom-notifications           { color: #89dceb; }
+#custom-power                   { color: #f38ba8; background: rgba(243,139,168,0.08); padding: 4px 10px; }
+#custom-power:hover             { background: rgba(243,139,168,0.20); box-shadow: 0 0 16px rgba(243,139,168,0.40); transform: translateY(-1px) scale(1.05); }
+
+#idle-inhibitor.activated       { color: #fab387; background: rgba(250,179,135,0.15); }
+#idle-inhibitor.deactivated     { color: #6c7086; }
+#submap                         { background: #cba4f7; color: #1e1e2e; font-weight: 700; animation: submap-glow 1.5s ease infinite; }
+#custom-separator-dot           { color: #45475a; background: transparent; font-size: 8px; padding: 0; margin: 0; }
+
+#tray                           { background: transparent; }
+#tray > .passive                { -gtk-icon-effect: dim; }
+#tray > .needs-attention        { -gtk-icon-effect: highlight; background: #f38ba8; border-radius: 4px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  KEYFRAMES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.40; }
+}
+
+@keyframes charge {
+    0%, 100% { color: #94e2d5; }
+    50%       { color: #a6e3a1; text-shadow: 0 0 12px rgba(166,227,161,0.60); }
+}
+
+@keyframes urgent-pulse {
+    0%, 100% { background: #f38ba8; transform: scale(1.0); }
+    50%       { background: #eba0ac; transform: scale(1.08); box-shadow: 0 0 18px rgba(243,139,168,0.70); }
+}
+
+@keyframes submap-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(203,164,247,0.40); }
+    50%       { box-shadow: 0 0 20px rgba(203,164,247,0.80); }
+}

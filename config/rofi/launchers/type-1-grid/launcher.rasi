@@ -1,0 +1,328 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-1: Grid                            ║
+   ║                                                                              ║
+   ║  Full-screen icon grid launcher. Applications displayed in a NxN grid      ║
+   ║  with large icons, app name and optional category label.                   ║
+   ║  Inspired by: GNOME Activities, macOS Launchpad, KDE Kicker grid.         ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    rofi -show drun -config ~/.config/rofi/launchers/type-1-grid/launcher.rasi ║
+   ║    With style: source the style-N.rasi or set @import at bottom            ║
+   ║                                                                              ║
+   ║  Styles:                                                                     ║
+   ║    style-1 — Glassmorphism frosted grid (default)                          ║
+   ║    style-2 — Dark card grid                                                 ║
+   ║    style-3 — Minimal flat grid                                              ║
+   ║    style-4 — Neon accent grid                                               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Apply active style (change number to switch styles) ─────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION OVERRIDES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                          "drun";
+    show-icons:                     true;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 11";
+
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name}";
+    drun-show-actions:              false;
+    drun-url-launcher:              "xdg-open";
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    disable-history:                false;
+    max-history-size:               25;
+
+    click-to-exit:                  true;
+    steal-focus:                    false;
+
+    /* Display strings */
+    display-drun:                   " Applications";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW — FULL SCREEN OVERLAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              100%;
+    height:             100%;
+    x-offset:           0px;
+    y-offset:           0px;
+    location:           center;
+    anchor:             center;
+    fullscreen:         true;
+
+    /* Colors set by active style */
+    background-color:   @window-bg;
+    border-color:       transparent;
+    border:             0px;
+    border-radius:      0px;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — CENTERED CONTENT CONTAINER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            60px 80px 40px 80px;
+    spacing:            20px;
+    orientation:        vertical;
+    children:           [header, inputbar, listview];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + SEARCH PROMPT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+header {
+    background-color:   transparent;
+    orientation:        vertical;
+    spacing:            4px;
+    padding:            0px 0px 12px 0px;
+    expand:             false;
+    children:           [header-title, header-subtitle];
+}
+
+header-title {
+    background-color:   transparent;
+    text-color:         @text;
+    font:               "JetBrainsMono Nerd Font Bold 24";
+    str:                " Applications";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+header-subtitle {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               "JetBrainsMono Nerd Font 12";
+    str:                "Type to search · Tab to navigate · Enter to launch";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  INPUT BAR — CENTERED SEARCH BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @inputbar-bg;
+    border-color:       @inputbar-border;
+    border:             @border-base;
+    border-radius:      @radius-pill;
+    padding:            12px 20px;
+    spacing:            10px;
+    expand:             false;
+    margin:             0px auto;
+    width:              500px;
+    children:           [prompt, entry, num-filtered-rows];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @accent;
+    font:               "JetBrainsMono Nerd Font Bold 13";
+    expand:             false;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @entry-fg;
+    placeholder-color:  @placeholder-fg;
+    placeholder:        "Search applications…";
+    font:               "JetBrainsMono Nerd Font 13";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST VIEW — GRID LAYOUT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            16px 0px;
+    margin:             0px;
+    spacing:            12px;
+    columns:            6;
+    lines:              4;
+    fixed-height:       false;
+    fixed-columns:      true;
+    dynamic:            true;
+    layout:             vertical;
+    reverse:            false;
+    flow:               horizontal;
+    cycle:              true;
+    scrollbar:          false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  GRID ELEMENT (icon card)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   @element-bg;
+    border-color:       @element-border;
+    border:             @element-border-width;
+    border-radius:      @element-radius;
+    padding:            16px 8px 12px 8px;
+    margin:             0px;
+    spacing:            6px;
+    orientation:        vertical;
+    cursor:             pointer;
+
+    /* Transition on all properties */
+    transition:         background-color 150ms ease;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   @element-bg;
+    text-color:         @normal-fg;
+    border-color:       @element-border;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.12);
+    text-color:         @red;
+    border-color:       rgba(243, 139, 168, 0.30);
+}
+
+element normal.active {
+    background-color:   @active-bg;
+    text-color:         @active-fg;
+    border-color:       @accent-15;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @element-selected-bg;
+    text-color:         @selected-fg;
+    border-color:       @element-selected-border;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+    border-color:       @red;
+}
+
+element selected.active {
+    background-color:   @accent;
+    text-color:         @base;
+    border-color:       @accent;
+}
+
+/* ── Alternate row states ─────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @element-alt-bg;
+    text-color:         @alternate-fg;
+    border-color:       @element-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  ELEMENT ICON — LARGE CENTERED ICON
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               52px;
+    padding:            0px;
+    margin:             0px auto;   /* Center icon horizontally */
+    cursor:             inherit;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT TEXT — APP NAME BELOW ICON
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 10";
+    cursor:             inherit;
+    expand:             true;
+    horizontal-align:   0.5;        /* Center text */
+    vertical-align:     0.5;
+    highlight:          bold @match-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-sm;
+    padding:            8px 16px;
+    margin:             0px auto;
+    width:              400px;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @message-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MODE SWITCHER — BOTTOM STRIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            8px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    margin:             0px auto;
+}
+
+button {
+    background-color:   rgba(49, 50, 68, 0.50);
+    text-color:         @subtext0;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-pill;
+    padding:            5px 16px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @accent;
+    text-color:         @base;
+    border-color:       @accent;
+}

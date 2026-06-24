@@ -1,0 +1,385 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-2: Sidebar                         ║
+   ║                                                                              ║
+   ║  Split-panel launcher: left sidebar with category/mode selector +          ║
+   ║  right panel with application list. Classic macOS Spotlight / Alfred       ║
+   ║  feel with Hyprland glassmorphism treatment.                               ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ┌─────────────────────────────────────────────────────────────────┐        ║
+   ║  │  ┌──────────────┐  ┌───────────────────────────────────────┐   │        ║
+   ║  │  │  SIDEBAR     │  │  RESULTS PANEL                        │   │        ║
+   ║  │  │              │  │  [Search input]                        │   │        ║
+   ║  │  │  Mode 1      │  │  ─────────────────────────────────    │   │        ║
+   ║  │  │  Mode 2      │  │   Icon  App Name        Category      │   │        ║
+   ║  │  │  Mode 3      │  │  ▶ Icon  App Name        Category     │   │        ║
+   ║  │  │  ──────      │  │   Icon  App Name        Category      │   │        ║
+   ║  │  │  Stats       │  │   Icon  App Name        Category      │   │        ║
+   ║  │  └──────────────┘  └───────────────────────────────────────┘   │        ║
+   ║  └─────────────────────────────────────────────────────────────────┘        ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    rofi -show drun -config ~/.config/rofi/launchers/type-2-sidebar/launcher.rasi ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:                          "drun,run,window,ssh";
+    show-icons:                     true;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 12";
+
+    drun-match-fields:              "name,generic,exec,categories,keywords";
+    drun-display-format:            "{name}";
+    drun-show-actions:              false;
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    disable-history:                false;
+    max-history-size:               25;
+
+    click-to-exit:                  true;
+    steal-focus:                    false;
+
+    display-drun:                   " Apps";
+    display-run:                    "󰨡 Run";
+    display-window:                 "󰖯 Windows";
+    display-ssh:                    "󰢹 SSH";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW — CENTERED DIALOG
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              780px;
+    height:             520px;
+    x-offset:           0px;
+    y-offset:           0px;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @win-bg;
+    border-color:       @win-border;
+    border:             @win-border-width;
+    border-radius:      @win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — HORIZONTAL SPLIT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        horizontal;
+    children:           [sidebar-column, content-column];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  LEFT SIDEBAR — MODE SELECTOR + BRANDING
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sidebar-column {
+    background-color:   @sidebar-bg;
+    border-color:       @sidebar-border;
+    border:             0px @sidebar-border-width 0px 0px;
+    border-radius:      @win-radius 0px 0px @win-radius;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    width:              200px;
+    orientation:        vertical;
+    children:           [sidebar-header, mode-switcher, sidebar-footer];
+}
+
+/* ── Sidebar header: logo / branding ─────────────────────────────────────── */
+sidebar-header {
+    background-color:   transparent;
+    orientation:        vertical;
+    padding:            24px 16px 16px 16px;
+    spacing:            4px;
+    expand:             false;
+    children:           [sidebar-logo, sidebar-title, sidebar-sep];
+}
+
+sidebar-logo {
+    background-color:   transparent;
+    text-color:         @accent;
+    font:               "JetBrainsMono Nerd Font Bold 32";
+    str:                "󰍜";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+sidebar-title {
+    background-color:   transparent;
+    text-color:         @text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Launcher";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+sidebar-sep {
+    background-color:   @surface1;
+    height:             1px;
+    margin:             12px 8px 0px 8px;
+    expand:             false;
+}
+
+/* ── Mode switcher: vertical list of modes ───────────────────────────────── */
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            2px;
+    padding:            12px 8px;
+    orientation:        vertical;
+    expand:             true;
+}
+
+button {
+    background-color:   @sidebar-btn-bg;
+    text-color:         @sidebar-btn-fg;
+    border:             0px;
+    border-radius:      @radius-md;
+    padding:            10px 14px;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             pointer;
+    horizontal-align:   0.0;    /* Left-align text */
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @sidebar-btn-selected-bg;
+    text-color:         @sidebar-btn-selected-fg;
+    border:             @border-thin;
+    border-color:       @sidebar-btn-selected-border;
+}
+
+/* ── Sidebar footer: stats / hint ────────────────────────────────────────── */
+sidebar-footer {
+    background-color:   transparent;
+    orientation:        vertical;
+    padding:            12px 12px 20px 12px;
+    spacing:            4px;
+    expand:             false;
+    children:           [sidebar-hint, num-filtered-rows];
+}
+
+sidebar-hint {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "↑↓ Navigate · Enter: Launch";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+num-filtered-rows {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+    horizontal-align:   0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  RIGHT CONTENT COLUMN — SEARCH + RESULTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+content-column {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    expand:             true;
+    children:           [inputbar, listview, message];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  INPUT BAR — TOP OF RESULTS PANEL
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @inputbar-bg;
+    border-color:       @inputbar-border;
+    border:             0px 0px @border-thin 0px;
+    border-radius:      0px @win-radius 0px 0px;
+    padding:            14px 18px;
+    spacing:            10px;
+    expand:             false;
+    children:           [prompt, textbox-prompt-colon, entry, case-indicator];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @accent;
+    font:               "JetBrainsMono Nerd Font Bold 13";
+    expand:             false;
+}
+
+textbox-prompt-colon {
+    background-color:   transparent;
+    text-color:         @overlay0;
+    str:                " › ";
+    expand:             false;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @text;
+    placeholder-color:  @overlay0;
+    placeholder:        "Type to search…";
+    font:               "JetBrainsMono Nerd Font 13";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — APPLICATION RESULTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    padding:            8px 0px;
+    margin:             0px;
+    spacing:            1px;
+    columns:            1;
+    lines:              9;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  LIST ELEMENTS — HORIZONTAL ICON + TEXT ROWS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            7px 16px;
+    margin:             0px 6px;
+    spacing:            12px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* Normal states */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @text;
+}
+
+element normal.active {
+    background-color:   @active-bg;
+    text-color:         @active-fg;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         @red;
+}
+
+/* Selected states */
+element selected.normal {
+    background-color:   @element-selected-bg;
+    text-color:         @element-selected-fg;
+}
+
+element selected.active {
+    background-color:   @accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* Alternate rows */
+element alternate.normal {
+    background-color:   @element-alt-bg;
+    text-color:         @subtext0;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         @accent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               28px;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @peach;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-sm;
+    padding:            6px 14px;
+    margin:             0px 8px 6px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               "JetBrainsMono Nerd Font 10";
+    highlight:          none;
+    markup:             true;
+}

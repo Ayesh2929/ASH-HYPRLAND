@@ -1,0 +1,194 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Neumorphism                        ║
+   ║                                                                              ║
+   ║  Soft 3D inset/raised surfaces created purely via dual box-shadow.        ║
+   ║  Convex raised modules that depress on hover. Warm neutral palette.       ║
+   ║  Best viewed on high-brightness displays (light base color).              ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── Neumorphism works on a mid-tone base ─────────────────────────────────── */
+:root {
+    --neu-base:         #1e1e2e;
+    --neu-light:        #2d2d42;
+    --neu-dark:         #131320;
+    --neu-text:         #cdd6f4;
+    --neu-accent:       #cba4f7;
+    --neu-radius:       16px;
+
+    /* Classic neumorphic shadow pair */
+    --neu-shadow-out:
+        6px 6px 16px var(--neu-dark),
+        -6px -6px 16px var(--neu-light);
+    --neu-shadow-in:
+        inset 4px 4px 10px var(--neu-dark),
+        inset -4px -4px 10px var(--neu-light);
+    --neu-shadow-flat:
+        2px 2px 6px var(--neu-dark),
+        -2px -2px 6px var(--neu-light);
+}
+
+window#waybar {
+    background-color:   var(--neu-base);
+    border:             none;
+    border-radius:      var(--neu-radius);
+    color:              var(--neu-text);
+    font-family:        "JetBrainsMono Nerd Font", monospace;
+    font-size:          12px;
+    box-shadow:         var(--neu-shadow-out);
+    margin:             6px 12px;
+    transition:         all 300ms cubic-bezier(0.16, 1.0, 0.30, 1.0);
+}
+
+tooltip {
+    background:     var(--neu-base);
+    border:         none;
+    border-radius:  12px;
+    color:          var(--neu-text);
+    padding:        10px 14px;
+    box-shadow:     var(--neu-shadow-out);
+}
+
+/* ── All modules: convex raised button look ─────────────────────────────── */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-media, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-ash-mode, #custom-ash-theme,
+#custom-power, #custom-notifications, #custom-separator-dot,
+#custom-vpn, #custom-docker, #custom-pomodoro,
+#custom-updates-pacman, #wireplumber, #mpd {
+    background:         var(--neu-base);
+    border:             none;
+    border-radius:      10px;
+    color:              var(--neu-text);
+    margin:             3px 2px;
+    padding:            5px 12px;
+    box-shadow:         var(--neu-shadow-flat);
+    transition:
+        box-shadow  200ms cubic-bezier(0.16, 1.0, 0.30, 1.0),
+        transform   200ms cubic-bezier(0.34, 1.56, 0.64, 1.0),
+        color       150ms ease;
+}
+
+/* Active state: pressed/inset */
+#clock:hover, #pulseaudio:hover, #network:hover,
+#battery:hover, #cpu:hover, #memory:hover,
+#custom-media:hover, #custom-power:hover {
+    box-shadow:     var(--neu-shadow-in);
+    transform:      translateY(1px);
+    cursor:         pointer;
+}
+
+/* ── Workspace buttons ──────────────────────────────────────────────────── */
+#workspaces {
+    padding:    3px 6px;
+    gap:        4px;
+    box-shadow: var(--neu-shadow-in);    /* Container appears inset/recessed */
+    border-radius: 14px;
+}
+
+#workspaces button {
+    padding:        5px 9px;
+    border-radius:  8px;
+    color:          #6c7086;
+    background:     var(--neu-base);
+    min-width:      30px;
+    font-size:      14px;
+    box-shadow:     var(--neu-shadow-flat);
+    border:         none;
+    transition:     all 200ms cubic-bezier(0.16, 1.0, 0.30, 1.0);
+}
+
+/* Active = raised and glowing */
+#workspaces button.active {
+    box-shadow:
+        var(--neu-shadow-out),
+        0 0 16px rgba(203, 164, 247, 0.30);
+    color:          var(--neu-accent);
+    font-weight:    700;
+    min-width:      38px;
+    transform:      translateY(-2px);
+}
+
+/* Occupied = flat, slightly brighter */
+#workspaces button.occupied {
+    color:          #bac2de;
+    box-shadow:     var(--neu-shadow-flat);
+}
+
+/* Urgent = inset with warning color */
+#workspaces button.urgent {
+    color:          #f38ba8;
+    box-shadow:     var(--neu-shadow-in), 0 0 12px rgba(243,139,168,0.40);
+    animation:      neu-urgent 1.5s ease infinite;
+}
+
+/* Hover = raise */
+#workspaces button:hover {
+    box-shadow:     var(--neu-shadow-out);
+    color:          var(--neu-text);
+    transform:      translateY(-1px);
+}
+
+/* ── Color assignments (neumorphic uses soft, less saturated tones) ─────── */
+#clock              { color: var(--neu-text); letter-spacing: 0.03em; }
+#pulseaudio         { color: #89dceb; }
+#pulseaudio.muted   { color: #585b70; }
+#network            { color: #a6e3a1; }
+#network.disconnected { color: #f38ba8; }
+#battery            { color: #a6e3a1; }
+#battery.warning    { color: #f9e2af; }
+#battery.critical   { color: #f38ba8; animation: blink 1s ease infinite; }
+#battery.charging   { color: #94e2d5; }
+#cpu                { color: #fab387; }
+#memory             { color: #cba4f7; }
+#backlight          { color: #f9e2af; }
+#bluetooth          { color: #89b4fa; }
+
+#custom-power {
+    color:          #f38ba8;
+    /* Power button: deeply inset */
+    box-shadow:     var(--neu-shadow-in), 0 0 8px rgba(243,139,168,0.15);
+}
+
+#custom-power:hover {
+    box-shadow:     var(--neu-shadow-out), 0 0 20px rgba(243,139,168,0.35);
+    transform:      translateY(-2px);
+}
+
+#submap {
+    color:          #1e1e2e;
+    background:     var(--neu-accent);
+    box-shadow:
+        4px 4px 10px rgba(0, 0, 0, 0.40),
+        -2px -2px 6px rgba(203, 164, 247, 0.30);
+    font-weight:    700;
+}
+
+#idle-inhibitor.activated {
+    color:          #fab387;
+    box-shadow:
+        var(--neu-shadow-in),
+        0 0 10px rgba(250, 179, 135, 0.30);
+}
+
+#custom-separator-dot {
+    background:     transparent;
+    box-shadow:     none;
+    color:          #45475a;
+    font-size:      7px;
+    padding:        0;
+    margin:         0;
+}
+
+#tray { background: transparent; box-shadow: none; border: none; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}
+
+@keyframes neu-urgent {
+    0%, 100% { box-shadow: var(--neu-shadow-in); }
+    50%       { box-shadow: var(--neu-shadow-in), 0 0 20px rgba(243,139,168,0.70); }
+}

@@ -1,0 +1,489 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Wallpaper Picker Menu                            ║
+   ║                                                                              ║
+   ║  Visual wallpaper browser with thumbnail preview, source filtering,        ║
+   ║  transition selection, blur controls and real-time live preview.           ║
+   ║                                                                              ║
+   ║  Features:                                                                   ║
+   ║  • Browse local wallpaper library with thumbnail names                     ║
+   ║  • Filter by category (dark/light/anime/space/nature/abstract)             ║
+   ║  • Select transition animation (fade/wipe/grow/wave/outer)                 ║
+   ║  • Download from Unsplash/Wallhaven with search                            ║
+   ║  • AI-generate wallpaper with custom prompt                                ║
+   ║  • Set per-monitor wallpaper                                               ║
+   ║  • Slideshow schedule control                                              ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════╗              ║
+   ║  ║  󰸉 Wallpaper Library              [Browse] [Download] [AI] ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  󰍉 Filter wallpapers…                              24/156  ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  [All] [Dark] [Light] [Anime] [Space] [Nature]           ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║   catppuccin-mountains.jpg     🌄  3840×2160  dark       ║              ║
+   ║  ║   tokyo-night-street.jpg       🌃  2560×1440  dark       ║              ║
+   ║  ║ ▶ space-nebula-purple.jpg      🌌  3840×2160  space      ║              ║
+   ║  ║   forest-morning-mist.jpg      🌲  2560×1440  nature     ║              ║
+   ║  ╠═══════════════════════════════════════════════════════════╣              ║
+   ║  ║  Transition: fade │ Duration: 0.8s │ Monitor: all        ║              ║
+   ║  ╚═══════════════════════════════════════════════════════════╝              ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/wallpaper/wallpaper.sh                       ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "wp:~/.config/rofi/menus/wallpaper/wallpaper.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-wp:         "";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — WIDE WALLPAPER BROWSER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @wp-width;
+    height:             @wp-height;
+    x-offset:           0px;
+    y-offset:           @wp-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @wp-win-bg;
+    border-color:       @wp-win-border;
+    border:             @wp-win-border-width;
+    border-radius:      @wp-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [wp-header, wp-searchbar, wp-category-strip, listview, wp-status-bar];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + ACTION BUTTONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wp-header {
+    background-color:   @wp-header-bg;
+    border:             0px 0px @wp-header-border-width 0px;
+    border-color:       @wp-header-border;
+    border-radius:      @wp-win-radius @wp-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wp-title-icon, wp-title-text, wp-header-spacer, wp-action-browse, wp-action-download, wp-action-ai, wp-action-slideshow];
+}
+
+wp-title-icon {
+    background-color:   transparent;
+    text-color:         @wp-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "󰸉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-title-text {
+    background-color:   transparent;
+    text-color:         @wp-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Wallpaper Library";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wp-action-browse {
+    background-color:   @wp-action-bg;
+    text-color:         @wp-action-fg;
+    border:             @wp-action-border-width;
+    border-color:       @wp-action-border;
+    border-radius:      @radius-sm;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󱗉 Browse";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+wp-action-download {
+    background-color:   @wp-action-bg;
+    text-color:         @wp-action-fg;
+    border:             @wp-action-border-width;
+    border-color:       @wp-action-border;
+    border-radius:      @radius-sm;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰇚 Download";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+wp-action-ai {
+    background-color:   @wp-ai-bg;
+    text-color:         @wp-ai-fg;
+    border:             1px;
+    border-color:       @wp-ai-border;
+    border-radius:      @radius-sm;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰚩 AI Generate";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+wp-action-slideshow {
+    background-color:   @wp-action-bg;
+    text-color:         @wp-action-fg;
+    border:             @wp-action-border-width;
+    border-color:       @wp-action-border;
+    border-radius:      @radius-sm;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰒓 Slideshow";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wp-searchbar {
+    background-color:   @wp-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @wp-search-border;
+    padding:            10px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wp-search-icon, entry, num-filtered-rows, case-indicator];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+wp-search-icon {
+    background-color:   transparent;
+    text-color:         @wp-accent;
+    font:               "Symbols Nerd Font Mono 14";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @wp-text;
+    placeholder-color:  @wp-muted;
+    placeholder:        "Filter wallpapers by name…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @wp-count-bg;
+    text-color:         @wp-count-fg;
+    border:             1px;
+    border-color:       @wp-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @wp-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  CATEGORY STRIP — FILTER TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wp-category-strip {
+    background-color:   @wp-category-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @wp-category-border;
+    padding:            6px 16px;
+    spacing:            4px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, wp-category-spacer, wp-wallpaper-count];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @wp-btn-bg;
+    text-color:         @wp-btn-fg;
+    border:             @wp-btn-border-width;
+    border-color:       @wp-btn-border;
+    border-radius:      @radius-pill;
+    padding:            3px 14px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @wp-btn-selected-bg;
+    text-color:         @wp-btn-selected-fg;
+    border-color:       @wp-btn-selected-border;
+}
+
+wp-category-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wp-wallpaper-count {
+    background-color:   transparent;
+    text-color:         @wp-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰸉 156 wallpapers";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — WALLPAPER ENTRIES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @wp-listview-bg;
+    border:             0px;
+    padding:            @wp-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @wp-list-spacing;
+    columns:            1;
+    lines:              @wp-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  LIST ELEMENTS — WALLPAPER ROWS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @wp-element-radius;
+    padding:            @wp-element-padding-v @wp-element-padding-h;
+    margin:             0px @wp-element-margin-h;
+    spacing:            12px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @wp-element-fg;
+}
+
+element normal.active {
+    background-color:   @wp-active-bg;
+    text-color:         @wp-accent;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @wp-selected-bg;
+    text-color:         @wp-selected-fg;
+}
+
+element selected.active {
+    background-color:   @wp-accent;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @wp-alt-bg;
+    text-color:         @wp-alt-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;          /* Hidden — wallpapers are text-only in list */
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @wp-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  STATUS BAR — TRANSITION + MONITOR SETTINGS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+wp-status-bar {
+    background-color:   @wp-status-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @wp-status-border;
+    border-radius:      0px 0px @wp-win-radius @wp-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [wp-status-transition, wp-status-sep-1, wp-status-duration, wp-status-sep-2, wp-status-monitor, wp-status-spacer, wp-status-hint];
+}
+
+wp-status-transition {
+    background-color:   transparent;
+    text-color:         @wp-status-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Transition: fade";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-status-sep-1 {
+    background-color:   transparent;
+    text-color:         @wp-status-sep;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-status-duration {
+    background-color:   transparent;
+    text-color:         @wp-status-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Duration: 0.8s";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-status-sep-2 {
+    background-color:   transparent;
+    text-color:         @wp-status-sep;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-status-monitor {
+    background-color:   transparent;
+    text-color:         @wp-status-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Monitor: all";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+wp-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+wp-status-hint {
+    background-color:   transparent;
+    text-color:         @wp-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ apply  ⌥↩ preview  Esc cancel";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @wp-msg-bg;
+    border:             1px;
+    border-color:       @wp-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @wp-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

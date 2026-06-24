@@ -1,0 +1,351 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — DMMenu Launcher Style 1: Ultimate Strip          ║
+   ║                                                                              ║
+   ║  Provides FOUR sub-variants via token configuration:                       ║
+   ║                                                                              ║
+   ║  Variant A — Top bar horizontal (classic dmenu feel)                       ║
+   ║  Variant B — Top bar with dropdown results panel below                     ║
+   ║  Variant C — Bottom bar strip                                              ║
+   ║  Variant D — Floating compact center bar                                   ║
+   ║                                                                              ║
+   ║  Switch variant by changing DM_VARIANT_* token blocks below               ║
+   ║                                                                              ║
+   ║  Active: Variant B (top bar + dropdown results)                            ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  VARIANT SELECTION
+   ══════════════════════════════════════════════════════════════════════════════
+   Uncomment ONE variant block below.
+   Each variant sets a different window position/size/behavior.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── VARIANT A: Pure horizontal strip (classic dmenu, no dropdown) ──────── */
+/*
+* {
+    dm-width:               100%;
+    dm-x-offset:            0px;
+    dm-y-offset:            0px;
+    dm-location:            1;          /* 1 = top-left */
+    dm-win-radius:          0px;
+
+    dm-mainbox-children:    [inputbar-and-list];  /* single row */
+    dm-inputbar-expand:     false;
+    dm-inputbar-border-sides: 0px;
+    dm-inputbar-radius:     0px;
+    dm-inputbar-padding-v:  8px;
+    dm-inputbar-padding-h:  16px;
+
+    dm-listview-border-sides: 0px 0px 0px 1px;
+    dm-list-layout:         horizontal;
+    dm-list-flow:           horizontal;
+    dm-list-columns:        20;
+    dm-list-lines:          1;
+    dm-list-padding-v:      6px;
+    dm-list-padding-h:      8px;
+    dm-list-spacing:        0px;
+
+    dm-element-radius:      0px;
+    dm-element-padding-v:   4px;
+    dm-element-padding-h:   12px;
+
+    dm-icon-size:           16px;
+    dm-text-expand:         false;
+    dm-text-align:          0.5;
+
+    dm-show-icons:          false;
+    dm-sep-char:            "›";
+}
+*/
+
+/* ─── VARIANT B: Top bar + dropdown results (ACTIVE) ────────────────────── */
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    dm-width:               100%;
+    dm-x-offset:            0px;
+    dm-y-offset:            0px;
+    dm-location:            1;          /* 1 = top anchor */
+
+    /* ── Window surface ──────────────────────────────────────────────────────── */
+    dm-win-bg:              rgba(17, 17, 27, 0.96);
+    dm-win-border:          rgba(203, 164, 247, 0.22);
+    dm-win-border-width:    0px 0px 1px 0px;    /* Bottom border only */
+    dm-win-radius:          0px;
+
+    /* ── Layout ──────────────────────────────────────────────────────────────── */
+    dm-mainbox-children:    [inputbar, listview, mode-switcher];
+
+    /* ── Input bar ───────────────────────────────────────────────────────────── */
+    dm-inputbar-bg:         rgba(24, 24, 37, 0.95);
+    dm-inputbar-border:     rgba(49, 50, 68, 0.90);
+    dm-inputbar-border-sides: 0px 0px 1px 0px;
+    dm-inputbar-radius:     0px;
+    dm-inputbar-padding-v:  10px;
+    dm-inputbar-padding-h:  20px;
+    dm-inputbar-expand:     true;
+
+    /* ── Separator between prompt and entry ──────────────────────────────────── */
+    dm-sep-char:            "›";
+    dm-sep-color:           rgba(108, 112, 134, 0.50);
+
+    /* ── Text ────────────────────────────────────────────────────────────────── */
+    dm-text:                #cdd6f4;
+    dm-subtext:             #a6adc8;
+    dm-placeholder:         rgba(108, 112, 134, 0.55);
+    dm-placeholder-text:    "Search applications, run commands…";
+    dm-muted:               rgba(88, 91, 112, 0.60);
+    dm-accent:              #cba4f7;
+    dm-highlight:           #fab387;
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    dm-listview-bg:         rgba(22, 22, 34, 0.92);
+    dm-listview-border:     rgba(49, 50, 68, 0.80);
+    dm-listview-border-sides: 0px 0px 1px 0px;
+    dm-listview-radius:     0px;
+    dm-list-padding-v:      6px;
+    dm-list-padding-h:      8px;
+    dm-list-spacing:        1px;
+
+    /* Horizontal layout with many columns ─────────────────────────────────── */
+    dm-list-layout:         vertical;
+    dm-list-flow:           horizontal;
+    dm-list-columns:        1;          /* Single column vertical dropdown */
+    dm-list-lines:          8;
+
+    /* ── Elements ────────────────────────────────────────────────────────────── */
+    dm-element-radius:      6px;
+    dm-element-padding-v:   7px;
+    dm-element-padding-h:   14px;
+    dm-element-fg:          #cdd6f4;
+    dm-active-bg:           rgba(203, 164, 247, 0.10);
+    dm-selected-bg:         rgba(203, 164, 247, 0.88);
+    dm-selected-fg:         #1e1e2e;
+    dm-alt-bg:              rgba(30, 30, 46, 0.40);
+    dm-alt-fg:              #9399b2;
+
+    /* ── Icon ────────────────────────────────────────────────────────────────── */
+    dm-icon-size:           20px;
+    dm-text-expand:         true;
+    dm-text-align:          0.0;
+    dm-show-icons:          true;
+
+    /* ── Mode switcher ────────────────────────────────────────────────────────── */
+    dm-mode-bg:             rgba(18, 18, 28, 0.92);
+    dm-mode-border:         rgba(49, 50, 68, 0.80);
+    dm-mode-border-sides:   1px 0px 0px 0px;
+    dm-mode-radius:         0px;
+    dm-mode-padding-v:      5px;
+    dm-mode-padding-h:      16px;
+    dm-btn-fg:              rgba(108, 112, 134, 0.70);
+    dm-btn-selected-bg:     rgba(203, 164, 247, 0.85);
+    dm-btn-selected-fg:     #1e1e2e;
+    dm-btn-selected-border: rgba(203, 164, 247, 1.0);
+}
+
+/* ─── VARIANT C: Bottom strip ─────────────────────────────────────────────── */
+/*
+* {
+    dm-width:               100%;
+    dm-x-offset:            0px;
+    dm-y-offset:            0px;
+    dm-location:            7;          /* 7 = bottom-left */
+    dm-win-radius:          0px;
+    dm-win-border-width:    1px 0px 0px 0px;  /* top border */
+    dm-mainbox-children:    [listview, inputbar];
+    dm-inputbar-expand:     true;
+    dm-inputbar-border-sides: 1px 0px 0px 0px;
+    dm-list-layout:         horizontal;
+    dm-list-flow:           horizontal;
+    dm-list-columns:        20;
+    dm-list-lines:          1;
+    dm-show-icons:          false;
+}
+*/
+
+/* ─── VARIANT D: Floating center compact ─────────────────────────────────── */
+/*
+* {
+    dm-width:               700px;
+    dm-x-offset:            0px;
+    dm-y-offset:            -40px;
+    dm-location:            0;          /* center */
+    dm-win-radius:          12px;
+    dm-win-border-width:    1px;
+    dm-mainbox-children:    [inputbar, listview];
+    dm-inputbar-expand:     true;
+    dm-inputbar-border-sides: 0px 0px 1px 0px;
+    dm-inputbar-radius:     12px 12px 0px 0px;
+    dm-listview-radius:     0px 0px 12px 12px;
+    dm-list-layout:         vertical;
+    dm-list-flow:           vertical;
+    dm-list-columns:        1;
+    dm-list-lines:          8;
+    dm-show-icons:          true;
+}
+*/
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES FOR ACTIVE VARIANT (B)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.96);
+    border-color:       rgba(203, 164, 247, 0.22);
+    border:             0px 0px 1px 0px;
+    border-radius:      0px;
+}
+
+inputbar {
+    background-color:   rgba(24, 24, 37, 0.95);
+    border-color:       rgba(49, 50, 68, 0.90);
+}
+
+prompt   { text-color: #cba4f7; font: "JetBrainsMono Nerd Font Bold 12"; }
+textbox-prompt-sep { text-color: rgba(108, 112, 134, 0.45); str: "›"; }
+entry    { text-color: #cdd6f4; placeholder-color: rgba(108, 112, 134, 0.55); }
+num-filtered-rows { text-color: rgba(88, 91, 112, 0.55); }
+case-indicator    { text-color: #cba4f7; }
+
+listview {
+    background-color:   rgba(22, 22, 34, 0.92);
+    border-color:       rgba(49, 50, 68, 0.80);
+    border:             0px 0px 1px 0px;
+}
+
+/* ── Element state styling ────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         #cdd6f4;
+}
+
+element normal.active {
+    background-color:   rgba(203, 164, 247, 0.10);
+    text-color:         #cba4f7;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         #f38ba8;
+}
+
+element selected.normal {
+    background-color:   rgba(203, 164, 247, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #cba4f7;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #f38ba8;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.40);
+    text-color:         #9399b2;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         #cba4f7;
+}
+
+element-icon { background-color: transparent; }
+element-text { highlight: bold #fab387; }
+
+/* ── Mode switcher ────────────────────────────────────────────────────────── */
+mode-switcher {
+    background-color:   rgba(18, 18, 28, 0.92);
+    border-color:       rgba(49, 50, 68, 0.80);
+    border:             1px 0px 0px 0px;
+}
+
+button {
+    background-color:   transparent;
+    text-color:         rgba(108, 112, 134, 0.70);
+    border:             0px;
+}
+
+button.selected {
+    background-color:   rgba(203, 164, 247, 0.85);
+    text-color:         #1e1e2e;
+    border:             1px;
+    border-color:       rgba(203, 164, 247, 1.0);
+    border-radius:      4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  DMENU SCRIPT USAGE EXAMPLES
+   ══════════════════════════════════════════════════════════════════════════════
+   These commands pipe content into rofi-dmenu mode:
+
+   # Basic list selection
+   echo -e "Option A\nOption B\nOption C" | \
+     rofi -dmenu -p "Select" -config PATH/launcher.rasi
+
+   # Application launcher with custom filter
+   rofi -show drun -config PATH/launcher.rasi
+
+   # Run command with history
+   rofi -show run -config PATH/launcher.rasi
+
+   # Window switcher (compact bar form)
+   rofi -show window -config PATH/launcher.rasi
+
+   # Custom menu from bash
+   CHOICE=$(printf '%s\n' "shut down" "reboot" "suspend" "logout" | \
+     rofi -dmenu -i -p "Power" -config PATH/launcher.rasi)
+   case "$CHOICE" in
+     "shut down") systemctl poweroff ;;
+     "reboot")    systemctl reboot   ;;
+     "suspend")   systemctl suspend  ;;
+     "logout")    loginctl terminate-user $USER ;;
+   esac
+
+   # File picker integration
+   find ~/ -maxdepth 3 -name "*.pdf" | \
+     rofi -dmenu -p "Open PDF" -config PATH/launcher.rasi | \
+     xargs -r zathura
+
+   # Clipboard history via cliphist
+   cliphist list | \
+     rofi -dmenu -p "Clipboard" -config PATH/launcher.rasi | \
+     cliphist decode | wl-copy
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  ACCESSIBILITY OVERRIDES
+   Applied when high-contrast mode is detected (body.high-contrast):
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* High contrast override (for motor/visual accessibility):
+window {
+    background-color:   #000000;
+    border-color:       #ffffff;
+    border:             2px;
+}
+
+inputbar { background-color: #111111; border-color: #ffffff; }
+prompt   { text-color: #ffff00; }
+entry    { text-color: #ffffff; }
+
+element selected.normal {
+    background-color:   #ffffff;
+    text-color:         #000000;
+}
+*/
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  ANIMATION HINTS
+   Rofi does not natively support CSS animations, but these comments
+   document the intended animation behavior for GTK layer-shell implementations.
+
+   Window appear:  fade-in 150ms ease-out + slide-down 8px
+   Window exit:    fade-out 100ms ease-in
+   Item select:    background fill 80ms ease
+   Item hover:     background tint 60ms ease
+   Mode switch:    cross-fade 120ms ease
+   ══════════════════════════════════════════════════════════════════════════════ */

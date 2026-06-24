@@ -1,0 +1,505 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Launcher Type-7: Runner (Raycast / Krunner)      ║
+   ║                                                                              ║
+   ║  Premium command runner with live category detection, rich contextual      ║
+   ║  preview, action shortcuts, math evaluation, URL detection and ASH CLI     ║
+   ║  integration. The most intelligent entry point to your system.             ║
+   ║                                                                              ║
+   ║  Supported input categories (auto-detected by prefix/pattern):             ║
+   ║  • No prefix  → fuzzy app/file/window search                               ║
+   ║  • :calc N*M  → calculator expression                                      ║
+   ║  • :web URL   → open URL in browser                                        ║
+   ║  • :run CMD   → execute shell command                                       ║
+   ║  • :ssh HOST  → SSH connection                                              ║
+   ║  • :clip      → clipboard history                                           ║
+   ║  • :snap      → ASH snapshot                                               ║
+   ║  • :theme N   → switch theme                                               ║
+   ║  • :mode N    → switch mode                                                ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║              ╔═══════════════════════════════════════╗                      ║
+   ║              ║  ⚡ › What do you need?               ║  ← hero search       ║
+   ║              ╠═══════════════════════════════════════╣                      ║
+   ║              ║  [APPS] [RUN] [WIN] [SSH] [FILES]     ║  ← category tabs     ║
+   ║              ╠═══════════════════════════════════════╣                      ║
+   ║              ║  ▶  Firefox             Web Browser   ║                      ║
+   ║              ║     VS Code             IDE            ║  ← results          ║
+   ║              ║     Kitty               Terminal       ║                      ║
+   ║              ╠═══════════════════════════════════════╣                      ║
+   ║              ║  ↩ Launch  ⌥↩ Run in term  ⌘C Copy  ║  ← action hints      ║
+   ║              ╚═══════════════════════════════════════╝                      ║
+   ║                                                                              ║
+   ║  Usage:                                                                      ║
+   ║    rofi -show combi -config ~/.config/rofi/launchers/type-7-runner/launcher.rasi ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+
+/* ── Active style ────────────────────────────────────────────────────────────── */
+@import "style-1.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION — RUNNER MODE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    /* ── Modes ───────────────────────────────────────────────────────────────── */
+    modes:                          "combi,drun,run,window,ssh,filebrowser";
+    combi-modes:                    "drun,run,window";
+    show-icons:                     true;
+    icon-theme:                     "Papirus-Dark";
+    font:                           "JetBrainsMono Nerd Font 12";
+
+    /* ── Search behavior ─────────────────────────────────────────────────────── */
+    drun-match-fields:              "name,generic,exec,categories,keywords,comment";
+    drun-display-format:            "{name}  <span size='small' alpha='55%'><i>{generic}</i></span>";
+    drun-show-actions:              true;
+    drun-url-launcher:              "xdg-open";
+
+    case-sensitive:                 false;
+    matching:                       "fuzzy";
+    sort:                           true;
+    sorting-method:                 "fzf";
+    normalize-match:                true;
+    tokenize:                       true;
+
+    /* ── History ─────────────────────────────────────────────────────────────── */
+    disable-history:                false;
+    max-history-size:               30;
+
+    /* ── UX ──────────────────────────────────────────────────────────────────── */
+    click-to-exit:                  true;
+    steal-focus:                    false;
+    auto-select:                    false;
+
+    /* ── Terminal for run-in-terminal action ─────────────────────────────────── */
+    terminal:                       "kitty";
+    run-shell-command:              "{terminal} -e {cmd}";
+
+    /* ── SSH ─────────────────────────────────────────────────────────────────── */
+    parse-hosts:                    true;
+    parse-known-hosts:              true;
+    ssh-client:                     "ssh";
+    ssh-command:                    "kitty -e ssh {host}";
+
+    /* ── File browser ────────────────────────────────────────────────────────── */
+    filebrowser-command:            "xdg-open";
+    filebrowser-directory:          "~";
+    filebrowser-show-hidden:        false;
+    filebrowser-sort-by:            "name";
+
+    /* ── Display labels ──────────────────────────────────────────────────────── */
+    display-combi:                  "⚡ Runner";
+    display-drun:                   " Apps";
+    display-run:                    "󰨡 Shell";
+    display-window:                 "󰖯 Windows";
+    display-ssh:                    "󰢹 SSH";
+    display-filebrowser:            "󱁉 Files";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  ROOT WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @rn-width;
+    height:             0px;
+    x-offset:           0px;
+    y-offset:           @rn-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @rn-win-bg;
+    border-color:       @rn-win-border;
+    border:             @rn-win-border-width;
+    border-radius:      @rn-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX — VERTICALLY STACKED SECTIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [hero-section, inputbar, category-bar, result-list, action-bar];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HERO SECTION — BRANDING BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+hero-section {
+    background-color:   @rn-hero-bg;
+    border:             0px 0px @rn-hero-border-width 0px;
+    border-color:       @rn-hero-border;
+    border-radius:      @rn-win-radius @rn-win-radius 0px 0px;
+    padding:            10px 20px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [hero-icon, hero-label, hero-spacer, hero-shortcuts];
+}
+
+hero-icon {
+    background-color:   transparent;
+    text-color:         @rn-accent;
+    font:               "Symbols Nerd Font Mono 16";
+    str:                "⚡";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+hero-label {
+    background-color:   transparent;
+    text-color:         @rn-text;
+    font:               "JetBrainsMono Nerd Font Bold 13";
+    str:                "ASH Runner";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+hero-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+hero-shortcuts {
+    background-color:   transparent;
+    text-color:         @rn-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Esc: close  Tab: mode  ↑↓: navigate";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  INPUT BAR — PROMINENT SEARCH FIELD
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+inputbar {
+    background-color:   @rn-inputbar-bg;
+    border-color:       @rn-inputbar-border;
+    border:             0px 0px @rn-inputbar-border-width 0px;
+    border-radius:      0px;
+    padding:            16px 20px;
+    spacing:            12px;
+    expand:             false;
+    children:           [prompt, textbox-prompt-sep, entry, num-filtered-rows, case-indicator];
+}
+
+prompt {
+    background-color:   transparent;
+    text-color:         @rn-prompt-fg;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    expand:             false;
+    padding:            0px;
+}
+
+textbox-prompt-sep {
+    background-color:   transparent;
+    text-color:         @rn-sep-color;
+    str:                "›";
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    expand:             false;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @rn-entry-fg;
+    placeholder-color:  @rn-placeholder;
+    placeholder:        "Search apps, run commands, open files…";
+    font:               "JetBrainsMono Nerd Font 14";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @rn-count-bg;
+    text-color:         @rn-count-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    border:             1px;
+    border-color:       @rn-count-border;
+    border-radius:      @radius-pill;
+    padding:            1px 8px;
+    expand:             false;
+}
+
+case-indicator {
+    background-color:   transparent;
+    text-color:         @rn-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  CATEGORY BAR — MODE SWITCHER AS HORIZONTAL TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+category-bar {
+    background-color:   @rn-category-bg;
+    border-color:       @rn-category-border;
+    border:             0px 0px @rn-category-border-width 0px;
+    padding:            6px 16px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, category-spacer, category-hint];
+}
+
+/* mode-switcher is placed inside category-bar via mainbox override */
+
+category-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+category-hint {
+    background-color:   transparent;
+    text-color:         @rn-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "Ctrl+Tab to switch";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            2px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @rn-btn-bg;
+    text-color:         @rn-btn-fg;
+    border:             @rn-btn-border-width;
+    border-color:       @rn-btn-border;
+    border-radius:      @rn-btn-radius;
+    padding:            4px 14px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @rn-btn-selected-bg;
+    text-color:         @rn-btn-selected-fg;
+    border-color:       @rn-btn-selected-border;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  RESULT LIST — MAIN RESULTS DISPLAY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+result-list {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    expand:             false;
+    children:           [listview];
+}
+
+listview {
+    background-color:   @rn-listview-bg;
+    border:             0px;
+    padding:            6px 0px;
+    margin:             0px;
+    spacing:            1px;
+    columns:            1;
+    lines:              @rn-list-lines;
+    fixed-height:       false;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  LIST ELEMENTS — RICH RESULT ROWS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @rn-element-radius;
+    padding:            @rn-element-padding-v @rn-element-padding-h;
+    margin:             0px @rn-element-margin-h;
+    spacing:            12px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @rn-element-fg;
+}
+
+element normal.active {
+    background-color:   @rn-active-bg;
+    text-color:         @rn-accent;
+}
+
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.10);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @rn-selected-bg;
+    text-color:         @rn-selected-fg;
+}
+
+element selected.active {
+    background-color:   @rn-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @rn-alt-bg;
+    text-color:         @rn-alt-fg;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         @rn-accent;
+}
+
+element alternate.urgent {
+    background-color:   rgba(243, 139, 168, 0.06);
+    text-color:         @red;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT ICON & TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               @rn-icon-size;
+    padding:            0px;
+    cursor:             inherit;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @rn-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  ACTION BAR — KEYBOARD SHORTCUT HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+action-bar {
+    background-color:   @rn-action-bg;
+    border-color:       @rn-action-border;
+    border:             @rn-action-border-width 0px 0px 0px;
+    border-radius:      0px 0px @rn-win-radius @rn-win-radius;
+    padding:            7px 18px;
+    spacing:            20px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [action-launch, action-terminal, action-copy, action-spacer, action-result-count];
+}
+
+action-launch {
+    background-color:   transparent;
+    text-color:         @rn-action-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ Launch";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+action-terminal {
+    background-color:   transparent;
+    text-color:         @rn-action-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ Run in terminal";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+action-copy {
+    background-color:   transparent;
+    text-color:         @rn-action-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌘C Copy path";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+action-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+action-result-count {
+    background-color:   transparent;
+    text-color:         @rn-action-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Powered by ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @message-bg;
+    border:             @border-thin;
+    border-color:       @surface1;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @subtext0;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+error-message {
+    background-color:   rgba(243, 139, 168, 0.10);
+    border:             @border-thin;
+    border-color:       @red;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 8px 4px 8px;
+    expand:             false;
+}

@@ -1,0 +1,100 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Minimal                            ║
+   ║                                                                              ║
+   ║  Absolute minimum. No backgrounds, no borders, no shadows. Only text.    ║
+   ║  Monochrome palette with single accent color for active state.            ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+   window#waybar {
+    background:     rgba(17, 17, 27, 0.70);
+    border:         none;
+    border-radius:  0;
+    color:          #9399b2;
+    font-family:    "JetBrainsMono Nerd Font", monospace;
+    font-size:      12px;
+    box-shadow:     none;
+    margin:         0;
+    transition:     background 200ms ease;
+}
+
+tooltip {
+    background:     #181825;
+    border:         1px solid #313244;
+    border-radius:  6px;
+    color:          #9399b2;
+    padding:        6px 10px;
+    box-shadow:     none;
+    font-size:      11px;
+}
+
+/* Zero decoration on all modules */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-media, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-ash-mode, #custom-power,
+#custom-notifications, #custom-separator-dot,
+#custom-vpn, #custom-docker, #custom-pomodoro,
+#custom-updates-pacman, #wireplumber, #mpd {
+    background:     transparent;
+    border:         none;
+    border-radius:  0;
+    color:          #6c7086;
+    margin:         0 2px;
+    padding:        4px 6px;
+    box-shadow:     none;
+    transition:     color 120ms ease;
+}
+
+/* Hover: just brighter text */
+#clock:hover, #pulseaudio:hover, #network:hover,
+#battery:hover, #cpu:hover, #memory:hover, #custom-power:hover {
+    color:      #cdd6f4;
+    cursor:     pointer;
+}
+
+#workspaces {
+    padding: 2px 4px;
+    gap: 1px;
+}
+
+#workspaces button {
+    padding:        4px 6px;
+    border-radius:  0;
+    color:          #313244;
+    background:     transparent;
+    min-width:      24px;
+    font-size:      12px;
+    transition:     color 120ms ease;
+    border-bottom:  1px solid transparent;
+}
+
+#workspaces button.active {
+    color:          #cba4f7;
+    border-bottom:  1px solid #cba4f7;
+    font-weight:    600;
+}
+
+#workspaces button.occupied { color: #585b70; }
+#workspaces button.urgent   { color: #f38ba8; animation: blink 1s ease infinite; }
+#workspaces button:hover    { color: #9399b2; }
+
+/* Everything is the same muted tone — clock is slightly brighter */
+#clock              { color: #9399b2; letter-spacing: 0.04em; }
+#clock:hover        { color: #cba4f7; }
+#battery.warning    { color: #f9e2af; }
+#battery.critical   { color: #f38ba8; animation: blink 1s ease infinite; }
+#battery.charging   { color: #94e2d5; }
+#network.disconnected { color: #f38ba8; }
+#cpu.critical       { color: #f38ba8; }
+#memory.critical    { color: #f38ba8; }
+#submap             { color: #cba4f7; font-weight: 700; }
+#idle-inhibitor.activated { color: #fab387; }
+#custom-power       { color: #f38ba8; }
+#custom-separator-dot { color: #313244; font-size: 7px; padding: 0 3px; }
+#tray               { padding: 2px 6px; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}

@@ -1,0 +1,327 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Material Design 3                  ║
+   ║                                                                              ║
+   ║  Google Material Design 3 principles applied to Waybar. Dynamic Color     ║
+   ║  tonal surfaces, state layers, elevation shadows, typography scale and    ║
+   ║  motion choreography following M3 spec timing curves.                      ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── Material Design 3 Color Tokens ─────────────────────────────────────────── */
+:root {
+    /* Tonal palette (purple/violet seed color) */
+    --md-sys-color-primary:             #cba4f7;
+    --md-sys-color-on-primary:          #1e1e2e;
+    --md-sys-color-primary-container:   #4a3668;
+    --md-sys-color-on-primary-container: #e9d8fd;
+    --md-sys-color-secondary:           #89b4fa;
+    --md-sys-color-on-secondary:        #1e1e2e;
+    --md-sys-color-secondary-container: #1e3a5a;
+    --md-sys-color-on-secondary-container: #c8d9f9;
+    --md-sys-color-tertiary:            #94e2d5;
+    --md-sys-color-error:               #f38ba8;
+    --md-sys-color-on-error:            #1e1e2e;
+    --md-sys-color-background:          #11111b;
+    --md-sys-color-on-background:       #cdd6f4;
+    --md-sys-color-surface:             #1e1e2e;
+    --md-sys-color-on-surface:          #cdd6f4;
+    --md-sys-color-surface-variant:     #313244;
+    --md-sys-color-on-surface-variant:  #9399b2;
+    --md-sys-color-outline:             #45475a;
+    --md-sys-color-outline-variant:     #313244;
+    --md-sys-color-shadow:              rgba(0, 0, 0, 0.50);
+
+    /* Elevation overlays (M3 uses tonal elevation) */
+    --md-elevation-1: rgba(203, 164, 247, 0.05);   /* dp1 */
+    --md-elevation-2: rgba(203, 164, 247, 0.08);   /* dp2 */
+    --md-elevation-3: rgba(203, 164, 247, 0.11);   /* dp3 */
+
+    /* State layers */
+    --md-state-hover:   rgba(203, 164, 247, 0.08);
+    --md-state-pressed: rgba(203, 164, 247, 0.12);
+    --md-state-focused: rgba(203, 164, 247, 0.12);
+
+    /* Motion (M3 standard + emphasized) */
+    --md-motion-standard:     cubic-bezier(0.20, 0.00, 0.00, 1.00);
+    --md-motion-emphasized:   cubic-bezier(0.05, 0.70, 0.10, 1.00);
+    --md-motion-decelerate:   cubic-bezier(0.00, 0.00, 0.00, 1.00);
+    --md-motion-accelerate:   cubic-bezier(0.30, 0.00, 1.00, 1.00);
+
+    --md-duration-short:  150ms;
+    --md-duration-medium: 250ms;
+    --md-duration-long:   400ms;
+
+    /* Shape (M3 rounded corners) */
+    --md-shape-none:    0px;
+    --md-shape-xs:      4px;
+    --md-shape-sm:      8px;
+    --md-shape-md:      12px;
+    --md-shape-lg:      16px;
+    --md-shape-xl:      28px;
+    --md-shape-full:    9999px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BAR SURFACE — M3 Surface Container (elevation 2)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window#waybar {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-surface),
+                            var(--md-sys-color-primary) 8%);
+    border:             1px solid var(--md-sys-color-outline-variant);
+    border-radius:      var(--md-shape-lg);
+    color:              var(--md-sys-color-on-surface);
+    font-family:        "JetBrainsMono Nerd Font", "Google Sans", system-ui, monospace;
+    font-size:          12px;
+    /* M3 dp2 shadow */
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.30),
+        0 2px 6px rgba(0,0,0,0.15),
+        0 1px 0   var(--md-elevation-2) inset;
+    margin:             6px 12px;
+    transition:
+        background-color var(--md-duration-medium) var(--md-motion-standard),
+        box-shadow       var(--md-duration-medium) var(--md-motion-standard);
+}
+
+/* ── M3 Tooltip (surface container highest) ──────────────────────────────── */
+tooltip {
+    background-color:
+        color-mix(in srgb,
+            var(--md-sys-color-surface),
+            var(--md-sys-color-primary) 11%);
+    border:             1px solid var(--md-sys-color-outline);
+    border-radius:      var(--md-shape-sm);
+    color:              var(--md-sys-color-on-surface);
+    padding:            8px 14px;
+    font-size:          11px;
+    box-shadow:
+        0 4px 8px rgba(0,0,0,0.30),
+        0 8px 16px rgba(0,0,0,0.15);
+}
+
+/* ── All modules: M3 Surface Variant containers ───────────────────────────── */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-media, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-ash-mode, #custom-power,
+#custom-notifications, #custom-separator-dot,
+#custom-vpn, #custom-docker, #custom-pomodoro,
+#custom-updates-pacman, #wireplumber, #mpd {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-surface-variant),
+                            var(--md-sys-color-primary) 5%);
+    border-radius:      var(--md-shape-sm);
+    color:              var(--md-sys-color-on-surface-variant);
+    margin:             2px 1px;
+    padding:            4px 12px;
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    /* M3 standard transition */
+    transition:
+        background-color var(--md-duration-short) var(--md-motion-standard),
+        color            var(--md-duration-short) var(--md-motion-standard),
+        box-shadow       var(--md-duration-short) var(--md-motion-standard),
+        transform        var(--md-duration-short) var(--md-motion-emphasized);
+}
+
+/* M3 Hover state layer */
+#clock:hover, #pulseaudio:hover, #network:hover,
+#battery:hover, #cpu:hover, #memory:hover, #custom-power:hover {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-surface-variant),
+                            var(--md-sys-color-primary) 13%);
+    color:              var(--md-sys-color-on-surface);
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.25),
+        0 4px 8px rgba(0,0,0,0.12);
+    transform:          translateY(-1px);
+    cursor:             pointer;
+}
+
+/* ── Workspace: M3 Navigation bar pattern ────────────────────────────────── */
+#workspaces {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-surface),
+                            var(--md-sys-color-primary) 5%);
+    border-radius:      var(--md-shape-full);
+    padding:            2px 4px;
+    gap:                2px;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.20),
+        0 1px 0 rgba(255,255,255,0.03) inset;
+}
+
+#workspaces button {
+    padding:            4px 8px;
+    border-radius:      var(--md-shape-full);
+    color:              var(--md-sys-color-on-surface-variant);
+    background:         transparent;
+    min-width:          32px;
+    font-size:          14px;
+    /* M3 emphasized transition for playful nav buttons */
+    transition:         all var(--md-duration-medium) var(--md-motion-emphasized);
+}
+
+/* Active: M3 Navigation indicator */
+#workspaces button.active {
+    background-color:   var(--md-sys-color-secondary-container);
+    color:              var(--md-sys-color-primary);
+    font-weight:        700;
+    min-width:          40px;
+    box-shadow:
+        0 0 0 1px var(--md-sys-color-primary),
+        0 2px 8px rgba(203,164,247,0.25);
+}
+
+#workspaces button.occupied {
+    background-color:   color-mix(in srgb,
+                            transparent,
+                            var(--md-sys-color-on-surface) 6%);
+    color:              var(--md-sys-color-on-surface);
+}
+
+/* M3 Error container for urgent */
+#workspaces button.urgent {
+    background-color:   rgba(243, 139, 168, 0.20);
+    color:              var(--md-sys-color-error);
+    box-shadow:         0 0 0 1px var(--md-sys-color-error);
+    animation:          m3-urgent 1.5s var(--md-motion-standard) infinite;
+}
+
+/* M3 hover state layer */
+#workspaces button:hover {
+    background-color:   color-mix(in srgb,
+                            transparent,
+                            var(--md-sys-color-primary) 12%);
+    color:              var(--md-sys-color-on-surface);
+}
+
+/* ── M3 Color roles per module ────────────────────────────────────────────── */
+#clock {
+    color:              var(--md-sys-color-on-surface);
+    font-weight:        500;
+    letter-spacing:     0.02em;
+}
+
+#clock:hover            { color: var(--md-sys-color-primary); }
+#pulseaudio             { color: var(--md-sys-color-tertiary); }
+#pulseaudio.muted       { color: var(--md-sys-color-on-surface-variant); opacity: 0.60; }
+#network                { color: #a6e3a1; }
+#network.disconnected   { color: var(--md-sys-color-error); }
+#battery                { color: #a6e3a1; }
+#battery.warning        { color: #f9e2af; }
+#battery.critical       { color: var(--md-sys-color-error); animation: m3-blink 1s ease infinite; }
+#battery.charging       { color: var(--md-sys-color-tertiary); }
+#battery.plugged        { color: var(--md-sys-color-tertiary); }
+#cpu                    { color: #fab387; }
+#cpu.warning            { color: #f9e2af; }
+#cpu.critical           { color: var(--md-sys-color-error); }
+#memory                 { color: var(--md-sys-color-primary); }
+#memory.warning         { color: #f9e2af; }
+#memory.critical        { color: var(--md-sys-color-error); }
+#backlight              { color: #f9e2af; }
+#bluetooth              { color: var(--md-sys-color-secondary); }
+#bluetooth.connected    { color: var(--md-sys-color-tertiary); }
+
+/* M3 Filled tonal button for power */
+#custom-power {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-error),
+                            var(--md-sys-color-surface-variant) 80%);
+    color:              var(--md-sys-color-error);
+    border-radius:      var(--md-shape-full);
+    padding:            4px 14px;
+}
+
+#custom-power:hover {
+    background-color:   color-mix(in srgb,
+                            var(--md-sys-color-error),
+                            var(--md-sys-color-surface-variant) 70%);
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.30),
+        0 0 0 1px var(--md-sys-color-error);
+    transform:          translateY(-1px) scale(1.02);
+}
+
+/* M3 Tertiary container for submap indicator */
+#submap {
+    background-color:   var(--md-sys-color-primary-container);
+    color:              var(--md-sys-color-primary);
+    font-weight:        700;
+    border-radius:      var(--md-shape-full);
+    box-shadow:         0 0 0 1px var(--md-sys-color-primary), 0 2px 8px rgba(203,164,247,0.30);
+}
+
+/* M3 FAB-like idle inhibitor */
+#idle-inhibitor.activated {
+    background-color:   rgba(250, 179, 135, 0.15);
+    color:              #fab387;
+    box-shadow:         0 0 0 1px rgba(250,179,135,0.40);
+}
+
+#idle-inhibitor.deactivated { color: var(--md-sys-color-on-surface-variant); opacity: 0.60; }
+
+/* M3 text indicators */
+#custom-ash-mode.game     { color: #a6e3a1; }
+#custom-ash-mode.work     { color: var(--md-sys-color-secondary); }
+#custom-ash-mode.focus    { color: var(--md-sys-color-primary); }
+#custom-ash-mode.battery  { color: #f9e2af; }
+
+#custom-recording   { color: var(--md-sys-color-error); }
+#custom-media       { color: var(--md-sys-color-tertiary); }
+#custom-media.Playing { color: #a6e3a1; }
+
+/* Separator: M3 divider */
+#custom-separator-dot {
+    background:     transparent;
+    color:          var(--md-sys-color-outline-variant);
+    font-size:      7px;
+    padding:        0;
+    margin:         0 2px;
+    box-shadow:     none;
+}
+
+#tray {
+    background:     transparent;
+    box-shadow:     none;
+    border-radius:  var(--md-shape-sm);
+}
+
+#tray > .needs-attention {
+    background-color:   var(--md-sys-color-error);
+    border-radius:      var(--md-shape-full);
+    -gtk-icon-effect:   highlight;
+}
+
+/* ── M3 Motion keyframes ──────────────────────────────────────────────────── */
+@keyframes m3-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.30; }
+}
+
+@keyframes m3-urgent {
+    0%, 100% {
+        background-color: rgba(243, 139, 168, 0.20);
+        box-shadow:       0 0 0 1px var(--md-sys-color-error);
+    }
+    50% {
+        background-color: rgba(243, 139, 168, 0.35);
+        box-shadow:
+            0 0 0 1px var(--md-sys-color-error),
+            0 0 16px rgba(243,139,168,0.40);
+    }
+}
+
+/* M3 Ripple simulation on active workspace */
+@keyframes m3-ripple {
+    0%   { transform: scale(0.90); opacity: 0.80; }
+    60%  { transform: scale(1.05); opacity: 1.00; }
+    100% { transform: scale(1.00); opacity: 1.00; }
+}
+
+#workspaces button.active {
+    animation: m3-ripple var(--md-duration-medium) var(--md-motion-emphasized) both;
+}

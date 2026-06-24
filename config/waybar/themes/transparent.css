@@ -1,0 +1,128 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Transparent                        ║
+   ║                                                                              ║
+   ║  Maximally transparent — bar has no background, only floating colored     ║
+   ║  text elements directly on the wallpaper/desktop. Requires beautiful       ║
+   ║  wallpaper and readable text contrast.                                     ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+   window#waybar {
+    background-color:   transparent;
+    border:             none;
+    border-radius:      0;
+    color:              #cdd6f4;
+    font-family:        "JetBrainsMono Nerd Font", monospace;
+    font-size:          12px;
+    box-shadow:         none;
+    margin:             4px 16px;
+}
+
+tooltip {
+    background:     rgba(17, 17, 27, 0.85);
+    border:         1px solid rgba(203, 164, 247, 0.25);
+    border-radius:  10px;
+    color:          #cdd6f4;
+    padding:        8px 12px;
+    box-shadow:     0 8px 32px rgba(0, 0, 0, 0.60);
+}
+
+/* All modules: transparent, text with drop-shadow for readability */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-media, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-ash-mode, #custom-power,
+#custom-notifications, #custom-separator-dot,
+#custom-vpn, #custom-docker, #custom-pomodoro,
+#custom-updates-pacman, #wireplumber, #mpd {
+    background:         transparent;
+    border:             none;
+    border-radius:      6px;
+    color:              #cdd6f4;
+    margin:             2px 1px;
+    padding:            4px 10px;
+    box-shadow:         none;
+    text-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.80),
+        0 0  8px rgba(0, 0, 0, 0.60);
+    transition:
+        background  150ms ease,
+        text-shadow 150ms ease,
+        transform   150ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+/* Hover: subtle darkened pill appears */
+#clock:hover, #pulseaudio:hover, #network:hover,
+#battery:hover, #cpu:hover, #memory:hover, #custom-power:hover {
+    background:     rgba(17, 17, 27, 0.50);
+    transform:      translateY(-1px);
+}
+
+#workspaces {
+    background:     transparent;
+    padding:        2px 4px;
+    gap:            2px;
+}
+
+#workspaces button {
+    padding:        4px 8px;
+    border-radius:  6px;
+    color:          rgba(109, 112, 134, 0.85);
+    background:     transparent;
+    min-width:      28px;
+    font-size:      14px;
+    text-shadow:    0 1px 4px rgba(0, 0, 0, 0.80);
+    transition:     all 150ms ease;
+}
+
+#workspaces button.active {
+    background:     rgba(203, 164, 247, 0.85);
+    color:          #1e1e2e;
+    font-weight:    700;
+    min-width:      36px;
+    transform:      translateY(-1px);
+    text-shadow:    none;
+    box-shadow:     0 2px 12px rgba(203, 164, 247, 0.50);
+}
+
+#workspaces button.occupied {
+    color:          rgba(186, 194, 222, 0.80);
+}
+
+#workspaces button.urgent {
+    background:     rgba(243, 139, 168, 0.85);
+    color:          #1e1e2e;
+    text-shadow:    none;
+}
+
+#workspaces button:hover {
+    background:     rgba(49, 50, 68, 0.60);
+    color:          #cdd6f4;
+    transform:      translateY(-1px);
+}
+
+/* Color assignments with strong text-shadow for wallpaper readability */
+#clock              { color: #cdd6f4; font-weight: 600; }
+#pulseaudio         { color: #89dceb; }
+#pulseaudio.muted   { color: rgba(88,91,112,0.80); }
+#network            { color: #a6e3a1; }
+#network.disconnected { color: #f38ba8; animation: blink 2s ease infinite; }
+#battery            { color: #a6e3a1; }
+#battery.warning    { color: #f9e2af; }
+#battery.critical   { color: #f38ba8; animation: blink 1s ease infinite; }
+#battery.charging   { color: #94e2d5; }
+#cpu                { color: #fab387; }
+#memory             { color: #cba4f7; }
+#backlight          { color: #f9e2af; }
+#bluetooth          { color: #89b4fa; }
+#custom-power       { color: #f38ba8; }
+#submap             { background: rgba(203,164,247,0.85); color: #1e1e2e; text-shadow: none; font-weight: 700; }
+#idle-inhibitor.activated { color: #fab387; background: rgba(250,179,135,0.20); }
+#custom-separator-dot { color: rgba(88,91,112,0.40); background: transparent; text-shadow: none; font-size: 7px; padding: 0; }
+#tray               { text-shadow: none; }
+#window             { color: rgba(186,194,222,0.80); font-size: 11px; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.30; }
+}

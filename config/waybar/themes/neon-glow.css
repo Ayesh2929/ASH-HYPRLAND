@@ -1,0 +1,228 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Waybar Theme: Neon Glow                          ║
+   ║                                                                              ║
+   ║  Cyberpunk neon aesthetic. Deep dark background, intensely glowing text,  ║
+   ║  pulsing border animations, neon accent colors and scanline texture.       ║
+   ║  Best paired with: cyberpunk-2077 or synthwave-84 themes.                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+   :root {
+    --neon-purple:  #cba4f7;
+    --neon-blue:    #89b4fa;
+    --neon-cyan:    #89dceb;
+    --neon-green:   #a6e3a1;
+    --neon-pink:    #f5c2e7;
+    --neon-red:     #f38ba8;
+    --neon-yellow:  #f9e2af;
+    --dark:         #060610;
+    --dark-2:       #0d0d1a;
+}
+
+window#waybar {
+    background-color:   var(--dark);
+    border:             1px solid var(--neon-purple);
+    border-radius:      6px;
+    color:              var(--neon-cyan);
+    font-family:        "JetBrainsMono Nerd Font", monospace;
+    font-size:          12px;
+    letter-spacing:     0.04em;
+    box-shadow:
+        0 0 8px  rgba(203, 164, 247, 0.40),
+        0 0 24px rgba(203, 164, 247, 0.15),
+        inset 0 0 30px rgba(203, 164, 247, 0.04);
+    animation:          neon-border-pulse 4s ease-in-out infinite;
+    transition:         all 300ms ease;
+}
+
+tooltip {
+    background:     var(--dark-2);
+    border:         1px solid var(--neon-cyan);
+    border-radius:  4px;
+    color:          var(--neon-cyan);
+    padding:        8px 12px;
+    font-family:    "JetBrainsMono Nerd Font", monospace;
+    font-size:      11px;
+    letter-spacing: 0.03em;
+    box-shadow:
+        0 0 12px rgba(137, 220, 235, 0.40),
+        0 0 32px rgba(137, 220, 235, 0.15);
+}
+
+/* All modules: neon-text on near-black */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth,
+#battery, #backlight, #cpu, #memory, #temperature, #disk,
+#tray, #privacy, #idle-inhibitor, #submap, #window,
+#custom-weather-full, #custom-media, #custom-gpu-amd,
+#custom-gpu-nvidia, #custom-ash-mode, #custom-power,
+#custom-notifications, #custom-separator-dot,
+#custom-vpn, #custom-docker, #custom-pomodoro,
+#custom-updates-pacman, #wireplumber, #mpd {
+    background:         var(--dark-2);
+    border:             1px solid rgba(203, 164, 247, 0.20);
+    border-radius:      4px;
+    color:              var(--neon-cyan);
+    margin:             2px 1px;
+    padding:            4px 10px;
+    box-shadow:
+        0 0 6px rgba(137, 220, 235, 0.20),
+        inset 0 0 10px rgba(137, 220, 235, 0.03);
+    text-shadow:        0 0 8px currentColor;
+    transition:
+        all             150ms ease,
+        transform       150ms cubic-bezier(0.34, 1.56, 0.64, 1.0);
+}
+
+/* Hover: neon flare */
+#clock:hover, #pulseaudio:hover, #network:hover,
+#battery:hover, #cpu:hover, #memory:hover, #custom-power:hover {
+    border-color:       var(--neon-purple);
+    box-shadow:
+        0 0 12px rgba(203, 164, 247, 0.60),
+        0 0 28px rgba(203, 164, 247, 0.25),
+        inset 0 0 12px rgba(203, 164, 247, 0.06);
+    transform:          translateY(-1px);
+    cursor:             pointer;
+}
+
+#workspaces {
+    background:     var(--dark);
+    border:         1px solid rgba(203, 164, 247, 0.25);
+    border-radius:  4px;
+    padding:        2px 4px;
+    gap:            2px;
+    box-shadow:     0 0 8px rgba(203, 164, 247, 0.15);
+}
+
+#workspaces button {
+    padding:        4px 8px;
+    border-radius:  2px;
+    color:          rgba(137, 220, 235, 0.40);
+    background:     transparent;
+    min-width:      28px;
+    font-size:      14px;
+    text-shadow:    0 0 6px currentColor;
+    transition:     all 150ms ease;
+    border:         1px solid transparent;
+}
+
+#workspaces button.active {
+    background:     rgba(203, 164, 247, 0.12);
+    color:          var(--neon-purple);
+    font-weight:    700;
+    min-width:      36px;
+    border:         1px solid var(--neon-purple);
+    text-shadow:    0 0 16px var(--neon-purple), 0 0 32px rgba(203,164,247,0.50);
+    box-shadow:
+        0 0 16px rgba(203, 164, 247, 0.60),
+        inset 0 0 8px rgba(203, 164, 247, 0.08);
+    animation:      neon-active 2s ease-in-out infinite;
+}
+
+#workspaces button.occupied {
+    color:          rgba(137, 220, 235, 0.70);
+    border:         1px solid rgba(137, 220, 235, 0.15);
+    text-shadow:    0 0 8px rgba(137,220,235,0.50);
+}
+
+#workspaces button.urgent {
+    background:     rgba(243, 139, 168, 0.15);
+    color:          var(--neon-red);
+    border:         1px solid var(--neon-red);
+    text-shadow:    0 0 16px var(--neon-red);
+    animation:      neon-urgent 0.8s ease infinite;
+}
+
+#workspaces button:hover {
+    background:     rgba(203, 164, 247, 0.08);
+    color:          var(--neon-purple);
+    border:         1px solid rgba(203, 164, 247, 0.40);
+    text-shadow:    0 0 12px var(--neon-purple);
+    transform:      translateY(-1px);
+}
+
+/* Per-module neon colors */
+#clock {
+    color:          var(--neon-cyan);
+    text-shadow:    0 0 10px var(--neon-cyan), 0 0 20px rgba(137,220,235,0.40);
+    font-weight:    600;
+    letter-spacing: 0.06em;
+    border-color:   rgba(137, 220, 235, 0.25);
+}
+
+#pulseaudio         { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); border-color: rgba(137,220,235,0.20); }
+#pulseaudio.muted   { color: rgba(88,91,112,0.60); text-shadow: none; border-color: rgba(88,91,112,0.20); }
+#network            { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); border-color: rgba(166,227,161,0.20); }
+#network.disconnected { color: var(--neon-red); animation: neon-blink 1.5s ease infinite; border-color: rgba(243,139,168,0.30); }
+#battery            { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+#battery.warning    { color: var(--neon-yellow); text-shadow: 0 0 10px var(--neon-yellow); }
+#battery.critical   { color: var(--neon-red); text-shadow: 0 0 16px var(--neon-red); animation: neon-blink 0.8s ease infinite; }
+#battery.charging   { color: var(--neon-cyan); text-shadow: 0 0 12px var(--neon-cyan); animation: charge-neon 2s ease infinite; }
+#cpu                { color: #fab387; text-shadow: 0 0 10px #fab387; border-color: rgba(250,179,135,0.20); }
+#memory             { color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple); border-color: rgba(203,164,247,0.20); }
+#backlight          { color: var(--neon-yellow); text-shadow: 0 0 10px var(--neon-yellow); }
+#bluetooth          { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+#custom-power {
+    color:          var(--neon-red);
+    border-color:   rgba(243, 139, 168, 0.40);
+    background:     rgba(243, 139, 168, 0.06);
+    text-shadow:    0 0 12px var(--neon-red);
+    box-shadow:     0 0 12px rgba(243, 139, 168, 0.30), inset 0 0 8px rgba(243,139,168,0.04);
+}
+
+#custom-power:hover {
+    box-shadow:     0 0 24px rgba(243, 139, 168, 0.70), 0 0 48px rgba(243,139,168,0.25);
+    border-color:   var(--neon-red);
+    background:     rgba(243, 139, 168, 0.14);
+    transform:      translateY(-1px) scale(1.04);
+}
+
+#submap {
+    background:     rgba(203, 164, 247, 0.15);
+    color:          var(--neon-purple);
+    border:         1px solid var(--neon-purple);
+    font-weight:    700;
+    text-shadow:    0 0 16px var(--neon-purple);
+    box-shadow:     0 0 20px rgba(203, 164, 247, 0.60);
+    animation:      neon-submap 1.5s ease infinite;
+}
+
+#idle-inhibitor.activated {
+    color:          #fab387;
+    text-shadow:    0 0 12px #fab387;
+    border-color:   rgba(250,179,135,0.40);
+}
+
+#custom-separator-dot { background: transparent; border: none; box-shadow: none; color: rgba(203,164,247,0.25); text-shadow: none; font-size: 7px; padding: 0; }
+#tray { background: transparent; border: none; box-shadow: none; }
+#window { color: rgba(137,220,235,0.50); text-shadow: 0 0 6px rgba(137,220,235,0.30); font-size: 11px; }
+
+@keyframes neon-border-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(203,164,247,0.40), 0 0 24px rgba(203,164,247,0.15); }
+    50%       { box-shadow: 0 0 14px rgba(203,164,247,0.60), 0 0 40px rgba(203,164,247,0.25); }
+}
+
+@keyframes neon-active {
+    0%, 100% { box-shadow: 0 0 16px rgba(203,164,247,0.60), inset 0 0 8px rgba(203,164,247,0.08); }
+    50%       { box-shadow: 0 0 28px rgba(203,164,247,0.90), inset 0 0 16px rgba(203,164,247,0.12); }
+}
+
+@keyframes neon-urgent {
+    0%, 100% { box-shadow: 0 0 12px rgba(243,139,168,0.60); }
+    50%       { box-shadow: 0 0 28px rgba(243,139,168,0.95); }
+}
+
+@keyframes neon-submap {
+    0%, 100% { box-shadow: 0 0 20px rgba(203,164,247,0.60); }
+    50%       { box-shadow: 0 0 36px rgba(203,164,247,0.95), 0 0 60px rgba(203,164,247,0.40); }
+}
+
+@keyframes neon-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.20; }
+}
+
+@keyframes charge-neon {
+    0%, 100% { color: var(--neon-cyan); text-shadow: 0 0 12px var(--neon-cyan); }
+    50%       { color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green), 0 0 40px rgba(166,227,161,0.40); }
+}
