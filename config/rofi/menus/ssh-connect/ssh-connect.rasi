@@ -1,0 +1,513 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — SSH Connection Manager                           ║
+   ║                                                                              ║
+   ║  Full SSH host manager with live connection status, latency ping,          ║
+   ║  key management, tunnel support, sftp browser and session history.         ║
+   ║                                                                              ║
+   ║  Host sources:                                                               ║
+   ║  • ~/.ssh/config (parsed)      • ~/.ssh/known_hosts (discovered)           ║
+   ║  • /etc/hosts (local network)   • ASH custom hosts file                    ║
+   ║                                                                              ║
+   ║  Connection types:                                                           ║
+   ║   SSH Shell        󰣘 SFTP/Files     󰒓 Tunnel/Forward                       ║
+   ║  󰿎 Jump Host        Copy-ID       󰋋 Run Command                             ║
+   ║  󰒔 Upload File      󰘓 VS Code SSH   󰋌 Mosh (mobile shell)                   ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰢹 SSH Connect              [Add Host] [Keys] [Config]           ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  [All] [Favorites] [Recent] [Personal] [Work] [VPS] [Local]      ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Search hosts by name, IP or alias…           24 hosts          ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  FAVORITES                                                        ║      ║
+   ║  ║  ★   dev-server      192.168.1.100  22  ubuntu  ● Online  12ms   ║      ║
+   ║  ║  ★   prod-web        10.0.0.1       22  root    ● Online  45ms   ║      ║
+   ║  ║  RECENT                                                           ║      ║
+   ║  ║    󰢹  nas-server      192.168.1.50   22  admin   ● Online  3ms    ║      ║
+   ║  ║  DISCOVERED                                                       ║      ║
+   ║  ║    󰢹  github.com      140.82.121.4   22  git     ○ Offline        ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ↩ connect  ⌥↩ sftp  ^F fav  ^T tunnel  ^C copy  ^K key info    ║      ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/ssh-connect/ssh-connect.sh                   ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "ssh:~/.config/rofi/menus/ssh-connect/ssh-connect.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-ssh:        "";
+
+    /* Custom bindings */
+    kb-custom-1:        "ctrl+f";         /* Toggle favorite */
+    kb-custom-2:        "ctrl+t";         /* SSH tunnel mode */
+    kb-custom-3:        "ctrl+c";         /* Copy connection string */
+    kb-custom-4:        "ctrl+k";         /* Show key info */
+    kb-custom-5:        "ctrl+n";         /* Add new host */
+    kb-custom-6:        "ctrl+e";         /* Edit host config */
+    kb-custom-7:        "ctrl+p";         /* Ping host */
+    kb-custom-8:        "ctrl+r";         /* Refresh / rescan */
+    kb-custom-9:        "ctrl+d";         /* Delete host */
+    kb-custom-10:       "ctrl+v";         /* VS Code Remote */
+    kb-custom-11:       "ctrl+s";         /* SFTP file browser */
+    kb-custom-12:       "ctrl+i";         /* Copy SSH ID */
+    kb-custom-13:       "alt+Return";     /* SFTP connect */
+    kb-custom-14:       "ctrl+m";         /* Mosh connect */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @sh-width;
+    height:             @sh-height;
+    x-offset:           0px;
+    y-offset:           @sh-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @sh-win-bg;
+    border-color:       @sh-win-border;
+    border:             @sh-win-border-width;
+    border-radius:      @sh-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [sh-header, sh-category-strip, sh-searchbar, listview, sh-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sh-header {
+    background-color:   @sh-header-bg;
+    border:             0px 0px @sh-header-border-width 0px;
+    border-color:       @sh-header-border;
+    border-radius:      @sh-win-radius @sh-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [sh-title-icon, sh-title-text, sh-header-spacer, sh-btn-add, sh-btn-keys, sh-btn-config];
+}
+
+sh-title-icon {
+    background-color:   transparent;
+    text-color:         @sh-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰢹";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-title-text {
+    background-color:   transparent;
+    text-color:         @sh-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "SSH Connect";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+sh-btn-add {
+    background-color:   @sh-add-bg;
+    text-color:         @sh-add-fg;
+    border:             1px;
+    border-color:       @sh-add-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰐕 Add Host";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+sh-btn-keys {
+    background-color:   @sh-btn-bg;
+    text-color:         @sh-btn-fg;
+    border:             1px;
+    border-color:       @sh-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰌋 Keys";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+sh-btn-config {
+    background-color:   @sh-btn-bg;
+    text-color:         @sh-btn-fg;
+    border:             1px;
+    border-color:       @sh-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰒓 Config";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  CATEGORY STRIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sh-category-strip {
+    background-color:   @sh-cat-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @sh-cat-border;
+    padding:            5px 14px;
+    spacing:            3px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, sh-cat-spacer, sh-host-count];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @sh-tab-bg;
+    text-color:         @sh-tab-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 10px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @sh-tab-selected-bg;
+    text-color:         @sh-tab-selected-fg;
+    border:             1px;
+    border-color:       @sh-tab-selected-border;
+}
+
+sh-cat-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+sh-host-count {
+    background-color:   transparent;
+    text-color:         @sh-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "0 hosts";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sh-searchbar {
+    background-color:   @sh-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @sh-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [sh-search-icon, entry, num-filtered-rows, sh-search-hint];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+sh-search-icon {
+    background-color:   transparent;
+    text-color:         @sh-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @sh-text;
+    placeholder-color:  @sh-muted;
+    placeholder:        "Search by hostname, IP, alias or user…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @sh-count-bg;
+    text-color:         @sh-count-fg;
+    border:             1px;
+    border-color:       @sh-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-search-hint {
+    background-color:   transparent;
+    text-color:         @sh-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "user@host";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @sh-listview-bg;
+    border:             0px;
+    padding:            @sh-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @sh-list-spacing;
+    columns:            1;
+    lines:              @sh-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  HOST ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @sh-element-radius;
+    padding:            @sh-element-padding-v @sh-element-padding-h;
+    margin:             0px @sh-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal: regular host ─────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @sh-element-fg;
+}
+
+/* ── Active: online/reachable host ───────────────────────────────────────── */
+element normal.active {
+    background-color:   @sh-online-bg;
+    text-color:         @sh-online-fg;
+}
+
+/* ── Urgent: favorite host ────────────────────────────────────────────────── */
+element normal.urgent {
+    background-color:   @sh-fav-bg;
+    text-color:         @sh-fav-fg;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @sh-selected-bg;
+    text-color:         @sh-selected-fg;
+}
+
+element selected.active {
+    background-color:   @sh-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @yellow;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @sh-alt-bg;
+    text-color:         @sh-alt-fg;
+}
+
+element alternate.active {
+    background-color:   @sh-online-alt-bg;
+    text-color:         @sh-online-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @sh-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  MESSAGE — CONNECTION INFO / KEY INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @sh-msg-bg;
+    border:             1px;
+    border-color:       @sh-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @sh-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+sh-footer {
+    background-color:   @sh-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @sh-footer-border;
+    border-radius:      0px 0px @sh-win-radius @sh-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [sh-hint-connect, sh-hint-sep-1, sh-hint-sftp, sh-hint-sep-2, sh-hint-fav, sh-hint-sep-3, sh-hint-tunnel, sh-hint-sep-4, sh-hint-copy, sh-footer-spacer, sh-ssh-version];
+}
+
+sh-hint-connect {
+    background-color:   transparent;
+    text-color:         @sh-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ connect";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-hint-sep-1, sh-hint-sep-2,
+sh-hint-sep-3, sh-hint-sep-4 {
+    background-color:   transparent;
+    text-color:         @sh-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-hint-sftp {
+    background-color:   transparent;
+    text-color:         @sh-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ sftp";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-hint-fav {
+    background-color:   transparent;
+    text-color:         @sh-hint-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^F favorite";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-hint-tunnel {
+    background-color:   transparent;
+    text-color:         @sh-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^T tunnel";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-hint-copy {
+    background-color:   transparent;
+    text-color:         @sh-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^C copy";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+sh-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+sh-ssh-version {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.38);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "OpenSSH  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

@@ -1,0 +1,528 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — File Browser Menu                                 ║
+   ║                                                                              ║
+   ║  Full-featured file browser with MIME-type icons, preview pane,            ║
+   ║  bookmarks, recent files, sort modes, hidden file toggle and                ║
+   ║  multi-action context menu per file type.                                   ║
+   ║                                                                              ║
+   ║  File type icons:                                                            ║
+   ║   Directory      Document     Image       Video       Audio                 ║
+   ║   Code/Source    Archive      PDF         Script      Binary                ║
+   ║   Symlink        Config       Database    Font        Unknown               ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󱁉 File Browser       ~/Documents    [↑ Up] [Hidden] [Sort]      ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  [⭐ Recent] [🔖 Bookmarks] [🏠 Home] [󰋊 Drives] [🗑 Trash]      ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Search in ~/Documents…                       24 items / 1.2G  ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰉋  ..  (parent directory)                                        ║      ║
+   ║  ║  󰉋  Projects/                  dir   4 items   Mar 12 10:45       ║      ║
+   ║  ║  󰉋  Notes/                     dir   18 items  Jan 08 09:23       ║      ║
+   ║  ║  󰈙  resume.pdf                 PDF   245 KB    Feb 28 14:32       ║      ║
+   ║  ║  󰷆  photo-2024.jpg             IMG   4.2 MB    Mar 15 08:17       ║      ║
+   ║  ║  󰅩  config.json                JSON  12 KB     Dec 20 11:55       ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ~/Documents  ·  24 items  ·  ↩ open  Del delete  ^C copy path   ║      ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/file-browser/file-browser.sh                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "fb:~/.config/rofi/menus/file-browser/file-browser.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-fb:         "";
+
+    kb-custom-1:        "ctrl+h";         /* Toggle hidden files */
+    kb-custom-2:        "ctrl+s";         /* Cycle sort mode */
+    kb-custom-3:        "ctrl+b";         /* Bookmark current dir */
+    kb-custom-4:        "ctrl+c";         /* Copy file path */
+    kb-custom-5:        "ctrl+n";         /* New file/folder */
+    kb-custom-6:        "ctrl+r";         /* Refresh */
+    kb-custom-7:        "ctrl+p";         /* Preview file */
+    kb-custom-8:        "ctrl+t";         /* Open in terminal */
+    kb-custom-9:        "Delete";         /* Delete file (with confirm) */
+    kb-custom-10:       "ctrl+x";         /* Cut file */
+    kb-custom-11:       "ctrl+v";         /* Paste file */
+    kb-custom-12:       "ctrl+a";         /* Select all */
+    kb-custom-13:       "alt+Return";     /* Open with... */
+    kb-custom-14:       "ctrl+l";         /* Jump to path */
+    kb-custom-15:       "BackSpace";      /* Navigate up */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — FILE MANAGER DIALOG
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @fb-width;
+    height:             @fb-height;
+    x-offset:           0px;
+    y-offset:           @fb-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @fb-win-bg;
+    border-color:       @fb-win-border;
+    border:             @fb-win-border-width;
+    border-radius:      @fb-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [fb-header, fb-location-strip, fb-searchbar, listview, fb-status-bar];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + PATH + CONTROLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+fb-header {
+    background-color:   @fb-header-bg;
+    border:             0px 0px @fb-header-border-width 0px;
+    border-color:       @fb-header-border;
+    border-radius:      @fb-win-radius @fb-win-radius 0px 0px;
+    padding:            11px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [fb-title-icon, fb-title-text, fb-current-path, fb-header-spacer, fb-btn-up, fb-btn-hidden, fb-btn-sort];
+}
+
+fb-title-icon {
+    background-color:   transparent;
+    text-color:         @fb-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "󱁉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-title-text {
+    background-color:   transparent;
+    text-color:         @fb-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "File Browser";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-current-path {
+    background-color:   @fb-path-bg;
+    text-color:         @fb-path-fg;
+    border:             1px;
+    border-color:       @fb-path-border;
+    border-radius:      @radius-sm;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "~/";
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+fb-btn-up {
+    background-color:   @fb-btn-bg;
+    text-color:         @fb-btn-fg;
+    border:             1px;
+    border-color:       @fb-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰁍 Up";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+fb-btn-hidden {
+    background-color:   @fb-btn-bg;
+    text-color:         @fb-btn-fg;
+    border:             1px;
+    border-color:       @fb-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  Hidden";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+fb-btn-sort {
+    background-color:   @fb-btn-bg;
+    text-color:         @fb-btn-fg;
+    border:             1px;
+    border-color:       @fb-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰒺 Name";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  LOCATION STRIP — QUICK ACCESS TABS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+fb-location-strip {
+    background-color:   @fb-loc-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @fb-loc-border;
+    padding:            5px 14px;
+    spacing:            4px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, fb-loc-spacer, fb-dir-stats];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @fb-tab-bg;
+    text-color:         @fb-tab-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 11px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @fb-tab-selected-bg;
+    text-color:         @fb-tab-selected-fg;
+    border:             1px;
+    border-color:       @fb-tab-selected-border;
+}
+
+fb-loc-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+fb-dir-stats {
+    background-color:   transparent;
+    text-color:         @fb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "0 items";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+fb-searchbar {
+    background-color:   @fb-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @fb-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [fb-search-icon, entry, num-filtered-rows, fb-size-display];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+fb-search-icon {
+    background-color:   transparent;
+    text-color:         @fb-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @fb-text;
+    placeholder-color:  @fb-muted;
+    placeholder:        "Filter files and folders…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @fb-count-bg;
+    text-color:         @fb-count-fg;
+    border:             1px;
+    border-color:       @fb-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-size-display {
+    background-color:   transparent;
+    text-color:         @fb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "─";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — FILE LISTING
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @fb-listview-bg;
+    border:             0px;
+    padding:            @fb-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @fb-list-spacing;
+    columns:            1;
+    lines:              @fb-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  FILE ENTRY ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @fb-element-radius;
+    padding:            @fb-element-padding-v @fb-element-padding-h;
+    margin:             0px @fb-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @fb-element-fg;
+}
+
+element normal.active {
+    /* Directory */
+    background-color:   @fb-dir-bg;
+    text-color:         @fb-dir-fg;
+}
+
+element normal.urgent {
+    /* Executable / special file */
+    background-color:   rgba(166, 227, 161, 0.07);
+    text-color:         @green;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @fb-selected-bg;
+    text-color:         @fb-selected-fg;
+}
+
+element selected.active {
+    /* Selected directory */
+    background-color:   @fb-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    /* Selected executable */
+    background-color:   @green;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @fb-alt-bg;
+    text-color:         @fb-alt-fg;
+}
+
+element alternate.active {
+    background-color:   @fb-dir-alt-bg;
+    text-color:         @fb-dir-fg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  ELEMENT TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @fb-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  MESSAGE — FILE PREVIEW / INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @fb-preview-bg;
+    border:             1px;
+    border-color:       @fb-preview-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @fb-preview-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  STATUS BAR — CURRENT PATH + STATS + HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+fb-status-bar {
+    background-color:   @fb-status-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @fb-status-border;
+    border-radius:      0px 0px @fb-win-radius @fb-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [fb-status-path, fb-status-sep-1, fb-status-count, fb-status-sep-2, fb-hint-open, fb-status-sep-3, fb-hint-copy, fb-status-sep-4, fb-hint-del, fb-status-spacer, fb-hint-term];
+}
+
+fb-status-path {
+    background-color:   transparent;
+    text-color:         @fb-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "~/";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-status-sep-1, fb-status-sep-2,
+fb-status-sep-3, fb-status-sep-4 {
+    background-color:   transparent;
+    text-color:         @fb-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-status-count {
+    background-color:   transparent;
+    text-color:         @fb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "0 items";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-hint-open {
+    background-color:   transparent;
+    text-color:         @fb-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ open";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-hint-copy {
+    background-color:   transparent;
+    text-color:         @fb-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^C copy path";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-hint-del {
+    background-color:   transparent;
+    text-color:         @fb-hint-danger;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Del delete";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+fb-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+fb-hint-term {
+    background-color:   transparent;
+    text-color:         @fb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^T terminal here";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

@@ -1,0 +1,268 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Keybind Viewer Style: Code Reference            ║
+   ║                                                                              ║
+   ║  Technical monospace-first aesthetic. Keyboard reference needs crisp       ║
+   ║  readability above all else. Minimal decoration, maximum information        ║
+   ║  density with high-contrast key labels.                                    ║
+   ║                                                                              ║
+   ║  Color system:                                                               ║
+   ║  • Lavender (#b4befe)  — primary accent, keybind labels, category icons    ║
+   ║  • Blue (#89b4fa)      — secondary, live indicator, categories              ║
+   ║  • Mauve (#cba4f7)     — selected state                                    ║
+   ║  • Green (#a6e3a1)     — no-conflict status, copy action                   ║
+   ║  • Yellow (#f9e2af)    — repeat-while-held binds, warnings                 ║
+   ║  • Red (#f38ba8)       — conflicting binds, locked binds                   ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+* {
+    /* ── Geometry ────────────────────────────────────────────────────────────── */
+    kb-width:                       820px;
+    kb-height:                      0px;
+    kb-y-offset:                    -50px;
+
+    /* ── Window ──────────────────────────────────────────────────────────────── */
+    kb-win-bg:                      rgba(17, 17, 27, 0.96);
+    kb-win-border:                  rgba(180, 190, 254, 0.28);
+    kb-win-border-width:            1px;
+    kb-win-radius:                  16px;
+
+    /* ── Header ──────────────────────────────────────────────────────────────── */
+    kb-header-bg:                   rgba(20, 20, 32, 0.80);
+    kb-header-border:               rgba(49, 50, 68, 0.80);
+    kb-header-border-width:         1px;
+
+    /* ── Primary accent (lavender — code/reference feel) ─────────────────────── */
+    kb-accent:                      #b4befe;
+
+    /* ── Buttons ──────────────────────────────────────────────────────────────── */
+    kb-btn-bg:                      rgba(49, 50, 68, 0.45);
+    kb-btn-fg:                      #a6adc8;
+    kb-btn-border:                  rgba(69, 71, 90, 0.45);
+
+    /* ── Live indicator button ────────────────────────────────────────────────── */
+    kb-live-bg:                     rgba(166, 227, 161, 0.12);
+    kb-live-fg:                     #a6e3a1;
+    kb-live-border:                 rgba(166, 227, 161, 0.28);
+
+    /* ── Bind count badge ─────────────────────────────────────────────────────── */
+    kb-count-bg:                    rgba(180, 190, 254, 0.10);
+    kb-count-fg:                    #b4befe;
+    kb-count-border:                rgba(180, 190, 254, 0.25);
+
+    /* ── Category strip ───────────────────────────────────────────────────────── */
+    kb-cat-bg:                      rgba(22, 22, 34, 0.68);
+    kb-cat-border:                  rgba(49, 50, 68, 0.80);
+    kb-cat-btn-bg:                  transparent;
+    kb-cat-btn-fg:                  rgba(108, 112, 134, 0.80);
+    kb-cat-selected-bg:             rgba(180, 190, 254, 0.85);
+    kb-cat-selected-fg:             #1e1e2e;
+    kb-cat-selected-border:         rgba(180, 190, 254, 1.0);
+
+    /* ── Search bar ───────────────────────────────────────────────────────────── */
+    kb-search-bg:                   rgba(30, 30, 46, 0.60);
+    kb-search-border:               rgba(49, 50, 68, 0.85);
+
+    /* ── Filtered count ───────────────────────────────────────────────────────── */
+    kb-filt-bg:                     rgba(180, 190, 254, 0.10);
+    kb-filt-fg:                     #b4befe;
+    kb-filt-border:                 rgba(180, 190, 254, 0.25);
+
+    /* ── Text ─────────────────────────────────────────────────────────────────── */
+    kb-text:                        #cdd6f4;
+    kb-muted:                       rgba(108, 112, 134, 0.65);
+    kb-sep-color:                   rgba(69, 71, 90, 0.55);
+    kb-highlight:                   #b4befe;
+
+    /* ── List view ────────────────────────────────────────────────────────────── */
+    kb-listview-bg:                 transparent;
+    kb-list-padding-v:              5px;
+    kb-list-spacing:                1px;
+    kb-list-lines:                  13;
+
+    /* ── Elements ─────────────────────────────────────────────────────────────── */
+    kb-element-radius:              @radius-sm;
+    kb-element-padding-v:           6px;
+    kb-element-padding-h:           16px;
+    kb-element-margin-h:            5px;
+    kb-element-fg:                  #cdd6f4;
+
+    /* ── Pinned / frequently used ─────────────────────────────────────────────── */
+    kb-pinned-bg:                   rgba(137, 180, 250, 0.08);
+    kb-pinned-fg:                   #89b4fa;
+
+    /* ── Selected ─────────────────────────────────────────────────────────────── */
+    kb-selected-bg:                 rgba(180, 190, 254, 0.88);
+    kb-selected-fg:                 #1e1e2e;
+
+    /* ── Alternate ────────────────────────────────────────────────────────────── */
+    kb-alt-bg:                      rgba(30, 30, 46, 0.25);
+    kb-alt-fg:                      #9399b2;
+
+    /* ── Status bar ───────────────────────────────────────────────────────────── */
+    kb-status-bg:                   rgba(22, 22, 34, 0.72);
+    kb-status-border:               rgba(49, 50, 68, 0.75);
+
+    /* ── Submap badge ─────────────────────────────────────────────────────────── */
+    kb-submap-bg:                   rgba(203, 164, 247, 0.12);
+    kb-submap-fg:                   #cba4f7;
+    kb-submap-border:               rgba(203, 164, 247, 0.28);
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    kb-footer-bg:                   rgba(17, 17, 27, 0.80);
+    kb-footer-border:               rgba(49, 50, 68, 0.70);
+    kb-hint-primary:                #b4befe;
+    kb-hint-fg:                     rgba(108, 112, 134, 0.65);
+
+    /* ── Message ──────────────────────────────────────────────────────────────── */
+    kb-msg-bg:                      rgba(180, 190, 254, 0.08);
+    kb-msg-fg:                      #a6adc8;
+    kb-msg-border:                  rgba(180, 190, 254, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  APPLIED STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    background-color:   rgba(17, 17, 27, 0.96);
+    border-color:       rgba(180, 190, 254, 0.28);
+    border:             1px;
+    border-radius:      16px;
+}
+
+kb-header {
+    background-color:   rgba(20, 20, 32, 0.80);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+kb-title-icon   { text-color: #b4befe; }
+kb-title-text   { text-color: #cdd6f4; }
+
+kb-btn-export {
+    background-color:   rgba(49, 50, 68, 0.45);
+    text-color:         #a6adc8;
+    border-color:       rgba(69, 71, 90, 0.45);
+}
+
+kb-btn-live {
+    background-color:   rgba(166, 227, 161, 0.12);
+    text-color:         #a6e3a1;
+    border-color:       rgba(166, 227, 161, 0.28);
+}
+
+kb-bind-count {
+    background-color:   rgba(180, 190, 254, 0.10);
+    text-color:         #b4befe;
+    border-color:       rgba(180, 190, 254, 0.25);
+}
+
+kb-category-strip {
+    background-color:   rgba(22, 22, 34, 0.68);
+    border-color:       rgba(49, 50, 68, 0.80);
+}
+
+kb-modifier-hint { text-color: rgba(88, 91, 112, 0.50); }
+
+button {
+    background-color:   transparent;
+    text-color:         rgba(108, 112, 134, 0.80);
+    border:             0px;
+}
+
+button.selected {
+    background-color:   rgba(180, 190, 254, 0.85);
+    text-color:         #1e1e2e;
+    border:             1px;
+    border-color:       rgba(180, 190, 254, 1.0);
+}
+
+kb-searchbar {
+    background-color:   rgba(30, 30, 46, 0.60);
+    border-color:       rgba(49, 50, 68, 0.85);
+}
+
+kb-search-icon  { text-color: #b4befe; }
+kb-search-meta  { text-color: rgba(88, 91, 112, 0.45); }
+entry           { text-color: #cdd6f4; placeholder-color: rgba(108,112,134,0.55); font: "JetBrainsMono Nerd Font 12"; }
+
+num-filtered-rows {
+    background-color:   rgba(180, 190, 254, 0.10);
+    text-color:         #b4befe;
+    border-color:       rgba(180, 190, 254, 0.25);
+}
+
+/* ── Keybind element states ───────────────────────────────────────────────── */
+element normal.normal  { background-color: transparent; text-color: #cdd6f4; }
+element normal.active  { background-color: rgba(137,180,250,0.08); text-color: #89b4fa; }
+element normal.urgent  { background-color: rgba(243,139,168,0.08); text-color: #f38ba8; }
+
+element selected.normal {
+    background-color:   rgba(180, 190, 254, 0.88);
+    text-color:         #1e1e2e;
+}
+
+element selected.active {
+    background-color:   #b4befe;
+    text-color:         #1e1e2e;
+}
+
+element selected.urgent {
+    background-color:   #f38ba8;
+    text-color:         #1e1e2e;
+}
+
+element alternate.normal {
+    background-color:   rgba(30, 30, 46, 0.25);
+    text-color:         #9399b2;
+}
+
+/* Monospace font critical for alignment in keybind viewer */
+element-text {
+    font:               "JetBrainsMono Nerd Font 12";
+    highlight:          bold #b4befe;
+    text-color:         inherit;
+}
+
+/* ── Status bar ───────────────────────────────────────────────────────────── */
+kb-status-bar {
+    background-color:   rgba(22, 22, 34, 0.72);
+    border-color:       rgba(49, 50, 68, 0.75);
+}
+
+kb-submap-label  { text-color: rgba(108, 112, 134, 0.65); }
+kb-submap-value {
+    background-color:   rgba(203, 164, 247, 0.12);
+    text-color:         #cba4f7;
+    border-color:       rgba(203, 164, 247, 0.28);
+}
+
+kb-stat-sep-1,
+kb-stat-sep-2    { text-color: rgba(69, 71, 90, 0.55); }
+kb-total-label   { text-color: rgba(108, 112, 134, 0.60); }
+kb-conflict-label { text-color: #a6e3a1; }
+kb-copy-hint     { text-color: rgba(88, 91, 112, 0.45); }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+kb-footer {
+    background-color:   rgba(17, 17, 27, 0.80);
+    border-color:       rgba(49, 50, 68, 0.70);
+}
+
+kb-hint-copy    { text-color: #b4befe; }
+kb-hint-edit,
+kb-hint-refresh,
+kb-hint-export  { text-color: rgba(108, 112, 134, 0.65); }
+
+kb-hint-sep-1,
+kb-hint-sep-2,
+kb-hint-sep-3   { text-color: rgba(49, 50, 68, 0.70); }
+
+kb-version { text-color: rgba(69, 71, 90, 0.38); }
+
+/* ── Message ──────────────────────────────────────────────────────────────── */
+message {
+    background-color:   rgba(180, 190, 254, 0.08);
+    border-color:       rgba(180, 190, 254, 0.25);
+}
+
+textbox { text-color: #a6adc8; font: "JetBrainsMono Nerd Font 11"; }

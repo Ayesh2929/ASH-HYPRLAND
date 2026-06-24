@@ -1,0 +1,449 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Clipboard History Manager                        ║
+   ║                                                                              ║
+   ║  Full-featured clipboard manager via cliphist integration. Browse,         ║
+   ║  search, preview, paste, pin, delete and organize clipboard history.        ║
+   ║                                                                              ║
+   ║  Entry types with icons:                                                     ║
+   ║  󰅌  Text (plain)      󰙀  Code snippet      󰆏  URL/Link                      ║
+   ║  󰻊  Email address     󰌌  Password/secret   󰋩  Image (binary)               ║
+   ║  󰒓  JSON/config       󰕯  Path/File         󰈦  Large text block             ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════╗      ║
+   ║  ║  󰅌 Clipboard History          [Pin] [Clear All]  247 entries     ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  󰍉 Search clipboard…                             just now       ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  PINNED                                                          ║      ║
+   ║  ║  📌 󰌌 •••••••••••••••                       password  3d ago    ║      ║
+   ║  ║  RECENT                                                          ║      ║
+   ║  ║  ▶ 󰆏  https://github.com/...               url       just now   ║      ║
+   ║  ║    󰅌  Hello world, this is a...             text      2m ago     ║      ║
+   ║  ║    󰙀  const x = require('...               code      15m ago    ║      ║
+   ║  ║    󰒓  {"name":"ash","ver...                json      1h ago     ║      ║
+   ║  ║    󰋩  [binary image data]                  image     2h ago     ║      ║
+   ║  ╠═══════════════════════════════════════════════════════════════════╣      ║
+   ║  ║  ↩ paste  Del delete  ^P pin  ^C copy  ^A clear  Esc cancel     ║      ║
+   ║  ╚═══════════════════════════════════════════════════════════════════╝      ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/clipboard/clipboard.sh                       ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "cb:~/.config/rofi/menus/clipboard/clipboard.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-cb:         "";
+
+    /* Custom key bindings */
+    kb-custom-1:        "ctrl+p";         /* Pin/unpin entry */
+    kb-custom-2:        "ctrl+a";         /* Clear all history */
+    kb-custom-3:        "ctrl+c";         /* Copy without closing */
+    kb-custom-4:        "ctrl+e";         /* Edit before pasting */
+    kb-custom-5:        "Delete";         /* Delete entry */
+    kb-custom-6:        "ctrl+shift+p";   /* Show pinned only */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW — CLIPBOARD BROWSER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @cb-width;
+    height:             @cb-height;
+    x-offset:           0px;
+    y-offset:           @cb-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @cb-win-bg;
+    border-color:       @cb-win-border;
+    border:             @cb-win-border-width;
+    border-radius:      @cb-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [cb-header, cb-searchbar, listview, cb-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER — TITLE + STATS + CONTROLS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cb-header {
+    background-color:   @cb-header-bg;
+    border:             0px 0px @cb-header-border-width 0px;
+    border-color:       @cb-header-border;
+    border-radius:      @cb-win-radius @cb-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cb-title-icon, cb-title-text, cb-header-spacer, cb-count-badge, cb-pin-btn, cb-clear-btn];
+}
+
+cb-title-icon {
+    background-color:   transparent;
+    text-color:         @cb-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "󰅌";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-title-text {
+    background-color:   transparent;
+    text-color:         @cb-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Clipboard History";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+cb-count-badge {
+    background-color:   @cb-badge-bg;
+    text-color:         @cb-badge-fg;
+    border:             1px;
+    border-color:       @cb-badge-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "0 entries";       /* Updated by script */
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-pin-btn {
+    background-color:   @cb-pin-bg;
+    text-color:         @cb-pin-fg;
+    border:             1px;
+    border-color:       @cb-pin-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "📌 Pinned";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+cb-clear-btn {
+    background-color:   @cb-clear-bg;
+    text-color:         @cb-clear-fg;
+    border:             1px;
+    border-color:       @cb-clear-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰩹 Clear All";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  SEARCH BAR — FILTER + TIMESTAMP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cb-searchbar {
+    background-color:   @cb-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @cb-search-border;
+    padding:            9px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cb-search-icon, entry, cb-time-display, num-filtered-rows];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+cb-search-icon {
+    background-color:   transparent;
+    text-color:         @cb-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @cb-text;
+    placeholder-color:  @cb-muted;
+    placeholder:        "Search clipboard history…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+cb-time-display {
+    background-color:   transparent;
+    text-color:         @cb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "just now";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+num-filtered-rows {
+    background-color:   @cb-count-bg;
+    text-color:         @cb-count-fg;
+    border:             1px;
+    border-color:       @cb-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  LIST VIEW — CLIPBOARD ENTRIES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @cb-listview-bg;
+    border:             0px;
+    padding:            @cb-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @cb-list-spacing;
+    columns:            1;
+    lines:              @cb-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  CLIPBOARD ENTRY ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @cb-element-radius;
+    padding:            @cb-element-padding-v @cb-element-padding-h;
+    margin:             0px @cb-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal states ────────────────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @cb-element-fg;
+}
+
+element normal.active {
+    /* Pinned entry */
+    background-color:   @cb-pinned-bg;
+    text-color:         @cb-pinned-fg;
+}
+
+element normal.urgent {
+    /* Large/binary entry warning */
+    background-color:   rgba(249, 226, 175, 0.08);
+    text-color:         @yellow;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @cb-selected-bg;
+    text-color:         @cb-selected-fg;
+}
+
+element selected.active {
+    /* Selected pinned */
+    background-color:   @cb-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @yellow;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @cb-alt-bg;
+    text-color:         @cb-alt-fg;
+}
+
+element alternate.active {
+    background-color:   rgba(203, 164, 247, 0.06);
+    text-color:         @cb-accent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  ELEMENT TEXT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @cb-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  PREVIEW PANEL — INLINE PREVIEW BELOW SELECTED
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Preview shown via message element when item is highlighted */
+message {
+    background-color:   @cb-preview-bg;
+    border:             1px;
+    border-color:       @cb-preview-border;
+    border-radius:      @radius-sm;
+    padding:            8px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @cb-preview-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — KEYBOARD SHORTCUTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+cb-footer {
+    background-color:   @cb-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @cb-footer-border;
+    border-radius:      0px 0px @cb-win-radius @cb-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [cb-hint-paste, cb-hint-sep-1, cb-hint-del, cb-hint-sep-2, cb-hint-pin, cb-hint-sep-3, cb-hint-copy, cb-hint-sep-4, cb-hint-clear, cb-footer-spacer, cb-entry-count];
+}
+
+cb-hint-paste {
+    background-color:   transparent;
+    text-color:         @cb-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ paste";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-hint-sep-1, cb-hint-sep-2,
+cb-hint-sep-3, cb-hint-sep-4 {
+    background-color:   transparent;
+    text-color:         @cb-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-hint-del {
+    background-color:   transparent;
+    text-color:         @cb-hint-danger;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Del delete";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-hint-pin {
+    background-color:   transparent;
+    text-color:         @cb-hint-accent;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^P pin";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-hint-copy {
+    background-color:   transparent;
+    text-color:         @cb-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^C copy";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-hint-clear {
+    background-color:   transparent;
+    text-color:         @cb-hint-danger;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^A clear all";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+cb-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+cb-entry-count {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.45);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "cliphist  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}

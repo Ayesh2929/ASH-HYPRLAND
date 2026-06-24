@@ -1,0 +1,575 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Theme Picker Menu                                 ║
+   ║                                                                              ║
+   ║  Full theme browser with live preview, category navigation, AI generation, ║
+   ║  dark/light variants, accent color picker and instant hot-reload.          ║
+   ║                                                                              ║
+   ║  Theme Categories:                                                            ║
+   ║  🌑 Dark    ☀ Light   🌸 Pastel   ⚡ Neon    🌿 Nature                       ║
+   ║  🚀 Space   🎌 Anime   📼 Retro   🎨 Custom  🤖 AI-Gen                       ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════════╗   ║
+   ║  ║  󰌁 Theme Picker               [AI Gen] [Random] [Favorites] [Dark]   ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  [All] [Dark] [Light] [Pastel] [Neon] [Nature] [Space] [Anime]...   ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  󰍉 Search themes by name, family or tag…           156 themes       ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  ★ catppuccin-mocha     Catppuccin  dark  purple  ● Active           ║   ║
+   ║  ║    catppuccin-latte     Catppuccin  light  blue                      ║   ║
+   ║  ║    tokyo-night          Independent dark  blue                       ║   ║
+   ║  ║    gruvbox-dark         Gruvbox     dark  orange                     ║   ║
+   ║  ║    nord                 Nord        dark  blue                       ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  Active: catppuccin-mocha  ·  Mauve accent  ·  Hot-reload: ON       ║   ║
+   ║  ║  ↩ apply  ⌥↩ preview  ^F fav  ^R random  ^A AI  Esc cancel         ║   ║
+   ║  ╚═══════════════════════════════════════════════════════════════════════╝   ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/theme-picker/theme-picker.sh                 ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "tp:~/.config/rofi/menus/theme-picker/theme-picker.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-tp:         "";
+
+    kb-custom-1:        "ctrl+f";         /* Toggle favorite */
+    kb-custom-2:        "ctrl+r";         /* Random theme */
+    kb-custom-3:        "ctrl+a";         /* AI generate */
+    kb-custom-4:        "ctrl+p";         /* Preview only */
+    kb-custom-5:        "ctrl+d";         /* Toggle dark/light */
+    kb-custom-6:        "ctrl+e";         /* Export theme */
+    kb-custom-7:        "ctrl+i";         /* Theme info */
+    kb-custom-8:        "alt+Return";     /* Preview without applying */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @tp-width;
+    height:             @tp-height;
+    x-offset:           0px;
+    y-offset:           @tp-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @tp-win-bg;
+    border-color:       @tp-win-border;
+    border:             @tp-win-border-width;
+    border-radius:      @tp-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [tp-header, tp-category-strip, tp-searchbar, listview, tp-status-bar, tp-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tp-header {
+    background-color:   @tp-header-bg;
+    border:             0px 0px @tp-header-border-width 0px;
+    border-color:       @tp-header-border;
+    border-radius:      @tp-win-radius @tp-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [tp-title-icon, tp-title-text, tp-header-spacer, tp-btn-ai, tp-btn-random, tp-btn-favorites, tp-btn-toggle-mode];
+}
+
+tp-title-icon {
+    background-color:   transparent;
+    text-color:         @tp-accent;
+    font:               "Symbols Nerd Font Mono 20";
+    str:                "󰌁";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-title-text {
+    background-color:   transparent;
+    text-color:         @tp-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Theme Picker";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+tp-btn-ai {
+    background-color:   @tp-ai-bg;
+    text-color:         @tp-ai-fg;
+    border:             1px;
+    border-color:       @tp-ai-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰚩 AI";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+tp-btn-random {
+    background-color:   @tp-btn-bg;
+    text-color:         @tp-btn-fg;
+    border:             1px;
+    border-color:       @tp-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰒝 Random";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+tp-btn-favorites {
+    background-color:   @tp-fav-bg;
+    text-color:         @tp-fav-fg;
+    border:             1px;
+    border-color:       @tp-fav-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "★ Favs";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+tp-btn-toggle-mode {
+    background-color:   @tp-mode-bg;
+    text-color:         @tp-mode-fg;
+    border:             1px;
+    border-color:       @tp-mode-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "🌙 Dark";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  CATEGORY STRIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tp-category-strip {
+    background-color:   @tp-cat-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @tp-cat-border;
+    padding:            5px 14px;
+    spacing:            3px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, tp-cat-spacer, tp-theme-count];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @tp-cat-btn-bg;
+    text-color:         @tp-cat-btn-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 11px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @tp-cat-btn-selected-bg;
+    text-color:         @tp-cat-btn-selected-fg;
+    border:             1px;
+    border-color:       @tp-cat-btn-selected-border;
+}
+
+tp-cat-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+tp-theme-count {
+    background-color:   transparent;
+    text-color:         @tp-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "156 themes";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tp-searchbar {
+    background-color:   @tp-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @tp-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [tp-search-icon, entry, num-filtered-rows, tp-search-meta];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+tp-search-icon {
+    background-color:   transparent;
+    text-color:         @tp-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @tp-text;
+    placeholder-color:  @tp-muted;
+    placeholder:        "Search by name, family, variant or tag…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @tp-count-bg;
+    text-color:         @tp-count-fg;
+    border:             1px;
+    border-color:       @tp-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-search-meta {
+    background-color:   transparent;
+    text-color:         @tp-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "name  family  tag";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @tp-listview-bg;
+    border:             0px;
+    padding:            @tp-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @tp-list-spacing;
+    columns:            1;
+    lines:              @tp-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  THEME ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @tp-element-radius;
+    padding:            @tp-element-padding-v @tp-element-padding-h;
+    margin:             0px @tp-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @tp-element-fg;
+}
+
+element normal.active {
+    /* Currently applied theme */
+    background-color:   @tp-active-bg;
+    text-color:         @tp-active-fg;
+}
+
+element normal.urgent {
+    /* Favorite theme */
+    background-color:   @tp-fav-item-bg;
+    text-color:         @tp-fav-item-fg;
+}
+
+element selected.normal {
+    background-color:   @tp-selected-bg;
+    text-color:         @tp-selected-fg;
+}
+
+element selected.active {
+    background-color:   @tp-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @yellow;
+    text-color:         @base;
+}
+
+element alternate.normal {
+    background-color:   @tp-alt-bg;
+    text-color:         @tp-alt-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @tp-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  STATUS BAR — ACTIVE THEME INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tp-status-bar {
+    background-color:   @tp-status-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @tp-status-border;
+    padding:            7px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [tp-status-icon, tp-status-active, tp-status-sep-1, tp-status-accent, tp-status-sep-2, tp-status-reload, tp-status-spacer, tp-status-actions];
+}
+
+tp-status-icon {
+    background-color:   transparent;
+    text-color:         @tp-accent;
+    font:               "Symbols Nerd Font Mono 12";
+    str:                "󰌁";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-status-active {
+    background-color:   transparent;
+    text-color:         @tp-text;
+    font:               "JetBrainsMono Nerd Font Bold 11";
+    str:                "catppuccin-mocha";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-status-sep-1, tp-status-sep-2 {
+    background-color:   transparent;
+    text-color:         @tp-sep-color;
+    font:               "JetBrainsMono Nerd Font 11";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-status-accent {
+    background-color:   transparent;
+    text-color:         @mauve;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⬤ mauve";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-status-reload {
+    background-color:   @tp-reload-bg;
+    text-color:         @tp-reload-fg;
+    border:             1px;
+    border-color:       @tp-reload-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "⚡ Live";
+    padding:            1px 7px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+tp-status-actions {
+    background-color:   transparent;
+    text-color:         @tp-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "^F fav  ^D dark/light  ^E export";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER — ACTION HINTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+tp-footer {
+    background-color:   @tp-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @tp-footer-border;
+    border-radius:      0px 0px @tp-win-radius @tp-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [tp-hint-apply, tp-hint-sep-1, tp-hint-preview, tp-hint-sep-2, tp-hint-random, tp-hint-sep-3, tp-hint-ai, tp-footer-spacer, tp-version];
+}
+
+tp-hint-apply {
+    background-color:   transparent;
+    text-color:         @tp-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ apply";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-hint-sep-1, tp-hint-sep-2, tp-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @tp-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-hint-preview {
+    background-color:   transparent;
+    text-color:         @tp-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⌥↩ preview";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-hint-random {
+    background-color:   transparent;
+    text-color:         @tp-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R random";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-hint-ai {
+    background-color:   transparent;
+    text-color:         @tp-ai-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^A AI generate";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+tp-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+tp-version {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.40);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "ASH Theme Engine v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE — THEME PREVIEW / INFO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @tp-msg-bg;
+    border:             1px;
+    border-color:       @tp-msg-border;
+    border-radius:      @radius-sm;
+    padding:            6px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @tp-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}

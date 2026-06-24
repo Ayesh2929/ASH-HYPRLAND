@@ -1,0 +1,563 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — Keybind Viewer / Cheatsheet                      ║
+   ║                                                                              ║
+   ║  Interactive keybind reference browser. Search, filter by category,        ║
+   ║  copy keybind to clipboard, jump to config and see live submap state.      ║
+   ║                                                                              ║
+   ║  Categories:                                                                 ║
+   ║  󰘳  All         󰘴  Windows    󰝪  Workspaces  󰍜  Launchers                   ║
+   ║  󰎵  Media       󰐥  Power      󰙳  Apps       🎮  Gaming                      ║
+   ║  󰹑  Screenshot  󱓋  Modes      🔑  Submaps    ⚡  Custom                      ║
+   ║                                                                              ║
+   ║  Layout:                                                                     ║
+   ║  ╔═══════════════════════════════════════════════════════════════════════╗   ║
+   ║  ║  🔑 Keybind Reference              [Category] [Export] [Live]        ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  [All] [Win] [WS] [Launch] [Media] [Power] [Apps] [Screen] [Modes]  ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  󰍉 Search keybinds…                               234 binds          ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  WINDOW MANAGEMENT                                                    ║   ║
+   ║  ║  󰘴  Super+Q          Close window (graceful)                         ║   ║
+   ║  ║  󰘴  Super+Shift+Q    Force kill window                               ║   ║
+   ║  ║  󰘴  Super+F          Toggle float / tile                             ║   ║
+   ║  ║  󰘴  Super+H/J/K/L    Focus window (vim directions)                   ║   ║
+   ║  ╠═══════════════════════════════════════════════════════════════════════╣   ║
+   ║  ║  Active submap: default  ·  Total: 234  ·  Conflicts: 0  ·  ^C copy ║   ║
+   ║  ║  ↩ copy  Ctrl+E edit  Ctrl+R refresh  Ctrl+X export   Esc close     ║   ║
+   ║  ╚═══════════════════════════════════════════════════════════════════════╝   ║
+   ║                                                                              ║
+   ║  Usage: ~/.config/rofi/menus/keybind-viewer/keybind-viewer.sh             ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+@import "../../colors.rasi"
+@import "../../fonts.rasi"
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §01  CONFIGURATION
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+configuration {
+    modes:              "kb:~/.config/rofi/menus/keybind-viewer/keybind-viewer.sh";
+    show-icons:         false;
+    font:               "JetBrainsMono Nerd Font 12";
+    case-sensitive:     false;
+    matching:           "fuzzy";
+    sort:               false;
+    click-to-exit:      true;
+    steal-focus:        false;
+    fixed-num-lines:    false;
+    display-kb:         "";
+
+    kb-custom-1:        "ctrl+e";         /* Edit keybind config */
+    kb-custom-2:        "ctrl+r";         /* Refresh from hyprctl */
+    kb-custom-3:        "ctrl+x";         /* Export to file */
+    kb-custom-4:        "ctrl+c";         /* Copy keybind to clipboard */
+    kb-custom-5:        "ctrl+f";         /* Toggle conflict finder */
+    kb-custom-6:        "ctrl+l";         /* Live hyprctl binds */
+    kb-custom-7:        "ctrl+s";         /* Search by key */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §02  WINDOW
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+window {
+    width:              @kb-width;
+    height:             @kb-height;
+    x-offset:           0px;
+    y-offset:           @kb-y-offset;
+    location:           center;
+    anchor:             center;
+    fullscreen:         false;
+
+    background-color:   @kb-win-bg;
+    border-color:       @kb-win-border;
+    border:             @kb-win-border-width;
+    border-radius:      @kb-win-radius;
+
+    padding:            0px;
+    cursor:             "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §03  MAIN BOX
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+mainbox {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    spacing:            0px;
+    orientation:        vertical;
+    children:           [kb-header, kb-category-strip, kb-searchbar, listview, kb-status-bar, kb-footer];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §04  HEADER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+kb-header {
+    background-color:   @kb-header-bg;
+    border:             0px 0px @kb-header-border-width 0px;
+    border-color:       @kb-header-border;
+    border-radius:      @kb-win-radius @kb-win-radius 0px 0px;
+    padding:            12px 18px;
+    spacing:            10px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [kb-title-icon, kb-title-text, kb-header-spacer, kb-btn-export, kb-btn-live, kb-bind-count];
+}
+
+kb-title-icon {
+    background-color:   transparent;
+    text-color:         @kb-accent;
+    font:               "Symbols Nerd Font Mono 18";
+    str:                "🔑";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-title-text {
+    background-color:   transparent;
+    text-color:         @kb-text;
+    font:               "JetBrainsMono Nerd Font Bold 14";
+    str:                "Keybind Reference";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-header-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+kb-btn-export {
+    background-color:   @kb-btn-bg;
+    text-color:         @kb-btn-fg;
+    border:             1px;
+    border-color:       @kb-btn-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰈦 Export";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+kb-btn-live {
+    background-color:   @kb-live-bg;
+    text-color:         @kb-live-fg;
+    border:             1px;
+    border-color:       @kb-live-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "⚡ Live";
+    padding:            3px 12px;
+    expand:             false;
+    vertical-align:     0.5;
+    cursor:             pointer;
+}
+
+kb-bind-count {
+    background-color:   @kb-count-bg;
+    text-color:         @kb-count-fg;
+    border:             1px;
+    border-color:       @kb-count-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "234 binds";
+    padding:            2px 10px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §05  CATEGORY STRIP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+kb-category-strip {
+    background-color:   @kb-cat-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @kb-cat-border;
+    padding:            5px 12px;
+    spacing:            3px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [mode-switcher, kb-cat-spacer, kb-modifier-hint];
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    spacing:            3px;
+    padding:            0px;
+    orientation:        horizontal;
+    expand:             false;
+}
+
+button {
+    background-color:   @kb-cat-btn-bg;
+    text-color:         @kb-cat-btn-fg;
+    border:             0px;
+    border-radius:      @radius-sm;
+    padding:            3px 10px;
+    font:               "JetBrainsMono Nerd Font 11";
+    cursor:             pointer;
+    expand:             false;
+}
+
+button.selected {
+    background-color:   @kb-cat-selected-bg;
+    text-color:         @kb-cat-selected-fg;
+    border:             1px;
+    border-color:       @kb-cat-selected-border;
+}
+
+kb-cat-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+kb-modifier-hint {
+    background-color:   transparent;
+    text-color:         @kb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "󰘳 Super = Win/Meta";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §06  SEARCH BAR
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+kb-searchbar {
+    background-color:   @kb-search-bg;
+    border:             0px 0px 1px 0px;
+    border-color:       @kb-search-border;
+    padding:            8px 18px;
+    spacing:            8px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [kb-search-icon, entry, num-filtered-rows, kb-search-meta];
+}
+
+inputbar {
+    background-color:   transparent;
+    border:             0px;
+    padding:            0px;
+    children:           [entry];
+}
+
+kb-search-icon {
+    background-color:   transparent;
+    text-color:         @kb-accent;
+    font:               "Symbols Nerd Font Mono 13";
+    str:                "󰍉";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+entry {
+    background-color:   transparent;
+    text-color:         @kb-text;
+    placeholder-color:  @kb-muted;
+    placeholder:        "Search by action, key or modifier…";
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             text;
+    expand:             true;
+    blink:              true;
+}
+
+num-filtered-rows {
+    background-color:   @kb-filt-bg;
+    text-color:         @kb-filt-fg;
+    border:             1px;
+    border-color:       @kb-filt-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font 10";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-search-meta {
+    background-color:   transparent;
+    text-color:         @kb-muted;
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "key  action  mod";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §07  LIST VIEW — KEYBIND ROWS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+listview {
+    background-color:   @kb-listview-bg;
+    border:             0px;
+    padding:            @kb-list-padding-v 0px;
+    margin:             0px;
+    spacing:            @kb-list-spacing;
+    columns:            1;
+    lines:              @kb-list-lines;
+    fixed-height:       true;
+    dynamic:            true;
+    layout:             vertical;
+    flow:               vertical;
+    cycle:              true;
+    scrollbar:          false;
+    expand:             true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §08  KEYBIND ELEMENTS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+element {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      @kb-element-radius;
+    padding:            @kb-element-padding-v @kb-element-padding-h;
+    margin:             0px @kb-element-margin-h;
+    spacing:            0px;
+    orientation:        horizontal;
+    cursor:             pointer;
+}
+
+/* ── Normal: regular keybind ──────────────────────────────────────────────── */
+element normal.normal {
+    background-color:   transparent;
+    text-color:         @kb-element-fg;
+}
+
+/* ── Active: frequently used / pinned keybind ────────────────────────────── */
+element normal.active {
+    background-color:   @kb-pinned-bg;
+    text-color:         @kb-pinned-fg;
+}
+
+/* ── Urgent: conflicting keybind ─────────────────────────────────────────── */
+element normal.urgent {
+    background-color:   rgba(243, 139, 168, 0.08);
+    text-color:         @red;
+}
+
+/* ── Selected states ─────────────────────────────────────────────────────── */
+element selected.normal {
+    background-color:   @kb-selected-bg;
+    text-color:         @kb-selected-fg;
+}
+
+element selected.active {
+    background-color:   @kb-accent;
+    text-color:         @base;
+}
+
+element selected.urgent {
+    background-color:   @red;
+    text-color:         @base;
+}
+
+/* ── Alternate rows ───────────────────────────────────────────────────────── */
+element alternate.normal {
+    background-color:   @kb-alt-bg;
+    text-color:         @kb-alt-fg;
+}
+
+element-icon {
+    background-color:   transparent;
+    size:               0px;
+    padding:            0px;
+}
+
+element-text {
+    background-color:   transparent;
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    cursor:             inherit;
+    expand:             true;
+    vertical-align:     0.5;
+    highlight:          bold @kb-highlight;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §09  STATUS BAR — SUBMAP + STATS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+kb-status-bar {
+    background-color:   @kb-status-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @kb-status-border;
+    padding:            6px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [kb-submap-label, kb-submap-value, kb-stat-sep-1, kb-total-label, kb-stat-sep-2, kb-conflict-label, kb-status-spacer, kb-copy-hint];
+}
+
+kb-submap-label {
+    background-color:   transparent;
+    text-color:         @kb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "Submap: ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-submap-value {
+    background-color:   @kb-submap-bg;
+    text-color:         @kb-submap-fg;
+    border:             1px;
+    border-color:       @kb-submap-border;
+    border-radius:      @radius-pill;
+    font:               "JetBrainsMono Nerd Font Bold 9";
+    str:                "default";
+    padding:            1px 8px;
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-stat-sep-1, kb-stat-sep-2 {
+    background-color:   transparent;
+    text-color:         @kb-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  ·  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-total-label {
+    background-color:   transparent;
+    text-color:         @kb-muted;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "234 total";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-conflict-label {
+    background-color:   transparent;
+    text-color:         @green;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "✓ no conflicts";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-status-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+kb-copy-hint {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.50);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "^C copy to clipboard";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §10  FOOTER
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+kb-footer {
+    background-color:   @kb-footer-bg;
+    border:             1px 0px 0px 0px;
+    border-color:       @kb-footer-border;
+    border-radius:      0px 0px @kb-win-radius @kb-win-radius;
+    padding:            8px 18px;
+    spacing:            0px;
+    orientation:        horizontal;
+    expand:             false;
+    children:           [kb-hint-copy, kb-hint-sep-1, kb-hint-edit, kb-hint-sep-2, kb-hint-refresh, kb-hint-sep-3, kb-hint-export, kb-footer-spacer, kb-version];
+}
+
+kb-hint-copy {
+    background-color:   transparent;
+    text-color:         @kb-hint-primary;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "↩ copy";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-hint-sep-1, kb-hint-sep-2, kb-hint-sep-3 {
+    background-color:   transparent;
+    text-color:         @kb-sep-color;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "  │  ";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-hint-edit {
+    background-color:   transparent;
+    text-color:         @kb-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^E edit";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-hint-refresh {
+    background-color:   transparent;
+    text-color:         @kb-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^R refresh";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-hint-export {
+    background-color:   transparent;
+    text-color:         @kb-hint-fg;
+    font:               "JetBrainsMono Nerd Font 10";
+    str:                "^X export";
+    expand:             false;
+    vertical-align:     0.5;
+}
+
+kb-footer-spacer {
+    background-color:   transparent;
+    expand:             true;
+}
+
+kb-version {
+    background-color:   transparent;
+    text-color:         rgba(88, 91, 112, 0.38);
+    font:               "JetBrainsMono Nerd Font 9";
+    str:                "Hyprland  ·  ASH v5.0";
+    expand:             false;
+    vertical-align:     0.5;
+    horizontal-align:   1.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   §11  MESSAGE — KEY DETAIL / HINT
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+message {
+    background-color:   @kb-msg-bg;
+    border:             1px;
+    border-color:       @kb-msg-border;
+    border-radius:      @radius-sm;
+    padding:            5px 16px;
+    margin:             0px 6px 4px 6px;
+    expand:             false;
+}
+
+textbox {
+    background-color:   transparent;
+    text-color:         @kb-msg-fg;
+    font:               "JetBrainsMono Nerd Font 11";
+    highlight:          none;
+    markup:             true;
+}
