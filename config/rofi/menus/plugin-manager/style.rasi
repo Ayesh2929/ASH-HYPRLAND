@@ -1,0 +1,417 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — PLUGIN MANAGER STYLE ENGINE
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : style.rasi
+ * Author  : Ash Dotfiles v5.0 Omega
+ * License : MIT
+ * Desc    : Complete design token system for the Plugin Manager UI.
+ *           All palette variables marked [INJECTED] are overwritten at
+ *           runtime by the ash theme engine color template system.
+ *           Never edit injected values — use: ash theme apply <name>
+ *
+ * Token Architecture:
+ *   § 1  Raw palette          (Catppuccin Mocha defaults → [INJECTED])
+ *   § 2  Semantic bg tokens   (30 named background roles)
+ *   § 3  Semantic fg tokens   (18 named foreground roles)
+ *   § 4  Border tokens        (12 named border roles)
+ *   § 5  Status color system  (installed·update·error·featured·beta)
+ *   § 6  Category color map   (10 plugin category colors)
+ *   § 7  Typography scale     (20 named font tokens)
+ *   § 8  Spacing & radius     (8-step scale)
+ *   § 9  Animation tokens     (easing + duration)
+ *   § 10 Icon reference map   (all nerd font codepoints documented)
+ *   § 11 Light theme override (commented — auto-applied by ash engine)
+ *   § 12 Neon theme override  (commented — auto-applied by ash engine)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 1  RAW PALETTE — [INJECTED] BY ASH THEME ENGINE AT RUNTIME
+ *      Default: Catppuccin Mocha (universally safe dark fallback)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* ── Base surface scale (dark → light) ──────────────────────────────── */
+    _crust:         #11111b;   /* Absolute darkest tone              */
+    _mantle:        #181825;   /* Deep background                    */
+    _base:          #1e1e2e;   /* Primary window background          */
+    _surface0:      #313244;   /* Elevated surface level 0           */
+    _surface1:      #45475a;   /* Elevated surface level 1           */
+    _surface2:      #585b70;   /* Elevated surface level 2           */
+
+    /* ── Overlay / muted scale ──────────────────────────────────────────── */
+    _overlay0:      #6c7086;   /* Overlay icons / faint text         */
+    _overlay1:      #7f849c;   /* Secondary hints / timestamps       */
+    _overlay2:      #9399b2;   /* Tertiary text / metadata           */
+
+    /* ── Text scale ─────────────────────────────────────────────────────── */
+    _text:          #cdd6f4;   /* Primary text                       */
+    _subtext1:      #bac2de;   /* Secondary text                     */
+    _subtext0:      #a6adc8;   /* Tertiary / muted text              */
+
+    /* ── Accent palette — [INJECTED] ────────────────────────────────────── */
+    _accent:        #cba6f7;   /* Mauve — primary UI accent          */
+    _accent-blue:   #89b4fa;   /* Blue — install / action            */
+    _accent-green:  #a6e3a1;   /* Green — installed / success        */
+    _accent-red:    #f38ba8;   /* Red — error / remove               */
+    _accent-yellow: #f9e2af;   /* Yellow — update available          */
+    _accent-peach:  #fab387;   /* Peach — warning / beta             */
+    _accent-sky:    #89dceb;   /* Sky — info / featured              */
+    _accent-teal:   #94e2d5;   /* Teal — core / built-in             */
+    _accent-pink:   #f5c2e7;   /* Pink — community / trending        */
+    _accent-lavender: #b4befe; /* Lavender — integration             */
+    _accent-sapphire: #74c7ec; /* Sapphire — version badge           */
+    _accent-maroon: #eba0ac;   /* Maroon — deprecated                */
+    _accent-flamingo: #f2cdcd; /* Flamingo — premium / featured      */
+
+    /* ── Glass / alpha variants ─────────────────────────────────────────── */
+    _glass-window:      #1e1e2ed6;   /* 84% window background        */
+    _glass-border:      #cba6f722;   /* 13% accent border            */
+    _glass-surface:     #31324466;   /* 40% surface glass            */
+    _glass-surface-md:  #31324488;   /* 53% medium glass             */
+    _glass-surface-hi:  #313244aa;   /* 67% heavy glass              */
+    _glass-input:       #45475a44;   /* 27% input background         */
+    _glass-hover:       #cba6f710;   /* 6%  hover fill               */
+    _glass-selected:    #cba6f724;   /* 14% selection fill           */
+    _glass-selected-bd: #cba6f748;   /* 28% selection border         */
+    _glass-overlay:     #11111bcc;   /* 80% modal overlay            */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 2  SEMANTIC BACKGROUND TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Window & structural */
+    bg-window:              @_glass-window;
+    bg-header:              @_mantle;
+    bg-sidebar:             @_crust;
+    bg-content:             @_base;
+    bg-detail-panel:        @_mantle;
+    bg-footer:              @_mantle;
+    bg-toolbar:             @_surface0;
+    bg-statusbar:           @_crust;
+
+    /* Surface variants */
+    bg-surface:             @_surface0;
+    bg-surface-raised:      @_surface1;
+    bg-surface-high:        @_surface2;
+    bg-input:               @_glass-input;
+    bg-input-focused:       @_glass-surface-md;
+    bg-hover:               @_glass-hover;
+    bg-overlay:             @_glass-overlay;
+
+    /* Category & tab navigation */
+    bg-tab-active:          @_accent;
+    bg-tab-inactive:        transparent;
+    bg-tab-hover:           @_glass-hover;
+    bg-category-pill:       @_surface1;
+    bg-category-active:     @_accent;
+
+    /* Plugin card states */
+    bg-card:                @_glass-surface;
+    bg-card-selected:       @_glass-selected;
+    bg-card-installed:      #a6e3a118;
+    bg-card-update:         #f9e2af18;
+    bg-card-featured:       #f5c2e718;
+    bg-card-error:          #f38ba818;
+
+    /* Badge backgrounds */
+    bg-badge-installed:     @_accent-green;
+    bg-badge-update:        @_accent-yellow;
+    bg-badge-error:         @_accent-red;
+    bg-badge-beta:          @_accent-peach;
+    bg-badge-featured:      @_accent-pink;
+    bg-badge-core:          @_accent-teal;
+    bg-badge-new:           @_accent-sky;
+    bg-badge-deprecated:    @_accent-maroon;
+    bg-badge-premium:       @_accent-flamingo;
+    bg-badge-community:     @_accent-lavender;
+
+    /* Scrollbar */
+    bg-scrollbar:           @_surface0;
+    bg-scrollbar-handle:    @_surface2;
+
+    /* Progress / loading */
+    bg-progress-track:      @_surface1;
+    bg-progress-fill:       @_accent;
+    bg-spinner:             transparent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 3  SEMANTIC FOREGROUND TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    fg-primary:             @_text;
+    fg-secondary:           @_subtext1;
+    fg-muted:               @_subtext0;
+    fg-faint:               @_overlay1;
+    fg-placeholder:         @_overlay0;
+    fg-hint:                @_overlay1;
+    fg-disabled:            @_overlay0;
+
+    fg-accent:              @_accent;
+    fg-accent-blue:         @_accent-blue;
+    fg-success:             @_accent-green;
+    fg-error:               @_accent-red;
+    fg-warning:             @_accent-yellow;
+    fg-info:                @_accent-sky;
+    fg-beta:                @_accent-peach;
+    fg-featured:            @_accent-pink;
+    fg-core:                @_accent-teal;
+    fg-community:           @_accent-lavender;
+
+    /* Badge foregrounds */
+    fg-badge-installed:     @_base;
+    fg-badge-update:        @_base;
+    fg-badge-error:         @_base;
+    fg-badge-beta:          @_base;
+    fg-badge-featured:      @_base;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 4  BORDER TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    border-window:          @_glass-border;
+    border-subtle:          @_surface2;
+    border-medium:          @_surface1;
+    border-input:           @_surface2;
+    border-input-focus:     @_accent;
+    border-card:            @_surface1;
+    border-card-selected:   @_glass-selected-bd;
+    border-card-installed:  #a6e3a144;
+    border-card-update:     #f9e2af44;
+    border-card-featured:   #f5c2e744;
+    border-header:          @_surface1;
+    border-panel:           @_surface1;
+
+    /* Selection */
+    selection-bg:           @_glass-selected;
+    selection-border:       @_glass-selected-bd;
+    selection-fg:           @_text;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 5  STATUS COLOR SYSTEM
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Status dot colors (used in list items + detail panel) */
+    status-installed:       @_accent-green;
+    status-update:          @_accent-yellow;
+    status-not-installed:   @_overlay1;
+    status-error:           @_accent-red;
+    status-disabled:        @_overlay0;
+    status-beta:            @_accent-peach;
+    status-deprecated:      @_accent-maroon;
+    status-featured:        @_accent-pink;
+    status-core:            @_accent-teal;
+    status-loading:         @_accent;
+
+    /* Alpha variants for background tinting */
+    status-installed-alpha: #a6e3a118;
+    status-update-alpha:    #f9e2af18;
+    status-error-alpha:     #f38ba818;
+    status-beta-alpha:      #fab38718;
+    status-featured-alpha:  #f5c2e718;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 6  CATEGORY COLOR MAP
+ *      Each plugin category has a distinct hue for visual scanning.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    cat-theme:          @_accent;            /* Mauve  — Theme plugins     */
+    cat-productivity:   @_accent-blue;       /* Blue   — Productivity      */
+    cat-system:         @_accent-teal;       /* Teal   — System tools      */
+    cat-integration:    @_accent-lavender;   /* Lav.   — Integrations      */
+    cat-gaming:         @_accent-green;      /* Green  — Gaming            */
+    cat-media:          @_accent-sky;        /* Sky    — Media             */
+    cat-security:       @_accent-red;        /* Red    — Security          */
+    cat-ai:             @_accent-pink;       /* Pink   — AI / ML           */
+    cat-network:        @_accent-sapphire;   /* Saph.  — Network           */
+    cat-utility:        @_accent-peach;      /* Peach  — Utilities         */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 7  TYPOGRAPHY SCALE
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    font-base:          "JetBrainsMono Nerd Font 12";
+    font-display:       "Inter Black 18";
+    font-title:         "Inter Bold 15";
+    font-subtitle:      "Inter SemiBold 13";
+    font-ui:            "Inter 12";
+    font-ui-med:        "Inter Medium 12";
+    font-ui-bold:       "Inter Bold 12";
+    font-small:         "Inter 10";
+    font-xsmall:        "Inter 9";
+    font-hint:          "JetBrainsMono Nerd Font 10";
+    font-mono:          "JetBrainsMono Nerd Font 12";
+    font-mono-sm:       "JetBrainsMono Nerd Font 10";
+    font-mono-xs:       "JetBrainsMono Nerd Font 9";
+    font-icon-xxl:      "JetBrainsMono Nerd Font 28";
+    font-icon-xl:       "JetBrainsMono Nerd Font 20";
+    font-icon-lg:       "JetBrainsMono Nerd Font 16";
+    font-icon-md:       "JetBrainsMono Nerd Font 13";
+    font-icon-sm:       "JetBrainsMono Nerd Font 11";
+    font-badge:         "Inter Bold 9";
+    font-version:       "JetBrainsMono Nerd Font Bold 10";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 8  SPACING & RADIUS SCALE
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    radius-xs:          4px;
+    radius-sm:          6px;
+    radius-md:          10px;
+    radius-lg:          14px;
+    radius-xl:          18px;
+    radius-2xl:         24px;
+    radius-3xl:         32px;
+    radius-pill:        9999px;
+
+    /* Component sizing */
+    sidebar-width:      220px;
+    detail-panel-width: 300px;
+    header-height:      66px;
+    footer-height:      40px;
+    tab-bar-height:     42px;
+    badge-height:       18px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 9  ANIMATION TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    _ease-out-expo:    "cubic-bezier(0.16, 1, 0.3, 1)";
+    _ease-out-quart:   "cubic-bezier(0.25, 1, 0.5, 1)";
+    _ease-spring:      "cubic-bezier(0.34, 1.56, 0.64, 1)";
+    _ease-smooth:      "cubic-bezier(0.4, 0.0, 0.2, 1)";
+    _ease-in-out:      "cubic-bezier(0.45, 0, 0.55, 1)";
+
+    _dur-instant:      "60ms";
+    _dur-fast:         "120ms";
+    _dur-base:         "200ms";
+    _dur-slow:         "350ms";
+    _dur-xslow:        "500ms";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 10  ICON REFERENCE MAP
+ *       All Nerd Font codepoints used in plugin-manager.rasi + .sh
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  PLUGIN MANAGER ICON REFERENCE
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  CORE UI:
+ *  󰏗   nf-md-package_variant         Main plugin icon
+ *  󰏔   nf-md-package_variant_closed  Installed plugin
+ *  󰏕   nf-md-package_check           Plugin with update
+ *  󰅢   nf-md-package_down            Install action
+ *  󰅣   nf-md-package_up              Update action
+ *  󱧉   nf-md-package_off             Remove action
+ *  󰍉   nf-md-magnify                 Search
+ *  󰒺   nf-md-sort                    Sort
+ *  󰈲   nf-md-filter_variant          Filter
+ *  󰑐   nf-md-refresh                 Refresh / reload
+ *  󰅖   nf-md-close                   Clear / close
+ *  󰒓   nf-md-cog                     Settings
+ *  󰋚   nf-md-earth                   Store / registry
+ *  ★   star (unicode)                Favourite / star
+ *
+ *  STATUS INDICATORS:
+ *  ●   bullet                        Status dot
+ *  ✓   check                         Installed / success
+ *  ✗   cross                         Error / not available
+ *  ⚡  zap                           Fast / active
+ *  󰏦   nf-md-alert-circle             Warning / beta
+ *  󰒃   nf-md-shield-check            Security verified
+ *  󰒅   nf-md-shield-off              Security unverified
+ *
+ *  CATEGORIES:
+ *  󰔰   nf-md-palette                 Theme
+ *  󰙏   nf-md-briefcase               Productivity
+ *  󰍛   nf-md-cpu-64-bit              System
+ *  󱘖   nf-md-puzzle-plus             Integration
+ *  󰊗   nf-md-gamepad-variant         Gaming
+ *  󰎆   nf-md-music                   Media
+ *  󰒃   nf-md-shield-check            Security
+ *  󰧱   nf-md-robot                   AI / ML
+ *  󰛳   nf-md-network                 Network
+ *  󰒄   nf-md-tools                   Utility
+ *
+ *  ACTIONS:
+ *  󰏫   nf-md-pencil                  Edit / configure
+ *  󰆏   nf-md-content_copy            Copy
+ *  󰈮   nf-md-export-variant          Export
+ *  󰹑   nf-md-history                 History / changelog
+ *  󰋗   nf-md-information             Info / about
+ *  󰐃   nf-md-pin                     Pin / favourite
+ *  󰐄   nf-md-pin-off                 Unpin
+ *  󱉬   nf-md-download-circle         Download indicator
+ *  󰙭   nf-md-cog-refresh             Auto-update
+ *
+ *  METRICS:
+ *  󰇰   nf-md-download                Download count
+ *  ★   star                          Rating star
+ *  󰔛   nf-md-clock-outline           Last updated
+ *  󰉿   nf-md-weight                  Size
+ *  󱂌   nf-md-source-branch           Version / branch
+ *  󰊤   nf-md-github                  GitHub link
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 11  LIGHT THEME OVERRIDE
+ *       Auto-applied by ash engine when a light theme is active.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * @theme-variant-light {
+ *   _crust:    #dce0e8;
+ *   _mantle:   #e6e9ef;
+ *   _base:     #eff1f5;
+ *   _surface0: #ccd0da;
+ *   _surface1: #bcc0cc;
+ *   _surface2: #acb0be;
+ *   _overlay0: #9ca0b0;
+ *   _overlay1: #8c8fa1;
+ *   _text:     #4c4f69;
+ *   _subtext1: #5c5f77;
+ *   _subtext0: #6c6f85;
+ *   _accent:   #8839ef;
+ *   _glass-window: #eff1f5ee;
+ *   _glass-border: #8839ef22;
+ * }
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 12  NEON THEME OVERRIDE
+ *       Auto-applied by ash engine when a neon/cyberpunk theme is active.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * @theme-variant-neon {
+ *   _crust:    #050508;
+ *   _mantle:   #080810;
+ *   _base:     #0d0d1a;
+ *   _surface0: #141428;
+ *   _surface1: #1e1e3f;
+ *   _text:     #e0e0ff;
+ *   _accent:   #ff00ff;
+ *   _glass-window: #0d0d1add;
+ *   _glass-border: #ff00ff30;
+ *   _glass-selected: #ff00ff20;
+ * }
+ */

@@ -1,0 +1,1665 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — TRANSLATION ULTRA PREMIUM UI
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : translation.rasi
+ * Author  : Ash Dotfiles v5.0 Omega
+ * License : MIT
+ * Desc    : Ultra premium real-time translation interface for Rofi.
+ *
+ *           Layout (1080 × 680px):
+ *           ┌─────────────────────────────────────────────────────────┐
+ *           │  HEADER — logo · title · provider switcher · settings  │
+ *           ├────────────────────────────────────────────────────────-│
+ *           │  LANG BAR — [source lang pills] ⇄ [target lang pills]  │
+ *           ├───────────────────────────────┬─────────────────────────┤
+ *           │  INPUT PANEL                  │  HISTORY PANEL          │
+ *           │  • search/entry               │  • recent 10 pairs      │
+ *           │  • char counter               │  • favourite pairs      │
+ *           │  • TTS + clipboard btns       │  • search history       │
+ *           ├───────────────────────────────┤                         │
+ *           │  OUTPUT PANEL                 │                         │
+ *           │  • translation result         │                         │
+ *           │  • phonetic / romanisation    │                         │
+ *           │  • TTS + copy + export btns   │                         │
+ *           ├───────────────────────────────┴─────────────────────────┤
+ *           │  FOOTER — keybind hints · engine status · word count    │
+ *           └─────────────────────────────────────────────────────────┘
+ *
+ *           Keybind map (10 custom bindings):
+ *           Ctrl+S  → Swap source ↔ target language
+ *           Ctrl+C  → Copy translation to clipboard
+ *           Ctrl+T  → Text-to-speech (result)
+ *           Ctrl+H  → Toggle history panel
+ *           Ctrl+F  → Add to favourites
+ *           Ctrl+E  → Export translation
+ *           Ctrl+P  → Paste from clipboard → translate
+ *           Ctrl+R  → Retry with next provider
+ *           Ctrl+D  → Detect source language
+ *           Ctrl+X  → Clear all
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ── Design token import ────────────────────────────────────────────────── */
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * CONFIGURATION BLOCK
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+configuration {
+    /* ── Modi ───────────────────────────────────────────────────────────── */
+    modi:                   "translation:~/.config/rofi/menus/translation/translation.sh";
+    display-translation:    " 󰗊  Translate";
+
+    /* ── Input ──────────────────────────────────────────────────────────── */
+    case-sensitive:         false;
+    cycle:                  true;
+    filter:                 "";
+    placeholder:            "󰗊  Type or paste text to translate…";
+
+    /* ── Matching ───────────────────────────────────────────────────────── */
+    matching:               "fuzzy";
+    tokenize:               true;
+    sort:                   false;
+
+    /* ── Scroll ─────────────────────────────────────────────────────────── */
+    scroll-method:          0;
+    window-thumbnail:       false;
+
+    /* ── Core Keybinds ──────────────────────────────────────────────────── */
+    kb-accept-entry:        "Return,KP_Enter";
+    kb-accept-alt:          "shift+Return";
+    kb-remove-char-back:    "BackSpace";
+    kb-remove-word-back:    "ctrl+BackSpace";
+    kb-remove-to-eol:       "ctrl+k";
+    kb-remove-to-sol:       "ctrl+u";
+    kb-move-front:          "ctrl+a";
+    kb-move-end:            "ctrl+e";
+    kb-cancel:              "Escape,ctrl+g";
+    kb-row-up:              "Up,ctrl+p";
+    kb-row-down:            "Down,ctrl+n";
+    kb-page-next:           "ctrl+f,ctrl+Right";
+    kb-page-prev:           "ctrl+b,ctrl+Left";
+    kb-row-first:           "ctrl+Home";
+    kb-row-last:            "ctrl+End";
+    kb-mode-next:           "ctrl+Tab";
+    kb-mode-previous:       "ctrl+shift+Tab";
+
+    /* ── Custom Action Keybinds ─────────────────────────────────────────── */
+    kb-custom-1:            "ctrl+s";        /* Swap languages         */
+    kb-custom-2:            "ctrl+c";        /* Copy result            */
+    kb-custom-3:            "ctrl+t";        /* TTS result             */
+    kb-custom-4:            "ctrl+h";        /* Toggle history         */
+    kb-custom-5:            "ctrl+f";        /* Favourite pair         */
+    kb-custom-6:            "ctrl+e";        /* Export translation     */
+    kb-custom-7:            "ctrl+p";        /* Paste → translate      */
+    kb-custom-8:            "ctrl+r";        /* Retry / next provider  */
+    kb-custom-9:            "ctrl+d";        /* Detect source lang     */
+    kb-custom-10:           "ctrl+x";        /* Clear all              */
+
+    /* ── Language Quick-select (Alt+1–9) ────────────────────────────────── */
+    kb-select-1:            "alt+1";
+    kb-select-2:            "alt+2";
+    kb-select-3:            "alt+3";
+    kb-select-4:            "alt+4";
+    kb-select-5:            "alt+5";
+    kb-select-6:            "alt+6";
+    kb-select-7:            "alt+7";
+    kb-select-8:            "alt+8";
+    kb-select-9:            "alt+9";
+
+    /* ── Performance ────────────────────────────────────────────────────── */
+    threads:                0;
+    lazy-grab:              false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ROOT WINDOW
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+window {
+    /* Geometry */
+    width:                  1080px;
+    height:                 680px;
+    x-offset:               0px;
+    y-offset:               0px;
+    location:               center;
+    anchor:                 center;
+
+    /* Glass decoration */
+    background-color:       @bg-window;
+    border:                 1px solid;
+    border-color:           @border-window;
+    border-radius:          @radius-xl;
+
+    /* Typography */
+    font:                   @font-base;
+    text-color:             @fg-primary;
+
+    /* Wayland blur support flag */
+    transparency:           "real";
+    cursor:                 "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * MAINBOX — ROOT LAYOUT
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+mainbox {
+    background-color:       transparent;
+    border:                 0px;
+    spacing:                0px;
+    padding:                0px;
+    orientation:            vertical;
+    children:               [ header, lang-bar, content-body, footer ];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION A: HEADER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+header {
+    background-color:       @bg-header;
+    border:                 0px 0px 1px 0px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-xl @radius-xl 0px 0px;
+    padding:                0px 20px;
+    orientation:            horizontal;
+    spacing:                14px;
+    expand:                 false;
+    children:               [
+                                header-brand,
+                                spacer,
+                                provider-switcher,
+                                header-divider,
+                                header-controls
+                            ];
+}
+
+/* ── Brand block ───────────────────────────────────────────────────────────── */
+header-brand {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                10px;
+    expand:                 false;
+    children:               [ brand-icon-wrap, brand-text-wrap ];
+}
+
+brand-icon-wrap {
+    background-color:       @accent-alpha;
+    border-radius:          @radius-md;
+    padding:                10px 12px;
+    expand:                 false;
+    children:               [ brand-icon ];
+}
+
+brand-icon {
+    background-color:       transparent;
+    content:                "󰗊";
+    font:                   @font-icon-xl;
+    text-color:             @accent;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    expand:                 false;
+}
+
+brand-text-wrap {
+    background-color:       transparent;
+    orientation:            vertical;
+    spacing:                3px;
+    expand:                 false;
+    children:               [ brand-title, brand-subtitle ];
+}
+
+brand-title {
+    background-color:       transparent;
+    content:                "Translate";
+    font:                   @font-title;
+    text-color:             @fg-primary;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+}
+
+brand-subtitle {
+    background-color:       transparent;
+    content:                "100+ languages · 6 engines · AI-powered";
+    font:                   @font-xsmall;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+}
+
+/* ── Provider Switcher ─────────────────────────────────────────────────────── */
+provider-switcher {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                6px;
+    expand:                 false;
+    children:               [
+                                prov-label,
+                                prov-google,
+                                prov-deepl,
+                                prov-libretranslate,
+                                prov-ollama,
+                                prov-lingva,
+                                prov-mymemory
+                            ];
+}
+
+prov-label {
+    background-color:       transparent;
+    content:                "Engine:";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+prov-google {
+    background-color:       @accent;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "🌐 Google";
+    font:                   @font-provider;
+    text-color:             @bg-window;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+prov-deepl {
+    background-color:       @bg-provider-badge;
+    border:                 1px solid;
+    border-color:           @border-provider;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "🔒 DeepL";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+prov-libretranslate {
+    background-color:       @bg-provider-badge;
+    border:                 1px solid;
+    border-color:           @border-provider;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "⚡ Libre";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+prov-ollama {
+    background-color:       @bg-provider-badge;
+    border:                 1px solid;
+    border-color:           @border-provider;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "🤖 Ollama";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+prov-lingva {
+    background-color:       @bg-provider-badge;
+    border:                 1px solid;
+    border-color:           @border-provider;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "⚡ Lingva";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+prov-mymemory {
+    background-color:       @bg-provider-badge;
+    border:                 1px solid;
+    border-color:           @border-provider;
+    border-radius:          @radius-pill;
+    padding:                4px 10px;
+    expand:                 false;
+    content:                "🌐 MyMem";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+header-divider {
+    background-color:       @border-subtle;
+    expand:                 false;
+    width:                  1px;
+    margin:                 12px 4px;
+}
+
+/* ── Header Controls ───────────────────────────────────────────────────────── */
+header-controls {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                6px;
+    expand:                 false;
+    children:               [ ctrl-history, ctrl-fav, ctrl-settings ];
+}
+
+ctrl-history {
+    background-color:       @bg-surface;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "󰹑";
+    font:                   @font-icon-md;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+ctrl-fav {
+    background-color:       @bg-surface;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "★";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+ctrl-settings {
+    background-color:       @bg-surface;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "󰒓";
+    font:                   @font-icon-md;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+spacer {
+    background-color:       transparent;
+    expand:                 true;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION B: LANGUAGE BAR
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+lang-bar {
+    background-color:       @bg-lang-bar;
+    border:                 0px 0px 1px 0px solid;
+    border-color:           @border-subtle;
+    padding:                8px 20px;
+    orientation:            horizontal;
+    spacing:                10px;
+    expand:                 false;
+    children:               [
+                                source-lang-group,
+                                swap-area,
+                                target-lang-group
+                            ];
+}
+
+/* ── Source language group ─────────────────────────────────────────────────── */
+source-lang-group {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                6px;
+    expand:                 true;
+    children:               [
+                                lang-src-detect,
+                                lang-src-en,
+                                lang-src-de,
+                                lang-src-fr,
+                                lang-src-es,
+                                lang-src-zh,
+                                lang-src-ja,
+                                lang-src-ru,
+                                lang-src-ar,
+                                lang-src-more
+                            ];
+}
+
+lang-src-detect {
+    background-color:       @bg-detect-badge;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "󰍉  Auto";
+    font:                   @font-ui;
+    text-color:             @fg-detect;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-en {
+    background-color:       @bg-lang-btn-active;
+    border:                 1px solid;
+    border-color:           @border-active-lang;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇺🇸 EN";
+    font:                   @font-lang-code;
+    text-color:             @fg-lang-active;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-de {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇩🇪 DE";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-fr {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇫🇷 FR";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-es {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇪🇸 ES";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-zh {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇨🇳 ZH";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-ja {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇯🇵 JA";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-ru {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇷🇺 RU";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-ar {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇸🇦 AR";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-src-more {
+    background-color:       @bg-lang-btn;
+    border:                 1px dashed;
+    border-color:           @border-subtle;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "󰋚 More…";
+    font:                   @font-lang-code;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+/* ── Swap area ─────────────────────────────────────────────────────────────── */
+swap-area {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [ swap-label-src, swap-btn, swap-label-tgt ];
+}
+
+swap-label-src {
+    background-color:       transparent;
+    content:                "SRC";
+    font:                   @font-xsmall;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    expand:                 false;
+}
+
+swap-btn {
+    background-color:       @bg-swap-btn;
+    border-radius:          @radius-pill;
+    padding:                6px 14px;
+    expand:                 false;
+    content:                "󰒊";
+    font:                   @font-icon-lg;
+    text-color:             @fg-swap;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+swap-label-tgt {
+    background-color:       transparent;
+    content:                "TGT";
+    font:                   @font-xsmall;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    expand:                 false;
+}
+
+/* ── Target language group ─────────────────────────────────────────────────── */
+target-lang-group {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                6px;
+    expand:                 true;
+    children:               [
+                                lang-tgt-de,
+                                lang-tgt-fr,
+                                lang-tgt-es,
+                                lang-tgt-it,
+                                lang-tgt-pt,
+                                lang-tgt-zh,
+                                lang-tgt-ja,
+                                lang-tgt-ko,
+                                lang-tgt-ru,
+                                lang-tgt-more
+                            ];
+}
+
+lang-tgt-de {
+    background-color:       @bg-lang-btn-active;
+    border:                 1px solid;
+    border-color:           @border-active-lang;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇩🇪 DE";
+    font:                   @font-lang-code;
+    text-color:             @fg-lang-active;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-fr {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇫🇷 FR";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-es {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇪🇸 ES";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-it {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇮🇹 IT";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-pt {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇵🇹 PT";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-zh {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇨🇳 ZH";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-ja {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇯🇵 JA";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-ko {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇰🇷 KO";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-ru {
+    background-color:       @bg-lang-btn;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "🇷🇺 RU";
+    font:                   @font-lang-code;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+lang-tgt-more {
+    background-color:       @bg-lang-btn;
+    border:                 1px dashed;
+    border-color:           @border-subtle;
+    border-radius:          @radius-pill;
+    padding:                4px 11px;
+    expand:                 false;
+    content:                "󰋚 More…";
+    font:                   @font-lang-code;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C: CONTENT BODY (three-panel row)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+content-body {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                0px;
+    expand:                 true;
+    children:               [ translation-panels, history-panel ];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C1: TRANSLATION PANELS (input + output stacked)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+translation-panels {
+    background-color:       transparent;
+    border:                 0px 1px 0px 0px solid;
+    border-color:           @border-panel;
+    orientation:            vertical;
+    spacing:                0px;
+    expand:                 true;
+    children:               [ input-panel, panel-divider, output-panel ];
+}
+
+/* ── Input Panel ───────────────────────────────────────────────────────────── */
+input-panel {
+    background-color:       @bg-input-panel;
+    border:                 0px;
+    padding:                0px;
+    orientation:            vertical;
+    spacing:                0px;
+    expand:                 true;
+    children:               [
+                                input-toolbar,
+                                input-area,
+                                input-statusbar
+                            ];
+}
+
+input-toolbar {
+    background-color:       @bg-surface;
+    border:                 0px 0px 1px 0px solid;
+    border-color:           @border-subtle;
+    padding:                6px 16px;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [
+                                itb-lang-badge,
+                                itb-sep,
+                                itb-label,
+                                spacer,
+                                itb-paste,
+                                itb-tts-src,
+                                itb-clear
+                            ];
+}
+
+itb-lang-badge {
+    background-color:       @accent-alpha;
+    border-radius:          @radius-pill;
+    padding:                3px 10px;
+    expand:                 false;
+    content:                "🇺🇸  English";
+    font:                   @font-ui-med;
+    text-color:             @accent;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+}
+
+itb-sep {
+    background-color:       @border-subtle;
+    expand:                 false;
+    width:                  1px;
+    margin:                 5px 2px;
+}
+
+itb-label {
+    background-color:       transparent;
+    content:                "Source";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+    expand:                 false;
+}
+
+itb-paste {
+    background-color:       transparent;
+    border-radius:          @radius-sm;
+    padding:                4px 8px;
+    expand:                 false;
+    content:                "󰨿";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+itb-tts-src {
+    background-color:       transparent;
+    border-radius:          @radius-sm;
+    padding:                4px 8px;
+    expand:                 false;
+    content:                "󰂚";
+    font:                   @font-icon-sm;
+    text-color:             @fg-tts;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+itb-clear {
+    background-color:       transparent;
+    border-radius:          @radius-sm;
+    padding:                4px 8px;
+    expand:                 false;
+    content:                "󰅖";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+/* ── The actual Rofi input entry lives here ──────────────────────────────── */
+input-area {
+    background-color:       transparent;
+    padding:                0px;
+    orientation:            vertical;
+    expand:                 true;
+    children:               [ inputbar ];
+}
+
+inputbar {
+    background-color:       transparent;
+    border:                 0px;
+    padding:                16px 18px;
+    spacing:                0px;
+    expand:                 true;
+    orientation:            vertical;
+    children:               [ prompt, entry, case-indicator ];
+}
+
+prompt {
+    background-color:       transparent;
+    enabled:                false;
+    expand:                 false;
+    text-color:             @fg-muted;
+}
+
+entry {
+    background-color:       transparent;
+    border:                 0px;
+    padding:                0px;
+    expand:                 true;
+    font:                   @font-result;
+    text-color:             @fg-primary;
+    vertical-align:         0.0;
+    horizontal-align:       0.0;
+    placeholder:            "Type or paste text to translate…";
+    placeholder-color:      @fg-placeholder;
+    cursor:                 text;
+}
+
+case-indicator {
+    background-color:       transparent;
+    text-color:             @fg-muted;
+    font:                   @font-small;
+    expand:                 false;
+}
+
+input-statusbar {
+    background-color:       @bg-surface;
+    border:                 1px 0px 0px 0px solid;
+    border-color:           @border-subtle;
+    padding:                6px 16px;
+    orientation:            horizontal;
+    spacing:                10px;
+    expand:                 false;
+    children:               [
+                                isb-detect-badge,
+                                spacer,
+                                isb-char-count,
+                                isb-word-count
+                            ];
+}
+
+isb-detect-badge {
+    background-color:       @bg-detect-badge;
+    border-radius:          @radius-pill;
+    padding:                3px 10px;
+    expand:                 false;
+    content:                "󰍉  Detected: English";
+    font:                   @font-small;
+    text-color:             @fg-detect;
+    vertical-align:         0.5;
+}
+
+isb-char-count {
+    background-color:       transparent;
+    content:                "0 / 5000";
+    font:                   @font-char-count;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+isb-word-count {
+    background-color:       transparent;
+    content:                "0 words";
+    font:                   @font-char-count;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+/* ── Panel Divider ─────────────────────────────────────────────────────────── */
+panel-divider {
+    background-color:       @border-panel;
+    expand:                 false;
+    height:                 1px;
+}
+
+/* ── Output Panel ──────────────────────────────────────────────────────────── */
+output-panel {
+    background-color:       @bg-output-panel;
+    border:                 0px;
+    padding:                0px;
+    orientation:            vertical;
+    spacing:                0px;
+    expand:                 true;
+    children:               [
+                                output-toolbar,
+                                output-area,
+                                output-phonetic-bar,
+                                output-actions
+                            ];
+}
+
+output-toolbar {
+    background-color:       @bg-surface;
+    border:                 0px 0px 1px 0px solid;
+    border-color:           @border-subtle;
+    padding:                6px 16px;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [
+                                otb-lang-badge,
+                                otb-sep,
+                                otb-label,
+                                spacer,
+                                otb-engine-badge,
+                                otb-confidence
+                            ];
+}
+
+otb-lang-badge {
+    background-color:       @accent-alpha;
+    border-radius:          @radius-pill;
+    padding:                3px 10px;
+    expand:                 false;
+    content:                "🇩🇪  Deutsch";
+    font:                   @font-ui-med;
+    text-color:             @accent;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+}
+
+otb-sep {
+    background-color:       @border-subtle;
+    expand:                 false;
+    width:                  1px;
+    margin:                 5px 2px;
+}
+
+otb-label {
+    background-color:       transparent;
+    content:                "Translation";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+    expand:                 false;
+}
+
+otb-engine-badge {
+    background-color:       @bg-provider-badge;
+    border-radius:          @radius-pill;
+    padding:                3px 9px;
+    expand:                 false;
+    content:                "🌐 Google";
+    font:                   @font-provider;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+}
+
+otb-confidence {
+    background-color:       transparent;
+    content:                "● 98%";
+    font:                   @font-small;
+    text-color:             @fg-success;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+output-area {
+    background-color:       transparent;
+    padding:                16px 18px 8px 18px;
+    expand:                 true;
+    orientation:            vertical;
+    spacing:                0px;
+    children:               [ output-result, output-empty ];
+}
+
+output-result {
+    background-color:       transparent;
+    content:                "Translation will appear here…";
+    font:                   @font-result;
+    text-color:             @fg-secondary;
+    vertical-align:         0.0;
+    horizontal-align:       0.0;
+    expand:                 true;
+}
+
+output-empty {
+    background-color:       transparent;
+    content:                "";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    expand:                 false;
+}
+
+output-phonetic-bar {
+    background-color:       @bg-surface;
+    border:                 1px 0px 0px 0px solid;
+    border-color:           @border-subtle;
+    padding:                6px 18px;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [
+                                phonetic-icon,
+                                phonetic-text,
+                                spacer,
+                                phonetic-romanize
+                            ];
+}
+
+phonetic-icon {
+    background-color:       transparent;
+    content:                "󱁬";
+    font:                   @font-icon-sm;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+phonetic-text {
+    background-color:       transparent;
+    content:                "Phonetic / romanisation shown here";
+    font:                   @font-phonetic;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+    expand:                 true;
+}
+
+phonetic-romanize {
+    background-color:       transparent;
+    content:                "Romanize";
+    font:                   @font-xsmall;
+    text-color:             @fg-accent;
+    vertical-align:         0.5;
+    expand:                 false;
+    cursor:                 pointer;
+}
+
+output-actions {
+    background-color:       @bg-surface;
+    border:                 1px 0px 0px 0px solid;
+    border-color:           @border-subtle;
+    padding:                8px 16px;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [
+                                oa-tts,
+                                oa-copy,
+                                oa-export,
+                                oa-retry,
+                                spacer,
+                                oa-fav,
+                                oa-word-arts
+                            ];
+}
+
+oa-tts {
+    background-color:       @bg-tts-btn;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 12px;
+    expand:                 false;
+    content:                "󰂚  Listen";
+    font:                   @font-ui;
+    text-color:             @fg-tts;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+oa-copy {
+    background-color:       @accent;
+    border-radius:          @radius-sm;
+    padding:                6px 14px;
+    expand:                 false;
+    content:                "󰆏  Copy";
+    font:                   @font-ui;
+    text-color:             @bg-window;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+oa-export {
+    background-color:       @bg-surface-raised;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "󰈮";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+oa-retry {
+    background-color:       @bg-surface-raised;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "󰑐";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+oa-fav {
+    background-color:       @bg-fav-btn;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    padding:                6px 10px;
+    expand:                 false;
+    content:                "★";
+    font:                   @font-icon-sm;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    cursor:                 pointer;
+}
+
+oa-word-arts {
+    background-color:       transparent;
+    content:                "6 alt. translations";
+    font:                   @font-small;
+    text-color:             @fg-accent;
+    vertical-align:         0.5;
+    horizontal-align:       1.0;
+    expand:                 false;
+    cursor:                 pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C2: HISTORY PANEL
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+history-panel {
+    background-color:       @bg-history-panel;
+    border:                 0px;
+    border-radius:          0px;
+    orientation:            vertical;
+    spacing:                0px;
+    expand:                 false;
+    width:                  260px;
+    children:               [
+                                history-header,
+                                history-search,
+                                listview,
+                                history-footer
+                            ];
+}
+
+history-header {
+    background-color:       @bg-surface;
+    border:                 0px 0px 1px 0px solid;
+    border-color:           @border-history;
+    padding:                8px 14px;
+    orientation:            horizontal;
+    spacing:                8px;
+    expand:                 false;
+    children:               [ hdr-icon, hdr-title, spacer, hdr-clear ];
+}
+
+hdr-icon {
+    background-color:       transparent;
+    content:                "󰹑";
+    font:                   @font-icon-md;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+hdr-title {
+    background-color:       transparent;
+    content:                "History";
+    font:                   @font-ui-med;
+    text-color:             @fg-secondary;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+    expand:                 true;
+}
+
+hdr-clear {
+    background-color:       transparent;
+    content:                "Clear";
+    font:                   @font-xsmall;
+    text-color:             @fg-accent;
+    vertical-align:         0.5;
+    horizontal-align:       1.0;
+    expand:                 false;
+    cursor:                 pointer;
+}
+
+history-search {
+    background-color:       @bg-input;
+    border:                 1px solid;
+    border-color:           @border-subtle;
+    border-radius:          @radius-sm;
+    margin:                 8px 10px 4px 10px;
+    padding:                5px 10px;
+    orientation:            horizontal;
+    spacing:                6px;
+    expand:                 false;
+    children:               [ hs-icon, hs-placeholder ];
+}
+
+hs-icon {
+    background-color:       transparent;
+    content:                "󰍉";
+    font:                   @font-icon-sm;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+}
+
+hs-placeholder {
+    background-color:       transparent;
+    content:                "Search history…";
+    font:                   @font-small;
+    text-color:             @fg-placeholder;
+    vertical-align:         0.5;
+    expand:                 true;
+}
+
+/* ── List view (history items rendered here) ─────────────────────────────── */
+listview {
+    background-color:       transparent;
+    border:                 0px;
+    padding:                4px 0px;
+    spacing:                1px;
+    expand:                 true;
+    orientation:            vertical;
+    dynamic:                true;
+    scrollbar:              true;
+    scroll-method:          0;
+    fixed-height:           false;
+    fixed-columns:          true;
+    lines:                  9999;
+    columns:                1;
+}
+
+scrollbar {
+    background-color:       @bg-scrollbar;
+    border:                 0px;
+    border-radius:          4px;
+    handle-color:           @border-subtle;
+    handle-width:           3px;
+    padding:                2px;
+    width:                  6px;
+}
+
+/* ── History list items ──────────────────────────────────────────────────── */
+element {
+    background-color:       transparent;
+    border:                 0px;
+    border-radius:          @radius-sm;
+    margin:                 0px 6px;
+    padding:                8px 10px;
+    orientation:            horizontal;
+    spacing:                8px;
+    cursor:                 pointer;
+}
+
+element normal.normal {
+    background-color:       transparent;
+    text-color:             @fg-secondary;
+}
+
+element normal.active {
+    background-color:       @accent-alpha;
+    text-color:             @accent;
+}
+
+element normal.urgent {
+    background-color:       transparent;
+    text-color:             @fg-accent;
+}
+
+element selected.normal {
+    background-color:       @selection-bg;
+    border:                 1px solid;
+    border-color:           @selection-border;
+    text-color:             @selection-fg;
+}
+
+element selected.active {
+    background-color:       @accent;
+    text-color:             @bg-window;
+}
+
+element selected.urgent {
+    background-color:       @accent4;
+    text-color:             @bg-window;
+}
+
+element alternate.normal {
+    background-color:       transparent;
+    text-color:             @fg-secondary;
+}
+
+element alternate.active {
+    background-color:       @accent-alpha;
+    text-color:             @accent;
+}
+
+element-icon {
+    background-color:       transparent;
+    size:                   1.8em;
+    border:                 0px;
+    padding:                0px;
+    expand:                 false;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+}
+
+element-text {
+    background-color:       transparent;
+    expand:                 true;
+    vertical-align:         0.5;
+    horizontal-align:       0.0;
+    text-color:             inherit;
+    font:                   @font-history;
+    highlight:              bold @accent;
+    cursor:                 inherit;
+}
+
+history-footer {
+    background-color:       @bg-surface;
+    border:                 1px 0px 0px 0px solid;
+    border-color:           @border-history;
+    border-radius:          0px 0px @radius-xl 0px;
+    padding:                7px 14px;
+    orientation:            horizontal;
+    spacing:                0px;
+    expand:                 false;
+    children:               [ hf-count, spacer, hf-fav-toggle ];
+}
+
+hf-count {
+    background-color:       transparent;
+    content:                "󰹑  24 translations";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+}
+
+hf-fav-toggle {
+    background-color:       transparent;
+    content:                "★  Favourites only";
+    font:                   @font-small;
+    text-color:             @fg-muted;
+    vertical-align:         0.5;
+    expand:                 false;
+    cursor:                 pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION D: FOOTER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+footer {
+    background-color:       @bg-footer;
+    border:                 1px 0px 0px 0px solid;
+    border-color:           @border-subtle;
+    border-radius:          0px 0px @radius-xl @radius-xl;
+    padding:                8px 20px;
+    orientation:            horizontal;
+    spacing:                0px;
+    expand:                 false;
+    children:               [ footer-hints-left, spacer, footer-status ];
+}
+
+footer-hints-left {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                18px;
+    expand:                 false;
+    children:               [
+                                fh-enter,
+                                fh-ctrl-s,
+                                fh-ctrl-c,
+                                fh-ctrl-t,
+                                fh-ctrl-r,
+                                fh-ctrl-d,
+                                fh-esc
+                            ];
+}
+
+fh-enter {
+    background-color:       transparent;
+    content:                "⏎ Translate";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-ctrl-s {
+    background-color:       transparent;
+    content:                "^S Swap";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-ctrl-c {
+    background-color:       transparent;
+    content:                "^C Copy";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-ctrl-t {
+    background-color:       transparent;
+    content:                "^T TTS";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-ctrl-r {
+    background-color:       transparent;
+    content:                "^R Retry";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-ctrl-d {
+    background-color:       transparent;
+    content:                "^D Detect";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fh-esc {
+    background-color:       transparent;
+    content:                "Esc Close";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+footer-status {
+    background-color:       transparent;
+    orientation:            horizontal;
+    spacing:                14px;
+    expand:                 false;
+    children:               [
+                                fs-provider-status,
+                                fs-divider,
+                                fs-latency,
+                                fs-divider2,
+                                fs-cache
+                            ];
+}
+
+fs-provider-status {
+    background-color:       transparent;
+    content:                "● Google — Online";
+    font:                   @font-hint;
+    text-color:             @fg-success;
+    vertical-align:         0.5;
+}
+
+fs-divider {
+    background-color:       @border-subtle;
+    expand:                 false;
+    width:                  1px;
+    margin:                 6px 0px;
+}
+
+fs-latency {
+    background-color:       transparent;
+    content:                "󰓅  142ms";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+fs-divider2 {
+    background-color:       @border-subtle;
+    expand:                 false;
+    width:                  1px;
+    margin:                 6px 0px;
+}
+
+fs-cache {
+    background-color:       transparent;
+    content:                "󰋗  Cache: 847";
+    font:                   @font-hint;
+    text-color:             @fg-hint;
+    vertical-align:         0.5;
+}
+
+/* ── Rofi internals (message, textbox, num-rows) ─────────────────────────── */
+message {
+    background-color:       transparent;
+    border:                 0px;
+    padding:                0px;
+    margin:                 0px;
+}
+
+textbox {
+    background-color:       transparent;
+    padding:                0px;
+    border:                 0px;
+    text-color:             @fg-muted;
+    font:                   @font-small;
+    vertical-align:         0.5;
+    horizontal-align:       0.5;
+    highlight:              none;
+    blink:                  false;
+    markup:                 true;
+}
+
+num-rows {
+    background-color:       transparent;
+    text-color:             @fg-muted;
+    font:                   @font-small;
+    expand:                 false;
+}
+
+num-filtered-rows {
+    background-color:       transparent;
+    text-color:             @accent;
+    font:                   @font-small;
+    expand:                 false;
+}

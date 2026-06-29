@@ -1,0 +1,238 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — QUICKNOTE STYLE ENGINE
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : style.rasi
+ * Desc    : Complete design token system — colors, typography, radii, spacing.
+ *           Auto-synced by ash theme engine via color template injection.
+ *           All @ash-* variables are replaced at runtime by the theme engine.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 1  THEME ENGINE INJECTION ZONE
+ *      Variables below marked [INJECTED] are overwritten at runtime.
+ *      Never edit them manually — run: ash theme apply <name>
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* [INJECTED] Base palette — set by ash color engine */
+* {
+    /* ── Raw Palette (HSL normalized hex) ─────────────────────────────────── */
+    /* Catppuccin Mocha defaults — overwritten by active theme */
+    _base:          #1e1e2e;   /* Crust/deepest bg            */
+    _mantle:        #181825;   /* Slightly darker surface     */
+    _surface0:      #313244;   /* Surface level 0             */
+    _surface1:      #45475a;   /* Surface level 1             */
+    _surface2:      #585b70;   /* Surface level 2             */
+    _overlay0:      #6c7086;   /* Overlay level 0             */
+    _overlay1:      #7f849c;   /* Overlay level 1             */
+    _overlay2:      #9399b2;   /* Overlay level 2             */
+    _text:          #cdd6f4;   /* Main text                   */
+    _subtext0:      #a6adc8;   /* Secondary text              */
+    _subtext1:      #bac2de;   /* Tertiary text               */
+
+    /* ── Accent — [INJECTED] ──────────────────────────────────────────────── */
+    _accent:        #cba6f7;   /* Mauve / primary accent      */
+    _accent2:       #89b4fa;   /* Blue / secondary accent     */
+    _accent3:       #a6e3a1;   /* Green / success             */
+    _accent4:       #f38ba8;   /* Red / danger                */
+    _accent5:       #fab387;   /* Peach / warning             */
+    _accent6:       #89dceb;   /* Sky / info                  */
+
+    /* ── Glassmorphism / Alpha Variants ──────────────────────────────────── */
+    _glass-bg:      #1e1e2ecc;   /* 80% opacity window bg      */
+    _glass-border:  #cba6f720;   /* 12% accent border          */
+    _glass-surface: #31324488;   /* 53% surface                */
+
+    /* ── Priority Colors ─────────────────────────────────────────────────── */
+    _priority-high:   #f38ba8;
+    _priority-medium: #fab387;
+    _priority-normal: #a6e3a1;
+    _priority-low:    #89b4fa;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 2  SEMANTIC COLOR TOKENS
+ *      These are what the layout file actually references.
+ *      Map raw palette → semantic meaning.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* ── Backgrounds ─────────────────────────────────────────────────────── */
+    bg-window:          @_glass-bg;
+    bg-header:          @_mantle;
+    bg-surface:         @_surface0;
+    bg-input:           @_surface1;
+    bg-preview:         @_base;
+    bg-footer:          @_mantle;
+    bg-item-hover:      @_surface1;
+    bg-item-selected:   @_surface2;
+    bg-scrollbar:       @_surface0;
+
+    /* ── Foregrounds ─────────────────────────────────────────────────────── */
+    fg-primary:         @_text;
+    fg-secondary:       @_subtext1;
+    fg-muted:           @_subtext0;
+    fg-placeholder:     @_overlay0;
+    fg-hint:            @_overlay1;
+
+    /* ── Accent ──────────────────────────────────────────────────────────── */
+    accent:             @_accent;
+    accent-alpha:       #cba6f718;   /* 10% accent for subtle backgrounds */
+    accent2:            @_accent2;
+    accent3:            @_accent3;
+
+    /* ── Borders ─────────────────────────────────────────────────────────── */
+    border-window:      @_glass-border;
+    border-subtle:      @_surface2;
+    border-input:       @_surface2;
+    border-input-focus: @_accent;
+
+    /* ── Selection ───────────────────────────────────────────────────────── */
+    selection-bg:       #cba6f722;
+    selection-border:   #cba6f755;
+    selection-fg:       @_text;
+
+    /* ── Priority System ─────────────────────────────────────────────────── */
+    priority-high:        @_priority-high;
+    priority-high-alpha:  #f38ba815;
+    priority-medium:      @_priority-medium;
+    priority-medium-alpha: #fab38715;
+    priority-normal:      @_priority-normal;
+    priority-low:         @_priority-low;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 3  TYPOGRAPHY TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Font family (override via ash config set rofi.font) */
+    _font-family:       "JetBrainsMono Nerd Font";
+    _font-family-ui:    "Inter";
+    _font-family-mono:  "JetBrainsMono Nerd Font";
+
+    /* Composed font strings */
+    font-base:          "JetBrainsMono Nerd Font 12";
+    font-title:         "Inter Bold 15";
+    font-ui:            "Inter 12";
+    font-small:         "Inter 10";
+    font-hint:          "JetBrainsMono Nerd Font 10";
+    font-preview:       "JetBrainsMono Nerd Font 11";
+    font-preview-title: "Inter SemiBold 14";
+    font-mono:          "JetBrainsMono Nerd Font 12";
+    font-icon-lg:       "JetBrainsMono Nerd Font 18";
+    font-icon-md:       "JetBrainsMono Nerd Font 14";
+    font-icon-sm:       "JetBrainsMono Nerd Font 11";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 4  SPACING & RADIUS TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Border radii — mapped to CSS-style scale */
+    radius-xs:     4px;
+    radius-sm:     6px;
+    radius-md:     10px;
+    radius-lg:     14px;
+    radius-xl:     18px;
+    radius-2xl:    24px;
+    radius-full:   9999px;
+
+    /* Common spacing */
+    spacing-xs:    4px;
+    spacing-sm:    8px;
+    spacing-md:    12px;
+    spacing-lg:    16px;
+    spacing-xl:    20px;
+    spacing-2xl:   28px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 5  THEME VARIANT OVERRIDES
+ *      Include one of these blocks by uncommenting.
+ *      The ash theme engine handles this automatically.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ── Light Theme (activated when: ash theme apply <any-light-theme>) ─────── */
+/* @theme-variant-light {
+    _base:       #eff1f5;
+    _mantle:     #e6e9ef;
+    _surface0:   #ccd0da;
+    _surface1:   #bcc0cc;
+    _surface2:   #acb0be;
+    _overlay0:   #9ca0b0;
+    _text:       #4c4f69;
+    _subtext0:   #6c6f85;
+    _subtext1:   #5c5f77;
+    _accent:     #8839ef;
+    _accent2:    #1e66f5;
+    _accent3:    #40a02b;
+    _accent4:    #d20f39;
+    _accent5:    #fe640b;
+    bg-window:   #eff1f5ee;
+} */
+
+/* ── Neon Theme (activated when: ash theme apply <any-neon-theme>) ────────── */
+/* @theme-variant-neon {
+    _base:       #0d0d0d;
+    _mantle:     #080808;
+    _surface0:   #1a1a2e;
+    _surface1:   #16213e;
+    _surface2:   #0f3460;
+    _text:       #e2e2e2;
+    _accent:     #ff00ff;
+    _accent2:    #00ffff;
+    _accent3:    #00ff41;
+    bg-window:   #0d0d0ddd;
+    border-window: #ff00ff40;
+} */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 6  ANIMATION TOKENS (Rofi property extensions — future-proof)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Standard easing curves (used by rofi-extensions if available) */
+    _ease-out-cubic:   "cubic-bezier(0.33, 1, 0.68, 1)";
+    _ease-in-out-quad: "cubic-bezier(0.45, 0, 0.55, 1)";
+    _ease-spring:      "cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+    /* Durations */
+    _duration-fast:    "120ms";
+    _duration-base:    "200ms";
+    _duration-slow:    "350ms";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 7  ICON MAP (Nerd Font codepoints used in quicknote.sh output)
+ *      Documented here for maintainability — referenced in scripts.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * ICON REFERENCE — QUICKNOTE
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  󱞁   nf-md-note_text_outline         Main note icon
+ *  󰐃   nf-md-pin                        Pinned note
+ *  󰐄   nf-md-pin_off                    Unpinned
+ *  󰙏   nf-md-filter_variant             Filter / search
+ *  󰒺   nf-md-sort                       Sort
+ *  󰬴   nf-md-alphabetical               Word count
+ *  󰃰   nf-md-calendar_clock             Date created
+ *  󰏫   nf-md-pencil                     Edit
+ *  󰆏   nf-md-content_copy               Copy
+ *  󰆴   nf-md-delete                     Delete
+ *  󰓻   nf-md-tag_multiple               Tags
+ *  󰔛   nf-md-history                    Recent
+ *  ⭐  star                              Favorite/high priority
+ *  🔴  red circle                       High priority
+ *  🟡  yellow circle                    Medium priority
+ *  🟢  green circle                     Normal priority
+ *  🔵  blue circle                      Low priority
+ *  󱝶   nf-md-note_multiple_outline      Note list header
+ *  󰅖   nf-md-close                      Clear search
+ *  󰍉   nf-md-magnify                    Search icon
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
