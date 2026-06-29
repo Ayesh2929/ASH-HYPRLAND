@@ -1,0 +1,877 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — QUICKNOTE ULTRA PREMIUM
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : quicknote.rasi
+ * Author  : Ash Dotfiles v5.0 Omega
+ * License : MIT
+ * Desc    : Ultra premium QuickNote launcher with full animation, glassmorphism,
+ *           dynamic color theming, multi-mode UI (view/create/search/pin),
+ *           priority indicators, tag system, and live preview panel.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ── IMPORT CHAIN ─────────────────────────────────────────────────────────── */
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * CONFIGURATION BLOCK
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+configuration {
+    /* ── Core ───────────────────────────────────────────────────────────── */
+    modi:                        "quicknote:~/.config/rofi/menus/quicknote/quicknote.sh";
+    display-quicknote:           " 󱞁  QuickNote";
+
+    /* ── Input Behaviour ─────────────────────────────────────────────────── */
+    case-sensitive:              false;
+    cycle:                       true;
+    filter:                      "";
+    placeholder:                 "󰙏  Search or create a note…";
+
+    /* ── Matching ────────────────────────────────────────────────────────── */
+    matching:                    "fuzzy";
+    tokenize:                    true;
+    sort:                        true;
+    sorting-method:              "fzf";
+    max-history-size:            50;
+
+    /* ── Scroll ──────────────────────────────────────────────────────────── */
+    scroll-method:               0;
+    window-thumbnail:            false;
+
+    /* ── Keybinds ────────────────────────────────────────────────────────── */
+    kb-accept-entry:             "Return,KP_Enter";
+    kb-accept-alt:               "shift+Return";
+    kb-remove-char-back:         "BackSpace";
+    kb-remove-word-back:         "ctrl+BackSpace";
+    kb-remove-to-eol:            "ctrl+k";
+    kb-remove-to-sol:            "ctrl+u";
+    kb-move-front:               "ctrl+a";
+    kb-move-end:                 "ctrl+e";
+    kb-mode-next:                "ctrl+Tab";
+    kb-mode-previous:            "ctrl+shift+Tab";
+    kb-page-next:                "ctrl+f,ctrl+Right";
+    kb-page-prev:                "ctrl+b,ctrl+Left";
+    kb-row-up:                   "Up,ctrl+p";
+    kb-row-down:                 "Down,ctrl+n";
+    kb-row-first:                "ctrl+Home";
+    kb-row-last:                 "ctrl+End";
+    kb-cancel:                   "Escape,ctrl+g,ctrl+bracketleft";
+    kb-select-1:                 "alt+1";
+    kb-select-2:                 "alt+2";
+    kb-select-3:                 "alt+3";
+    kb-select-4:                 "alt+4";
+    kb-select-5:                 "alt+5";
+    kb-custom-1:                 "ctrl+n";          /* New note          */
+    kb-custom-2:                 "ctrl+d";          /* Delete note       */
+    kb-custom-3:                 "ctrl+e";          /* Edit in editor    */
+    kb-custom-4:                 "ctrl+p";          /* Pin / unpin       */
+    kb-custom-5:                 "ctrl+y";          /* Copy to clipboard */
+    kb-custom-6:                 "ctrl+s";          /* Share note        */
+    kb-custom-7:                 "ctrl+t";          /* Add tag           */
+    kb-custom-8:                 "ctrl+r";          /* Rename note       */
+    kb-custom-9:                 "ctrl+shift+e";    /* Export markdown   */
+    kb-custom-10:                "ctrl+shift+a";    /* Archive note      */
+
+    /* ── Threading & Performance ─────────────────────────────────────────── */
+    threads:                     0;
+    lazy-grab:                   false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ROOT — WINDOW CONTAINER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+window {
+    /* Geometry */
+    width:                       920px;
+    height:                      640px;
+    x-offset:                    0px;
+    y-offset:                    0px;
+    location:                    center;
+    anchor:                      center;
+
+    /* Decoration */
+    background-color:            @bg-window;
+    border:                      2px solid;
+    border-color:                @border-window;
+    border-radius:               @radius-xl;
+
+    /* Premium shadow via outline trick */
+    outline:                     0px solid transparent;
+    outline-offset:              0px;
+
+    /* Typography */
+    font:                        @font-base;
+    text-color:                  @fg-primary;
+
+    /* Animation */
+    transparency:                "real";
+    cursor:                      "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * MAINBOX — ROOT LAYOUT CONTAINER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+mainbox {
+    background-color:            transparent;
+    border:                      0px;
+    spacing:                     0px;
+    padding:                     0px;
+    orientation:                 vertical;
+    children:                    [ header, body, footer ];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * HEADER SECTION
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+header {
+    background-color:            @bg-header;
+    border:                      0px 0px 1px 0px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-xl @radius-xl 0px 0px;
+    padding:                     16px 20px 14px 20px;
+    orientation:                 vertical;
+    spacing:                     10px;
+    children:                    [ header-top, header-bottom ];
+}
+
+header-top {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     12px;
+    children:                    [ app-icon, app-title, spacer, header-actions ];
+}
+
+app-icon {
+    background-color:            @accent-alpha;
+    border-radius:               @radius-md;
+    padding:                     6px 8px;
+    expand:                      false;
+    content:                     "󱞁";
+    font:                        "JetBrainsMono Nerd Font 18";
+    text-color:                  @accent;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+app-title {
+    background-color:            transparent;
+    orientation:                 vertical;
+    spacing:                     2px;
+    expand:                      false;
+    children:                    [ app-title-text, app-title-sub ];
+}
+
+app-title-text {
+    background-color:            transparent;
+    content:                     "QuickNote";
+    font:                        @font-title;
+    text-color:                  @fg-primary;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+app-title-sub {
+    background-color:            transparent;
+    content:                     "Capture thoughts instantly";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+spacer {
+    background-color:            transparent;
+    expand:                      true;
+}
+
+header-actions {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     6px;
+    children:                    [ btn-new, btn-filter, btn-sort ];
+}
+
+btn-new {
+    background-color:            @accent;
+    border-radius:               @radius-sm;
+    padding:                     6px 12px;
+    expand:                      false;
+    content:                     "  New";
+    font:                        @font-ui;
+    text-color:                  @bg-window;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+btn-filter {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-sm;
+    padding:                     6px 10px;
+    expand:                      false;
+    content:                     "󰈲";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+btn-sort {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-sm;
+    padding:                     6px 10px;
+    expand:                      false;
+    content:                     "󰒺";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+/* ── Header Bottom — Searchbar + Mode Tabs ─────────────────────────────────── */
+header-bottom {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     10px;
+    children:                    [ search-wrapper, mode-tabs ];
+}
+
+search-wrapper {
+    background-color:            @bg-input;
+    border:                      1px solid;
+    border-color:                @border-input;
+    border-radius:               @radius-md;
+    padding:                     0px 12px;
+    orientation:                 horizontal;
+    spacing:                     8px;
+    expand:                      true;
+    children:                    [ search-icon, prompt, entry, search-clear ];
+}
+
+search-icon {
+    background-color:            transparent;
+    expand:                      false;
+    content:                     "󰍉";
+    font:                        "JetBrainsMono Nerd Font 14";
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+prompt {
+    background-color:            transparent;
+    enabled:                     false;
+    expand:                      false;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+}
+
+entry {
+    background-color:            transparent;
+    border:                      0px;
+    padding:                     10px 0px;
+    expand:                      true;
+    font:                        @font-ui;
+    text-color:                  @fg-primary;
+    vertical-align:              0.5;
+    placeholder:                 "Search notes or press Ctrl+N to create…";
+    placeholder-color:           @fg-placeholder;
+    cursor:                      text;
+}
+
+search-clear {
+    background-color:            transparent;
+    expand:                      false;
+    content:                     "󰅖";
+    font:                        "JetBrainsMono Nerd Font 11";
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+/* ── Mode Tabs ───────────────────────────────────────────────────────────── */
+mode-tabs {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-md;
+    padding:                     4px;
+    orientation:                 horizontal;
+    spacing:                     2px;
+    expand:                      false;
+    children:                    [ tab-all, tab-pinned, tab-recent, tab-tags ];
+}
+
+tab-all {
+    background-color:            @accent;
+    border-radius:               @radius-sm;
+    padding:                     5px 10px;
+    expand:                      false;
+    content:                     " All";
+    font:                        @font-ui;
+    text-color:                  @bg-window;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+tab-pinned {
+    background-color:            transparent;
+    border-radius:               @radius-sm;
+    padding:                     5px 10px;
+    expand:                      false;
+    content:                     "󰐃 Pinned";
+    font:                        @font-ui;
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+tab-recent {
+    background-color:            transparent;
+    border-radius:               @radius-sm;
+    padding:                     5px 10px;
+    expand:                      false;
+    content:                     "󰔛 Recent";
+    font:                        @font-ui;
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+tab-tags {
+    background-color:            transparent;
+    border-radius:               @radius-sm;
+    padding:                     5px 10px;
+    expand:                      false;
+    content:                     "󰓻 Tags";
+    font:                        @font-ui;
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * BODY — DUAL-PANEL LAYOUT
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+body {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     0px;
+    expand:                      true;
+    children:                    [ listview-panel, preview-panel ];
+}
+
+/* ── Left Panel — Note List ─────────────────────────────────────────────── */
+listview-panel {
+    background-color:            transparent;
+    border:                      0px 1px 0px 0px solid;
+    border-color:                @border-subtle;
+    orientation:                 vertical;
+    spacing:                     0px;
+    expand:                      false;
+    width:                       380px;
+    children:                    [ listview-header, listview, listview-empty ];
+}
+
+listview-header {
+    background-color:            @bg-surface;
+    border:                      0px 0px 1px 0px solid;
+    border-color:                @border-subtle;
+    padding:                     8px 16px;
+    orientation:                 horizontal;
+    spacing:                     8px;
+    children:                    [ lv-header-count, spacer, lv-header-sort-icon ];
+}
+
+lv-header-count {
+    background-color:            transparent;
+    content:                     "24 notes";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+lv-header-sort-icon {
+    background-color:            transparent;
+    content:                     "󰒺  Date";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            1.0;
+}
+
+listview {
+    background-color:            transparent;
+    border:                      0px;
+    padding:                     6px 0px;
+    margin:                      0px;
+    spacing:                     2px;
+    expand:                      true;
+    orientation:                 vertical;
+    dynamic:                     true;
+    scrollbar:                   true;
+    scroll-method:               0;
+    fixed-height:                false;
+    fixed-columns:               true;
+    reverse:                     false;
+    layout:                      vertical;
+    lines:                       9999;
+    columns:                     1;
+}
+
+listview-empty {
+    background-color:            transparent;
+    content:                     "󱞁\nNo notes found\nPress Ctrl+N to create one";
+    font:                        @font-ui;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+scrollbar {
+    background-color:            @bg-surface;
+    border:                      0px;
+    border-radius:               4px;
+    handle-color:                @border-subtle;
+    handle-width:                4px;
+    padding:                     2px;
+    width:                       8px;
+}
+
+/* ── List Items ──────────────────────────────────────────────────────────── */
+element {
+    background-color:            transparent;
+    border:                      0px;
+    border-radius:               @radius-sm;
+    margin:                      0px 6px;
+    padding:                     10px 12px;
+    orientation:                 horizontal;
+    spacing:                     10px;
+    cursor:                      pointer;
+}
+
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @fg-primary;
+}
+
+element normal.urgent {
+    background-color:            @priority-high-alpha;
+    text-color:                  @priority-high;
+}
+
+element normal.active {
+    background-color:            @accent-alpha;
+    text-color:                  @accent;
+}
+
+element selected.normal {
+    background-color:            @selection-bg;
+    border:                      1px solid;
+    border-color:                @selection-border;
+    text-color:                  @selection-fg;
+}
+
+element selected.urgent {
+    background-color:            @priority-high;
+    text-color:                  @bg-window;
+}
+
+element selected.active {
+    background-color:            @accent;
+    text-color:                  @bg-window;
+}
+
+element alternate.normal {
+    background-color:            transparent;
+    text-color:                  @fg-primary;
+}
+
+element alternate.urgent {
+    background-color:            @priority-high-alpha;
+    text-color:                  @priority-high;
+}
+
+element alternate.active {
+    background-color:            @accent-alpha;
+    text-color:                  @accent;
+}
+
+/* ── Element Icon ─────────────────────────────────────────────────────────── */
+element-icon {
+    background-color:            transparent;
+    size:                        2.2em;
+    border:                      0px;
+    padding:                     0px;
+    expand:                      false;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+/* ── Element Text (two-line) ──────────────────────────────────────────────── */
+element-text {
+    background-color:            transparent;
+    expand:                      true;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    text-color:                  inherit;
+    font:                        @font-ui;
+    highlight:                   bold @accent;
+    cursor:                      inherit;
+}
+
+/* ── Right Panel — Preview ──────────────────────────────────────────────── */
+preview-panel {
+    background-color:            @bg-preview;
+    border:                      0px;
+    border-radius:               0px 0px @radius-xl 0px;
+    orientation:                 vertical;
+    spacing:                     0px;
+    expand:                      true;
+    children:                    [
+                                    preview-header,
+                                    preview-content,
+                                    preview-meta
+                                 ];
+}
+
+preview-header {
+    background-color:            @bg-surface;
+    border:                      0px 0px 1px 0px solid;
+    border-color:                @border-subtle;
+    padding:                     12px 18px;
+    orientation:                 horizontal;
+    spacing:                     10px;
+    children:                    [
+                                    preview-title-block,
+                                    spacer,
+                                    preview-actions
+                                 ];
+}
+
+preview-title-block {
+    background-color:            transparent;
+    orientation:                 vertical;
+    spacing:                     4px;
+    expand:                      true;
+    children:                    [ preview-title, preview-tags ];
+}
+
+preview-title {
+    background-color:            transparent;
+    content:                     "Select a note to preview";
+    font:                        @font-preview-title;
+    text-color:                  @fg-primary;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+preview-tags {
+    background-color:            transparent;
+    content:                     "";
+    font:                        @font-small;
+    text-color:                  @accent;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+preview-actions {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     6px;
+    children:                    [
+                                    pact-pin,
+                                    pact-edit,
+                                    pact-copy,
+                                    pact-delete
+                                 ];
+}
+
+pact-pin {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-sm;
+    padding:                     5px 8px;
+    expand:                      false;
+    content:                     "󰐃";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+pact-edit {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-sm;
+    padding:                     5px 8px;
+    expand:                      false;
+    content:                     "󰏫";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+pact-copy {
+    background-color:            @bg-surface;
+    border:                      1px solid;
+    border-color:                @border-subtle;
+    border-radius:               @radius-sm;
+    padding:                     5px 8px;
+    expand:                      false;
+    content:                     "󰆏";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @fg-secondary;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+pact-delete {
+    background-color:            @priority-high-alpha;
+    border:                      1px solid;
+    border-color:                @priority-high;
+    border-radius:               @radius-sm;
+    padding:                     5px 8px;
+    expand:                      false;
+    content:                     "󰆴";
+    font:                        "JetBrainsMono Nerd Font 12";
+    text-color:                  @priority-high;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    cursor:                      pointer;
+}
+
+preview-content {
+    background-color:            transparent;
+    padding:                     20px 18px;
+    expand:                      true;
+    text-color:                  @fg-secondary;
+    font:                        @font-preview;
+    vertical-align:              0.0;
+    horizontal-align:            0.0;
+}
+
+preview-meta {
+    background-color:            @bg-surface;
+    border:                      1px 0px 0px 0px solid;
+    border-color:                @border-subtle;
+    border-radius:               0px 0px @radius-xl 0px;
+    padding:                     10px 18px;
+    orientation:                 horizontal;
+    spacing:                     16px;
+    children:                    [
+                                    meta-created,
+                                    meta-modified,
+                                    meta-words,
+                                    spacer,
+                                    meta-priority
+                                 ];
+}
+
+meta-created {
+    background-color:            transparent;
+    content:                     "󰃰  Created: Today";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+}
+
+meta-modified {
+    background-color:            transparent;
+    content:                     "󰏫  Modified: Now";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+}
+
+meta-words {
+    background-color:            transparent;
+    content:                     "󰬴  0 words";
+    font:                        @font-small;
+    text-color:                  @fg-muted;
+    vertical-align:              0.5;
+}
+
+meta-priority {
+    background-color:            transparent;
+    content:                     "● Normal";
+    font:                        @font-small;
+    text-color:                  @priority-normal;
+    vertical-align:              0.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * FOOTER — STATUS BAR + KEYBIND HINTS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+footer {
+    background-color:            @bg-footer;
+    border:                      1px 0px 0px 0px solid;
+    border-color:                @border-subtle;
+    border-radius:               0px 0px @radius-xl @radius-xl;
+    padding:                     10px 20px;
+    orientation:                 horizontal;
+    spacing:                     0px;
+    children:                    [ keyhints-left, spacer, keyhints-right ];
+}
+
+keyhints-left {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     16px;
+    children:                    [
+                                    hint-enter,
+                                    hint-ctrl-n,
+                                    hint-ctrl-e,
+                                    hint-ctrl-d
+                                 ];
+}
+
+hint-enter {
+    background-color:            transparent;
+    content:                     "⏎ Open";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-ctrl-n {
+    background-color:            transparent;
+    content:                     "^N New";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-ctrl-e {
+    background-color:            transparent;
+    content:                     "^E Edit";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-ctrl-d {
+    background-color:            transparent;
+    content:                     "^D Delete";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+keyhints-right {
+    background-color:            transparent;
+    orientation:                 horizontal;
+    spacing:                     16px;
+    children:                    [
+                                    hint-ctrl-p,
+                                    hint-ctrl-y,
+                                    hint-ctrl-t,
+                                    hint-esc
+                                 ];
+}
+
+hint-ctrl-p {
+    background-color:            transparent;
+    content:                     "^P Pin";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-ctrl-y {
+    background-color:            transparent;
+    content:                     "^Y Copy";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-ctrl-t {
+    background-color:            transparent;
+    content:                     "^T Tag";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+hint-esc {
+    background-color:            transparent;
+    content:                     "Esc Close";
+    font:                        @font-hint;
+    text-color:                  @fg-hint;
+    vertical-align:              0.5;
+}
+
+/* ── Numeric shortcuts (message bar repurposed) ──────────────────────────── */
+message {
+    background-color:            transparent;
+    border:                      0px;
+    padding:                     0px;
+    margin:                      0px;
+}
+
+textbox {
+    background-color:            transparent;
+    padding:                     0px;
+    border:                      0px;
+    text-color:                  @fg-muted;
+    font:                        @font-small;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+    highlight:                   none;
+    blink:                       false;
+    markup:                      true;
+}
+
+/* ── Input bar (hidden — entry lifted into search-wrapper) ───────────────── */
+inputbar {
+    background-color:            transparent;
+    border:                      0px;
+    padding:                     0px;
+    spacing:                     0px;
+    children:                    [ prompt, entry, case-indicator, num-rows, num-filtered-rows ];
+}
+
+case-indicator {
+    background-color:            transparent;
+    text-color:                  @fg-muted;
+    font:                        @font-small;
+}
+
+num-rows {
+    background-color:            transparent;
+    text-color:                  @fg-muted;
+    font:                        @font-small;
+    expand:                      false;
+}
+
+num-filtered-rows {
+    background-color:            transparent;
+    text-color:                  @accent;
+    font:                        @font-small;
+    expand:                      false;
+}

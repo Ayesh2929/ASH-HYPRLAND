@@ -1,0 +1,1844 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — PLUGIN MANAGER ULTRA PREMIUM UI
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : plugin-manager.rasi
+ * Author  : Ash Dotfiles v5.0 Omega
+ * License : MIT
+ * Desc    : Ultra-premium three-panel plugin management interface for Rofi.
+ *
+ * Window: 1140 × 720px  |  Three-panel layout
+ *
+ * ┌──────────────────────────────────────────────────────────────────────────┐
+ * │  HEADER — icon · title · search · stats · controls                      │
+ * ├──────────────────────────────────────────────────────────────────────────┤
+ * │  TAB BAR — All · Installed · Updates · Featured · Browse · Search        │
+ * ├────────────┬─────────────────────────────────────┬───────────────────────┤
+ * │  SIDEBAR   │  PLUGIN LIST (listview)              │  DETAIL PANEL         │
+ * │  Category  │  • search result rows                │  • Plugin icon/name   │
+ * │  filter    │  • status badges                     │  • Description        │
+ * │  pills     │  • rating / downloads                │  • Version info       │
+ * │            │  • action buttons per row            │  • Author / license   │
+ * │  Stats     │                                      │  • Screenshots        │
+ * │  block     │                                      │  • Dependencies       │
+ * │            │                                      │  • Action buttons     │
+ * ├────────────┴─────────────────────────────────────┴───────────────────────┤
+ * │  FOOTER — keybind hints · engine status · install queue · progress       │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ *
+ * Custom keybind map (10 bindings):
+ *   Ctrl+I   → Install selected plugin
+ *   Ctrl+R   → Remove selected plugin
+ *   Ctrl+U   → Update selected plugin
+ *   Ctrl+A   → Update all plugins
+ *   Ctrl+E   → Enable / disable toggle
+ *   Ctrl+C   → Configure plugin
+ *   Ctrl+F   → Add to favourites
+ *   Ctrl+G   → Open GitHub page
+ *   Ctrl+S   → Sync / refresh registry
+ *   Ctrl+X   → Clear search / reset filters
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ── Design token import ────────────────────────────────────────────────── */
+@import "style.rasi"
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * CONFIGURATION BLOCK
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+configuration {
+    /* ── Modi ───────────────────────────────────────────────────────────── */
+    modi:                       "plugin-manager:~/.config/rofi/menus/plugin-manager/plugin-manager.sh";
+    display-plugin-manager:     " 󰏗  Plugins";
+
+    /* ── Input ──────────────────────────────────────────────────────────── */
+    case-sensitive:             false;
+    cycle:                      true;
+    filter:                     "";
+    placeholder:                "󰍉  Search plugins by name, tag, or author…";
+
+    /* ── Matching ───────────────────────────────────────────────────────── */
+    matching:                   "fuzzy";
+    tokenize:                   true;
+    sort:                       true;
+    sorting-method:             "fzf";
+    max-history-size:           30;
+
+    /* ── Scroll ─────────────────────────────────────────────────────────── */
+    scroll-method:              0;
+    window-thumbnail:           false;
+
+    /* ── Core Keybinds ──────────────────────────────────────────────────── */
+    kb-accept-entry:            "Return,KP_Enter";
+    kb-accept-alt:              "shift+Return";
+    kb-remove-char-back:        "BackSpace";
+    kb-remove-word-back:        "ctrl+BackSpace";
+    kb-remove-to-eol:           "ctrl+k";
+    kb-remove-to-sol:           "ctrl+u";
+    kb-move-front:              "ctrl+Home";
+    kb-move-end:                "ctrl+End";
+    kb-cancel:                  "Escape,ctrl+g";
+    kb-row-up:                  "Up,ctrl+p";
+    kb-row-down:                "Down,ctrl+n";
+    kb-page-next:               "Page_Down";
+    kb-page-prev:               "Page_Up";
+    kb-row-first:               "ctrl+Home";
+    kb-row-last:                "ctrl+End";
+    kb-mode-next:               "ctrl+Tab";
+    kb-mode-previous:           "ctrl+shift+Tab";
+
+    /* ── Custom Action Keybinds ─────────────────────────────────────────── */
+    kb-custom-1:                "ctrl+i";      /* Install plugin         */
+    kb-custom-2:                "ctrl+r";      /* Remove plugin          */
+    kb-custom-3:                "ctrl+u";      /* Update plugin          */
+    kb-custom-4:                "ctrl+a";      /* Update all plugins     */
+    kb-custom-5:                "ctrl+e";      /* Enable / disable       */
+    kb-custom-6:                "ctrl+c";      /* Configure plugin       */
+    kb-custom-7:                "ctrl+f";      /* Favourite toggle       */
+    kb-custom-8:                "ctrl+g";      /* Open GitHub            */
+    kb-custom-9:                "ctrl+s";      /* Sync registry          */
+    kb-custom-10:               "ctrl+x";      /* Clear / reset filters  */
+
+    /* ── Category quick-select (Alt+1–9) ────────────────────────────────── */
+    kb-select-1:                "alt+1";       /* All                    */
+    kb-select-2:                "alt+2";       /* Installed              */
+    kb-select-3:                "alt+3";       /* Updates                */
+    kb-select-4:                "alt+4";       /* Featured               */
+    kb-select-5:                "alt+5";       /* Theme                  */
+    kb-select-6:                "alt+6";       /* Productivity           */
+    kb-select-7:                "alt+7";       /* System                 */
+    kb-select-8:                "alt+8";       /* Gaming                 */
+    kb-select-9:                "alt+9";       /* AI / ML                */
+
+    threads:                    0;
+    lazy-grab:                  false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ROOT WINDOW
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+window {
+    width:                      1140px;
+    height:                     720px;
+    x-offset:                   0px;
+    y-offset:                   0px;
+    location:                   center;
+    anchor:                     center;
+
+    background-color:           @bg-window;
+    border:                     1px solid;
+    border-color:               @border-window;
+    border-radius:              @radius-xl;
+
+    font:                       @font-base;
+    text-color:                 @fg-primary;
+    transparency:               "real";
+    cursor:                     "default";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * MAINBOX
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+mainbox {
+    background-color:           transparent;
+    border:                     0px;
+    spacing:                    0px;
+    padding:                    0px;
+    orientation:                vertical;
+    children:                   [ header, tab-bar, body-row, footer ];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION A: HEADER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+header {
+    background-color:           @bg-header;
+    border:                     0px 0px 1px 0px solid;
+    border-color:               @border-header;
+    border-radius:              @radius-xl @radius-xl 0px 0px;
+    padding:                    0px 22px;
+    orientation:                horizontal;
+    spacing:                    14px;
+    expand:                     false;
+    children:                   [
+                                    header-brand,
+                                    header-search,
+                                    spacer,
+                                    header-stats,
+                                    header-divider,
+                                    header-controls
+                                ];
+}
+
+/* ── Brand ──────────────────────────────────────────────────────────────── */
+header-brand {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    12px;
+    expand:                     false;
+    children:                   [ brand-icon-wrap, brand-text ];
+}
+
+brand-icon-wrap {
+    background-color:           @status-installed-alpha;
+    border:                     1px solid;
+    border-color:               #a6e3a130;
+    border-radius:              @radius-md;
+    padding:                    10px 13px;
+    expand:                     false;
+    children:                   [ brand-icon ];
+}
+
+brand-icon {
+    background-color:           transparent;
+    content:                    "󰏗";
+    font:                       @font-icon-xl;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    expand:                     false;
+}
+
+brand-text {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    3px;
+    expand:                     false;
+    children:                   [ brand-title, brand-sub ];
+}
+
+brand-title {
+    background-color:           transparent;
+    content:                    "Plugin Manager";
+    font:                       @font-title;
+    text-color:                 @fg-primary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+brand-sub {
+    background-color:           transparent;
+    content:                    "150+ plugins · 10 categories · live registry";
+    font:                       @font-xsmall;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+/* ── Header Search Box ──────────────────────────────────────────────────── */
+header-search {
+    background-color:           @bg-input;
+    border:                     1px solid;
+    border-color:               @border-input;
+    border-radius:              @radius-md;
+    padding:                    0px 14px;
+    orientation:                horizontal;
+    spacing:                    10px;
+    expand:                     false;
+    width:                      320px;
+    children:                   [ hs-icon, prompt, entry, hs-shortcut ];
+}
+
+hs-icon {
+    background-color:           transparent;
+    content:                    "󰍉";
+    font:                       @font-icon-md;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    expand:                     false;
+}
+
+prompt {
+    background-color:           transparent;
+    enabled:                    false;
+    expand:                     false;
+    text-color:                 @fg-muted;
+}
+
+entry {
+    background-color:           transparent;
+    border:                     0px;
+    padding:                    11px 0px;
+    expand:                     true;
+    font:                       @font-ui;
+    text-color:                 @fg-primary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    placeholder:                "Search name, tag, author…";
+    placeholder-color:          @fg-placeholder;
+    cursor:                     text;
+}
+
+hs-shortcut {
+    background-color:           @bg-surface;
+    border-radius:              @radius-xs;
+    padding:                    2px 6px;
+    expand:                     false;
+    content:                    "/ ";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+spacer {
+    background-color:           transparent;
+    expand:                     true;
+}
+
+/* ── Header Stats ───────────────────────────────────────────────────────── */
+header-stats {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    20px;
+    expand:                     false;
+    children:                   [
+                                    stat-installed,
+                                    stat-updates,
+                                    stat-available,
+                                    stat-disabled
+                                ];
+}
+
+stat-installed {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    2px;
+    expand:                     false;
+    children:                   [ stat-installed-num, stat-installed-lbl ];
+}
+
+stat-installed-num {
+    background-color:           transparent;
+    content:                    "42";
+    font:                       @font-subtitle;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-installed-lbl {
+    background-color:           transparent;
+    content:                    "Installed";
+    font:                       @font-xsmall;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-updates {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    2px;
+    expand:                     false;
+    children:                   [ stat-updates-num, stat-updates-lbl ];
+}
+
+stat-updates-num {
+    background-color:           transparent;
+    content:                    "3";
+    font:                       @font-subtitle;
+    text-color:                 @fg-warning;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-updates-lbl {
+    background-color:           transparent;
+    content:                    "Updates";
+    font:                       @font-xsmall;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-available {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    2px;
+    expand:                     false;
+    children:                   [ stat-avail-num, stat-avail-lbl ];
+}
+
+stat-avail-num {
+    background-color:           transparent;
+    content:                    "150+";
+    font:                       @font-subtitle;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-avail-lbl {
+    background-color:           transparent;
+    content:                    "Available";
+    font:                       @font-xsmall;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-disabled {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    2px;
+    expand:                     false;
+    children:                   [ stat-dis-num, stat-dis-lbl ];
+}
+
+stat-dis-num {
+    background-color:           transparent;
+    content:                    "5";
+    font:                       @font-subtitle;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+stat-dis-lbl {
+    background-color:           transparent;
+    content:                    "Disabled";
+    font:                       @font-xsmall;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+header-divider {
+    background-color:           @border-subtle;
+    expand:                     false;
+    width:                      1px;
+    margin:                     14px 4px;
+}
+
+/* ── Header Controls ────────────────────────────────────────────────────── */
+header-controls {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    6px;
+    expand:                     false;
+    children:                   [ ctrl-sync, ctrl-sort, ctrl-filter, ctrl-settings ];
+}
+
+ctrl-sync {
+    background-color:           @status-installed-alpha;
+    border:                     1px solid;
+    border-color:               #a6e3a130;
+    border-radius:              @radius-sm;
+    padding:                    7px 12px;
+    expand:                     false;
+    content:                    "󰑐  Sync";
+    font:                       @font-ui;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+ctrl-sort {
+    background-color:           @bg-surface;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    7px 10px;
+    expand:                     false;
+    content:                    "󰒺";
+    font:                       @font-icon-sm;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+ctrl-filter {
+    background-color:           @bg-surface;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    7px 10px;
+    expand:                     false;
+    content:                    "󰈲";
+    font:                       @font-icon-sm;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+ctrl-settings {
+    background-color:           @bg-surface;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    7px 10px;
+    expand:                     false;
+    content:                    "󰒓";
+    font:                       @font-icon-sm;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION B: TAB BAR
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+tab-bar {
+    background-color:           @bg-toolbar;
+    border:                     0px 0px 1px 0px solid;
+    border-color:               @border-subtle;
+    padding:                    0px 22px;
+    orientation:                horizontal;
+    spacing:                    2px;
+    expand:                     false;
+    children:                   [
+                                    tab-all,
+                                    tab-installed,
+                                    tab-updates,
+                                    tab-featured,
+                                    tab-browse,
+                                    tab-favourites,
+                                    spacer,
+                                    tab-update-all-btn
+                                ];
+}
+
+tab-all {
+    background-color:           @bg-tab-active;
+    border:                     0px 0px 2px 0px solid;
+    border-color:               @fg-accent;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "󰏗  All";
+    font:                       @font-ui-bold;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-installed {
+    background-color:           @bg-tab-inactive;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "✓  Installed";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-updates {
+    background-color:           @bg-tab-inactive;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "󰏕  Updates  ③";
+    font:                       @font-ui;
+    text-color:                 @fg-warning;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-featured {
+    background-color:           @bg-tab-inactive;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "★  Featured";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-browse {
+    background-color:           @bg-tab-inactive;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "󰋚  Browse";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-favourites {
+    background-color:           @bg-tab-inactive;
+    border-radius:              0px;
+    padding:                    10px 16px;
+    expand:                     false;
+    content:                    "󰐃  Pinned";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+tab-update-all-btn {
+    background-color:           @status-update-alpha;
+    border:                     1px solid;
+    border-color:               #f9e2af40;
+    border-radius:              @radius-sm;
+    padding:                    6px 14px;
+    margin:                     6px 0px;
+    expand:                     false;
+    content:                    "󰅣  Update All  (3)";
+    font:                       @font-ui;
+    text-color:                 @fg-warning;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C: BODY ROW (sidebar + list + detail)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+body-row {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    0px;
+    expand:                     true;
+    children:                   [ sidebar, plugin-list-panel, detail-panel ];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C1: SIDEBAR — Category navigation
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+sidebar {
+    background-color:           @bg-sidebar;
+    border:                     0px 1px 0px 0px solid;
+    border-color:               @border-panel;
+    orientation:                vertical;
+    spacing:                    0px;
+    expand:                     false;
+    width:                      @sidebar-width;
+    children:                   [
+                                    sidebar-section-label,
+                                    cat-all,
+                                    cat-installed,
+                                    cat-theme,
+                                    cat-productivity,
+                                    cat-system,
+                                    cat-integration,
+                                    cat-gaming,
+                                    cat-media,
+                                    cat-security,
+                                    cat-ai,
+                                    cat-network,
+                                    cat-utility,
+                                    sidebar-divider,
+                                    sidebar-section-label-2,
+                                    cat-community,
+                                    cat-core,
+                                    cat-deprecated,
+                                    sidebar-spacer,
+                                    sidebar-stats-block
+                                ];
+}
+
+sidebar-section-label {
+    background-color:           transparent;
+    content:                    "  CATEGORIES";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    padding:                    12px 16px 6px 16px;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    expand:                     false;
+}
+
+sidebar-section-label-2 {
+    background-color:           transparent;
+    content:                    "  COLLECTIONS";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    padding:                    8px 16px 4px 16px;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    expand:                     false;
+}
+
+/* ── Category pill macro ─────────────────────────────────────────────────── */
+cat-all {
+    background-color:           @status-installed-alpha;
+    border:                     0px 0px 0px 2px solid;
+    border-color:               @fg-success;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰏗   All Plugins";
+    font:                       @font-ui-med;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-installed {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "✓   Installed";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-theme {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰔰   Theme";
+    font:                       @font-ui;
+    text-color:                 @cat-theme;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-productivity {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰙏   Productivity";
+    font:                       @font-ui;
+    text-color:                 @cat-productivity;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-system {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰍛   System";
+    font:                       @font-ui;
+    text-color:                 @cat-system;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-integration {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󱘖   Integration";
+    font:                       @font-ui;
+    text-color:                 @cat-integration;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-gaming {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰊗   Gaming";
+    font:                       @font-ui;
+    text-color:                 @cat-gaming;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-media {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰎆   Media";
+    font:                       @font-ui;
+    text-color:                 @cat-media;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-security {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰒃   Security";
+    font:                       @font-ui;
+    text-color:                 @cat-security;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-ai {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰧱   AI / ML";
+    font:                       @font-ui;
+    text-color:                 @cat-ai;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-network {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰛳   Network";
+    font:                       @font-ui;
+    text-color:                 @cat-network;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-utility {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    7px 14px;
+    expand:                     false;
+    content:                    "󰒄   Utility";
+    font:                       @font-ui;
+    text-color:                 @cat-utility;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+sidebar-divider {
+    background-color:           @border-subtle;
+    expand:                     false;
+    height:                     1px;
+    margin:                     8px 16px;
+}
+
+cat-community {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    6px 14px;
+    expand:                     false;
+    content:                    "󰀄   Community";
+    font:                       @font-ui;
+    text-color:                 @fg-community;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-core {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    6px 14px;
+    expand:                     false;
+    content:                    "󰏔   Core";
+    font:                       @font-ui;
+    text-color:                 @fg-core;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+cat-deprecated {
+    background-color:           transparent;
+    border-radius:              0px @radius-sm @radius-sm 0px;
+    margin:                     2px 10px 2px 0px;
+    padding:                    6px 14px;
+    expand:                     false;
+    content:                    "󱧈   Deprecated";
+    font:                       @font-ui;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    cursor:                     pointer;
+}
+
+sidebar-spacer {
+    background-color:           transparent;
+    expand:                     true;
+}
+
+/* ── Sidebar Stats Block ─────────────────────────────────────────────────── */
+sidebar-stats-block {
+    background-color:           @bg-surface;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               @border-panel;
+    padding:                    12px 16px;
+    orientation:                vertical;
+    spacing:                    6px;
+    expand:                     false;
+    children:                   [
+                                    ssb-title,
+                                    ssb-storage,
+                                    ssb-registry,
+                                    ssb-last-sync
+                                ];
+}
+
+ssb-title {
+    background-color:           transparent;
+    content:                    "REGISTRY INFO";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+ssb-storage {
+    background-color:           transparent;
+    content:                    "󰉿  Storage: 84 MB";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+ssb-registry {
+    background-color:           transparent;
+    content:                    "󰋚  Registry: v1.42.0";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+ssb-last-sync {
+    background-color:           transparent;
+    content:                    "󰔛  Synced: 2h ago";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C2: PLUGIN LIST PANEL
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+plugin-list-panel {
+    background-color:           @bg-content;
+    border:                     0px 1px 0px 0px solid;
+    border-color:               @border-panel;
+    orientation:                vertical;
+    spacing:                    0px;
+    expand:                     true;
+    children:                   [
+                                    list-toolbar,
+                                    listview,
+                                    list-empty-state
+                                ];
+}
+
+/* ── List Toolbar ───────────────────────────────────────────────────────── */
+list-toolbar {
+    background-color:           @bg-toolbar;
+    border:                     0px 0px 1px 0px solid;
+    border-color:               @border-subtle;
+    padding:                    7px 16px;
+    orientation:                horizontal;
+    spacing:                    10px;
+    expand:                     false;
+    children:                   [
+                                    ltb-count,
+                                    ltb-divider,
+                                    ltb-sort-label,
+                                    ltb-sort-name,
+                                    ltb-sort-date,
+                                    ltb-sort-rating,
+                                    ltb-sort-size,
+                                    spacer,
+                                    ltb-view-toggle
+                                ];
+}
+
+ltb-count {
+    background-color:           transparent;
+    content:                    "150 plugins";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    expand:                     false;
+}
+
+ltb-divider {
+    background-color:           @border-subtle;
+    expand:                     false;
+    width:                      1px;
+    margin:                     4px 4px;
+}
+
+ltb-sort-label {
+    background-color:           transparent;
+    content:                    "Sort:";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    expand:                     false;
+}
+
+ltb-sort-name {
+    background-color:           @bg-surface;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "Name";
+    font:                       @font-small;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+ltb-sort-date {
+    background-color:           transparent;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "Date";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+ltb-sort-rating {
+    background-color:           transparent;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "★ Rating";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+ltb-sort-size {
+    background-color:           transparent;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "Size";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+ltb-view-toggle {
+    background-color:           @bg-surface;
+    border-radius:              @radius-sm;
+    padding:                    4px 10px;
+    expand:                     false;
+    content:                    "☰ List";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+/* ── Listview (Rofi native element) ─────────────────────────────────────── */
+listview {
+    background-color:           transparent;
+    border:                     0px;
+    padding:                    6px 0px;
+    margin:                     0px;
+    spacing:                    2px;
+    expand:                     true;
+    orientation:                vertical;
+    dynamic:                    true;
+    scrollbar:                  true;
+    scroll-method:              0;
+    fixed-height:               false;
+    fixed-columns:              true;
+    lines:                      9999;
+    columns:                    1;
+}
+
+scrollbar {
+    background-color:           @bg-scrollbar;
+    border:                     0px;
+    border-radius:              4px;
+    handle-color:               @bg-scrollbar-handle;
+    handle-width:               4px;
+    padding:                    2px;
+    width:                      8px;
+}
+
+/* ── Element: Plugin list row ───────────────────────────────────────────── */
+element {
+    background-color:           transparent;
+    border:                     1px solid;
+    border-color:               transparent;
+    border-radius:              @radius-sm;
+    margin:                     0px 8px;
+    padding:                    10px 12px;
+    orientation:                horizontal;
+    spacing:                    12px;
+    cursor:                     pointer;
+}
+
+element normal.normal {
+    background-color:           transparent;
+    border-color:               transparent;
+    text-color:                 @fg-primary;
+}
+
+element normal.active {
+    background-color:           @bg-card-installed;
+    border-color:               @border-card-installed;
+    text-color:                 @fg-success;
+}
+
+element normal.urgent {
+    background-color:           @bg-card-update;
+    border-color:               @border-card-update;
+    text-color:                 @fg-warning;
+}
+
+element selected.normal {
+    background-color:           @bg-card-selected;
+    border-color:               @border-card-selected;
+    text-color:                 @fg-primary;
+}
+
+element selected.active {
+    background-color:           @bg-card-installed;
+    border-color:               @fg-success;
+    text-color:                 @fg-success;
+}
+
+element selected.urgent {
+    background-color:           @bg-card-update;
+    border-color:               @fg-warning;
+    text-color:                 @fg-warning;
+}
+
+element alternate.normal {
+    background-color:           transparent;
+    border-color:               transparent;
+    text-color:                 @fg-primary;
+}
+
+element alternate.active {
+    background-color:           @bg-card-installed;
+    border-color:               transparent;
+    text-color:                 @fg-success;
+}
+
+element alternate.urgent {
+    background-color:           @bg-card-update;
+    border-color:               transparent;
+    text-color:                 @fg-warning;
+}
+
+element-icon {
+    background-color:           transparent;
+    size:                       2.6em;
+    border:                     0px;
+    padding:                    0px;
+    expand:                     false;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+element-text {
+    background-color:           transparent;
+    expand:                     true;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    text-color:                 inherit;
+    font:                       @font-ui;
+    highlight:                  bold @fg-accent;
+    cursor:                     inherit;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+list-empty-state {
+    background-color:           transparent;
+    content:                    "󰏗\n\nNo plugins found\nTry a different filter or search term";
+    font:                       @font-ui;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    expand:                     false;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION C3: DETAIL PANEL
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+detail-panel {
+    background-color:           @bg-detail-panel;
+    border:                     0px;
+    orientation:                vertical;
+    spacing:                    0px;
+    expand:                     false;
+    width:                      @detail-panel-width;
+    children:                   [
+                                    detail-hero,
+                                    detail-body,
+                                    detail-meta,
+                                    detail-deps,
+                                    detail-actions,
+                                    detail-danger-zone
+                                ];
+}
+
+/* ── Detail Hero ────────────────────────────────────────────────────────── */
+detail-hero {
+    background-color:           @bg-surface;
+    border:                     0px 0px 1px 0px solid;
+    border-color:               @border-panel;
+    padding:                    18px 18px 14px 18px;
+    orientation:                vertical;
+    spacing:                    10px;
+    expand:                     false;
+    children:                   [
+                                    detail-hero-top,
+                                    detail-badges,
+                                    detail-rating-row
+                                ];
+}
+
+detail-hero-top {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    12px;
+    expand:                     false;
+    children:                   [ detail-icon-wrap, detail-name-block, spacer, detail-fav-btn ];
+}
+
+detail-icon-wrap {
+    background-color:           @bg-card;
+    border:                     1px solid;
+    border-color:               @border-card;
+    border-radius:              @radius-md;
+    padding:                    10px 12px;
+    expand:                     false;
+    children:                   [ detail-icon ];
+}
+
+detail-icon {
+    background-color:           transparent;
+    content:                    "󰏗";
+    font:                       @font-icon-xl;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    expand:                     false;
+}
+
+detail-name-block {
+    background-color:           transparent;
+    orientation:                vertical;
+    spacing:                    4px;
+    expand:                     true;
+    children:                   [ detail-name, detail-author, detail-version ];
+}
+
+detail-name {
+    background-color:           transparent;
+    content:                    "Select a plugin";
+    font:                       @font-subtitle;
+    text-color:                 @fg-primary;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+detail-author {
+    background-color:           transparent;
+    content:                    "by — / —";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+detail-version {
+    background-color:           transparent;
+    content:                    "v—";
+    font:                       @font-version;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+detail-fav-btn {
+    background-color:           transparent;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    6px 8px;
+    expand:                     false;
+    content:                    "★";
+    font:                       @font-icon-sm;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+detail-badges {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    5px;
+    expand:                     false;
+    children:                   [
+                                    badge-status,
+                                    badge-category,
+                                    badge-type
+                                ];
+}
+
+badge-status {
+    background-color:           @bg-badge-installed;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "✓ Installed";
+    font:                       @font-badge;
+    text-color:                 @fg-badge-installed;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+badge-category {
+    background-color:           @bg-surface-raised;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "󰔰 Theme";
+    font:                       @font-badge;
+    text-color:                 @cat-theme;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+badge-type {
+    background-color:           @bg-badge-core;
+    border-radius:              @radius-pill;
+    padding:                    3px 9px;
+    expand:                     false;
+    content:                    "Core";
+    font:                       @font-badge;
+    text-color:                 @fg-badge-installed;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+}
+
+detail-rating-row {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    16px;
+    expand:                     false;
+    children:                   [
+                                    rating-stars,
+                                    rating-downloads,
+                                    rating-size
+                                ];
+}
+
+rating-stars {
+    background-color:           transparent;
+    content:                    "★★★★½  4.8";
+    font:                       @font-small;
+    text-color:                 @fg-warning;
+    vertical-align:             0.5;
+}
+
+rating-downloads {
+    background-color:           transparent;
+    content:                    "󰇰  12.4k";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+}
+
+rating-size {
+    background-color:           transparent;
+    content:                    "󰉿  2.1 MB";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+}
+
+/* ── Detail Body ────────────────────────────────────────────────────────── */
+detail-body {
+    background-color:           transparent;
+    padding:                    14px 18px 8px 18px;
+    expand:                     true;
+    orientation:                vertical;
+    spacing:                    8px;
+    children:                   [ detail-desc-label, detail-desc, detail-tags ];
+}
+
+detail-desc-label {
+    background-color:           transparent;
+    content:                    "DESCRIPTION";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+detail-desc {
+    background-color:           transparent;
+    content:                    "Select a plugin from the list\nto view its details here.";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.0;
+    horizontal-align:           0.0;
+    expand:                     true;
+}
+
+detail-tags {
+    background-color:           transparent;
+    content:                    "󰓻 —";
+    font:                       @font-small;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+/* ── Detail Meta ────────────────────────────────────────────────────────── */
+detail-meta {
+    background-color:           @bg-surface;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               @border-panel;
+    padding:                    10px 18px;
+    orientation:                vertical;
+    spacing:                    5px;
+    expand:                     false;
+    children:                   [
+                                    meta-label,
+                                    meta-license,
+                                    meta-updated,
+                                    meta-compat,
+                                    meta-repo
+                                ];
+}
+
+meta-label {
+    background-color:           transparent;
+    content:                    "METADATA";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+meta-license {
+    background-color:           transparent;
+    content:                    "󰒃  License: MIT";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+}
+
+meta-updated {
+    background-color:           transparent;
+    content:                    "󰔛  Updated: 3 days ago";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+}
+
+meta-compat {
+    background-color:           transparent;
+    content:                    "󱁆  Requires: ash ≥ 4.0";
+    font:                       @font-small;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+}
+
+meta-repo {
+    background-color:           transparent;
+    content:                    "󰊤  github.com/ash-dotfiles/…";
+    font:                       @font-small;
+    text-color:                 @fg-accent;
+    vertical-align:             0.5;
+    cursor:                     pointer;
+}
+
+/* ── Detail Dependencies ────────────────────────────────────────────────── */
+detail-deps {
+    background-color:           @bg-surface;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               @border-panel;
+    padding:                    10px 18px;
+    orientation:                vertical;
+    spacing:                    5px;
+    expand:                     false;
+    children:                   [ deps-label, deps-list ];
+}
+
+deps-label {
+    background-color:           transparent;
+    content:                    "DEPENDENCIES";
+    font:                       @font-mono-xs;
+    text-color:                 @fg-faint;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+deps-list {
+    background-color:           transparent;
+    content:                    "No dependencies";
+    font:                       @font-small;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+}
+
+/* ── Detail Actions ─────────────────────────────────────────────────────── */
+detail-actions {
+    background-color:           @bg-surface;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               @border-panel;
+    padding:                    12px 18px;
+    orientation:                vertical;
+    spacing:                    8px;
+    expand:                     false;
+    children:                   [
+                                    action-install,
+                                    action-enable,
+                                    action-configure,
+                                    action-changelog
+                                ];
+}
+
+action-install {
+    background-color:           @fg-accent;
+    border-radius:              @radius-sm;
+    padding:                    9px 16px;
+    expand:                     false;
+    content:                    "󰅢  Install Plugin";
+    font:                       @font-ui-bold;
+    text-color:                 @bg-window;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+action-enable {
+    background-color:           @status-installed-alpha;
+    border:                     1px solid;
+    border-color:               #a6e3a140;
+    border-radius:              @radius-sm;
+    padding:                    7px 16px;
+    expand:                     false;
+    content:                    "⚡  Enable";
+    font:                       @font-ui;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+action-configure {
+    background-color:           @bg-surface-raised;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    7px 16px;
+    expand:                     false;
+    content:                    "󰏫  Configure";
+    font:                       @font-ui;
+    text-color:                 @fg-secondary;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+action-changelog {
+    background-color:           transparent;
+    border-radius:              @radius-sm;
+    padding:                    7px 16px;
+    expand:                     false;
+    content:                    "󰹑  Changelog";
+    font:                       @font-ui;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+/* ── Detail Danger Zone ─────────────────────────────────────────────────── */
+detail-danger-zone {
+    background-color:           @status-error-alpha;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               #f38ba830;
+    padding:                    10px 18px;
+    orientation:                horizontal;
+    spacing:                    8px;
+    expand:                     false;
+    children:                   [ dz-remove, dz-report ];
+}
+
+dz-remove {
+    background-color:           transparent;
+    border:                     1px solid;
+    border-color:               @fg-error;
+    border-radius:              @radius-sm;
+    padding:                    6px 14px;
+    expand:                     true;
+    content:                    "󱧉  Remove";
+    font:                       @font-ui;
+    text-color:                 @fg-error;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+dz-report {
+    background-color:           transparent;
+    border:                     1px solid;
+    border-color:               @border-subtle;
+    border-radius:              @radius-sm;
+    padding:                    6px 10px;
+    expand:                     false;
+    content:                    "󰏦";
+    font:                       @font-icon-sm;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    cursor:                     pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ── SECTION D: FOOTER
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+footer {
+    background-color:           @bg-footer;
+    border:                     1px 0px 0px 0px solid;
+    border-color:               @border-subtle;
+    border-radius:              0px 0px @radius-xl @radius-xl;
+    padding:                    8px 22px;
+    orientation:                horizontal;
+    spacing:                    0px;
+    expand:                     false;
+    children:                   [ footer-hints, spacer, footer-queue, footer-status ];
+}
+
+footer-hints {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    16px;
+    expand:                     false;
+    children:                   [
+                                    fh-enter,
+                                    fh-ctrl-i,
+                                    fh-ctrl-r,
+                                    fh-ctrl-u,
+                                    fh-ctrl-e,
+                                    fh-ctrl-c,
+                                    fh-ctrl-s,
+                                    fh-esc
+                                ];
+}
+
+fh-enter {
+    background-color:           transparent;
+    content:                    "⏎ Detail";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-i {
+    background-color:           transparent;
+    content:                    "^I Install";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-r {
+    background-color:           transparent;
+    content:                    "^R Remove";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-u {
+    background-color:           transparent;
+    content:                    "^U Update";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-e {
+    background-color:           transparent;
+    content:                    "^E Enable";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-c {
+    background-color:           transparent;
+    content:                    "^C Config";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-ctrl-s {
+    background-color:           transparent;
+    content:                    "^S Sync";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+fh-esc {
+    background-color:           transparent;
+    content:                    "Esc Close";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+/* ── Install Queue Indicator ────────────────────────────────────────────── */
+footer-queue {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    10px;
+    expand:                     false;
+    children:                   [ fq-label, fq-divider ];
+}
+
+fq-label {
+    background-color:           transparent;
+    content:                    "󰅢  Queue: 0 pending";
+    font:                       @font-hint;
+    text-color:                 @fg-muted;
+    vertical-align:             0.5;
+}
+
+fq-divider {
+    background-color:           @border-subtle;
+    expand:                     false;
+    width:                      1px;
+    margin:                     6px 4px;
+}
+
+/* ── Status ─────────────────────────────────────────────────────────────── */
+footer-status {
+    background-color:           transparent;
+    orientation:                horizontal;
+    spacing:                    12px;
+    expand:                     false;
+    children:                   [
+                                    fs-registry,
+                                    fs-divider,
+                                    fs-version
+                                ];
+}
+
+fs-registry {
+    background-color:           transparent;
+    content:                    "● Registry Online";
+    font:                       @font-hint;
+    text-color:                 @fg-success;
+    vertical-align:             0.5;
+}
+
+fs-divider {
+    background-color:           @border-subtle;
+    expand:                     false;
+    width:                      1px;
+    margin:                     6px 0px;
+}
+
+fs-version {
+    background-color:           transparent;
+    content:                    "󱂌  ash v5.0";
+    font:                       @font-hint;
+    text-color:                 @fg-hint;
+    vertical-align:             0.5;
+}
+
+/* ── Rofi internals ─────────────────────────────────────────────────────── */
+message {
+    background-color:           transparent;
+    border:                     0px;
+    padding:                    0px;
+    margin:                     0px;
+}
+
+textbox {
+    background-color:           transparent;
+    padding:                    0px;
+    border:                     0px;
+    text-color:                 @fg-secondary;
+    font:                       @font-small;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    highlight:                  none;
+    blink:                      false;
+    markup:                     true;
+}
+
+num-rows {
+    background-color:           transparent;
+    text-color:                 @fg-muted;
+    font:                       @font-small;
+    expand:                     false;
+}
+
+num-filtered-rows {
+    background-color:           transparent;
+    text-color:                 @fg-accent;
+    font:                       @font-small;
+    expand:                     false;
+}
+
+case-indicator {
+    background-color:           transparent;
+    text-color:                 @fg-muted;
+    font:                       @font-small;
+}

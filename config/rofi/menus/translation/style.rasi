@@ -1,0 +1,281 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * ASH DOTFILES v5.0 OMEGA — TRANSLATION STYLE ENGINE
+ * ══════════════════════════════════════════════════════════════════════════════
+ * File    : style.rasi
+ * Author  : Ash Dotfiles v5.0 Omega
+ * License : MIT
+ * Desc    : Complete design token system for the Translation menu.
+ *           All @ash-* palette variables are injected at runtime by the
+ *           ash theme engine via color template substitution.
+ *           Never edit injected values manually — use: ash theme apply <name>
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 1  THEME ENGINE INJECTION ZONE
+ *      Raw palette — overwritten at runtime by ash color engine.
+ *      Defaults: Catppuccin Mocha (dark) — universally safe fallback.
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* ── Base Surface Scale ───────────────────────────────────────────────── */
+    _base:          #1e1e2e;   /* Deepest background (crust)         */
+    _mantle:        #181825;   /* Slightly elevated surface           */
+    _crust:         #11111b;   /* Absolute darkest tone               */
+    _surface0:      #313244;   /* Surface level 0                     */
+    _surface1:      #45475a;   /* Surface level 1                     */
+    _surface2:      #585b70;   /* Surface level 2 / borders           */
+    _overlay0:      #6c7086;   /* Overlay / muted icons               */
+    _overlay1:      #7f849c;   /* Overlay / secondary hints           */
+    _overlay2:      #9399b2;   /* Overlay / tertiary text             */
+
+    /* ── Text Scale ──────────────────────────────────────────────────────── */
+    _text:          #cdd6f4;   /* Primary text                        */
+    _subtext1:      #bac2de;   /* Secondary text                      */
+    _subtext0:      #a6adc8;   /* Tertiary / muted text               */
+
+    /* ── Accent Palette — [INJECTED] ─────────────────────────────────────── */
+    _accent:        #89b4fa;   /* Blue — primary accent (translation) */
+    _accent2:       #cba6f7;   /* Mauve — secondary                   */
+    _accent3:       #a6e3a1;   /* Green — success / detected          */
+    _accent4:       #f38ba8;   /* Red — error / warning               */
+    _accent5:       #fab387;   /* Peach — warning                     */
+    _accent6:       #89dceb;   /* Sky — info / language badge         */
+    _accent7:       #f5c2e7;   /* Pink — favourite lang               */
+    _accent8:       #94e2d5;   /* Teal — swap button                  */
+
+    /* ── Language Family Color Coding ────────────────────────────────────── */
+    _lang-european: #89b4fa;   /* European languages                  */
+    _lang-asian:    #f5c2e7;   /* CJK / Asian languages               */
+    _lang-semitic:  #fab387;   /* Arabic / Hebrew / Semitic           */
+    _lang-slavic:   #a6e3a1;   /* Slavic / Cyrillic                   */
+    _lang-latin:    #89dceb;   /* Latin / Romance                     */
+    _lang-other:    #cba6f7;   /* Other language families             */
+
+    /* ── Glassmorphism Alpha Variants ────────────────────────────────────── */
+    _glass-bg:           #1e1e2ed9;   /* 85% window background         */
+    _glass-border:       #89b4fa28;   /* 16% accent border             */
+    _glass-surface:      #31324480;   /* 50% surface glass             */
+    _glass-surface-deep: #18182599;   /* 60% deep surface              */
+    _glass-input:        #45475a55;   /* 33% input background          */
+    _glass-hover:        #89b4fa12;   /* 7%  hover fill                */
+    _glass-selected:     #89b4fa26;   /* 15% selection fill            */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 2  SEMANTIC COLOR TOKENS
+ *      Maps raw palette → semantic roles used by translation.rasi
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* ── Window & Backgrounds ─────────────────────────────────────────────── */
+    bg-window:              @_glass-bg;
+    bg-header:              @_mantle;
+    bg-lang-bar:            @_crust;
+    bg-input-panel:         @_glass-surface-deep;
+    bg-output-panel:        @_base;
+    bg-history-panel:       @_mantle;
+    bg-surface:             @_surface0;
+    bg-surface-raised:      @_surface1;
+    bg-input:               @_glass-input;
+    bg-tag:                 @_surface1;
+    bg-footer:              @_mantle;
+    bg-lang-btn:            @_surface0;
+    bg-lang-btn-active:     @_accent;
+    bg-swap-btn:            @_accent8;
+    bg-provider-badge:      @_surface1;
+    bg-char-counter:        transparent;
+    bg-detect-badge:        @_accent3;
+    bg-copied-toast:        @_accent3;
+    bg-error-toast:         @_accent4;
+    bg-tts-btn:             @_surface1;
+    bg-history-item:        transparent;
+    bg-fav-btn:             transparent;
+    bg-scrollbar:           @_surface0;
+
+    /* ── Foregrounds ──────────────────────────────────────────────────────── */
+    fg-primary:             @_text;
+    fg-secondary:           @_subtext1;
+    fg-muted:               @_subtext0;
+    fg-hint:                @_overlay1;
+    fg-placeholder:         @_overlay0;
+    fg-lang-active:         @_base;
+    fg-swap:                @_base;
+    fg-detect:              @_base;
+    fg-accent:              @_accent;
+    fg-success:             @_accent3;
+    fg-error:               @_accent4;
+    fg-warning:             @_accent5;
+    fg-info:                @_accent6;
+    fg-tts:                 @_accent6;
+    fg-history:             @_subtext0;
+
+    /* ── Accent ───────────────────────────────────────────────────────────── */
+    accent:                 @_accent;
+    accent-alpha:           #89b4fa18;
+    accent2:                @_accent2;
+    accent3:                @_accent3;
+    accent4:                @_accent4;
+    accent-swap:            @_accent8;
+    accent-detect:          @_accent3;
+
+    /* ── Borders ──────────────────────────────────────────────────────────── */
+    border-window:          @_glass-border;
+    border-subtle:          @_surface2;
+    border-input:           @_surface2;
+    border-input-focus:     @_accent;
+    border-panel:           @_surface1;
+    border-active-lang:     @_accent;
+    border-provider:        @_surface2;
+    border-history:         @_surface1;
+
+    /* ── Selection ────────────────────────────────────────────────────────── */
+    selection-bg:           @_glass-selected;
+    selection-border:       #89b4fa44;
+    selection-fg:           @_text;
+    hover-bg:               @_glass-hover;
+
+    /* ── Language Family Colors ───────────────────────────────────────────── */
+    lang-european:          @_lang-european;
+    lang-asian:             @_lang-asian;
+    lang-semitic:           @_lang-semitic;
+    lang-slavic:            @_lang-slavic;
+    lang-latin:             @_lang-latin;
+    lang-other:             @_lang-other;
+
+    /* ── Provider Status Colors ───────────────────────────────────────────── */
+    provider-free:          @_accent3;
+    provider-premium:       @_accent5;
+    provider-offline:       @_accent6;
+    provider-ai:            @_accent2;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 3  TYPOGRAPHY TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* ── Composed font strings ────────────────────────────────────────────── */
+    font-base:              "JetBrainsMono Nerd Font 12";
+    font-title:             "Inter Bold 15";
+    font-subtitle:          "Inter SemiBold 13";
+    font-ui:                "Inter 12";
+    font-ui-med:            "Inter Medium 12";
+    font-small:             "Inter 10";
+    font-xsmall:            "Inter 9";
+    font-hint:              "JetBrainsMono Nerd Font 10";
+    font-mono:              "JetBrainsMono Nerd Font 12";
+    font-mono-sm:           "JetBrainsMono Nerd Font 10";
+    font-icon-xl:           "JetBrainsMono Nerd Font 22";
+    font-icon-lg:           "JetBrainsMono Nerd Font 16";
+    font-icon-md:           "JetBrainsMono Nerd Font 13";
+    font-icon-sm:           "JetBrainsMono Nerd Font 11";
+    font-lang-code:         "JetBrainsMono Nerd Font Bold 11";
+    font-result:            "Inter 13";
+    font-result-bold:       "Inter SemiBold 13";
+    font-provider:          "Inter Medium 10";
+    font-history:           "Inter 11";
+    font-char-count:        "JetBrainsMono Nerd Font 10";
+    font-phonetic:          "Inter Italic 11";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 4  SPACING & RADIUS SCALE
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    /* Border radius scale */
+    radius-xs:      4px;
+    radius-sm:      6px;
+    radius-md:      10px;
+    radius-lg:      14px;
+    radius-xl:      18px;
+    radius-2xl:     24px;
+    radius-pill:    9999px;
+
+    /* Panel sizing */
+    panel-input-width:      480px;
+    panel-history-width:    260px;
+    header-height:          64px;
+    lang-bar-height:        44px;
+    footer-height:          38px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 5  LIGHT THEME OVERRIDE (activated automatically by ash engine)
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * @theme-variant-light {
+ *   _base:      #eff1f5;
+ *   _mantle:    #e6e9ef;
+ *   _crust:     #dce0e8;
+ *   _surface0:  #ccd0da;
+ *   _surface1:  #bcc0cc;
+ *   _surface2:  #acb0be;
+ *   _text:      #4c4f69;
+ *   _subtext1:  #5c5f77;
+ *   _subtext0:  #6c6f85;
+ *   _overlay0:  #9ca0b0;
+ *   _overlay1:  #8c8fa1;
+ *   _accent:    #1e66f5;
+ *   _accent2:   #8839ef;
+ *   _accent3:   #40a02b;
+ *   _accent4:   #d20f39;
+ *   _glass-bg:  #eff1f5ee;
+ * }
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 6  ANIMATION TOKENS
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+* {
+    _ease-out-quart:   "cubic-bezier(0.25, 1, 0.5, 1)";
+    _ease-spring:      "cubic-bezier(0.34, 1.56, 0.64, 1)";
+    _ease-smooth:      "cubic-bezier(0.4, 0, 0.2, 1)";
+    _duration-instant: "80ms";
+    _duration-fast:    "150ms";
+    _duration-base:    "240ms";
+    _duration-slow:    "400ms";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * § 7  ICON REFERENCE MAP
+ *      All Nerd Font codepoints used across translation.rasi + translation.sh
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  ICON REFERENCE — TRANSLATION MENU
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  󰗊   nf-md-translate          Main translation icon
+ *  󱓿   nf-md-translate_variant  Translate variant
+ *  󰍉   nf-md-magnify            Search / detect language
+ *  󰒊   nf-md-swap_horizontal    Swap source ↔ target
+ *  󰆏   nf-md-content_copy       Copy result
+ *  󰂚   nf-md-volume_high        Text-to-speech
+ *  󰂛   nf-md-volume_off         TTS muted
+ *  ★   star                     Favourite language
+ *  󰹑   nf-md-history            History
+ *  󰅖   nf-md-close              Clear / close
+ *  󰋚   nf-md-earth              Language family / globe
+ *  󰒆   nf-md-swap_vertical      Swap vertical
+ *  󰑐   nf-md-refresh            Retry translation
+ *  󰓻   nf-md-tag_multiple       Language tags
+ *  󰈮   nf-md-export-variant     Export translation
+ *  󰨿   nf-md-clipboard_text     Paste from clipboard
+ *  󰙅   nf-md-text_recognition   OCR / detect
+ *  ⚡  zap                      Fast / instant engine
+ *  🤖  robot                    AI engine indicator
+ *  🌐  globe                    Web-based engine
+ *  🔒  lock                     Premium engine
+ *  ✓   check                    Translation success
+ *  ✗   cross                    Translation error
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * LANGUAGE FLAG EMOJIS (used in history + lang picker rows):
+ *  🇺🇸 🇬🇧 🇩🇪 🇫🇷 🇪🇸 🇮🇹 🇵🇹 🇷🇺 🇨🇳 🇯🇵 🇰🇷
+ *  🇸🇦 🇮🇳 🇳🇱 🇸🇪 🇳🇴 🇩🇰 🇫🇮 🇵🇱 🇹🇷 🇺🇦
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
