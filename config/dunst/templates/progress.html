@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ⚡ ASH DOTFILES v5.0 OMEGA — DUNST PROGRESS NOTIFICATION TEMPLATE          ║
+║  Universal progress • Downloads • Installs • Backups • Builds • Uploads     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/progress.html
+📦 Requires  : dunst ≥ 1.11.0 with HTML body + progress bar support
+🎨 Colors    : Operation-type aware — each task type has its own identity
+📡 Template Variables:
+  {{OPERATION}}      — download | upload | install | uninstall | backup
+                       restore | build | compile | sync | convert | scan
+                       update | extract | compress | encrypt | decrypt
+  {{TITLE}}          — human readable operation title
+  {{SUBTITLE}}       — file name / package name / operation detail
+  {{PROGRESS}}       — 0-100 integer percentage
+  {{PROGRESS_PCT}}   — "75%"
+  {{ICON}}           — operation emoji icon
+  {{STATUS}}         — running | paused | done | failed | cancelled | queued
+  {{SPEED}}          — transfer speed (e.g., "24.5 MB/s")
+  {{SPEED_UNIT}}     — unit label
+  {{ETA}}            — "2m 34s remaining" | "Calculating…"
+  {{TRANSFERRED}}    — amount done (e.g., "342 MB")
+  {{TOTAL_SIZE}}     — total size (e.g., "1.2 GB")
+  {{CURRENT_ITEM}}   — current item being processed
+  {{ITEMS_DONE}}     — completed items count
+  {{ITEMS_TOTAL}}    — total items count
+  {{ERROR_MSG}}      — error message when failed
+  {{COLOR}}          — operation-type hex color
+  {{QUEUE_POS}}      — position in queue
+  {{QUEUE_TOTAL}}    — total queued operations
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Design Tokens ────────────────────────────────────────────────────────── */
+:root {
+    --base:      #1e1e2e;
+    --mantle:    #181825;
+    --crust:     #11111b;
+    --surface0:  #313244;
+    --surface1:  #45475a;
+    --surface2:  #585b70;
+    --overlay0:  #6c7086;
+    --overlay1:  #7f849c;
+    --overlay2:  #9399b2;
+    --text:      #cdd6f4;
+    --subtext0:  #a6adc8;
+    --subtext1:  #bac2de;
+
+    --green:     #a6e3a1;
+    --teal:      #94e2d5;
+    --sky:       #89dceb;
+    --blue:      #89b4fa;
+    --sapphire:  #74c7ec;
+    --lavender:  #b4befe;
+    --mauve:     #cba6f7;
+    --pink:      #f5c2e7;
+    --red:       #f38ba8;
+    --maroon:    #eba0ac;
+    --peach:     #fab387;
+    --yellow:    #f9e2af;
+    --rosewater: #f5e0dc;
+
+    /* Operation type → color mapping */
+    --op-download:   var(--blue);
+    --op-upload:     var(--green);
+    --op-install:    var(--mauve);
+    --op-uninstall:  var(--red);
+    --op-backup:     var(--sapphire);
+    --op-restore:    var(--teal);
+    --op-build:      var(--peach);
+    --op-compile:    var(--peach);
+    --op-sync:       var(--lavender);
+    --op-convert:    var(--sky);
+    --op-scan:       var(--yellow);
+    --op-update:     var(--mauve);
+    --op-extract:    var(--teal);
+    --op-compress:   var(--sapphire);
+    --op-encrypt:    var(--mauve);
+    --op-decrypt:    var(--green);
+    --op-default:    var(--blue);
+
+    /* Dynamic */
+    --op-color:   var(--op-default);
+    --op-color-2: var(--blue);
+
+    /* Layout */
+    --card-radius: 16px;
+    --card-pad:    16px 18px 14px;
+    --icon-size:   48px;
+    --icon-radius: 13px;
+    --bar-h:       12px;
+    --bar-r:       6px;
+    --bar-h-sm:    5px;
+
+    /* Glass */
+    --glass-bg:
+        linear-gradient(
+            145deg,
+            rgba(24, 24, 37, 0.96) 0%,
+            rgba(17, 17, 27, 0.96) 100%
+        );
+    --glass-border:  rgba(88, 91, 112, 0.33);
+    --glass-blur:    20px;
+    --glass-shadow:
+        0 8px 36px rgba(0,0,0,0.54),
+        0 2px 10px rgba(0,0,0,0.36),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+
+    /* Animation */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-out:    cubic-bezier(0.16, 1.0, 0.3, 1.0);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --dur-xs:  100ms;
+    --dur-sm:  200ms;
+    --dur-md:  340ms;
+    --dur-lg:  520ms;
+}
+
+/* ── Operation Type → Color ───────────────────────────────────────────────── */
+[data-op="download"]   { --op-color: var(--op-download);   }
+[data-op="upload"]     { --op-color: var(--op-upload);     }
+[data-op="install"]    { --op-color: var(--op-install);    }
+[data-op="uninstall"]  { --op-color: var(--op-uninstall);  }
+[data-op="backup"]     { --op-color: var(--op-backup);     }
+[data-op="restore"]    { --op-color: var(--op-restore);    }
+[data-op="build"]      { --op-color: var(--op-build);      }
+[data-op="compile"]    { --op-color: var(--op-compile);    }
+[data-op="sync"]       { --op-color: var(--op-sync);       }
+[data-op="convert"]    { --op-color: var(--op-convert);    }
+[data-op="scan"]       { --op-color: var(--op-scan);       }
+[data-op="update"]     { --op-color: var(--op-update);     }
+[data-op="extract"]    { --op-color: var(--op-extract);    }
+[data-op="compress"]   { --op-color: var(--op-compress);   }
+[data-op="encrypt"]    { --op-color: var(--op-encrypt);    }
+[data-op="decrypt"]    { --op-color: var(--op-decrypt);    }
+
+/* ── Status States ────────────────────────────────────────────────────────── */
+[data-status="done"]      { --op-color: var(--green); }
+[data-status="failed"]    { --op-color: var(--red); }
+[data-status="cancelled"] { --op-color: var(--overlay1); }
+[data-status="paused"]    { --op-color: var(--yellow); }
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.progress-card {
+    padding: var(--card-pad);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+    min-width: 340px;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: card-appear var(--dur-lg) var(--ease-spring) both;
+    will-change: transform, opacity;
+}
+
+/* Gradient border glow */
+.progress-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    padding: 1px;
+    background: linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--op-color) 55%, transparent),
+        transparent 42%,
+        color-mix(in srgb, var(--op-color) 14%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background var(--dur-md) var(--ease-smooth);
+}
+
+/* Ambient glow */
+.progress-card::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 60%;
+    background: radial-gradient(
+        ellipse at top,
+        color-mix(in srgb, var(--op-color) 10%, transparent) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+    transition: background var(--dur-md);
+    animation: ambient-breathe 3.5s ease-in-out infinite alternate;
+}
+
+/* Failed shake */
+[data-status="failed"] .progress-card {
+    animation:
+        card-appear var(--dur-lg) var(--ease-spring) both,
+        fail-shake 400ms var(--ease-smooth) calc(var(--dur-lg) + 50ms);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEADER: ICON + TITLE + STATUS
+══════════════════════════════════════════════════════════════════════════ */
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+/* ── Operation Icon ───────────────────────────────────────────────────────── */
+.op-icon-wrap {
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--op-color) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--op-color) 25%, transparent);
+    border-radius: var(--icon-radius);
+    position: relative;
+    transition: all var(--dur-sm) var(--ease-smooth);
+}
+
+/* Running spin for active states */
+[data-status="running"] .op-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 2px solid transparent;
+    border-top-color: color-mix(in srgb, var(--op-color) 70%, transparent);
+    border-right-color: color-mix(in srgb, var(--op-color) 30%, transparent);
+    animation: spinner 1.2s linear infinite;
+}
+
+/* Paused double-border */
+[data-status="paused"] .op-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 2px dashed color-mix(in srgb, var(--yellow) 40%, transparent);
+    animation: pause-rotate 4s linear infinite;
+}
+
+/* Done checkmark ring */
+[data-status="done"] .op-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 2px solid color-mix(in srgb, var(--green) 50%, transparent);
+    animation: done-pulse 2s ease-in-out infinite;
+}
+
+/* Failed cross ring */
+[data-status="failed"] .op-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 2px solid color-mix(in srgb, var(--red) 50%, transparent);
+}
+
+.op-emoji {
+    font-size: 22px;
+    z-index: 1;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--op-color) 55%, transparent));
+    animation: icon-enter var(--dur-md) var(--ease-spring) both;
+    animation-delay: 60ms;
+}
+
+/* ── Title Area ───────────────────────────────────────────────────────────── */
+.op-title-group {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.op-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.op-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    animation: title-in var(--dur-md) var(--ease-out) both;
+    animation-delay: 40ms;
+}
+
+/* Status badge */
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: all var(--dur-sm) var(--ease-smooth);
+    background: color-mix(in srgb, var(--op-color) 14%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--op-color) 28%, transparent);
+    color: var(--op-color);
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-status="running"] .status-dot {
+    animation: dot-pulse-fast 0.8s ease-in-out infinite alternate;
+}
+
+[data-status="paused"] .status-dot {
+    animation: none;
+    opacity: 0.5;
+}
+
+/* ── Subtitle / File ──────────────────────────────────────────────────────── */
+.op-subtitle {
+    font-size: 10.5px;
+    color: var(--overlay1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.subtitle-icon {
+    font-size: 9px;
+    opacity: 0.65;
+    flex-shrink: 0;
+}
+
+/* ── Queue indicator ──────────────────────────────────────────────────────── */
+.queue-badge {
+    font-size: 9px;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: monospace;
+}
+
+.queue-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--overlay0);
+    flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MAIN PROGRESS BAR
+══════════════════════════════════════════════════════════════════════════ */
+
+.main-progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.progress-stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.progress-percent {
+    font-size: 28px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    color: var(--op-color);
+    line-height: 1;
+    text-shadow:
+        0 0 18px color-mix(in srgb, var(--op-color) 45%, transparent),
+        0 0 36px color-mix(in srgb, var(--op-color) 18%, transparent);
+    transition: color var(--dur-sm) var(--ease-smooth);
+    animation: percent-pop var(--dur-md) var(--ease-spring) both;
+}
+
+.progress-size-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+}
+
+.size-transferred {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.size-total {
+    font-size: 10px;
+    color: var(--overlay0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Progress Track ───────────────────────────────────────────────────────── */
+.progress-track {
+    width: 100%;
+    height: var(--bar-h);
+    background: var(--surface0);
+    border-radius: var(--bar-r);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* Milestone markers */
+.progress-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent calc(25% - 1px),
+        rgba(17,17,27, 0.65) calc(25% - 1px),
+        rgba(17,17,27, 0.65) 25%
+    );
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Striped overlay for paused */
+[data-status="paused"] .progress-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 4px,
+        rgba(0,0,0,0.2) 4px,
+        rgba(0,0,0,0.2) 8px
+    );
+    z-index: 4;
+    pointer-events: none;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--bar-r);
+    position: relative;
+    transform-origin: left center;
+    animation: bar-fill var(--dur-lg) var(--ease-spring) both;
+    transition:
+        width var(--dur-md) var(--ease-spring),
+        background var(--dur-md) var(--ease-smooth);
+    will-change: width, background;
+}
+
+/* Gradient fill — always full spectrum */
+.progress-fill {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--op-color) 60%, var(--surface0)),
+        var(--op-color),
+        color-mix(in srgb, var(--op-color) 85%, white)
+    );
+}
+
+/* Cancelled — gray */
+[data-status="cancelled"] .progress-fill {
+    background: linear-gradient(90deg, var(--surface1), var(--surface2));
+}
+
+/* Failed — red with error effect */
+[data-status="failed"] .progress-fill {
+    background: linear-gradient(90deg, var(--maroon), var(--red));
+    animation: error-flicker 0.5s ease-in-out 3;
+}
+
+/* Done — celebration gradient */
+[data-status="done"] .progress-fill {
+    background: linear-gradient(90deg, var(--teal), var(--green));
+}
+
+/* Paused — desaturated */
+[data-status="paused"] .progress-fill {
+    filter: saturate(0.4) brightness(0.8);
+}
+
+/* Moving shimmer — running only */
+[data-status="running"] .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.28),
+        transparent
+    );
+    animation: progress-shimmer 1.8s ease-in-out infinite;
+}
+
+/* Leading dot indicator */
+.progress-fill::before {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--op-color);
+    border: 2.5px solid var(--mantle);
+    box-shadow:
+        0 0 8px  color-mix(in srgb, var(--op-color) 70%, transparent),
+        0 0 16px color-mix(in srgb, var(--op-color) 30%, transparent);
+    z-index: 5;
+    animation: dot-appear var(--dur-lg) var(--ease-spring) both;
+    animation-delay: 80ms;
+    transition: background var(--dur-sm);
+}
+
+[data-status="done"] .progress-fill::before {
+    background: var(--green);
+    content: '✓';
+    display: grid;
+    place-items: center;
+    font-size: 8px;
+    color: var(--crust);
+    font-weight: 800;
+}
+
+[data-status="failed"] .progress-fill::before {
+    background: var(--red);
+    content: '×';
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    color: var(--crust);
+    font-weight: 800;
+}
+
+/* ── Progress Milestones ──────────────────────────────────────────────────── */
+.milestones {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1px;
+}
+
+.milestone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    position: relative;
+}
+
+.milestone-tick {
+    width: 1.5px;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 1px;
+}
+
+.milestone-label {
+    font-size: 7.5px;
+    color: var(--overlay0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Reached milestone highlight */
+.milestone.reached .milestone-tick {
+    background: color-mix(in srgb, var(--op-color) 60%, var(--surface2));
+}
+
+.milestone.reached .milestone-label {
+    color: color-mix(in srgb, var(--op-color) 70%, var(--overlay0));
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SPEED + ETA ROW
+══════════════════════════════════════════════════════════════════════════ */
+
+.speed-eta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.speed-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    border-radius: 8px;
+    transition: all var(--dur-xs) var(--ease-smooth);
+    animation: chip-in var(--dur-md) var(--ease-spring) both;
+    flex: 1;
+    min-width: 0;
+}
+
+.speed-chip:hover {
+    background: var(--surface1);
+    border-color: color-mix(in srgb, var(--op-color) 30%, transparent);
+}
+
+.speed-chip:nth-child(1) { animation-delay:  80ms; }
+.speed-chip:nth-child(2) { animation-delay: 120ms; }
+.speed-chip:nth-child(3) { animation-delay: 160ms; }
+
+.chip-icon { font-size: 12px; flex-shrink: 0; }
+
+.chip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.chip-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+    white-space: nowrap;
+}
+
+.chip-value {
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--subtext1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chip-value.highlight {
+    color: var(--op-color);
+    text-shadow:
+        0 0 10px color-mix(in srgb, var(--op-color) 40%, transparent);
+}
+
+/* Live speed oscillation dots */
+.speed-live {
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.live-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: color-mix(in srgb, var(--op-color) 55%, var(--surface1));
+}
+
+[data-status="running"] .live-bar:nth-child(1) { animation: live-pulse 1.0s ease-in-out infinite alternate; animation-delay:   0ms; }
+[data-status="running"] .live-bar:nth-child(2) { animation: live-pulse 1.0s ease-in-out infinite alternate; animation-delay: 130ms; }
+[data-status="running"] .live-bar:nth-child(3) { animation: live-pulse 1.0s ease-in-out infinite alternate; animation-delay: 260ms; }
+[data-status="running"] .live-bar:nth-child(4) { animation: live-pulse 1.0s ease-in-out infinite alternate; animation-delay: 100ms; }
+
+.live-bar { height: 40%; }
+.live-bar:nth-child(2) { height: 75%; }
+.live-bar:nth-child(3) { height: 100%; }
+.live-bar:nth-child(4) { height: 55%; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ITEMS PROGRESS (multi-file / multi-step)
+══════════════════════════════════════════════════════════════════════════ */
+
+.items-section {
+    display: none;
+}
+
+[data-items="true"] .items-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.items-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.items-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.items-counter {
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--op-color);
+}
+
+.items-total-label {
+    font-size: 10px;
+    color: var(--overlay0);
+}
+
+.current-item {
+    font-size: 10px;
+    color: var(--overlay1);
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.item-arrow {
+    color: var(--op-color);
+    font-size: 9px;
+    animation: arrow-blink 1.2s ease-in-out infinite alternate;
+    flex-shrink: 0;
+}
+
+/* Item progress mini-bar */
+.items-bar-track {
+    width: 100%;
+    height: var(--bar-h-sm);
+    background: var(--surface0);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.items-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--op-color) 50%, var(--surface0)),
+        var(--op-color)
+    );
+    animation: bar-fill var(--dur-lg) var(--ease-spring) both;
+    animation-delay: 200ms;
+    transition: width var(--dur-md) var(--ease-spring);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STATUS-SPECIFIC OVERLAYS
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Completion Banner ────────────────────────────────────────────────────── */
+.completion-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    animation: banner-appear var(--dur-md) var(--ease-spring) both;
+}
+
+[data-status="done"] .completion-banner {
+    display: flex;
+    background: color-mix(in srgb, var(--green) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--green) 22%, transparent);
+    color: var(--green);
+}
+
+.completion-icon {
+    font-size: 22px;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--green) 60%, transparent));
+    animation: check-bounce var(--dur-md) var(--ease-spring) both;
+}
+
+.completion-text {
+    flex: 1;
+}
+
+.completion-title {
+    font-size: 13px;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.completion-detail {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* Confetti burst */
+.confetti {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+[data-status="done"] .confetti {
+    display: block;
+}
+
+.confetti-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    animation: confetti-fall 1.2s ease-out both;
+}
+
+.confetti-particle:nth-child(1)  { left: 10%; background: var(--red);    animation-delay: 0ms;   }
+.confetti-particle:nth-child(2)  { left: 20%; background: var(--yellow); animation-delay: 80ms;  }
+.confetti-particle:nth-child(3)  { left: 30%; background: var(--green);  animation-delay: 40ms;  }
+.confetti-particle:nth-child(4)  { left: 40%; background: var(--blue);   animation-delay: 120ms; }
+.confetti-particle:nth-child(5)  { left: 50%; background: var(--mauve);  animation-delay: 60ms;  }
+.confetti-particle:nth-child(6)  { left: 60%; background: var(--peach);  animation-delay: 100ms; }
+.confetti-particle:nth-child(7)  { left: 70%; background: var(--teal);   animation-delay: 20ms;  }
+.confetti-particle:nth-child(8)  { left: 80%; background: var(--red);    animation-delay: 140ms; }
+.confetti-particle:nth-child(9)  { left: 90%; background: var(--yellow); animation-delay: 80ms;  }
+
+/* ── Error Banner ─────────────────────────────────────────────────────────── */
+.error-banner {
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    animation: banner-appear var(--dur-md) var(--ease-spring) both;
+}
+
+[data-status="failed"] .error-banner {
+    display: flex;
+    background: color-mix(in srgb, var(--red) 12%, var(--crust));
+    border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+}
+
+.error-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--red) 55%, transparent));
+    animation: error-shake-icon 400ms var(--ease-smooth);
+}
+
+.error-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.error-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--red);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.error-message {
+    font-size: 10px;
+    color: var(--maroon);
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.error-action-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.error-btn {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+
+.btn-retry {
+    background: color-mix(in srgb, var(--red) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+    color: var(--red);
+}
+
+.btn-dismiss {
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    color: var(--overlay1);
+}
+
+/* ── Paused Banner ────────────────────────────────────────────────────────── */
+.paused-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--yellow) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 22%, transparent);
+    animation: banner-appear var(--dur-md) var(--ease-spring) both;
+}
+
+[data-status="paused"] .paused-banner {
+    display: flex;
+}
+
+.paused-icon {
+    font-size: 16px;
+    color: var(--yellow);
+    animation: paused-blink 2s ease-in-out infinite;
+}
+
+.paused-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--yellow);
+}
+
+.paused-resume-hint {
+    margin-left: auto;
+    font-size: 9px;
+    color: var(--overlay0);
+    font-style: italic;
+}
+
+/* ── Cancelled Banner ─────────────────────────────────────────────────────── */
+.cancelled-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    animation: banner-appear var(--dur-md) var(--ease-spring) both;
+}
+
+[data-status="cancelled"] .cancelled-banner {
+    display: flex;
+}
+
+.cancelled-text {
+    font-size: 11px;
+    color: var(--overlay1);
+}
+
+/* ── Queue Info ───────────────────────────────────────────────────────────── */
+.queue-section {
+    display: none;
+}
+
+[data-status="queued"] .queue-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    border-radius: 10px;
+}
+
+.queue-position {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--overlay1);
+    font-variant-numeric: tabular-nums;
+}
+
+.queue-of {
+    font-size: 10px;
+    color: var(--overlay0);
+    margin-top: -2px;
+}
+
+.queue-dots {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.queue-op-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface1);
+}
+
+.queue-op-dot.active {
+    background: var(--op-color);
+    animation: dot-pulse-fast 0.8s ease-in-out infinite alternate;
+}
+
+.queue-op-dot.done {
+    background: var(--green);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes card-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.94);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes bar-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes progress-shimmer {
+    0%   { left: -40%; }
+    100% { left: 110%; }
+}
+
+@keyframes icon-enter {
+    from { transform: scale(0.5) rotate(-12deg); opacity: 0; }
+    65%  { transform: scale(1.18) rotate(5deg); }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes title-in {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes percent-pop {
+    from { opacity: 0; transform: scale(0.65); }
+    70%  { transform: scale(1.06); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes dot-appear {
+    from { transform: translateY(-50%) scale(0); opacity: 0; }
+    70%  { transform: translateY(-50%) scale(1.5); }
+    to   { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes chip-in {
+    from { opacity: 0; transform: translateY(5px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes banner-appear {
+    from { opacity: 0; transform: scaleY(0.65); transform-origin: top; }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes spinner {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes pause-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes done-pulse {
+    0%, 80%, 100% { opacity: 0.4; transform: scale(1); }
+    40%            { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes error-flicker {
+    0%, 100% { opacity: 1; }
+    25%       { opacity: 0.6; }
+    50%       { opacity: 1; }
+    75%       { opacity: 0.4; }
+}
+
+@keyframes fail-shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-6px); }
+    40%  { transform: translateX(6px); }
+    60%  { transform: translateX(-4px); }
+    80%  { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes error-shake-icon {
+    0%   { transform: rotate(0deg); }
+    20%  { transform: rotate(-10deg); }
+    40%  { transform: rotate(10deg); }
+    60%  { transform: rotate(-8deg); }
+    80%  { transform: rotate(8deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes check-bounce {
+    from { transform: scale(0) rotate(-15deg); opacity: 0; }
+    60%  { transform: scale(1.3) rotate(5deg); }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes confetti-fall {
+    from {
+        top: -10px;
+        opacity: 1;
+        transform: rotate(0deg);
+    }
+    to {
+        top: 110%;
+        opacity: 0;
+        transform: rotate(540deg);
+    }
+}
+
+@keyframes dot-pulse-fast {
+    from { opacity: 0.3; transform: scale(0.7); }
+    to   { opacity: 1.0; transform: scale(1.0); }
+}
+
+@keyframes live-pulse {
+    from { transform: scaleY(0.4); opacity: 0.5; }
+    to   { transform: scaleY(1.0); opacity: 1.0; }
+}
+
+@keyframes arrow-blink {
+    from { opacity: 0.4; }
+    to   { opacity: 1.0; }
+}
+
+@keyframes paused-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+@keyframes ambient-breathe {
+    from { opacity: 0.6; transform: translateX(-50%) scale(1.0); }
+    to   { opacity: 1.0; transform: translateX(-50%) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="progress-card"
+     data-op="{{OPERATION}}"
+     data-status="{{STATUS}}"
+     data-items="{{HAS_ITEMS}}">
+
+    <!-- Confetti (done state) -->
+    <div class="confetti" aria-hidden="true">
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+        <div class="confetti-particle"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════════════ -->
+    <div class="card-header">
+
+        <!-- Icon -->
+        <div class="op-icon-wrap">
+            <span class="op-emoji" role="img" aria-label="{{OPERATION}}">
+                {{ICON}}
+            </span>
+        </div>
+
+        <!-- Title Group -->
+        <div class="op-title-group">
+
+            <div class="op-title-row">
+                <span class="op-title">{{TITLE}}</span>
+                <div class="status-badge">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    {{STATUS_LABEL}}
+                </div>
+            </div>
+
+            <div class="op-subtitle">
+                <span class="subtitle-icon" aria-hidden="true">📄</span>
+                {{SUBTITLE}}
+            </div>
+
+            <div class="queue-badge" style="display: {{SHOW_QUEUE}}">
+                <span class="queue-dot" aria-hidden="true"></span>
+                Queue: {{QUEUE_POS}} of {{QUEUE_TOTAL}}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         STATUS BANNERS
+    ═══════════════════════════════════════════════ -->
+
+    <!-- Completion -->
+    <div class="completion-banner" role="status" aria-live="polite">
+        <span class="completion-icon" aria-hidden="true">✅</span>
+        <div class="completion-text">
+            <span class="completion-title">{{TITLE}} Complete!</span>
+            <span class="completion-detail">
+                {{TRANSFERRED}} in {{ELAPSED_TIME}}
+            </span>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" role="alert" aria-live="assertive">
+        <span class="error-icon" aria-hidden="true">❌</span>
+        <div class="error-body">
+            <span class="error-title">{{TITLE}} Failed</span>
+            <div class="error-message">{{ERROR_MSG}}</div>
+            <div class="error-action-row">
+                <span class="error-btn btn-retry">Retry</span>
+                <span class="error-btn btn-dismiss">Dismiss</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paused -->
+    <div class="paused-banner">
+        <span class="paused-icon" aria-hidden="true">⏸</span>
+        <span class="paused-text">Paused</span>
+        <span class="paused-resume-hint">will resume automatically</span>
+    </div>
+
+    <!-- Cancelled -->
+    <div class="cancelled-banner">
+        <span aria-hidden="true">🚫</span>
+        <span class="cancelled-text">Operation cancelled</span>
+    </div>
+
+    <!-- Queue waiting -->
+    <div class="queue-section">
+        <div>
+            <div class="queue-position">#{{QUEUE_POS}}</div>
+            <div class="queue-of">of {{QUEUE_TOTAL}}</div>
+        </div>
+        <span style="font-size:10px; color: var(--overlay0);">Queued — waiting for other operations</span>
+        <div class="queue-dots" aria-hidden="true">
+            <div class="queue-op-dot done"></div>
+            <div class="queue-op-dot active"></div>
+            <div class="queue-op-dot"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         MAIN PROGRESS
+    ═══════════════════════════════════════════════ -->
+    <div class="main-progress-section">
+
+        <div class="progress-stats-row">
+            <span class="progress-percent">{{PROGRESS}}%</span>
+            <div class="progress-size-info">
+                <span class="size-transferred">{{TRANSFERRED}}</span>
+                <span class="size-total">of {{TOTAL_SIZE}}</span>
+            </div>
+        </div>
+
+        <div class="progress-track"
+             role="progressbar"
+             aria-valuenow="{{PROGRESS}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="{{TITLE}}: {{PROGRESS_PCT}} complete">
+            <div class="progress-fill"
+                 style="width: {{PROGRESS}}%;">
+            </div>
+        </div>
+
+        <div class="milestones" aria-hidden="true">
+            <div class="milestone {{M0_CLASS}}">
+                <div class="milestone-tick"></div>
+                <span class="milestone-label">0%</span>
+            </div>
+            <div class="milestone {{M25_CLASS}}">
+                <div class="milestone-tick"></div>
+                <span class="milestone-label">25%</span>
+            </div>
+            <div class="milestone {{M50_CLASS}}">
+                <div class="milestone-tick"></div>
+                <span class="milestone-label">50%</span>
+            </div>
+            <div class="milestone {{M75_CLASS}}">
+                <div class="milestone-tick"></div>
+                <span class="milestone-label">75%</span>
+            </div>
+            <div class="milestone {{M100_CLASS}}">
+                <div class="milestone-tick"></div>
+                <span class="milestone-label">100%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         MULTI-ITEM PROGRESS
+    ═══════════════════════════════════════════════ -->
+    <div class="items-section">
+
+        <div class="items-header">
+            <span class="items-label">
+                📦 Items
+            </span>
+            <div style="display: flex; align-items: baseline; gap: 3px;">
+                <span class="items-counter">{{ITEMS_DONE}}</span>
+                <span class="items-total-label">/ {{ITEMS_TOTAL}}</span>
+            </div>
+        </div>
+
+        <div class="current-item">
+            <span class="item-arrow" aria-hidden="true">▶</span>
+            {{CURRENT_ITEM}}
+        </div>
+
+        <div class="items-bar-track"
+             role="progressbar"
+             aria-valuenow="{{ITEMS_DONE}}"
+             aria-valuemax="{{ITEMS_TOTAL}}"
+             aria-label="Items: {{ITEMS_DONE}} of {{ITEMS_TOTAL}}">
+            <div class="items-bar-fill"
+                 style="width: {{ITEMS_PCT}}%;">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         SPEED + ETA
+    ═══════════════════════════════════════════════ -->
+    <div class="speed-eta-row">
+
+        <!-- Speed -->
+        <div class="speed-chip">
+            <span class="chip-icon" aria-hidden="true">⚡</span>
+            <div class="chip-content">
+                <span class="chip-label">Speed</span>
+                <span class="chip-value highlight">{{SPEED}}</span>
+            </div>
+            <div class="speed-live" aria-hidden="true">
+                <div class="live-bar"></div>
+                <div class="live-bar"></div>
+                <div class="live-bar"></div>
+                <div class="live-bar"></div>
+            </div>
+        </div>
+
+        <!-- ETA -->
+        <div class="speed-chip">
+            <span class="chip-icon" aria-hidden="true">⏱</span>
+            <div class="chip-content">
+                <span class="chip-label">Remaining</span>
+                <span class="chip-value">{{ETA}}</span>
+            </div>
+        </div>
+
+        <!-- Elapsed -->
+        <div class="speed-chip">
+            <span class="chip-icon" aria-hidden="true">🕐</span>
+            <div class="chip-content">
+                <span class="chip-label">Elapsed</span>
+                <span class="chip-value">{{ELAPSED_TIME}}</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

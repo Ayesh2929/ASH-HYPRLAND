@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🌐 ASH DOTFILES v5.0 OMEGA — DUNST NETWORK NOTIFICATION TEMPLATE          ║
+║  WiFi • Ethernet • VPN • Bluetooth • DNS • Speed • Signal • Security        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/network.html
+📦 Requires  : dunst ≥ 1.11.0, NetworkManager, iwd, wireguard
+🎨 Colors    : ASH semantic network palette — connection-state aware
+📡 Template Variables:
+  {{TYPE}}           — wifi | ethernet | vpn | bluetooth | hotspot | tor
+  {{STATE}}          — connected | disconnected | connecting | failed
+                       scanning | auth-failed | captive | weak-signal
+  {{SSID}}           — network name / SSID / device name
+  {{ICON}}           — connection type emoji icon
+  {{SIGNAL}}         — 0-100 signal strength (wifi)
+  {{SIGNAL_BARS}}    — ▂▄▆█ signal bar visualization
+  {{SPEED_DOWN}}     — download speed (e.g., "94.2 Mbps")
+  {{SPEED_UP}}       — upload speed (e.g., "12.4 Mbps")
+  {{IP_ADDRESS}}     — local IP address
+  {{DNS}}            — DNS server(s)
+  {{LATENCY}}        — "12ms" ping latency
+  {{SECURITY}}       — WPA3 | WPA2 | WEP | Open | Encrypted
+  {{FREQUENCY}}      — 2.4GHz | 5GHz | 6GHz
+  {{CHANNEL}}        — channel number
+  {{MAC}}            — device MAC address (last 4)
+  {{DATA_USED}}      — session data usage
+  {{VPNSERVER}}      — VPN server location
+  {{TOR_CIRCUIT}}    — Tor circuit hops
+  {{COLOR}}          — semantic color for current state
+  {{LEVEL}}          — excellent | good | fair | poor | none
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── ASH Design Tokens ────────────────────────────────────────────────────── */
+:root {
+    /* Catppuccin Mocha */
+    --base:      #1e1e2e;
+    --mantle:    #181825;
+    --crust:     #11111b;
+    --surface0:  #313244;
+    --surface1:  #45475a;
+    --surface2:  #585b70;
+    --overlay0:  #6c7086;
+    --overlay1:  #7f849c;
+    --overlay2:  #9399b2;
+    --text:      #cdd6f4;
+    --subtext0:  #a6adc8;
+    --subtext1:  #bac2de;
+
+    /* Semantic */
+    --green:     #a6e3a1;
+    --teal:      #94e2d5;
+    --sky:       #89dceb;
+    --blue:      #89b4fa;
+    --sapphire:  #74c7ec;
+    --lavender:  #b4befe;
+    --mauve:     #cba6f7;
+    --red:       #f38ba8;
+    --maroon:    #eba0ac;
+    --peach:     #fab387;
+    --yellow:    #f9e2af;
+    --rosewater: #f5e0dc;
+
+    /* Network state colors */
+    --color-connected:    var(--green);
+    --color-connecting:   var(--blue);
+    --color-disconnected: var(--overlay1);
+    --color-failed:       var(--red);
+    --color-weak:         var(--yellow);
+    --color-vpn:          var(--mauve);
+    --color-bluetooth:    var(--sapphire);
+    --color-tor:          var(--mauve);
+
+    /* Signal strength colors */
+    --sig-none: var(--surface2);
+    --sig-poor: var(--red);
+    --sig-fair: var(--yellow);
+    --sig-good: var(--teal);
+    --sig-excellent: var(--green);
+
+    /* Dynamic — set per state */
+    --network-color: var(--color-connected);
+
+    /* Layout */
+    --card-radius:   16px;
+    --card-pad:      16px 18px 14px;
+    --icon-size:     48px;
+    --icon-radius:   13px;
+    --bar-h:         6px;
+    --bar-r:         3px;
+
+    /* Glass */
+    --glass-bg:
+        radial-gradient(
+            ellipse at top left,
+            rgba(30, 30, 46, 0.96) 0%,
+            rgba(17, 17, 27, 0.96) 100%
+        );
+    --glass-border:  rgba(88, 91, 112, 0.35);
+    --glass-blur:    20px;
+    --glass-shadow:
+        0 8px 36px rgba(0,0,0,0.52),
+        0 2px 10px rgba(0,0,0,0.34),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+
+    /* Animation */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-out:    cubic-bezier(0.16, 1.0, 0.3, 1.0);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --dur-xs:  100ms;
+    --dur-sm:  200ms;
+    --dur-md:  340ms;
+    --dur-lg:  520ms;
+}
+
+/* ── State Color Bindings ─────────────────────────────────────────────────── */
+[data-state="connected"]     { --network-color: var(--color-connected); }
+[data-state="connecting"]    { --network-color: var(--color-connecting); }
+[data-state="disconnected"]  { --network-color: var(--color-disconnected); }
+[data-state="failed"]        { --network-color: var(--color-failed); }
+[data-state="auth-failed"]   { --network-color: var(--color-failed); }
+[data-state="weak-signal"]   { --network-color: var(--color-weak); }
+[data-state="captive"]       { --network-color: var(--yellow); }
+[data-type="vpn"]            { --network-color: var(--color-vpn); }
+[data-type="bluetooth"]      { --network-color: var(--color-bluetooth); }
+[data-type="tor"]            { --network-color: var(--color-tor); }
+
+/* Signal level colors */
+[data-level="none"]          { --sig-active: var(--sig-none); }
+[data-level="poor"]          { --sig-active: var(--sig-poor); }
+[data-level="fair"]          { --sig-active: var(--sig-fair); }
+[data-level="good"]          { --sig-active: var(--sig-good); }
+[data-level="excellent"]     { --sig-active: var(--sig-excellent); }
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── Card Shell ───────────────────────────────────────────────────────────── */
+.network-card {
+    padding: var(--card-pad);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+    min-width: 320px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: card-in var(--dur-lg) var(--ease-spring) both;
+    will-change: transform, opacity;
+}
+
+/* Gradient border glow */
+.network-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--network-color) 55%, transparent),
+        transparent 45%,
+        color-mix(in srgb, var(--network-color) 15%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background var(--dur-md) var(--ease-smooth);
+}
+
+/* Data flow background animation */
+.network-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 40px,
+        color-mix(in srgb, var(--network-color) 2%, transparent) 40px,
+        color-mix(in srgb, var(--network-color) 2%, transparent) 41px
+    );
+    pointer-events: none;
+    opacity: 0;
+    animation: data-flow 4s linear infinite;
+    transition: opacity var(--dur-md);
+}
+
+[data-state="connected"] .network-card::after {
+    opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOP SECTION: ICON + IDENTITY
+══════════════════════════════════════════════════════════════════════════ */
+
+.top-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+/* ── Network Type Icon ────────────────────────────────────────────────────── */
+.net-icon-wrap {
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--network-color) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--network-color) 25%, transparent);
+    border-radius: var(--icon-radius);
+    position: relative;
+    overflow: visible;
+    transition:
+        background   var(--dur-sm) var(--ease-smooth),
+        border-color var(--dur-sm) var(--ease-smooth);
+}
+
+/* Scanning radar animation */
+[data-state="scanning"] .net-icon-wrap::before,
+[data-state="connecting"] .net-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--network-color) 40%, transparent);
+    animation: radar-ring 1.8s ease-out infinite;
+}
+
+[data-state="scanning"] .net-icon-wrap::after,
+[data-state="connecting"] .net-icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--network-color) 20%, transparent);
+    animation: radar-ring 1.8s ease-out 0.6s infinite;
+}
+
+/* Connection ripple for connected state */
+[data-state="connected"] .net-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 1.5px solid color-mix(in srgb, var(--network-color) 35%, transparent);
+    animation: connect-pulse 3s ease-in-out infinite;
+}
+
+/* VPN lock overlay */
+[data-type="vpn"] .net-icon-wrap::after {
+    content: '🔒';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    font-size: 13px;
+    background: var(--mantle);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--mauve) 30%, transparent);
+    z-index: 2;
+}
+
+.net-emoji {
+    font-size: 22px;
+    z-index: 1;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--network-color) 55%, transparent));
+    animation: icon-in var(--dur-md) var(--ease-spring) both;
+    animation-delay: 60ms;
+    will-change: transform;
+}
+
+/* Disconnected dim */
+[data-state="disconnected"] .net-emoji,
+[data-state="failed"] .net-emoji {
+    filter: grayscale(80%) drop-shadow(0 0 4px rgba(0,0,0,0.4));
+    opacity: 0.6;
+}
+
+/* ── Network Identity ─────────────────────────────────────────────────────── */
+.net-identity {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.net-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.net-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    animation: name-in var(--dur-md) var(--ease-out) both;
+    animation-delay: 40ms;
+}
+
+.state-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    background: color-mix(in srgb, var(--network-color) 14%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--network-color) 28%, transparent);
+    color: var(--network-color);
+    transition: all var(--dur-sm) var(--ease-smooth);
+}
+
+.state-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-state="connected"] .state-dot {
+    animation: dot-live 2.5s ease-in-out infinite;
+}
+
+[data-state="connecting"] .state-dot,
+[data-state="scanning"] .state-dot {
+    animation: dot-blink 0.7s ease-in-out infinite alternate;
+}
+
+/* ── Security + Frequency Tags ────────────────────────────────────────────── */
+.net-meta-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.meta-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.tag-security {
+    background: color-mix(in srgb, var(--green) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--green) 22%, transparent);
+    color: var(--green);
+}
+
+.tag-security.open {
+    background: color-mix(in srgb, var(--yellow) 12%, var(--surface0));
+    border-color: color-mix(in srgb, var(--yellow) 22%, transparent);
+    color: var(--yellow);
+}
+
+.tag-freq {
+    background: color-mix(in srgb, var(--blue) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--blue) 20%, transparent);
+    color: var(--blue);
+}
+
+.tag-channel {
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    color: var(--overlay1);
+}
+
+/* ── IP Address ───────────────────────────────────────────────────────────── */
+.ip-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    color: var(--overlay0);
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.ip-icon { font-size: 9px; opacity: 0.7; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIGNAL STRENGTH SECTION
+══════════════════════════════════════════════════════════════════════════ */
+
+.signal-section {
+    display: none;
+}
+
+[data-type="wifi"] .signal-section,
+[data-type="bluetooth"] .signal-section {
+    display: block;
+}
+
+.signal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.signal-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.signal-value-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.signal-percent {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--sig-active, var(--green));
+    text-shadow:
+        0 0 12px color-mix(in srgb, var(--sig-active, var(--green)) 50%, transparent);
+    transition: color var(--dur-sm);
+    line-height: 1;
+}
+
+/* Animated WiFi bars visualization */
+.wifi-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 20px;
+}
+
+.wifi-bar {
+    width: 6px;
+    border-radius: 2px;
+    background: var(--surface1);
+    transition: background var(--dur-sm) var(--ease-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.wifi-bar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+    background: var(--sig-active, var(--green));
+    transition: height var(--dur-md) var(--ease-spring);
+}
+
+.wifi-bar:nth-child(1) { height: 25%; }
+.wifi-bar:nth-child(2) { height: 45%; }
+.wifi-bar:nth-child(3) { height: 70%; }
+.wifi-bar:nth-child(4) { height: 100%; }
+
+/* Fill based on signal level */
+[data-level="poor"] .wifi-bar:nth-child(1)::after    { height: 100%; }
+[data-level="fair"] .wifi-bar:nth-child(1)::after,
+[data-level="fair"] .wifi-bar:nth-child(2)::after    { height: 100%; }
+[data-level="good"] .wifi-bar:nth-child(1)::after,
+[data-level="good"] .wifi-bar:nth-child(2)::after,
+[data-level="good"] .wifi-bar:nth-child(3)::after    { height: 100%; }
+[data-level="excellent"] .wifi-bar::after             { height: 100%; }
+
+/* Animated fill on entry */
+.wifi-bar::after {
+    animation: bar-fill-up var(--dur-lg) var(--ease-spring) both;
+}
+
+.wifi-bar:nth-child(1)::after { animation-delay:  60ms; }
+.wifi-bar:nth-child(2)::after { animation-delay: 100ms; }
+.wifi-bar:nth-child(3)::after { animation-delay: 140ms; }
+.wifi-bar:nth-child(4)::after { animation-delay: 180ms; }
+
+/* Signal quality progress track */
+.signal-track {
+    width: 100%;
+    height: var(--bar-h);
+    background: var(--surface0);
+    border-radius: var(--bar-r);
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+/* Quality zones */
+.signal-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        var(--sig-poor)      0%  25%,
+        var(--sig-fair)     25%  50%,
+        var(--sig-good)     50%  75%,
+        var(--sig-excellent) 75% 100%
+    );
+    opacity: 0.25;
+}
+
+.signal-fill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--sig-poor),
+        var(--sig-fair),
+        var(--sig-good),
+        var(--sig-excellent)
+    );
+    background-size: calc(100% / {{SIGNAL_NORM}});
+    border-radius: var(--bar-r);
+    position: relative;
+    transform-origin: left;
+    animation: bar-grow var(--dur-lg) var(--ease-spring) both;
+    animation-delay: 80ms;
+    transition: width var(--dur-md) var(--ease-spring);
+}
+
+/* Shimmer sweep */
+.signal-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    animation: shimmer 2.5s ease-in-out infinite;
+    animation-delay: var(--dur-lg);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SPEED METRICS
+══════════════════════════════════════════════════════════════════════════ */
+
+.speed-section {
+    display: none;
+}
+
+[data-state="connected"] .speed-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.speed-card {
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+    animation: metric-in var(--dur-md) var(--ease-spring) both;
+    transition: all var(--dur-xs) var(--ease-smooth);
+}
+
+.speed-card:hover {
+    border-color: color-mix(in srgb, var(--network-color) 30%, transparent);
+    transform: translateY(-1px);
+}
+
+.speed-card:nth-child(1) { animation-delay:  80ms; }
+.speed-card:nth-child(2) { animation-delay: 120ms; }
+
+/* Flow arrow decoration */
+.speed-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--network-color) 4%, transparent),
+        transparent 60%
+    );
+    pointer-events: none;
+}
+
+.speed-dir {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+}
+
+.speed-arrow {
+    font-size: 11px;
+    animation: arrow-pulse 2s ease-in-out infinite alternate;
+}
+
+.speed-arrow.down { color: var(--blue); }
+.speed-arrow.up   { color: var(--green); }
+
+.speed-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.speed-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    transition: color var(--dur-sm);
+}
+
+.speed-card:first-child .speed-value { color: var(--blue); }
+.speed-card:last-child  .speed-value { color: var(--green); }
+
+.speed-unit {
+    font-size: 10px;
+    color: var(--overlay1);
+    font-weight: 600;
+    padding-bottom: 2px;
+}
+
+/* Mini speed bars */
+.speed-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+    margin-top: 2px;
+}
+
+.speed-bar {
+    flex: 1;
+    border-radius: 1.5px;
+}
+
+.speed-card:first-child .speed-bar {
+    background: color-mix(in srgb, var(--blue) 50%, var(--surface1));
+}
+
+.speed-card:last-child .speed-bar {
+    background: color-mix(in srgb, var(--green) 50%, var(--surface1));
+}
+
+/* Animated heights simulating live traffic */
+.speed-bar:nth-child(1) { height: 40%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay:   0ms; }
+.speed-bar:nth-child(2) { height: 70%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay: 100ms; }
+.speed-bar:nth-child(3) { height: 55%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay: 200ms; }
+.speed-bar:nth-child(4) { height: 85%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay: 150ms; }
+.speed-bar:nth-child(5) { height: 45%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay:  80ms; }
+.speed-bar:nth-child(6) { height: 65%; animation: traffic 1.2s ease-in-out infinite alternate; animation-delay: 220ms; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LATENCY + DATA ROW
+══════════════════════════════════════════════════════════════════════════ */
+
+.stats-row {
+    display: none;
+    align-items: center;
+    gap: 6px;
+}
+
+[data-state="connected"] .stats-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    border-radius: 8px;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--subtext0);
+    white-space: nowrap;
+    transition: all var(--dur-xs) var(--ease-smooth);
+    animation: chip-in var(--dur-md) var(--ease-spring) both;
+}
+
+.stat-chip:hover {
+    background: var(--surface1);
+    border-color: color-mix(in srgb, var(--network-color) 25%, transparent);
+    color: var(--text);
+}
+
+.stat-chip:nth-child(1) { animation-delay:  80ms; }
+.stat-chip:nth-child(2) { animation-delay: 120ms; }
+.stat-chip:nth-child(3) { animation-delay: 160ms; }
+.stat-chip:nth-child(4) { animation-delay: 200ms; }
+
+.chip-icon {
+    font-size: 10px;
+    opacity: 0.75;
+}
+
+.chip-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    color: var(--overlay0);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chip-value {
+    font-weight: 700;
+    color: var(--subtext1);
+}
+
+/* Latency color coding */
+.latency-good  { color: var(--green); }
+.latency-ok    { color: var(--teal); }
+.latency-high  { color: var(--yellow); }
+.latency-bad   { color: var(--red); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VPN SECTION
+══════════════════════════════════════════════════════════════════════════ */
+
+.vpn-section {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--mauve) 8%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--mauve) 20%, transparent);
+    border-radius: 10px;
+    animation: section-in var(--dur-md) var(--ease-spring) both;
+    animation-delay: 100ms;
+}
+
+[data-type="vpn"] .vpn-section {
+    display: flex;
+}
+
+.vpn-lock-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--mauve) 60%, transparent));
+    animation: lock-appear var(--dur-md) var(--ease-spring) both;
+}
+
+.vpn-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vpn-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--mauve);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vpn-server {
+    font-size: 10px;
+    color: var(--overlay1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.vpn-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.vpn-encrypted-tag {
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--green) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--green) 25%, transparent);
+    color: var(--green);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.vpn-kill-switch {
+    font-size: 8px;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Kill switch active */
+.vpn-kill-active {
+    color: var(--yellow);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOR SECTION
+══════════════════════════════════════════════════════════════════════════ */
+
+.tor-section {
+    display: none;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--mauve) 7%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--mauve) 18%, transparent);
+    border-radius: 10px;
+}
+
+[data-type="tor"] .tor-section {
+    display: block;
+}
+
+.tor-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tor-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--mauve) 60%, transparent));
+}
+
+.tor-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--mauve);
+}
+
+.tor-anon-badge {
+    margin-left: auto;
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--mauve) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--mauve) 28%, transparent);
+    color: var(--mauve);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Circuit hops visualization */
+.tor-circuit {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.tor-hop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    color: var(--overlay0);
+    font-family: monospace;
+}
+
+.tor-hop-node {
+    padding: 2px 6px;
+    background: color-mix(in srgb, var(--mauve) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--mauve) 18%, transparent);
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--overlay2);
+    animation: hop-fade var(--dur-md) ease both;
+}
+
+.tor-hop-node:nth-child(1) { animation-delay:  80ms; }
+.tor-hop-node:nth-child(2) { animation-delay: 160ms; }
+.tor-hop-node:nth-child(3) { animation-delay: 240ms; }
+
+.tor-hop-arrow {
+    color: var(--overlay0);
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.tor-exit {
+    color: var(--mauve);
+    border-color: color-mix(in srgb, var(--mauve) 35%, transparent);
+    background: color-mix(in srgb, var(--mauve) 15%, var(--surface0));
+    font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ALERT BANNERS
+══════════════════════════════════════════════════════════════════════════ */
+
+.alert-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    animation: alert-in var(--dur-md) var(--ease-spring) both;
+}
+
+/* Auth failed */
+[data-state="auth-failed"] .alert-auth {
+    display: flex;
+    background: color-mix(in srgb, var(--red) 12%, var(--crust));
+    border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+    color: var(--red);
+}
+
+/* Captive portal */
+[data-state="captive"] .alert-captive {
+    display: flex;
+    background: color-mix(in srgb, var(--yellow) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 22%, transparent);
+    color: var(--yellow);
+}
+
+/* Weak signal */
+[data-state="weak-signal"] .alert-weak {
+    display: flex;
+    background: color-mix(in srgb, var(--yellow) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 22%, transparent);
+    color: var(--yellow);
+}
+
+/* Open network warning */
+[data-security="open"] .alert-open {
+    display: flex;
+    background: color-mix(in srgb, var(--peach) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--peach) 22%, transparent);
+    color: var(--peach);
+}
+
+/* Disconnected */
+[data-state="disconnected"] .alert-disconnected,
+[data-state="failed"] .alert-disconnected {
+    display: flex;
+    background: color-mix(in srgb, var(--overlay0) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--overlay0) 18%, transparent);
+    color: var(--subtext0);
+}
+
+.alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    animation: alert-icon-in var(--dur-md) var(--ease-spring) both;
+}
+
+.alert-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-size: 12px;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.alert-detail {
+    font-size: 10px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.alert-action {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: color-mix(in srgb, currentColor 15%, transparent);
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BLUETOOTH SPECIFIC
+══════════════════════════════════════════════════════════════════════════ */
+
+.bt-section {
+    display: none;
+}
+
+[data-type="bluetooth"] .bt-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--sapphire) 8%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--sapphire) 18%, transparent);
+    border-radius: 10px;
+}
+
+.bt-device-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--sapphire) 50%, transparent));
+}
+
+.bt-info {
+    flex: 1;
+}
+
+.bt-device-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sapphire);
+}
+
+.bt-device-type {
+    font-size: 10px;
+    color: var(--overlay0);
+    margin-top: 1px;
+}
+
+.bt-battery {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.bt-battery-label {
+    font-size: 8.5px;
+    color: var(--overlay0);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.bt-battery-value {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FOOTER: DNS + MAC
+══════════════════════════════════════════════════════════════════════════ */
+
+.footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--surface0);
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    color: var(--overlay0);
+    font-family: monospace;
+}
+
+.footer-icon {
+    font-size: 9px;
+    opacity: 0.65;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.94);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes icon-in {
+    from { transform: scale(0.55) rotate(-12deg); opacity: 0; }
+    65%  { transform: scale(1.18) rotate(5deg); }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes name-in {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes bar-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes bar-fill-up {
+    from { height: 0%; }
+    to   { height: 100%; }
+}
+
+@keyframes shimmer {
+    0%   { left: -50%; }
+    60%  { left: 110%; }
+    100% { left: 110%; }
+}
+
+@keyframes metric-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes chip-in {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes section-in {
+    from { opacity: 0; transform: scaleY(0.7); transform-origin: top; }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes alert-in {
+    from { opacity: 0; transform: scaleY(0.6); transform-origin: top; }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes alert-icon-in {
+    from { transform: scale(0.5) rotate(-20deg); opacity: 0; }
+    70%  { transform: scale(1.2) rotate(5deg); }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes radar-ring {
+    from { transform: scale(0.6); opacity: 0.8; }
+    to   { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes connect-pulse {
+    0%,  80%, 100% { opacity: 0.4; transform: scale(1); }
+    40%             { opacity: 0;   transform: scale(1.6); }
+}
+
+@keyframes dot-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.35; transform: scale(0.65); }
+}
+
+@keyframes dot-blink {
+    from { opacity: 0.25; }
+    to   { opacity: 1.0; }
+}
+
+@keyframes arrow-pulse {
+    from { transform: scale(0.9); opacity: 0.7; }
+    to   { transform: scale(1.1); opacity: 1.0; }
+}
+
+@keyframes traffic {
+    from { opacity: 0.4; transform: scaleY(0.6); }
+    to   { opacity: 1.0; transform: scaleY(1.0); }
+}
+
+@keyframes lock-appear {
+    from { transform: scale(0.5) translateY(8px); opacity: 0; }
+    70%  { transform: scale(1.15) translateY(-2px); }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes hop-fade {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes data-flow {
+    from { background-position: 0 0; }
+    to   { background-position: 81px 0; }
+}
+
+@keyframes hop-pulse {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1.0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="network-card"
+     data-type="{{TYPE}}"
+     data-state="{{STATE}}"
+     data-level="{{LEVEL}}"
+     data-security="{{SECURITY_KEY}}">
+
+    <!-- ═══════════════════════════════════════════════
+         TOP: ICON + IDENTITY
+    ═══════════════════════════════════════════════ -->
+    <div class="top-section">
+
+        <!-- Network Type Icon -->
+        <div class="net-icon-wrap">
+            <span class="net-emoji" role="img" aria-label="{{TYPE}} network">
+                {{ICON}}
+            </span>
+        </div>
+
+        <!-- Network Identity -->
+        <div class="net-identity">
+
+            <div class="net-name-row">
+                <span class="net-name">{{SSID}}</span>
+                <div class="state-chip">
+                    <span class="state-dot" aria-hidden="true"></span>
+                    {{STATE_LABEL}}
+                </div>
+            </div>
+
+            <div class="net-meta-tags">
+                <span class="meta-tag tag-security {{SECURITY_CLASS}}">
+                    {{SECURITY_ICON}} {{SECURITY}}
+                </span>
+                <span class="meta-tag tag-freq">{{FREQUENCY}}</span>
+                <span class="meta-tag tag-channel">ch {{CHANNEL}}</span>
+            </div>
+
+            <div class="ip-row">
+                <span class="ip-icon" aria-hidden="true">🌐</span>
+                <span>{{IP_ADDRESS}}</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         SIGNAL STRENGTH (WiFi / BT only)
+    ═══════════════════════════════════════════════ -->
+    <div class="signal-section">
+
+        <div class="signal-header">
+            <span class="signal-label">
+                📶 Signal Strength
+            </span>
+            <div class="signal-value-group">
+                <span class="signal-percent">{{SIGNAL}}%</span>
+                <div class="wifi-bars" aria-hidden="true">
+                    <div class="wifi-bar"></div>
+                    <div class="wifi-bar"></div>
+                    <div class="wifi-bar"></div>
+                    <div class="wifi-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="signal-track"
+             role="progressbar"
+             aria-valuenow="{{SIGNAL}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="Signal {{SIGNAL}}%">
+            <div class="signal-fill"
+                 style="width: {{SIGNAL}}%;">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         ALERT BANNERS
+    ═══════════════════════════════════════════════ -->
+
+    <!-- Auth failed -->
+    <div class="alert-banner alert-auth" role="alert">
+        <span class="alert-icon">🔐</span>
+        <div class="alert-body">
+            <span class="alert-title">Authentication Failed</span>
+            <span class="alert-detail">Incorrect password or rejected certificate</span>
+        </div>
+        <span class="alert-action">Retry</span>
+    </div>
+
+    <!-- Captive portal -->
+    <div class="alert-banner alert-captive" role="alert">
+        <span class="alert-icon">🌐</span>
+        <div class="alert-body">
+            <span class="alert-title">Login Required</span>
+            <span class="alert-detail">Captive portal detected — browser login needed</span>
+        </div>
+        <span class="alert-action">Open</span>
+    </div>
+
+    <!-- Weak signal -->
+    <div class="alert-banner alert-weak" role="alert">
+        <span class="alert-icon">📶</span>
+        <div class="alert-body">
+            <span class="alert-title">Weak Signal</span>
+            <span class="alert-detail">Move closer to the router for better performance</span>
+        </div>
+    </div>
+
+    <!-- Open network warning -->
+    <div class="alert-banner alert-open" role="alert">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-body">
+            <span class="alert-title">Unencrypted Network</span>
+            <span class="alert-detail">Traffic is unprotected — use VPN</span>
+        </div>
+        <span class="alert-action">VPN</span>
+    </div>
+
+    <!-- Disconnected -->
+    <div class="alert-banner alert-disconnected" role="alert">
+        <span class="alert-icon">📵</span>
+        <div class="alert-body">
+            <span class="alert-title">{{STATE_MESSAGE}}</span>
+            <span class="alert-detail">{{DISCONNECT_REASON}}</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         VPN DETAILS
+    ═══════════════════════════════════════════════ -->
+    <div class="vpn-section">
+
+        <span class="vpn-lock-icon" aria-hidden="true">🔒</span>
+
+        <div class="vpn-info">
+            <div class="vpn-name">{{SSID}}</div>
+            <div class="vpn-server">
+                <span>📍</span>
+                <span>{{VPNSERVER}}</span>
+            </div>
+        </div>
+
+        <div class="vpn-badge">
+            <span class="vpn-encrypted-tag">🛡️ Encrypted</span>
+            <span class="vpn-kill-switch {{VPN_KS_CLASS}}">
+                ⛔ Kill Switch {{VPN_KS_STATE}}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         TOR CIRCUIT
+    ═══════════════════════════════════════════════ -->
+    <div class="tor-section">
+
+        <div class="tor-header">
+            <span class="tor-icon" aria-hidden="true">🧅</span>
+            <span class="tor-title">Tor Anonymous Routing</span>
+            <span class="tor-anon-badge">🕵️ Anonymous</span>
+        </div>
+
+        <div class="tor-circuit" aria-label="Tor circuit: {{TOR_CIRCUIT}}">
+            <div class="tor-hop">
+                <span class="tor-hop-node">You</span>
+                <span class="tor-hop-arrow">→</span>
+            </div>
+            <div class="tor-hop">
+                <span class="tor-hop-node">Guard</span>
+                <span class="tor-hop-arrow">→</span>
+            </div>
+            <div class="tor-hop">
+                <span class="tor-hop-node">Middle</span>
+                <span class="tor-hop-arrow">→</span>
+            </div>
+            <div class="tor-hop">
+                <span class="tor-hop-node tor-exit">Exit {{TOR_EXIT}}</span>
+                <span class="tor-hop-arrow">→</span>
+            </div>
+            <div class="tor-hop">
+                <span class="tor-hop-node">🌐</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         BLUETOOTH DETAILS
+    ═══════════════════════════════════════════════ -->
+    <div class="bt-section">
+
+        <span class="bt-device-icon" aria-hidden="true">{{BT_DEVICE_ICON}}</span>
+
+        <div class="bt-info">
+            <div class="bt-device-name">{{SSID}}</div>
+            <div class="bt-device-type">{{BT_DEVICE_TYPE}}</div>
+        </div>
+
+        <div class="bt-battery">
+            <span class="bt-battery-label">🔋 Device</span>
+            <span class="bt-battery-value">{{BT_BATTERY}}%</span>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         SPEED METRICS (connected only)
+    ═══════════════════════════════════════════════ -->
+    <div class="speed-section">
+
+        <!-- Download -->
+        <div class="speed-card">
+            <div class="speed-dir">
+                <span class="speed-arrow down">↓</span>
+                Download
+            </div>
+            <div class="speed-value-row">
+                <span class="speed-value">{{SPEED_DOWN_VAL}}</span>
+                <span class="speed-unit">{{SPEED_DOWN_UNIT}}</span>
+            </div>
+            <div class="speed-bars" aria-hidden="true">
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="speed-card">
+            <div class="speed-dir">
+                <span class="speed-arrow up">↑</span>
+                Upload
+            </div>
+            <div class="speed-value-row">
+                <span class="speed-value">{{SPEED_UP_VAL}}</span>
+                <span class="speed-unit">{{SPEED_UP_UNIT}}</span>
+            </div>
+            <div class="speed-bars" aria-hidden="true">
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+                <div class="speed-bar"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         STATS CHIPS
+    ═══════════════════════════════════════════════ -->
+    <div class="stats-row">
+
+        <div class="stat-chip">
+            <span class="chip-icon" aria-hidden="true">⏱</span>
+            <span class="chip-label">Ping</span>
+            <span class="chip-value {{LATENCY_CLASS}}">{{LATENCY}}</span>
+        </div>
+
+        <div class="stat-chip">
+            <span class="chip-icon" aria-hidden="true">🖧</span>
+            <span class="chip-label">DNS</span>
+            <span class="chip-value">{{DNS}}</span>
+        </div>
+
+        <div class="stat-chip">
+            <span class="chip-icon" aria-hidden="true">📊</span>
+            <span class="chip-label">Used</span>
+            <span class="chip-value">{{DATA_USED}}</span>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════════════ -->
+    <div class="footer-row">
+
+        <div class="footer-item">
+            <span class="footer-icon" aria-hidden="true">🔌</span>
+            <span>{{MAC}}</span>
+        </div>
+
+        <div class="footer-item">
+            <span class="footer-icon" aria-hidden="true">📡</span>
+            <span>{{FREQUENCY}} · ch{{CHANNEL}}</span>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
