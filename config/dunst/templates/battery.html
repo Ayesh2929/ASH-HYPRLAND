@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🔋 ASH DOTFILES v5.0 OMEGA — DUNST BATTERY OSD TEMPLATE                   ║
+║  Smart levels • Thermal • Health • Time remaining • Charging animation      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/battery.html
+📦 Requires  : dunst ≥ 1.11.0 with HTML body support, upower
+🎨 Colors    : Full spectrum from emergency red to healthy green
+📡 Template Variables:
+  {{PERCENT}}        — 0-100 battery percentage
+  {{PERCENT_PCT}}    — "75%"
+  {{STATE}}          — charging | discharging | full | unknown
+  {{HEALTH}}         — 0-100 battery health percentage
+  {{TIME_REMAINING}} — "2h 34m" | "Calculating…"
+  {{ICON}}           — emoji battery icon
+  {{POWER_DRAW}}     — "8.4W" current power draw
+  {{VOLTAGE}}        — "12.4V"
+  {{TEMPERATURE}}    — "32°C"
+  {{CYCLE_COUNT}}    — number of charge cycles
+  {{LEVEL}}          — emergency | critical | very-low | low
+                       medium | good | high | full | charging | full-charging
+  {{CHARGER_TYPE}}   — AC | USB-C | Wireless | Unknown
+  {{CHARGE_RATE}}    — "+45W" charging rate
+  {{ETA}}            — "Full in 1h 20m" | "45m remaining"
+  {{HEALTH_LEVEL}}   — excellent | good | degraded | poor | failing
+  {{BAR_WIDTH}}      — fill percentage for progress bar
+  {{HEALTH_WIDTH}}   — health bar fill percentage
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── CSS Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── ASH Design Tokens ────────────────────────────────────────────────────── */
+:root {
+    /* Catppuccin Mocha base */
+    --base:      #1e1e2e;
+    --mantle:    #181825;
+    --crust:     #11111b;
+    --surface0:  #313244;
+    --surface1:  #45475a;
+    --surface2:  #585b70;
+    --overlay0:  #6c7086;
+    --overlay1:  #7f849c;
+    --overlay2:  #9399b2;
+    --text:      #cdd6f4;
+    --subtext0:  #a6adc8;
+    --subtext1:  #bac2de;
+
+    /* Semantic */
+    --green:     #a6e3a1;
+    --teal:      #94e2d5;
+    --sky:       #89dceb;
+    --blue:      #89b4fa;
+    --sapphire:  #74c7ec;
+    --lavender:  #b4befe;
+    --mauve:     #cba6f7;
+    --pink:      #f5c2e7;
+    --red:       #f38ba8;
+    --maroon:    #eba0ac;
+    --peach:     #fab387;
+    --yellow:    #f9e2af;
+    --rosewater: #f5e0dc;
+    --flamingo:  #f2cdcd;
+
+    /* Battery level → color mapping */
+    --bat-emergency: #f38ba8;  /* 0-5%    */
+    --bat-critical:  #f38ba8;  /* 6-10%   */
+    --bat-very-low:  #fab387;  /* 11-20%  */
+    --bat-low:       #f9e2af;  /* 21-30%  */
+    --bat-medium:    #f9e2af;  /* 31-50%  */
+    --bat-good:      #a6e3a1;  /* 51-70%  */
+    --bat-high:      #a6e3a1;  /* 71-89%  */
+    --bat-full:      #a6e3a1;  /* 90-100% */
+    --bat-charging:  #89b4fa;  /* Any% + charging */
+
+    /* Active color — overridden per level */
+    --battery-color: var(--bat-good);
+
+    /* Layout */
+    --osd-radius:   16px;
+    --osd-pad:      16px 18px 14px;
+    --icon-size:    48px;
+    --icon-radius:  13px;
+    --bar-h:        10px;
+    --bar-r:        5px;
+    --bar-h-sm:     4px;
+
+    /* Glass */
+    --glass-bg:     rgba(17, 17, 27, 0.94);
+    --glass-border: rgba(88, 91, 112, 0.35);
+    --glass-blur:   20px;
+    --glass-shadow:
+        0 8px 36px rgba(0, 0, 0, 0.55),
+        0 2px 10px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    /* Animation */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --dur-xs:  120ms;
+    --dur-sm:  200ms;
+    --dur-md:  340ms;
+    --dur-lg:  520ms;
+}
+
+/* ── Level Color Bindings ─────────────────────────────────────────────────── */
+[data-level="emergency"]    { --battery-color: var(--bat-emergency); }
+[data-level="critical"]     { --battery-color: var(--bat-critical); }
+[data-level="very-low"]     { --battery-color: var(--bat-very-low); }
+[data-level="low"]          { --battery-color: var(--bat-low); }
+[data-level="medium"]       { --battery-color: var(--bat-medium); }
+[data-level="good"]         { --battery-color: var(--bat-good); }
+[data-level="high"]         { --battery-color: var(--bat-high); }
+[data-level="full"]         { --battery-color: var(--bat-full); }
+[data-level="charging"]     { --battery-color: var(--bat-charging); }
+[data-level="full-charging"]{ --battery-color: var(--green); }
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── Notification Card ────────────────────────────────────────────────────── */
+.battery-card {
+    padding: var(--osd-pad);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--osd-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+    min-width: 310px;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: card-enter var(--dur-lg) var(--ease-spring) both;
+    will-change: transform, opacity;
+}
+
+/* Gradient border accent */
+.battery-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--osd-radius);
+    padding: 1px;
+    background: linear-gradient(
+        140deg,
+        color-mix(in srgb, var(--battery-color) 60%, transparent),
+        transparent 50%,
+        color-mix(in srgb, var(--battery-color) 18%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background var(--dur-md) var(--ease-smooth);
+}
+
+/* Bottom ambient glow */
+.battery-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 60%;
+    background: radial-gradient(
+        ellipse at bottom,
+        color-mix(in srgb, var(--battery-color) 8%, transparent) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+    transition: background var(--dur-md) var(--ease-smooth);
+}
+
+/* Emergency pulsing glow */
+[data-level="emergency"] .battery-card,
+[data-level="critical"] .battery-card {
+    animation:
+        card-enter var(--dur-lg) var(--ease-spring) both,
+        emergency-pulse 1.5s ease-in-out infinite;
+    animation-delay: 0s, var(--dur-lg);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOP SECTION: ICON + MAIN STATS
+══════════════════════════════════════════════════════════════════════════ */
+
+.top-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+/* ── Battery Icon ─────────────────────────────────────────────────────────── */
+.battery-icon-wrap {
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--battery-color) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--battery-color) 25%, transparent);
+    border-radius: var(--icon-radius);
+    position: relative;
+    transition:
+        background    var(--dur-sm) var(--ease-smooth),
+        border-color  var(--dur-sm) var(--ease-smooth);
+}
+
+/* Charging lightning animation ring */
+[data-state="charging"] .battery-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--icon-radius) + 4px);
+    border: 1.5px dashed
+        color-mix(in srgb, var(--battery-color) 45%, transparent);
+    animation: charge-spin 2s linear infinite;
+}
+
+/* Inner gradient fill showing charge level */
+.battery-icon-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    height: calc({{BAR_WIDTH}}% - 8px);
+    max-height: calc(100% - 8px);
+    background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--battery-color) 30%, transparent),
+        transparent
+    );
+    border-radius: calc(var(--icon-radius) - 4px);
+    transition: height var(--dur-md) var(--ease-spring);
+}
+
+.battery-emoji {
+    font-size: 24px;
+    z-index: 1;
+    animation: icon-enter var(--dur-md) var(--ease-spring) both;
+    animation-delay: 80ms;
+    filter: drop-shadow(
+        0 0 8px color-mix(in srgb, var(--battery-color) 55%, transparent)
+    );
+    position: relative;
+}
+
+/* Charging bolt overlay */
+[data-state="charging"] .charging-bolt {
+    display: flex;
+}
+
+.charging-bolt {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: -4px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    z-index: 2;
+    animation: bolt-flash 1.2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 4px var(--yellow));
+}
+
+/* ── Main Stats ───────────────────────────────────────────────────────────── */
+.main-stats {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtext0);
+}
+
+/* State badge: charging / discharging */
+.state-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    transition: all var(--dur-sm) var(--ease-smooth);
+}
+
+[data-state="charging"] .state-pill {
+    background: color-mix(in srgb, var(--blue) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+    color: var(--blue);
+}
+
+[data-state="discharging"] .state-pill {
+    background: color-mix(in srgb, var(--battery-color) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--battery-color) 25%, transparent);
+    color: var(--battery-color);
+}
+
+[data-state="full"] .state-pill {
+    background: color-mix(in srgb, var(--green) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+    color: var(--green);
+}
+
+.state-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-state="charging"] .state-dot {
+    animation: dot-blink 0.8s ease-in-out infinite alternate;
+}
+
+/* ── Percentage Display ───────────────────────────────────────────────────── */
+.percent-display {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    margin: 2px 0;
+}
+
+.percent-value {
+    font-size: 38px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--battery-color);
+    transition: color var(--dur-sm) var(--ease-smooth);
+    text-shadow:
+        0 0 20px color-mix(in srgb, var(--battery-color) 45%, transparent),
+        0 0 40px color-mix(in srgb, var(--battery-color) 18%, transparent);
+    animation: percent-enter var(--dur-md) var(--ease-spring) both;
+}
+
+.percent-symbol {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--overlay1);
+    padding-bottom: 4px;
+}
+
+/* Time remaining display */
+.time-remaining {
+    font-size: 11.5px;
+    color: var(--subtext0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: fade-in var(--dur-md) ease both;
+    animation-delay: var(--dur-sm);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.time-icon {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHARGE PROGRESS BAR
+══════════════════════════════════════════════════════════════════════════ */
+
+.charge-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.charge-bar-track {
+    width: 100%;
+    height: var(--bar-h);
+    background: var(--surface0);
+    border-radius: var(--bar-r);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Segment dividers at 25% intervals */
+.charge-bar-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent calc(25% - 1px),
+        rgba(17, 17, 27, 0.7) calc(25% - 1px),
+        rgba(17, 17, 27, 0.7) 25%
+    );
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Critical zone marker at 20% */
+.charge-bar-track::after {
+    content: '';
+    position: absolute;
+    left: 20%;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: color-mix(in srgb, var(--red) 40%, transparent);
+    z-index: 4;
+    pointer-events: none;
+}
+
+.charge-bar-fill {
+    height: 100%;
+    border-radius: var(--bar-r);
+    position: relative;
+    transform-origin: left center;
+    animation: bar-fill var(--dur-lg) var(--ease-spring) both;
+    transition:
+        width      var(--dur-md) var(--ease-spring),
+        background var(--dur-md) var(--ease-smooth);
+    will-change: width, background;
+}
+
+/* Gradient: always shows charge level spectrum */
+.charge-bar-fill {
+    background: linear-gradient(
+        90deg,
+        var(--bat-critical),
+        var(--bat-low),
+        var(--bat-medium),
+        var(--bat-good),
+        var(--bat-full)
+    );
+    background-size: calc(100% / ({{BAR_WIDTH}} / 100));
+    background-position: 0 0;
+}
+
+/* Charging animation — moving energy flow */
+[data-state="charging"] .charge-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -30%;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.35),
+        transparent
+    );
+    animation: charge-flow 1.2s linear infinite;
+}
+
+/* Normal shimmer */
+[data-state="discharging"] .charge-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent
+    );
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Charge level indicator dot */
+.charge-bar-fill::before {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: white;
+    border: 2.5px solid var(--battery-color);
+    box-shadow:
+        0 0 6px  color-mix(in srgb, var(--battery-color) 70%, transparent),
+        0 0 12px color-mix(in srgb, var(--battery-color) 30%, transparent);
+    z-index: 5;
+    animation: dot-pop var(--dur-lg) var(--ease-spring) both;
+    animation-delay: 100ms;
+}
+
+/* ── Charge Scale Labels ───────────────────────────────────────────────────── */
+.charge-scale {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1px;
+}
+
+.scale-label {
+    font-size: 7.5px;
+    color: var(--overlay0);
+    font-variant-numeric: tabular-nums;
+}
+
+.scale-warn {
+    color: var(--red);
+    opacity: 0.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DETAIL METRICS GRID
+══════════════════════════════════════════════════════════════════════════ */
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.metric-card {
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    transition: all var(--dur-xs) var(--ease-smooth);
+    animation: metric-enter var(--dur-md) var(--ease-spring) both;
+}
+
+.metric-card:nth-child(1) { animation-delay:  80ms; }
+.metric-card:nth-child(2) { animation-delay: 120ms; }
+.metric-card:nth-child(3) { animation-delay: 160ms; }
+
+.metric-card:hover {
+    background: var(--surface1);
+    border-color: color-mix(in srgb, var(--battery-color) 25%, transparent);
+    transform: translateY(-1px);
+}
+
+.metric-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+}
+
+.metric-value {
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    line-height: 1;
+}
+
+.metric-value.highlight {
+    color: var(--battery-color);
+}
+
+.metric-unit {
+    font-size: 9px;
+    color: var(--overlay1);
+    font-weight: 500;
+}
+
+/* Power draw indicator */
+.metric-card.power-card {
+    grid-column: span 1;
+}
+
+.power-indicator {
+    display: flex;
+    gap: 1.5px;
+    align-items: flex-end;
+    height: 12px;
+    margin-top: 2px;
+}
+
+.power-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: color-mix(in srgb, var(--battery-color) 50%, var(--surface2));
+}
+
+.power-bar:nth-child(1) { height: 30%; }
+.power-bar:nth-child(2) { height: 55%; }
+.power-bar:nth-child(3) { height: 80%; }
+.power-bar:nth-child(4) { height: 65%; }
+.power-bar:nth-child(5) { height: 45%; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BATTERY HEALTH BAR
+══════════════════════════════════════════════════════════════════════════ */
+
+.health-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.health-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.health-icon {
+    font-size: 10px;
+}
+
+.health-value-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.health-value {
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Health color based on level */
+[data-health-level="excellent"] .health-value { color: var(--green); }
+[data-health-level="good"]      .health-value { color: var(--teal); }
+[data-health-level="degraded"]  .health-value { color: var(--yellow); }
+[data-health-level="poor"]      .health-value { color: var(--peach); }
+[data-health-level="failing"]   .health-value { color: var(--red); }
+
+.health-badge {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+[data-health-level="excellent"] .health-badge {
+    background: color-mix(in srgb, var(--green) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--green) 25%, transparent);
+    color: var(--green);
+}
+
+[data-health-level="good"] .health-badge {
+    background: color-mix(in srgb, var(--teal) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
+    color: var(--teal);
+}
+
+[data-health-level="degraded"] .health-badge {
+    background: color-mix(in srgb, var(--yellow) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 25%, transparent);
+    color: var(--yellow);
+}
+
+[data-health-level="poor"] .health-badge {
+    background: color-mix(in srgb, var(--peach) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--peach) 25%, transparent);
+    color: var(--peach);
+}
+
+[data-health-level="failing"] .health-badge {
+    background: color-mix(in srgb, var(--red) 20%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
+    color: var(--red);
+    animation: warn-blink 1s ease-in-out infinite alternate;
+}
+
+/* Health track */
+.health-track {
+    width: 100%;
+    height: var(--bar-h-sm);
+    background: var(--surface0);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.health-fill {
+    height: 100%;
+    border-radius: 2px;
+    animation: bar-fill var(--dur-lg) var(--ease-out) both;
+    animation-delay: 200ms;
+    transition: width var(--dur-md) var(--ease-spring);
+}
+
+[data-health-level="excellent"] .health-fill {
+    background: linear-gradient(90deg, var(--teal), var(--green));
+}
+
+[data-health-level="good"] .health-fill {
+    background: linear-gradient(90deg, var(--sky), var(--teal));
+}
+
+[data-health-level="degraded"] .health-fill {
+    background: linear-gradient(90deg, var(--peach), var(--yellow));
+}
+
+[data-health-level="poor"] .health-fill {
+    background: linear-gradient(90deg, var(--maroon), var(--peach));
+}
+
+[data-health-level="failing"] .health-fill {
+    background: linear-gradient(90deg, var(--red), var(--maroon));
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHARGING DETAILS
+══════════════════════════════════════════════════════════════════════════ */
+
+.charging-details {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: color-mix(in srgb, var(--blue) 8%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--blue) 20%, transparent);
+    border-radius: 10px;
+    animation: fade-up var(--dur-md) var(--ease-spring) both;
+}
+
+[data-state="charging"] .charging-details {
+    display: flex;
+}
+
+.charger-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.charger-icon {
+    font-size: 16px;
+    animation: plug-bounce 2s ease-in-out infinite;
+}
+
+.charger-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.charger-type {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+}
+
+.charger-rate {
+    font-size: 9.5px;
+    color: var(--overlay1);
+}
+
+.charge-eta {
+    text-align: right;
+}
+
+.eta-label {
+    font-size: 9px;
+    color: var(--overlay0);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.eta-value {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Charging progress dots animation ────────────────────────────────────── */
+.charging-dots {
+    display: none;
+    gap: 4px;
+    align-items: center;
+}
+
+[data-state="charging"] .charging-dots {
+    display: flex;
+}
+
+.charge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+    opacity: 0.3;
+}
+
+.charge-dot:nth-child(1) { animation: dot-charge 1.2s ease-in-out infinite; animation-delay:   0ms; }
+.charge-dot:nth-child(2) { animation: dot-charge 1.2s ease-in-out infinite; animation-delay: 200ms; }
+.charge-dot:nth-child(3) { animation: dot-charge 1.2s ease-in-out infinite; animation-delay: 400ms; }
+.charge-dot:nth-child(4) { animation: dot-charge 1.2s ease-in-out infinite; animation-delay: 600ms; }
+.charge-dot:nth-child(5) { animation: dot-charge 1.2s ease-in-out infinite; animation-delay: 800ms; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ALERT BANNERS
+══════════════════════════════════════════════════════════════════════════ */
+
+.alert-banner {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    animation: alert-appear var(--dur-md) var(--ease-spring) both;
+}
+
+/* Low battery alert */
+[data-level="low"] .alert-low,
+[data-level="very-low"] .alert-low {
+    display: flex;
+    background: color-mix(in srgb, var(--yellow) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 28%, transparent);
+    color: var(--yellow);
+}
+
+/* Critical / Emergency alert */
+[data-level="critical"] .alert-critical,
+[data-level="emergency"] .alert-critical {
+    display: flex;
+    background: color-mix(in srgb, var(--red) 15%, var(--crust));
+    border: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
+    color: var(--red);
+    animation:
+        alert-appear var(--dur-md) var(--ease-spring) both,
+        alert-shake 400ms var(--ease-smooth) var(--dur-md);
+}
+
+/* Health warning */
+[data-health-level="poor"] .alert-health,
+[data-health-level="failing"] .alert-health {
+    display: flex;
+    background: color-mix(in srgb, var(--peach) 10%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--peach) 22%, transparent);
+    color: var(--peach);
+}
+
+.alert-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    animation: alert-icon-pulse 1s ease-in-out infinite alternate;
+}
+
+.alert-text {
+    flex: 1;
+    line-height: 1.3;
+}
+
+.alert-title {
+    font-weight: 800;
+    display: block;
+    margin-bottom: 1px;
+}
+
+.alert-sub {
+    font-size: 9.5px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+/* ── Cycle Count Info ─────────────────────────────────────────────────────── */
+.footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 2px;
+    border-top: 1px solid var(--surface0);
+}
+
+.cycle-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    color: var(--overlay0);
+}
+
+.cycle-icon {
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+.temp-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    color: var(--overlay0);
+}
+
+.temp-icon {
+    font-size: 10px;
+}
+
+/* Thermal warning colors */
+[data-temp="hot"] .temp-info   { color: var(--peach); }
+[data-temp="critical"] .temp-info { color: var(--red); animation: temp-blink 0.8s ease-in-out infinite alternate; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.93);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes bar-fill {
+    from { transform: scaleX(0); opacity: 0.6; }
+    to   { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes charge-flow {
+    from { left: -30%; }
+    to   { left: 110%; }
+}
+
+@keyframes shimmer {
+    0%   { left: -60%; }
+    60%  { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes icon-enter {
+    from { transform: scale(0.55) rotate(-10deg); opacity: 0; }
+    60%  { transform: scale(1.18) rotate(4deg); }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes percent-enter {
+    from { opacity: 0; transform: scale(0.7) translateY(6px); }
+    70%  { transform: scale(1.04) translateY(-1px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes dot-pop {
+    from { transform: translateY(-50%) scale(0); opacity: 0; }
+    70%  { transform: translateY(-50%) scale(1.4); }
+    to   { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes charge-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes bolt-flash {
+    from { opacity: 0.6; transform: translateY(-50%) scale(0.9); }
+    to   { opacity: 1.0; transform: translateY(-50%) scale(1.1); }
+}
+
+@keyframes dot-charge {
+    0%, 60%, 100% { opacity: 0.25; transform: scale(0.8); }
+    30%            { opacity: 1.00; transform: scale(1.2); }
+}
+
+@keyframes dot-blink {
+    from { opacity: 0.3; }
+    to   { opacity: 1.0; }
+}
+
+@keyframes plug-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-2px); }
+}
+
+@keyframes metric-enter {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes alert-appear {
+    from { opacity: 0; transform: scaleY(0.6); transform-origin: top; }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes alert-shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-5px); }
+    40%  { transform: translateX(5px); }
+    60%  { transform: translateX(-3px); }
+    80%  { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes alert-icon-pulse {
+    from { transform: scale(0.9); opacity: 0.7; }
+    to   { transform: scale(1.1); opacity: 1.0; }
+}
+
+@keyframes warn-blink {
+    from { opacity: 0.7; }
+    to   { opacity: 1.0; }
+}
+
+@keyframes emergency-pulse {
+    0%, 100% {
+        box-shadow: var(--glass-shadow);
+    }
+    50% {
+        box-shadow:
+            var(--glass-shadow),
+            0 0 24px color-mix(in srgb, var(--red) 35%, transparent);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes temp-blink {
+    from { opacity: 0.6; }
+    to   { opacity: 1.0; }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="battery-card"
+     data-level="{{LEVEL}}"
+     data-state="{{STATE}}"
+     data-health-level="{{HEALTH_LEVEL}}"
+     data-temp="{{TEMP_STATE}}">
+
+    <!-- ═══════════════════════════════════════════════
+         TOP: ICON + MAIN STATS
+    ═══════════════════════════════════════════════ -->
+    <div class="top-section">
+
+        <!-- Battery Icon -->
+        <div class="battery-icon-wrap">
+            <span class="battery-emoji"
+                  role="img"
+                  aria-label="battery {{PERCENT}}%">
+                {{ICON}}
+            </span>
+            <!-- Charging bolt indicator -->
+            <span class="charging-bolt" aria-hidden="true">⚡</span>
+        </div>
+
+        <!-- Main Stats -->
+        <div class="main-stats">
+
+            <!-- Label + State -->
+            <div class="stat-header">
+                <span class="stat-label">Battery</span>
+                <div class="state-pill">
+                    <span class="state-dot" aria-hidden="true"></span>
+                    {{STATE_LABEL}}
+                </div>
+            </div>
+
+            <!-- Percentage -->
+            <div class="percent-display">
+                <span class="percent-value">{{PERCENT}}</span>
+                <span class="percent-symbol">%</span>
+            </div>
+
+            <!-- Time / ETA -->
+            <div class="time-remaining">
+                <span class="time-icon">{{TIME_ICON}}</span>
+                {{ETA}}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         CHARGE PROGRESS BAR
+    ═══════════════════════════════════════════════ -->
+    <div class="charge-section">
+
+        <div class="charge-bar-track"
+             role="progressbar"
+             aria-valuenow="{{PERCENT}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="Battery {{PERCENT_PCT}}">
+            <div class="charge-bar-fill"
+                 style="width: {{BAR_WIDTH}}%;">
+            </div>
+        </div>
+
+        <!-- Scale labels -->
+        <div class="charge-scale" aria-hidden="true">
+            <span class="scale-label">0</span>
+            <span class="scale-label scale-warn">20%</span>
+            <span class="scale-label">50%</span>
+            <span class="scale-label">75%</span>
+            <span class="scale-label">100%</span>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         ALERT BANNERS
+    ═══════════════════════════════════════════════ -->
+
+    <!-- Low battery -->
+    <div class="alert-banner alert-low" role="alert">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-text">
+            <span class="alert-title">Battery Low</span>
+            <span class="alert-sub">Connect charger to continue</span>
+        </div>
+    </div>
+
+    <!-- Critical battery -->
+    <div class="alert-banner alert-critical" role="alert" aria-live="assertive">
+        <span class="alert-icon">🔴</span>
+        <div class="alert-text">
+            <span class="alert-title">CRITICAL — Plug in now!</span>
+            <span class="alert-sub">System will suspend to prevent data loss</span>
+        </div>
+    </div>
+
+    <!-- Health warning -->
+    <div class="alert-banner alert-health" role="alert">
+        <span class="alert-icon">🔋</span>
+        <div class="alert-text">
+            <span class="alert-title">Battery Health Degraded</span>
+            <span class="alert-sub">Consider replacement soon</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         METRICS GRID
+    ═══════════════════════════════════════════════ -->
+    <div class="metrics-grid">
+
+        <!-- Power Draw -->
+        <div class="metric-card power-card">
+            <span class="metric-label">Power</span>
+            <div class="metric-value highlight">{{POWER_DRAW}}</div>
+            <div class="power-indicator" aria-hidden="true">
+                <div class="power-bar"></div>
+                <div class="power-bar"></div>
+                <div class="power-bar"></div>
+                <div class="power-bar"></div>
+                <div class="power-bar"></div>
+            </div>
+        </div>
+
+        <!-- Voltage -->
+        <div class="metric-card">
+            <span class="metric-label">Voltage</span>
+            <div class="metric-value">
+                {{VOLTAGE}}<span class="metric-unit">V</span>
+            </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="metric-card">
+            <span class="metric-label">Temp</span>
+            <div class="metric-value">
+                {{TEMPERATURE}}<span class="metric-unit">°C</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         CHARGING DETAILS (visible when charging)
+    ═══════════════════════════════════════════════ -->
+    <div class="charging-details">
+
+        <div class="charger-info">
+            <span class="charger-icon" aria-hidden="true">🔌</span>
+            <div class="charger-text">
+                <span class="charger-type">{{CHARGER_TYPE}}</span>
+                <span class="charger-rate">{{CHARGE_RATE}}</span>
+            </div>
+        </div>
+
+        <div class="charging-dots" aria-hidden="true">
+            <div class="charge-dot"></div>
+            <div class="charge-dot"></div>
+            <div class="charge-dot"></div>
+            <div class="charge-dot"></div>
+            <div class="charge-dot"></div>
+        </div>
+
+        <div class="charge-eta">
+            <div class="eta-label">Full in</div>
+            <div class="eta-value">{{CHARGE_ETA}}</div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         HEALTH SECTION
+    ═══════════════════════════════════════════════ -->
+    <div class="health-section">
+
+        <div class="health-header">
+            <span class="health-label">
+                <span class="health-icon">❤️</span>
+                Battery Health
+            </span>
+            <div class="health-value-group">
+                <span class="health-value">{{HEALTH}}%</span>
+                <span class="health-badge">{{HEALTH_LABEL}}</span>
+            </div>
+        </div>
+
+        <div class="health-track"
+             role="progressbar"
+             aria-valuenow="{{HEALTH}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="Battery health {{HEALTH}}%">
+            <div class="health-fill"
+                 style="width: {{HEALTH_WIDTH}}%;">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         FOOTER: CYCLES + TEMP
+    ═══════════════════════════════════════════════ -->
+    <div class="footer-row">
+
+        <div class="cycle-info">
+            <span class="cycle-icon" aria-hidden="true">🔄</span>
+            <span>{{CYCLE_COUNT}} cycles</span>
+        </div>
+
+        <div class="temp-info">
+            <span class="temp-icon" aria-hidden="true">🌡</span>
+            <span>{{TEMPERATURE}}</span>
+        </div>
+
+    </div>
+
+</div>
+
+<!--
+DUNST PANGO FALLBACK (no HTML support):
+
+🔋 <b>Battery — {{PERCENT}}%</b>
+<span foreground="{{COLOR}}" size="xx-large">{{PERCENT}}%</span>
+<span size="small" foreground="#9399b2">{{ETA}} • {{POWER_DRAW}} • {{CHARGER_TYPE}}</span>
+❤️ <span size="small">Health: {{HEALTH}}% ({{HEALTH_LABEL}})</span>
+-->
+
+</body>
+</html>

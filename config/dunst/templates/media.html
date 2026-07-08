@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🎵 ASH DOTFILES v5.0 OMEGA — DUNST MEDIA PLAYER NOTIFICATION TEMPLATE     ║
+║  Now Playing • Album Art • Waveform • Controls • Lyrics • Rich Metadata     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/media.html
+📦 Requires  : dunst ≥ 1.11.0, playerctl, mpd, spotify
+🎨 Colors    : Album-art extracted palette via ASH color engine
+📡 Template Variables:
+  {{TITLE}}          — track title
+  {{ARTIST}}         — artist name
+  {{ALBUM}}          — album name
+  {{TRACK_NUM}}      — track number (e.g., "3/12")
+  {{YEAR}}           — release year
+  {{GENRE}}          — music genre
+  {{DURATION}}       — total track duration (e.g., "3:42")
+  {{POSITION}}       — current position (e.g., "1:24")
+  {{POSITION_PCT}}   — 0-100 position percentage
+  {{ICON}}           — player/state emoji icon
+  {{STATE}}          — playing | paused | stopped | next | previous
+  {{PLAYER}}         — spotify | mpd | rhythmbox | vlc | ncmpcpp
+  {{PLAYER_LABEL}}   — human readable player name
+  {{REPEAT}}         — none | track | context
+  {{SHUFFLE}}        — on | off
+  {{LOVED}}          — true | false (liked/hearted)
+  {{VOLUME}}         — 0-100
+  {{ART_COLOR_1}}    — primary extracted color from album art
+  {{ART_COLOR_2}}    — secondary extracted color
+  {{ART_COLOR_3}}    — tertiary extracted color
+  {{BIT_DEPTH}}      — audio bit depth (e.g., "24-bit")
+  {{SAMPLE_RATE}}    — sample rate (e.g., "96 kHz")
+  {{FORMAT}}         — FLAC | MP3 | AAC | OGG | WAV | OPUS
+  {{BITRATE}}        — bitrate (e.g., "320 kbps")
+  {{NEXT_TRACK}}     — upcoming track title
+  {{LYRICS_LINE}}    — current lyrics line (optional)
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── ASH Design System ────────────────────────────────────────────────────── */
+:root {
+    --base:      #1e1e2e;
+    --mantle:    #181825;
+    --crust:     #11111b;
+    --surface0:  #313244;
+    --surface1:  #45475a;
+    --surface2:  #585b70;
+    --overlay0:  #6c7086;
+    --overlay1:  #7f849c;
+    --overlay2:  #9399b2;
+    --text:      #cdd6f4;
+    --subtext0:  #a6adc8;
+    --subtext1:  #bac2de;
+
+    --green:     #a6e3a1;
+    --teal:      #94e2d5;
+    --sky:       #89dceb;
+    --blue:      #89b4fa;
+    --sapphire:  #74c7ec;
+    --lavender:  #b4befe;
+    --mauve:     #cba6f7;
+    --pink:      #f5c2e7;
+    --red:       #f38ba8;
+    --maroon:    #eba0ac;
+    --peach:     #fab387;
+    --yellow:    #f9e2af;
+    --rosewater: #f5e0dc;
+    --flamingo:  #f2cdcd;
+
+    /* Player brand colors */
+    --spotify-green: #1db954;
+    --mpd-blue:      #89b4fa;
+    --vlc-orange:    #fab387;
+
+    /* Album art extracted colors (dynamic) */
+    --art-primary:   {{ART_COLOR_1}};
+    --art-secondary: {{ART_COLOR_2}};
+    --art-tertiary:  {{ART_COLOR_3}};
+
+    /* Player color — set per player */
+    --player-color:  var(--mauve);
+
+    /* Layout */
+    --card-radius:   18px;
+    --art-size:      80px;
+    --art-radius:    12px;
+    --bar-h:         4px;
+    --bar-r:         2px;
+
+    /* Glass — tinted with album art colors */
+    --glass-bg:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--art-primary) 8%, rgba(17,17,27,0.97)) 0%,
+            rgba(17,17,27,0.97) 100%
+        );
+    --glass-border:  rgba(88, 91, 112, 0.30);
+    --glass-blur:    24px;
+    --glass-shadow:
+        0 10px 40px rgba(0,0,0,0.58),
+        0 2px 12px  rgba(0,0,0,0.38),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+
+    /* Animation */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-out:    cubic-bezier(0.16, 1.0, 0.3, 1.0);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --dur-xs:  80ms;
+    --dur-sm:  180ms;
+    --dur-md:  320ms;
+    --dur-lg:  500ms;
+}
+
+/* ── Player Specific Colors ───────────────────────────────────────────────── */
+[data-player="spotify"]  { --player-color: var(--spotify-green); }
+[data-player="mpd"]      { --player-color: var(--mpd-blue); }
+[data-player="vlc"]      { --player-color: var(--vlc-orange); }
+[data-player="rhythmbox"]{ --player-color: var(--red); }
+[data-player="ncmpcpp"]  { --player-color: var(--blue); }
+[data-player="playerctl"]{ --player-color: var(--mauve); }
+
+/* ── Playback State Modifications ────────────────────────────────────────── */
+[data-state="paused"] .progress-fill {
+    animation: none;
+    opacity: 0.6;
+}
+
+[data-state="paused"] .waveform-bar {
+    animation: none !important;
+    height: 30% !important;
+    opacity: 0.4;
+}
+
+[data-state="stopped"] {
+    opacity: 0.75;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.media-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.8) brightness(0.92);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.8) brightness(0.92);
+    min-width: 360px;
+    max-width: 540px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    animation: card-slide-in var(--dur-lg) var(--ease-spring) both;
+    will-change: transform, opacity;
+}
+
+/* Album art backdrop blur — blurred version fills whole card */
+.card-backdrop {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--art-primary) 15%, transparent) 0%,
+        color-mix(in srgb, var(--art-secondary) 8%, transparent) 50%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+    transition: background var(--dur-md) var(--ease-smooth);
+}
+
+/* Gradient border — art color derived */
+.media-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    padding: 1px;
+    background: linear-gradient(
+        140deg,
+        color-mix(in srgb, var(--art-primary) 60%, transparent),
+        transparent 40%,
+        color-mix(in srgb, var(--art-secondary) 20%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Top highlight line */
+.media-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    width: 70%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--art-primary) 50%, white),
+        transparent
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════════════════════════════════════════ */
+
+.card-content {
+    padding: 16px 18px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    z-index: 3;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOP ROW: ALBUM ART + TRACK INFO
+══════════════════════════════════════════════════════════════════════════ */
+
+.top-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+/* ── Album Art ────────────────────────────────────────────────────────────── */
+.album-art-wrap {
+    flex-shrink: 0;
+    width: var(--art-size);
+    height: var(--art-size);
+    border-radius: var(--art-radius);
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 4px 16px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,255,255,0.08),
+        0 0 20px color-mix(in srgb, var(--art-primary) 30%, transparent);
+    animation: art-appear var(--dur-lg) var(--ease-spring) both;
+    transition: box-shadow var(--dur-md) var(--ease-smooth);
+}
+
+/* Placeholder gradient (when no art) */
+.album-art-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--art-primary) 40%, var(--surface0)),
+        color-mix(in srgb, var(--art-secondary) 30%, var(--surface1)),
+        color-mix(in srgb, var(--art-tertiary) 20%, var(--surface0))
+    );
+    display: grid;
+    place-items: center;
+    font-size: 32px;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
+}
+
+/* Vinyl record rotation for playing state */
+[data-state="playing"] .album-art-wrap {
+    animation:
+        art-appear var(--dur-lg) var(--ease-spring) both,
+        vinyl-spin 6s linear infinite;
+    animation-delay: 0s, var(--dur-lg);
+}
+
+/* Playing indicator ring */
+[data-state="playing"] .album-art-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: calc(var(--art-radius) + 3px);
+    border: 2px solid color-mix(in srgb, var(--art-primary) 55%, transparent);
+    animation: art-ring 3s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Reflection overlay */
+.album-art-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.08),
+        transparent
+    );
+    border-radius: var(--art-radius) var(--art-radius) 0 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Pause overlay */
+[data-state="paused"] .album-art-wrap::before {
+    content: '⏸';
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    position: absolute;
+    inset: 0;
+    border-radius: var(--art-radius);
+    background: rgba(0,0,0,0.5);
+    z-index: 3;
+    border: none;
+    animation: none;
+}
+
+/* ── Track Information ────────────────────────────────────────────────────── */
+.track-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 2px;
+}
+
+/* Player pill */
+.player-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--player-color) 12%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--player-color) 25%, transparent);
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--player-color);
+    width: fit-content;
+    margin-bottom: 2px;
+}
+
+.player-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-state="playing"] .player-dot {
+    animation: dot-live 1.5s ease-in-out infinite;
+}
+
+/* Track title */
+.track-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    animation: track-in var(--dur-md) var(--ease-out) both;
+    animation-delay: 60ms;
+}
+
+/* Artist */
+.track-artist {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--art-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow:
+        0 0 12px color-mix(in srgb, var(--art-primary) 45%, transparent);
+    transition: color var(--dur-md);
+    animation: track-in var(--dur-md) var(--ease-out) both;
+    animation-delay: 80ms;
+}
+
+/* Album */
+.track-album {
+    font-size: 10.5px;
+    color: var(--overlay1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: track-in var(--dur-md) var(--ease-out) both;
+    animation-delay: 100ms;
+}
+
+.album-icon {
+    font-size: 9px;
+    opacity: 0.65;
+}
+
+/* Track meta: year · genre · number */
+.track-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.meta-chip {
+    font-size: 8.5px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    color: var(--overlay1);
+    white-space: nowrap;
+}
+
+/* ── Love / Liked Indicator ───────────────────────────────────────────────── */
+.love-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 16px;
+    z-index: 4;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
+    transition: transform var(--dur-xs) var(--ease-spring);
+}
+
+[data-loved="true"] .love-btn {
+    filter:
+        drop-shadow(0 0 8px color-mix(in srgb, var(--red) 70%, transparent));
+    animation: heart-beat 0.6s var(--ease-spring);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   WAVEFORM VISUALIZER
+══════════════════════════════════════════════════════════════════════════ */
+
+.waveform-section {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 32px;
+    padding: 0 2px;
+}
+
+.waveform-bar {
+    flex: 1;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--art-primary) 55%, var(--surface1));
+    transition: background var(--dur-md) var(--ease-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer on each bar */
+.waveform-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        transparent,
+        rgba(255,255,255,0.15)
+    );
+}
+
+/* 20 bars with varied animation speeds and delays */
+.waveform-bar:nth-child(1)  { animation: wave 0.42s ease-in-out infinite alternate; animation-delay:   0ms; }
+.waveform-bar:nth-child(2)  { animation: wave 0.38s ease-in-out infinite alternate; animation-delay:  50ms; }
+.waveform-bar:nth-child(3)  { animation: wave 0.45s ease-in-out infinite alternate; animation-delay:  30ms; }
+.waveform-bar:nth-child(4)  { animation: wave 0.36s ease-in-out infinite alternate; animation-delay:  80ms; }
+.waveform-bar:nth-child(5)  { animation: wave 0.48s ease-in-out infinite alternate; animation-delay:  20ms; }
+.waveform-bar:nth-child(6)  { animation: wave 0.40s ease-in-out infinite alternate; animation-delay: 100ms; }
+.waveform-bar:nth-child(7)  { animation: wave 0.52s ease-in-out infinite alternate; animation-delay:  60ms; }
+.waveform-bar:nth-child(8)  { animation: wave 0.35s ease-in-out infinite alternate; animation-delay:  40ms; }
+.waveform-bar:nth-child(9)  { animation: wave 0.44s ease-in-out infinite alternate; animation-delay:  90ms; }
+.waveform-bar:nth-child(10) { animation: wave 0.46s ease-in-out infinite alternate; animation-delay:  15ms; }
+.waveform-bar:nth-child(11) { animation: wave 0.39s ease-in-out infinite alternate; animation-delay:  70ms; }
+.waveform-bar:nth-child(12) { animation: wave 0.43s ease-in-out infinite alternate; animation-delay:  35ms; }
+.waveform-bar:nth-child(13) { animation: wave 0.50s ease-in-out infinite alternate; animation-delay:  55ms; }
+.waveform-bar:nth-child(14) { animation: wave 0.37s ease-in-out infinite alternate; animation-delay:  85ms; }
+.waveform-bar:nth-child(15) { animation: wave 0.47s ease-in-out infinite alternate; animation-delay:  25ms; }
+.waveform-bar:nth-child(16) { animation: wave 0.41s ease-in-out infinite alternate; animation-delay:  95ms; }
+.waveform-bar:nth-child(17) { animation: wave 0.53s ease-in-out infinite alternate; animation-delay:  45ms; }
+.waveform-bar:nth-child(18) { animation: wave 0.38s ease-in-out infinite alternate; animation-delay:  10ms; }
+.waveform-bar:nth-child(19) { animation: wave 0.49s ease-in-out infinite alternate; animation-delay:  75ms; }
+.waveform-bar:nth-child(20) { animation: wave 0.42s ease-in-out infinite alternate; animation-delay:  30ms; }
+
+/* Initial heights — varied profile */
+.waveform-bar:nth-child(odd)  { height: 45%; }
+.waveform-bar:nth-child(even) { height: 70%; }
+.waveform-bar:nth-child(5),
+.waveform-bar:nth-child(10),
+.waveform-bar:nth-child(15)   { height: 95%; }
+.waveform-bar:nth-child(1),
+.waveform-bar:nth-child(20)   { height: 25%; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PROGRESS SECTION
+══════════════════════════════════════════════════════════════════════════ */
+
+.progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Time row */
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.time-position {
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--art-primary);
+    text-shadow:
+        0 0 10px color-mix(in srgb, var(--art-primary) 40%, transparent);
+    transition: color var(--dur-md);
+}
+
+.time-remaining {
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--overlay0);
+}
+
+/* Track progress bar */
+.track-progress-track {
+    width: 100%;
+    height: var(--bar-h);
+    background: var(--surface0);
+    border-radius: var(--bar-r);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    transition: height var(--dur-xs) var(--ease-smooth);
+}
+
+.track-progress-track:hover {
+    height: 7px;
+}
+
+/* Background — faded full gradient */
+.track-progress-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--art-primary) 15%, transparent),
+        color-mix(in srgb, var(--art-secondary) 8%, transparent)
+    );
+}
+
+.track-progress-fill {
+    height: 100%;
+    border-radius: var(--bar-r);
+    position: relative;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--art-primary) 80%, var(--art-secondary)),
+        var(--art-primary)
+    );
+    transition:
+        width var(--dur-xs) linear,
+        background var(--dur-md) var(--ease-smooth);
+    animation: bar-fill var(--dur-lg) var(--ease-spring) both;
+}
+
+/* Playhead dot */
+.track-progress-fill::before {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--art-primary);
+    box-shadow:
+        0 0 6px  color-mix(in srgb, var(--art-primary) 70%, transparent),
+        0 0 12px color-mix(in srgb, var(--art-primary) 30%, transparent);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--dur-xs);
+}
+
+.track-progress-track:hover .track-progress-fill::before {
+    opacity: 1;
+}
+
+/* Playhead shimmer */
+.track-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -30%;
+    width: 30%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: progress-sweep 2.5s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LYRICS LINE
+══════════════════════════════════════════════════════════════════════════ */
+
+.lyrics-section {
+    display: none;
+    text-align: center;
+    position: relative;
+}
+
+[data-has-lyrics="true"] .lyrics-section {
+    display: block;
+}
+
+.lyrics-line {
+    font-size: 12px;
+    font-style: italic;
+    color: color-mix(in srgb, var(--art-primary) 70%, var(--subtext0));
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 16px;
+    text-shadow:
+        0 0 16px color-mix(in srgb, var(--art-primary) 30%, transparent);
+    animation: lyrics-fade-in var(--dur-md) ease both;
+}
+
+.lyrics-line::before { content: '" '; opacity: 0.4; }
+.lyrics-line::after  { content: ' "'; opacity: 0.4; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROLS ROW
+══════════════════════════════════════════════════════════════════════════ */
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 2px 0 6px;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    font-size: 15px;
+    cursor: pointer;
+    transition: all var(--dur-xs) var(--ease-smooth);
+    flex-shrink: 0;
+}
+
+.control-btn:hover {
+    background: var(--surface1);
+    border-color: color-mix(in srgb, var(--art-primary) 35%, transparent);
+    transform: scale(1.08);
+}
+
+.control-btn:active {
+    transform: scale(0.94);
+}
+
+/* Main play/pause button — larger */
+.control-btn.play-pause {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+    background: color-mix(in srgb, var(--art-primary) 20%, var(--surface0));
+    border-color: color-mix(in srgb, var(--art-primary) 35%, transparent);
+    box-shadow:
+        0 0 12px color-mix(in srgb, var(--art-primary) 25%, transparent);
+    transition: all var(--dur-sm) var(--ease-spring);
+}
+
+[data-state="playing"] .control-btn.play-pause {
+    background: color-mix(in srgb, var(--art-primary) 25%, var(--surface0));
+    box-shadow:
+        0 0 16px color-mix(in srgb, var(--art-primary) 40%, transparent),
+        0 0 32px color-mix(in srgb, var(--art-primary) 15%, transparent);
+}
+
+/* Active state for toggles */
+.control-btn.active {
+    background: color-mix(in srgb, var(--art-primary) 18%, var(--surface0));
+    border-color: color-mix(in srgb, var(--art-primary) 35%, transparent);
+    color: var(--art-primary);
+}
+
+/* ── Volume mini-bar ──────────────────────────────────────────────────────── */
+.volume-mini {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.volume-icon {
+    font-size: 11px;
+    color: var(--overlay0);
+}
+
+.volume-track {
+    width: 48px;
+    height: 3px;
+    background: var(--surface1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.volume-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--art-primary);
+    transition: width var(--dur-sm) var(--ease-smooth);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOTTOM SECTION: AUDIO QUALITY + NEXT TRACK
+══════════════════════════════════════════════════════════════════════════ */
+
+.bottom-section {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 10px 18px 14px;
+    gap: 10px;
+    position: relative;
+    z-index: 3;
+}
+
+/* ── Audio Quality Chips ──────────────────────────────────────────────────── */
+.quality-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.quality-chip {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.chip-format {
+    background: color-mix(in srgb, var(--art-primary) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--art-primary) 28%, transparent);
+    color: var(--art-primary);
+}
+
+.chip-quality {
+    background: var(--surface0);
+    border: 1px solid var(--surface1);
+    color: var(--overlay1);
+}
+
+.chip-hires {
+    background: color-mix(in srgb, var(--yellow) 14%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--yellow) 26%, transparent);
+    color: var(--yellow);
+}
+
+/* ── Next Track Preview ───────────────────────────────────────────────────── */
+.next-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: next-fade-in var(--dur-md) ease both;
+    animation-delay: var(--dur-lg);
+    animation-fill-mode: forwards;
+}
+
+.next-icon {
+    font-size: 10px;
+    color: var(--overlay0);
+    flex-shrink: 0;
+}
+
+.next-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--overlay0);
+    flex-shrink: 0;
+}
+
+.next-title {
+    font-size: 10.5px;
+    color: var(--subtext0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* ── Equalizer mini ───────────────────────────────────────────────────────── */
+.eq-mini {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.eq-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: color-mix(in srgb, var(--art-primary) 50%, var(--surface2));
+}
+
+[data-state="playing"] .eq-bar:nth-child(1) { animation: eq-wave 0.8s ease-in-out infinite alternate; animation-delay:   0ms; }
+[data-state="playing"] .eq-bar:nth-child(2) { animation: eq-wave 0.7s ease-in-out infinite alternate; animation-delay: 150ms; }
+[data-state="playing"] .eq-bar:nth-child(3) { animation: eq-wave 0.9s ease-in-out infinite alternate; animation-delay:  80ms; }
+[data-state="playing"] .eq-bar:nth-child(4) { animation: eq-wave 0.6s ease-in-out infinite alternate; animation-delay: 200ms; }
+[data-state="playing"] .eq-bar:nth-child(5) { animation: eq-wave 0.8s ease-in-out infinite alternate; animation-delay:  40ms; }
+
+.eq-bar { height: 40%; }
+.eq-bar:nth-child(2) { height: 70%; }
+.eq-bar:nth-child(3) { height: 100%; }
+.eq-bar:nth-child(4) { height: 55%; }
+.eq-bar:nth-child(5) { height: 30%; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes card-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(0.96);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes art-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.7) rotate(-5deg);
+        filter: blur(6px);
+    }
+    60% {
+        transform: scale(1.06) rotate(1deg);
+        filter: blur(0);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes vinyl-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes art-ring {
+    from { opacity: 0.3; transform: scale(1.0); }
+    to   { opacity: 0.7; transform: scale(1.06); }
+}
+
+@keyframes track-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bar-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes progress-sweep {
+    0%   { left: -30%; }
+    100% { left: 110%; }
+}
+
+@keyframes wave {
+    from { transform: scaleY(0.35); }
+    to   { transform: scaleY(1.0); }
+}
+
+@keyframes eq-wave {
+    from { transform: scaleY(0.3); }
+    to   { transform: scaleY(1.0); }
+}
+
+@keyframes heart-beat {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.35); }
+    60%  { transform: scale(0.9); }
+    80%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+@keyframes dot-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.3; transform: scale(0.6); }
+}
+
+@keyframes lyrics-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes next-fade-in {
+    from { opacity: 0; transform: translateX(-5px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+
+    [data-state="playing"] .album-art-wrap {
+        animation: art-appear var(--dur-lg) var(--ease-spring) both;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="media-card"
+     data-player="{{PLAYER}}"
+     data-state="{{STATE}}"
+     data-loved="{{LOVED}}"
+     data-has-lyrics="{{HAS_LYRICS}}">
+
+    <!-- Album art backdrop blur -->
+    <div class="card-backdrop" aria-hidden="true"></div>
+
+    <!-- Love button -->
+    <div class="love-btn"
+         role="img"
+         aria-label="{{LOVED_LABEL}}">
+        {{LOVED_ICON}}
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════════════ -->
+    <div class="card-content">
+
+        <!-- TOP: Art + Info -->
+        <div class="top-row">
+
+            <!-- Album Art -->
+            <div class="album-art-wrap"
+                 role="img"
+                 aria-label="Album art for {{ALBUM}}">
+                <div class="album-art-placeholder">
+                    {{ART_PLACEHOLDER_ICON}}
+                </div>
+            </div>
+
+            <!-- Track Info -->
+            <div class="track-info">
+
+                <div class="player-pill">
+                    <span class="player-dot" aria-hidden="true"></span>
+                    {{PLAYER_LABEL}}
+                </div>
+
+                <div class="track-title">{{TITLE}}</div>
+                <div class="track-artist">{{ARTIST}}</div>
+
+                <div class="track-album">
+                    <span class="album-icon" aria-hidden="true">💿</span>
+                    {{ALBUM}}
+                </div>
+
+                <div class="track-meta">
+                    <span class="meta-chip">{{YEAR}}</span>
+                    <span class="meta-chip">{{GENRE}}</span>
+                    <span class="meta-chip">{{TRACK_NUM}}</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- WAVEFORM VISUALIZER -->
+        <div class="waveform-section" aria-hidden="true">
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+        </div>
+
+        <!-- LYRICS -->
+        <div class="lyrics-section">
+            <div class="lyrics-line" aria-live="polite">{{LYRICS_LINE}}</div>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="progress-section">
+
+            <div class="time-row">
+                <span class="time-position"
+                      aria-label="Position {{POSITION}}">
+                    {{POSITION}}
+                </span>
+                <span class="time-remaining"
+                      aria-label="Duration {{DURATION}}">
+                    {{DURATION}}
+                </span>
+            </div>
+
+            <div class="track-progress-track"
+                 role="progressbar"
+                 aria-valuenow="{{POSITION_PCT}}"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-label="{{POSITION}} of {{DURATION}}">
+                <div class="track-progress-fill"
+                     style="width: {{POSITION_PCT}}%;">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls-row">
+
+            <!-- Shuffle -->
+            <div class="control-btn {{SHUFFLE_ACTIVE}}"
+                 role="button"
+                 aria-label="Shuffle {{SHUFFLE}}"
+                 aria-pressed="{{SHUFFLE_BOOL}}">
+                🔀
+            </div>
+
+            <!-- Previous -->
+            <div class="control-btn"
+                 role="button"
+                 aria-label="Previous track">
+                ⏮
+            </div>
+
+            <!-- Play / Pause -->
+            <div class="control-btn play-pause"
+                 role="button"
+                 aria-label="{{STATE_LABEL}}">
+                {{PLAY_ICON}}
+            </div>
+
+            <!-- Next -->
+            <div class="control-btn"
+                 role="button"
+                 aria-label="Next track">
+                ⏭
+            </div>
+
+            <!-- Repeat -->
+            <div class="control-btn {{REPEAT_ACTIVE}}"
+                 role="button"
+                 aria-label="Repeat: {{REPEAT}}"
+                 aria-pressed="{{REPEAT_BOOL}}">
+                {{REPEAT_ICON}}
+            </div>
+
+            <!-- Volume -->
+            <div class="volume-mini">
+                <span class="volume-icon" aria-hidden="true">
+                    {{VOL_ICON}}
+                </span>
+                <div class="volume-track"
+                     role="progressbar"
+                     aria-valuenow="{{VOLUME}}"
+                     aria-label="Volume {{VOLUME}}%">
+                    <div class="volume-fill"
+                         style="width: {{VOLUME}}%;">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         BOTTOM: QUALITY + NEXT TRACK
+    ═══════════════════════════════════════════════ -->
+    <div class="bottom-section">
+
+        <!-- Audio Quality -->
+        <div class="quality-row">
+            <span class="quality-chip chip-format">{{FORMAT}}</span>
+            <span class="quality-chip chip-quality">{{BITRATE}}</span>
+            <span class="quality-chip chip-quality">{{SAMPLE_RATE}}</span>
+            <span class="quality-chip {{HIRES_CLASS}}">{{BIT_DEPTH}}</span>
+        </div>
+
+        <!-- Next Track -->
+        <div class="next-track">
+            <span class="next-icon" aria-hidden="true">▷</span>
+            <span class="next-label">Next</span>
+            <span class="next-title">{{NEXT_TRACK}}</span>
+            <div class="eq-mini" aria-hidden="true">
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

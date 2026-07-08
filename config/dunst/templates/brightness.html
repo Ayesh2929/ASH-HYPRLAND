@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ☀️ ASH DOTFILES v5.0 OMEGA — DUNST BRIGHTNESS OSD TEMPLATE               ║
+║  Ultra-premium • Adaptive color • Sun animation • Multi-monitor aware      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/brightness.html
+📦 Requires  : dunst ≥ 1.11.0 with HTML body support, brightnessctl
+🎨 Colors    : Dynamic spectrum from deep blue (low) to warm amber (high)
+📡 Variables  :
+  {{BRIGHTNESS}}    — 0-100 integer
+  {{BRIGHTNESS_PCT}} — "75%"
+  {{ICON}}          — adaptive sun/moon icon
+  {{MONITOR}}       — display name (e.g., "eDP-1")
+  {{MONITOR_LABEL}} — display label (e.g., "Primary")
+  {{LEVEL}}         — dark | dim | low | medium | standard | bright | max
+  {{COLOR}}         — hex color for current level
+  {{COLOR_TEMP}}    — optional color temperature (e.g., "6500K")
+  {{NIGHT_LIGHT}}   — "on" | "off"
+  {{AUTO_BRIGHTNESS}} — "on" | "off"
+  {{BAR_WIDTH}}     — fill percentage
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── CSS Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── ASH Color System ─────────────────────────────────────────────────────── */
+:root {
+    /* Base palette */
+    --base:       #1e1e2e;
+    --mantle:     #181825;
+    --surface0:   #313244;
+    --surface1:   #45475a;
+    --surface2:   #585b70;
+    --overlay0:   #6c7086;
+    --overlay1:   #7f849c;
+    --overlay2:   #9399b2;
+    --text:       #cdd6f4;
+    --subtext0:   #a6adc8;
+    --subtext1:   #bac2de;
+
+    /* Semantic */
+    --green:      #a6e3a1;
+    --yellow:     #f9e2af;
+    --peach:      #fab387;
+    --red:        #f38ba8;
+    --mauve:      #cba6f7;
+    --blue:       #89b4fa;
+    --sky:        #89dceb;
+    --teal:       #94e2d5;
+    --lavender:   #b4befe;
+    --rosewater:  #f5e0dc;
+    --flamingo:   #f2cdcd;
+
+    /* Brightness level colors — cool to warm spectrum */
+    --color-dark:     #313244;    /* 0-4%   pitch dark */
+    --color-dim:      #585b70;    /* 5-14%  very dim */
+    --color-low:      #89b4fa;    /* 15-29% low */
+    --color-medium:   #89dceb;    /* 30-44% medium */
+    --color-standard: #a6e3a1;    /* 45-64% standard — ideal */
+    --color-bright:   #f9e2af;    /* 65-79% bright */
+    --color-high:     #fab387;    /* 80-89% high */
+    --color-max:      #f38ba8;    /* 90-100% max */
+
+    /* Dynamic — set per level */
+    --brightness-color: var(--color-standard);
+
+    /* OSD geometry */
+    --osd-radius:     16px;
+    --osd-padding:    16px 20px;
+    --bar-height:     8px;
+    --bar-radius:     4px;
+    --icon-size:      44px;
+    --icon-radius:    12px;
+
+    /* Glass */
+    --glass-bg:       rgba(24, 24, 37, 0.93);
+    --glass-border:   rgba(88, 91, 112, 0.38);
+    --glass-blur:     18px;
+    --glass-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.50),
+        0 2px 8px  rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    /* Animation */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --dur-fast:    150ms;
+    --dur-med:     300ms;
+    --dur-slow:    460ms;
+}
+
+/* ── Level Color Bindings ─────────────────────────────────────────────────── */
+[data-level="dark"]     { --brightness-color: var(--color-dark);     }
+[data-level="dim"]      { --brightness-color: var(--color-dim);      }
+[data-level="low"]      { --brightness-color: var(--color-low);      }
+[data-level="medium"]   { --brightness-color: var(--color-medium);   }
+[data-level="standard"] { --brightness-color: var(--color-standard); }
+[data-level="bright"]   { --brightness-color: var(--color-bright);   }
+[data-level="high"]     { --brightness-color: var(--color-high);     }
+[data-level="max"]      { --brightness-color: var(--color-max);      }
+
+/* Night light tint */
+[data-night-light="on"] {
+    --brightness-color: var(--rosewater);
+    --glass-bg: rgba(30, 24, 24, 0.93);
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── OSD Card ─────────────────────────────────────────────────────────────── */
+.osd-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: var(--osd-padding);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--osd-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(0.95);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(0.95);
+    min-width: 300px;
+    max-width: 460px;
+    position: relative;
+    overflow: hidden;
+    animation: card-appear var(--dur-slow) var(--ease-spring) both;
+    will-change: transform, opacity;
+    transition:
+        background var(--dur-med) var(--ease-smooth),
+        border-color var(--dur-med) var(--ease-smooth);
+}
+
+/* Gradient accent border */
+.osd-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--osd-radius);
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--brightness-color) 55%, transparent),
+        transparent 45%,
+        color-mix(in srgb, var(--brightness-color) 15%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background var(--dur-med) var(--ease-smooth);
+}
+
+/* Ambient light glow — simulates actual screen glow */
+.osd-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 80%;
+    background: radial-gradient(
+        ellipse at center top,
+        color-mix(in srgb, var(--brightness-color) 10%, transparent) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+    transition: background var(--dur-med) var(--ease-smooth);
+    animation: glow-breathe 3s ease-in-out infinite alternate;
+}
+
+/* ── Sun Icon ─────────────────────────────────────────────────────────────── */
+.icon-wrap {
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--brightness-color) 14%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--brightness-color) 28%, transparent);
+    border-radius: var(--icon-radius);
+    position: relative;
+    overflow: visible;
+    transition:
+        background   var(--dur-fast) var(--ease-smooth),
+        border-color var(--dur-fast) var(--ease-smooth);
+}
+
+/* Sun ray ring animation */
+.icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: calc(var(--icon-radius) + 6px);
+    border: 1.5px solid
+        color-mix(in srgb, var(--brightness-color) 30%, transparent);
+    animation: ray-spin 8s linear infinite;
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-level="bright"] .icon-wrap::before,
+[data-level="high"] .icon-wrap::before,
+[data-level="max"] .icon-wrap::before {
+    opacity: 1;
+}
+
+/* Inner glow pulse */
+.icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: calc(var(--icon-radius) - 2px);
+    background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--brightness-color) 20%, transparent),
+        transparent 70%
+    );
+    animation: inner-glow 2s ease-in-out infinite alternate;
+}
+
+.icon-emoji {
+    font-size: 22px;
+    line-height: 1;
+    z-index: 1;
+    filter: drop-shadow(
+        0 0 8px color-mix(in srgb, var(--brightness-color) 60%, transparent)
+    );
+    animation: icon-appear var(--dur-med) var(--ease-spring) both;
+    animation-delay: 60ms;
+    transition: filter var(--dur-fast) var(--ease-smooth);
+    will-change: transform;
+}
+
+/* Spinning rays for high brightness */
+[data-level="bright"] .icon-emoji,
+[data-level="high"] .icon-emoji,
+[data-level="max"] .icon-emoji {
+    animation:
+        icon-appear var(--dur-med) var(--ease-spring) both,
+        sun-spin-slow 6s linear infinite;
+    animation-delay: 60ms, calc(var(--dur-slow) + 100ms);
+}
+
+/* ── Content ──────────────────────────────────────────────────────────────── */
+.content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ── Header Row ───────────────────────────────────────────────────────────── */
+.header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--subtext0);
+    white-space: nowrap;
+}
+
+.value-group {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.value {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--brightness-color);
+    line-height: 1;
+    transition: color var(--dur-fast) var(--ease-smooth);
+    text-shadow:
+        0 0 14px color-mix(in srgb, var(--brightness-color) 55%, transparent),
+        0 0 28px color-mix(in srgb, var(--brightness-color) 22%, transparent);
+    animation: value-appear var(--dur-med) var(--ease-spring) both;
+}
+
+.value-unit {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--overlay1);
+    padding-bottom: 2px;
+}
+
+/* ── Progress Track ───────────────────────────────────────────────────────── */
+.progress-track {
+    width: 100%;
+    height: var(--bar-height);
+    background: var(--surface0);
+    border-radius: var(--bar-radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* Tick marks at 25/50/75 */
+.progress-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent calc(25% - 1px),
+        rgba(24, 24, 37, 0.55) calc(25% - 1px),
+        rgba(24, 24, 37, 0.55) 25%
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--bar-radius);
+    position: relative;
+    transform-origin: left center;
+    animation: bar-grow var(--dur-slow) var(--ease-spring) both;
+    transition:
+        width      var(--dur-med) var(--ease-spring),
+        background var(--dur-med) var(--ease-smooth);
+    will-change: width;
+}
+
+/* Warm-to-cool gradient matching brightness level */
+.progress-fill {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--color-low) 80%, var(--brightness-color)),
+        var(--brightness-color),
+        color-mix(in srgb, var(--brightness-color) 85%, white)
+    );
+}
+
+/* Animated shine */
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.30),
+        transparent
+    );
+    animation: shine-sweep 2.8s ease-in-out infinite;
+    animation-delay: var(--dur-slow);
+}
+
+/* Knob indicator */
+.progress-fill::before {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brightness-color);
+    border: 2px solid var(--mantle);
+    box-shadow:
+        0 0 6px  color-mix(in srgb, var(--brightness-color) 75%, transparent),
+        0 0 14px color-mix(in srgb, var(--brightness-color) 35%, transparent);
+    z-index: 3;
+    animation: knob-pop var(--dur-slow) var(--ease-spring) both;
+    animation-delay: 100ms;
+}
+
+/* Luminance scale decoration */
+.luminance-scale {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1px;
+    margin-top: -2px;
+}
+
+.lum-tick {
+    width: 1px;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 1px;
+}
+
+.lum-label {
+    font-size: 7.5px;
+    color: var(--overlay0);
+    font-variant-numeric: tabular-nums;
+    width: 20px;
+    text-align: center;
+}
+
+/* ── Meta Row ─────────────────────────────────────────────────────────────── */
+.meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 1px;
+}
+
+.monitor-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--overlay0);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.monitor-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    animation: dot-pulse 2.5s ease-in-out infinite;
+}
+
+.monitor-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+}
+
+.tags {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all var(--dur-fast) var(--ease-smooth);
+}
+
+.tag-night {
+    background: color-mix(in srgb, var(--mauve) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--mauve) 30%, transparent);
+    color: var(--mauve);
+}
+
+.tag-auto {
+    background: color-mix(in srgb, var(--blue) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+    color: var(--blue);
+}
+
+.tag-level {
+    background: color-mix(in srgb, var(--brightness-color) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--brightness-color) 28%, transparent);
+    color: var(--brightness-color);
+    transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+
+/* ── Color Temperature Strip ──────────────────────────────────────────────── */
+.color-temp-row {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--overlay0);
+    margin-top: 2px;
+}
+
+[data-night-light="on"] .color-temp-row {
+    display: flex;
+}
+
+.temp-gradient {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        #89dceb,
+        #f9e2af,
+        #f5e0dc,
+        #f38ba8
+    );
+    position: relative;
+}
+
+.temp-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    border: 1.5px solid var(--rosewater);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+    transition: left var(--dur-med) var(--ease-spring);
+}
+
+/* ── Eye Care Warning ─────────────────────────────────────────────────────── */
+.eye-warning {
+    display: none;
+    font-size: 9.5px;
+    color: var(--peach);
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    animation: fade-up var(--dur-med) ease both;
+    animation-delay: var(--dur-slow);
+    animation-fill-mode: forwards;
+}
+
+[data-level="high"] .eye-warning,
+[data-level="max"] .eye-warning {
+    display: flex;
+}
+
+.eye-icon {
+    font-size: 11px;
+    animation: eye-blink 3s ease-in-out infinite;
+}
+
+/* ── Adaptive Indicator ───────────────────────────────────────────────────── */
+.adaptive-row {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 9.5px;
+    color: var(--blue);
+}
+
+[data-auto-brightness="on"] .adaptive-row {
+    display: flex;
+}
+
+.adaptive-icon {
+    font-size: 10px;
+    animation: adapt-spin 3s linear infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes card-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes bar-grow {
+    from { transform: scaleX(0); opacity: 0.5; }
+    to   { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes shine-sweep {
+    0%   { left: -60%; }
+    50%  { left: 100%;  }
+    100% { left: 100%;  }
+}
+
+@keyframes icon-appear {
+    from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+    60%  { transform: scale(1.2)  rotate(5deg);  }
+    to   { transform: scale(1)    rotate(0deg);  opacity: 1; }
+}
+
+@keyframes sun-spin-slow {
+    from { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--brightness-color) 60%, transparent)) rotate(0deg); }
+    to   { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--brightness-color) 60%, transparent)) rotate(360deg); }
+}
+
+@keyframes value-appear {
+    from { opacity: 0; transform: scale(0.75); }
+    60%  { transform: scale(1.06); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes knob-pop {
+    from { transform: translateY(-50%) scale(0); opacity: 0; }
+    70%  { transform: translateY(-50%) scale(1.4); }
+    to   { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes ray-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes inner-glow {
+    from { opacity: 0.4; transform: scale(0.9); }
+    to   { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes glow-breathe {
+    from { opacity: 0.6; transform: translateX(-50%) scale(0.95); }
+    to   { opacity: 1.0; transform: translateX(-50%) scale(1.05); }
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+@keyframes eye-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96%            { transform: scaleY(0.1); }
+}
+
+@keyframes adapt-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="osd-card"
+     data-level="{{LEVEL}}"
+     data-night-light="{{NIGHT_LIGHT}}"
+     data-auto-brightness="{{AUTO_BRIGHTNESS}}">
+
+    <!-- Sun / Moon Icon -->
+    <div class="icon-wrap">
+        <span class="icon-emoji" role="img" aria-label="brightness">
+            {{ICON}}
+        </span>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Header row: label + value -->
+        <div class="header-row">
+            <span class="label">Brightness</span>
+            <div class="value-group">
+                <span class="value">{{BRIGHTNESS}}</span>
+                <span class="value-unit">%</span>
+            </div>
+        </div>
+
+        <!-- Progress track -->
+        <div class="progress-track"
+             role="progressbar"
+             aria-valuenow="{{BRIGHTNESS}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="Brightness {{BRIGHTNESS_PCT}}">
+            <div class="progress-fill"
+                 style="width: {{BAR_WIDTH}}%;">
+            </div>
+        </div>
+
+        <!-- Luminance scale markers -->
+        <div class="luminance-scale" aria-hidden="true">
+            <span class="lum-label" style="text-align:left">0</span>
+            <span class="lum-label">25</span>
+            <span class="lum-label">50</span>
+            <span class="lum-label">75</span>
+            <span class="lum-label" style="text-align:right">100</span>
+        </div>
+
+        <!-- Meta: monitor + tags -->
+        <div class="meta-row">
+            <div class="monitor-info">
+                <span class="monitor-dot" aria-hidden="true"></span>
+                <span class="monitor-name">{{MONITOR_LABEL}}</span>
+            </div>
+            <div class="tags">
+                <span class="tag tag-level">{{LEVEL_LABEL}}</span>
+                <span class="tag tag-night" style="display: none;">
+                    🌙 Night Light
+                </span>
+                <span class="tag tag-auto" style="display: none;">
+                    🔆 Auto
+                </span>
+            </div>
+        </div>
+
+        <!-- Color temperature strip (night light only) -->
+        <div class="color-temp-row">
+            <span>🌡</span>
+            <div class="temp-gradient">
+                <div class="temp-indicator"
+                     style="left: {{TEMP_POSITION}}%;">
+                </div>
+            </div>
+            <span>{{COLOR_TEMP}}</span>
+        </div>
+
+        <!-- Adaptive brightness indicator -->
+        <div class="adaptive-row">
+            <span class="adaptive-icon">🔄</span>
+            <span>Adaptive brightness active</span>
+        </div>
+
+        <!-- Eye strain warning -->
+        <div class="eye-warning" role="alert" aria-live="polite">
+            <span class="eye-icon">👁️</span>
+            High brightness — eye strain risk
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

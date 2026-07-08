@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🔊 ASH DOTFILES v5.0 OMEGA — DUNST VOLUME OSD TEMPLATE                    ║
+║  Ultra-premium notification design • Glassmorphism • Animated progress      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 Location  : ~/.config/dunst/templates/volume.html
+📦 Requires  : dunst ≥ 1.11.0 with libnotify HTML body support
+🎨 Colors    : Dynamic — sourced from ASH color engine via CSS variables
+📡 Usage     : notify-send with -h string:x-dunst-stack-tag:volume
+               Variables: {{VOLUME}} {{ICON}} {{DEVICE}} {{STATE}}
+
+Template Variables (replaced by notification scripts):
+  {{VOLUME}}     — 0-100 (integer)
+  {{VOLUME_PCT}} — "75%" (string with percent)
+  {{ICON}}       — emoji icon based on level
+  {{DEVICE}}     — audio device name
+  {{STATE}}      — muted | unmuted | boosted
+  {{COLOR}}      — hex color based on volume level
+  {{BAR_WIDTH}}  — progress bar fill width percentage
+  {{THEME_ACCENT}} — current ASH theme accent color
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+/* ── CSS Reset & Base ─────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── ASH Color Tokens ─────────────────────────────────────────────────────── */
+:root {
+    /* Base palette — Catppuccin Mocha defaults */
+    --base:       #1e1e2e;
+    --mantle:     #181825;
+    --surface0:   #313244;
+    --surface1:   #45475a;
+    --surface2:   #585b70;
+    --overlay0:   #6c7086;
+    --overlay1:   #7f849c;
+    --overlay2:   #9399b2;
+    --text:       #cdd6f4;
+    --subtext0:   #a6adc8;
+    --subtext1:   #bac2de;
+
+    /* Semantic colors */
+    --green:      #a6e3a1;
+    --yellow:     #f9e2af;
+    --peach:      #fab387;
+    --red:        #f38ba8;
+    --mauve:      #cba6f7;
+    --blue:       #89b4fa;
+    --sky:        #89dceb;
+    --teal:       #94e2d5;
+
+    /* Dynamic — set by ASH color engine */
+    --accent:     var(--mauve);
+    --volume-color: var(--green);
+
+    /* OSD geometry */
+    --osd-radius:     16px;
+    --osd-padding:    16px 20px;
+    --bar-height:     8px;
+    --bar-radius:     4px;
+    --icon-size:      44px;
+    --icon-radius:    12px;
+
+    /* Glassmorphism */
+    --glass-bg:       rgba(30, 30, 46, 0.92);
+    --glass-border:   rgba(88, 91, 112, 0.40);
+    --glass-blur:     16px;
+    --glass-shadow:   0 8px 32px rgba(0, 0, 0, 0.48),
+                      0 2px 8px  rgba(0, 0, 0, 0.32);
+
+    /* Animation */
+    --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1.0);
+    --ease-smooth:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --duration-fast:  160ms;
+    --duration-med:   320ms;
+    --duration-slow:  480ms;
+}
+
+/* ── Volume Level Color Mapping ───────────────────────────────────────────── */
+[data-state="muted"]        { --volume-color: var(--red);    }
+[data-level="0"]            { --volume-color: var(--overlay0); }
+[data-level="low"]          { --volume-color: var(--green);  }
+[data-level="medium"]       { --volume-color: var(--green);  }
+[data-level="high"]         { --volume-color: var(--yellow); }
+[data-level="very-high"]    { --volume-color: var(--peach);  }
+[data-level="max"]          { --volume-color: var(--red);    }
+[data-level="boosted"]      { --volume-color: var(--red);    }
+
+/* ── Body / Container ─────────────────────────────────────────────────────── */
+body {
+    font-family:
+        'JetBrainsMono Nerd Font',
+        'JetBrains Mono',
+        'Noto Sans',
+        'Segoe UI',
+        system-ui,
+        sans-serif;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ── OSD Card ─────────────────────────────────────────────────────────────── */
+.osd-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: var(--osd-padding);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--osd-radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+    min-width: 300px;
+    max-width: 460px;
+    position: relative;
+    overflow: hidden;
+    animation: osd-appear var(--duration-slow) var(--ease-spring) both;
+    will-change: transform, opacity;
+}
+
+/* ── Glow accent border ───────────────────────────────────────────────────── */
+.osd-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--osd-radius);
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--volume-color) 60%, transparent),
+        transparent 50%,
+        color-mix(in srgb, var(--volume-color) 20%, transparent)
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: background var(--duration-med) var(--ease-smooth);
+}
+
+/* ── Ambient light leak ───────────────────────────────────────────────────── */
+.osd-card::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 10%;
+    width: 80%;
+    height: 60%;
+    background: radial-gradient(
+        ellipse at center,
+        color-mix(in srgb, var(--volume-color) 12%, transparent) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+    animation: ambient-pulse 3s ease-in-out infinite alternate;
+    will-change: opacity;
+}
+
+/* ── Icon Container ───────────────────────────────────────────────────────── */
+.icon-wrap {
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--volume-color) 14%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--volume-color) 30%, transparent);
+    border-radius: var(--icon-radius);
+    position: relative;
+    transition:
+        background    var(--duration-fast) var(--ease-smooth),
+        border-color  var(--duration-fast) var(--ease-smooth),
+        transform     var(--duration-fast) var(--ease-spring);
+}
+
+.icon-wrap:hover {
+    transform: scale(1.05);
+}
+
+/* Ripple on icon */
+.icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--icon-radius) + 2px);
+    border: 2px solid color-mix(in srgb, var(--volume-color) 40%, transparent);
+    animation: icon-pulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.icon-emoji {
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--volume-color) 50%, transparent));
+    animation: icon-bounce var(--duration-med) var(--ease-spring) both;
+    animation-delay: 80ms;
+    will-change: transform;
+}
+
+/* ── Content Area ─────────────────────────────────────────────────────────── */
+.content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ── Top Row: Label + Value ───────────────────────────────────────────────── */
+.top-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.label {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtext0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+}
+
+.value-group {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.value {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--volume-color);
+    line-height: 1;
+    transition: color var(--duration-fast) var(--ease-smooth);
+    text-shadow:
+        0 0 16px color-mix(in srgb, var(--volume-color) 50%, transparent),
+        0 0 32px color-mix(in srgb, var(--volume-color) 20%, transparent);
+    animation: value-pop var(--duration-med) var(--ease-spring) both;
+}
+
+.value-suffix {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--overlay1);
+    padding-bottom: 2px;
+}
+
+/* ── Progress Bar ─────────────────────────────────────────────────────────── */
+.progress-track {
+    width: 100%;
+    height: var(--bar-height);
+    background: var(--surface0);
+    border-radius: var(--bar-radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Segment markers */
+.progress-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent calc(20% - 1px),
+            rgba(30, 30, 46, 0.6) calc(20% - 1px),
+            rgba(30, 30, 46, 0.6) 20%
+        );
+    border-radius: var(--bar-radius);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--volume-color) 70%, var(--green)),
+        var(--volume-color),
+        color-mix(in srgb, var(--volume-color) 80%, white)
+    );
+    border-radius: var(--bar-radius);
+    position: relative;
+    transform-origin: left center;
+    animation: bar-fill var(--duration-slow) var(--ease-spring) both;
+    transition:
+        width        var(--duration-med) var(--ease-spring),
+        background   var(--duration-med) var(--ease-smooth);
+    will-change: width, transform;
+}
+
+/* Shimmer effect on bar */
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.25),
+        transparent
+    );
+    animation: shimmer 2.4s ease-in-out infinite;
+    animation-delay: var(--duration-slow);
+}
+
+/* Volume bubble indicator */
+.progress-fill::before {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--volume-color);
+    box-shadow:
+        0 0 6px  color-mix(in srgb, var(--volume-color) 80%, transparent),
+        0 0 12px color-mix(in srgb, var(--volume-color) 40%, transparent);
+    border: 2px solid var(--base);
+    z-index: 3;
+    animation: thumb-appear var(--duration-slow) var(--ease-spring) both;
+    animation-delay: 120ms;
+}
+
+/* ── Bottom Row: Device + State ───────────────────────────────────────────── */
+.bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.device-name {
+    font-size: 10.5px;
+    color: var(--overlay0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.device-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    animation: dot-blink 2s ease-in-out infinite;
+}
+
+[data-state="muted"] .device-dot {
+    background: var(--red);
+    animation: none;
+}
+
+.state-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--volume-color) 15%, var(--surface0));
+    border: 1px solid color-mix(in srgb, var(--volume-color) 30%, transparent);
+    color: var(--volume-color);
+    flex-shrink: 0;
+    transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+/* ── Mute Overlay ─────────────────────────────────────────────────────────── */
+[data-state="muted"] .progress-fill {
+    background: linear-gradient(
+        90deg,
+        var(--surface1),
+        var(--surface2)
+    );
+}
+
+[data-state="muted"] .value {
+    opacity: 0.5;
+    text-decoration: line-through;
+    text-decoration-color: var(--red);
+}
+
+/* ── Boost Warning ────────────────────────────────────────────────────────── */
+[data-level="boosted"] .osd-card,
+[data-level="max"] .osd-card {
+    animation:
+        osd-appear var(--duration-slow) var(--ease-spring) both,
+        warn-shake 420ms var(--ease-smooth) calc(var(--duration-slow) + 100ms);
+}
+
+/* ── Hearing Warning Strip ────────────────────────────────────────────────── */
+.hearing-warning {
+    display: none;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--red);
+    text-transform: uppercase;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+    animation: fade-in var(--duration-med) ease both;
+    animation-delay: var(--duration-slow);
+}
+
+[data-level="very-high"] .hearing-warning,
+[data-level="max"] .hearing-warning,
+[data-level="boosted"] .hearing-warning {
+    display: flex;
+}
+
+.warning-icon {
+    font-size: 10px;
+    animation: warn-pulse 1.2s ease-in-out infinite alternate;
+}
+
+/* ── Keyboard Shortcut Hints ──────────────────────────────────────────────── */
+.kb-hints {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    opacity: 0;
+    animation: fade-in var(--duration-med) ease both;
+    animation-delay: 600ms;
+    animation-fill-mode: forwards;
+}
+
+.kb-hint {
+    font-size: 9px;
+    color: var(--overlay0);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.kb-key {
+    background: var(--surface1);
+    border: 1px solid var(--surface2);
+    border-radius: 3px;
+    padding: 0 4px;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--subtext0);
+    line-height: 1.6;
+}
+
+/* ── Waveform Visualizer ──────────────────────────────────────────────────── */
+.waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.wave-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--volume-color) 60%, transparent);
+    animation: wave var(--duration-fast) ease-in-out infinite alternate;
+    will-change: height;
+}
+
+.wave-bar:nth-child(1) { height: 30%; animation-delay:   0ms; animation-duration: 420ms; }
+.wave-bar:nth-child(2) { height: 60%; animation-delay:  80ms; animation-duration: 380ms; }
+.wave-bar:nth-child(3) { height: 90%; animation-delay:  40ms; animation-duration: 460ms; }
+.wave-bar:nth-child(4) { height: 60%; animation-delay: 120ms; animation-duration: 400ms; }
+.wave-bar:nth-child(5) { height: 35%; animation-delay:  60ms; animation-duration: 440ms; }
+
+[data-state="muted"] .wave-bar {
+    animation: none;
+    height: 30% !important;
+    background: var(--surface2);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes osd-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.94);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes bar-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes shimmer {
+    0%   { left: -100%; }
+    60%  { left: 100%;  }
+    100% { left: 100%;  }
+}
+
+@keyframes icon-bounce {
+    from { transform: scale(0.6) rotate(-8deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(4deg); }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes value-pop {
+    from { transform: scale(0.7); opacity: 0; }
+    70%  { transform: scale(1.08); }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes thumb-appear {
+    from { transform: translateY(-50%) scale(0); opacity: 0; }
+    70%  { transform: translateY(-50%) scale(1.3); }
+    to   { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes ambient-pulse {
+    from { opacity: 0.6; transform: scale(1); }
+    to   { opacity: 1.0; transform: scale(1.1); }
+}
+
+@keyframes icon-pulse {
+    0%   { opacity: 0.6; transform: scale(1); }
+    50%  { opacity: 0; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.4); }
+}
+
+@keyframes dot-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+@keyframes wave {
+    from { transform: scaleY(0.4); }
+    to   { transform: scaleY(1.0); }
+}
+
+@keyframes warn-shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-4px); }
+    40%  { transform: translateX(4px); }
+    60%  { transform: translateX(-3px); }
+    80%  { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes warn-pulse {
+    from { opacity: 0.7; transform: scale(0.95); }
+    to   { opacity: 1.0; transform: scale(1.05); }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced Motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<!--
+  Template usage — replace variables in notification scripts:
+  VOLUME=75 DEVICE="Headphones" STATE="unmuted"
+  Levels: 0 | low(1-30) | medium(31-69) | high(70-84)
+          very-high(85-94) | max(95-100) | boosted(101+) | muted
+-->
+
+<div class="osd-card"
+     data-state="{{STATE}}"
+     data-level="{{LEVEL}}">
+
+    <!-- Icon -->
+    <div class="icon-wrap">
+        <span class="icon-emoji" role="img" aria-label="volume">
+            {{ICON}}
+        </span>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Top row: label + value -->
+        <div class="top-row">
+            <span class="label">Volume</span>
+            <div class="value-group">
+                <span class="value">{{VOLUME}}</span>
+                <span class="value-suffix">%</span>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-track"
+             role="progressbar"
+             aria-valuenow="{{VOLUME}}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-label="Volume {{VOLUME_PCT}}">
+            <div class="progress-fill"
+                 style="width: {{BAR_WIDTH}}%;">
+            </div>
+        </div>
+
+        <!-- Bottom row: device + state -->
+        <div class="bottom-row">
+            <span class="device-name">
+                <span class="device-dot" aria-hidden="true"></span>
+                {{DEVICE}}
+            </span>
+            <span class="state-badge">{{STATE_LABEL}}</span>
+        </div>
+
+        <!-- Hearing warning (visible at 85%+) -->
+        <div class="hearing-warning" role="alert" aria-live="polite">
+            <span class="warning-icon">⚠</span>
+            High volume — hearing risk
+        </div>
+
+    </div>
+
+    <!-- Waveform visualizer -->
+    <div class="waveform" aria-hidden="true">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+    </div>
+
+</div>
+
+<!--
+DUNST BODY PANGO MARKUP EQUIVALENT:
+(Used when HTML rendering is not available)
+
+<b>🔊 Volume</b>
+<span size="xx-large" foreground="#cba6f7">75%</span>
+<span foreground="#6c7086" size="small">Headphones — Unmuted</span>
+-->
+
+</body>
+</html>
