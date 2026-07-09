@@ -1,0 +1,1028 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Night Light Toggle",
+      "version": "5.0.0",
+      "description": "Premium night light control with circadian rhythm engine, blue light filtering, eye strain analytics, multi-backend support, and adaptive scheduling",
+      "author": "ash-dotfiles",
+      "icon": "󰖔",
+      "category": "display",
+      "tags": [
+        "nightlight", "bluelight", "circadian", "gammastep",
+        "wlsunset", "redshift", "eye-care", "melatonin",
+        "f.lux", "color-temperature", "sleep", "health"
+      ]
+    },
+  
+    "widget": {
+      "type": "nightlight-toggle",
+      "id": "ash-nightlight-widget",
+      "class": "ash-widget ash-widget--nightlight ash-widget--glass",
+      "aria-label": "Night Light Control",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 }
+    },
+  
+    "main-toggle": {
+      "enabled": true,
+      "class": "nl-main-toggle",
+      "layout": "space-between",
+      "align": "center",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "off": {
+              "icon": "󰖙",
+              "class": "nl-icon nl-icon--off",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Night light disabled",
+              "animation": "none"
+            },
+            "on-dim": {
+              "icon": "󰖔",
+              "class": "nl-icon nl-icon--dim",
+              "color": "#ffb347",
+              "tooltip": "Night light active — dim",
+              "glow": "0 0 12px rgba(255,179,71,0.35)",
+              "animation": "nightlight-warm-pulse 4s ease-in-out infinite"
+            },
+            "on-medium": {
+              "icon": "󰖔",
+              "class": "nl-icon nl-icon--medium",
+              "color": "#ff8c42",
+              "tooltip": "Night light active — medium",
+              "glow": "0 0 16px rgba(255,140,66,0.40)",
+              "animation": "nightlight-warm-pulse 3s ease-in-out infinite"
+            },
+            "on-strong": {
+              "icon": "󰖔",
+              "class": "nl-icon nl-icon--strong",
+              "color": "#ff6a00",
+              "tooltip": "Night light active — strong",
+              "glow": "0 0 20px rgba(255,106,0,0.50)",
+              "animation": "nightlight-warm-pulse 2s ease-in-out infinite"
+            },
+            "candle": {
+              "icon": "󰈈",
+              "class": "nl-icon nl-icon--candle",
+              "color": "#ff4500",
+              "tooltip": "Candlelight mode",
+              "glow": "0 0 24px rgba(255,69,0,0.55)",
+              "animation": "candle-flicker 3s ease-in-out infinite"
+            },
+            "scheduled": {
+              "icon": "󱑃",
+              "class": "nl-icon nl-icon--scheduled",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Night light scheduled",
+              "animation": "schedule-breathe 3s ease-in-out infinite"
+            },
+            "auto": {
+              "icon": "󰃢",
+              "class": "nl-icon nl-icon--auto",
+              "color": "var(--cc-accent)",
+              "tooltip": "Auto — follows sun position",
+              "animation": "auto-spin 8s linear infinite"
+            },
+            "sunrise": {
+              "icon": "󰖙",
+              "class": "nl-icon nl-icon--sunrise",
+              "color": "#ffcc6e",
+              "tooltip": "Sunrise transition active",
+              "animation": "sunrise-glow 4s ease-in-out infinite"
+            },
+            "transition": {
+              "icon": "󰖔",
+              "class": "nl-icon nl-icon--transition",
+              "color": "#ffb347",
+              "tooltip": "Transitioning…",
+              "animation": "transition-fade 1.5s ease-in-out infinite"
+            }
+          },
+          "font-size": "22px",
+          "transition": "all 400ms cubic-bezier(0.4,0,0.2,1)"
+        },
+  
+        "labels": {
+          "primary": {
+            "class": "nl-label-primary",
+            "font-size": "13px",
+            "font-weight": 800,
+            "color": "var(--cc-text-primary)",
+            "states": {
+              "off":        "Night Light",
+              "on":         "Night Light",
+              "candle":     "Candlelight",
+              "scheduled":  "Scheduled",
+              "auto":       "Auto (Circadian)",
+              "transition": "Transitioning…"
+            }
+          },
+          "secondary": {
+            "class": "nl-label-secondary",
+            "font-size": "11px",
+            "font-weight": 500,
+            "color": "var(--cc-text-muted)",
+            "states": {
+              "off":        "Blue light filter off",
+              "on":         "{colortemp}K  •  {intensity}% filter",
+              "candle":     "1900K  •  Maximum warmth",
+              "scheduled":  "Active {start} – {end}",
+              "auto":       "{phase}  •  {colortemp}K",
+              "transition": "Adjusting to {target-temp}K"
+            }
+          }
+        }
+      },
+  
+      "right": {
+        "switch": {
+          "class": "nl-switch",
+          "aria-label": "Toggle night light",
+          "command-on":    "~/.config/swaync/scripts/night-light-on.sh",
+          "command-off":   "~/.config/swaync/scripts/night-light-off.sh",
+          "state-command": "~/.config/swaync/scripts/night-light-state.sh",
+          "state-file":    "~/.cache/ash/night-light.state",
+          "keybind":       "n",
+  
+          "track": {
+            "width": 52,
+            "height": 28,
+            "border-radius": 100,
+            "states": {
+              "off": {
+                "background": "var(--cc-surface0)",
+                "border": "2px solid var(--cc-border)"
+              },
+              "on": {
+                "background": "linear-gradient(90deg, #ff8c42, #ffb347)",
+                "border": "2px solid #ff8c42",
+                "box-shadow": [
+                  "0 0 20px rgba(255,140,66,0.45)",
+                  "inset 0 1px 0 rgba(255,255,255,0.25)"
+                ]
+              }
+            },
+            "animation": {
+              "on":  "nl-track-on  350ms cubic-bezier(0.34,1.56,0.64,1) forwards",
+              "off": "nl-track-off 250ms cubic-bezier(0.4,0,0.2,1) forwards"
+            }
+          },
+  
+          "thumb": {
+            "size": 20,
+            "margin": 3,
+            "border-radius": "50%",
+            "background": "#ffffff",
+            "states": {
+              "off": { "transform": "translateX(0)" },
+              "on":  { "transform": "translateX(24px)" }
+            },
+            "icon": {
+              "on":  { "icon": "󰖔", "size": "11px", "color": "#ff8c42" },
+              "off": { "icon": "󰖙", "size": "11px", "color": "var(--cc-surface0)" }
+            },
+            "box-shadow": [
+              "0 2px 6px rgba(0,0,0,0.30)",
+              "0 0 8px rgba(255,140,66,0.30)"
+            ],
+            "animation": {
+              "transition": "transform 300ms cubic-bezier(0.34,1.56,0.64,1)"
+            }
+          }
+        },
+  
+        "auto-toggle": {
+          "enabled": true,
+          "icon": "󰃢",
+          "class": "btn-nl-auto btn-icon",
+          "tooltip-auto":   "Auto mode: follows sun",
+          "tooltip-manual": "Manual mode",
+          "color-auto":   "var(--cc-accent)",
+          "color-manual": "var(--cc-text-muted)",
+          "command": "~/.config/swaync/scripts/night-light-toggle-auto.sh",
+          "margin-left": 6
+        }
+      }
+    },
+  
+    "temperature-slider": {
+      "enabled": true,
+      "class": "nl-temp-slider",
+      "show-when": "not-auto",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "layout": "space-between",
+        "align": "center",
+        "margin-bottom": 10,
+  
+        "label": {
+          "icon": "󱩎",
+          "text": "Color Temperature",
+          "class": "nl-slider-label",
+          "font-size": "11px",
+          "font-weight": 700,
+          "color": "var(--cc-text-muted)",
+          "letter-spacing": "0.04em",
+          "text-transform": "uppercase"
+        },
+  
+        "value-display": {
+          "class": "nl-temp-value",
+          "format": "{value}K",
+          "font-size": "13px",
+          "font-weight": 900,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "dynamic",
+          "color-formula": "blackbody-interpolate({value})",
+          "glow": "dynamic",
+          "animation": "number-roll 150ms ease"
+        }
+      },
+  
+      "slider": {
+        "class": "slider slider--nightlight slider--colortemp",
+        "aria-label": "Color temperature",
+        "range": {
+          "min": 1000,
+          "max": 6500,
+          "step": 100,
+          "scroll-step": 100,
+          "fine-step": 50,
+          "default": 4500
+        },
+  
+        "command": {
+          "set":   "~/.config/swaync/scripts/night-light-temp.sh {value}",
+          "reset": "~/.config/swaync/scripts/night-light-temp.sh 6500"
+        },
+  
+        "track": {
+          "class": "slider__track slider__track--spectrum",
+          "height": 14,
+          "border-radius": 100,
+          "gradient": {
+            "type": "linear",
+            "direction": "90deg",
+            "stops": [
+              { "at":   "0%",  "color": "#ff3800" },
+              { "at":  "10%",  "color": "#ff5200" },
+              { "at":  "18%",  "color": "#ff6e00" },
+              { "at":  "26%",  "color": "#ff8c42" },
+              { "at":  "34%",  "color": "#ffaa6e" },
+              { "at":  "42%",  "color": "#ffc48a" },
+              { "at":  "52%",  "color": "#ffd9b0" },
+              { "at":  "62%",  "color": "#ffecda" },
+              { "at":  "72%",  "color": "#fff8f0" },
+              { "at":  "82%",  "color": "#fdfeff" },
+              { "at":  "92%",  "color": "#f0f5ff" },
+              { "at": "100%",  "color": "#e8f0ff" }
+            ]
+          },
+          "border": "1px solid rgba(255,255,255,0.08)",
+          "box-shadow": "inset 0 1px 3px rgba(0,0,0,0.35)"
+        },
+  
+        "position-glow": {
+          "enabled": true,
+          "class": "temp-position-glow",
+          "width": 3,
+          "height": "100%",
+          "color": "rgba(255,255,255,0.55)",
+          "blur": "4px",
+          "border-radius": 100
+        },
+  
+        "thumb": {
+          "class": "slider__thumb slider__thumb--colortemp",
+          "size": 24,
+          "border-radius": "50%",
+          "background": "dynamic",
+          "background-formula": "blackbody({value}K)",
+          "border": "3px solid rgba(255,255,255,0.75)",
+          "box-shadow": [
+            "0 3px 12px rgba(0,0,0,0.45)",
+            "0 0 16px {current-temp-glow}"
+          ],
+          "hover": {
+            "scale": 1.18,
+            "border-color": "#ffffff",
+            "box-shadow": [
+              "0 4px 20px rgba(0,0,0,0.55)",
+              "0 0 24px {current-temp-glow}"
+            ]
+          },
+          "active": { "scale": 0.90 },
+          "center-dot": {
+            "size": 8,
+            "background": "rgba(255,255,255,0.85)",
+            "border-radius": "50%"
+          }
+        },
+  
+        "zone-labels": {
+          "enabled": true,
+          "class": "temp-zone-labels",
+          "items": [
+            { "value": 1900, "label": "Candle",   "icon": "󰈈"  },
+            { "value": 2700, "label": "Warm",     "icon": "󰌵"  },
+            { "value": 4000, "label": "Neutral",  "icon": "󰌶"  },
+            { "value": 5500, "label": "Daylight", "icon": "󰖙"  },
+            { "value": 6500, "label": "sRGB",     "icon": "󰍹"  }
+          ],
+          "font-size": "9px",
+          "font-weight": 700,
+          "color": "rgba(255,255,255,0.50)",
+          "margin-top": 4
+        }
+      }
+    },
+  
+    "intensity-slider": {
+      "enabled": true,
+      "class": "nl-intensity-slider",
+      "show-when": "active",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "layout": "space-between",
+        "margin-bottom": 10,
+        "label": {
+          "icon": "󱈀",
+          "text": "Blue Light Filter",
+          "class": "nl-slider-label",
+          "font-size": "11px",
+          "font-weight": 700,
+          "color": "var(--cc-text-muted)",
+          "letter-spacing": "0.04em",
+          "text-transform": "uppercase"
+        },
+        "value-display": {
+          "class": "nl-intensity-value",
+          "format": "{value}%",
+          "font-size": "13px",
+          "font-weight": 900,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "#ffb347"
+        }
+      },
+  
+      "slider": {
+        "class": "slider slider--intensity",
+        "aria-label": "Blue light filter intensity",
+        "range": { "min": 0, "max": 100, "step": 5, "default": 40 },
+        "command": "~/.config/swaync/scripts/night-light-intensity.sh {value}",
+  
+        "track": {
+          "height": 8,
+          "border-radius": 100,
+          "background": "var(--cc-progress-track)"
+        },
+  
+        "fill": {
+          "border-radius": 100,
+          "gradient": {
+            "type": "linear",
+            "direction": "90deg",
+            "stops": [
+              { "at":   "0%", "color": "rgba(255,179,71,0.30)" },
+              { "at":  "50%", "color": "rgba(255,140,66,0.70)" },
+              { "at": "100%", "color": "rgba(255,69,0,0.95)"   }
+            ]
+          },
+          "glow": {
+            "enabled": true,
+            "color": "rgba(255,140,66,0.35)",
+            "blur": "8px"
+          }
+        },
+  
+        "thumb": {
+          "size": 18,
+          "border-radius": "50%",
+          "background": "#ff8c42",
+          "border": "2.5px solid var(--cc-panel-bg)",
+          "box-shadow": [
+            "0 2px 8px rgba(0,0,0,0.35)",
+            "0 0 10px rgba(255,140,66,0.45)"
+          ],
+          "hover": { "scale": 1.20 },
+          "active": { "scale": 0.92 }
+        }
+      },
+  
+      "rgb-reduction": {
+        "enabled": true,
+        "class": "nl-rgb-bars",
+        "layout": "row",
+        "gap": 8,
+        "margin-top": 8,
+        "items": [
+          {
+            "channel": "R",
+            "color": "var(--cc-red)",
+            "reduction-formula": "0",
+            "class": "rgb-bar rgb-bar--red"
+          },
+          {
+            "channel": "G",
+            "color": "var(--cc-green)",
+            "reduction-formula": "intensity * 0.004",
+            "class": "rgb-bar rgb-bar--green"
+          },
+          {
+            "channel": "B",
+            "color": "var(--cc-blue)",
+            "reduction-formula": "intensity * 0.009",
+            "class": "rgb-bar rgb-bar--blue"
+          }
+        ],
+        "bar-style": {
+          "height": 4,
+          "border-radius": 100,
+          "background": "var(--cc-progress-track)",
+          "label": {
+            "font-size": "9px",
+            "font-weight": 800,
+            "min-width": "12px"
+          }
+        }
+      }
+    },
+  
+    "quick-presets": {
+      "enabled": true,
+      "class": "nl-quick-presets",
+      "layout": "row",
+      "gap": 6,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+      "scroll-horizontal": true,
+  
+      "presets": [
+        {
+          "id": "candle",
+          "label": "Candle",
+          "icon": "󰈈",
+          "colortemp": 1900,
+          "intensity": 90,
+          "color": "#ff4500",
+          "glow": "rgba(255,69,0,0.45)",
+          "class": "nl-preset-chip",
+          "tooltip": "1900K — Maximum warmth",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh candle"
+        },
+        {
+          "id": "fire",
+          "label": "Fire",
+          "icon": "󱁉",
+          "colortemp": 2200,
+          "intensity": 75,
+          "color": "#ff6200",
+          "glow": "rgba(255,98,0,0.40)",
+          "class": "nl-preset-chip",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh fire"
+        },
+        {
+          "id": "warm",
+          "label": "Warm",
+          "icon": "󰌵",
+          "colortemp": 2700,
+          "intensity": 60,
+          "color": "#ffaa6e",
+          "glow": "rgba(255,170,110,0.35)",
+          "class": "nl-preset-chip",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh warm"
+        },
+        {
+          "id": "evening",
+          "label": "Evening",
+          "icon": "󰖔",
+          "colortemp": 3500,
+          "intensity": 45,
+          "color": "#ffcc6e",
+          "glow": "rgba(255,204,110,0.30)",
+          "class": "nl-preset-chip nl-preset-chip--default",
+          "badge": "REC",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh evening"
+        },
+        {
+          "id": "reading",
+          "label": "Reading",
+          "icon": "󰂿",
+          "colortemp": 4200,
+          "intensity": 30,
+          "color": "#ffd580",
+          "glow": "rgba(255,213,128,0.25)",
+          "class": "nl-preset-chip",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh reading"
+        },
+        {
+          "id": "sleep",
+          "label": "Sleep",
+          "icon": "󰒲",
+          "colortemp": 1900,
+          "intensity": 100,
+          "brightness": 15,
+          "color": "#8b0000",
+          "glow": "rgba(139,0,0,0.35)",
+          "class": "nl-preset-chip nl-preset-chip--sleep",
+          "tooltip": "Minimum blue light for sleep",
+          "command": "~/.config/swaync/scripts/night-light-preset.sh sleep"
+        },
+        {
+          "id": "off",
+          "label": "Off",
+          "icon": "󰖙",
+          "colortemp": 6500,
+          "intensity": 0,
+          "color": "var(--cc-text-muted)",
+          "glow": "none",
+          "class": "nl-preset-chip nl-preset-chip--off",
+          "command": "~/.config/swaync/scripts/night-light-off.sh"
+        }
+      ],
+  
+      "chip-style": {
+        "border-radius": "12px",
+        "padding": "8px 10px",
+        "min-width": 64,
+        "gap": 5,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "icon-size": "18px",
+        "label-size": "10px",
+        "label-weight": 700,
+  
+        "states": {
+          "default": {
+            "background": "var(--cc-toggle-off-bg)",
+            "color": "var(--cc-text-muted)"
+          },
+          "active": {
+            "background": "{preset-color-alpha}",
+            "border-color": "{preset-color}",
+            "color": "{preset-color}",
+            "box-shadow": [
+              "0 0 0 1px {preset-color}",
+              "0 4px 16px {preset-glow}"
+            ]
+          }
+        },
+  
+        "hover": {
+          "transform": "translateY(-2px) scale(1.04)",
+          "box-shadow": "0 6px 18px var(--cc-shadow)"
+        },
+  
+        "active": { "transform": "scale(0.94)" },
+  
+        "badge-style": {
+          "background": "#ff8c42",
+          "color": "#1a0a00",
+          "font-size": "8px",
+          "font-weight": 900,
+          "border-radius": "100px",
+          "padding": "1px 5px",
+          "letter-spacing": "0.06em"
+        }
+      }
+    },
+  
+    "circadian-section": {
+      "enabled": true,
+      "class": "nl-circadian",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󱑃",
+        "label": "Circadian Rhythm",
+        "class": "section-label",
+        "master-toggle": {
+          "class": "circadian-master-switch",
+          "icon-on":  "󱑃",
+          "icon-off": "󱑃",
+          "color-on":  "var(--cc-accent)",
+          "color-off": "var(--cc-text-muted)",
+          "command-on":  "~/.config/swaync/scripts/circadian-enable.sh",
+          "command-off": "~/.config/swaync/scripts/circadian-disable.sh",
+          "state-file":  "~/.cache/ash/circadian.state"
+        }
+      },
+  
+      "sun-arc": {
+        "enabled": true,
+        "class": "nl-sun-arc",
+        "width": "100%",
+        "height": 56,
+        "border-radius": 12,
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "padding": "8px 12px",
+        "margin-bottom": 10,
+  
+        "arc-track": {
+          "stroke-width": 3,
+          "color": "var(--cc-surface1)"
+        },
+  
+        "arc-fill": {
+          "stroke-width": 3,
+          "gradient": {
+            "stops": [
+              { "at":   "0%", "color": "#1a0a2e" },
+              { "at":  "20%", "color": "#ff6a00" },
+              { "at":  "40%", "color": "#ffb347" },
+              { "at":  "60%", "color": "#ffffff" },
+              { "at":  "80%", "color": "#ff8c42" },
+              { "at": "100%", "color": "#1a0a2e" }
+            ]
+          }
+        },
+  
+        "sun-indicator": {
+          "icon": "󰖙",
+          "size": "14px",
+          "color": "#ffcc6e",
+          "glow": "0 0 8px rgba(255,204,110,0.60)",
+          "animation": "sun-travel linear"
+        },
+  
+        "phase-markers": {
+          "enabled": true,
+          "items": [
+            { "time": "06:00", "icon": "󰖙", "label": "Sunrise", "color": "#ff8c42"  },
+            { "time": "12:00", "icon": "󰖙", "label": "Noon",    "color": "#ffffff"   },
+            { "time": "19:00", "icon": "󰖔", "label": "Sunset",  "color": "#ff6a00"  },
+            { "time": "00:00", "icon": "󰖔", "label": "Night",   "color": "#1a0a2e"  }
+          ],
+          "font-size": "9px",
+          "font-weight": 700
+        },
+  
+        "current-time-indicator": {
+          "enabled": true,
+          "color": "var(--cc-accent)",
+          "width": 2,
+          "glow": "0 0 6px var(--cc-accent-glow)"
+        }
+      },
+  
+      "schedule-timeline": {
+        "enabled": true,
+        "class": "nl-timeline",
+        "gap": 4,
+  
+        "transitions": [
+          {
+            "id": "midnight",
+            "time": "00:00",
+            "icon": "󰖔",
+            "label": "Deep Night",
+            "colortemp": 1900,
+            "intensity": 85,
+            "color": "#3d0000",
+            "class": "timeline-item"
+          },
+          {
+            "id": "pre-dawn",
+            "time": "05:30",
+            "icon": "󰱀",
+            "label": "Pre-dawn",
+            "colortemp": 2400,
+            "intensity": 60,
+            "color": "#8b2500",
+            "class": "timeline-item"
+          },
+          {
+            "id": "sunrise",
+            "time": "sunrise",
+            "icon": "󰖙",
+            "label": "Sunrise",
+            "colortemp": 3500,
+            "intensity": 30,
+            "color": "#ff8c42",
+            "class": "timeline-item"
+          },
+          {
+            "id": "morning",
+            "time": "08:00",
+            "icon": "󰖙",
+            "label": "Morning",
+            "colortemp": 5500,
+            "intensity": 0,
+            "color": "#ffd580",
+            "class": "timeline-item"
+          },
+          {
+            "id": "noon",
+            "time": "12:00",
+            "icon": "󰖙",
+            "label": "Noon",
+            "colortemp": 6500,
+            "intensity": 0,
+            "color": "#ffffff",
+            "class": "timeline-item"
+          },
+          {
+            "id": "golden-hour",
+            "time": "sunset-60",
+            "icon": "󰖔",
+            "label": "Golden Hour",
+            "colortemp": 4000,
+            "intensity": 25,
+            "color": "#ffaa6e",
+            "class": "timeline-item"
+          },
+          {
+            "id": "sunset",
+            "time": "sunset",
+            "icon": "󰖔",
+            "label": "Sunset",
+            "colortemp": 3000,
+            "intensity": 50,
+            "color": "#ff6a00",
+            "class": "timeline-item"
+          },
+          {
+            "id": "evening",
+            "time": "21:00",
+            "icon": "󰖔",
+            "label": "Evening",
+            "colortemp": 2700,
+            "intensity": 70,
+            "color": "#ff4500",
+            "class": "timeline-item"
+          }
+        ],
+  
+        "item-style": {
+          "border-radius": "10px",
+          "padding": "7px 10px",
+          "gap": 8,
+          "background": "var(--cc-widget-bg)",
+          "border": "1px solid var(--cc-border-subtle)",
+          "margin-bottom": 3,
+  
+          "current": {
+            "background": "rgba(255,140,66,0.12)",
+            "border-color": "#ff8c42",
+            "box-shadow": "0 0 0 1px #ff8c42, 0 4px 14px rgba(255,140,66,0.25)"
+          },
+  
+          "time": {
+            "font-size": "10px",
+            "font-weight": 700,
+            "font-family": "JetBrainsMono Nerd Font",
+            "color": "var(--cc-text-muted)",
+            "min-width": 38
+          },
+  
+          "label": {
+            "font-size": "12px",
+            "font-weight": 700,
+            "flex": 1
+          },
+  
+          "temp-badge": {
+            "font-size": "10px",
+            "font-weight": 700,
+            "font-family": "JetBrainsMono Nerd Font",
+            "color": "dynamic",
+            "color-formula": "blackbody-text({colortemp})"
+          },
+  
+          "hover": {
+            "background": "var(--cc-hover)",
+            "transform": "translateX(2px)"
+          }
+        }
+      },
+  
+      "geolocation": {
+        "enabled": true,
+        "class": "nl-geolocation",
+        "layout": "space-between",
+        "margin-top": 8,
+  
+        "status": {
+          "icon": "󱋿",
+          "format": "{city}, {country}  •  Sunrise {sunrise}  •  Sunset {sunset}",
+          "font-size": "10px",
+          "font-weight": 600,
+          "color": "var(--cc-text-muted)"
+        },
+  
+        "refresh-btn": {
+          "icon": "󰑓",
+          "class": "btn-geo-refresh btn-icon",
+          "command": "~/.config/swaync/scripts/geo-refresh.sh",
+          "tooltip": "Refresh location"
+        }
+      }
+    },
+  
+    "eye-care": {
+      "enabled": true,
+      "class": "nl-eye-care",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󰛓",
+        "label": "Eye Care",
+        "class": "section-label"
+      },
+  
+      "twenty-rule": {
+        "enabled": true,
+        "class": "rule-20-20-20",
+        "icon": "󰛓",
+        "title": "20-20-20 Rule",
+        "description": "Every 20 min — look 20 ft away for 20 sec",
+        "font-size": "11px",
+        "color": "var(--cc-text-secondary)",
+        "timer": {
+          "enabled": true,
+          "class": "eye-care-timer",
+          "interval": 1200,
+          "reminder-command": "notify-send -u normal '󰛓 Eye Break' 'Look 20 feet away for 20 seconds' -t 20000",
+          "countdown-display": {
+            "format": "Next break in {mm}:{ss}",
+            "font-size": "10px",
+            "font-family": "JetBrainsMono Nerd Font",
+            "color": "var(--cc-text-muted)"
+          }
+        },
+        "toggle": {
+          "class": "eye-care-toggle",
+          "command-on":  "~/.config/swaync/scripts/eye-care-start.sh",
+          "command-off": "~/.config/swaync/scripts/eye-care-stop.sh"
+        }
+      },
+  
+      "melatonin-meter": {
+        "enabled": true,
+        "class": "nl-melatonin-meter",
+        "label": "Melatonin Impact",
+        "icon": "󰒲",
+        "description": "Lower blue light = better sleep",
+        "margin-top": 10,
+        "bar": {
+          "class": "melatonin-bar",
+          "height": 8,
+          "border-radius": 100,
+          "background": "var(--cc-progress-track)",
+          "fill-gradient": {
+            "type": "linear",
+            "direction": "90deg",
+            "stops": [
+              { "at":   "0%", "color": "var(--cc-red)"   },
+              { "at":  "50%", "color": "var(--cc-yellow)" },
+              { "at": "100%", "color": "var(--cc-green)"  }
+            ]
+          },
+          "fill-formula": "100 - (colortemp / 65)"
+        },
+        "labels": {
+          "left":  { "text": "Low",  "color": "var(--cc-red)"   },
+          "right": { "text": "High", "color": "var(--cc-green)" },
+          "font-size": "9px",
+          "font-weight": 700
+        }
+      },
+  
+      "screen-time": {
+        "enabled": true,
+        "class": "nl-screen-time",
+        "margin-top": 10,
+        "label": "Screen Time Today",
+        "icon": "󰍹",
+        "format": "{hours}h {minutes}m",
+        "command": "~/.config/swaync/scripts/screen-time.sh",
+        "poll-interval": 60000,
+        "font-size": "11px",
+        "font-weight": 700,
+        "color-thresholds": {
+          "0":   "var(--cc-green)",
+          "360": "var(--cc-yellow)",
+          "480": "var(--cc-red)"
+        }
+      }
+    },
+  
+    "backend": {
+      "primary": "gammastep",
+      "fallbacks": ["wlsunset", "redshift", "xrandr"],
+      "auto-detect": true,
+      "config": {
+        "gammastep": {
+          "command-apply":     "pkill gammastep; gammastep -O {colortemp} &",
+          "command-reset":     "gammastep -x",
+          "command-daemon":    "gammastep -l {lat}:{lon} -t {day}:{night}",
+          "config-file":       "~/.config/gammastep/config.ini"
+        },
+        "wlsunset": {
+          "command-apply":     "pkill wlsunset; wlsunset -T {colortemp} -t {colortemp} &",
+          "command-reset":     "pkill wlsunset",
+          "command-daemon":    "wlsunset -l {lat} -L {lon} -T {day-temp} -t {night-temp}"
+        },
+        "redshift": {
+          "command-apply":     "redshift -O {colortemp} -P",
+          "command-reset":     "redshift -x",
+          "config-file":       "~/.config/redshift.conf"
+        },
+        "xrandr": {
+          "command-apply":     "xrandr --output {output} --gamma {r}:{g}:{b}",
+          "command-reset":     "xrandr --output {output} --gamma 1:1:1"
+        }
+      },
+      "transition": {
+        "duration": 1200,
+        "steps": 40,
+        "easing": "cubic-bezier(0.4,0,0.2,1)",
+        "smooth": true
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle":           "n",
+        "warmer":           "shift+w",
+        "cooler":           "shift+c",
+        "preset-candle":    "1",
+        "preset-warm":      "2",
+        "preset-evening":   "3",
+        "preset-off":       "0",
+        "circadian-toggle": "shift+a"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "active-glow": {
+        "enabled": true,
+        "color": "rgba(255,140,66,0.15)",
+        "blur": "20px",
+        "spread": "-4px",
+        "show-when": "active"
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "160ms",
+        "easing":   "cubic-bezier(0.19,1,0.22,1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-on":  "Night light enabled — {colortemp}K",
+      "announce-off": "Night light disabled",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid #ff8c42",
+        "outline-offset": "2px"
+      }
+    }
+  }

@@ -1,0 +1,828 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Color Temperature Slider",
+      "version": "5.0.0",
+      "description": "Premium color temperature control with circadian rhythm scheduling, presets, gamma, and blue light filtering",
+      "author": "ash-dotfiles",
+      "icon": "󱩎",
+      "category": "display",
+      "tags": [
+        "colortemp", "nightlight", "blue-light", "circadian",
+        "gammastep", "redshift", "wlsunset", "eye-care"
+      ]
+    },
+  
+    "widget": {
+      "type": "colortemp-slider",
+      "id": "ash-colortemp-widget",
+      "class": "ash-widget ash-widget--colortemp ash-widget--glass",
+      "aria-label": "Color Temperature Control Panel",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      }
+    },
+  
+    "header": {
+      "enabled": true,
+      "layout": "space-between",
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "candle":      { "icon": "󰈈", "color": "#ff6a00", "tooltip": "Candlelight (1900K)"  },
+            "warm-plus":   { "icon": "󱩎", "color": "#ff8c42", "tooltip": "Warm+ (2400K)"        },
+            "warm":        { "icon": "󰖔",  "color": "#ffb347", "tooltip": "Warm (3000K)"         },
+            "neutral":     { "icon": "󰌶",  "color": "#ffd580", "tooltip": "Neutral (4000K)"      },
+            "daylight":    { "icon": "󰖙",  "color": "#fff4e0", "tooltip": "Daylight (5500K)"     },
+            "cool":        { "icon": "󰖙",  "color": "#e8f4ff", "tooltip": "Cool (6500K)"         },
+            "cool-plus":   { "icon": "󰖚",  "color": "#cce4ff", "tooltip": "Cool+ (7500K)"        },
+            "sky-blue":    { "icon": "󰖚",  "color": "#a8d4ff", "tooltip": "Sky Blue (9000K)"     },
+            "off":         { "icon": "󰌶",  "color": "var(--cc-text-muted)", "tooltip": "Disabled" }
+          },
+          "thresholds": {
+            "candle":    1900,
+            "warm-plus": 2400,
+            "warm":      3000,
+            "neutral":   4000,
+            "daylight":  5500,
+            "cool":      6500,
+            "cool-plus": 7500,
+            "sky-blue":  9000
+          },
+          "font-size": "20px",
+          "animation": "icon-bounce",
+          "animation-on": "state-change"
+        },
+        "label": {
+          "text": "Color Temp",
+          "class": "widget-section-label",
+          "font-weight": 700,
+          "font-size": "13px"
+        }
+      },
+      "right": {
+        "kelvin-label": {
+          "enabled": true,
+          "class": "colortemp-kelvin",
+          "format": "{value}K",
+          "font-size": "13px",
+          "font-weight": 700,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "dynamic",
+          "color-map": {
+            "1900":  "#ff6a00",
+            "3000":  "#ffb347",
+            "4500":  "#ffd580",
+            "6500":  "#e8f4ff",
+            "10000": "#a8d4ff"
+          },
+          "animation": "number-roll",
+          "animation-duration": "150ms"
+        },
+        "toggle-button": {
+          "enabled": true,
+          "class": "btn-toggle btn-icon",
+          "icon-on":  "󰌶",
+          "icon-off": "󰌵",
+          "tooltip-on":  "Disable night light",
+          "tooltip-off": "Enable night light",
+          "command-on":  "~/.config/swaync/scripts/night-light-off.sh",
+          "command-off": "~/.config/swaync/scripts/night-light-on.sh",
+          "state-file":  "~/.cache/ash/night-light.state",
+          "animation":   "icon-bounce"
+        }
+      }
+    },
+  
+    "master-slider": {
+      "enabled": true,
+      "class": "slider slider--master slider--colortemp",
+      "aria-label": "Color Temperature",
+  
+      "range": {
+        "min":         1000,
+        "max":        10000,
+        "step":         100,
+        "scroll-step":  100,
+        "fine-step":     50,
+        "default":      6500,
+        "recommended": {
+          "day":   { "min": 5500, "max": 6500 },
+          "night": { "min": 2700, "max": 4000 }
+        }
+      },
+  
+      "backend": {
+        "primary": "gammastep",
+        "fallbacks": ["wlsunset", "redshift", "xrandr-gamma"],
+        "commands": {
+          "gammastep": {
+            "apply":  "gammastep -O {value} &",
+            "reset":  "gammastep -x",
+            "daemon": "gammastep -l manual:0:0 -t {day}:{night}"
+          },
+          "wlsunset": {
+            "apply":  "pkill wlsunset; wlsunset -T {value} -t {value} &",
+            "reset":  "pkill wlsunset"
+          },
+          "redshift": {
+            "apply":  "redshift -O {value} -P",
+            "reset":  "redshift -x"
+          },
+          "xrandr-gamma": {
+            "apply":  "xrandr --output {output} --gamma {r}:{g}:{b}",
+            "reset":  "xrandr --output {output} --gamma 1:1:1"
+          }
+        }
+      },
+  
+      "track": {
+        "class": "slider__track slider__track--colortemp",
+        "height": 12,
+        "border-radius": 100,
+        "gradient": {
+          "type": "linear",
+          "direction": "90deg",
+          "stops": [
+            { "at":   "0%",  "color": "#ff3800" },
+            { "at":  "10%",  "color": "#ff5900" },
+            { "at":  "18%",  "color": "#ff7e00" },
+            { "at":  "25%",  "color": "#ffa04b" },
+            { "at":  "32%",  "color": "#ffbf68" },
+            { "at":  "42%",  "color": "#ffd68f" },
+            { "at":  "52%",  "color": "#fff1d0" },
+            { "at":  "62%",  "color": "#ffffff" },
+            { "at":  "73%",  "color": "#e6efff" },
+            { "at":  "83%",  "color": "#c9dfff" },
+            { "at":  "92%",  "color": "#aad0ff" },
+            { "at": "100%",  "color": "#8fc1ff" }
+          ]
+        },
+        "border": "1px solid rgba(255,255,255,0.10)",
+        "box-shadow": "inset 0 1px 3px rgba(0,0,0,0.30)"
+      },
+  
+      "fill": {
+        "enabled": false,
+        "note": "Fill hidden — track gradient shows full spectrum"
+      },
+  
+      "position-indicator": {
+        "enabled": true,
+        "class": "colortemp-position-indicator",
+        "style": "glow-line",
+        "width": 2,
+        "color": "rgba(255,255,255,0.70)",
+        "glow": "0 0 8px rgba(255,255,255,0.90)"
+      },
+  
+      "thumb": {
+        "class": "slider__thumb slider__thumb--colortemp",
+        "size": 22,
+        "border-radius": "50%",
+        "background": "dynamic",
+        "background-formula": "blackbody({value}K)",
+        "border": "3px solid rgba(255,255,255,0.70)",
+        "box-shadow": [
+          "0 3px 10px rgba(0,0,0,0.40)",
+          "0 0 12px {current-color-glow}"
+        ],
+        "hover": {
+          "scale": 1.18,
+          "border-color": "#ffffff",
+          "box-shadow": [
+            "0 4px 20px rgba(0,0,0,0.50)",
+            "0 0 20px {current-color-glow}"
+          ]
+        },
+        "active": {
+          "scale": 0.92
+        },
+        "inner-circle": {
+          "enabled": true,
+          "size": 8,
+          "background": "rgba(255,255,255,0.80)",
+          "border-radius": "50%"
+        }
+      },
+  
+      "zone-markers": {
+        "enabled": true,
+        "class": "zone-markers",
+        "markers": [
+          {
+            "value": 1900,
+            "label": "󰈈",
+            "tooltip": "Candlelight",
+            "class": "zone-marker zone-marker--candle"
+          },
+          {
+            "value": 2700,
+            "label": "󰖔",
+            "tooltip": "Incandescent",
+            "class": "zone-marker zone-marker--incandescent"
+          },
+          {
+            "value": 4000,
+            "label": "󰌶",
+            "tooltip": "Neutral White",
+            "class": "zone-marker zone-marker--neutral"
+          },
+          {
+            "value": 5500,
+            "label": "󰖙",
+            "tooltip": "Daylight",
+            "class": "zone-marker zone-marker--daylight"
+          },
+          {
+            "value": 6500,
+            "label": "󰖙",
+            "tooltip": "Cool White",
+            "class": "zone-marker zone-marker--cool",
+            "highlight": true,
+            "label-text": "sRGB"
+          },
+          {
+            "value": 9300,
+            "label": "󰖚",
+            "tooltip": "Deep Blue Sky",
+            "class": "zone-marker zone-marker--sky"
+          }
+        ]
+      },
+  
+      "feedback": {
+        "osd": {
+          "enabled": true,
+          "position": "bottom-center",
+          "duration": 1200,
+          "class": "colortemp-osd",
+          "format": "{icon}  {value}K",
+          "color-preview": true
+        },
+        "transition": {
+          "duration": 800,
+          "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+          "smooth": true,
+          "steps": 30
+        }
+      }
+    },
+  
+    "presets-section": {
+      "enabled": true,
+      "class": "colortemp-presets",
+      "label": "Presets",
+      "layout": "grid",
+      "columns": 4,
+      "gap": 6,
+      "show-kelvin": true,
+  
+      "presets": [
+        {
+          "id": "candle",
+          "label": "Candle",
+          "icon": "󰈈",
+          "kelvin": 1900,
+          "color": "#ff6a00",
+          "glow": "rgba(255,106,0,0.40)",
+          "description": "Very warm, like candlelight",
+          "class": "preset-chip preset-chip--candle"
+        },
+        {
+          "id": "fire",
+          "label": "Fire",
+          "icon": "󱁉",
+          "kelvin": 2200,
+          "color": "#ff8c00",
+          "glow": "rgba(255,140,0,0.40)",
+          "description": "Warm fireplace ambiance",
+          "class": "preset-chip preset-chip--fire"
+        },
+        {
+          "id": "incandescent",
+          "label": "Bulb",
+          "icon": "󰌵",
+          "kelvin": 2700,
+          "color": "#ffb347",
+          "glow": "rgba(255,179,71,0.35)",
+          "description": "Classic incandescent bulb",
+          "class": "preset-chip preset-chip--incandescent"
+        },
+        {
+          "id": "warm-white",
+          "label": "Warm",
+          "icon": "󰖔",
+          "kelvin": 3000,
+          "color": "#ffcc6e",
+          "glow": "rgba(255,204,110,0.30)",
+          "description": "Warm white LED",
+          "class": "preset-chip preset-chip--warm"
+        },
+        {
+          "id": "neutral",
+          "label": "Neutral",
+          "icon": "󰌶",
+          "kelvin": 4000,
+          "color": "#ffd580",
+          "glow": "rgba(255,213,128,0.25)",
+          "description": "Neutral white — balanced",
+          "class": "preset-chip preset-chip--neutral"
+        },
+        {
+          "id": "cool-white",
+          "label": "Cool",
+          "icon": "󱩎",
+          "kelvin": 5000,
+          "color": "#ffe8b5",
+          "glow": "rgba(255,232,181,0.25)",
+          "description": "Cool white for focus",
+          "class": "preset-chip preset-chip--cool-white"
+        },
+        {
+          "id": "daylight",
+          "label": "Daylight",
+          "icon": "󰖙",
+          "kelvin": 5500,
+          "color": "#fff4e0",
+          "glow": "rgba(255,244,224,0.20)",
+          "description": "Natural daylight",
+          "class": "preset-chip preset-chip--daylight"
+        },
+        {
+          "id": "srgb",
+          "label": "sRGB",
+          "icon": "󰍹",
+          "kelvin": 6500,
+          "color": "#ffffff",
+          "glow": "rgba(255,255,255,0.15)",
+          "description": "Standard sRGB white point",
+          "class": "preset-chip preset-chip--srgb",
+          "highlight": true,
+          "badge": "STD"
+        },
+        {
+          "id": "overcast",
+          "label": "Overcast",
+          "icon": "󰖐",
+          "kelvin": 7500,
+          "color": "#e8f4ff",
+          "glow": "rgba(232,244,255,0.15)",
+          "description": "Overcast sky light",
+          "class": "preset-chip preset-chip--overcast"
+        },
+        {
+          "id": "sky-blue",
+          "label": "Sky",
+          "icon": "󰖚",
+          "kelvin": 9300,
+          "color": "#c9dfff",
+          "glow": "rgba(201,223,255,0.20)",
+          "description": "Clear blue sky",
+          "class": "preset-chip preset-chip--sky"
+        },
+        {
+          "id": "ice",
+          "label": "Ice",
+          "icon": "󰸁",
+          "kelvin": 10000,
+          "color": "#a8d4ff",
+          "glow": "rgba(168,212,255,0.20)",
+          "description": "Ultra cool blue",
+          "class": "preset-chip preset-chip--ice"
+        },
+        {
+          "id": "custom",
+          "label": "Custom",
+          "icon": "󱥸",
+          "kelvin": -1,
+          "color": "var(--cc-accent)",
+          "glow": "var(--cc-accent-glow)",
+          "description": "Your custom temperature",
+          "class": "preset-chip preset-chip--custom",
+          "command": "~/.config/swaync/scripts/colortemp-input.sh"
+        }
+      ],
+  
+      "animation": {
+        "enter": "widget-enter",
+        "item-enter": "notif-fade-in",
+        "stagger": 30
+      }
+    },
+  
+    "blue-light-filter": {
+      "enabled": true,
+      "class": "blue-light-section",
+      "label": "Blue Light Filter",
+      "label-icon": "󱈀",
+      "collapsible": true,
+      "collapsed-by-default": false,
+  
+      "header": {
+        "toggle": {
+          "enabled": true,
+          "class": "blf-toggle",
+          "icon-on":   "󱈀",
+          "icon-off":  "󱈁",
+          "command-on":  "~/.config/swaync/scripts/blue-light-on.sh",
+          "command-off": "~/.config/swaync/scripts/blue-light-off.sh"
+        },
+        "intensity-label": {
+          "enabled": true,
+          "format": "{intensity}%",
+          "class": "blf-intensity-label"
+        }
+      },
+  
+      "intensity-slider": {
+        "enabled": true,
+        "label": "Intensity",
+        "range": { "min": 0, "max": 100, "step": 5, "default": 40 },
+        "class": "slider--blf-intensity",
+        "color": "var(--cc-yellow)",
+        "gradient": {
+          "type": "linear",
+          "direction": "90deg",
+          "stops": [
+            { "at":   "0%", "color": "rgba(255,180,50,0.20)"  },
+            { "at": "100%", "color": "rgba(255,100,0,0.90)"   }
+          ]
+        },
+        "command": "~/.config/swaync/scripts/blue-light-intensity.sh {value}"
+      },
+  
+      "reduction-display": {
+        "enabled": true,
+        "class": "blf-reduction-bars",
+        "bars": [
+          {
+            "channel": "red",
+            "label": "R",
+            "color": "var(--cc-red)",
+            "formula": "1.0 - ({intensity} * 0.0)"
+          },
+          {
+            "channel": "green",
+            "label": "G",
+            "color": "var(--cc-green)",
+            "formula": "1.0 - ({intensity} * 0.004)"
+          },
+          {
+            "channel": "blue",
+            "label": "B",
+            "color": "var(--cc-blue)",
+            "formula": "1.0 - ({intensity} * 0.008)"
+          }
+        ]
+      },
+  
+      "quick-presets": [
+        { "label": "Off",    "intensity": 0,   "class": "blf-preset" },
+        { "label": "Light",  "intensity": 20,  "class": "blf-preset" },
+        { "label": "Medium", "intensity": 40,  "class": "blf-preset" },
+        { "label": "Strong", "intensity": 65,  "class": "blf-preset" },
+        { "label": "Night",  "intensity": 85,  "class": "blf-preset" }
+      ],
+  
+      "eye-care-tip": {
+        "enabled": true,
+        "class": "eye-care-tip",
+        "icon": "󰛓",
+        "text": "20-20-20 rule: every 20 min, look 20 ft away for 20 sec",
+        "show-after": 7200
+      }
+    },
+  
+    "circadian-section": {
+      "enabled": true,
+      "class": "circadian-section",
+      "label": "Circadian Rhythm",
+      "label-icon": "󱑃",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "toggle": {
+        "enabled": true,
+        "class": "circadian-toggle",
+        "icon-on":  "󱑃",
+        "icon-off": "󱑃",
+        "command-on":  "~/.config/swaync/scripts/circadian-enable.sh",
+        "command-off": "~/.config/swaync/scripts/circadian-disable.sh",
+        "state-file":  "~/.cache/ash/circadian.state"
+      },
+  
+      "sun-timeline": {
+        "enabled": true,
+        "class": "sun-timeline",
+        "style": "arc",
+        "show-current-time": true,
+        "show-sunrise-sunset": true,
+        "sunrise-icon": "󰖙",
+        "sunset-icon":  "󰖔",
+        "current-icon": "󰖙",
+        "gradient": {
+          "night":   "#1a0a2e",
+          "dawn":    "#ff6a00",
+          "morning": "#ffb347",
+          "noon":    "#ffffff",
+          "evening": "#ff8c42",
+          "dusk":    "#ff4800",
+          "night2":  "#1a0a2e"
+        }
+      },
+  
+      "schedule": {
+        "mode": "geolocation",
+        "modes": ["geolocation", "manual", "fixed"],
+        "geolocation": {
+          "provider": "ip-api",
+          "endpoint": "http://ip-api.com/json",
+          "cache-duration": 86400,
+          "fallback-lat": 40.7128,
+          "fallback-lon": -74.0060
+        },
+        "manual": {
+          "sunrise": "06:30",
+          "sunset":  "19:30",
+          "timezone": "local"
+        },
+        "transitions": [
+          {
+            "id": "midnight",
+            "time": "00:00",
+            "color-temp": 1900,
+            "brightness": 10,
+            "duration": 1800
+          },
+          {
+            "id": "pre-dawn",
+            "time": "05:00",
+            "color-temp": 2700,
+            "brightness": 20,
+            "duration": 1800
+          },
+          {
+            "id": "sunrise",
+            "time": "sunrise",
+            "color-temp": 3500,
+            "brightness": 50,
+            "duration": 2400
+          },
+          {
+            "id": "morning",
+            "time": "08:00",
+            "color-temp": 5500,
+            "brightness": 80,
+            "duration": 1200
+          },
+          {
+            "id": "noon",
+            "time": "12:00",
+            "color-temp": 6500,
+            "brightness": 100,
+            "duration": 600
+          },
+          {
+            "id": "afternoon",
+            "time": "15:00",
+            "color-temp": 6000,
+            "brightness": 90,
+            "duration": 900
+          },
+          {
+            "id": "golden-hour",
+            "time": "sunset-60",
+            "color-temp": 4500,
+            "brightness": 70,
+            "duration": 1800
+          },
+          {
+            "id": "sunset",
+            "time": "sunset",
+            "color-temp": 3000,
+            "brightness": 50,
+            "duration": 2400
+          },
+          {
+            "id": "evening",
+            "time": "21:00",
+            "color-temp": 2400,
+            "brightness": 25,
+            "duration": 1800
+          }
+        ]
+      },
+  
+      "status-display": {
+        "enabled": true,
+        "class": "circadian-status",
+        "show-current-phase": true,
+        "show-next-transition": true,
+        "format-phase": "{icon}  {phase}",
+        "format-next":  "Next: {transition} in {time}",
+        "phase-icons": {
+          "midnight":    "󱑑",
+          "pre-dawn":    "󱐿",
+          "sunrise":     "󰖙",
+          "morning":     "󰖙",
+          "noon":        "󰖙",
+          "afternoon":   "󰖙",
+          "golden-hour": "󰖙",
+          "sunset":      "󰖔",
+          "evening":     "󰖔",
+          "night":       "󰖔"
+        }
+      }
+    },
+  
+    "multi-monitor": {
+      "enabled": true,
+      "class": "multi-monitor-colortemp",
+      "label": "Per Monitor",
+      "label-icon": "󰹑",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "sync-mode": {
+        "enabled": true,
+        "default": true,
+        "icon-synced":   "󰌾",
+        "icon-unsynced": "󱥸",
+        "label-synced":   "Synced",
+        "label-unsynced": "Independent"
+      },
+      "monitors": "auto-detect",
+      "command-per-monitor": "gammastep -O {value} -d {display}",
+      "slider": {
+        "range": { "min": 1000, "max": 10000, "step": 100 },
+        "height": 8,
+        "class": "slider--monitor-colortemp"
+      }
+    },
+  
+    "history": {
+      "enabled": true,
+      "max-entries": 10,
+      "storage": "~/.cache/ash/colortemp-history.json",
+      "class": "colortemp-history",
+      "label": "Recent",
+      "label-icon": "󰋚",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "show-timestamps": true,
+      "format": "{value}K  •  {time}",
+      "click-to-apply": true
+    },
+  
+    "color-preview": {
+      "enabled": true,
+      "class": "color-preview",
+      "position": "below-slider",
+      "size": { "width": "100%", "height": 24 },
+      "border-radius": 8,
+      "show-label": true,
+      "label-format": "{name} ({value}K)",
+      "blackbody-gradient": true,
+      "current-indicator": {
+        "enabled": true,
+        "style": "arrow-above",
+        "size": 8,
+        "color": "#ffffff",
+        "animation": "smooth"
+      }
+    },
+  
+    "information-panel": {
+      "enabled": true,
+      "class": "colortemp-info",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "label": "What is Color Temperature?",
+      "label-icon": "󰋼",
+      "entries": [
+        {
+          "range": "1000K - 2000K",
+          "name":  "Candlelight / Fire",
+          "icon":  "󰈈",
+          "description": "Ultra warm, amber-red tones. Ideal for relaxation.",
+          "melatonin-impact": "very-high",
+          "color": "#ff6a00"
+        },
+        {
+          "range": "2700K - 3000K",
+          "name":  "Incandescent / Warm LED",
+          "icon":  "󰌵",
+          "description": "Warm white light. Great for evenings and winding down.",
+          "melatonin-impact": "high",
+          "color": "#ffb347"
+        },
+        {
+          "range": "4000K - 4500K",
+          "name":  "Neutral / Cool White",
+          "icon":  "󰌶",
+          "description": "Balanced white light for offices and work.",
+          "melatonin-impact": "medium",
+          "color": "#ffd580"
+        },
+        {
+          "range": "5500K - 6500K",
+          "name":  "Daylight / sRGB",
+          "icon":  "󰖙",
+          "description": "Natural daylight. Standard for monitors (sRGB = 6500K).",
+          "melatonin-impact": "low",
+          "color": "#ffffff"
+        },
+        {
+          "range": "7500K - 10000K",
+          "name":  "Cool / Sky Blue",
+          "icon":  "󰖚",
+          "description": "Cool blue-tinted light. Stimulating but may disrupt sleep.",
+          "melatonin-impact": "very-low",
+          "color": "#a8d4ff"
+        }
+      ],
+      "melatonin-legend": {
+        "enabled": true,
+        "label": "Melatonin Impact",
+        "levels": [
+          { "label": "Very High", "color": "#ff6a00", "icon": "●●●●●" },
+          { "label": "High",      "color": "#ffb347", "icon": "●●●●○" },
+          { "label": "Medium",    "color": "#ffd580", "icon": "●●●○○" },
+          { "label": "Low",       "color": "#e8f4ff", "icon": "●●○○○" },
+          { "label": "Very Low",  "color": "#a8d4ff", "icon": "●○○○○" }
+        ]
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "temp-warmer":      "super+shift+w",
+        "temp-cooler":      "super+shift+c",
+        "night-on":         "super+shift+n",
+        "night-off":        "super+shift+m",
+        "preset-cycle":     "super+ctrl+n",
+        "circadian-toggle": "super+ctrl+c"
+      }
+    },
+  
+    "scroll-behavior": {
+      "enabled": true,
+      "direction": "vertical",
+      "step": 100,
+      "smooth": true,
+      "invert": false,
+      "command-up":   "~/.config/swaync/scripts/colortemp-up.sh 100",
+      "command-down": "~/.config/swaync/scripts/colortemp-down.sh 100"
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "accent-color": "dynamic",
+      "accent-formula": "blackbody({current-kelvin}K)",
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "0 0 0 1px {current-temp-glow}",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "200ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-format": "Color temperature {value} Kelvin, {name}",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "deuteranopia-safe": true,
+      "protanopia-safe": true,
+      "focus-visible": {
+        "outline": "2px solid {current-accent-color}",
+        "outline-offset": "2px"
+      }
+    }
+  }

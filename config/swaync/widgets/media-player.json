@@ -1,0 +1,860 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Media Player Widget",
+      "version": "5.0.0",
+      "description": "Premium MPRIS2 media player with album art, waveform visualizer, queue management, lyrics, and multi-player support",
+      "author": "ash-dotfiles",
+      "icon": "󰝚",
+      "category": "media",
+      "tags": [
+        "mpris", "media", "music", "spotify", "mpd",
+        "playerctl", "lyrics", "visualizer", "queue"
+      ]
+    },
+  
+    "widget": {
+      "type": "media-player",
+      "id": "ash-media-widget",
+      "class": "ash-widget ash-widget--media ash-widget--glass",
+      "aria-label": "Media Player",
+      "aria-role": "region"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+      "overflow": "hidden"
+    },
+  
+    "sources": {
+      "backend": "mpris",
+      "priority": [
+        "spotify",
+        "firefox",
+        "chromium",
+        "mpd",
+        "rhythmbox",
+        "vlc",
+        "mpv",
+        "cmus",
+        "ncmpcpp"
+      ],
+      "poll-interval": 0,
+      "subscribe": "playerctl --follow metadata",
+      "command-base": "playerctl",
+      "multi-player": {
+        "enabled": true,
+        "max-players": 4,
+        "show-switcher": true,
+        "switcher-position": "top-right"
+      },
+      "empty-state": {
+        "enabled": true,
+        "icon": "󰝚",
+        "title": "No Media Playing",
+        "subtitle": "Play something to see controls",
+        "class": "media-empty-state",
+        "animation": "empty-float"
+      }
+    },
+  
+    "album-art": {
+      "enabled": true,
+      "class": "media-album-art",
+      "size": 72,
+      "border-radius": 14,
+      "position": "left",
+  
+      "image": {
+        "object-fit": "cover",
+        "border": "1px solid rgba(255,255,255,0.10)",
+        "box-shadow": [
+          "0 8px 28px rgba(0,0,0,0.50)",
+          "0 2px 8px rgba(0,0,0,0.30)",
+          "0 0 0 1px rgba(255,255,255,0.06)"
+        ],
+        "transition": "all 400ms cubic-bezier(0.4,0,0.2,1)",
+        "fallback-icon": "󰝚",
+        "fallback-size": "32px",
+        "fallback-background": "var(--cc-surface0)"
+      },
+  
+      "playing-animation": {
+        "enabled": true,
+        "type": "subtle-pulse",
+        "keyframes": "album-art-pulse",
+        "duration": "4s",
+        "easing": "ease-in-out",
+        "iteration": "infinite"
+      },
+  
+      "vinyl-effect": {
+        "enabled": true,
+        "class": "vinyl-ring",
+        "size": 76,
+        "border-radius": "50%",
+        "border": "3px solid rgba(255,255,255,0.08)",
+        "inner-ring": "2px solid rgba(0,0,0,0.30)",
+        "center-dot": {
+          "size": 10,
+          "background": "rgba(255,255,255,0.60)",
+          "border": "2px solid rgba(0,0,0,0.40)"
+        },
+        "spin-animation": {
+          "enabled": true,
+          "duration": "8s",
+          "play-state-on":  "running",
+          "play-state-off": "paused"
+        }
+      },
+  
+      "color-extraction": {
+        "enabled": true,
+        "algorithm": "dominant",
+        "palette-size": 5,
+        "outputs": {
+          "--media-color-primary":    "dominant",
+          "--media-color-secondary":  "vibrant",
+          "--media-color-muted":      "muted",
+          "--media-color-bg":         "dark-muted",
+          "--media-color-text":       "light-vibrant"
+        },
+        "fallback-color": "var(--cc-accent)",
+        "contrast-check": true,
+        "wcag-level": "AA"
+      },
+  
+      "click-action": {
+        "single": "show-lyrics",
+        "double": "open-player",
+        "right":  "show-queue"
+      }
+    },
+  
+    "background": {
+      "enabled": true,
+      "class": "media-bg",
+      "type": "blurred-album-art",
+      "blur": "40px",
+      "scale": 1.15,
+      "opacity": 0.20,
+      "overlay": {
+        "enabled": true,
+        "gradient": {
+          "type": "linear",
+          "direction": "180deg",
+          "stops": [
+            { "at":   "0%", "color": "var(--cc-panel-bg)", "opacity": 0.40 },
+            { "at":  "50%", "color": "var(--cc-panel-bg)", "opacity": 0.70 },
+            { "at": "100%", "color": "var(--cc-panel-bg)", "opacity": 0.90 }
+          ]
+        }
+      },
+      "transition": "all 600ms cubic-bezier(0.4,0,0.2,1)",
+      "border-radius": "16px 16px 0 0"
+    },
+  
+    "track-info": {
+      "enabled": true,
+      "class": "media-track-info",
+      "padding": "14px 14px 0 14px",
+  
+      "layout": "row",
+      "gap": 14,
+      "align": "center",
+  
+      "text-area": {
+        "class": "media-text-area",
+        "flex": 1,
+        "min-width": 0,
+  
+        "title": {
+          "class": "media-title",
+          "max-length": 32,
+          "overflow": "marquee",
+          "marquee": {
+            "speed": 40,
+            "pause-start": 2000,
+            "pause-end": 1500,
+            "separator": "   •   "
+          },
+          "font-size": "14px",
+          "font-weight": 800,
+          "color": "var(--media-color-text, var(--cc-text-primary))",
+          "letter-spacing": "-0.01em",
+          "line-height": 1.3,
+          "animation": {
+            "on-change": "track-title-change",
+            "duration": "300ms"
+          }
+        },
+  
+        "artist": {
+          "class": "media-artist",
+          "max-length": 28,
+          "overflow": "truncate",
+          "font-size": "12px",
+          "font-weight": 600,
+          "color": "var(--media-color-secondary, var(--cc-text-secondary))",
+          "opacity": 0.85,
+          "margin-top": "2px",
+          "animation": {
+            "on-change": "track-info-fade",
+            "duration": "250ms"
+          }
+        },
+  
+        "album": {
+          "class": "media-album",
+          "enabled": true,
+          "show-when": "hover",
+          "max-length": 26,
+          "font-size": "11px",
+          "font-weight": 500,
+          "color": "var(--cc-text-muted)",
+          "prefix-icon": "󰀉",
+          "margin-top": "1px"
+        },
+  
+        "badges": {
+          "enabled": true,
+          "class": "media-badges",
+          "gap": 4,
+          "items": [
+            {
+              "id": "quality",
+              "type": "audio-quality",
+              "show-when": "lossless",
+              "label": "HIFI",
+              "icon": "󱑽",
+              "class": "badge badge--hifi",
+              "color": "var(--cc-green)",
+              "font-size": "9px"
+            },
+            {
+              "id": "explicit",
+              "type": "explicit",
+              "show-when": "explicit",
+              "label": "E",
+              "class": "badge badge--explicit",
+              "color": "var(--cc-red)"
+            },
+            {
+              "id": "liked",
+              "type": "liked",
+              "show-when": "liked",
+              "icon": "󰣐",
+              "class": "badge badge--liked",
+              "color": "var(--cc-red)"
+            }
+          ]
+        }
+      },
+  
+      "action-buttons": {
+        "class": "media-action-buttons",
+        "gap": 4,
+  
+        "like": {
+          "enabled": true,
+          "class": "btn-like btn-icon",
+          "icon-liked":    "󰣐",
+          "icon-unliked":  "󰣜",
+          "color-liked":   "var(--cc-red)",
+          "color-unliked": "var(--cc-text-muted)",
+          "tooltip-liked":   "Unlike",
+          "tooltip-unliked": "Like",
+          "size": "18px",
+          "command-like":   "playerctl metadata --format '{{mpris:trackid}}' | xargs -I{} ~/scripts/media-like.sh {}",
+          "command-unlike": "~/scripts/media-unlike.sh",
+          "animation": "heart-beat"
+        },
+  
+        "more": {
+          "enabled": true,
+          "class": "btn-more btn-icon",
+          "icon": "󰇛",
+          "tooltip": "More options",
+          "size": "16px",
+          "menu": {
+            "items": [
+              { "label": "Add to queue",   "icon": "󰐕",  "command": "~/scripts/media-queue-add.sh"   },
+              { "label": "Go to artist",   "icon": "󰠴",  "command": "~/scripts/media-open-artist.sh" },
+              { "label": "Go to album",    "icon": "󰀉",  "command": "~/scripts/media-open-album.sh"  },
+              { "label": "Copy track URL", "icon": "󰆏",  "command": "~/scripts/media-copy-url.sh"    },
+              { "label": "Open in app",    "icon": "󰏌",  "command": "~/scripts/media-open-app.sh"    }
+            ]
+          }
+        }
+      }
+    },
+  
+    "progress-section": {
+      "enabled": true,
+      "class": "media-progress-section",
+      "padding": "10px 14px 0",
+  
+      "waveform-visualizer": {
+        "enabled": true,
+        "class": "media-waveform",
+        "position": "behind-progress",
+        "height": 28,
+        "bars": 48,
+        "bar-width": 2,
+        "bar-gap": 1,
+        "bar-radius": 2,
+        "source": "pipewire",
+        "color": {
+          "type": "dynamic",
+          "source": "album-art-dominant",
+          "fallback": "var(--cc-accent)",
+          "opacity": 0.30
+        },
+        "played-color": {
+          "opacity": 0.60
+        },
+        "animation": {
+          "type": "smooth",
+          "fps": 30,
+          "falloff": 0.80
+        }
+      },
+  
+      "progress-bar": {
+        "class": "media-progress-bar",
+        "height": 5,
+        "border-radius": 100,
+        "cursor": "pointer",
+        "seekable": true,
+        "command-seek": "playerctl position {seconds}",
+  
+        "track": {
+          "background": "rgba(255,255,255,0.12)",
+          "border-radius": 100,
+          "hover": {
+            "height": 7,
+            "transition": "height 150ms ease"
+          }
+        },
+  
+        "fill": {
+          "background": {
+            "type": "dynamic",
+            "source": "album-art",
+            "fallback": "var(--cc-accent)",
+            "gradient": {
+              "type": "linear",
+              "direction": "90deg",
+              "stops": [
+                { "at":   "0%", "color": "var(--media-color-primary, var(--cc-accent))",     "opacity": 0.85 },
+                { "at": "100%", "color": "var(--media-color-secondary, var(--cc-accent-bright))", "opacity": 1.00 }
+              ]
+            }
+          },
+          "border-radius": 100,
+          "glow": {
+            "enabled": true,
+            "color": "var(--media-color-primary, var(--cc-accent-glow))",
+            "blur": "6px",
+            "opacity": 0.50
+          }
+        },
+  
+        "thumb": {
+          "size": 14,
+          "border-radius": "50%",
+          "background": "#ffffff",
+          "box-shadow": [
+            "0 2px 6px rgba(0,0,0,0.40)",
+            "0 0 8px var(--media-color-primary, var(--cc-accent-glow))"
+          ],
+          "show-on-hover": true,
+          "animation": {
+            "appear": "slider-thumb-appear",
+            "duration": "150ms"
+          }
+        },
+  
+        "buffered": {
+          "enabled": true,
+          "background": "rgba(255,255,255,0.08)",
+          "border-radius": 100
+        },
+  
+        "chapters": {
+          "enabled": true,
+          "marker-color": "rgba(255,255,255,0.30)",
+          "marker-width": 2,
+          "marker-height": 8,
+          "show-tooltip": true
+        }
+      },
+  
+      "time-labels": {
+        "class": "media-time",
+        "layout": "space-between",
+        "margin-top": 5,
+        "font-size": "10px",
+        "font-family": "JetBrainsMono Nerd Font",
+        "font-weight": 600,
+        "color": "var(--cc-text-muted)",
+        "current": {
+          "class": "time-current",
+          "format": "{mm}:{ss}"
+        },
+        "remaining": {
+          "class": "time-remaining",
+          "format": "-{mm}:{ss}",
+          "click-toggles-total": true
+        }
+      }
+    },
+  
+    "controls": {
+      "enabled": true,
+      "class": "media-controls",
+      "padding": "12px 14px",
+      "layout": "row",
+      "justify": "space-between",
+      "align": "center",
+  
+      "left-controls": {
+        "class": "media-controls-left",
+        "gap": 4,
+  
+        "shuffle": {
+          "class": "btn-shuffle btn-icon",
+          "icon-on":  "󰒟",
+          "icon-off": "󰒞",
+          "color-on":  "var(--media-color-primary, var(--cc-accent))",
+          "color-off": "var(--cc-text-muted)",
+          "tooltip-on":  "Shuffle: On",
+          "tooltip-off": "Shuffle: Off",
+          "size": "16px",
+          "command": "playerctl shuffle Toggle",
+          "state-command": "playerctl shuffle",
+          "animation": "icon-bounce"
+        },
+  
+        "repeat": {
+          "class": "btn-repeat btn-icon",
+          "states": {
+            "none":     { "icon": "󰑗", "color": "var(--cc-text-muted)",  "tooltip": "Repeat: Off"    },
+            "track":    { "icon": "󰑘", "color": "var(--cc-accent)",       "tooltip": "Repeat: Track"  },
+            "playlist": { "icon": "󰑖", "color": "var(--cc-accent)",       "tooltip": "Repeat: All"   }
+          },
+          "size": "16px",
+          "command": "playerctl loop {next-state}",
+          "cycle": ["none", "playlist", "track"],
+          "animation": "icon-bounce"
+        }
+      },
+  
+      "center-controls": {
+        "class": "media-controls-center",
+        "gap": 8,
+  
+        "previous": {
+          "class": "btn-previous btn-icon btn-control",
+          "icon": "󰒮",
+          "tooltip": "Previous track",
+          "size": "22px",
+          "command": "playerctl previous",
+          "hold-command": "playerctl position 0",
+          "hold-duration": 800,
+          "style": {
+            "size": 38,
+            "border-radius": "50%",
+            "background": "rgba(255,255,255,0.06)",
+            "border": "1px solid rgba(255,255,255,0.08)"
+          },
+          "hover": {
+            "background": "rgba(255,255,255,0.12)",
+            "transform": "scale(1.08)"
+          },
+          "active": {
+            "transform": "scale(0.92)"
+          },
+          "animation": "btn-ripple"
+        },
+  
+        "play-pause": {
+          "class": "btn-play-pause btn-control btn-play",
+          "states": {
+            "playing": {
+              "icon":    "󰏤",
+              "tooltip": "Pause",
+              "class":   "btn-pause"
+            },
+            "paused": {
+              "icon":    "󰐊",
+              "tooltip": "Play",
+              "class":   "btn-play"
+            },
+            "stopped": {
+              "icon":    "󰐊",
+              "tooltip": "Play",
+              "class":   "btn-play btn-stopped"
+            },
+            "loading": {
+              "icon":    "󰄹",
+              "tooltip": "Loading...",
+              "class":   "btn-loading",
+              "animation": "spin-smooth"
+            }
+          },
+          "size": "28px",
+          "command": "playerctl play-pause",
+          "style": {
+            "size": 52,
+            "border-radius": "50%",
+            "background": "var(--media-color-primary, var(--cc-accent))",
+            "box-shadow": [
+              "0 4px 20px rgba(0,0,0,0.40)",
+              "0 0 20px var(--media-color-primary, var(--cc-accent-glow))"
+            ]
+          },
+          "hover": {
+            "transform": "scale(1.08)",
+            "box-shadow": [
+              "0 6px 28px rgba(0,0,0,0.50)",
+              "0 0 30px var(--media-color-primary, var(--cc-accent-glow))"
+            ]
+          },
+          "active": {
+            "transform": "scale(0.94)"
+          },
+          "animation": {
+            "play-to-pause": "play-pause-morph 200ms ease",
+            "pause-to-play": "pause-play-morph 200ms ease"
+          }
+        },
+  
+        "next": {
+          "class": "btn-next btn-icon btn-control",
+          "icon": "󰒭",
+          "tooltip": "Next track",
+          "size": "22px",
+          "command": "playerctl next",
+          "style": {
+            "size": 38,
+            "border-radius": "50%",
+            "background": "rgba(255,255,255,0.06)",
+            "border": "1px solid rgba(255,255,255,0.08)"
+          },
+          "hover": {
+            "background": "rgba(255,255,255,0.12)",
+            "transform": "scale(1.08)"
+          },
+          "active": {
+            "transform": "scale(0.92)"
+          },
+          "animation": "btn-ripple"
+        }
+      },
+  
+      "right-controls": {
+        "class": "media-controls-right",
+        "gap": 4,
+  
+        "volume": {
+          "class": "btn-volume btn-icon",
+          "states": {
+            "muted":  { "icon": "󰝟", "color": "var(--cc-red)"          },
+            "low":    { "icon": "󰕿", "color": "var(--cc-text-muted)"   },
+            "medium": { "icon": "󰖀", "color": "var(--cc-text-muted)"   },
+            "high":   { "icon": "󰕾", "color": "var(--cc-text-muted)"   }
+          },
+          "size": "16px",
+          "scroll-command-up":   "playerctl volume 0.05+",
+          "scroll-command-down": "playerctl volume 0.05-",
+          "click-command":       "playerctl volume {toggle-mute}",
+          "mini-slider": {
+            "enabled": true,
+            "show-on-hover": true,
+            "width": 60,
+            "height": 4,
+            "class": "volume-mini-slider",
+            "command": "playerctl volume {decimal}"
+          }
+        },
+  
+        "queue": {
+          "class": "btn-queue btn-icon",
+          "icon": "󰲸",
+          "tooltip": "Show queue",
+          "size": "16px",
+          "command": "~/.config/swaync/scripts/show-queue.sh",
+          "badge": {
+            "enabled": true,
+            "source": "queue-count",
+            "max": 99,
+            "class": "queue-badge"
+          }
+        }
+      }
+    },
+  
+    "lyrics-section": {
+      "enabled": true,
+      "class": "media-lyrics",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "max-height": 120,
+  
+      "toggle-button": {
+        "class": "btn-lyrics btn-icon",
+        "icon-on":  "󰗑",
+        "icon-off": "󰗐",
+        "tooltip-on":  "Hide lyrics",
+        "tooltip-off": "Show lyrics",
+        "color-on":  "var(--cc-accent)",
+        "color-off": "var(--cc-text-muted)"
+      },
+  
+      "display": {
+        "class": "lyrics-display",
+        "backend": "klyrics",
+        "fallback": "genius-api",
+        "scroll-mode": "current-line-centered",
+        "previous-lines": 2,
+        "next-lines": 2,
+        "font-size": "13px",
+        "line-height": 1.8,
+  
+        "line-styles": {
+          "current": {
+            "class": "lyric-current",
+            "font-size": "14px",
+            "font-weight": 800,
+            "color": "var(--media-color-text, var(--cc-text-primary))",
+            "opacity": 1.0,
+            "animation": "lyric-highlight 300ms ease"
+          },
+          "previous": {
+            "class": "lyric-prev",
+            "color": "var(--cc-text-muted)",
+            "opacity": 0.50
+          },
+          "next": {
+            "class": "lyric-next",
+            "color": "var(--cc-text-secondary)",
+            "opacity": 0.70
+          }
+        },
+  
+        "karaoke-mode": {
+          "enabled": false,
+          "highlight-color": "var(--media-color-primary, var(--cc-accent))",
+          "animation": "karaoke-fill"
+        },
+  
+        "no-lyrics-state": {
+          "icon": "󰗐",
+          "text": "No lyrics available",
+          "class": "lyrics-empty"
+        }
+      }
+    },
+  
+    "queue-section": {
+      "enabled": true,
+      "class": "media-queue",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "max-items": 8,
+      "max-height": 200,
+  
+      "header": {
+        "label": "Up Next",
+        "icon": "󰲸",
+        "count-badge": true,
+        "clear-button": {
+          "label": "Clear",
+          "icon": "󰎟",
+          "class": "btn-clear-queue",
+          "command": "playerctl clear"
+        }
+      },
+  
+      "item": {
+        "class": "queue-item",
+        "height": 44,
+        "gap": 10,
+        "padding": "8px 10px",
+        "border-radius": 10,
+        "thumbnail": {
+          "enabled": true,
+          "size": 28,
+          "border-radius": 6
+        },
+        "title": {
+          "font-size": "12px",
+          "font-weight": 600,
+          "max-length": 30
+        },
+        "artist": {
+          "font-size": "11px",
+          "color": "var(--cc-text-muted)"
+        },
+        "duration": {
+          "font-size": "10px",
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "var(--cc-text-muted)"
+        },
+        "drag-and-drop": true,
+        "hover": {
+          "background": "var(--cc-hover)",
+          "transform": "translateX(2px)"
+        },
+        "click-command": "playerctl jump {index}",
+        "remove-button": {
+          "icon": "󰅙",
+          "class": "btn-remove-queue-item",
+          "show-on-hover": true
+        }
+      }
+    },
+  
+    "player-switcher": {
+      "enabled": true,
+      "class": "media-player-switcher",
+      "show-when": "multiple-players",
+      "position": "bottom",
+      "layout": "row",
+      "gap": 8,
+      "padding": "8px 14px 14px",
+  
+      "player-chip": {
+        "class": "player-chip",
+        "active-class": "player-chip--active",
+        "border-radius": "100px",
+        "padding": "4px 12px",
+        "font-size": "11px",
+        "font-weight": 600,
+        "gap": 6,
+  
+        "icon-map": {
+          "spotify":   "󰓇",
+          "firefox":   "󰈹",
+          "chromium":  "󰊯",
+          "mpd":       "󰝚",
+          "vlc":       "󰕼",
+          "mpv":       "󰎁",
+          "rhythmbox": "󱑽",
+          "cmus":      "󰝚",
+          "default":   "󰝚"
+        },
+  
+        "states": {
+          "inactive": {
+            "background": "var(--cc-toggle-off-bg)",
+            "border": "1px solid var(--cc-toggle-off-border)",
+            "color": "var(--cc-text-muted)"
+          },
+          "active": {
+            "background": "var(--cc-accent-alpha)",
+            "border": "1px solid var(--cc-accent)",
+            "color": "var(--cc-accent)",
+            "box-shadow": "0 0 12px var(--cc-accent-glow)"
+          },
+          "playing": {
+            "indicator": {
+              "enabled": true,
+              "size": 6,
+              "color": "var(--cc-green)",
+              "animation": "playing-dot-pulse 1.5s ease infinite"
+            }
+          }
+        },
+  
+        "command": "playerctld shift"
+      }
+    },
+  
+    "color-theme-apply": {
+      "enabled": true,
+      "description": "Apply extracted album art colors to other widgets",
+      "targets": [
+        {
+          "widget": "colortemp-slider",
+          "variable": "--media-color-primary",
+          "property": "accent-color"
+        },
+        {
+          "widget": "volume-slider",
+          "variable": "--media-color-primary",
+          "property": "fill-color"
+        }
+      ],
+      "reset-on-stop": true,
+      "transition": "all 600ms cubic-bezier(0.4,0,0.2,1)"
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "play-pause":     "super+space",
+        "next":           "super+right",
+        "previous":       "super+left",
+        "volume-up":      "super+up",
+        "volume-down":    "super+down",
+        "mute":           "super+m",
+        "like":           "super+l",
+        "shuffle":        "super+s",
+        "repeat":         "super+r",
+        "lyrics-toggle":  "super+y",
+        "queue-toggle":   "super+q"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "dynamic-colors": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "32px",
+        "saturate": "200%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "overflow": "hidden",
+      "box-shadow": [
+        "0 8px 32px var(--cc-shadow)",
+        "0 0 0 1px var(--media-color-primary, transparent)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "playing-glow": {
+        "enabled": true,
+        "color": "var(--media-color-primary, var(--cc-accent-glow))",
+        "blur": "24px",
+        "opacity": 0.20,
+        "spread": "-4px"
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "80ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-track-change": true,
+      "announce-format": "Now playing: {title} by {artist}",
+      "announce-play":   "Playback resumed",
+      "announce-pause":  "Playback paused",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--media-color-primary, var(--cc-accent))",
+        "outline-offset": "2px"
+      }
+    }
+  }

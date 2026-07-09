@@ -1,0 +1,868 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Do Not Disturb Toggle",
+      "version": "5.0.0",
+      "description": "Premium DND control with scheduling, focus modes, exception rules, smart silence, and per-app overrides",
+      "author": "ash-dotfiles",
+      "icon": "󰂛",
+      "category": "notifications",
+      "tags": [
+        "dnd", "do-not-disturb", "focus", "silence",
+        "notifications", "pomodoro", "schedule", "filter"
+      ]
+    },
+  
+    "widget": {
+      "type": "dnd-toggle",
+      "id": "ash-dnd-widget",
+      "class": "ash-widget ash-widget--dnd ash-widget--glass",
+      "aria-label": "Do Not Disturb Control",
+      "aria-role": "group",
+      "aria-live": "polite"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      }
+    },
+  
+    "main-toggle": {
+      "enabled": true,
+      "class": "dnd-main-toggle",
+      "layout": "space-between",
+      "align": "center",
+  
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "off": {
+              "icon": "󰂚",
+              "class": "dnd-icon dnd-icon--off",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Notifications enabled",
+              "animation": "none"
+            },
+            "on": {
+              "icon": "󰂛",
+              "class": "dnd-icon dnd-icon--on",
+              "color": "var(--cc-accent)",
+              "tooltip": "Do Not Disturb active",
+              "animation": "dnd-activate-pulse",
+              "glow": "0 0 14px var(--cc-accent-glow)"
+            },
+            "scheduled": {
+              "icon": "󱑂",
+              "class": "dnd-icon dnd-icon--scheduled",
+              "color": "var(--cc-yellow)",
+              "tooltip": "DND scheduled",
+              "animation": "dnd-schedule-tick"
+            },
+            "focus": {
+              "icon": "󰁁",
+              "class": "dnd-icon dnd-icon--focus",
+              "color": "var(--cc-green)",
+              "tooltip": "Focus mode active",
+              "animation": "focus-breathe"
+            },
+            "pomodoro": {
+              "icon": "󱎫",
+              "class": "dnd-icon dnd-icon--pomodoro",
+              "color": "var(--cc-red)",
+              "tooltip": "Pomodoro session active",
+              "animation": "pomodoro-pulse"
+            }
+          },
+          "font-size": "22px",
+          "transition": "all 300ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+        },
+        "labels": {
+          "primary": {
+            "class": "dnd-label-primary",
+            "states": {
+              "off":       "Do Not Disturb",
+              "on":        "Do Not Disturb",
+              "scheduled": "DND Scheduled",
+              "focus":     "Focus Mode",
+              "pomodoro":  "Pomodoro"
+            },
+            "font-size": "13px",
+            "font-weight": 700,
+            "color": "var(--cc-text-primary)"
+          },
+          "secondary": {
+            "class": "dnd-label-secondary",
+            "states": {
+              "off":       "All notifications allowed",
+              "on":        "Notifications silenced",
+              "scheduled": "Active {start} – {end}",
+              "focus":     "Ends in {remaining}",
+              "pomodoro":  "{remaining} remaining"
+            },
+            "font-size": "11px",
+            "font-weight": 500,
+            "color": "var(--cc-text-muted)"
+          }
+        }
+      },
+  
+      "right": {
+        "switch": {
+          "class": "dnd-switch",
+          "aria-label": "Toggle Do Not Disturb",
+          "command-on":  "swaync-client --dnd-on",
+          "command-off": "swaync-client --dnd-off",
+          "state-command": "swaync-client --get-dnd",
+          "keybind": "d",
+  
+          "track": {
+            "width": 52,
+            "height": 28,
+            "border-radius": 100,
+            "states": {
+              "off": {
+                "background": "var(--cc-surface0)",
+                "border": "2px solid var(--cc-border)",
+                "box-shadow": "inset 0 2px 4px rgba(0,0,0,0.20)"
+              },
+              "on": {
+                "background": "var(--cc-accent)",
+                "border": "2px solid var(--cc-accent)",
+                "box-shadow": [
+                  "inset 0 2px 4px rgba(0,0,0,0.20)",
+                  "0 0 16px var(--cc-accent-glow)"
+                ]
+              }
+            },
+            "animation": {
+              "on":  "switch-track-on  300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              "off": "switch-track-off 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards"
+            }
+          },
+  
+          "thumb": {
+            "size": 20,
+            "border-radius": "50%",
+            "margin": 3,
+            "states": {
+              "off": {
+                "background": "#ffffff",
+                "transform": "translateX(0)",
+                "box-shadow": [
+                  "0 2px 6px rgba(0,0,0,0.30)",
+                  "0 1px 2px rgba(0,0,0,0.15)"
+                ]
+              },
+              "on": {
+                "background": "#ffffff",
+                "transform": "translateX(24px)",
+                "box-shadow": [
+                  "0 2px 8px rgba(0,0,0,0.35)",
+                  "0 0 8px var(--cc-accent-glow)"
+                ]
+              }
+            },
+            "icon": {
+              "off": { "icon": "󰂚", "size": "10px", "color": "var(--cc-surface0)" },
+              "on":  { "icon": "󰂛", "size": "10px", "color": "var(--cc-accent)"   }
+            },
+            "animation": {
+              "transition": "transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+            }
+          }
+        }
+      }
+    },
+  
+    "status-bar": {
+      "enabled": true,
+      "class": "dnd-status-bar",
+      "show-when": "active",
+      "layout": "row",
+      "gap": 8,
+      "padding": { "top": 10, "bottom": 6 },
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 12,
+  
+      "items": [
+        {
+          "id": "active-indicator",
+          "type": "badge",
+          "class": "dnd-badge dnd-badge--active",
+          "icon": "󰝟",
+          "text": "SILENT",
+          "show-when": "dnd-on",
+          "background": "var(--cc-accent-alpha)",
+          "border": "1px solid var(--cc-accent)",
+          "color": "var(--cc-accent)",
+          "border-radius": "100px",
+          "padding": "3px 10px",
+          "font-size": "10px",
+          "font-weight": 800,
+          "letter-spacing": "0.08em",
+          "animation": "dnd-badge-pulse 3s ease-in-out infinite"
+        },
+        {
+          "id": "exceptions-count",
+          "type": "info-chip",
+          "class": "dnd-chip",
+          "icon": "󰜺",
+          "format": "{count} exceptions",
+          "show-when": "exceptions-active",
+          "color": "var(--cc-yellow)",
+          "font-size": "11px"
+        },
+        {
+          "id": "timer-display",
+          "type": "countdown",
+          "class": "dnd-timer",
+          "icon": "󱑂",
+          "format": "{hh}:{mm}:{ss}",
+          "show-when": "timer-active",
+          "color": "var(--cc-text-secondary)",
+          "font-size": "11px",
+          "font-family": "JetBrainsMono Nerd Font",
+          "animation": "none"
+        },
+        {
+          "id": "schedule-info",
+          "type": "info",
+          "class": "dnd-schedule-info",
+          "icon": "󰁯",
+          "format": "Until {end-time}",
+          "show-when": "scheduled-active",
+          "color": "var(--cc-text-muted)",
+          "font-size": "11px"
+        }
+      ]
+    },
+  
+    "quick-duration": {
+      "enabled": true,
+      "class": "dnd-quick-duration",
+      "label": "Silence for",
+      "label-icon": "󱑃",
+      "show-when": "dnd-off",
+      "layout": "row",
+      "gap": 6,
+      "padding-top": 12,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 12,
+  
+      "options": [
+        {
+          "id": "30m",
+          "label": "30m",
+          "icon": "󱑎",
+          "duration": 1800,
+          "tooltip": "Silence for 30 minutes",
+          "class": "duration-chip",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "1h",
+          "label": "1h",
+          "icon": "󱑏",
+          "duration": 3600,
+          "tooltip": "Silence for 1 hour",
+          "class": "duration-chip",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "2h",
+          "label": "2h",
+          "icon": "󱑐",
+          "duration": 7200,
+          "tooltip": "Silence for 2 hours",
+          "class": "duration-chip",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "4h",
+          "label": "4h",
+          "icon": "󱑑",
+          "duration": 14400,
+          "tooltip": "Silence for 4 hours",
+          "class": "duration-chip",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "tonight",
+          "label": "󰖔",
+          "icon": "󰖔",
+          "duration": "until-morning",
+          "until": "08:00",
+          "tooltip": "Silence until 8:00 AM",
+          "class": "duration-chip duration-chip--special",
+          "color": "var(--cc-yellow)"
+        },
+        {
+          "id": "custom",
+          "label": "󱥸",
+          "icon": "󱥸",
+          "duration": "custom",
+          "tooltip": "Custom duration",
+          "class": "duration-chip duration-chip--custom",
+          "color": "var(--cc-text-muted)",
+          "command": "~/.config/swaync/scripts/dnd-custom-duration.sh"
+        }
+      ],
+  
+      "command-template": "swaync-client --dnd-on && sleep {duration} && swaync-client --dnd-off &",
+      "cancel-command": "pkill -f dnd-timer.sh && swaync-client --dnd-off",
+  
+      "chip-style": {
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "border-radius": "100px",
+        "padding": "5px 12px",
+        "font-size": "12px",
+        "font-weight": 700,
+        "hover": {
+          "background": "var(--cc-accent-alpha)",
+          "border-color": "var(--cc-accent)",
+          "color": "var(--cc-accent)",
+          "transform": "translateY(-2px)",
+          "box-shadow": "0 4px 12px var(--cc-accent-glow)"
+        },
+        "active": {
+          "transform": "scale(0.95)"
+        },
+        "selected": {
+          "background": "var(--cc-accent)",
+          "border-color": "var(--cc-accent)",
+          "color": "var(--cc-accent-fg)",
+          "box-shadow": "0 4px 14px var(--cc-accent-glow)"
+        }
+      }
+    },
+  
+    "focus-modes": {
+      "enabled": true,
+      "class": "dnd-focus-modes",
+      "label": "Focus Modes",
+      "label-icon": "󰁁",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "border-top": "1px solid var(--cc-separator)",
+      "padding-top": 12,
+      "margin-top": 4,
+  
+      "modes": [
+        {
+          "id": "deep-focus",
+          "label": "Deep Focus",
+          "icon": "󰁁",
+          "description": "Zero interruptions — critical only",
+          "color": "var(--cc-blue)",
+          "glow": "var(--cc-blue-glow, rgba(137,180,250,0.35))",
+          "duration": 5400,
+          "settings": {
+            "dnd": true,
+            "allow-critical": true,
+            "allow-calls": false,
+            "screen-dimming": false,
+            "ambient-sounds": "none"
+          },
+          "class": "focus-mode-btn focus-mode-btn--deep",
+          "command": "ash mode focus --level deep"
+        },
+        {
+          "id": "work",
+          "label": "Work",
+          "icon": "󰌨",
+          "description": "Work notifications only",
+          "color": "var(--cc-accent)",
+          "glow": "var(--cc-accent-glow)",
+          "duration": 7200,
+          "settings": {
+            "dnd": true,
+            "allow-critical": true,
+            "allow-calls": true,
+            "allowed-apps": ["slack", "teams", "email"],
+            "ambient-sounds": "none"
+          },
+          "class": "focus-mode-btn focus-mode-btn--work",
+          "command": "ash mode work"
+        },
+        {
+          "id": "pomodoro",
+          "label": "Pomodoro",
+          "icon": "󱎫",
+          "description": "25min focus / 5min break",
+          "color": "var(--cc-red)",
+          "glow": "rgba(243,139,168,0.35)",
+          "duration": 1500,
+          "settings": {
+            "dnd": true,
+            "allow-critical": true,
+            "allow-calls": false,
+            "pomodoro": {
+              "work":       1500,
+              "short-break":  300,
+              "long-break":  1200,
+              "cycles":         4
+            },
+            "ambient-sounds": "brown-noise"
+          },
+          "class": "focus-mode-btn focus-mode-btn--pomodoro",
+          "command": "ash plugin pomodoro-plus start"
+        },
+        {
+          "id": "reading",
+          "label": "Reading",
+          "icon": "󰂿",
+          "description": "Quiet reading session",
+          "color": "var(--cc-yellow)",
+          "glow": "var(--cc-yellow-glow)",
+          "duration": 3600,
+          "settings": {
+            "dnd": true,
+            "allow-critical": false,
+            "allow-calls": false,
+            "screen-dimming": true,
+            "ambient-sounds": "rain"
+          },
+          "class": "focus-mode-btn focus-mode-btn--reading",
+          "command": "ash mode focus --level reading"
+        },
+        {
+          "id": "meeting",
+          "label": "Meeting",
+          "icon": "󰊻",
+          "description": "Meeting in progress",
+          "color": "var(--cc-green)",
+          "glow": "rgba(166,227,161,0.35)",
+          "duration": 3600,
+          "settings": {
+            "dnd": true,
+            "allow-critical": true,
+            "allow-calls": true,
+            "screenshare-safe": true
+          },
+          "class": "focus-mode-btn focus-mode-btn--meeting",
+          "command": "ash mode present"
+        },
+        {
+          "id": "sleep",
+          "label": "Sleep",
+          "icon": "󰒲",
+          "description": "Goodnight — full silence",
+          "color": "var(--cc-overlay0)",
+          "glow": "rgba(108,112,134,0.25)",
+          "duration": 28800,
+          "settings": {
+            "dnd": true,
+            "allow-critical": false,
+            "allow-calls": false,
+            "screen-dimming": true,
+            "night-light": true
+          },
+          "class": "focus-mode-btn focus-mode-btn--sleep",
+          "command": "ash mode focus --level sleep"
+        }
+      ],
+  
+      "active-session": {
+        "show-timer": true,
+        "show-progress": true,
+        "progress-style": "ring",
+        "class": "focus-session-display",
+        "cancel-button": {
+          "label": "End Session",
+          "icon": "󰅙",
+          "class": "btn-cancel-focus",
+          "command": "ash mode default"
+        },
+        "pause-button": {
+          "label": "Pause",
+          "icon": "󰏤",
+          "class": "btn-pause-focus",
+          "command": "ash mode focus --pause"
+        }
+      },
+  
+      "button-style": {
+        "border-radius": "14px",
+        "padding": "10px 12px",
+        "gap": 8,
+        "hover": {
+          "transform": "translateY(-2px)",
+          "box-shadow": "0 6px 18px var(--mode-glow)"
+        },
+        "active-session": {
+          "border": "2px solid {mode-color}",
+          "background": "{mode-color-alpha}",
+          "box-shadow": "0 0 0 1px {mode-color}, 0 4px 16px {mode-glow}"
+        }
+      }
+    },
+  
+    "exception-rules": {
+      "enabled": true,
+      "class": "dnd-exceptions",
+      "label": "Exceptions",
+      "label-icon": "󰜺",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "global-exceptions": [
+        {
+          "id": "allow-critical",
+          "label": "Critical alerts",
+          "icon": "󰀦",
+          "description": "System & security alerts",
+          "default": true,
+          "class": "exception-toggle",
+          "command-on":  "~/.config/swaync/scripts/exceptions.sh critical on",
+          "command-off": "~/.config/swaync/scripts/exceptions.sh critical off"
+        },
+        {
+          "id": "allow-calls",
+          "label": "Phone calls",
+          "icon": "󰄣",
+          "description": "Incoming call notifications",
+          "default": true,
+          "class": "exception-toggle",
+          "command-on":  "~/.config/swaync/scripts/exceptions.sh calls on",
+          "command-off": "~/.config/swaync/scripts/exceptions.sh calls off"
+        },
+        {
+          "id": "allow-reminders",
+          "label": "Reminders",
+          "icon": "󰂟",
+          "description": "Calendar & alarm reminders",
+          "default": false,
+          "class": "exception-toggle"
+        },
+        {
+          "id": "allow-mentions",
+          "label": "Direct mentions",
+          "icon": "󰭹",
+          "description": "When someone @mentions you",
+          "default": false,
+          "class": "exception-toggle"
+        },
+        {
+          "id": "allow-battery",
+          "label": "Battery critical",
+          "icon": "󰂃",
+          "description": "Low battery warnings",
+          "default": true,
+          "class": "exception-toggle"
+        }
+      ],
+  
+      "per-app-exceptions": {
+        "enabled": true,
+        "label": "App Exceptions",
+        "label-icon": "󰍽",
+        "collapsible": true,
+        "collapsed-by-default": true,
+        "max-display": 5,
+        "apps": [
+          {
+            "app-name": "Slack",
+            "app-icon": "󰒱",
+            "class": "app-exception-item",
+            "allowed": true,
+            "priority": "normal"
+          },
+          {
+            "app-name": "Discord",
+            "app-icon": "󰙯",
+            "class": "app-exception-item",
+            "allowed": false,
+            "priority": "low"
+          },
+          {
+            "app-name": "Signal",
+            "app-icon": "󰭹",
+            "class": "app-exception-item",
+            "allowed": true,
+            "priority": "high"
+          },
+          {
+            "app-name": "Email",
+            "app-icon": "󰇮",
+            "class": "app-exception-item",
+            "allowed": false,
+            "priority": "normal"
+          }
+        ],
+        "add-button": {
+          "label": "Add exception",
+          "icon": "󰐕",
+          "class": "btn-add-exception",
+          "command": "~/.config/swaync/scripts/add-exception.sh"
+        }
+      },
+  
+      "toggle-style": {
+        "layout": "space-between",
+        "padding": "8px 0",
+        "border-bottom": "1px solid var(--cc-separator)",
+        "switch": {
+          "mini": true,
+          "width": 38,
+          "height": 22
+        }
+      }
+    },
+  
+    "schedule": {
+      "enabled": true,
+      "class": "dnd-schedule",
+      "label": "Schedule",
+      "label-icon": "󱑃",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "global-toggle": {
+        "label": "Enable scheduling",
+        "class": "schedule-master-toggle"
+      },
+  
+      "rules": [
+        {
+          "id": "nighttime",
+          "label": "Night",
+          "icon": "󰖔",
+          "enabled": true,
+          "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+          "start": "22:00",
+          "end": "07:30",
+          "color": "var(--cc-accent)",
+          "class": "schedule-rule"
+        },
+        {
+          "id": "workday-lunch",
+          "label": "Lunch",
+          "icon": "󱃲",
+          "enabled": false,
+          "days": ["mon", "tue", "wed", "thu", "fri"],
+          "start": "12:00",
+          "end": "13:00",
+          "color": "var(--cc-green)",
+          "class": "schedule-rule"
+        },
+        {
+          "id": "weekend-morning",
+          "label": "Weekend AM",
+          "icon": "󰖙",
+          "enabled": false,
+          "days": ["sat", "sun"],
+          "start": "00:00",
+          "end": "10:00",
+          "color": "var(--cc-yellow)",
+          "class": "schedule-rule"
+        }
+      ],
+  
+      "add-rule-button": {
+        "label": "Add schedule",
+        "icon": "󰐕",
+        "class": "btn-add-schedule",
+        "command": "~/.config/swaync/scripts/dnd-schedule-add.sh"
+      },
+  
+      "next-event": {
+        "enabled": true,
+        "class": "dnd-next-event",
+        "format-active":   "󰁯  DND ends at {end-time}",
+        "format-upcoming": "󱑃  DND starts at {start-time}",
+        "font-size": "11px",
+        "color": "var(--cc-text-muted)"
+      }
+    },
+  
+    "statistics": {
+      "enabled": true,
+      "class": "dnd-statistics",
+      "label": "Today's Stats",
+      "label-icon": "󰄧",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "storage": "~/.cache/ash/dnd-stats.json",
+  
+      "metrics": [
+        {
+          "id": "total-silenced",
+          "label": "Silenced",
+          "icon": "󰂛",
+          "format": "{count} notifications",
+          "class": "stat-item",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "focus-time",
+          "label": "Focus Time",
+          "icon": "󰁁",
+          "format": "{hours}h {minutes}m",
+          "class": "stat-item",
+          "color": "var(--cc-green)"
+        },
+        {
+          "id": "sessions",
+          "label": "Sessions",
+          "icon": "󱎫",
+          "format": "{count} sessions",
+          "class": "stat-item",
+          "color": "var(--cc-yellow)"
+        }
+      ],
+  
+      "mini-chart": {
+        "enabled": true,
+        "type": "bar",
+        "class": "dnd-chart",
+        "hours": 24,
+        "bar-color": "var(--cc-accent)",
+        "empty-color": "var(--cc-surface0)",
+        "height": 24,
+        "bar-width": 4,
+        "gap": 2,
+        "border-radius": 2
+      }
+    },
+  
+    "integration": {
+      "ash-cli": {
+        "command-on":    "ash mode focus",
+        "command-off":   "ash mode default",
+        "state-file":    "~/.cache/ash/state/current-mode.json",
+        "ipc-socket":    "/tmp/ash-ipc.sock"
+      },
+      "swaync": {
+        "command-on":    "swaync-client --dnd-on",
+        "command-off":   "swaync-client --dnd-off",
+        "command-state": "swaync-client --get-dnd",
+        "subscribe":     "swaync-client --subscribe"
+      },
+      "waybar": {
+        "signal": 8,
+        "command": "pkill -SIGRTMIN+8 waybar"
+      },
+      "hyprland": {
+        "on-workspace-change": false,
+        "on-fullscreen": {
+          "enabled": true,
+          "action": "enable-dnd",
+          "exclude-apps": ["mpv", "vlc"]
+        },
+        "on-game-mode": {
+          "enabled": true,
+          "action": "enable-dnd"
+        }
+      },
+      "discord-status": {
+        "enabled": false,
+        "status-on":  "Do Not Disturb",
+        "status-off": "Online",
+        "command": "~/.config/swaync/scripts/discord-status.sh {status}"
+      },
+      "slack-status": {
+        "enabled": false,
+        "emoji-on":  ":no_bell:",
+        "text-on":   "In focus mode",
+        "command": "~/.config/swaync/scripts/slack-status.sh"
+      }
+    },
+  
+    "notifications-preview": {
+      "enabled": true,
+      "class": "dnd-notif-preview",
+      "label": "Held Notifications",
+      "label-icon": "󰂟",
+      "show-when": "dnd-on",
+      "show-count": true,
+      "count-badge": {
+        "class": "notif-count-badge",
+        "background": "var(--cc-red)",
+        "color": "#ffffff",
+        "border-radius": "100px",
+        "font-size": "10px",
+        "font-weight": 800,
+        "padding": "1px 6px",
+        "animation": "badge-bounce"
+      },
+      "peek-button": {
+        "label": "Peek",
+        "icon": "󰱵",
+        "class": "btn-peek",
+        "command": "swaync-client --open-panel"
+      },
+      "clear-button": {
+        "label": "Clear all",
+        "icon": "󰎟",
+        "class": "btn-clear-held",
+        "command": "swaync-client --close-all"
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle-dnd":         "super+shift+d",
+        "focus-mode":         "super+shift+f",
+        "pomodoro-start":     "super+shift+p",
+        "session-end":        "super+shift+escape",
+        "duration-30m":       "super+ctrl+3",
+        "duration-1h":        "super+ctrl+1",
+        "duration-until-morning": "super+ctrl+0"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "dnd-active-style": {
+        "border-color": "var(--cc-accent)",
+        "box-shadow": [
+          "0 4px 24px var(--cc-shadow)",
+          "0 0 0 1px var(--cc-accent)",
+          "0 0 24px var(--cc-accent-glow)",
+          "inset 0 1px 0 var(--cc-highlight)"
+        ]
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "40ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "assertive",
+      "announce-on": "Do not disturb activated",
+      "announce-off": "Do not disturb deactivated",
+      "announce-focus": "Focus mode {name} started",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--cc-accent)",
+        "outline-offset": "3px"
+      }
+    }
+  }

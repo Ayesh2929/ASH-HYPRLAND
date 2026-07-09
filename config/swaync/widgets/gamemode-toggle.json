@@ -1,0 +1,1059 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Game Mode Toggle",
+      "version": "5.0.0",
+      "description": "Premium gaming mode control with performance profiling, GPU tuning, network optimization, process management, overlay controls, and per-game profiles",
+      "author": "ash-dotfiles",
+      "icon": "󰎃",
+      "category": "gaming",
+      "tags": [
+        "gaming", "gamemode", "performance", "fps", "gpu",
+        "mangohud", "steam", "proton", "wine", "vulkan",
+        "cpu-governor", "network-optimization", "latency"
+      ]
+    },
+  
+    "widget": {
+      "type": "gamemode-toggle",
+      "id": "ash-gamemode-widget",
+      "class": "ash-widget ash-widget--gamemode ash-widget--glass",
+      "aria-label": "Game Mode Control",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 }
+    },
+  
+    "main-toggle": {
+      "enabled": true,
+      "class": "gm-main-toggle",
+      "layout": "space-between",
+      "align": "center",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "off": {
+              "icon": "󰎃",
+              "class": "gm-icon gm-icon--off",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Game mode disabled"
+            },
+            "activating": {
+              "icon": "󰎃",
+              "class": "gm-icon gm-icon--activating",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Activating game mode…",
+              "animation": "gm-activate-spin 1s ease infinite"
+            },
+            "on": {
+              "icon": "󰎃",
+              "class": "gm-icon gm-icon--on",
+              "color": "var(--cc-green)",
+              "tooltip": "Game mode active",
+              "glow": "0 0 20px rgba(166,227,161,0.50)",
+              "animation": "gm-active-pulse 3s ease-in-out infinite"
+            },
+            "gaming-intense": {
+              "icon": "󱎃",
+              "class": "gm-icon gm-icon--intense",
+              "color": "var(--cc-green)",
+              "tooltip": "High-performance gaming",
+              "glow": "0 0 24px rgba(166,227,161,0.65)",
+              "animation": "gm-intense-pulse 1.5s ease-in-out infinite"
+            },
+            "fps-critical": {
+              "icon": "󰎃",
+              "class": "gm-icon gm-icon--fps-warn",
+              "color": "var(--cc-red)",
+              "tooltip": "FPS below target",
+              "animation": "critical-pulse 1s ease-in-out infinite"
+            },
+            "thermal-throttle": {
+              "icon": "󱐋",
+              "class": "gm-icon gm-icon--thermal",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Thermal throttling detected",
+              "animation": "thermal-warn 2s ease-in-out infinite"
+            }
+          },
+          "font-size": "22px",
+          "transition": "all 300ms cubic-bezier(0.34,1.56,0.64,1)"
+        },
+  
+        "labels": {
+          "primary": {
+            "class": "gm-label-primary",
+            "font-size": "13px",
+            "font-weight": 800,
+            "color": "var(--cc-text-primary)",
+            "states": {
+              "off":               "Game Mode",
+              "activating":        "Activating…",
+              "on":                "Game Mode",
+              "gaming-intense":    "Gaming — Max Perf",
+              "fps-critical":      "FPS Warning",
+              "thermal-throttle":  "Thermal Alert"
+            }
+          },
+          "secondary": {
+            "class": "gm-label-secondary",
+            "font-size": "11px",
+            "font-weight": 500,
+            "color": "var(--cc-text-muted)",
+            "states": {
+              "off":              "Performance optimizations off",
+              "activating":       "Applying optimizations…",
+              "on":               "{active-game}  •  {fps} FPS  •  {gpu}%",
+              "gaming-intense":   "{fps} FPS  •  GPU {gpu}%  •  CPU {cpu}%",
+              "fps-critical":     "{fps} FPS — below {target-fps} target",
+              "thermal-throttle": "{temp}°C — reduce settings"
+            }
+          }
+        }
+      },
+  
+      "right": {
+        "switch": {
+          "class": "gm-switch",
+          "aria-label": "Toggle game mode",
+          "command-on":    "ash mode game",
+          "command-off":   "ash mode default",
+          "state-command": "ash mode status --json | jq -r '.mode'",
+          "state-on":      "game",
+          "keybind":       "g",
+  
+          "track": {
+            "width": 52,
+            "height": 28,
+            "border-radius": 100,
+            "states": {
+              "off": {
+                "background": "var(--cc-surface0)",
+                "border": "2px solid var(--cc-border)"
+              },
+              "on": {
+                "background": "linear-gradient(90deg, #40a02b, #a6e3a1)",
+                "border": "2px solid #40a02b",
+                "box-shadow": [
+                  "0 0 20px rgba(166,227,161,0.45)",
+                  "inset 0 1px 0 rgba(255,255,255,0.25)"
+                ]
+              }
+            },
+            "animation": {
+              "on":  "gm-track-on  350ms cubic-bezier(0.34,1.56,0.64,1) forwards",
+              "off": "gm-track-off 250ms cubic-bezier(0.4,0,0.2,1) forwards"
+            }
+          },
+  
+          "thumb": {
+            "size": 20,
+            "margin": 3,
+            "border-radius": "50%",
+            "background": "#ffffff",
+            "states": {
+              "off": { "transform": "translateX(0)"    },
+              "on":  { "transform": "translateX(24px)" }
+            },
+            "icon": {
+              "on":  { "icon": "󰎃", "size": "11px", "color": "#40a02b"             },
+              "off": { "icon": "󰎃", "size": "11px", "color": "var(--cc-surface0)" }
+            },
+            "box-shadow": [
+              "0 2px 6px rgba(0,0,0,0.30)",
+              "0 0 8px rgba(166,227,161,0.30)"
+            ]
+          }
+        },
+  
+        "quick-launch": {
+          "enabled": true,
+          "icon": "󰐊",
+          "class": "btn-gm-launch btn-icon",
+          "tooltip": "Launch game",
+          "command": "~/.config/swaync/scripts/game-launcher.sh",
+          "margin-left": 6,
+          "color": "var(--cc-text-muted)",
+          "hover-color": "var(--cc-green)"
+        }
+      }
+    },
+  
+    "live-metrics": {
+      "enabled": true,
+      "class": "gm-live-metrics",
+      "show-when": "active",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+      "poll-interval": 1000,
+  
+      "fps-display": {
+        "enabled": true,
+        "class": "gm-fps",
+        "layout": "row",
+        "gap": 12,
+        "align": "center",
+        "margin-bottom": 10,
+  
+        "main-fps": {
+          "class": "fps-main",
+          "font-size": "42px",
+          "font-weight": 900,
+          "font-family": "JetBrainsMono Nerd Font",
+          "letter-spacing": "-0.03em",
+          "color": "dynamic",
+          "color-thresholds": {
+            "0":   "var(--cc-red)",
+            "30":  "var(--cc-yellow)",
+            "60":  "var(--cc-green)",
+            "120": "var(--cc-sapphire)"
+          },
+          "glow": "dynamic",
+          "suffix": {
+            "text": "FPS",
+            "font-size": "14px",
+            "font-weight": 700,
+            "color": "var(--cc-text-muted)",
+            "vertical-align": "baseline"
+          },
+          "animation": "fps-counter-update 100ms ease",
+          "command": "~/.config/swaync/scripts/get-fps.sh"
+        },
+  
+        "fps-stats": {
+          "class": "fps-stats",
+          "gap": 4,
+          "items": [
+            {
+              "id": "avg",
+              "label": "AVG",
+              "format": "{value}",
+              "color": "var(--cc-text-muted)",
+              "font-size": "11px",
+              "font-family": "JetBrainsMono Nerd Font"
+            },
+            {
+              "id": "min",
+              "label": "MIN",
+              "format": "{value}",
+              "color": "var(--cc-red)",
+              "font-size": "11px",
+              "font-family": "JetBrainsMono Nerd Font"
+            },
+            {
+              "id": "1pct",
+              "label": "1%",
+              "format": "{value}",
+              "color": "var(--cc-yellow)",
+              "font-size": "11px",
+              "font-family": "JetBrainsMono Nerd Font",
+              "tooltip": "1% low frametimes"
+            },
+            {
+              "id": "frametimes",
+              "label": "FT",
+              "format": "{value}ms",
+              "color": "var(--cc-text-secondary)",
+              "font-size": "11px",
+              "font-family": "JetBrainsMono Nerd Font",
+              "tooltip": "Frame time"
+            }
+          ],
+          "stat-style": {
+            "border-radius": "6px",
+            "padding": "3px 7px",
+            "background": "var(--cc-widget-bg)",
+            "border": "1px solid var(--cc-border-subtle)",
+            "label-size": "9px",
+            "label-color": "var(--cc-text-muted)"
+          }
+        }
+      },
+  
+      "fps-graph": {
+        "enabled": true,
+        "class": "gm-fps-graph",
+        "type": "line",
+        "width": "100%",
+        "height": 36,
+        "border-radius": 8,
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "samples": 60,
+        "interval": 1000,
+        "padding": "4px 6px",
+        "margin-bottom": 10,
+  
+        "line": {
+          "color": "dynamic",
+          "color-source": "fps-value",
+          "line-width": 1.5,
+          "fill-opacity": 0.15,
+          "smooth": true
+        },
+  
+        "target-line": {
+          "enabled": true,
+          "values": [60, 120, 144, 165, 240],
+          "color": "rgba(255,255,255,0.20)",
+          "dash-pattern": [4, 4],
+          "label": {
+            "font-size": "9px",
+            "color": "rgba(255,255,255,0.35)"
+          }
+        },
+  
+        "grid": {
+          "enabled": true,
+          "color": "var(--cc-border-subtle)",
+          "opacity": 0.30
+        },
+  
+        "tooltips": {
+          "enabled": true,
+          "format": "{fps} FPS at {time}"
+        }
+      },
+  
+      "hardware-meters": {
+        "enabled": true,
+        "class": "gm-hw-meters",
+        "layout": "row",
+        "gap": 6,
+  
+        "items": [
+          {
+            "id": "cpu",
+            "icon": "󰻠",
+            "label": "CPU",
+            "format": "{usage}%",
+            "command": "~/.config/swaync/scripts/metrics.sh cpu",
+            "poll-interval": 1000,
+            "class": "hw-meter",
+            "color-thresholds": {
+              "0":  "var(--cc-green)",
+              "70": "var(--cc-yellow)",
+              "90": "var(--cc-red)"
+            },
+            "mini-bar": {
+              "enabled": true,
+              "height": 3,
+              "border-radius": 100
+            }
+          },
+          {
+            "id": "gpu",
+            "icon": "󰾲",
+            "label": "GPU",
+            "format": "{usage}%",
+            "command": "~/.config/swaync/scripts/metrics.sh gpu",
+            "poll-interval": 1000,
+            "class": "hw-meter",
+            "color-thresholds": {
+              "0":  "var(--cc-green)",
+              "80": "var(--cc-yellow)",
+              "95": "var(--cc-red)"
+            },
+            "mini-bar": { "enabled": true, "height": 3 }
+          },
+          {
+            "id": "vram",
+            "icon": "󰍛",
+            "label": "VRAM",
+            "format": "{used}G",
+            "command": "~/.config/swaync/scripts/metrics.sh vram",
+            "poll-interval": 2000,
+            "class": "hw-meter",
+            "mini-bar": { "enabled": true, "height": 3 }
+          },
+          {
+            "id": "ram",
+            "icon": "󰍛",
+            "label": "RAM",
+            "format": "{used}G",
+            "command": "free -g | awk '/Mem/{print $3}'",
+            "poll-interval": 3000,
+            "class": "hw-meter",
+            "mini-bar": { "enabled": true, "height": 3 }
+          },
+          {
+            "id": "temp",
+            "icon": "󱃂",
+            "label": "TEMP",
+            "format": "{temp}°C",
+            "command": "~/.config/swaync/scripts/metrics.sh temp",
+            "poll-interval": 2000,
+            "class": "hw-meter",
+            "color-thresholds": {
+              "0":  "var(--cc-green)",
+              "75": "var(--cc-yellow)",
+              "90": "var(--cc-red)"
+            },
+            "mini-bar": { "enabled": true, "height": 3 }
+          }
+        ],
+  
+        "meter-style": {
+          "border-radius": "10px",
+          "padding": "8px 8px 6px",
+          "background": "var(--cc-widget-bg)",
+          "border": "1px solid var(--cc-border-subtle)",
+          "flex": 1,
+          "gap": 3,
+          "icon-size": "14px",
+          "label-size": "9px",
+          "value-size": "12px",
+          "value-weight": 800,
+          "value-family": "JetBrainsMono Nerd Font"
+        }
+      }
+    },
+  
+    "performance-profiles": {
+      "enabled": true,
+      "class": "gm-profiles",
+      "label": "Performance Profile",
+      "label-icon": "󰓅",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+      "layout": "row",
+      "gap": 6,
+  
+      "profiles": [
+        {
+          "id": "eco",
+          "label": "Eco",
+          "icon": "󰁹",
+          "description": "Power saving — reduced performance",
+          "color": "var(--cc-green)",
+          "glow": "rgba(166,227,161,0.30)",
+          "class": "gm-profile-btn",
+          "settings": {
+            "cpu-governor": "schedutil",
+            "gpu-power-limit": 70,
+            "process-priority": 0,
+            "network-optimization": false,
+            "amd-performance-level": "auto",
+            "nvidia-powermizer": "adaptive"
+          },
+          "command": "ash gaming optimize --profile eco"
+        },
+        {
+          "id": "balanced",
+          "label": "Balanced",
+          "icon": "󰗑",
+          "description": "Good performance + thermals",
+          "color": "var(--cc-accent)",
+          "glow": "var(--cc-accent-glow)",
+          "class": "gm-profile-btn gm-profile-btn--default",
+          "badge": "DEF",
+          "settings": {
+            "cpu-governor": "performance",
+            "gpu-power-limit": 85,
+            "process-priority": 5,
+            "network-optimization": true
+          },
+          "command": "ash gaming optimize --profile balanced"
+        },
+        {
+          "id": "performance",
+          "label": "Max FPS",
+          "icon": "󱖑",
+          "description": "Maximum frames — no limits",
+          "color": "var(--cc-yellow)",
+          "glow": "var(--cc-yellow-glow)",
+          "class": "gm-profile-btn",
+          "settings": {
+            "cpu-governor": "performance",
+            "gpu-power-limit": 100,
+            "gpu-overclock": true,
+            "process-priority": 10,
+            "network-optimization": true,
+            "amd-performance-level": "high",
+            "nvidia-powermizer": "prefer-max"
+          },
+          "command": "ash gaming optimize --profile performance"
+        },
+        {
+          "id": "ultra",
+          "label": "Ultra",
+          "icon": "󱡂",
+          "description": "Extreme OC — for benchmarks",
+          "color": "var(--cc-red)",
+          "glow": "rgba(243,139,168,0.35)",
+          "class": "gm-profile-btn gm-profile-btn--ultra",
+          "settings": {
+            "cpu-governor": "performance",
+            "cpu-boost": true,
+            "gpu-power-limit": 115,
+            "gpu-overclock": "aggressive",
+            "ram-overclock": true,
+            "process-priority": 19,
+            "kill-nonessential": true
+          },
+          "command": "ash gaming optimize --profile ultra",
+          "confirm": {
+            "enabled": true,
+            "message": "Ultra mode may cause instability. Continue?",
+            "icon": "󰀦"
+          }
+        }
+      ],
+  
+      "state-command": "ash gaming status --json | jq -r '.profile'",
+  
+      "profile-style": {
+        "border-radius": "12px",
+        "padding": "9px 10px",
+        "flex": 1,
+        "gap": 5,
+        "font-size": "11px",
+        "font-weight": 700,
+        "icon-size": "18px",
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+  
+        "active": {
+          "background": "{profile-color-alpha}",
+          "border-color": "{profile-color}",
+          "color": "{profile-color}",
+          "box-shadow": [
+            "0 0 0 1px {profile-color}",
+            "0 4px 16px {profile-glow}"
+          ]
+        },
+  
+        "hover": {
+          "transform": "translateY(-2px)",
+          "box-shadow": "0 6px 18px var(--cc-shadow)"
+        },
+  
+        "active-btn": { "transform": "scale(0.95)" },
+  
+        "badge-style": {
+          "font-size": "8px",
+          "font-weight": 900,
+          "border-radius": "100px",
+          "padding": "1px 5px",
+          "letter-spacing": "0.06em"
+        }
+      }
+    },
+  
+    "game-optimizations": {
+      "enabled": true,
+      "class": "gm-optimizations",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󰒓",
+        "label": "Optimizations",
+        "class": "section-label"
+      },
+  
+      "grid": {
+        "columns": 2,
+        "gap": 6,
+  
+        "toggles": [
+          {
+            "id": "dnd",
+            "label": "Silence Notifs",
+            "icon": "󰂛",
+            "description": "DND during gameplay",
+            "default": true,
+            "class": "opt-toggle",
+            "color": "var(--cc-accent)",
+            "command-on":  "swaync-client --dnd-on",
+            "command-off": "swaync-client --dnd-off"
+          },
+          {
+            "id": "compositor-tweaks",
+            "label": "Disable Blur",
+            "icon": "󰏤",
+            "description": "Remove compositing effects",
+            "default": true,
+            "class": "opt-toggle",
+            "color": "var(--cc-accent)",
+            "command-on":  "hyprctl keyword decoration:blur:enabled false",
+            "command-off": "hyprctl keyword decoration:blur:enabled true"
+          },
+          {
+            "id": "mangohud",
+            "label": "MangoHud",
+            "icon": "󱂬",
+            "description": "In-game overlay",
+            "default": false,
+            "class": "opt-toggle",
+            "color": "var(--cc-green)",
+            "command-on":  "~/.config/swaync/scripts/mangohud-on.sh",
+            "command-off": "~/.config/swaync/scripts/mangohud-off.sh"
+          },
+          {
+            "id": "gamescope",
+            "label": "GameScope",
+            "icon": "󰊗",
+            "description": "Wayland compositing for games",
+            "default": false,
+            "class": "opt-toggle",
+            "color": "var(--cc-yellow)",
+            "command-on":  "~/.config/swaync/scripts/gamescope-on.sh",
+            "command-off": "~/.config/swaync/scripts/gamescope-off.sh"
+          },
+          {
+            "id": "network-qos",
+            "label": "Network QoS",
+            "icon": "󰤨",
+            "description": "Prioritize game traffic",
+            "default": true,
+            "class": "opt-toggle",
+            "color": "var(--cc-accent)",
+            "command-on":  "~/.config/swaync/scripts/net-qos-game.sh on",
+            "command-off": "~/.config/swaync/scripts/net-qos-game.sh off"
+          },
+          {
+            "id": "cpu-boost",
+            "label": "CPU Boost",
+            "icon": "󰻠",
+            "description": "Enable processor boost",
+            "default": true,
+            "class": "opt-toggle",
+            "color": "var(--cc-yellow)",
+            "command-on":  "~/.config/swaync/scripts/cpu-boost.sh on",
+            "command-off": "~/.config/swaync/scripts/cpu-boost.sh off"
+          },
+          {
+            "id": "gpu-clocks",
+            "label": "Lock GPU Clocks",
+            "icon": "󰾲",
+            "description": "Stable GPU frequency",
+            "default": false,
+            "class": "opt-toggle",
+            "color": "var(--cc-red)",
+            "command-on":  "~/.config/swaync/scripts/gpu-lock.sh on",
+            "command-off": "~/.config/swaync/scripts/gpu-lock.sh off"
+          },
+          {
+            "id": "steam-gamemode",
+            "label": "GameMode Daemon",
+            "icon": "󱎃",
+            "description": "Feral gamemode service",
+            "default": true,
+            "class": "opt-toggle",
+            "color": "var(--cc-accent)",
+            "command-on":  "gamemoded -r &",
+            "command-off": "kill $(pgrep gamemoded)",
+            "state-command": "pgrep -x gamemoded"
+          }
+        ]
+      },
+  
+      "toggle-style": {
+        "border-radius": "12px",
+        "padding": "9px 10px",
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "gap": 8,
+  
+        "icon": { "font-size": "18px", "min-width": "22px" },
+        "label": { "font-size": "12px", "font-weight": 700, "flex": 1 },
+        "description": { "font-size": "10px", "color": "var(--cc-text-muted)" },
+  
+        "mini-switch": {
+          "width": 32,
+          "height": 18,
+          "thumb-size": 12,
+          "margin": 2
+        },
+  
+        "active": {
+          "background": "{toggle-color-alpha}",
+          "border-color": "{toggle-color}"
+        },
+  
+        "hover": { "background": "var(--cc-toggle-hover-bg)" }
+      }
+    },
+  
+    "running-games": {
+      "enabled": true,
+      "class": "gm-running",
+      "show-when": "active",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󰐊",
+        "label": "Running Games",
+        "class": "section-label",
+        "count-badge": {
+          "class": "game-count-badge",
+          "background": "var(--cc-green)",
+          "color": "#0d1117",
+          "border-radius": "100px",
+          "padding": "1px 7px",
+          "font-size": "10px",
+          "font-weight": 800,
+          "animation": "badge-bounce"
+        }
+      },
+  
+      "game-item": {
+        "class": "gm-game-item",
+        "border-radius": "12px",
+        "padding": "10px 12px",
+        "margin-bottom": 6,
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "layout": "row",
+        "gap": 10,
+        "align": "center",
+  
+        "icon": {
+          "size": 40,
+          "border-radius": "10px",
+          "fallback-icon": "󰊗",
+          "fallback-background": "var(--cc-surface0)",
+          "border": "1px solid var(--cc-border-subtle)"
+        },
+  
+        "info": {
+          "flex": 1,
+          "min-width": 0,
+  
+          "name": {
+            "font-size": "13px",
+            "font-weight": 700,
+            "color": "var(--cc-text-primary)",
+            "max-length": 22,
+            "overflow": "ellipsis"
+          },
+  
+          "meta": {
+            "font-size": "10px",
+            "font-weight": 600,
+            "color": "var(--cc-text-muted)",
+            "format": "{platform}  •  {playtime}  •  PID {pid}"
+          }
+        },
+  
+        "live-fps": {
+          "class": "game-fps-badge",
+          "format": "{fps}",
+          "suffix": "FPS",
+          "font-size": "14px",
+          "font-weight": 900,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "dynamic",
+          "color-thresholds": {
+            "0":  "var(--cc-red)",
+            "30": "var(--cc-yellow)",
+            "60": "var(--cc-green)"
+          },
+          "min-width": 52,
+          "text-align": "right"
+        },
+  
+        "actions": {
+          "gap": 4,
+          "items": [
+            {
+              "id": "focus",
+              "icon": "󰊓",
+              "tooltip": "Focus window",
+              "class": "btn-game-focus btn-icon",
+              "command": "hyprctl dispatch focuswindow pid:{pid}",
+              "color": "var(--cc-accent)"
+            },
+            {
+              "id": "kill",
+              "icon": "󰅙",
+              "tooltip": "Kill process",
+              "class": "btn-game-kill btn-icon",
+              "command": "kill -9 {pid}",
+              "color": "var(--cc-red)",
+              "confirm": { "enabled": true, "message": "Kill {name}?" }
+            }
+          ]
+        },
+  
+        "active-indicator": {
+          "enabled": true,
+          "class": "game-active-dot",
+          "size": 8,
+          "border-radius": "50%",
+          "background": "var(--cc-green)",
+          "glow": "0 0 6px rgba(166,227,161,0.60)",
+          "animation": "playing-dot-pulse 2s ease-in-out infinite"
+        },
+  
+        "hover": {
+          "background": "var(--cc-notif-hover-bg)",
+          "transform": "translateX(2px)"
+        },
+  
+        "animation": {
+          "enter": "notif-fade-in",
+          "duration": "200ms"
+        }
+      },
+  
+      "detect": {
+        "method": "process-scan",
+        "command": "~/.config/swaync/scripts/detect-games.sh",
+        "poll-interval": 5000,
+        "steam-library": "~/.local/share/Steam/steamapps",
+        "lutris-library": "~/.local/share/lutris",
+        "heroic-library": "~/.config/heroic"
+      }
+    },
+  
+    "per-game-profiles": {
+      "enabled": true,
+      "class": "gm-per-game",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󱎃",
+        "label": "Per-Game Profiles",
+        "class": "section-label",
+        "add-button": {
+          "icon": "󰐕",
+          "class": "btn-add-game-profile btn-icon",
+          "command": "~/.config/swaync/scripts/add-game-profile.sh"
+        }
+      },
+  
+      "profiles": [
+        {
+          "id": "cs2",
+          "name": "Counter-Strike 2",
+          "icon": "󰊗",
+          "exe": "cs2",
+          "auto-apply": true,
+          "performance-profile": "performance",
+          "fps-target": 300,
+          "settings": {
+            "cpu-governor": "performance",
+            "mangohud": false,
+            "network-qos": true
+          },
+          "class": "game-profile-item"
+        },
+        {
+          "id": "cyberpunk",
+          "name": "Cyberpunk 2077",
+          "icon": "󰊗",
+          "exe": "Cyberpunk2077.exe",
+          "auto-apply": true,
+          "performance-profile": "balanced",
+          "fps-target": 60,
+          "settings": {
+            "gpu-power-limit": 100,
+            "mangohud": true
+          },
+          "class": "game-profile-item"
+        }
+      ],
+  
+      "item-style": {
+        "layout": "space-between",
+        "padding": "8px 10px",
+        "border-radius": "10px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "margin-bottom": 4,
+        "hover": {
+          "background": "var(--cc-hover)"
+        }
+      }
+    },
+  
+    "overlay-controls": {
+      "enabled": true,
+      "class": "gm-overlays",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󱂬",
+        "label": "Overlays & Monitoring",
+        "class": "section-label"
+      },
+  
+      "controls": [
+        {
+          "id": "mangohud",
+          "label": "MangoHud",
+          "icon": "󱂬",
+          "color": "var(--cc-green)",
+          "class": "overlay-control",
+          "toggle": {
+            "command-on":  "MANGOHUD=1 && notify-send '󱂬 MangoHud' 'Overlay enabled'",
+            "command-off": "MANGOHUD=0"
+          },
+          "config": {
+            "label": "Configure",
+            "command": "nvim ~/.config/MangoHud/MangoHud.conf"
+          }
+        },
+        {
+          "id": "goverlay",
+          "label": "GOverlay",
+          "icon": "󱂬",
+          "color": "var(--cc-accent)",
+          "class": "overlay-control",
+          "command": "goverlay"
+        },
+        {
+          "id": "obs-gaming",
+          "label": "OBS Recording",
+          "icon": "󰐊",
+          "color": "var(--cc-red)",
+          "class": "overlay-control",
+          "toggle": {
+            "command-on":  "obs-cmd recording start",
+            "command-off": "obs-cmd recording stop"
+          }
+        },
+        {
+          "id": "replay-buffer",
+          "label": "Replay Buffer",
+          "icon": "󰦕",
+          "color": "var(--cc-yellow)",
+          "class": "overlay-control",
+          "toggle": {
+            "command-on":  "obs-cmd replay start",
+            "command-off": "obs-cmd replay stop"
+          },
+          "save-button": {
+            "label": "Save Clip",
+            "icon": "󰸐",
+            "command": "obs-cmd replay save"
+          }
+        }
+      ],
+  
+      "control-style": {
+        "border-radius": "10px",
+        "padding": "8px 10px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "margin-bottom": 4,
+        "layout": "space-between",
+        "align": "center"
+      }
+    },
+  
+    "proton-settings": {
+      "enabled": true,
+      "class": "gm-proton",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "header": {
+        "icon": "󱎃",
+        "label": "Proton / Wine",
+        "class": "section-label"
+      },
+  
+      "version-selector": {
+        "label": "Proton Version",
+        "command-list": "ls ~/.steam/steam/compatibilitytools.d/",
+        "command-set":  "~/.config/swaync/scripts/set-proton.sh {version}",
+        "class": "proton-selector"
+      },
+  
+      "env-vars": {
+        "label": "Launch Options",
+        "class": "proton-env",
+        "presets": [
+          { "label": "DXVK",       "var": "PROTON_USE_WINED3D=0"   },
+          { "label": "VKD3D",      "var": "PROTON_NO_D3D12=0"      },
+          { "label": "ESync",      "var": "PROTON_NO_ESYNC=0"      },
+          { "label": "FSync",      "var": "PROTON_NO_FSYNC=0"      },
+          { "label": "No Nvapi",   "var": "PROTON_HIDE_NVIDIA_GPU=1"},
+          { "label": "Heap4GB",    "var": "WINE_HEAP_DELAY_FREE=1"  }
+        ]
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle-gamemode":    "g",
+        "profile-eco":        "1",
+        "profile-balanced":   "2",
+        "profile-perf":       "3",
+        "profile-ultra":      "4",
+        "toggle-mangohud":    "m",
+        "save-replay":        "shift+r"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "active-style": {
+        "border-color": "var(--cc-green)",
+        "box-shadow": [
+          "0 4px 24px var(--cc-shadow)",
+          "0 0 0 1px var(--cc-green)",
+          "0 0 28px rgba(166,227,161,0.20)"
+        ]
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "0ms",
+        "easing":   "cubic-bezier(0.19,1,0.22,1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-on":  "Game mode enabled — {profile} profile",
+      "announce-off": "Game mode disabled",
+      "high-contrast-support": true,
+      "reduced-motion-support": true
+    }
+  }

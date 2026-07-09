@@ -1,0 +1,1130 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Wi-Fi Toggle Widget",
+      "version": "5.0.0",
+      "description": "Premium Wi-Fi control with network scanner, signal strength, hotspot management, VPN status, and live traffic monitoring",
+      "author": "ash-dotfiles",
+      "icon": "󰤨",
+      "category": "network",
+      "tags": [
+        "wifi", "wireless", "network", "nmcli", "hotspot",
+        "signal", "scanner", "dns", "vpn", "traffic", "qr"
+      ]
+    },
+  
+    "widget": {
+      "type": "wifi-toggle",
+      "id": "ash-wifi-widget",
+      "class": "ash-widget ash-widget--wifi ash-widget--glass",
+      "aria-label": "Wi-Fi Network Control",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 }
+    },
+  
+    "main-toggle": {
+      "enabled": true,
+      "class": "wifi-main-toggle",
+      "layout": "space-between",
+      "align": "center",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "disabled": {
+              "icon": "󰤭",
+              "class": "wifi-icon wifi-icon--off",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Wi-Fi disabled",
+              "glow": "none"
+            },
+            "disconnected": {
+              "icon": "󰤯",
+              "class": "wifi-icon wifi-icon--disconnected",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Not connected"
+            },
+            "scanning": {
+              "icon": "󰤫",
+              "class": "wifi-icon wifi-icon--scanning",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Scanning…",
+              "animation": "wifi-scan-rotate 1.8s linear infinite"
+            },
+            "connecting": {
+              "icon": "󰤩",
+              "class": "wifi-icon wifi-icon--connecting",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Connecting…",
+              "animation": "wifi-connecting-pulse 1.2s ease-in-out infinite"
+            },
+            "signal-none": {
+              "icon": "󰤯",
+              "class": "wifi-icon wifi-icon--s0",
+              "color": "var(--cc-red)",
+              "tooltip": "No signal"
+            },
+            "signal-weak": {
+              "icon": "󰤟",
+              "class": "wifi-icon wifi-icon--s1",
+              "color": "var(--cc-red)",
+              "tooltip": "Weak signal"
+            },
+            "signal-fair": {
+              "icon": "󰤢",
+              "class": "wifi-icon wifi-icon--s2",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Fair signal"
+            },
+            "signal-good": {
+              "icon": "󰤥",
+              "class": "wifi-icon wifi-icon--s3",
+              "color": "var(--cc-accent)",
+              "tooltip": "Good signal"
+            },
+            "signal-excellent": {
+              "icon": "󰤨",
+              "class": "wifi-icon wifi-icon--s4",
+              "color": "var(--cc-green)",
+              "tooltip": "Excellent signal",
+              "glow": "0 0 12px rgba(166,227,161,0.40)"
+            },
+            "secured": {
+              "icon": "󰤨",
+              "color": "var(--cc-accent)",
+              "badge": { "icon": "󰌾", "color": "var(--cc-green)", "size": "10px" }
+            },
+            "open": {
+              "icon": "󰤨",
+              "color": "var(--cc-yellow)",
+              "badge": { "icon": "󰦻", "color": "var(--cc-yellow)", "size": "10px" }
+            },
+            "hotspot": {
+              "icon": "󱛁",
+              "class": "wifi-icon wifi-icon--hotspot",
+              "color": "var(--cc-accent)",
+              "animation": "hotspot-radiate 2s ease-out infinite"
+            },
+            "error": {
+              "icon": "󰤮",
+              "class": "wifi-icon wifi-icon--error",
+              "color": "var(--cc-red)",
+              "animation": "icon-shake 500ms ease"
+            }
+          },
+          "thresholds": {
+            "signal-none": 0,
+            "signal-weak": 1,
+            "signal-fair": 30,
+            "signal-good": 55,
+            "signal-excellent": 75
+          },
+          "font-size": "22px",
+          "transition": "all 300ms cubic-bezier(0.34,1.56,0.64,1)"
+        },
+  
+        "labels": {
+          "primary": {
+            "class": "wifi-label-primary",
+            "font-size": "13px",
+            "font-weight": 800,
+            "color": "var(--cc-text-primary)",
+            "states": {
+              "disabled":     "Wi-Fi",
+              "disconnected": "Wi-Fi",
+              "scanning":     "Scanning…",
+              "connecting":   "Connecting…",
+              "connected":    "{ssid}",
+              "hotspot":      "Hotspot Active"
+            },
+            "max-length": 24,
+            "overflow": "ellipsis",
+            "animation": {
+              "on-change": "track-info-fade",
+              "duration": "250ms"
+            }
+          },
+          "secondary": {
+            "class": "wifi-label-secondary",
+            "font-size": "11px",
+            "font-weight": 500,
+            "color": "var(--cc-text-muted)",
+            "states": {
+              "disabled":     "Wireless disabled",
+              "disconnected": "Not connected",
+              "scanning":     "Looking for networks",
+              "connecting":   "Authenticating…",
+              "connected":    "{frequency} GHz  •  {signal}%  •  {security}",
+              "hotspot":      "{clients} device{s} connected"
+            }
+          }
+        }
+      },
+  
+      "right": {
+        "switch": {
+          "class": "wifi-switch",
+          "command-on":    "nmcli radio wifi on",
+          "command-off":   "nmcli radio wifi off",
+          "state-command": "nmcli radio wifi",
+          "state-on":      "enabled",
+          "keybind": "w",
+          "aria-label": "Toggle Wi-Fi",
+  
+          "track": {
+            "width": 52,
+            "height": 28,
+            "border-radius": 100,
+            "states": {
+              "off": {
+                "background": "var(--cc-surface0)",
+                "border": "2px solid var(--cc-border)"
+              },
+              "on": {
+                "background": "var(--cc-accent)",
+                "border": "2px solid var(--cc-accent)",
+                "box-shadow": [
+                  "0 0 16px var(--cc-accent-glow)",
+                  "inset 0 1px 0 rgba(255,255,255,0.20)"
+                ]
+              }
+            },
+            "animation": {
+              "on":  "switch-track-on  300ms cubic-bezier(0.34,1.56,0.64,1) forwards",
+              "off": "switch-track-off 250ms cubic-bezier(0.4,0,0.2,1) forwards"
+            }
+          },
+  
+          "thumb": {
+            "size": 20,
+            "margin": 3,
+            "border-radius": "50%",
+            "background": "#ffffff",
+            "states": {
+              "off": { "transform": "translateX(0)"    },
+              "on":  { "transform": "translateX(24px)" }
+            },
+            "icon": {
+              "on":  { "icon": "󰤨", "size": "10px", "color": "var(--cc-accent)"   },
+              "off": { "icon": "󰤭", "size": "10px", "color": "var(--cc-surface0)" }
+            },
+            "box-shadow": "0 2px 6px rgba(0,0,0,0.30)",
+            "animation": {
+              "transition": "transform 280ms cubic-bezier(0.34,1.56,0.64,1)"
+            }
+          }
+        },
+  
+        "settings-btn": {
+          "enabled": true,
+          "icon": "󰒓",
+          "class": "btn-wifi-settings btn-icon",
+          "tooltip": "Network settings",
+          "command": "nm-connection-editor",
+          "font-size": "15px",
+          "color": "var(--cc-text-muted)",
+          "margin-left": 6,
+          "hover-color": "var(--cc-accent)"
+        }
+      }
+    },
+  
+    "signal-meter": {
+      "enabled": true,
+      "class": "wifi-signal-meter",
+      "show-when": "connected",
+      "layout": "row",
+      "gap": 6,
+      "align": "center",
+      "padding": "0 0 12px",
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "bars": {
+        "count": 5,
+        "width": 5,
+        "gap": 3,
+        "max-height": 20,
+        "heights": [4, 7, 10, 14, 20],
+        "border-radius": 2,
+        "color-filled": "dynamic",
+        "color-map": {
+          "0":  "var(--cc-red)",
+          "20": "var(--cc-red)",
+          "40": "var(--cc-yellow)",
+          "60": "var(--cc-accent)",
+          "80": "var(--cc-green)"
+        },
+        "color-empty": "var(--cc-surface1)",
+        "animation": {
+          "fill": "signal-bar-fill 400ms cubic-bezier(0.34,1.56,0.64,1) both",
+          "stagger": 60
+        }
+      },
+  
+      "signal-label": {
+        "class": "signal-label",
+        "format": "{signal}%",
+        "font-size": "11px",
+        "font-weight": 800,
+        "font-family": "JetBrainsMono Nerd Font",
+        "color": "dynamic",
+        "color-map": {
+          "0":  "var(--cc-red)",
+          "40": "var(--cc-yellow)",
+          "70": "var(--cc-green)"
+        }
+      },
+  
+      "frequency-badge": {
+        "class": "freq-badge",
+        "states": {
+          "2.4": { "label": "2.4 GHz", "color": "var(--cc-yellow)", "icon": "󰤢" },
+          "5":   { "label": "5 GHz",   "color": "var(--cc-accent)",  "icon": "󰤨" },
+          "6":   { "label": "6 GHz",   "color": "var(--cc-green)",   "icon": "󰤨" }
+        },
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "border-radius": "100px",
+        "padding": "2px 8px",
+        "font-size": "10px",
+        "font-weight": 700
+      },
+  
+      "speed-display": {
+        "class": "wifi-speed",
+        "show-when": "connected",
+        "layout": "row",
+        "gap": 8,
+        "items": [
+          {
+            "id": "download",
+            "icon": "󰇚",
+            "format": "{speed}",
+            "command": "~/.config/swaync/scripts/net-speed.sh down",
+            "poll-interval": 1500,
+            "class": "speed-down",
+            "color": "var(--cc-accent)",
+            "font-size": "11px",
+            "font-family": "JetBrainsMono Nerd Font",
+            "font-weight": 700
+          },
+          {
+            "id": "upload",
+            "icon": "󰕒",
+            "format": "{speed}",
+            "command": "~/.config/swaync/scripts/net-speed.sh up",
+            "poll-interval": 1500,
+            "class": "speed-up",
+            "color": "var(--cc-green)",
+            "font-size": "11px",
+            "font-family": "JetBrainsMono Nerd Font",
+            "font-weight": 700
+          }
+        ]
+      }
+    },
+  
+    "connection-details": {
+      "enabled": true,
+      "class": "wifi-conn-details",
+      "show-when": "connected",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "layout": "grid",
+      "columns": 2,
+      "gap": 8,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "fields": [
+        {
+          "id": "ip4",
+          "label": "IPv4",
+          "icon": "󰩟",
+          "command": "ip -4 addr show $(nmcli -t -f DEVICE,TYPE dev | grep ':wifi' | cut -d: -f1) | grep 'inet ' | awk '{print $2}'",
+          "class": "detail-field",
+          "copy-on-click": true,
+          "tooltip": "Click to copy"
+        },
+        {
+          "id": "ip6",
+          "label": "IPv6",
+          "icon": "󰩟",
+          "command": "ip -6 addr show $(nmcli -t -f DEVICE,TYPE dev | grep ':wifi' | cut -d: -f1) | grep 'inet6 ' | awk '{print $2}' | head -1",
+          "class": "detail-field",
+          "copy-on-click": true
+        },
+        {
+          "id": "gateway",
+          "label": "Gateway",
+          "icon": "󰛳",
+          "command": "ip route | grep default | awk '{print $3}'",
+          "class": "detail-field",
+          "copy-on-click": true
+        },
+        {
+          "id": "dns",
+          "label": "DNS",
+          "icon": "󰖟",
+          "command": "resolvectl status | grep 'DNS Servers' | awk '{print $3}' | head -1",
+          "class": "detail-field",
+          "copy-on-click": true
+        },
+        {
+          "id": "mac",
+          "label": "MAC",
+          "icon": "󰌜",
+          "command": "cat /sys/class/net/$(nmcli -t -f DEVICE,TYPE dev | grep ':wifi' | cut -d: -f1)/address",
+          "class": "detail-field",
+          "copy-on-click": true
+        },
+        {
+          "id": "bssid",
+          "label": "BSSID",
+          "icon": "󰤨",
+          "command": "nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes' | cut -d: -f2-",
+          "class": "detail-field",
+          "copy-on-click": true
+        },
+        {
+          "id": "security",
+          "label": "Security",
+          "icon": "󰌾",
+          "command": "nmcli -t -f ACTIVE,SECURITY dev wifi | grep '^yes' | cut -d: -f2",
+          "class": "detail-field"
+        },
+        {
+          "id": "channel",
+          "label": "Channel",
+          "icon": "󰀶",
+          "command": "nmcli -t -f ACTIVE,CHAN dev wifi | grep '^yes' | cut -d: -f2",
+          "class": "detail-field"
+        },
+        {
+          "id": "ping",
+          "label": "Latency",
+          "icon": "󰖤",
+          "command": "ping -c 1 -W 1 8.8.8.8 2>/dev/null | tail -1 | awk -F/ '{printf \"%.0fms\", $5}' || echo 'Timeout'",
+          "poll-interval": 10000,
+          "class": "detail-field",
+          "color-thresholds": {
+            "0":   "var(--cc-green)",
+            "50":  "var(--cc-yellow)",
+            "150": "var(--cc-red)"
+          }
+        },
+        {
+          "id": "public-ip",
+          "label": "Public IP",
+          "icon": "󰖟",
+          "command": "curl -s --max-time 3 ifconfig.me || echo 'Unavailable'",
+          "poll-interval": 60000,
+          "class": "detail-field",
+          "copy-on-click": true
+        }
+      ],
+  
+      "field-style": {
+        "border-radius": "8px",
+        "padding": "6px 8px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "gap": 6,
+  
+        "label": {
+          "font-size": "10px",
+          "font-weight": 700,
+          "color": "var(--cc-text-muted)",
+          "letter-spacing": "0.05em",
+          "text-transform": "uppercase"
+        },
+  
+        "value": {
+          "font-size": "11px",
+          "font-weight": 600,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "var(--cc-text-primary)",
+          "max-length": 18,
+          "overflow": "ellipsis"
+        },
+  
+        "hover": {
+          "background": "var(--cc-hover)",
+          "border-color": "var(--cc-accent)"
+        },
+  
+        "copy-flash": {
+          "animation": "copy-flash 400ms ease",
+          "background": "var(--cc-accent-alpha)"
+        }
+      }
+    },
+  
+    "network-scanner": {
+      "enabled": true,
+      "class": "wifi-scanner",
+      "label": "Networks",
+      "label-icon": "󰤨",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "search": {
+        "enabled": true,
+        "class": "wifi-search",
+        "placeholder": "󰍉  Search networks…",
+        "font-size": "12px",
+        "border-radius": "10px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-widget-border)",
+        "padding": "6px 12px",
+        "margin-bottom": "8px",
+        "focus": {
+          "border-color": "var(--cc-accent)",
+          "box-shadow": "0 0 0 3px var(--cc-accent-alpha)"
+        }
+      },
+  
+      "scan": {
+        "command-scan": "nmcli -t -f SSID,SIGNAL,SECURITY,FREQ,BSSID,IN-USE dev wifi list --rescan yes",
+        "command-scan-fast": "nmcli -t -f SSID,SIGNAL,SECURITY,FREQ,BSSID,IN-USE dev wifi list",
+        "auto-scan-interval": 30000,
+        "scan-on-open": true,
+        "parse-format": "tsv"
+      },
+  
+      "list": {
+        "class": "wifi-network-list",
+        "max-height": 200,
+        "scroll": true,
+        "max-display": 10,
+        "sort-by": "signal",
+        "sort-order": "desc",
+  
+        "network-item": {
+          "class": "wifi-network-item",
+          "border-radius": "10px",
+          "padding": "9px 10px",
+          "gap": 10,
+          "margin-bottom": 3,
+  
+          "signal-icon": {
+            "type": "bar-chart",
+            "bars": 4,
+            "size": 16,
+            "thresholds": {
+              "0":  { "bars-filled": 0, "color": "var(--cc-red)"    },
+              "25": { "bars-filled": 1, "color": "var(--cc-red)"    },
+              "50": { "bars-filled": 2, "color": "var(--cc-yellow)" },
+              "70": { "bars-filled": 3, "color": "var(--cc-accent)" },
+              "85": { "bars-filled": 4, "color": "var(--cc-green)"  }
+            }
+          },
+  
+          "network-info": {
+            "flex": 1,
+            "min-width": 0,
+  
+            "ssid": {
+              "font-size": "13px",
+              "font-weight": 700,
+              "color": "var(--cc-text-primary)",
+              "max-length": 24,
+              "overflow": "ellipsis"
+            },
+  
+            "meta": {
+              "font-size": "10px",
+              "color": "var(--cc-text-muted)",
+              "font-weight": 600,
+              "format": "{frequency}  •  {security-icon}  {security}",
+              "icons": {
+                "WPA3":  { "icon": "󰌾", "color": "var(--cc-green)"  },
+                "WPA2":  { "icon": "󰌾", "color": "var(--cc-accent)" },
+                "WPA":   { "icon": "󰦹", "color": "var(--cc-yellow)" },
+                "WEP":   { "icon": "󰦻", "color": "var(--cc-red)"    },
+                "Open":  { "icon": "󰦻", "color": "var(--cc-red)"    }
+              }
+            }
+          },
+  
+          "badges": {
+            "saved": {
+              "icon": "󰀀",
+              "color": "var(--cc-accent)",
+              "tooltip": "Saved network",
+              "size": "13px"
+            },
+            "connected": {
+              "icon": "󰄬",
+              "color": "var(--cc-green)",
+              "tooltip": "Connected",
+              "size": "13px",
+              "animation": "none"
+            }
+          },
+  
+          "actions": {
+            "show-on-hover": true,
+            "gap": 4,
+            "items": [
+              {
+                "id": "connect",
+                "icon": "󰌺",
+                "tooltip": "Connect",
+                "class": "btn-net-connect btn-icon",
+                "show-when": "not-connected",
+                "color": "var(--cc-accent)",
+                "command": "~/.config/swaync/scripts/wifi-connect.sh '{ssid}'"
+              },
+              {
+                "id": "disconnect",
+                "icon": "󰌼",
+                "tooltip": "Disconnect",
+                "class": "btn-net-disconnect btn-icon",
+                "show-when": "connected",
+                "color": "var(--cc-red)",
+                "command": "nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep ':wifi' | cut -d: -f1)"
+              },
+              {
+                "id": "forget",
+                "icon": "󰅙",
+                "tooltip": "Forget network",
+                "class": "btn-net-forget btn-icon",
+                "show-when": "saved",
+                "color": "var(--cc-text-muted)",
+                "command": "nmcli connection delete '{ssid}'",
+                "confirm": {
+                  "enabled": true,
+                  "message": "Forget '{ssid}'?"
+                }
+              },
+              {
+                "id": "qr",
+                "icon": "󰄌",
+                "tooltip": "Show QR code",
+                "class": "btn-net-qr btn-icon",
+                "show-when": "saved",
+                "color": "var(--cc-text-muted)",
+                "command": "~/.config/swaync/scripts/wifi-qr.sh '{ssid}'"
+              },
+              {
+                "id": "info",
+                "icon": "󰋼",
+                "tooltip": "Network details",
+                "class": "btn-net-info btn-icon",
+                "color": "var(--cc-text-muted)",
+                "command": "~/.config/swaync/scripts/wifi-info.sh '{bssid}'"
+              }
+            ]
+          },
+  
+          "states": {
+            "connected": {
+              "class": "network-item--connected",
+              "background": "var(--cc-accent-alpha)",
+              "border": "1px solid var(--cc-accent)",
+              "box-shadow": "0 0 0 1px var(--cc-accent)"
+            },
+            "saved": {
+              "class": "network-item--saved",
+              "background": "rgba(255,255,255,0.03)"
+            },
+            "default": {
+              "background": "var(--cc-widget-bg)",
+              "border": "1px solid transparent"
+            },
+            "open-network": {
+              "class": "network-item--open",
+              "border-left": "3px solid var(--cc-red)"
+            }
+          },
+  
+          "hover": {
+            "background": "var(--cc-notif-hover-bg)",
+            "border-color": "var(--cc-border)",
+            "transform": "translateX(2px)"
+          },
+  
+          "click-action": "connect",
+          "animation": {
+            "enter": "notif-fade-in",
+            "duration": "150ms",
+            "stagger": 20
+          }
+        }
+      },
+  
+      "scan-button": {
+        "enabled": true,
+        "class": "btn-scan",
+        "label": "Rescan",
+        "icon": "󰑓",
+        "icon-scanning": "󰑓",
+        "animation-scanning": "spin-smooth 1s linear infinite",
+        "border-radius": "100px",
+        "padding": "5px 12px",
+        "font-size": "11px",
+        "font-weight": 700,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-accent)",
+        "command": "nmcli dev wifi list --rescan yes",
+        "cooldown": 5000,
+        "hover": {
+          "background": "var(--cc-accent-alpha)",
+          "border-color": "var(--cc-accent)"
+        }
+      },
+  
+      "hidden-network": {
+        "enabled": true,
+        "class": "btn-hidden-net",
+        "label": "Connect to hidden…",
+        "icon": "󰛑",
+        "font-size": "11px",
+        "font-weight": 600,
+        "color": "var(--cc-text-muted)",
+        "command": "~/.config/swaync/scripts/wifi-hidden.sh",
+        "hover-color": "var(--cc-accent)"
+      }
+    },
+  
+    "hotspot": {
+      "enabled": true,
+      "class": "wifi-hotspot",
+      "label": "Hotspot",
+      "label-icon": "󱛁",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "toggle": {
+        "class": "hotspot-toggle",
+        "label-on":  "Hotspot Active",
+        "label-off": "Mobile Hotspot",
+        "icon-on":  "󱛁",
+        "icon-off": "󱛀",
+        "color-on":  "var(--cc-accent)",
+        "color-off": "var(--cc-text-muted)",
+        "command-on":  "~/.config/swaync/scripts/hotspot-on.sh",
+        "command-off": "~/.config/swaync/scripts/hotspot-off.sh",
+        "state-command": "nmcli con show --active | grep -c 'Hotspot'",
+        "animation-on": "hotspot-radiate 2s ease-out infinite"
+      },
+  
+      "config": {
+        "enabled": true,
+        "class": "hotspot-config",
+        "show-when": "hotspot-off",
+        "fields": [
+          {
+            "id": "ssid",
+            "label": "SSID",
+            "icon": "󰤨",
+            "default": "{hostname}-Hotspot",
+            "editable": true
+          },
+          {
+            "id": "password",
+            "label": "Password",
+            "icon": "󰌾",
+            "type": "password",
+            "editable": true,
+            "show-toggle": true
+          },
+          {
+            "id": "band",
+            "label": "Band",
+            "icon": "󰀶",
+            "type": "select",
+            "options": ["2.4 GHz", "5 GHz"],
+            "default": "5 GHz"
+          }
+        ]
+      },
+  
+      "active-display": {
+        "class": "hotspot-active",
+        "show-when": "hotspot-on",
+  
+        "connected-clients": {
+          "enabled": true,
+          "class": "hotspot-clients",
+          "icon": "󱦜",
+          "format": "{count} device{s} connected",
+          "font-size": "12px",
+          "font-weight": 700,
+          "color": "var(--cc-text-primary)",
+          "command": "nmcli dev wifi hotspot status | grep -c 'STATION'",
+          "poll-interval": 10000
+        },
+  
+        "traffic": {
+          "enabled": true,
+          "class": "hotspot-traffic",
+          "items": [
+            {
+              "icon": "󰇚",
+              "format": "↓ {total-down}",
+              "color": "var(--cc-accent)"
+            },
+            {
+              "icon": "󰕒",
+              "format": "↑ {total-up}",
+              "color": "var(--cc-green)"
+            }
+          ],
+          "font-size": "11px",
+          "font-family": "JetBrainsMono Nerd Font"
+        },
+  
+        "qr-button": {
+          "label": "Show QR Code",
+          "icon": "󰄌",
+          "class": "btn-hotspot-qr",
+          "command": "~/.config/swaync/scripts/hotspot-qr.sh",
+          "color": "var(--cc-accent)"
+        }
+      }
+    },
+  
+    "dns-section": {
+      "enabled": true,
+      "class": "wifi-dns",
+      "label": "DNS",
+      "label-icon": "󰖟",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "presets": [
+        {
+          "id": "auto",
+          "label": "Auto (ISP)",
+          "icon": "󰛳",
+          "color": "var(--cc-text-muted)",
+          "command": "~/.config/swaync/scripts/dns-set.sh auto",
+          "class": "dns-preset"
+        },
+        {
+          "id": "cloudflare",
+          "label": "Cloudflare",
+          "icon": "󱅧",
+          "color": "var(--cc-yellow)",
+          "dns": ["1.1.1.1", "1.0.0.1"],
+          "command": "~/.config/swaync/scripts/dns-set.sh 1.1.1.1 1.0.0.1",
+          "class": "dns-preset",
+          "tooltip": "1.1.1.1 & 1.0.0.1"
+        },
+        {
+          "id": "google",
+          "label": "Google",
+          "icon": "󰊭",
+          "color": "var(--cc-blue)",
+          "dns": ["8.8.8.8", "8.8.4.4"],
+          "command": "~/.config/swaync/scripts/dns-set.sh 8.8.8.8 8.8.4.4",
+          "class": "dns-preset"
+        },
+        {
+          "id": "quad9",
+          "label": "Quad9",
+          "icon": "󰌾",
+          "color": "var(--cc-accent)",
+          "dns": ["9.9.9.9", "149.112.112.112"],
+          "command": "~/.config/swaync/scripts/dns-set.sh 9.9.9.9 149.112.112.112",
+          "class": "dns-preset",
+          "tooltip": "Security-filtered DNS"
+        },
+        {
+          "id": "custom",
+          "label": "Custom",
+          "icon": "󱥸",
+          "color": "var(--cc-text-muted)",
+          "command": "~/.config/swaync/scripts/dns-custom.sh",
+          "class": "dns-preset"
+        }
+      ],
+  
+      "test-button": {
+        "label": "Test DNS",
+        "icon": "󰐍",
+        "class": "btn-dns-test",
+        "command": "~/.config/swaync/scripts/dns-test.sh",
+        "color": "var(--cc-accent)"
+      },
+  
+      "dns-leak-test": {
+        "enabled": true,
+        "label": "DNS Leak Test",
+        "icon": "󱕴",
+        "command": "xdg-open https://dnsleaktest.com",
+        "class": "btn-dns-leak"
+      }
+    },
+  
+    "traffic-monitor": {
+      "enabled": true,
+      "class": "wifi-traffic",
+      "label": "Traffic Monitor",
+      "label-icon": "󰓅",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "mini-graph": {
+        "enabled": true,
+        "class": "traffic-graph",
+        "type": "line",
+        "width": "100%",
+        "height": 48,
+        "samples": 30,
+        "interval": 1500,
+        "border-radius": "8px",
+        "background": "var(--cc-widget-bg)",
+  
+        "download": {
+          "color": "var(--cc-accent)",
+          "fill-opacity": 0.15,
+          "line-width": 1.5
+        },
+  
+        "upload": {
+          "color": "var(--cc-green)",
+          "fill-opacity": 0.10,
+          "line-width": 1.5
+        },
+  
+        "grid": {
+          "enabled": true,
+          "color": "var(--cc-border-subtle)",
+          "opacity": 0.30
+        }
+      },
+  
+      "totals": {
+        "enabled": true,
+        "class": "traffic-totals",
+        "layout": "row",
+        "gap": 12,
+        "margin-top": 8,
+  
+        "items": [
+          {
+            "id": "session-down",
+            "label": "Session ↓",
+            "icon": "󰇚",
+            "command": "~/.config/swaync/scripts/traffic-session.sh down",
+            "color": "var(--cc-accent)",
+            "font-family": "JetBrainsMono Nerd Font"
+          },
+          {
+            "id": "session-up",
+            "label": "Session ↑",
+            "icon": "󰕒",
+            "command": "~/.config/swaync/scripts/traffic-session.sh up",
+            "color": "var(--cc-green)",
+            "font-family": "JetBrainsMono Nerd Font"
+          },
+          {
+            "id": "daily-down",
+            "label": "Today ↓",
+            "icon": "󰇚",
+            "command": "vnstat -i $(nmcli -t -f DEVICE,TYPE dev | grep ':wifi' | cut -d: -f1) --oneline | awk -F';' '{print $4}'",
+            "color": "var(--cc-text-secondary)"
+          }
+        ],
+  
+        "item-style": {
+          "font-size": "11px",
+          "font-weight": 700,
+          "gap": 4,
+          "label-color": "var(--cc-text-muted)",
+          "label-size": "10px"
+        }
+      }
+    },
+  
+    "quick-actions": {
+      "enabled": true,
+      "class": "wifi-quick-actions",
+      "layout": "row",
+      "gap": 6,
+      "padding-top": 12,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 4,
+  
+      "actions": [
+        {
+          "id": "open-settings",
+          "label": "Settings",
+          "icon": "󰒓",
+          "class": "quick-action-btn",
+          "command": "nm-connection-editor",
+          "tooltip": "Network Manager"
+        },
+        {
+          "id": "flush-dns",
+          "label": "Flush DNS",
+          "icon": "󰑓",
+          "class": "quick-action-btn",
+          "command": "sudo resolvectl flush-caches && notify-send '󰖟 DNS' 'Cache flushed'",
+          "tooltip": "Flush DNS cache"
+        },
+        {
+          "id": "speed-test",
+          "label": "Speed Test",
+          "icon": "󰓅",
+          "class": "quick-action-btn",
+          "command": "kitty -e speedtest-cli",
+          "tooltip": "Run speed test"
+        },
+        {
+          "id": "ping-test",
+          "label": "Ping",
+          "icon": "󰖤",
+          "class": "quick-action-btn",
+          "command": "kitty -e ping 8.8.8.8",
+          "tooltip": "Ping test"
+        },
+        {
+          "id": "traceroute",
+          "label": "Trace",
+          "icon": "󰛳",
+          "class": "quick-action-btn",
+          "command": "kitty -e traceroute 8.8.8.8",
+          "tooltip": "Traceroute"
+        }
+      ],
+  
+      "button-style": {
+        "border-radius": "100px",
+        "padding": "5px 12px",
+        "font-size": "11px",
+        "font-weight": 700,
+        "gap": 5,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "hover": {
+          "background": "var(--cc-accent-alpha)",
+          "border-color": "var(--cc-accent)",
+          "color": "var(--cc-accent)",
+          "transform": "translateY(-1px)"
+        },
+        "active": {
+          "transform": "scale(0.95)"
+        }
+      }
+    },
+  
+    "state-management": {
+      "poll-interval": 5000,
+      "subscribe": "nmcli monitor",
+      "cache-duration": 3000,
+      "state-file": "~/.cache/ash/wifi-state.json",
+      "reconnect": {
+        "auto": true,
+        "max-attempts": 3,
+        "backoff": "exponential",
+        "notify-on-reconnect": true
+      }
+    },
+  
+    "notifications": {
+      "connect": {
+        "enabled": true,
+        "title": "󰤨  Connected",
+        "body": "Connected to {ssid}",
+        "icon": "󰤨",
+        "urgency": "low",
+        "sound": "~/.config/sounds/network-connect.ogg"
+      },
+      "disconnect": {
+        "enabled": true,
+        "title": "󰤭  Disconnected",
+        "body": "Disconnected from {ssid}",
+        "icon": "󰤭",
+        "urgency": "normal",
+        "sound": "~/.config/sounds/network-disconnect.ogg"
+      },
+      "captive-portal": {
+        "enabled": true,
+        "title": "󰖟  Sign-in Required",
+        "body": "A network login is required",
+        "action": {
+          "label": "Open Portal",
+          "command": "xdg-open http://captive.apple.com"
+        }
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle-wifi":     "w",
+        "scan":            "r",
+        "focus-search":    "slash",
+        "toggle-hotspot":  "h",
+        "open-settings":   "s"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "connected-glow": {
+        "enabled": true,
+        "color": "var(--cc-accent-glow)",
+        "blur": "20px",
+        "opacity": 0.12,
+        "spread": "-4px"
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "40ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-connect":    "Connected to {ssid}",
+      "announce-disconnect": "Wi-Fi disconnected",
+      "announce-enabled":    "Wi-Fi enabled",
+      "announce-disabled":   "Wi-Fi disabled",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--cc-accent)",
+        "outline-offset": "2px"
+      }
+    }
+  }

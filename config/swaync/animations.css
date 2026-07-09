@@ -1,0 +1,581 @@
+/* ╔══════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — SwayNC Ultra Animations                 ║
+   ║  Full keyframe library — fluid, premium, GPU-accelerated            ║
+   ╚══════════════════════════════════════════════════════════════════════╝ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NOTIFICATION ENTRANCE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Slide in from the right with spring overshoot */
+@keyframes notif-slide-in {
+    0% {
+      opacity:   0;
+      transform: translateX(100%) scale(0.88);
+      filter:    blur(6px);
+    }
+    55% {
+      opacity:   1;
+      transform: translateX(-6px) scale(1.01);
+      filter:    blur(0px);
+    }
+    75% {
+      transform: translateX(3px) scale(0.995);
+    }
+    90% {
+      transform: translateX(-1px) scale(1.002);
+    }
+    100% {
+      opacity:   1;
+      transform: translateX(0) scale(1);
+      filter:    blur(0px);
+    }
+  }
+  
+  /* Slide out to the right on dismiss */
+  @keyframes notif-slide-out {
+    0% {
+      opacity:    1;
+      transform:  translateX(0) scale(1);
+      max-height: 200px;
+      margin:     4px 0;
+      padding:    16px;
+    }
+    30% {
+      transform:  translateX(8px) scale(1.01);
+      opacity:    0.8;
+    }
+    100% {
+      opacity:    0;
+      transform:  translateX(110%) scale(0.85);
+      max-height: 0;
+      margin:     0;
+      padding:    0;
+      filter:     blur(4px);
+    }
+  }
+  
+  /* Swipe left to dismiss */
+  @keyframes notif-swipe-left {
+    0% {
+      opacity:   1;
+      transform: translateX(0) scale(1);
+      filter:    blur(0px);
+    }
+    25% {
+      transform: translateX(-12px) scale(1.01);
+    }
+    100% {
+      opacity:   0;
+      transform: translateX(-115%) scale(0.90);
+      filter:    blur(6px);
+    }
+  }
+  
+  /* Fade-in with subtle drop */
+  @keyframes notif-fade-in {
+    0% {
+      opacity:   0;
+      transform: translateY(-12px) scale(0.96);
+      filter:    blur(4px);
+    }
+    60% {
+      opacity:   1;
+      transform: translateY(2px) scale(1.01);
+      filter:    blur(0);
+    }
+    100% {
+      opacity:   1;
+      transform: translateY(0) scale(1);
+      filter:    blur(0);
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTROL CENTER PANEL
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Panel glides in from the right edge */
+  @keyframes cc-open {
+    0% {
+      opacity:   0;
+      transform: translateX(100%);
+      filter:    blur(8px);
+    }
+    60% {
+      opacity:   1;
+      transform: translateX(-4px);
+      filter:    blur(0);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+    100% {
+      opacity:   1;
+      transform: translateX(0);
+      filter:    blur(0);
+    }
+  }
+  
+  /* Panel glides out */
+  @keyframes cc-close {
+    0% {
+      opacity:   1;
+      transform: translateX(0);
+      filter:    blur(0);
+    }
+    30% {
+      transform: translateX(-4px);
+      opacity:   0.9;
+    }
+    100% {
+      opacity:   0;
+      transform: translateX(100%);
+      filter:    blur(8px);
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     URGENCY — CRITICAL PULSE
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes critical-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 8px 32px var(--cc-shadow),
+        0 0 0 2px  var(--cc-urgency-critical),
+        0 0 20px   var(--cc-urgency-critical-glow);
+    }
+    50% {
+      box-shadow:
+        0 8px 32px var(--cc-shadow),
+        0 0 0 3px  var(--cc-urgency-critical),
+        0 0 36px   var(--cc-urgency-critical-glow),
+        0 0 60px   rgba(243, 139, 168, 0.20);
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     BUTTONS & INTERACTIVE ELEMENTS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Ripple effect on button press */
+  @keyframes btn-ripple {
+    0% {
+      transform: scale(0);
+      opacity:   0.5;
+    }
+    100% {
+      transform: scale(4);
+      opacity:   0;
+    }
+  }
+  
+  /* Toggle button ON activation pulse */
+  @keyframes toggle-activate {
+    0% {
+      transform: scale(0.95);
+      box-shadow: none;
+    }
+    40% {
+      transform: scale(1.06);
+      box-shadow: 0 0 0 4px var(--cc-accent-glow);
+    }
+    70% {
+      transform: scale(0.98);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow:
+        0 0 0 1px  var(--cc-accent),
+        0 4px 14px var(--cc-accent-glow);
+    }
+  }
+  
+  /* Toggle button OFF deactivation */
+  @keyframes toggle-deactivate {
+    0% {
+      transform: scale(1.02);
+    }
+    60% {
+      transform: scale(0.97);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  /* Button success flash */
+  @keyframes btn-success {
+    0%   { background: var(--cc-btn-bg);  }
+    30%  { background: var(--cc-green);   color: #1a2e1a; }
+    100% { background: var(--cc-btn-bg);  }
+  }
+  
+  /* Button error shake */
+  @keyframes btn-error {
+    0%, 100% { transform: translateX(0);     }
+    15%       { transform: translateX(-6px);  }
+    30%       { transform: translateX(5px);   }
+    45%       { transform: translateX(-4px);  }
+    60%       { transform: translateX(3px);   }
+    75%       { transform: translateX(-2px);  }
+    90%       { transform: translateX(1px);   }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     MPRIS ALBUM ART
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes album-spin-idle {
+    0%   { transform: rotate(0deg);   }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Album art entrance */
+  @keyframes album-pop {
+    0% {
+      transform: scale(0.80) rotate(-8deg);
+      opacity:   0;
+      filter:    blur(4px);
+    }
+    60% {
+      transform: scale(1.05) rotate(2deg);
+      opacity:   1;
+      filter:    blur(0);
+    }
+    80% {
+      transform: scale(0.97) rotate(-1deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity:   1;
+      filter:    blur(0);
+    }
+  }
+  
+  /* Track change crossfade */
+  @keyframes track-change {
+    0% {
+      opacity:   1;
+      transform: translateY(0);
+    }
+    35% {
+      opacity:   0;
+      transform: translateY(-8px);
+    }
+    65% {
+      opacity:   0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity:   1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     SLIDER & PROGRESS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Slider thumb appear */
+  @keyframes slider-thumb-appear {
+    0% {
+      transform: scale(0);
+      opacity:   0;
+    }
+    70% {
+      transform: scale(1.20);
+    }
+    100% {
+      transform: scale(1);
+      opacity:   1;
+    }
+  }
+  
+  /* Progress fill pulse (used for loading states) */
+  @keyframes progress-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+  
+  /* Indeterminate loading bar */
+  @keyframes progress-indeterminate {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position:  200% 0;
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     WIDGET ENTRANCE — STAGGERED
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes widget-enter {
+    0% {
+      opacity:   0;
+      transform: translateY(12px) scale(0.97);
+      filter:    blur(3px);
+    }
+    60% {
+      opacity:   1;
+      transform: translateY(-2px) scale(1.005);
+      filter:    blur(0);
+    }
+    100% {
+      opacity:   1;
+      transform: translateY(0) scale(1);
+      filter:    blur(0);
+    }
+  }
+  
+  /* Stagger delays for each widget section */
+  .widget-title       { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 0ms   both; }
+  .widget-dnd         { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 40ms  both; }
+  .widget-mpris       { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 80ms  both; }
+  .widget-volume      { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 120ms both; }
+  .widget-backlight   { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 160ms both; }
+  .widget-buttons-grid{ animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 200ms both; }
+  .widget-inhibitors  { animation: widget-enter var(--anim-duration-normal)
+                          var(--ease-out-expo) 240ms both; }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ICON ANIMATIONS
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Icon scale bounce on state change */
+  @keyframes icon-bounce {
+    0%   { transform: scale(1);    }
+    30%  { transform: scale(1.30); }
+    60%  { transform: scale(0.90); }
+    80%  { transform: scale(1.08); }
+    100% { transform: scale(1);    }
+  }
+  
+  /* Wifi icon searching animation */
+  @keyframes wifi-searching {
+    0%, 100% { opacity: 1;    }
+    33%       { opacity: 0.25; }
+    66%       { opacity: 0.60; }
+  }
+  
+  /* Bluetooth icon pairing pulse */
+  @keyframes bt-pairing {
+    0%, 100% {
+      color:     var(--ash-blue);
+      transform: scale(1);
+    }
+    50% {
+      color:     var(--ash-sapphire);
+      transform: scale(1.15);
+      filter:    drop-shadow(0 0 6px var(--ash-blue));
+    }
+  }
+  
+  /* VPN lock icon rotate */
+  @keyframes vpn-connecting {
+    0%   { transform: rotate(0deg);   }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CLEAR-ALL BUTTON ANIMATION
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes clear-sweep {
+    0% {
+      transform:    rotate(0deg) scale(1);
+      filter:       none;
+    }
+    30% {
+      transform:    rotate(-15deg) scale(1.05);
+      filter:       drop-shadow(0 0 6px var(--cc-accent-glow));
+    }
+    60% {
+      transform:    rotate(10deg) scale(0.98);
+    }
+    100% {
+      transform:    rotate(0deg) scale(1);
+      filter:       none;
+    }
+  }
+  
+  .widget-title > button:active {
+    animation: clear-sweep 400ms var(--ease-spring) forwards;
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CLOSE BUTTON SPIN
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  /* Already handled inline via CSS transition: transform + rotate(90deg) */
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     SHIMMER / SKELETON LOADING
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position:  400px 0;
+    }
+  }
+  
+  .loading-skeleton {
+    background:
+      linear-gradient(
+        90deg,
+        var(--cc-widget-bg)        25%,
+        rgba(255, 255, 255, 0.06)  50%,
+        var(--cc-widget-bg)        75%
+      );
+    background-size: 800px 100%;
+    animation:       shimmer 1.6s ease-in-out infinite;
+    border-radius:   8px;
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     NOTIFICATION GROUP EXPAND / COLLAPSE
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes group-expand {
+    0% {
+      opacity:    0;
+      max-height: 0;
+      transform:  scaleY(0.85) translateY(-8px);
+      transform-origin: top center;
+    }
+    60% {
+      transform:  scaleY(1.02) translateY(1px);
+      opacity:    1;
+    }
+    100% {
+      opacity:    1;
+      max-height: 1000px;
+      transform:  scaleY(1) translateY(0);
+      transform-origin: top center;
+    }
+  }
+  
+  @keyframes group-collapse {
+    0% {
+      opacity:    1;
+      max-height: 1000px;
+      transform:  scaleY(1);
+      transform-origin: top center;
+    }
+    100% {
+      opacity:    0;
+      max-height: 0;
+      transform:  scaleY(0.85) translateY(-8px);
+      transform-origin: top center;
+      overflow:   hidden;
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     DND SWITCH TOGGLE
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes switch-on {
+    0% {
+      box-shadow: none;
+    }
+    50% {
+      box-shadow:
+        0 0 0 4px var(--cc-accent-alpha),
+        0 0 12px  var(--cc-accent-glow);
+    }
+    100% {
+      box-shadow: 0 0 12px var(--cc-accent-glow);
+    }
+  }
+  
+  @keyframes switch-off {
+    0% {
+      box-shadow: 0 0 12px var(--cc-accent-glow);
+    }
+    100% {
+      box-shadow: none;
+    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     BADGE BOUNCE (notification count)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes badge-bounce {
+    0%   { transform: scale(1);    }
+    20%  { transform: scale(1.35); }
+    40%  { transform: scale(0.90); }
+    60%  { transform: scale(1.12); }
+    80%  { transform: scale(0.97); }
+    100% { transform: scale(1);    }
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     GLASSMORPHISM SHIMMER ON HOVER
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @keyframes glass-shimmer {
+    0% {
+      background-position: -200% 0;
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      background-position:  200% 0;
+      opacity: 0;
+    }
+  }
+  
+  .notification:hover::after,
+  .widget-buttons-grid > flowbox > flowboxchild > button:hover::after {
+    content:  "";
+    position: absolute;
+    inset:    0;
+    border-radius: inherit;
+    background:
+      linear-gradient(
+        105deg,
+        transparent      40%,
+        rgba(255,255,255,0.06) 50%,
+        transparent      60%
+      );
+    background-size: 300% 100%;
+    animation:
+      glass-shimmer 0.6s var(--ease-smooth) forwards;
+    pointer-events: none;
+  }
+  
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     REDUCED MOTION — ACCESSIBILITY
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration:        0.01ms !important;
+      animation-iteration-count: 1      !important;
+      transition-duration:       0.01ms !important;
+    }
+  }

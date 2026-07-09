@@ -1,0 +1,1146 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Bluetooth Toggle Widget",
+      "version": "5.0.0",
+      "description": "Premium Bluetooth control with device scanner, pairing wizard, battery tracking, audio profiles, and device history",
+      "author": "ash-dotfiles",
+      "icon": "󰂯",
+      "category": "connectivity",
+      "tags": [
+        "bluetooth", "bluez", "bluetoothctl", "audio",
+        "headphones", "speakers", "keyboard", "mouse",
+        "pairing", "battery", "a2dp", "hfp", "le-audio"
+      ]
+    },
+  
+    "widget": {
+      "type": "bluetooth-toggle",
+      "id": "ash-bluetooth-widget",
+      "class": "ash-widget ash-widget--bluetooth ash-widget--glass",
+      "aria-label": "Bluetooth Control",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 }
+    },
+  
+    "main-toggle": {
+      "enabled": true,
+      "class": "bt-main-toggle",
+      "layout": "space-between",
+      "align": "center",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "disabled": {
+              "icon": "󰂲",
+              "class": "bt-icon bt-icon--off",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Bluetooth disabled"
+            },
+            "idle": {
+              "icon": "󰂯",
+              "class": "bt-icon bt-icon--idle",
+              "color": "var(--cc-blue)",
+              "tooltip": "Bluetooth on — no devices"
+            },
+            "scanning": {
+              "icon": "󰂯",
+              "class": "bt-icon bt-icon--scanning",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Scanning for devices…",
+              "animation": "bt-scan-pulse 1.5s ease-in-out infinite"
+            },
+            "pairing": {
+              "icon": "󰂴",
+              "class": "bt-icon bt-icon--pairing",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Pairing…",
+              "animation": "bt-pairing 1.2s ease infinite"
+            },
+            "connected-audio": {
+              "icon": "󰂰",
+              "class": "bt-icon bt-icon--audio",
+              "color": "var(--cc-accent)",
+              "tooltip": "Audio device connected",
+              "glow": "0 0 14px rgba(203,166,247,0.40)"
+            },
+            "connected-hid": {
+              "icon": "󰂱",
+              "class": "bt-icon bt-icon--hid",
+              "color": "var(--cc-accent)",
+              "tooltip": "HID device connected"
+            },
+            "connected-multi": {
+              "icon": "󰂱",
+              "class": "bt-icon bt-icon--multi",
+              "color": "var(--cc-green)",
+              "tooltip": "{count} devices connected"
+            },
+            "error": {
+              "icon": "󰂲",
+              "class": "bt-icon bt-icon--error",
+              "color": "var(--cc-red)",
+              "tooltip": "Bluetooth error",
+              "animation": "icon-shake 500ms ease"
+            }
+          },
+          "font-size": "22px",
+          "transition": "all 300ms cubic-bezier(0.34,1.56,0.64,1)"
+        },
+  
+        "labels": {
+          "primary": {
+            "class": "bt-label-primary",
+            "font-size": "13px",
+            "font-weight": 800,
+            "color": "var(--cc-text-primary)",
+            "states": {
+              "disabled":   "Bluetooth",
+              "idle":       "Bluetooth",
+              "scanning":   "Scanning…",
+              "pairing":    "Pairing…",
+              "connected":  "{device-name}",
+              "multi":      "{count} devices"
+            },
+            "max-length": 22,
+            "animation": {
+              "on-change": "track-info-fade",
+              "duration": "250ms"
+            }
+          },
+          "secondary": {
+            "class": "bt-label-secondary",
+            "font-size": "11px",
+            "font-weight": 500,
+            "color": "var(--cc-text-muted)",
+            "states": {
+              "disabled":   "Wireless disabled",
+              "idle":       "Ready to connect",
+              "scanning":   "Looking for devices",
+              "pairing":    "Confirm PIN on device",
+              "connected":  "{device-type}  •  {battery-icon} {battery}%",
+              "multi":      "{audio-count} audio  •  {hid-count} HID"
+            }
+          }
+        }
+      },
+  
+      "right": {
+        "switch": {
+          "class": "bt-switch",
+          "command-on":    "bluetoothctl power on",
+          "command-off":   "bluetoothctl power off",
+          "state-command": "bluetoothctl show | grep 'Powered: yes'",
+          "keybind": "b",
+          "aria-label": "Toggle Bluetooth",
+  
+          "track": {
+            "width": 52,
+            "height": 28,
+            "border-radius": 100,
+            "states": {
+              "off": {
+                "background": "var(--cc-surface0)",
+                "border": "2px solid var(--cc-border)"
+              },
+              "on": {
+                "background": "var(--cc-blue)",
+                "border": "2px solid var(--cc-blue)",
+                "box-shadow": [
+                  "0 0 16px rgba(137,180,250,0.40)",
+                  "inset 0 1px 0 rgba(255,255,255,0.20)"
+                ]
+              }
+            },
+            "animation": {
+              "on":  "switch-track-on  300ms cubic-bezier(0.34,1.56,0.64,1) forwards",
+              "off": "switch-track-off 250ms cubic-bezier(0.4,0,0.2,1) forwards"
+            }
+          },
+  
+          "thumb": {
+            "size": 20,
+            "margin": 3,
+            "border-radius": "50%",
+            "background": "#ffffff",
+            "states": {
+              "off": { "transform": "translateX(0)"    },
+              "on":  { "transform": "translateX(24px)" }
+            },
+            "icon": {
+              "on":  { "icon": "󰂯", "size": "10px", "color": "var(--cc-blue)"    },
+              "off": { "icon": "󰂲", "size": "10px", "color": "var(--cc-surface0)" }
+            },
+            "box-shadow": "0 2px 6px rgba(0,0,0,0.30)",
+            "animation": {
+              "transition": "transform 280ms cubic-bezier(0.34,1.56,0.64,1)"
+            }
+          }
+        },
+  
+        "scan-button": {
+          "enabled": true,
+          "class": "btn-bt-scan btn-icon",
+          "icon": "󰑓",
+          "icon-scanning": "󰑓",
+          "animation-scanning": "spin-smooth 1.5s linear infinite",
+          "tooltip": "Scan for devices",
+          "tooltip-scanning": "Stop scan",
+          "command-start": "bluetoothctl scan on &",
+          "command-stop":  "bluetoothctl scan off",
+          "duration": 30000,
+          "font-size": "15px",
+          "color": "var(--cc-text-muted)",
+          "margin-left": 6,
+          "hover-color": "var(--cc-blue)"
+        }
+      }
+    },
+  
+    "connected-devices": {
+      "enabled": true,
+      "class": "bt-connected",
+      "show-when": "has-connected",
+      "label": "Connected",
+      "label-icon": "󰂱",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "device-card": {
+        "class": "bt-device-card bt-device-card--connected",
+        "border-radius": "12px",
+        "padding": "10px 12px",
+        "margin-bottom": 6,
+        "background": "var(--cc-accent-alpha)",
+        "border": "1px solid var(--cc-accent)",
+        "box-shadow": "0 0 0 1px var(--cc-accent), 0 4px 16px var(--cc-shadow)",
+        "layout": "row",
+        "gap": 10,
+        "align": "center",
+  
+        "device-icon": {
+          "type": "dynamic",
+          "size": "24px",
+          "font": "nerd-font",
+          "icons": {
+            "audio-headphones": { "icon": "󰋋", "color": "var(--cc-accent)"  },
+            "audio-headset":    { "icon": "󰋎", "color": "var(--cc-accent)"  },
+            "audio-speakers":   { "icon": "󰓃", "color": "var(--cc-accent)"  },
+            "audio-earbuds":    { "icon": "󰟑", "color": "var(--cc-accent)"  },
+            "input-keyboard":   { "icon": "󰌌", "color": "var(--cc-blue)"    },
+            "input-mouse":      { "icon": "󰦋", "color": "var(--cc-blue)"    },
+            "input-gaming":     { "icon": "󰊗", "color": "var(--cc-green)"   },
+            "phone":            { "icon": "󰄜", "color": "var(--cc-yellow)"  },
+            "computer":         { "icon": "󰇄", "color": "var(--cc-text-secondary)" },
+            "watch":            { "icon": "󱑻", "color": "var(--cc-yellow)"  },
+            "tv":               { "icon": "󰟴", "color": "var(--cc-text-secondary)" },
+            "printer":          { "icon": "󰐪", "color": "var(--cc-text-muted)"     },
+            "default":          { "icon": "󰂯", "color": "var(--cc-blue)"           }
+          },
+          "icon-background": {
+            "size": 38,
+            "border-radius": "50%",
+            "background": "var(--cc-widget-bg)",
+            "border": "1px solid var(--cc-border-subtle)"
+          }
+        },
+  
+        "device-info": {
+          "flex": 1,
+          "min-width": 0,
+  
+          "name": {
+            "class": "bt-device-name",
+            "font-size": "13px",
+            "font-weight": 700,
+            "color": "var(--cc-text-primary)",
+            "max-length": 22,
+            "overflow": "ellipsis"
+          },
+  
+          "meta": {
+            "class": "bt-device-meta",
+            "font-size": "10px",
+            "color": "var(--cc-text-muted)",
+            "font-weight": 600,
+            "layout": "row",
+            "gap": 8,
+            "items": [
+              {
+                "id": "type",
+                "format": "{device-type}",
+                "color": "var(--cc-text-muted)"
+              },
+              {
+                "id": "codec",
+                "format": "{codec}",
+                "color": "var(--cc-accent)",
+                "show-when": "audio",
+                "tooltip": "Active audio codec"
+              },
+              {
+                "id": "rssi",
+                "format": "{rssi} dBm",
+                "color": "var(--cc-text-muted)",
+                "show-when": "rssi-available"
+              }
+            ]
+          }
+        },
+  
+        "battery-indicator": {
+          "enabled": true,
+          "class": "bt-battery",
+          "show-when": "battery-available",
+          "layout": "row",
+          "gap": 4,
+          "align": "center",
+  
+          "icon": {
+            "type": "threshold",
+            "thresholds": {
+              "0":  { "icon": "󰂎", "color": "var(--cc-red)"    },
+              "10": { "icon": "󰁺", "color": "var(--cc-red)"    },
+              "20": { "icon": "󰁻", "color": "var(--cc-yellow)" },
+              "30": { "icon": "󰁼", "color": "var(--cc-yellow)" },
+              "40": { "icon": "󰁽", "color": "var(--cc-accent)" },
+              "60": { "icon": "󰁿", "color": "var(--cc-accent)" },
+              "80": { "icon": "󰂁", "color": "var(--cc-green)"  },
+              "95": { "icon": "󰁹", "color": "var(--cc-green)"  }
+            }
+          },
+  
+          "percentage": {
+            "format": "{battery}%",
+            "font-size": "11px",
+            "font-weight": 800,
+            "font-family": "JetBrainsMono Nerd Font"
+          },
+  
+          "mini-bar": {
+            "enabled": true,
+            "width": 28,
+            "height": 4,
+            "border-radius": 100,
+            "color-thresholds": {
+              "0":  "var(--cc-red)",
+              "20": "var(--cc-yellow)",
+              "50": "var(--cc-green)"
+            }
+          },
+  
+          "low-warning": {
+            "enabled": true,
+            "threshold": 20,
+            "animation": "critical-pulse 2s ease-in-out infinite"
+          }
+        },
+  
+        "device-actions": {
+          "class": "bt-device-actions",
+          "gap": 4,
+          "show-on-hover": false,
+  
+          "disconnect": {
+            "icon": "󰌼",
+            "class": "btn-bt-disconnect btn-icon",
+            "tooltip": "Disconnect",
+            "command": "bluetoothctl disconnect {mac}",
+            "color": "var(--cc-red)",
+            "confirm": {
+              "enabled": false
+            }
+          },
+  
+          "audio-profile": {
+            "icon": "󰓃",
+            "class": "btn-bt-profile btn-icon",
+            "tooltip": "Audio profile",
+            "show-when": "audio",
+            "color": "var(--cc-text-muted)",
+            "menu": {
+              "items": [
+                { "label": "A2DP (High Quality)", "command": "pactl set-card-profile {card} a2dp-sink"              },
+                { "label": "HFP (Hands-free)",    "command": "pactl set-card-profile {card} headset-head-unit"      },
+                { "label": "HFP (mSBC)",          "command": "pactl set-card-profile {card} headset-head-unit-msbc" },
+                { "label": "LC3 (LE Audio)",      "command": "pactl set-card-profile {card} le-audio-stereo"        }
+              ]
+            }
+          },
+  
+          "equalizer": {
+            "icon": "󱡒",
+            "class": "btn-bt-eq btn-icon",
+            "tooltip": "Equalizer",
+            "show-when": "audio",
+            "color": "var(--cc-text-muted)",
+            "command": "easyeffects"
+          },
+  
+          "trust-toggle": {
+            "icon-trusted":   "󰕶",
+            "icon-untrusted": "󰕹",
+            "class": "btn-bt-trust btn-icon",
+            "tooltip-trusted":   "Untrust device",
+            "tooltip-untrusted": "Trust device",
+            "command-trust":   "bluetoothctl trust {mac}",
+            "command-untrust": "bluetoothctl untrust {mac}",
+            "color": "var(--cc-text-muted)"
+          }
+        },
+  
+        "animation": {
+          "enter": "notif-fade-in",
+          "duration": "250ms"
+        }
+      }
+    },
+  
+    "available-devices": {
+      "enabled": true,
+      "class": "bt-available",
+      "label": "Available Devices",
+      "label-icon": "󰂯",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "search": {
+        "enabled": true,
+        "class": "bt-search",
+        "placeholder": "󰍉  Search devices…",
+        "font-size": "12px",
+        "border-radius": "10px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-widget-border)",
+        "padding": "6px 12px",
+        "margin-bottom": "8px"
+      },
+  
+      "filters": {
+        "enabled": true,
+        "class": "bt-filters",
+        "layout": "row",
+        "gap": 4,
+        "margin-bottom": 8,
+        "items": [
+          { "id": "all",       "label": "All",       "class": "filter-chip", "filter": "all"   },
+          { "id": "audio",     "label": "󰋋 Audio",   "class": "filter-chip", "filter": "audio" },
+          { "id": "hid",       "label": "󰌌 HID",     "class": "filter-chip", "filter": "hid"   },
+          { "id": "phone",     "label": "󰄜 Phone",   "class": "filter-chip", "filter": "phone" },
+          { "id": "saved",     "label": "󰀀 Saved",   "class": "filter-chip", "filter": "saved" }
+        ],
+        "chip-style": {
+          "border-radius": "100px",
+          "padding": "3px 10px",
+          "font-size": "11px",
+          "font-weight": 700,
+          "background": "var(--cc-toggle-off-bg)",
+          "border": "1px solid var(--cc-toggle-off-border)",
+          "color": "var(--cc-text-muted)",
+          "active": {
+            "background": "var(--cc-accent-alpha)",
+            "border-color": "var(--cc-accent)",
+            "color": "var(--cc-accent)"
+          }
+        }
+      },
+  
+      "list": {
+        "class": "bt-device-list",
+        "max-height": 220,
+        "scroll": true,
+        "sort-by": "rssi",
+        "sort-order": "desc",
+        "group-by": "type",
+        "show-paired-first": true,
+  
+        "group-header": {
+          "font-size": "10px",
+          "font-weight": 800,
+          "color": "var(--cc-text-muted)",
+          "letter-spacing": "0.08em",
+          "text-transform": "uppercase",
+          "padding": "6px 0 3px"
+        },
+  
+        "device-item": {
+          "class": "bt-device-item",
+          "border-radius": "10px",
+          "padding": "9px 10px",
+          "gap": 10,
+          "margin-bottom": 3,
+          "layout": "row",
+          "align": "center",
+  
+          "icon-column": {
+            "size": 36,
+            "border-radius": "50%",
+            "background": "var(--cc-widget-bg)",
+            "border": "1px solid var(--cc-border-subtle)",
+            "icon-size": "18px"
+          },
+  
+          "info": {
+            "flex": 1,
+            "min-width": 0,
+  
+            "name": {
+              "font-size": "13px",
+              "font-weight": 700,
+              "color": "var(--cc-text-primary)",
+              "max-length": 20,
+              "overflow": "ellipsis"
+            },
+  
+            "details": {
+              "font-size": "10px",
+              "color": "var(--cc-text-muted)",
+              "font-weight": 600,
+              "format": "{type}  •  {rssi} dBm",
+              "rssi-color": {
+                "-50":  "var(--cc-green)",
+                "-70":  "var(--cc-yellow)",
+                "-90":  "var(--cc-red)"
+              }
+            }
+          },
+  
+          "rssi-bar": {
+            "enabled": true,
+            "bars": 3,
+            "bar-size": 3,
+            "gap": 2,
+            "border-radius": 1,
+            "thresholds": {
+              "0":   { "bars": 0, "color": "var(--cc-red)"    },
+              "-80": { "bars": 1, "color": "var(--cc-red)"    },
+              "-65": { "bars": 2, "color": "var(--cc-yellow)" },
+              "-50": { "bars": 3, "color": "var(--cc-green)"  }
+            },
+            "empty-color": "var(--cc-surface1)"
+          },
+  
+          "badges": {
+            "paired": {
+              "icon": "󰀀",
+              "color": "var(--cc-blue)",
+              "tooltip": "Paired",
+              "font-size": "12px"
+            },
+            "trusted": {
+              "icon": "󰕶",
+              "color": "var(--cc-green)",
+              "tooltip": "Trusted",
+              "font-size": "12px"
+            },
+            "audio-codec": {
+              "label": "dynamic",
+              "color": "var(--cc-accent)",
+              "font-size": "9px",
+              "show-when": "audio"
+            }
+          },
+  
+          "connect-button": {
+            "class": "btn-device-connect",
+            "states": {
+              "not-paired": {
+                "label": "Pair",
+                "icon": "󰂴",
+                "color": "var(--cc-accent)",
+                "command": "bluetoothctl pair {mac}"
+              },
+              "paired-not-connected": {
+                "label": "Connect",
+                "icon": "󰌺",
+                "color": "var(--cc-accent)",
+                "command": "bluetoothctl connect {mac}"
+              },
+              "connecting": {
+                "label": "󰸞",
+                "color": "var(--cc-yellow)",
+                "animation": "spin-smooth 1s linear infinite"
+              }
+            },
+            "border-radius": "100px",
+            "padding": "4px 10px",
+            "font-size": "11px",
+            "font-weight": 700,
+            "background": "var(--cc-accent-alpha)",
+            "border": "1px solid var(--cc-accent)"
+          },
+  
+          "long-press-menu": {
+            "enabled": true,
+            "items": [
+              { "label": "Connect",    "icon": "󰌺", "command": "bluetoothctl connect {mac}"    },
+              { "label": "Pair",       "icon": "󰂴", "command": "bluetoothctl pair {mac}"       },
+              { "label": "Trust",      "icon": "󰕶", "command": "bluetoothctl trust {mac}"      },
+              { "label": "Unpair",     "icon": "󰅙", "command": "bluetoothctl remove {mac}"     },
+              { "label": "Device info","icon": "󰋼", "command": "bluetoothctl info {mac}"       }
+            ]
+          },
+  
+          "states": {
+            "connected": {
+              "class": "device-item--connected",
+              "background": "var(--cc-accent-alpha)",
+              "border": "1px solid var(--cc-accent)"
+            },
+            "paired": {
+              "class": "device-item--paired",
+              "background": "rgba(255,255,255,0.03)"
+            },
+            "default": {
+              "background": "var(--cc-widget-bg)",
+              "border": "1px solid transparent"
+            }
+          },
+  
+          "hover": {
+            "background": "var(--cc-notif-hover-bg)",
+            "border-color": "var(--cc-border)",
+            "transform": "translateX(2px)"
+          },
+  
+          "animation": {
+            "enter": "notif-fade-in",
+            "duration": "150ms",
+            "stagger": 25
+          }
+        }
+      },
+  
+      "empty-state": {
+        "class": "bt-empty",
+        "show-when": "not-scanning",
+        "icon": "󰂯",
+        "title": "No devices found",
+        "subtitle": "Press rescan to find devices",
+        "padding": "16px 0",
+        "animation": "empty-float 4s ease-in-out infinite"
+      },
+  
+      "scanning-state": {
+        "class": "bt-scanning-state",
+        "show-when": "scanning",
+        "icon": "󰂯",
+        "icon-animation": "bt-scan-pulse 1.5s ease-in-out infinite",
+        "text": "Scanning for devices…",
+        "dots-animation": "dots-typing 1.4s infinite"
+      }
+    },
+  
+    "pairing-wizard": {
+      "enabled": true,
+      "class": "bt-pairing-wizard",
+      "show-when": "pairing",
+      "padding": { "top": 12, "right": 12, "bottom": 12, "left": 12 },
+      "border": "1px solid var(--cc-yellow)",
+      "border-radius": "12px",
+      "background": "rgba(249,226,175,0.08)",
+      "margin-bottom": 12,
+  
+      "steps": [
+        {
+          "id": "confirm-pin",
+          "class": "pairing-step",
+          "icon": "󰌾",
+          "title": "Confirm PIN",
+          "description": "Does this PIN match your device?",
+          "pin-display": {
+            "class": "pairing-pin",
+            "font-size": "28px",
+            "font-weight": 900,
+            "font-family": "JetBrainsMono Nerd Font",
+            "color": "var(--cc-yellow)",
+            "letter-spacing": "0.2em",
+            "glow": "0 0 14px var(--cc-yellow-glow)"
+          },
+          "buttons": [
+            {
+              "label": "Yes, Connect",
+              "icon": "󰄬",
+              "class": "btn-pair-confirm",
+              "command": "bluetoothctl confirm yes",
+              "color": "var(--cc-green)"
+            },
+            {
+              "label": "No, Reject",
+              "icon": "󰅙",
+              "class": "btn-pair-reject",
+              "command": "bluetoothctl confirm no",
+              "color": "var(--cc-red)"
+            }
+          ]
+        },
+        {
+          "id": "enter-pin",
+          "class": "pairing-step",
+          "icon": "󰌾",
+          "title": "Enter PIN",
+          "description": "Type the PIN shown on your device",
+          "pin-input": {
+            "class": "pairing-pin-input",
+            "type": "number",
+            "max-length": 6,
+            "font-family": "JetBrainsMono Nerd Font"
+          }
+        }
+      ]
+    },
+  
+    "audio-controls": {
+      "enabled": true,
+      "class": "bt-audio-controls",
+      "show-when": "audio-connected",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󰋋",
+        "label": "Audio Controls",
+        "class": "section-label"
+      },
+  
+      "profile-selector": {
+        "enabled": true,
+        "class": "bt-profile-selector",
+        "label": "Profile",
+        "font-size": "11px",
+        "font-weight": 700,
+  
+        "profiles": [
+          {
+            "id": "a2dp",
+            "label": "A2DP",
+            "icon": "󱑽",
+            "tooltip": "High Quality Stereo",
+            "color": "var(--cc-green)",
+            "command": "pactl set-card-profile {card} a2dp-sink"
+          },
+          {
+            "id": "hfp",
+            "label": "HFP",
+            "icon": "󰋎",
+            "tooltip": "Hands-free + Mic",
+            "color": "var(--cc-yellow)",
+            "command": "pactl set-card-profile {card} headset-head-unit"
+          },
+          {
+            "id": "msbc",
+            "label": "mSBC",
+            "icon": "󰋎",
+            "tooltip": "Wide-band Speech",
+            "color": "var(--cc-accent)",
+            "command": "pactl set-card-profile {card} headset-head-unit-msbc"
+          },
+          {
+            "id": "le-audio",
+            "label": "LC3",
+            "icon": "󱑽",
+            "tooltip": "LE Audio (LC3 codec)",
+            "color": "var(--cc-sapphire)",
+            "command": "pactl set-card-profile {card} le-audio-stereo",
+            "requires": "le-audio-support"
+          }
+        ],
+  
+        "profile-style": {
+          "border-radius": "100px",
+          "padding": "4px 12px",
+          "font-size": "11px",
+          "font-weight": 700,
+          "background": "var(--cc-toggle-off-bg)",
+          "border": "1px solid var(--cc-toggle-off-border)",
+          "active": {
+            "background": "{profile-color-alpha}",
+            "border-color": "{profile-color}",
+            "color": "{profile-color}"
+          }
+        }
+      },
+  
+      "codec-display": {
+        "enabled": true,
+        "class": "bt-codec",
+        "layout": "row",
+        "gap": 8,
+        "margin-top": 8,
+        "items": [
+          {
+            "id": "active-codec",
+            "label": "Codec",
+            "icon": "󱑽",
+            "format": "{codec}",
+            "class": "codec-chip",
+            "color": "var(--cc-accent)"
+          },
+          {
+            "id": "sample-rate",
+            "label": "Sample Rate",
+            "icon": "󰓅",
+            "format": "{sample-rate} Hz",
+            "class": "codec-chip",
+            "font-family": "JetBrainsMono Nerd Font"
+          },
+          {
+            "id": "bit-depth",
+            "label": "Bit Depth",
+            "icon": "󰀶",
+            "format": "{bit-depth}-bit",
+            "class": "codec-chip",
+            "font-family": "JetBrainsMono Nerd Font"
+          }
+        ],
+        "chip-style": {
+          "background": "var(--cc-widget-bg)",
+          "border": "1px solid var(--cc-border-subtle)",
+          "border-radius": "100px",
+          "padding": "3px 8px",
+          "font-size": "10px",
+          "font-weight": 700,
+          "gap": 4
+        }
+      },
+  
+      "volume-balance": {
+        "enabled": true,
+        "class": "bt-balance",
+        "label": "Balance",
+        "label-icon": "󰓃",
+        "margin-top": 10,
+        "slider": {
+          "range": { "min": -100, "max": 100, "step": 5, "default": 0 },
+          "height": 4,
+          "border-radius": 100,
+          "gradient": {
+            "type": "linear",
+            "direction": "90deg",
+            "stops": [
+              { "at":   "0%", "color": "var(--cc-blue)"   },
+              { "at":  "50%", "color": "var(--cc-accent)"  },
+              { "at": "100%", "color": "var(--cc-accent)"  }
+            ]
+          },
+          "command": "pactl set-sink-channel-volumes {sink} {left}% {right}%",
+          "center-snap": true,
+          "center-snap-threshold": 5,
+          "center-indicator": {
+            "enabled": true,
+            "color": "rgba(255,255,255,0.40)",
+            "width": 2
+          }
+        },
+        "labels": {
+          "left":   { "text": "L", "color": "var(--cc-blue)"   },
+          "center": { "text": "C", "color": "var(--cc-text-muted)" },
+          "right":  { "text": "R", "color": "var(--cc-accent)"  }
+        }
+      }
+    },
+  
+    "device-history": {
+      "enabled": true,
+      "class": "bt-history",
+      "label": "Recent Devices",
+      "label-icon": "󰋚",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "max-items": 6,
+      "storage": "~/.cache/ash/bt-history.json",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "item": {
+        "class": "bt-history-item",
+        "border-radius": "10px",
+        "padding": "8px 10px",
+        "gap": 10,
+        "margin-bottom": 3,
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+  
+        "icon": {
+          "size": "18px",
+          "color": "var(--cc-text-muted)"
+        },
+  
+        "name": {
+          "font-size": "12px",
+          "font-weight": 700,
+          "color": "var(--cc-text-secondary)"
+        },
+  
+        "last-seen": {
+          "font-size": "10px",
+          "color": "var(--cc-text-muted)",
+          "format": "Last seen {relative-time}"
+        },
+  
+        "quick-connect": {
+          "icon": "󰌺",
+          "class": "btn-history-connect btn-icon",
+          "color": "var(--cc-text-muted)",
+          "hover-color": "var(--cc-accent)",
+          "command": "bluetoothctl connect {mac}"
+        },
+  
+        "hover": {
+          "background": "var(--cc-hover)",
+          "border-color": "var(--cc-border)"
+        }
+      }
+    },
+  
+    "adapter-info": {
+      "enabled": true,
+      "class": "bt-adapter",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "header": {
+        "icon": "󰂯",
+        "label": "Adapter",
+        "class": "section-label"
+      },
+  
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "command": "bluetoothctl show | grep 'Name' | awk '{print $2}'",
+          "icon": "󰂯"
+        },
+        {
+          "id": "address",
+          "label": "Address",
+          "command": "bluetoothctl show | grep 'Controller' | awk '{print $2}'",
+          "icon": "󰌜",
+          "copy-on-click": true,
+          "font-family": "JetBrainsMono Nerd Font"
+        },
+        {
+          "id": "version",
+          "label": "Version",
+          "command": "bluetoothctl show | grep 'Version' | awk '{print $2}'",
+          "icon": "󰋼"
+        },
+        {
+          "id": "discoverable",
+          "label": "Discoverable",
+          "command": "bluetoothctl show | grep 'Discoverable' | awk '{print $2}'",
+          "icon": "󰋋",
+          "toggle": {
+            "command-on":  "bluetoothctl discoverable on && bluetoothctl discoverable-timeout 120",
+            "command-off": "bluetoothctl discoverable off"
+          }
+        }
+      ],
+  
+      "field-style": {
+        "layout": "space-between",
+        "padding": "6px 0",
+        "border-bottom": "1px solid var(--cc-separator)",
+        "label": {
+          "font-size": "11px",
+          "font-weight": 600,
+          "color": "var(--cc-text-muted)"
+        },
+        "value": {
+          "font-size": "11px",
+          "font-weight": 700,
+          "color": "var(--cc-text-primary)",
+          "font-family": "JetBrainsMono Nerd Font"
+        }
+      }
+    },
+  
+    "quick-actions": {
+      "enabled": true,
+      "class": "bt-quick-actions",
+      "layout": "row",
+      "gap": 6,
+      "padding-top": 12,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 4,
+  
+      "actions": [
+        {
+          "id": "open-manager",
+          "label": "Manager",
+          "icon": "󰂯",
+          "class": "quick-action-btn",
+          "command": "blueman-manager",
+          "tooltip": "Blueman Manager"
+        },
+        {
+          "id": "toggle-discoverable",
+          "label": "Visible",
+          "icon": "󰋋",
+          "class": "quick-action-btn",
+          "command": "~/.config/swaync/scripts/bt-discoverable.sh",
+          "tooltip": "Make discoverable (2min)",
+          "toggle": true
+        },
+        {
+          "id": "send-file",
+          "label": "Send File",
+          "icon": "󰈔",
+          "class": "quick-action-btn",
+          "command": "bluetooth-sendto",
+          "tooltip": "Send file via Bluetooth",
+          "show-when": "connected"
+        },
+        {
+          "id": "reconnect-audio",
+          "label": "Reconnect",
+          "icon": "󰑓",
+          "class": "quick-action-btn",
+          "command": "~/.config/swaync/scripts/bt-reconnect-audio.sh",
+          "tooltip": "Reconnect audio device",
+          "show-when": "audio-paired"
+        }
+      ],
+  
+      "button-style": {
+        "border-radius": "100px",
+        "padding": "5px 12px",
+        "font-size": "11px",
+        "font-weight": 700,
+        "gap": 5,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "hover": {
+          "background": "rgba(137,180,250,0.15)",
+          "border-color": "var(--cc-blue)",
+          "color": "var(--cc-blue)",
+          "transform": "translateY(-1px)"
+        },
+        "active": {
+          "transform": "scale(0.95)"
+        }
+      }
+    },
+  
+    "state-management": {
+      "backend": "bluetoothctl",
+      "dbus-service": "org.bluez",
+      "poll-interval": 5000,
+      "subscribe": "bluetoothctl --monitor",
+      "cache-duration": 2000,
+      "state-file": "~/.cache/ash/bluetooth-state.json",
+      "auto-reconnect": {
+        "enabled": true,
+        "max-attempts": 3,
+        "delay": 3000
+      }
+    },
+  
+    "notifications": {
+      "connect": {
+        "enabled": true,
+        "title": "󰂯  Connected",
+        "body": "{device-name} connected",
+        "urgency": "low",
+        "sound": "~/.config/sounds/bluetooth-connect.ogg"
+      },
+      "disconnect": {
+        "enabled": true,
+        "title": "󰂲  Disconnected",
+        "body": "{device-name} disconnected",
+        "urgency": "normal"
+      },
+      "pair-request": {
+        "enabled": true,
+        "title": "󰂴  Pairing Request",
+        "body": "{device-name} wants to pair",
+        "urgency": "critical",
+        "actions": [
+          { "label": "Accept", "command": "bluetoothctl confirm yes" },
+          { "label": "Reject", "command": "bluetoothctl confirm no"  }
+        ]
+      },
+      "battery-low": {
+        "enabled": true,
+        "threshold": 20,
+        "title": "󰂎  Low Battery",
+        "body": "{device-name} battery at {battery}%",
+        "urgency": "normal"
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle-bluetooth": "b",
+        "start-scan":       "r",
+        "focus-search":     "slash",
+        "disconnect-all":   "shift+d"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "connected-glow": {
+        "enabled": true,
+        "color": "rgba(137,180,250,0.20)",
+        "blur": "20px",
+        "spread": "-4px"
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "80ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-connect":    "{device-name} connected",
+      "announce-disconnect": "{device-name} disconnected",
+      "announce-enabled":    "Bluetooth enabled",
+      "announce-disabled":   "Bluetooth disabled",
+      "announce-pairing":    "Pairing with {device-name}",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--cc-blue)",
+        "outline-offset": "2px"
+      }
+    }
+  }

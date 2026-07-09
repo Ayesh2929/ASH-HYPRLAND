@@ -1,0 +1,632 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Brightness Slider",
+      "version": "5.0.0",
+      "description": "Premium multi-backend brightness control with adaptive display profiles, color temperature, and night light integration",
+      "author": "ash-dotfiles",
+      "icon": "󰃟",
+      "category": "display",
+      "tags": ["brightness", "backlight", "display", "monitor", "adaptive", "hdr"]
+    },
+  
+    "widget": {
+      "type": "brightness-slider",
+      "id": "ash-brightness-widget",
+      "class": "ash-widget ash-widget--brightness ash-widget--glass",
+      "aria-label": "Brightness Control Panel",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      }
+    },
+  
+    "header": {
+      "enabled": true,
+      "layout": "space-between",
+      "left": {
+        "icon": {
+          "type": "dynamic",
+          "states": {
+            "off":      { "icon": "󰃞", "class": "icon--off",      "color": "var(--cc-text-muted)", "tooltip": "Off"          },
+            "very-low": { "icon": "󰃟", "class": "icon--very-low", "color": "var(--cc-yellow-dim)", "tooltip": "Very Low"     },
+            "low":      { "icon": "󰃝", "class": "icon--low",      "color": "var(--cc-yellow-dim)", "tooltip": "Low"          },
+            "medium":   { "icon": "󰃠", "class": "icon--medium",   "color": "var(--cc-yellow)",     "tooltip": "Medium"       },
+            "high":     { "icon": "󰃠", "class": "icon--high",     "color": "var(--cc-yellow)",     "tooltip": "High"         },
+            "max":      { "icon": "󰃡", "class": "icon--max",      "color": "var(--cc-yellow)",     "tooltip": "Maximum"      },
+            "auto":     { "icon": "󰃢", "class": "icon--auto",     "color": "var(--cc-accent)",     "tooltip": "Auto (ALS)"   }
+          },
+          "thresholds": {
+            "off":       0,
+            "very-low":  1,
+            "low":       20,
+            "medium":    40,
+            "high":      70,
+            "max":       95,
+            "auto":     -1
+          },
+          "font-size": "20px",
+          "animation": "icon-bounce",
+          "animation-on": "state-change"
+        },
+        "label": {
+          "text": "Brightness",
+          "class": "widget-section-label",
+          "font-weight": 700,
+          "font-size": "13px"
+        }
+      },
+      "right": {
+        "percentage-label": {
+          "enabled": true,
+          "class": "brightness-percentage",
+          "format": "{value}%",
+          "font-size": "13px",
+          "font-weight": 700,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "var(--cc-yellow)",
+          "animation": "number-roll",
+          "animation-duration": "150ms"
+        },
+        "auto-button": {
+          "enabled": true,
+          "class": "btn-auto btn-icon",
+          "icon":    "󰃢",
+          "icon-on": "󰃢",
+          "icon-off": "󰃠",
+          "tooltip-on":  "Disable auto-brightness",
+          "tooltip-off": "Enable auto-brightness (ALS)",
+          "command-enable":  "brightnessctl --device=als set 100%",
+          "command-disable": "brightnessctl set {last-value}%",
+          "requires": "als",
+          "animation": "icon-bounce"
+        }
+      }
+    },
+  
+    "backends": {
+      "primary": "brightnessctl",
+      "fallbacks": ["ddcutil", "xrandr", "sysfs"],
+      "auto-detect": true,
+      "config": {
+        "brightnessctl": {
+          "device": "auto",
+          "command-set": "brightnessctl set {value}%",
+          "command-get": "brightnessctl get",
+          "command-max": "brightnessctl max",
+          "poll-interval": 0,
+          "poll-event": "inotify:/sys/class/backlight"
+        },
+        "ddcutil": {
+          "feature-code": "10",
+          "command-set": "ddcutil setvcp 10 {value}",
+          "command-get": "ddcutil getvcp 10",
+          "bus-detection": "auto",
+          "retry-attempts": 3,
+          "timeout": 5000
+        },
+        "xrandr": {
+          "output": "auto",
+          "command-set": "xrandr --output {output} --brightness {decimal}",
+          "decimal-format": true
+        },
+        "sysfs": {
+          "path": "/sys/class/backlight/auto/brightness",
+          "max-path": "/sys/class/backlight/auto/max_brightness"
+        }
+      }
+    },
+  
+    "master-slider": {
+      "enabled": true,
+      "class": "slider slider--master slider--brightness",
+      "aria-label": "Master Brightness",
+  
+      "range": {
+        "min": 1,
+        "max": 100,
+        "step": 1,
+        "scroll-step": 5,
+        "fine-step": 1,
+        "minimum-safe": 5
+      },
+  
+      "track": {
+        "class": "slider__track",
+        "height": 8,
+        "border-radius": 100,
+        "background": "var(--cc-progress-track)"
+      },
+  
+      "fill": {
+        "class": "slider__fill",
+        "border-radius": 100,
+        "gradient": {
+          "type": "linear",
+          "direction": "90deg",
+          "stops": [
+            { "at":   "0%", "color": "var(--cc-yellow-dim)", "opacity": 0.60 },
+            { "at":  "50%", "color": "var(--cc-yellow)",     "opacity": 0.85 },
+            { "at": "100%", "color": "#ffffff",               "opacity": 1.00 }
+          ]
+        },
+        "transition": {
+          "property": "all",
+          "duration": "100ms",
+          "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+        },
+        "glow": {
+          "enabled": true,
+          "color": "var(--cc-yellow-glow)",
+          "blur": "8px",
+          "opacity": 0.5,
+          "intensity-responsive": true
+        }
+      },
+  
+      "thumb": {
+        "class": "slider__thumb",
+        "size": 18,
+        "border-radius": "50%",
+        "background": "var(--cc-yellow)",
+        "border": "2.5px solid var(--cc-panel-bg)",
+        "box-shadow": [
+          "0 2px 8px var(--cc-shadow)",
+          "0 0 8px var(--cc-yellow-glow)"
+        ],
+        "hover": {
+          "scale": 1.22,
+          "box-shadow": [
+            "0 4px 16px var(--cc-shadow)",
+            "0 0 16px var(--cc-yellow-glow)"
+          ]
+        },
+        "active": {
+          "scale": 0.90
+        },
+        "icon": {
+          "enabled": true,
+          "icon": "󰃟",
+          "size": "10px",
+          "color": "var(--cc-panel-bg)",
+          "show-above": 50
+        }
+      },
+  
+      "sun-effect": {
+        "enabled": true,
+        "class": "sun-rays",
+        "rays": 8,
+        "animate": true,
+        "animation": "sun-rays-pulse",
+        "animation-speed": "3s",
+        "max-opacity": 0.35,
+        "responsive-to-value": true
+      },
+  
+      "feedback": {
+        "osd": {
+          "enabled": true,
+          "position": "bottom-center",
+          "duration": 1200,
+          "class": "brightness-osd"
+        }
+      }
+    },
+  
+    "display-profiles": {
+      "enabled": true,
+      "class": "display-profiles",
+      "label": "Display Profile",
+      "label-icon": "󰍹",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "layout": "grid",
+      "columns": 3,
+  
+      "profiles": [
+        {
+          "id": "auto",
+          "label": "Auto",
+          "icon": "󰃢",
+          "description": "Adaptive (ALS sensor)",
+          "brightness": -1,
+          "color-temp": -1,
+          "class": "profile-btn profile-btn--auto",
+          "requires": "als"
+        },
+        {
+          "id": "day",
+          "label": "Day",
+          "icon": "󰖙",
+          "description": "Bright & cool for daytime",
+          "brightness": 100,
+          "color-temp": 6500,
+          "gamma": { "r": 1.0, "g": 1.0, "b": 1.0 },
+          "class": "profile-btn profile-btn--day"
+        },
+        {
+          "id": "indoor",
+          "label": "Indoor",
+          "icon": "󱎖",
+          "description": "Comfortable indoor lighting",
+          "brightness": 70,
+          "color-temp": 5500,
+          "class": "profile-btn profile-btn--indoor"
+        },
+        {
+          "id": "focus",
+          "label": "Focus",
+          "icon": "󰁁",
+          "description": "Reduced eye strain for work",
+          "brightness": 60,
+          "color-temp": 4500,
+          "gamma": { "r": 1.0, "g": 0.98, "b": 0.95 },
+          "class": "profile-btn profile-btn--focus"
+        },
+        {
+          "id": "dim",
+          "label": "Dim",
+          "icon": "󰃞",
+          "description": "Low light environment",
+          "brightness": 30,
+          "color-temp": 4000,
+          "class": "profile-btn profile-btn--dim"
+        },
+        {
+          "id": "night",
+          "label": "Night",
+          "icon": "󰖔",
+          "description": "Warm for nighttime use",
+          "brightness": 20,
+          "color-temp": 2700,
+          "gamma": { "r": 1.0, "g": 0.90, "b": 0.75 },
+          "class": "profile-btn profile-btn--night"
+        },
+        {
+          "id": "reading",
+          "label": "Reading",
+          "icon": "󰂿",
+          "description": "Optimal for long reading",
+          "brightness": 55,
+          "color-temp": 4200,
+          "gamma": { "r": 1.0, "g": 0.96, "b": 0.90 },
+          "class": "profile-btn profile-btn--reading"
+        },
+        {
+          "id": "cinema",
+          "label": "Cinema",
+          "icon": "󰿎",
+          "description": "Movie watching mode",
+          "brightness": 45,
+          "color-temp": 5000,
+          "gamma": { "r": 1.05, "g": 1.0, "b": 0.95 },
+          "class": "profile-btn profile-btn--cinema"
+        },
+        {
+          "id": "gaming",
+          "label": "Gaming",
+          "icon": "󰎃",
+          "description": "Vivid & bright for gaming",
+          "brightness": 100,
+          "color-temp": 6500,
+          "gamma": { "r": 1.0, "g": 1.05, "b": 1.0 },
+          "vibrance": 1.15,
+          "class": "profile-btn profile-btn--gaming"
+        }
+      ],
+  
+      "transition": {
+        "duration": 1500,
+        "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "steps": 60,
+        "smooth": true
+      },
+  
+      "commands": {
+        "apply-brightness": "brightnessctl set {brightness}%",
+        "apply-colortemp":  "gammastep -O {colortemp}",
+        "apply-gamma":      "xrandr --output {output} --gamma {r}:{g}:{b}",
+        "apply-vibrance":   "nvidia-settings -a [DPY:0]/DigitalVibrance={vibrance}"
+      }
+    },
+  
+    "per-monitor": {
+      "enabled": true,
+      "class": "per-monitor-section",
+      "label": "Per Monitor",
+      "label-icon": "󰍹",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "auto-detect": true,
+      "backend": "ddcutil",
+      "max-monitors": 4,
+  
+      "monitor-slider": {
+        "range": { "min": 0, "max": 100, "step": 1 },
+        "height": 5,
+        "border-radius": 100,
+        "class": "slider--monitor",
+        "thumb-size": 14,
+        "color": "var(--cc-accent)"
+      },
+  
+      "monitor-icons": {
+        "laptop":   "󰍹",
+        "external": "󰹑",
+        "4k":       "󰹑",
+        "ultrawide":"󰹑",
+        "default":  "󰍹"
+      },
+  
+      "empty-state": {
+        "icon":    "󰍹",
+        "message": "DDC/CI not available",
+        "hint":    "Install ddcutil for per-monitor control",
+        "class":   "per-monitor-empty"
+      }
+    },
+  
+    "als-integration": {
+      "enabled": true,
+      "class": "als-section",
+      "label": "Auto Brightness",
+      "label-icon": "󰃢",
+      "device-path": "/sys/bus/iio/devices",
+      "sensitivity-slider": {
+        "enabled": true,
+        "label": "Sensitivity",
+        "range": { "min": 1, "max": 10, "step": 1 },
+        "default": 5,
+        "class": "slider--als-sensitivity"
+      },
+      "ambient-display": {
+        "enabled": true,
+        "unit": "lux",
+        "format": "{value} lx",
+        "update-interval": 2000,
+        "class": "als-lux-display",
+        "icon": "󰃟"
+      },
+      "schedule-override": {
+        "enabled": true,
+        "sunrise": "06:30",
+        "sunset":  "19:30",
+        "timezone": "local"
+      }
+    },
+  
+    "hdr": {
+      "enabled": false,
+      "class": "hdr-section",
+      "label": "HDR",
+      "label-icon": "󰹑",
+      "toggle-command-on":  "kscreen-doctor output.{output}.hdr.enable",
+      "toggle-command-off": "kscreen-doctor output.{output}.hdr.disable",
+      "requires": ["kscreen", "hyprland>=0.41"],
+      "sdr-brightness": {
+        "enabled": true,
+        "label": "SDR Brightness",
+        "range": { "min": 0, "max": 100, "step": 1 },
+        "class": "slider--sdr-brightness"
+      }
+    },
+  
+    "quick-actions": {
+      "enabled": true,
+      "class": "brightness-quick-actions",
+      "layout": "row",
+      "gap": 6,
+      "actions": [
+        {
+          "id": "max",
+          "label": "󰃡",
+          "tooltip": "Maximum brightness",
+          "command": "brightnessctl set 100%",
+          "class": "quick-btn quick-btn--max"
+        },
+        {
+          "id": "min",
+          "label": "󰃞",
+          "tooltip": "Minimum brightness (5%)",
+          "command": "brightnessctl set 5%",
+          "class": "quick-btn quick-btn--min"
+        },
+        {
+          "id": "night-toggle",
+          "label": "󰖔",
+          "tooltip": "Toggle night light",
+          "command": "~/.config/swaync/scripts/toggle-night-light.sh",
+          "toggle": true,
+          "class": "quick-btn quick-btn--night"
+        },
+        {
+          "id": "dark-room",
+          "label": "󰲊",
+          "tooltip": "Dark room (1%)",
+          "command": "brightnessctl set 1%",
+          "class": "quick-btn quick-btn--dark"
+        },
+        {
+          "id": "gamma-reset",
+          "label": "󰑓",
+          "tooltip": "Reset display gamma",
+          "command": "xrandr --output $(hyprctl monitors -j | jq -r '.[0].name') --gamma 1:1:1",
+          "class": "quick-btn quick-btn--reset"
+        }
+      ]
+    },
+  
+    "gamma-correction": {
+      "enabled": true,
+      "class": "gamma-section",
+      "label": "Gamma",
+      "label-icon": "󱉞",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "sliders": [
+        {
+          "channel": "red",
+          "label":   "R",
+          "icon":    "󰝤",
+          "color":   "var(--cc-red)",
+          "range":   { "min": 0.5, "max": 2.0, "step": 0.01, "default": 1.0 },
+          "command": "xrandr --output {output} --gamma {r}:{g}:{b}",
+          "class":   "slider--gamma-r"
+        },
+        {
+          "channel": "green",
+          "label":   "G",
+          "icon":    "󰝤",
+          "color":   "var(--cc-green)",
+          "range":   { "min": 0.5, "max": 2.0, "step": 0.01, "default": 1.0 },
+          "class":   "slider--gamma-g"
+        },
+        {
+          "channel": "blue",
+          "label":   "B",
+          "icon":    "󰝤",
+          "color":   "var(--cc-blue)",
+          "range":   { "min": 0.5, "max": 2.0, "step": 0.01, "default": 1.0 },
+          "class":   "slider--gamma-b"
+        }
+      ],
+      "link-channels": {
+        "enabled": true,
+        "default": false,
+        "label": "Link RGB"
+      },
+      "presets": [
+        { "name": "sRGB",       "gamma": { "r": 1.0,  "g": 1.0,  "b": 1.0  } },
+        { "name": "Warm",       "gamma": { "r": 1.1,  "g": 1.0,  "b": 0.85 } },
+        { "name": "Cool",       "gamma": { "r": 0.9,  "g": 0.95, "b": 1.1  } },
+        { "name": "Vivid",      "gamma": { "r": 1.05, "g": 1.1,  "b": 1.0  } },
+        { "name": "Low Blue",   "gamma": { "r": 1.0,  "g": 0.95, "b": 0.75 } }
+      ]
+    },
+  
+    "schedule": {
+      "enabled": true,
+      "class": "brightness-schedule",
+      "label": "Auto Schedule",
+      "label-icon": "󱑃",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "rules": [
+        {
+          "id": "morning",
+          "time": "06:30",
+          "profile": "day",
+          "brightness": 80,
+          "color-temp": 6000,
+          "enabled": true
+        },
+        {
+          "id": "noon",
+          "time": "12:00",
+          "profile": "day",
+          "brightness": 100,
+          "color-temp": 6500,
+          "enabled": true
+        },
+        {
+          "id": "evening",
+          "time": "18:00",
+          "profile": "indoor",
+          "brightness": 65,
+          "color-temp": 4500,
+          "enabled": true
+        },
+        {
+          "id": "night",
+          "time": "21:00",
+          "profile": "night",
+          "brightness": 25,
+          "color-temp": 2700,
+          "enabled": true
+        },
+        {
+          "id": "midnight",
+          "time": "00:00",
+          "profile": "night",
+          "brightness": 10,
+          "color-temp": 2400,
+          "enabled": false
+        }
+      ],
+      "geolocation": {
+        "enabled": false,
+        "provider": "ip-api",
+        "cache-duration": 86400
+      },
+      "transition-duration": 2000
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "brightness-up":     "XF86MonBrightnessUp",
+        "brightness-down":   "XF86MonBrightnessDown",
+        "brightness-max":    "super+shift+equal",
+        "brightness-min":    "super+shift+minus",
+        "night-toggle":      "super+n",
+        "profile-next":      "super+shift+n",
+        "profile-prev":      "super+shift+b"
+      }
+    },
+  
+    "scroll-behavior": {
+      "enabled": true,
+      "direction": "vertical",
+      "step": 5,
+      "smooth": true,
+      "invert": false,
+      "command-up":   "brightnessctl set +5%",
+      "command-down": "brightnessctl set 5%-"
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "accent-color": "var(--cc-yellow)",
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "160ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-format": "Brightness {value} percent",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "minimum-brightness-guard": {
+        "enabled": true,
+        "minimum": 5,
+        "warning": "Brightness is very low"
+      }
+    }
+  }
