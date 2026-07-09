@@ -1,0 +1,922 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Quick Settings",
+      "version": "5.0.0",
+      "description": "Premium control center quick settings grid with smart toggles, sliders, device management, and live system stats",
+      "author": "ash-dotfiles",
+      "icon": "󱤳",
+      "category": "system",
+      "tags": [
+        "quick-settings", "toggles", "wifi", "bluetooth",
+        "vpn", "hotspot", "nfc", "airdrop", "shortcuts"
+      ]
+    },
+  
+    "widget": {
+      "type": "quick-settings",
+      "id": "ash-quick-settings-widget",
+      "class": "ash-widget ash-widget--quick-settings ash-widget--glass",
+      "aria-label": "Quick Settings",
+      "aria-role": "toolbar"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": {
+        "top": 14,
+        "right": 14,
+        "bottom": 14,
+        "left": 14
+      }
+    },
+  
+    "section-header": {
+      "enabled": true,
+      "class": "qs-header",
+      "layout": "space-between",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "left": {
+        "icon": {
+          "icon": "󱤳",
+          "font-size": "18px",
+          "color": "var(--cc-accent)",
+          "class": "qs-header-icon"
+        },
+        "label": {
+          "text": "Quick Settings",
+          "font-size": "14px",
+          "font-weight": 800,
+          "color": "var(--cc-text-primary)",
+          "class": "qs-header-label"
+        }
+      },
+  
+      "right": {
+        "system-info": {
+          "class": "qs-system-info",
+          "gap": 10,
+          "items": [
+            {
+              "id": "cpu",
+              "icon": "󰻠",
+              "format": "{usage}%",
+              "command": "top -bn1 | grep 'Cpu' | awk '{print int($2)}'",
+              "poll-interval": 3000,
+              "class": "sys-stat",
+              "color-thresholds": {
+                "0":  "var(--cc-green)",
+                "60": "var(--cc-yellow)",
+                "85": "var(--cc-red)"
+              }
+            },
+            {
+              "id": "ram",
+              "icon": "󰍛",
+              "format": "{used}G",
+              "command": "free -g | awk '/Mem/{print $3}'",
+              "poll-interval": 5000,
+              "class": "sys-stat"
+            },
+            {
+              "id": "time",
+              "icon": "󰅐",
+              "format": "{HH}:{MM}",
+              "type": "clock",
+              "class": "sys-time",
+              "font-family": "JetBrainsMono Nerd Font"
+            }
+          ]
+        },
+        "settings-btn": {
+          "icon": "󰒓",
+          "tooltip": "Full settings",
+          "class": "btn-full-settings btn-icon",
+          "command": "ash config edit",
+          "font-size": "16px",
+          "color": "var(--cc-text-muted)"
+        }
+      }
+    },
+  
+    "primary-grid": {
+      "enabled": true,
+      "class": "qs-primary-grid",
+      "columns": 3,
+      "gap": 8,
+  
+      "tiles": [
+        {
+          "id": "wifi",
+          "class": "qs-tile qs-tile--wifi",
+          "type": "toggle-with-detail",
+          "aria-label": "Wi-Fi",
+  
+          "icons": {
+            "on":         { "icon": "󰤨", "color": "var(--cc-accent)"      },
+            "off":        { "icon": "󰤭", "color": "var(--cc-text-muted)"  },
+            "connecting": { "icon": "󰤫", "color": "var(--cc-yellow)",
+                            "animation": "wifi-searching 1s ease infinite" },
+            "weak":       { "icon": "󰤟", "color": "var(--cc-yellow)"      },
+            "medium":     { "icon": "󰤢", "color": "var(--cc-accent)"      },
+            "strong":     { "icon": "󰤨", "color": "var(--cc-accent)"      }
+          },
+  
+          "labels": {
+            "primary":   "Wi-Fi",
+            "secondary-on":  "{ssid}",
+            "secondary-off": "Disabled",
+            "secondary-connecting": "Connecting…"
+          },
+  
+          "state": {
+            "command-get":    "nmcli radio wifi",
+            "command-on":     "nmcli radio wifi on",
+            "command-off":    "nmcli radio wifi off",
+            "status-command": "nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi | grep '^yes'",
+            "poll-interval":  5000,
+            "subscribe":      "nmcli monitor"
+          },
+  
+          "detail-action": {
+            "icon": "󰄱",
+            "command": "~/.config/rofi/menus/wifi/wifi.sh",
+            "tooltip": "Wi-Fi networks",
+            "class": "tile-detail-btn"
+          },
+  
+          "menu": {
+            "items": [
+              { "label": "Wi-Fi Networks",  "icon": "󰤨", "command": "~/.config/rofi/menus/wifi/wifi.sh"          },
+              { "label": "Create Hotspot",  "icon": "󱛁", "command": "~/.config/swaync/scripts/hotspot.sh"         },
+              { "label": "Saved Networks",  "icon": "󰀎", "command": "nm-connection-editor"                        },
+              { "label": "Network Settings","icon": "󰒓", "command": "ash net status"                              }
+            ]
+          },
+  
+          "signal-bar": {
+            "enabled": true,
+            "class": "wifi-signal-bar",
+            "bars": 4,
+            "color-strong": "var(--cc-green)",
+            "color-medium": "var(--cc-yellow)",
+            "color-weak":   "var(--cc-red)",
+            "color-empty":  "var(--cc-surface0)"
+          }
+        },
+  
+        {
+          "id": "bluetooth",
+          "class": "qs-tile qs-tile--bluetooth",
+          "type": "toggle-with-detail",
+          "aria-label": "Bluetooth",
+  
+          "icons": {
+            "on":          { "icon": "󰂯", "color": "var(--cc-blue)"      },
+            "off":         { "icon": "󰂲", "color": "var(--cc-text-muted)" },
+            "connected":   { "icon": "󰂱", "color": "var(--cc-accent)"    },
+            "pairing":     { "icon": "󰂴", "color": "var(--cc-yellow)",
+                             "animation": "bt-pairing 1.2s ease infinite" },
+            "audio":       { "icon": "󰂰", "color": "var(--cc-accent)"    }
+          },
+  
+          "labels": {
+            "primary":             "Bluetooth",
+            "secondary-on":        "On",
+            "secondary-off":       "Off",
+            "secondary-connected": "{device-name}",
+            "secondary-pairing":   "Pairing…"
+          },
+  
+          "state": {
+            "command-get":    "bluetoothctl show | grep 'Powered'",
+            "command-on":     "bluetoothctl power on",
+            "command-off":    "bluetoothctl power off",
+            "status-command": "bluetoothctl info | grep -E 'Name|Connected'",
+            "poll-interval":  6000
+          },
+  
+          "detail-action": {
+            "icon": "󰄱",
+            "command": "~/.config/rofi/menus/bluetooth/bluetooth.sh",
+            "tooltip": "Bluetooth devices"
+          },
+  
+          "menu": {
+            "items": [
+              { "label": "Devices",         "icon": "󰂯", "command": "~/.config/rofi/menus/bluetooth/bluetooth.sh" },
+              { "label": "Bluetooth Settings","icon":"󰒓","command": "blueman-manager"                              },
+              { "label": "Send File",       "icon": "󰈔", "command": "bluetooth-sendto"                           }
+            ]
+          },
+  
+          "connected-device": {
+            "enabled": true,
+            "class": "bt-connected-device",
+            "show-battery": true,
+            "battery-icon": "󰥅",
+            "font-size": "10px"
+          }
+        },
+  
+        {
+          "id": "dnd",
+          "class": "qs-tile qs-tile--dnd",
+          "type": "toggle",
+          "aria-label": "Do Not Disturb",
+  
+          "icons": {
+            "on":  { "icon": "󰂛", "color": "var(--cc-accent)",     "animation": "dnd-activate-pulse 2s ease infinite" },
+            "off": { "icon": "󰂚", "color": "var(--cc-text-muted)" }
+          },
+  
+          "labels": {
+            "primary":    "Do Not Disturb",
+            "secondary-on":  "Silenced",
+            "secondary-off": "All allowed"
+          },
+  
+          "state": {
+            "command-get": "swaync-client --get-dnd",
+            "command-on":  "swaync-client --dnd-on",
+            "command-off": "swaync-client --dnd-off"
+          },
+  
+          "detail-action": {
+            "icon": "󰄱",
+            "command": "ash mode focus",
+            "tooltip": "Focus modes"
+          }
+        },
+  
+        {
+          "id": "night-light",
+          "class": "qs-tile qs-tile--nightlight",
+          "type": "toggle",
+          "aria-label": "Night Light",
+  
+          "icons": {
+            "on":  { "icon": "󰖔", "color": "var(--cc-yellow)",     "glow": "0 0 10px var(--cc-yellow-glow)" },
+            "off": { "icon": "󰖙", "color": "var(--cc-text-muted)" }
+          },
+  
+          "labels": {
+            "primary":      "Night Light",
+            "secondary-on":  "{colortemp}K",
+            "secondary-off": "Disabled"
+          },
+  
+          "state": {
+            "command-get": "~/.config/swaync/scripts/night-light-state.sh",
+            "command-on":  "gammastep -O 3500 &",
+            "command-off": "gammastep -x"
+          },
+  
+          "detail-action": {
+            "icon": "󰄱",
+            "command": "~/.config/rofi/menus/color-picker/color-picker.sh",
+            "tooltip": "Color temperature"
+          }
+        },
+  
+        {
+          "id": "vpn",
+          "class": "qs-tile qs-tile--vpn",
+          "type": "toggle-with-detail",
+          "aria-label": "VPN",
+  
+          "icons": {
+            "connected":    { "icon": "󰌾", "color": "var(--cc-green)"     },
+            "disconnected": { "icon": "󰌿", "color": "var(--cc-text-muted)" },
+            "connecting":   { "icon": "󰌿", "color": "var(--cc-yellow)",
+                              "animation": "vpn-connecting 1.5s linear infinite" },
+            "error":        { "icon": "󰅗", "color": "var(--cc-red)"       }
+          },
+  
+          "labels": {
+            "primary":            "VPN",
+            "secondary-connected": "{server-name}",
+            "secondary-disconnected": "Disconnected",
+            "secondary-connecting":   "Connecting…"
+          },
+  
+          "state": {
+            "command-get":    "ash net vpn status",
+            "command-on":     "ash net vpn on",
+            "command-off":    "ash net vpn off",
+            "status-command": "nmcli con show --active | grep vpn",
+            "poll-interval":  8000
+          },
+  
+          "detail-action": {
+            "icon": "󰄱",
+            "command": "ash net vpn",
+            "tooltip": "VPN profiles"
+          },
+  
+          "connection-info": {
+            "enabled": true,
+            "class": "vpn-info",
+            "show-ip": true,
+            "show-server": true,
+            "font-size": "10px"
+          }
+        },
+  
+        {
+          "id": "airplane-mode",
+          "class": "qs-tile qs-tile--airplane",
+          "type": "toggle",
+          "aria-label": "Airplane Mode",
+  
+          "icons": {
+            "on":  { "icon": "󱄙", "color": "var(--cc-yellow)"     },
+            "off": { "icon": "󱄙", "color": "var(--cc-text-muted)" }
+          },
+  
+          "labels": {
+            "primary":    "Airplane",
+            "secondary-on":  "All radio off",
+            "secondary-off": "Normal mode"
+          },
+  
+          "state": {
+            "command-on":  "nmcli radio all off && bluetoothctl power off",
+            "command-off": "nmcli radio all on  && bluetoothctl power on",
+            "command-get": "nmcli radio all | grep -c disabled"
+          },
+  
+          "confirm": {
+            "enabled": true,
+            "message": "Enable airplane mode? This will disable all wireless.",
+            "confirm-label": "Enable",
+            "cancel-label": "Cancel"
+          }
+        }
+      ]
+    },
+  
+    "secondary-grid": {
+      "enabled": true,
+      "class": "qs-secondary-grid",
+      "columns": 4,
+      "gap": 6,
+      "padding-top": 10,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 8,
+  
+      "tiles": [
+        {
+          "id": "hotspot",
+          "class": "qs-tile-mini",
+          "icon-on":  "󱛁",
+          "icon-off": "󱛁",
+          "label": "Hotspot",
+          "color-on": "var(--cc-accent)",
+          "command-on":  "~/.config/swaync/scripts/hotspot-on.sh",
+          "command-off": "~/.config/swaync/scripts/hotspot-off.sh",
+          "tooltip": "Wi-Fi Hotspot"
+        },
+        {
+          "id": "dark-mode",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰌁",
+          "icon-off": "󰖨",
+          "label": "Dark Mode",
+          "color-on": "var(--cc-accent)",
+          "command": "ash theme toggle-dark-light",
+          "tooltip": "Toggle dark/light theme"
+        },
+        {
+          "id": "game-mode",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰎃",
+          "icon-off": "󰎃",
+          "label": "Game Mode",
+          "color-on": "var(--cc-green)",
+          "command-on":  "ash mode game",
+          "command-off": "ash mode default",
+          "tooltip": "Toggle game mode"
+        },
+        {
+          "id": "screen-record",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰻃",
+          "icon-off": "󰻃",
+          "label": "Record",
+          "color-on": "var(--cc-red)",
+          "command-on":  "ash shot record",
+          "command-off": "ash shot record --stop",
+          "tooltip": "Screen recording",
+          "active-animation": "recording-pulse 1.5s ease infinite"
+        },
+        {
+          "id": "screenshare",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰾍",
+          "icon-off": "󰾍",
+          "label": "Share",
+          "color-on": "var(--cc-yellow)",
+          "command": "~/.config/swaync/scripts/screenshare.sh",
+          "tooltip": "Screen sharing"
+        },
+        {
+          "id": "camera",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰄯",
+          "icon-off": "󰄰",
+          "label": "Camera",
+          "color-on": "var(--cc-accent)",
+          "command-on":  "webcamoid &",
+          "command-off": "pkill webcamoid",
+          "tooltip": "Camera"
+        },
+        {
+          "id": "mic-mute",
+          "class": "qs-tile-mini",
+          "icon-on":  "󰍭",
+          "icon-off": "󰍬",
+          "label": "Mic",
+          "color-on": "var(--cc-red)",
+          "command": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+          "state-command": "pactl get-source-mute @DEFAULT_SOURCE@",
+          "tooltip": "Microphone"
+        },
+        {
+          "id": "eye-comfort",
+          "class": "qs-tile-mini",
+          "icon-on":  "󱈀",
+          "icon-off": "󱈁",
+          "label": "Eye Care",
+          "color-on": "var(--cc-yellow)",
+          "command-on":  "~/.config/swaync/scripts/blue-light-on.sh",
+          "command-off": "~/.config/swaync/scripts/blue-light-off.sh",
+          "tooltip": "Blue light filter"
+        }
+      ],
+  
+      "tile-style": {
+        "border-radius": "12px",
+        "padding": "8px 6px",
+        "min-width": 70,
+        "gap": 4,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+  
+        "icon": {
+          "font-size": "18px",
+          "margin-bottom": "3px"
+        },
+  
+        "label": {
+          "font-size": "10px",
+          "font-weight": 600,
+          "color": "var(--cc-text-secondary)",
+          "letter-spacing": "0.02em"
+        },
+  
+        "states": {
+          "off": {
+            "background": "var(--cc-toggle-off-bg)",
+            "border-color": "var(--cc-toggle-off-border)",
+            "color": "var(--cc-text-muted)"
+          },
+          "on": {
+            "background": "var(--cc-accent-alpha)",
+            "border-color": "var(--cc-accent)",
+            "color": "var(--cc-accent)",
+            "box-shadow": [
+              "0 0 0 1px var(--cc-accent)",
+              "0 4px 14px var(--cc-accent-glow)"
+            ]
+          },
+          "hover": {
+            "transform": "translateY(-2px) scale(1.04)",
+            "box-shadow": "0 6px 18px var(--cc-shadow)"
+          },
+          "active": {
+            "transform": "scale(0.94)"
+          }
+        }
+      }
+    },
+  
+    "connectivity-status": {
+      "enabled": true,
+      "class": "qs-connectivity",
+      "layout": "row",
+      "gap": 8,
+      "padding": "10px 0 0",
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 10,
+  
+      "items": [
+        {
+          "id": "ip-address",
+          "icon": "󰩟",
+          "format": "{local-ip}",
+          "command": "hostname -I | awk '{print $1}'",
+          "poll-interval": 30000,
+          "class": "connectivity-chip",
+          "tooltip": "Local IP address",
+          "click-command": "ash net status",
+          "copy-on-click": true
+        },
+        {
+          "id": "public-ip",
+          "icon": "󰖟",
+          "format": "{public-ip}",
+          "command": "curl -s --max-time 3 ifconfig.me",
+          "poll-interval": 60000,
+          "class": "connectivity-chip",
+          "tooltip": "Public IP address",
+          "copy-on-click": true,
+          "show-when": "online"
+        },
+        {
+          "id": "net-speed",
+          "icon": "󰓅",
+          "format": "↑{up} ↓{down}",
+          "command": "~/.config/swaync/scripts/net-speed.sh",
+          "poll-interval": 2000,
+          "class": "connectivity-chip",
+          "font-family": "JetBrainsMono Nerd Font",
+          "font-size": "10px"
+        },
+        {
+          "id": "ping",
+          "icon": "󰛳",
+          "format": "{ping}ms",
+          "command": "ping -c 1 -W 1 8.8.8.8 | tail -1 | awk -F/ '{print int($5)}'",
+          "poll-interval": 10000,
+          "class": "connectivity-chip",
+          "color-thresholds": {
+            "0":   "var(--cc-green)",
+            "50":  "var(--cc-yellow)",
+            "150": "var(--cc-red)"
+          }
+        }
+      ],
+  
+      "chip-style": {
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-widget-border)",
+        "border-radius": "100px",
+        "padding": "3px 10px",
+        "font-size": "10px",
+        "font-weight": 600,
+        "gap": 5,
+        "color": "var(--cc-text-muted)"
+      }
+    },
+  
+    "system-sliders": {
+      "enabled": true,
+      "class": "qs-system-sliders",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-top": 10,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 8,
+  
+      "label": "Adjustments",
+      "label-icon": "󰒓",
+  
+      "sliders": [
+        {
+          "id": "volume",
+          "icon": "dynamic",
+          "label": "Volume",
+          "range": { "min": 0, "max": 100, "step": 5 },
+          "command-set": "pactl set-sink-volume @DEFAULT_SINK@ {value}%",
+          "command-get": "pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | tr -d '%'",
+          "color": "var(--cc-accent)",
+          "class": "qs-slider qs-slider--volume"
+        },
+        {
+          "id": "brightness",
+          "icon": "󰃟",
+          "label": "Brightness",
+          "range": { "min": 1, "max": 100, "step": 5 },
+          "command-set": "brightnessctl set {value}%",
+          "command-get": "brightnessctl -m | awk -F, '{print int($4)}'",
+          "color": "var(--cc-yellow)",
+          "class": "qs-slider qs-slider--brightness"
+        },
+        {
+          "id": "colortemp",
+          "icon": "󱩎",
+          "label": "Color Temp",
+          "range": { "min": 1900, "max": 6500, "step": 100 },
+          "command-set": "gammastep -O {value} &",
+          "command-get": "~/.config/swaync/scripts/colortemp-get.sh",
+          "color": "dynamic",
+          "color-formula": "blackbody({value}K)",
+          "class": "qs-slider qs-slider--colortemp",
+          "track-gradient": {
+            "type": "linear",
+            "direction": "90deg",
+            "stops": [
+              { "at":   "0%", "color": "#ff6a00" },
+              { "at":  "50%", "color": "#ffd580" },
+              { "at": "100%", "color": "#e8f4ff" }
+            ]
+          }
+        }
+      ],
+  
+      "slider-style": {
+        "height": 5,
+        "border-radius": 100,
+        "thumb-size": 14,
+        "icon-size": "16px",
+        "label-size": "11px",
+        "label-weight": 600,
+        "gap": 10,
+        "margin-bottom": 10
+      }
+    },
+  
+    "power-profiles": {
+      "enabled": true,
+      "class": "qs-power-profiles",
+      "label": "Power",
+      "label-icon": "󰖂",
+      "collapsible": false,
+      "padding-top": 10,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 8,
+  
+      "layout": "row",
+      "gap": 6,
+  
+      "profiles": [
+        {
+          "id": "power-saver",
+          "label": "Saver",
+          "icon": "󰁹",
+          "color": "var(--cc-green)",
+          "glow": "rgba(166,227,161,0.30)",
+          "command": "powerprofilesctl set power-saver",
+          "class": "power-profile-btn"
+        },
+        {
+          "id": "balanced",
+          "label": "Balanced",
+          "icon": "󰗑",
+          "color": "var(--cc-accent)",
+          "glow": "var(--cc-accent-glow)",
+          "command": "powerprofilesctl set balanced",
+          "class": "power-profile-btn power-profile-btn--default"
+        },
+        {
+          "id": "performance",
+          "label": "Perform",
+          "icon": "󰖙",
+          "color": "var(--cc-yellow)",
+          "glow": "var(--cc-yellow-glow)",
+          "command": "powerprofilesctl set performance",
+          "class": "power-profile-btn"
+        }
+      ],
+  
+      "state-command": "powerprofilesctl get",
+      "poll-interval": 10000,
+  
+      "battery-display": {
+        "enabled": true,
+        "class": "qs-battery",
+        "format": "{icon}  {percent}%  {status}",
+        "status-format": {
+          "discharging": "󱟞  {time} left",
+          "charging":    "󰚥  {time} to full",
+          "full":        "󰁹  Full",
+          "ac":          "󰍹  AC"
+        },
+        "icon-thresholds": {
+          "0":  { "icon": "󰂎", "color": "var(--cc-red)"    },
+          "10": { "icon": "󰁺", "color": "var(--cc-red)"    },
+          "20": { "icon": "󰁻", "color": "var(--cc-yellow)" },
+          "30": { "icon": "󰁼", "color": "var(--cc-yellow)" },
+          "40": { "icon": "󰁽", "color": "var(--cc-accent)" },
+          "50": { "icon": "󰁾", "color": "var(--cc-accent)" },
+          "60": { "icon": "󰁿", "color": "var(--cc-accent)" },
+          "70": { "icon": "󰂀", "color": "var(--cc-green)"  },
+          "80": { "icon": "󰂁", "color": "var(--cc-green)"  },
+          "90": { "icon": "󰂂", "color": "var(--cc-green)"  },
+          "100":{ "icon": "󰁹", "color": "var(--cc-green)"  }
+        },
+        "charging-icon": "󰂄",
+        "command": "cat /sys/class/power_supply/BAT0/capacity",
+        "poll-interval": 30000,
+        "mini-bar": {
+          "enabled": true,
+          "width": "100%",
+          "height": 3,
+          "border-radius": 100,
+          "color-thresholds": {
+            "0":   "var(--cc-red)",
+            "20":  "var(--cc-yellow)",
+            "40":  "var(--cc-green)"
+          }
+        }
+      },
+  
+      "profile-style": {
+        "border-radius": "10px",
+        "padding": "7px 10px",
+        "flex": 1,
+        "gap": 6,
+        "font-size": "11px",
+        "font-weight": 700,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "active": {
+          "background": "{profile-color-alpha}",
+          "border-color": "{profile-color}",
+          "color": "{profile-color}",
+          "box-shadow": "0 0 12px {profile-glow}"
+        },
+        "hover": {
+          "transform": "translateY(-2px)",
+          "box-shadow": "0 4px 14px var(--cc-shadow)"
+        }
+      }
+    },
+  
+    "ash-modes": {
+      "enabled": true,
+      "class": "qs-ash-modes",
+      "label": "ASH Modes",
+      "label-icon": "󱎫",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-top": 10,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 8,
+  
+      "layout": "row-wrap",
+      "gap": 6,
+  
+      "modes": [
+        { "id": "default",     "label": "Default",     "icon": "󰇄",  "color": "var(--cc-text-muted)", "command": "ash mode default"      },
+        { "id": "game",        "label": "Gaming",      "icon": "󰎃",  "color": "var(--cc-green)",       "command": "ash mode game"          },
+        { "id": "work",        "label": "Work",        "icon": "󰌨",  "color": "var(--cc-accent)",      "command": "ash mode work"          },
+        { "id": "focus",       "label": "Focus",       "icon": "󰁁",  "color": "var(--cc-blue)",         "command": "ash mode focus"         },
+        { "id": "cinema",      "label": "Cinema",      "icon": "󰿎",  "color": "var(--cc-yellow)",      "command": "ash mode cinema"        },
+        { "id": "stream",      "label": "Stream",      "icon": "󰐊",  "color": "var(--cc-red)",          "command": "ash mode stream"        },
+        { "id": "battery",     "label": "Battery",     "icon": "󰁹",  "color": "var(--cc-green)",       "command": "ash mode battery"       },
+        { "id": "privacy",     "label": "Privacy",     "icon": "󱕴",  "color": "var(--cc-mauve)",       "command": "ash mode privacy"       },
+        { "id": "present",     "label": "Present",     "icon": "󰕧",  "color": "var(--cc-peach)",       "command": "ash mode present"       }
+      ],
+  
+      "state-command": "ash mode status --json",
+      "poll-interval": 5000,
+  
+      "chip-style": {
+        "border-radius": "100px",
+        "padding": "5px 12px",
+        "font-size": "11px",
+        "font-weight": 700,
+        "gap": 5,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "active": {
+          "background": "{mode-color-alpha}",
+          "border-color": "{mode-color}",
+          "color": "{mode-color}",
+          "box-shadow": "0 0 12px {mode-color-glow}"
+        },
+        "hover": {
+          "background": "var(--cc-toggle-hover-bg)",
+          "transform": "translateY(-1px)"
+        }
+      }
+    },
+  
+    "theme-preview": {
+      "enabled": true,
+      "class": "qs-theme-preview",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-top": 10,
+      "border-top": "1px solid var(--cc-separator)",
+      "margin-top": 8,
+  
+      "header": {
+        "icon": "󱎫",
+        "label": "Theme",
+        "label-class": "qs-section-label",
+        "action": {
+          "label": "Browse",
+          "icon": "󰍉",
+          "command": "ash theme pick"
+        }
+      },
+  
+      "current-theme": {
+        "class": "current-theme-display",
+        "show-name": true,
+        "show-palette": true,
+        "palette-swatches": 8,
+        "swatch-size": 18,
+        "swatch-radius": 4,
+        "gap": 4,
+        "command": "ash theme list --current --json"
+      },
+  
+      "quick-picks": {
+        "enabled": true,
+        "class": "theme-quick-picks",
+        "max": 5,
+        "layout": "row",
+        "gap": 6,
+        "source": "favorites",
+        "fallback": "recent",
+        "thumbnail-size": 40,
+        "thumbnail-radius": 8,
+        "thumbnail-border": "2px solid transparent",
+        "active-border": "2px solid var(--cc-accent)",
+        "click-command": "ash theme apply {theme-id}",
+        "transition": {
+          "duration": 500,
+          "smooth": true
+        }
+      },
+  
+      "random-btn": {
+        "enabled": true,
+        "label": "Random",
+        "icon": "󰒎",
+        "class": "btn-random-theme",
+        "command": "ash theme random",
+        "animation": "icon-spin-once"
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "toggle-wifi":        "super+w",
+        "toggle-bluetooth":   "super+b",
+        "toggle-dnd":         "super+shift+d",
+        "toggle-night-light": "super+n",
+        "toggle-vpn":         "super+v",
+        "toggle-game-mode":   "super+g",
+        "cycle-power-profile":"super+p",
+        "cycle-ash-mode":     "super+shift+m"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "0ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      },
+  
+      "tile-enter-stagger": {
+        "enabled": true,
+        "delay-per-item": 25,
+        "animation": "notif-fade-in"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "tab-order": "natural",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--cc-accent)",
+        "outline-offset": "3px"
+      },
+      "announce-toggle": "{label} {state}",
+      "states": {
+        "on":  "enabled",
+        "off": "disabled"
+      }
+    }
+  }

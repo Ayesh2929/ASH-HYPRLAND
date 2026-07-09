@@ -1,0 +1,259 @@
+{
+    "$schema": "https://raw.githubusercontent.com/ErikReider/SwayNotificationCenter/main/src/config-schema.json",
+  
+    "positionX": "right",
+    "positionY": "top",
+    "layer": "overlay",
+    "layer-shell": true,
+    "cssPriority": "application",
+  
+    "control-center-margin-top": 8,
+    "control-center-margin-bottom": 8,
+    "control-center-margin-right": 8,
+    "control-center-margin-left": 0,
+  
+    "control-center-width": 460,
+    "control-center-height": 0,
+  
+    "notification-window-width": 420,
+  
+    "fit-to-screen": false,
+    "relative-timestamps": true,
+    "notification-visibility": {
+      "example-name": {
+        "state": "muted",
+        "urgency": "low",
+        "app-name": "Spotify"
+      }
+    },
+  
+    "timeout": 6,
+    "timeout-low": 3,
+    "timeout-critical": 0,
+  
+    "keyboard-shortcuts": true,
+    "image-visibility": "when-available",
+    "transition-time": 200,
+  
+    "hide-on-clear": false,
+    "hide-on-action": true,
+    "open-on-button-middle-click": false,
+    "close-on-fullscreen": false,
+  
+    "notification-icon-size": 48,
+    "notification-body-image-height": 120,
+    "notification-body-image-width": 200,
+  
+    "script-fail-notify": true,
+  
+    "scripts": {
+      "on-theme-change": {
+        "exec": "$HOME/.config/swaync/scripts/on-theme-change.sh",
+        "urgency": "Normal"
+      },
+      "on-snapshot": {
+        "exec": "$HOME/.config/swaync/scripts/on-snapshot.sh",
+        "app-name": "ash-snapshot"
+      },
+      "battery-critical": {
+        "exec": "$HOME/.config/swaync/scripts/battery-critical.sh",
+        "urgency": "Critical",
+        "category": "device.battery"
+      },
+      "screenshot-saved": {
+        "exec": "$HOME/.config/swaync/scripts/screenshot-action.sh",
+        "summary": "Screenshot saved*"
+      }
+    },
+  
+    "notification-body-markup": true,
+  
+    "widgets": [
+      "inhibitors",
+      "dnd",
+      "title",
+      "mpris",
+      "volume",
+      "backlight",
+      "buttons-grid",
+      "notifications"
+    ],
+  
+    "widget-config": {
+  
+      "title": {
+        "text": "Notification Center",
+        "clear-all-button": true,
+        "button-text": "󰎟  Clear All"
+      },
+  
+      "dnd": {
+        "text": "Do Not Disturb"
+      },
+  
+      "inhibitors": {
+        "text": "Inhibitors",
+        "button-text": "󰜺  Clear",
+        "clear-all-inhibitors": true
+      },
+  
+      "label": {
+        "max-lines": 1,
+        "text": "ASH Control Center"
+      },
+  
+      "mpris": {
+        "image-size": 64,
+        "image-radius": 12,
+        "blur": false
+      },
+  
+      "volume": {
+        "label": "󰕾",
+        "expand-button-label": "󰒓",
+        "collapse-button-label": "󰒓",
+        "show-per-app": true,
+        "show-per-app-icon": true,
+        "show-per-app-label": false
+      },
+  
+      "backlight": {
+        "label": "󰃟",
+        "device": "intel_backlight",
+        "min": 1,
+        "max": 100,
+        "step": 5
+      },
+  
+      "buttons-grid": {
+        "actions": [
+          {
+            "label": "󰤨",
+            "command": "~/.config/swaync/scripts/toggle-wifi.sh",
+            "type": "toggle",
+            "active": true
+          },
+          {
+            "label": "󰂯",
+            "command": "~/.config/swaync/scripts/toggle-bluetooth.sh",
+            "type": "toggle",
+            "active": false
+          },
+          {
+            "label": "󰕾",
+            "command": "~/.config/swaync/scripts/toggle-dnd.sh",
+            "type": "toggle",
+            "active": false
+          },
+          {
+            "label": "󰌶",
+            "command": "gammastep -O 4000 &",
+            "type": "toggle",
+            "active": false
+          },
+          {
+            "label": "󰃠",
+            "command": "brightnessctl set 100%",
+            "type": "button"
+          },
+          {
+            "label": "󰖔",
+            "command": "systemctl --user restart swww-daemon",
+            "type": "button"
+          },
+          {
+            "label": "󰎃",
+            "command": "ash mode game",
+            "type": "toggle",
+            "active": false
+          },
+          {
+            "label": "󰋋",
+            "command": "pavucontrol",
+            "type": "button"
+          },
+          {
+            "label": "󱎫",
+            "command": "ash theme pick",
+            "type": "button"
+          },
+          {
+            "label": "󰑓",
+            "command": "ash snapshot create",
+            "type": "button"
+          },
+          {
+            "label": "󰦗",
+            "command": "~/.config/swaync/scripts/toggle-screenrecord.sh",
+            "type": "toggle",
+            "active": false
+          },
+          {
+            "label": "󰐥",
+            "command": "wlogout -b 5 -p layer-shell",
+            "type": "button"
+          }
+        ]
+      },
+  
+      "notifications": {
+        "notification-visibility": {
+          "firefox-pip": {
+            "state": "muted",
+            "app-name": "firefox"
+          }
+        }
+      },
+  
+      "menubar": {
+        "menu": {
+          "label": "󰄬",
+          "position": "left",
+          "actions": [
+            {
+              "label": "󱎫  Theme Store",
+              "command": "ash store browse"
+            },
+            {
+              "label": "󱌣  Plugin Manager",
+              "command": "ash plugin browse"
+            },
+            {
+              "label": "󰓦  System Doctor",
+              "command": "kitty ash doctor"
+            },
+            {
+              "label": "󰒓  Settings",
+              "command": "ash config edit"
+            }
+          ]
+        }
+      },
+  
+      "date-time": {
+        "format": "%H:%M  •  %A, %B %d",
+        "interval": 60
+      },
+  
+      "buttons": {
+        "actions": [
+          {
+            "label": "󰌾  Lock",
+            "command": "hyprlock"
+          },
+          {
+            "label": "󰤂  Suspend",
+            "command": "systemctl suspend"
+          },
+          {
+            "label": "󰜉  Reboot",
+            "command": "systemctl reboot"
+          },
+          {
+            "label": "󰐥  Shutdown",
+            "command": "systemctl poweroff"
+          }
+        ]
+      }
+    }
+  }

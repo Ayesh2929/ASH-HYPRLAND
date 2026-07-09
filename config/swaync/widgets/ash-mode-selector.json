@@ -1,0 +1,932 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Mode Selector",
+      "version": "5.0.0",
+      "description": "Premium ASH system mode controller with live previews, sub-mode config, per-mode automation, scheduling, and intelligent context-aware switching",
+      "author": "ash-dotfiles",
+      "icon": "󱎫",
+      "category": "ash-system",
+      "tags": [
+        "ash", "modes", "context", "automation", "profiles",
+        "focus", "gaming", "work", "cinema", "stream",
+        "battery", "privacy", "present", "accessibility"
+      ]
+    },
+  
+    "widget": {
+      "type": "ash-mode-selector",
+      "id": "ash-mode-selector-widget",
+      "class": "ash-widget ash-widget--mode-selector ash-widget--glass",
+      "aria-label": "ASH System Mode Selector",
+      "aria-role": "group"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 }
+    },
+  
+    "header": {
+      "enabled": true,
+      "class": "mode-header",
+      "layout": "space-between",
+      "align": "center",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 14,
+  
+      "left": {
+        "logo": {
+          "icon": "󱎫",
+          "class": "ash-logo-icon",
+          "font-size": "20px",
+          "color": "var(--cc-accent)",
+          "glow": "0 0 14px var(--cc-accent-glow)",
+          "animation": "ash-logo-pulse 4s ease-in-out infinite"
+        },
+        "labels": {
+          "primary": {
+            "text": "ASH System",
+            "class": "mode-header-title",
+            "font-size": "14px",
+            "font-weight": 900,
+            "color": "var(--cc-text-primary)",
+            "letter-spacing": "-0.01em"
+          },
+          "secondary": {
+            "class": "mode-header-subtitle",
+            "format": "Mode: {current-mode}  •  v5.0",
+            "font-size": "10px",
+            "font-weight": 600,
+            "color": "var(--cc-text-muted)"
+          }
+        }
+      },
+  
+      "right": {
+        "active-mode-badge": {
+          "class": "active-mode-badge",
+          "format": "{current-mode-icon}  {current-mode-label}",
+          "background": "var(--cc-accent-alpha)",
+          "border": "1px solid var(--cc-accent)",
+          "border-radius": "100px",
+          "padding": "4px 12px",
+          "font-size": "11px",
+          "font-weight": 800,
+          "color": "var(--cc-accent)",
+          "box-shadow": "0 0 12px var(--cc-accent-glow)",
+          "animation": "active-badge-glow 3s ease-in-out infinite"
+        },
+  
+        "settings-btn": {
+          "icon": "󰒓",
+          "class": "btn-ash-settings btn-icon",
+          "tooltip": "ASH Configuration",
+          "command": "ash config edit",
+          "color": "var(--cc-text-muted)",
+          "hover-color": "var(--cc-accent)"
+        }
+      }
+    },
+  
+    "mode-grid": {
+      "enabled": true,
+      "class": "mode-grid",
+      "layout": "grid",
+      "columns": 3,
+      "gap": 8,
+      "padding-bottom": 14,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 14,
+  
+      "modes": [
+        {
+          "id": "default",
+          "label": "Default",
+          "icon": "󰇄",
+          "emoji": "🏠",
+          "description": "Standard configuration",
+          "color": "var(--cc-text-secondary)",
+          "glow": "rgba(166,173,200,0.25)",
+          "class": "mode-tile",
+          "command": "ash mode default",
+          "effects": {
+            "hyprland-animations": true,
+            "blur": true,
+            "dnd": false,
+            "performance-profile": "balanced",
+            "waybar-layout": "top-bar",
+            "theme-variant": "auto"
+          },
+          "keybind": "super+F1",
+          "auto-trigger": []
+        },
+        {
+          "id": "work",
+          "label": "Work",
+          "icon": "󰌨",
+          "emoji": "💼",
+          "description": "Focused productivity",
+          "color": "var(--cc-accent)",
+          "glow": "var(--cc-accent-glow)",
+          "class": "mode-tile",
+          "command": "ash mode work",
+          "effects": {
+            "hyprland-animations": true,
+            "blur": true,
+            "dnd": false,
+            "performance-profile": "balanced",
+            "waybar-layout": "top-bar",
+            "startup-apps": ["kitty", "firefox"],
+            "workspace-layout": "master-stack"
+          },
+          "keybind": "super+F2",
+          "auto-trigger": ["09:00 weekdays"]
+        },
+        {
+          "id": "focus",
+          "label": "Focus",
+          "icon": "󰁁",
+          "emoji": "🎯",
+          "description": "Deep concentration",
+          "color": "var(--cc-blue)",
+          "glow": "rgba(137,180,250,0.35)",
+          "class": "mode-tile",
+          "command": "ash mode focus",
+          "effects": {
+            "hyprland-animations": false,
+            "blur": false,
+            "dnd": true,
+            "performance-profile": "balanced",
+            "waybar-layout": "minimal-bar",
+            "hyprland-gaps": 0,
+            "hide-waybar": false,
+            "night-light": true,
+            "ambient-sounds": "brown-noise"
+          },
+          "keybind": "super+F3",
+          "sub-modes": {
+            "enabled": true,
+            "items": [
+              { "id": "deep",   "label": "Deep",   "duration": 5400 },
+              { "id": "pomodoro","label": "Pomo",  "duration": 1500 },
+              { "id": "reading","label": "Read",   "duration": 3600 }
+            ]
+          },
+          "auto-trigger": []
+        },
+        {
+          "id": "game",
+          "label": "Gaming",
+          "icon": "󰎃",
+          "emoji": "🎮",
+          "description": "Maximum performance",
+          "color": "var(--cc-green)",
+          "glow": "rgba(166,227,161,0.40)",
+          "class": "mode-tile",
+          "command": "ash mode game",
+          "effects": {
+            "hyprland-animations": false,
+            "blur": false,
+            "dnd": true,
+            "performance-profile": "performance",
+            "cpu-governor": "performance",
+            "waybar-layout": "gaming-bar",
+            "startup-services": ["gamemoded"],
+            "kill-apps": ["electron-apps"]
+          },
+          "keybind": "super+F4",
+          "auto-trigger": ["on-steam-launch", "on-game-detect"]
+        },
+        {
+          "id": "cinema",
+          "label": "Cinema",
+          "icon": "󰿎",
+          "emoji": "🎬",
+          "description": "Immersive media",
+          "color": "var(--cc-yellow)",
+          "glow": "var(--cc-yellow-glow)",
+          "class": "mode-tile",
+          "command": "ash mode cinema",
+          "effects": {
+            "hyprland-animations": true,
+            "blur": false,
+            "dnd": true,
+            "performance-profile": "balanced",
+            "waybar-layout": "zen-bar",
+            "hide-waybar-delay": 3000,
+            "night-light": true,
+            "colortemp": 5000,
+            "wallpaper": "cinema-dark"
+          },
+          "keybind": "super+F5",
+          "auto-trigger": ["on-mpv-launch", "on-fullscreen"]
+        },
+        {
+          "id": "present",
+          "label": "Present",
+          "icon": "󰕧",
+          "emoji": "📊",
+          "description": "Clean presentation",
+          "color": "var(--cc-peach, var(--cc-yellow))",
+          "glow": "rgba(250,179,135,0.35)",
+          "class": "mode-tile",
+          "command": "ash mode present",
+          "effects": {
+            "hyprland-animations": true,
+            "blur": false,
+            "dnd": true,
+            "performance-profile": "balanced",
+            "waybar-layout": "minimal-bar",
+            "screenshare-safe": true,
+            "hide-private-workspaces": true,
+            "wallpaper": "present-clean"
+          },
+          "keybind": "super+F6",
+          "auto-trigger": ["on-screenshare"]
+        },
+        {
+          "id": "stream",
+          "label": "Stream",
+          "icon": "󰐊",
+          "emoji": "📡",
+          "description": "Live streaming setup",
+          "color": "var(--cc-red)",
+          "glow": "rgba(243,139,168,0.35)",
+          "class": "mode-tile",
+          "command": "ash mode stream",
+          "effects": {
+            "hyprland-animations": true,
+            "blur": false,
+            "dnd": true,
+            "performance-profile": "balanced",
+            "startup-apps": ["obs"],
+            "waybar-layout": "stream-bar",
+            "stream-safe-mode": true,
+            "hide-notifications": true
+          },
+          "keybind": "super+F7",
+          "auto-trigger": ["on-obs-stream-start"]
+        },
+        {
+          "id": "battery",
+          "label": "Battery",
+          "icon": "󰁹",
+          "emoji": "🔋",
+          "description": "Maximum battery life",
+          "color": "var(--cc-green)",
+          "glow": "rgba(166,227,161,0.30)",
+          "class": "mode-tile",
+          "command": "ash mode battery",
+          "effects": {
+            "hyprland-animations": false,
+            "blur": false,
+            "dnd": false,
+            "performance-profile": "eco",
+            "cpu-governor": "powersave",
+            "brightness": 40,
+            "refresh-rate": 60,
+            "kill-background": true,
+            "sync-interval": "30m"
+          },
+          "keybind": "super+F8",
+          "auto-trigger": [
+            "on-battery-below:20",
+            "on-battery-disconnect"
+          ]
+        },
+        {
+          "id": "privacy",
+          "label": "Privacy",
+          "icon": "󱕴",
+          "emoji": "🔒",
+          "description": "Maximum privacy",
+          "color": "var(--cc-mauve)",
+          "glow": "rgba(203,166,247,0.35)",
+          "class": "mode-tile",
+          "command": "ash mode privacy",
+          "effects": {
+            "hyprland-animations": false,
+            "blur": true,
+            "dnd": true,
+            "performance-profile": "balanced",
+            "vpn": "auto-connect",
+            "block-telemetry": true,
+            "hide-title-bars": true,
+            "tor-routing": false,
+            "camera-off": true,
+            "mic-mute": true,
+            "clear-clipboard": true
+          },
+          "keybind": "super+F9",
+          "auto-trigger": [],
+          "confirm": {
+            "enabled": false
+          }
+        }
+      ],
+  
+      "tile-style": {
+        "border-radius": "14px",
+        "padding": "12px 10px",
+        "gap": 6,
+        "background": "var(--cc-toggle-off-bg)",
+        "border": "1px solid var(--cc-toggle-off-border)",
+        "color": "var(--cc-text-muted)",
+        "min-height": 82,
+  
+        "icon": {
+          "font-size": "24px",
+          "margin-bottom": "2px",
+          "transition": "all 250ms cubic-bezier(0.34,1.56,0.64,1)"
+        },
+  
+        "label": {
+          "font-size": "11px",
+          "font-weight": 800,
+          "letter-spacing": "0.02em"
+        },
+  
+        "description": {
+          "font-size": "9px",
+          "font-weight": 500,
+          "color": "var(--cc-text-muted)",
+          "opacity": 0.70,
+          "show-on-hover": true
+        },
+  
+        "active-indicator": {
+          "class": "mode-tile-active-dot",
+          "size": 5,
+          "border-radius": "50%",
+          "background": "currentColor",
+          "glow": "0 0 6px currentColor",
+          "animation": "playing-dot-pulse 2s ease-in-out infinite"
+        },
+  
+        "states": {
+          "default": {
+            "background": "var(--cc-toggle-off-bg)",
+            "border-color": "var(--cc-toggle-off-border)",
+            "color": "var(--cc-text-muted)"
+          },
+          "active": {
+            "background": "{mode-color-alpha}",
+            "border-color": "{mode-color}",
+            "color": "{mode-color}",
+            "box-shadow": [
+              "0 0 0 1px {mode-color}",
+              "0 4px 20px {mode-glow}"
+            ],
+            "icon-transform": "scale(1.10)",
+            "icon-glow": "0 0 14px {mode-color}"
+          },
+          "hover": {
+            "transform": "translateY(-2px) scale(1.03)",
+            "box-shadow": "0 8px 24px var(--cc-shadow)",
+            "border-color": "{mode-color}",
+            "background": "{mode-color-alpha-light}"
+          }
+        },
+  
+        "active-btn": { "transform": "scale(0.94)" },
+  
+        "animation": {
+          "enter": "widget-enter",
+          "stagger": 30,
+          "duration": "200ms"
+        }
+      }
+    },
+  
+    "active-mode-details": {
+      "enabled": true,
+      "class": "mode-details",
+      "show-when": "not-default",
+      "padding-bottom": 14,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 14,
+  
+      "layout": "space-between",
+      "align": "center",
+  
+      "info": {
+        "class": "mode-details-info",
+        "gap": 6,
+  
+        "mode-name": {
+          "class": "details-mode-name",
+          "format": "{current-mode-icon}  {current-mode-label}",
+          "font-size": "14px",
+          "font-weight": 800,
+          "color": "{current-mode-color}"
+        },
+  
+        "active-since": {
+          "class": "details-active-since",
+          "format": "Active for {elapsed}",
+          "font-size": "11px",
+          "color": "var(--cc-text-muted)",
+          "font-family": "JetBrainsMono Nerd Font"
+        },
+  
+        "active-effects": {
+          "class": "details-effects",
+          "layout": "row",
+          "gap": 5,
+          "margin-top": 6,
+          "max-display": 5,
+          "chip-style": {
+            "border-radius": "100px",
+            "padding": "2px 8px",
+            "font-size": "10px",
+            "font-weight": 700,
+            "background": "var(--cc-widget-bg)",
+            "border": "1px solid var(--cc-border-subtle)",
+            "color": "var(--cc-text-muted)",
+            "gap": 4
+          },
+          "sources": [
+            { "id": "dnd",         "icon": "󰂛", "label": "DND",      "show-when": "dnd-active"     },
+            { "id": "perf",        "icon": "󰓅", "label": "Perf",     "show-when": "perf-on"        },
+            { "id": "night-light", "icon": "󰖔", "label": "Night",    "show-when": "nl-active"      },
+            { "id": "vpn",         "icon": "󰌾", "label": "VPN",      "show-when": "vpn-active"     },
+            { "id": "focus-timer", "icon": "󱎫", "label": "{timer}",  "show-when": "timer-active"   },
+            { "id": "gamemode",    "icon": "󰎃", "label": "GameMode", "show-when": "gamemode-on"    },
+            { "id": "eco",         "icon": "󰁹", "label": "Eco",      "show-when": "eco-profile"    }
+          ]
+        }
+      },
+  
+      "actions": {
+        "class": "mode-details-actions",
+        "gap": 6,
+  
+        "exit-button": {
+          "label": "Exit Mode",
+          "icon": "󰅙",
+          "class": "btn-exit-mode",
+          "command": "ash mode default",
+          "border-radius": "100px",
+          "padding": "5px 12px",
+          "font-size": "11px",
+          "font-weight": 700,
+          "background": "var(--cc-toggle-off-bg)",
+          "border": "1px solid var(--cc-toggle-off-border)",
+          "color": "var(--cc-text-muted)",
+          "hover": {
+            "background": "rgba(243,139,168,0.15)",
+            "border-color": "var(--cc-red)",
+            "color": "var(--cc-red)"
+          }
+        },
+  
+        "sub-mode-selector": {
+          "enabled": true,
+          "show-when": "mode-has-submodes",
+          "class": "sub-mode-selector",
+          "layout": "row",
+          "gap": 4
+        }
+      }
+    },
+  
+    "mode-timer": {
+      "enabled": true,
+      "class": "mode-timer-section",
+      "show-when": "timer-active",
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "display": {
+        "class": "mode-timer-display",
+        "layout": "space-between",
+        "align": "center",
+  
+        "left": {
+          "icon": "󱑃",
+          "format": "{hh}:{mm}:{ss}",
+          "font-size": "20px",
+          "font-weight": 900,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "{current-mode-color}",
+          "glow": "0 0 12px {current-mode-color-glow}",
+          "label": {
+            "text": "Auto-exit in",
+            "font-size": "10px",
+            "color": "var(--cc-text-muted)",
+            "font-weight": 600
+          }
+        },
+  
+        "right": {
+          "gap": 6,
+          "extend-btn": {
+            "icon": "󰐕",
+            "label": "+30m",
+            "class": "btn-timer-extend",
+            "command": "ash mode extend 1800",
+            "color": "var(--cc-accent)"
+          },
+          "cancel-btn": {
+            "icon": "󰅙",
+            "class": "btn-timer-cancel btn-icon",
+            "command": "ash mode timer-cancel",
+            "color": "var(--cc-text-muted)"
+          }
+        }
+      },
+  
+      "progress": {
+        "class": "mode-timer-progress",
+        "height": 4,
+        "border-radius": 100,
+        "background": "var(--cc-progress-track)",
+        "fill": {
+          "background": "{current-mode-color}",
+          "border-radius": 100,
+          "glow": "0 0 6px {current-mode-color-glow}",
+          "transition": "width 1s linear"
+        },
+        "margin-top": 8
+      }
+    },
+  
+    "mode-automation": {
+      "enabled": true,
+      "class": "mode-automation",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+  
+      "header": {
+        "icon": "󰑓",
+        "label": "Auto Switching",
+        "class": "section-label",
+        "master-toggle": {
+          "class": "auto-switch-toggle",
+          "command-on":  "ash config set automation.enabled true",
+          "command-off": "ash config set automation.enabled false",
+          "state-command": "ash config get automation.enabled"
+        }
+      },
+  
+      "rules": [
+        {
+          "id": "work-hours",
+          "label": "Work Hours",
+          "icon": "󰌨",
+          "trigger": "time:09:00-18:00:weekdays",
+          "action": "ash mode work",
+          "enabled": true,
+          "class": "auto-rule",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "evening",
+          "label": "Evening",
+          "icon": "󰖔",
+          "trigger": "time:20:00-23:59",
+          "action": "ash mode focus",
+          "enabled": true,
+          "class": "auto-rule",
+          "color": "var(--cc-yellow)"
+        },
+        {
+          "id": "low-battery",
+          "label": "Low Battery",
+          "icon": "󰂃",
+          "trigger": "battery:<20",
+          "action": "ash mode battery",
+          "enabled": true,
+          "class": "auto-rule",
+          "color": "var(--cc-red)"
+        },
+        {
+          "id": "game-detect",
+          "label": "Game Launch",
+          "icon": "󰎃",
+          "trigger": "process:steam,lutris,heroic",
+          "action": "ash mode game",
+          "enabled": false,
+          "class": "auto-rule",
+          "color": "var(--cc-green)"
+        },
+        {
+          "id": "screenshare",
+          "label": "Screen Share",
+          "icon": "󰾍",
+          "trigger": "screenshare:active",
+          "action": "ash mode present",
+          "enabled": true,
+          "class": "auto-rule",
+          "color": "var(--cc-yellow)"
+        },
+        {
+          "id": "fullscreen",
+          "label": "Fullscreen Video",
+          "icon": "󰿎",
+          "trigger": "fullscreen:mpv,vlc,firefox",
+          "action": "ash mode cinema",
+          "enabled": false,
+          "class": "auto-rule",
+          "color": "var(--cc-yellow)"
+        },
+        {
+          "id": "network-vpn",
+          "label": "VPN Connect",
+          "icon": "󰌾",
+          "trigger": "vpn:connect",
+          "action": "ash mode privacy",
+          "enabled": false,
+          "class": "auto-rule",
+          "color": "var(--cc-mauve)"
+        }
+      ],
+  
+      "rule-style": {
+        "layout": "space-between",
+        "padding": "8px 10px",
+        "border-radius": "10px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "margin-bottom": 4,
+        "align": "center",
+  
+        "left": {
+          "gap": 8,
+          "icon": { "font-size": "16px", "min-width": "20px" },
+          "label": { "font-size": "12px", "font-weight": 700 },
+          "trigger": {
+            "font-size": "10px",
+            "color": "var(--cc-text-muted)",
+            "font-family": "JetBrainsMono Nerd Font"
+          }
+        },
+  
+        "mini-switch": {
+          "width": 32,
+          "height": 18,
+          "states": {
+            "on": { "background": "{rule-color}" }
+          }
+        },
+  
+        "hover": {
+          "background": "var(--cc-hover)",
+          "border-color": "var(--cc-border)"
+        }
+      },
+  
+      "add-rule-btn": {
+        "label": "Add Rule",
+        "icon": "󰐕",
+        "class": "btn-add-rule",
+        "command": "~/.config/swaync/scripts/add-mode-rule.sh",
+        "color": "var(--cc-accent)",
+        "margin-top": 8
+      }
+    },
+  
+    "mode-history": {
+      "enabled": true,
+      "class": "mode-history",
+      "collapsible": true,
+      "collapsed-by-default": true,
+      "padding-bottom": 12,
+      "border-bottom": "1px solid var(--cc-separator)",
+      "margin-bottom": 12,
+      "max-entries": 10,
+      "storage": "~/.cache/ash/mode-history.json",
+  
+      "header": {
+        "icon": "󰋚",
+        "label": "Mode History",
+        "class": "section-label",
+        "clear-btn": {
+          "icon": "󰎟",
+          "class": "btn-clear-history btn-icon",
+          "command": "ash config clear-history modes"
+        }
+      },
+  
+      "item": {
+        "class": "history-item",
+        "border-radius": "10px",
+        "padding": "7px 10px",
+        "margin-bottom": 3,
+        "layout": "row",
+        "gap": 8,
+        "align": "center",
+  
+        "mode-icon": {
+          "font-size": "16px",
+          "min-width": "20px",
+          "color": "{mode-color}"
+        },
+  
+        "info": {
+          "flex": 1,
+          "mode-name": {
+            "font-size": "12px",
+            "font-weight": 700,
+            "color": "var(--cc-text-primary)"
+          },
+          "meta": {
+            "font-size": "10px",
+            "color": "var(--cc-text-muted)",
+            "format": "{elapsed}  •  Duration: {duration}"
+          }
+        },
+  
+        "restore-btn": {
+          "icon": "󰑓",
+          "class": "btn-restore-mode btn-icon",
+          "tooltip": "Switch to {mode-name}",
+          "command": "ash mode {mode-id}",
+          "show-on-hover": true,
+          "color": "var(--cc-text-muted)",
+          "hover-color": "{mode-color}"
+        },
+  
+        "hover": {
+          "background": "var(--cc-hover)",
+          "border-radius": "10px"
+        }
+      }
+    },
+  
+    "system-status": {
+      "enabled": true,
+      "class": "mode-sys-status",
+      "layout": "row",
+      "gap": 6,
+      "flex-wrap": true,
+      "padding-top": 4,
+  
+      "chips": [
+        {
+          "id": "theme",
+          "icon": "󱎫",
+          "format": "{theme-name}",
+          "command": "ash theme list --current --short",
+          "class": "status-chip status-chip--theme",
+          "tooltip": "Active theme",
+          "click-command": "ash theme pick",
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "uptime",
+          "icon": "󰅐",
+          "format": "{uptime}",
+          "command": "uptime -p | sed 's/up //'",
+          "class": "status-chip",
+          "tooltip": "System uptime",
+          "poll-interval": 60000
+        },
+        {
+          "id": "cpu-temp",
+          "icon": "󱃂",
+          "format": "{temp}°C",
+          "command": "~/.config/swaync/scripts/metrics.sh temp",
+          "class": "status-chip",
+          "poll-interval": 5000,
+          "color-thresholds": {
+            "0":  "var(--cc-green)",
+            "70": "var(--cc-yellow)",
+            "85": "var(--cc-red)"
+          }
+        },
+        {
+          "id": "memory",
+          "icon": "󰍛",
+          "format": "{used}G / {total}G",
+          "command": "free -g | awk '/Mem/{printf \"%d/%d\", $3, $2}'",
+          "class": "status-chip",
+          "poll-interval": 10000,
+          "font-family": "JetBrainsMono Nerd Font"
+        },
+        {
+          "id": "notifications",
+          "icon": "󰂚",
+          "format": "{count}",
+          "command": "swaync-client --count",
+          "class": "status-chip",
+          "click-command": "swaync-client --open-panel",
+          "show-when": "count > 0",
+          "color": "var(--cc-yellow)"
+        },
+        {
+          "id": "ash-version",
+          "icon": "󱎫",
+          "format": "v{version}",
+          "command": "ash version --short",
+          "class": "status-chip",
+          "tooltip": "ASH Dotfiles version",
+          "click-command": "ash update check",
+          "color": "var(--cc-text-muted)"
+        }
+      ],
+  
+      "chip-style": {
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-border-subtle)",
+        "border-radius": "100px",
+        "padding": "3px 10px",
+        "font-size": "10px",
+        "font-weight": 700,
+        "gap": 5,
+        "color": "var(--cc-text-muted)",
+        "hover": {
+          "border-color": "var(--cc-accent)",
+          "color": "var(--cc-text-primary)"
+        }
+      }
+    },
+  
+    "ipc": {
+      "enabled": true,
+      "socket": "/tmp/ash-ipc.sock",
+      "subscribe-events": [
+        "mode-change",
+        "theme-change",
+        "plugin-event",
+        "snapshot-create"
+      ],
+      "command-prefix": "ash ipc",
+      "auto-refresh": true
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "mode-default":  "super+F1",
+        "mode-work":     "super+F2",
+        "mode-focus":    "super+F3",
+        "mode-game":     "super+F4",
+        "mode-cinema":   "super+F5",
+        "mode-present":  "super+F6",
+        "mode-stream":   "super+F7",
+        "mode-battery":  "super+F8",
+        "mode-privacy":  "super+F9",
+        "mode-exit":     "super+F10",
+        "mode-previous": "super+F11"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "dynamic-accent": {
+        "enabled": true,
+        "source": "current-mode-color",
+        "affects": [
+          "--cc-accent",
+          "--cc-accent-glow",
+          "--cc-accent-alpha"
+        ],
+        "transition": "all 500ms cubic-bezier(0.4,0,0.2,1)"
+      },
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "0 0 0 1px {current-mode-color-subtle}",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "mode-transition": {
+        "duration": 400,
+        "easing": "cubic-bezier(0.4,0,0.2,1)",
+        "animation": "mode-switch-flash"
+      },
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "240ms",
+        "easing":   "cubic-bezier(0.19,1,0.22,1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "assertive",
+      "announce-format": "ASH mode changed to {mode-name}",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid {current-mode-color}",
+        "outline-offset": "3px"
+      }
+    }
+  }

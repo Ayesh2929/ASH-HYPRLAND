@@ -1,0 +1,1040 @@
+{
+    "$schema": "../schema/widget-schema.json",
+    "_meta": {
+      "name": "ASH Ultra Calendar Widget",
+      "version": "5.0.0",
+      "description": "Premium full-featured calendar with events, reminders, multi-provider sync, world clocks, countdowns, and lunar phases",
+      "author": "ash-dotfiles",
+      "icon": "󰃮",
+      "category": "time",
+      "tags": [
+        "calendar", "clock", "events", "reminders", "agenda",
+        "google-calendar", "nextcloud", "khal", "lunar", "worldclock",
+        "countdown", "pomodoro", "timezone", "schedule"
+      ]
+    },
+  
+    "widget": {
+      "type": "calendar",
+      "id": "ash-calendar-widget",
+      "class": "ash-widget ash-widget--calendar ash-widget--glass",
+      "aria-label": "Calendar and Clock",
+      "aria-role": "region"
+    },
+  
+    "layout": {
+      "orientation": "vertical",
+      "spacing": 0,
+      "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+      "overflow": "hidden"
+    },
+  
+    "clock-hero": {
+      "enabled": true,
+      "class": "cal-clock-hero",
+      "padding": { "top": 20, "right": 20, "bottom": 16, "left": 20 },
+      "background": {
+        "type": "gradient",
+        "gradient": {
+          "type": "radial",
+          "stops": [
+            { "at":   "0%", "color": "var(--cc-accent-alpha)",  "opacity": 0.30 },
+            { "at": "100%", "color": "transparent",              "opacity": 0.00 }
+          ]
+        }
+      },
+  
+      "time-display": {
+        "class": "clock-hero-time",
+        "format-24h": "%H:%M",
+        "format-12h": "%I:%M",
+        "format-mode": "24h",
+        "font-size": "52px",
+        "font-weight": 900,
+        "font-family": "JetBrainsMono Nerd Font",
+        "letter-spacing": "-0.03em",
+        "color": "var(--cc-text-primary)",
+        "line-height": 1,
+  
+        "seconds": {
+          "enabled": true,
+          "class": "clock-seconds",
+          "font-size": "22px",
+          "font-weight": 700,
+          "color": "var(--cc-accent)",
+          "opacity": 0.85,
+          "vertical-align": "super",
+          "animation": {
+            "type": "tick",
+            "keyframes": "seconds-tick",
+            "duration": "1s",
+            "iteration": "infinite"
+          }
+        },
+  
+        "period": {
+          "enabled": true,
+          "show-when": "12h",
+          "class": "clock-period",
+          "font-size": "14px",
+          "font-weight": 700,
+          "color": "var(--cc-accent)",
+          "letter-spacing": "0.05em"
+        },
+  
+        "glow": {
+          "enabled": true,
+          "color": "var(--cc-accent-glow)",
+          "blur": "30px",
+          "opacity": 0.15,
+          "responsive": true
+        },
+  
+        "animation": {
+          "minute-change": "time-flip 400ms cubic-bezier(0.34,1.56,0.64,1)",
+          "hour-change":   "time-flip-big 600ms cubic-bezier(0.34,1.56,0.64,1)"
+        },
+  
+        "click-action": "toggle-12h-24h"
+      },
+  
+      "date-display": {
+        "class": "clock-hero-date",
+        "format": "%A, %B %d",
+        "format-short": "%a %d %b",
+        "font-size": "14px",
+        "font-weight": 700,
+        "color": "var(--cc-text-secondary)",
+        "letter-spacing": "0.01em",
+        "margin-top": "6px",
+  
+        "day-name": {
+          "class": "date-day-name",
+          "color": "var(--cc-accent)",
+          "font-weight": 800
+        },
+  
+        "day-number": {
+          "class": "date-day-number",
+          "color": "var(--cc-text-primary)"
+        },
+  
+        "special-day": {
+          "enabled": true,
+          "class": "date-special",
+          "show-icon": true,
+          "icon": "󱁉",
+          "color": "var(--cc-yellow)",
+          "tooltip": "{holiday-name}"
+        }
+      },
+  
+      "right-column": {
+        "class": "clock-hero-right",
+        "gap": 8,
+  
+        "analog-clock": {
+          "enabled": true,
+          "class": "analog-clock",
+          "size": 58,
+          "background": {
+            "fill": "var(--cc-surface0)",
+            "border": "2px solid var(--cc-border)",
+            "box-shadow": [
+              "0 4px 16px var(--cc-shadow)",
+              "inset 0 1px 0 var(--cc-highlight)"
+            ]
+          },
+          "face": {
+            "hour-marks": {
+              "enabled": true,
+              "count": 12,
+              "length": 4,
+              "width": 1.5,
+              "color": "var(--cc-overlay0)"
+            },
+            "minute-marks": {
+              "enabled": true,
+              "count": 60,
+              "length": 2,
+              "width": 0.8,
+              "color": "var(--cc-surface2)"
+            },
+            "numbers": {
+              "enabled": false
+            },
+            "center-dot": {
+              "size": 5,
+              "color": "var(--cc-accent)",
+              "box-shadow": "0 0 6px var(--cc-accent-glow)"
+            }
+          },
+          "hands": {
+            "hour": {
+              "length": 0.50,
+              "width": 3,
+              "color": "var(--cc-text-primary)",
+              "border-radius": 2,
+              "animation": "clock-tick-smooth 3600s linear infinite"
+            },
+            "minute": {
+              "length": 0.70,
+              "width": 2,
+              "color": "var(--cc-text-primary)",
+              "border-radius": 2,
+              "animation": "clock-tick-smooth 60s linear infinite"
+            },
+            "second": {
+              "length": 0.78,
+              "width": 1,
+              "color": "var(--cc-accent)",
+              "tail-length": 0.15,
+              "tail-color": "var(--cc-red)",
+              "border-radius": 1,
+              "glow": "0 0 4px var(--cc-accent-glow)",
+              "animation": "clock-tick-step 1s steps(60) infinite"
+            }
+          }
+        },
+  
+        "quick-stats": {
+          "class": "clock-quick-stats",
+          "gap": 6,
+          "items": [
+            {
+              "id": "week-number",
+              "icon": "󰃰",
+              "format": "W{week}",
+              "class": "stat-chip",
+              "tooltip": "Week number",
+              "font-family": "JetBrainsMono Nerd Font"
+            },
+            {
+              "id": "day-of-year",
+              "icon": "󰃮",
+              "format": "Day {doy}",
+              "class": "stat-chip",
+              "tooltip": "Day of year"
+            },
+            {
+              "id": "lunar-phase",
+              "icon": "dynamic",
+              "format": "{phase-name}",
+              "class": "stat-chip stat-chip--lunar",
+              "tooltip": "{illumination}% illuminated",
+              "color": "var(--cc-yellow)",
+              "icons": {
+                "new":             "󰽤",
+                "waxing-crescent": "󰽥",
+                "first-quarter":   "󰽦",
+                "waxing-gibbous":  "󰽧",
+                "full":            "󰽨",
+                "waning-gibbous":  "󰽩",
+                "last-quarter":    "󰽪",
+                "waning-crescent": "󰽫"
+              }
+            }
+          ],
+          "chip-style": {
+            "background": "var(--cc-widget-bg)",
+            "border": "1px solid var(--cc-border-subtle)",
+            "border-radius": "100px",
+            "padding": "3px 8px",
+            "font-size": "10px",
+            "font-weight": 700,
+            "gap": 4
+          }
+        }
+      }
+    },
+  
+    "world-clocks": {
+      "enabled": true,
+      "class": "cal-world-clocks",
+      "collapsible": true,
+      "collapsed-by-default": false,
+      "padding": { "top": 10, "right": 20, "bottom": 10, "left": 20 },
+      "border-top": "1px solid var(--cc-separator)",
+      "layout": "row",
+      "gap": 8,
+      "scroll-horizontal": true,
+  
+      "header": {
+        "icon": "󰖟",
+        "label": "World",
+        "class": "section-label",
+        "add-button": {
+          "icon": "󰐕",
+          "class": "btn-add-clock btn-icon",
+          "command": "~/.config/swaync/scripts/add-world-clock.sh",
+          "tooltip": "Add timezone"
+        }
+      },
+  
+      "clocks": [
+        {
+          "id": "local",
+          "label": "Local",
+          "timezone": "local",
+          "icon": "󱎂",
+          "class": "world-clock world-clock--local",
+          "highlight": true,
+          "color": "var(--cc-accent)"
+        },
+        {
+          "id": "utc",
+          "label": "UTC",
+          "timezone": "UTC",
+          "icon": "󰖟",
+          "class": "world-clock",
+          "color": "var(--cc-text-secondary)"
+        },
+        {
+          "id": "ny",
+          "label": "New York",
+          "timezone": "America/New_York",
+          "icon": "󰝣",
+          "class": "world-clock",
+          "color": "var(--cc-text-secondary)"
+        },
+        {
+          "id": "london",
+          "label": "London",
+          "timezone": "Europe/London",
+          "icon": "󰠱",
+          "class": "world-clock",
+          "color": "var(--cc-text-secondary)"
+        },
+        {
+          "id": "tokyo",
+          "label": "Tokyo",
+          "timezone": "Asia/Tokyo",
+          "icon": "󰠱",
+          "class": "world-clock",
+          "color": "var(--cc-text-secondary)"
+        }
+      ],
+  
+      "clock-card": {
+        "class": "world-clock-card",
+        "border-radius": "12px",
+        "padding": "8px 12px",
+        "background": "var(--cc-widget-bg)",
+        "border": "1px solid var(--cc-widget-border)",
+        "min-width": 82,
+        "gap": 2,
+  
+        "city-label": {
+          "font-size": "10px",
+          "font-weight": 700,
+          "color": "var(--cc-text-muted)",
+          "letter-spacing": "0.05em",
+          "text-transform": "uppercase"
+        },
+  
+        "time-label": {
+          "font-size": "16px",
+          "font-weight": 800,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "var(--cc-text-primary)",
+          "letter-spacing": "-0.02em"
+        },
+  
+        "offset-label": {
+          "font-size": "9px",
+          "font-weight": 600,
+          "color": "var(--cc-text-muted)"
+        },
+  
+        "day-indicator": {
+          "enabled": true,
+          "class": "day-indicator",
+          "tomorrow-icon": "󰃱",
+          "yesterday-icon": "󰃮",
+          "color": "var(--cc-yellow)",
+          "font-size": "9px"
+        },
+  
+        "business-hours": {
+          "enabled": true,
+          "start": "09:00",
+          "end":   "18:00",
+          "indicator": {
+            "open-color":  "var(--cc-green)",
+            "closed-color":"var(--cc-red)",
+            "size": 5,
+            "border-radius": "50%"
+          }
+        },
+  
+        "states": {
+          "local": {
+            "background": "var(--cc-accent-alpha)",
+            "border-color": "var(--cc-accent)",
+            "box-shadow": "0 0 12px var(--cc-accent-glow)"
+          }
+        },
+  
+        "hover": {
+          "transform": "translateY(-2px)",
+          "box-shadow": "0 6px 18px var(--cc-shadow)"
+        },
+  
+        "animation": {
+          "enter": "notif-fade-in",
+          "duration": "200ms"
+        }
+      }
+    },
+  
+    "calendar-grid": {
+      "enabled": true,
+      "class": "cal-grid",
+      "padding": { "top": 14, "right": 20, "bottom": 12, "left": 20 },
+      "border-top": "1px solid var(--cc-separator)",
+  
+      "header": {
+        "class": "cal-grid-header",
+        "layout": "space-between",
+        "align": "center",
+        "margin-bottom": 12,
+  
+        "navigation": {
+          "prev-button": {
+            "icon": "󰅁",
+            "class": "btn-cal-nav btn-icon",
+            "tooltip": "Previous month",
+            "animation": "btn-slide-left"
+          },
+          "next-button": {
+            "icon": "󰅂",
+            "class": "btn-cal-nav btn-icon",
+            "tooltip": "Next month",
+            "animation": "btn-slide-right"
+          }
+        },
+  
+        "month-year": {
+          "class": "cal-month-year",
+          "month-format": "%B",
+          "year-format": "%Y",
+          "font-size": "15px",
+          "font-weight": 800,
+          "color": "var(--cc-text-primary)",
+          "letter-spacing": "-0.01em",
+          "click-action": "jump-to-today",
+          "animation": {
+            "month-change-forward":  "month-slide-left  350ms cubic-bezier(0.4,0,0.2,1)",
+            "month-change-backward": "month-slide-right 350ms cubic-bezier(0.4,0,0.2,1)"
+          }
+        },
+  
+        "today-button": {
+          "enabled": true,
+          "label": "Today",
+          "icon": "󰃮",
+          "class": "btn-today",
+          "border-radius": "100px",
+          "padding": "4px 12px",
+          "font-size": "11px",
+          "font-weight": 700,
+          "background": "var(--cc-toggle-off-bg)",
+          "border": "1px solid var(--cc-toggle-off-border)",
+          "color": "var(--cc-accent)",
+          "hover": {
+            "background": "var(--cc-accent-alpha)",
+            "border-color": "var(--cc-accent)",
+            "transform": "translateY(-1px)"
+          }
+        }
+      },
+  
+      "weekday-labels": {
+        "class": "cal-weekday-labels",
+        "columns": 7,
+        "gap": 2,
+        "labels-short": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+        "labels-full": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        "first-day": "monday",
+        "font-size": "11px",
+        "font-weight": 800,
+        "color": "var(--cc-text-muted)",
+        "letter-spacing": "0.04em",
+        "text-transform": "uppercase",
+        "weekend-color": "var(--cc-accent)",
+        "margin-bottom": 6
+      },
+  
+      "days-grid": {
+        "class": "cal-days-grid",
+        "columns": 7,
+        "gap": 3,
+  
+        "day-cell": {
+          "class": "cal-day",
+          "size": 34,
+          "border-radius": "50%",
+          "font-size": "12px",
+          "font-weight": 600,
+          "font-family": "JetBrainsMono Nerd Font",
+  
+          "states": {
+            "default": {
+              "background": "transparent",
+              "color": "var(--cc-text-primary)"
+            },
+            "today": {
+              "class": "cal-day--today",
+              "background": "var(--cc-accent)",
+              "color": "var(--cc-accent-fg)",
+              "font-weight": 900,
+              "box-shadow": [
+                "0 0 0 2px var(--cc-accent)",
+                "0 0 16px var(--cc-accent-glow)"
+              ],
+              "animation": "today-pulse 3s ease-in-out infinite"
+            },
+            "selected": {
+              "class": "cal-day--selected",
+              "background": "var(--cc-accent-alpha)",
+              "border": "2px solid var(--cc-accent)",
+              "color": "var(--cc-accent)"
+            },
+            "other-month": {
+              "class": "cal-day--other",
+              "color": "var(--cc-text-muted)",
+              "opacity": 0.40
+            },
+            "weekend": {
+              "class": "cal-day--weekend",
+              "color": "var(--cc-accent)"
+            },
+            "has-events": {
+              "class": "cal-day--has-events"
+            },
+            "holiday": {
+              "class": "cal-day--holiday",
+              "color": "var(--cc-yellow)"
+            },
+            "past": {
+              "class": "cal-day--past",
+              "opacity": 0.55
+            }
+          },
+  
+          "event-indicators": {
+            "enabled": true,
+            "position": "bottom-center",
+            "max-dots": 3,
+            "dot": {
+              "size": 4,
+              "border-radius": "50%",
+              "gap": 2,
+              "margin-top": 2
+            },
+            "colors": {
+              "work":     "var(--cc-accent)",
+              "personal": "var(--cc-green)",
+              "birthday": "var(--cc-pink, var(--cc-red))",
+              "holiday":  "var(--cc-yellow)",
+              "reminder": "var(--cc-yellow)",
+              "default":  "var(--cc-text-muted)"
+            }
+          },
+  
+          "hover": {
+            "background": "var(--cc-hover)",
+            "transform": "scale(1.12)",
+            "box-shadow": "0 4px 12px var(--cc-shadow)",
+            "transition": "all 150ms cubic-bezier(0.34,1.56,0.64,1)"
+          },
+  
+          "active": {
+            "transform": "scale(0.92)"
+          },
+  
+          "click-action": "show-day-events",
+          "right-click-action": "add-event"
+        },
+  
+        "animation": {
+          "grid-enter": "cal-grid-appear",
+          "stagger": 8,
+          "duration": "250ms"
+        }
+      },
+  
+      "week-numbers": {
+        "enabled": true,
+        "position": "left",
+        "class": "cal-week-numbers",
+        "font-size": "9px",
+        "font-weight": 600,
+        "color": "var(--cc-text-muted)",
+        "opacity": 0.50,
+        "font-family": "JetBrainsMono Nerd Font",
+        "prefix": "W"
+      }
+    },
+  
+    "agenda-section": {
+      "enabled": true,
+      "class": "cal-agenda",
+      "padding": { "top": 12, "right": 20, "bottom": 12, "left": 20 },
+      "border-top": "1px solid var(--cc-separator)",
+      "max-height": 240,
+      "scroll": true,
+  
+      "header": {
+        "class": "agenda-header",
+        "layout": "space-between",
+        "margin-bottom": 10,
+  
+        "left": {
+          "icon": "󰃰",
+          "label": "Upcoming",
+          "class": "section-label"
+        },
+  
+        "right": {
+          "view-all": {
+            "label": "All events",
+            "icon": "󰅂",
+            "class": "btn-view-all btn-text",
+            "command": "khal interactive",
+            "tooltip": "Open calendar app"
+          },
+          "add-event": {
+            "icon": "󰐕",
+            "class": "btn-add-event btn-icon",
+            "command": "~/.config/swaync/scripts/add-event.sh",
+            "tooltip": "Add new event"
+          }
+        }
+      },
+  
+      "day-groups": {
+        "enabled": true,
+        "class": "agenda-day-group",
+        "show-days-ahead": 7,
+        "empty-days": "hide",
+  
+        "day-label": {
+          "class": "agenda-day-label",
+          "today-text":    "Today",
+          "tomorrow-text": "Tomorrow",
+          "format":        "%A, %B %d",
+          "font-size":     "11px",
+          "font-weight":   800,
+          "color":         "var(--cc-text-muted)",
+          "letter-spacing":"0.05em",
+          "text-transform":"uppercase",
+          "today-color":   "var(--cc-accent)",
+          "padding":       "6px 0 4px",
+          "border-bottom": "1px solid var(--cc-separator)",
+          "margin-bottom": "4px"
+        }
+      },
+  
+      "event-item": {
+        "class": "agenda-event",
+        "border-radius": "10px",
+        "padding": "8px 10px",
+        "margin-bottom": 4,
+        "gap": 10,
+        "layout": "row",
+        "align": "center",
+  
+        "color-strip": {
+          "enabled": true,
+          "width": 3,
+          "border-radius": "100px",
+          "min-height": 28,
+          "color": "{event-color}"
+        },
+  
+        "time": {
+          "class": "event-time",
+          "font-size": "11px",
+          "font-weight": 700,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "var(--cc-text-muted)",
+          "min-width": 80,
+          "format": "%H:%M",
+          "all-day-text": "All day",
+          "all-day-icon": "󰃮",
+          "all-day-color": "var(--cc-accent)"
+        },
+  
+        "content": {
+          "flex": 1,
+          "min-width": 0,
+  
+          "title": {
+            "class": "event-title",
+            "font-size": "13px",
+            "font-weight": 700,
+            "color": "var(--cc-text-primary)",
+            "max-length": 36,
+            "overflow": "ellipsis"
+          },
+  
+          "location": {
+            "class": "event-location",
+            "font-size": "11px",
+            "color": "var(--cc-text-muted)",
+            "icon": "󰍎",
+            "icon-size": "11px",
+            "max-length": 28,
+            "show-when": "available"
+          },
+  
+          "duration": {
+            "class": "event-duration",
+            "font-size": "10px",
+            "color": "var(--cc-text-muted)",
+            "format": "{duration}",
+            "show-when": "not-all-day"
+          }
+        },
+  
+        "badges": {
+          "class": "event-badges",
+          "gap": 4,
+          "items": [
+            {
+              "id": "online",
+              "icon": "󰖟",
+              "color": "var(--cc-accent)",
+              "tooltip": "Online meeting",
+              "show-when": "has-url"
+            },
+            {
+              "id": "recurring",
+              "icon": "󰑖",
+              "color": "var(--cc-text-muted)",
+              "tooltip": "Recurring event",
+              "show-when": "recurring"
+            },
+            {
+              "id": "reminder",
+              "icon": "󰂟",
+              "color": "var(--cc-yellow)",
+              "tooltip": "Has reminder",
+              "show-when": "has-alarm"
+            },
+            {
+              "id": "attendees",
+              "icon": "󰗊",
+              "color": "var(--cc-text-muted)",
+              "format": "{count}",
+              "tooltip": "{count} attendees",
+              "show-when": "has-attendees"
+            }
+          ]
+        },
+  
+        "actions": {
+          "show-on-hover": true,
+          "gap": 4,
+          "items": [
+            {
+              "id": "join",
+              "icon": "󰖟",
+              "tooltip": "Join meeting",
+              "class": "event-action btn-icon",
+              "show-when": "has-url",
+              "command": "xdg-open {url}",
+              "color": "var(--cc-accent)"
+            },
+            {
+              "id": "snooze",
+              "icon": "󱎫",
+              "tooltip": "Snooze reminder",
+              "class": "event-action btn-icon",
+              "command": "~/.config/swaync/scripts/snooze-event.sh {id}",
+              "color": "var(--cc-yellow)"
+            },
+            {
+              "id": "edit",
+              "icon": "󰏫",
+              "tooltip": "Edit event",
+              "class": "event-action btn-icon",
+              "command": "~/.config/swaync/scripts/edit-event.sh {id}"
+            }
+          ]
+        },
+  
+        "states": {
+          "now": {
+            "class": "agenda-event--now",
+            "background": "var(--cc-accent-alpha)",
+            "border": "1px solid var(--cc-accent)",
+            "animation": "event-now-pulse 3s ease-in-out infinite"
+          },
+          "soon": {
+            "class": "agenda-event--soon",
+            "background": "rgba(249,226,175,0.08)",
+            "border": "1px solid rgba(249,226,175,0.20)"
+          },
+          "past": {
+            "class": "agenda-event--past",
+            "opacity": 0.45
+          }
+        },
+  
+        "hover": {
+          "background": "var(--cc-notif-hover-bg)",
+          "transform": "translateX(2px)",
+          "box-shadow": "4px 0 16px var(--cc-shadow)"
+        },
+  
+        "click-action": "open-event-detail",
+        "animation": {
+          "enter": "notif-fade-in",
+          "duration": "200ms",
+          "stagger": 30
+        }
+      },
+  
+      "empty-state": {
+        "class": "agenda-empty",
+        "icon": "󰃮",
+        "title": "No upcoming events",
+        "subtitle": "You're all clear for the next 7 days",
+        "padding": "20px 0",
+        "animation": "empty-float 4s ease-in-out infinite"
+      },
+  
+      "providers": {
+        "primary": "khal",
+        "fallbacks": ["vdir", "ical-file", "google-calendar"],
+        "auto-detect": true,
+        "refresh-interval": 300000,
+        "cache-duration": 60000,
+  
+        "khal": {
+          "config": "~/.config/khal/config",
+          "command-list": "khal list --format '{start-time} {title} {calendar}' now 7d",
+          "command-add":  "khal new",
+          "calendars": "all"
+        },
+  
+        "vdir": {
+          "path": "~/.local/share/vdir/calendars",
+          "format": "ics"
+        },
+  
+        "google-calendar": {
+          "enabled": false,
+          "credentials": "~/.config/ash/secrets/google-cal.enc",
+          "scopes": ["https://www.googleapis.com/auth/calendar.readonly"]
+        }
+      },
+  
+      "categories": {
+        "work":     { "color": "var(--cc-accent)",  "icon": "󰌨" },
+        "personal": { "color": "var(--cc-green)",   "icon": "󰇮" },
+        "birthday": { "color": "var(--cc-red)",     "icon": "󱁉" },
+        "holiday":  { "color": "var(--cc-yellow)",  "icon": "󰃮" },
+        "reminder": { "color": "var(--cc-yellow)",  "icon": "󰂟" },
+        "health":   { "color": "var(--cc-teal)",    "icon": "󰳦" },
+        "family":   { "color": "var(--cc-peach)",   "icon": "󱤧" },
+        "default":  { "color": "var(--cc-text-muted)", "icon": "󰃮" }
+      }
+    },
+  
+    "countdown-section": {
+      "enabled": true,
+      "class": "cal-countdowns",
+      "padding": { "top": 10, "right": 20, "bottom": 10, "left": 20 },
+      "border-top": "1px solid var(--cc-separator)",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "header": {
+        "icon": "󱑃",
+        "label": "Countdowns",
+        "add-button": {
+          "icon": "󰐕",
+          "command": "~/.config/swaync/scripts/add-countdown.sh"
+        }
+      },
+  
+      "items": [
+        {
+          "id": "new-year",
+          "label": "New Year 🎆",
+          "target": "next-new-year",
+          "icon": "󱐵",
+          "color": "var(--cc-yellow)",
+          "class": "countdown-item"
+        },
+        {
+          "id": "weekend",
+          "label": "Weekend 󰎃",
+          "target": "next-saturday-00:00",
+          "icon": "󰢩",
+          "color": "var(--cc-green)",
+          "class": "countdown-item"
+        }
+      ],
+  
+      "item-style": {
+        "layout": "space-between",
+        "padding": "7px 0",
+        "border-bottom": "1px solid var(--cc-separator)",
+  
+        "label": {
+          "font-size": "12px",
+          "font-weight": 600,
+          "color": "var(--cc-text-secondary)"
+        },
+  
+        "timer": {
+          "font-size": "12px",
+          "font-weight": 800,
+          "font-family": "JetBrainsMono Nerd Font",
+          "color": "{item-color}",
+          "format-days":    "{d}d {h}h",
+          "format-hours":   "{h}h {m}m",
+          "format-minutes": "{m}m {s}s",
+          "format-seconds": "{s}s",
+          "glow": "0 0 8px {item-color-glow}",
+          "animation": "countdown-tick 1s steps(1) infinite"
+        }
+      }
+    },
+  
+    "mini-stopwatch": {
+      "enabled": true,
+      "class": "cal-stopwatch",
+      "padding": { "top": 10, "right": 20, "bottom": 14, "left": 20 },
+      "border-top": "1px solid var(--cc-separator)",
+      "collapsible": true,
+      "collapsed-by-default": true,
+  
+      "header": {
+        "icon": "󰸞",
+        "label": "Stopwatch & Timer",
+        "class": "section-label"
+      },
+  
+      "tabs": {
+        "enabled": true,
+        "items": [
+          { "id": "stopwatch", "label": "Stopwatch", "icon": "󰸞" },
+          { "id": "timer",     "label": "Timer",     "icon": "󱑃" }
+        ],
+        "class": "sw-tabs"
+      },
+  
+      "stopwatch": {
+        "class": "sw-display",
+        "format": "{HH}:{MM}:{SS}.{ms}",
+        "font-size": "28px",
+        "font-weight": 900,
+        "font-family": "JetBrainsMono Nerd Font",
+        "color": "var(--cc-text-primary)",
+        "letter-spacing": "-0.02em",
+  
+        "controls": {
+          "start-stop": {
+            "class": "btn-sw-start btn-icon",
+            "icon-start": "󰐊",
+            "icon-stop":  "󰏤",
+            "color-start": "var(--cc-green)",
+            "color-stop":  "var(--cc-yellow)"
+          },
+          "lap": {
+            "class": "btn-sw-lap btn-icon",
+            "icon": "󱑃",
+            "color": "var(--cc-accent)"
+          },
+          "reset": {
+            "class": "btn-sw-reset btn-icon",
+            "icon": "󰑓",
+            "color": "var(--cc-text-muted)"
+          }
+        },
+  
+        "laps": {
+          "enabled": true,
+          "max": 10,
+          "class": "sw-laps",
+          "font-size": "11px",
+          "font-family": "JetBrainsMono Nerd Font",
+          "best-color":  "var(--cc-green)",
+          "worst-color": "var(--cc-red)"
+        }
+      },
+  
+      "timer": {
+        "class": "timer-display",
+        "quick-presets": [
+          { "label": "5m",  "seconds": 300,  "icon": "󱎫" },
+          { "label": "10m", "seconds": 600,  "icon": "󱎫" },
+          { "label": "15m", "seconds": 900,  "icon": "󱎫" },
+          { "label": "25m", "seconds": 1500, "icon": "󱎫", "tooltip": "Pomodoro" },
+          { "label": "30m", "seconds": 1800, "icon": "󱎫" },
+          { "label": "1h",  "seconds": 3600, "icon": "󱎫" }
+        ],
+        "end-sound": "~/.config/sounds/pomodoro-end.ogg",
+        "end-notification": {
+          "title": "⏰ Timer Complete",
+          "body": "Your timer has finished!",
+          "urgency": "normal"
+        },
+        "end-animation": "timer-complete-flash"
+      }
+    },
+  
+    "keyboard-shortcuts": {
+      "enabled": true,
+      "bindings": {
+        "prev-month":   "left",
+        "next-month":   "right",
+        "today":        "t",
+        "add-event":    "a",
+        "search":       "slash",
+        "toggle-view":  "v"
+      }
+    },
+  
+    "styling": {
+      "theme-integration": true,
+      "glassmorphism": {
+        "enabled": true,
+        "blur": "24px",
+        "saturate": "180%",
+        "background": "var(--cc-widget-bg)"
+      },
+      "border-radius": "16px",
+      "border": "1px solid var(--cc-widget-border)",
+      "overflow": "hidden",
+      "box-shadow": [
+        "0 4px 24px var(--cc-shadow)",
+        "inset 0 1px 0 var(--cc-highlight)"
+      ],
+      "animation": {
+        "enter":    "widget-enter",
+        "duration": "280ms",
+        "delay":    "200ms",
+        "easing":   "cubic-bezier(0.19, 1, 0.22, 1)"
+      }
+    },
+  
+    "accessibility": {
+      "keyboard-navigable": true,
+      "screen-reader": true,
+      "aria-live": "polite",
+      "announce-month-change": "Navigated to {month} {year}",
+      "announce-event-select": "{title} on {date} at {time}",
+      "high-contrast-support": true,
+      "reduced-motion-support": true,
+      "focus-visible": {
+        "outline": "2px solid var(--cc-accent)",
+        "outline-offset": "2px"
+      }
+    }
+  }
