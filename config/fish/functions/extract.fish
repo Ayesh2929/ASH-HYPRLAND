@@ -348,24 +348,24 @@ function extract --description "Universal archive extractor (40+ formats)"
                 eval $cmd 2>/dev/null && set extracted 1
 
             case '*.tar.gz' '*.tgz'
-                set -l cmd "tar -x${vflag}zf '$f' -C '$extract_to'"
+                set -l cmd "tar -x"$vflag"zf '$f' -C '$extract_to'"
                 test $_dry_run -eq 1 && __extr_info "DRY: $cmd" && return 0
                 eval $cmd 2>/dev/null && set extracted 1
 
             case '*.tar.bz2' '*.tbz' '*.tbz2'
-                set -l cmd "tar -x${vflag}jf '$f' -C '$extract_to'"
+                set -l cmd "tar -x"$vflag"jf '$f' -C '$extract_to'"
                 test $_dry_run -eq 1 && __extr_info "DRY: $cmd" && return 0
                 eval $cmd 2>/dev/null && set extracted 1
 
             case '*.tar.xz' '*.txz'
-                set -l cmd "tar -x${vflag}Jf '$f' -C '$extract_to'"
+                set -l cmd "tar -x"$vflag"Jf '$f' -C '$extract_to'"
                 test $_dry_run -eq 1 && __extr_info "DRY: $cmd" && return 0
                 eval $cmd 2>/dev/null && set extracted 1
 
             case '*.tar.zst' '*.tzst'
                 if command -q zstd
-                    test $_dry_run -eq 1 && __extr_info "DRY: tar --zstd -x${vflag}f" && return 0
-                    tar --zstd -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    test $_dry_run -eq 1 && __extr_info "DRY: tar --zstd -x\"$vflag\"f" && return 0
+                    tar --zstd -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 else
                     __extr_fail "zstd not installed"
                     return 1
@@ -373,16 +373,16 @@ function extract --description "Universal archive extractor (40+ formats)"
 
             case '*.tar.lz' '*.tlz'
                 test $_dry_run -eq 1 && __extr_info "DRY: tar --lzip" && return 0
-                tar --lzip -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                tar --lzip -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
 
             case '*.tar.lzma' '*.tlzma'
                 test $_dry_run -eq 1 && __extr_info "DRY: tar --lzma" && return 0
-                tar --lzma -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                tar --lzma -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
 
             case '*.tar.lz4' '*.tlz4'
                 if command -q lz4
                     test $_dry_run -eq 1 && __extr_info "DRY: lz4 | tar" && return 0
-                    lz4 -dc $f | tar -x${vflag}f - -C $extract_to 2>/dev/null && set extracted 1
+                    lz4 -dc $f | tar -x"$vflag"f - -C $extract_to 2>/dev/null && set extracted 1
                 else
                     __extr_fail "lz4 not installed"
                     return 1
@@ -391,7 +391,7 @@ function extract --description "Universal archive extractor (40+ formats)"
             case '*.tar.br' '*.tbr'
                 if command -q brotli
                     test $_dry_run -eq 1 && __extr_info "DRY: brotli | tar" && return 0
-                    brotli -dc $f | tar -x${vflag}f - -C $extract_to 2>/dev/null && set extracted 1
+                    brotli -dc $f | tar -x"$vflag"f - -C $extract_to 2>/dev/null && set extracted 1
                 else
                     __extr_fail "brotli not installed"
                     return 1
@@ -494,7 +494,7 @@ with open('$f','rb') as i, open('$out','wb') as o:
                     rar x $f $extract_to/ 2>/dev/null && set extracted 1
                 else if command -q bsdtar
                     test $_dry_run -eq 1 && __extr_info "DRY: bsdtar -xf" && return 0
-                    bsdtar -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    bsdtar -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 else
                     __extr_fail "unrar, rar, or bsdtar required for RAR files"
                     return 1
@@ -519,10 +519,10 @@ with open('$f','rb') as i, open('$out','wb') as o:
             case '*.rpm'
                 test $_dry_run -eq 1 && __extr_info "DRY: rpm2cpio | cpio" && return 0
                 if command -q rpm2cpio && command -q cpio
-                    rpm2cpio $f | cpio -idm${vflag} --directory=$extract_to 2>/dev/null
+                    rpm2cpio $f | cpio -idm"$vflag" --directory=$extract_to 2>/dev/null
                     and set extracted 1
                 else if command -q bsdtar
-                    bsdtar -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    bsdtar -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 else
                     __extr_fail "rpm2cpio + cpio or bsdtar required for .rpm"
                     return 1
@@ -556,7 +556,7 @@ with open('$f','rb') as i, open('$out','wb') as o:
                 if command -q 7z
                     7z x $f -o$extract_to 2>/dev/null && set extracted 1
                 else if command -q bsdtar
-                    bsdtar -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    bsdtar -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 else if command -q isoinfo
                     __extr_warn "isoinfo only lists — use 7z or bsdtar for extraction"
                     return 1
@@ -592,15 +592,15 @@ with open('$f','rb') as i, open('$out','wb') as o:
             case '*.cpio'
                 test $_dry_run -eq 1 && __extr_info "DRY: cpio -idm" && return 0
                 command -q cpio || begin; __extr_fail "cpio not installed"; return 1; end
-                cpio -idm${vflag} < $f --directory=$extract_to 2>/dev/null && set extracted 1
+                cpio -idm"$vflag" < $f --directory=$extract_to 2>/dev/null && set extracted 1
 
             # ── Fallback: bsdtar (handles many formats) ────────────────────────
             case '*'
                 test $_dry_run -eq 1 && __extr_info "DRY: bsdtar / tar -xf" && return 0
                 if command -q bsdtar
-                    bsdtar -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    bsdtar -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 else
-                    tar -x${vflag}f $f -C $extract_to 2>/dev/null && set extracted 1
+                    tar -x"$vflag"f $f -C $extract_to 2>/dev/null && set extracted 1
                 end
         end
 

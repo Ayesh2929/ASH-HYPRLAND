@@ -307,17 +307,17 @@ function compress --description "Universal archive creator with smart format sel
         # ── tar.bz2 ───────────────────────────────────────────────────────────
         case tar.bz2 tbz2 tbz
             if command -q pbzip2
-                eval "tar -${_tar_verbose}cf - $\_tar_exclude $_sources | pbzip2 -$_level > '$_output'" 2>/dev/null
+                eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | pbzip2 -$_level > '$_output'" 2>/dev/null
                 __cmp_info "Using pbzip2 (parallel bzip2)"
             else
-                eval "tar -${_tar_verbose}cjf '$_output' $\_tar_exclude $_sources" 2>/dev/null
+                eval "tar -$_tar_verbose""cjf '$_output' $_tar_exclude $_sources" 2>/dev/null
             end
             test $status -eq 0 && set _created 1
 
         # ── tar.xz ────────────────────────────────────────────────────────────
         case tar.xz txz
             set -l xz_threads (nproc 2>/dev/null; or sysctl -n hw.logicalcpu 2>/dev/null; or echo 1)
-            eval "tar -${_tar_verbose}cf - $\_tar_exclude $_sources | xz -$_level -T$xz_threads > '$_output'" 2>/dev/null
+            eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | xz -$_level -T$xz_threads > '$_output'" 2>/dev/null
             test $status -eq 0 && set _created 1
 
         # ── tar.zst ───────────────────────────────────────────────────────────
@@ -331,7 +331,7 @@ function compress --description "Universal archive creator with smart format sel
             test $_best -eq 1 && set zst_level 22
             set -l zst_threads (nproc 2>/dev/null; or echo 4)
 
-            eval "tar -${_tar_verbose}cf - $\_tar_exclude $_sources | zstd -$zst_level -T$zst_threads -o '$_output'" 2>/dev/null
+            eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | zstd -$zst_level -T$zst_threads -o '$_output'" 2>/dev/null
             test $status -eq 0 && set _created 1
 
         # ── tar.lz4 ───────────────────────────────────────────────────────────
@@ -340,7 +340,7 @@ function compress --description "Universal archive creator with smart format sel
                 __cmp_fail "lz4 not installed"
                 return 1
             end
-            eval "tar -${_tar_verbose}cf - $\_tar_exclude $_sources | lz4 -$_level > '$_output'" 2>/dev/null
+            eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | lz4 -$_level > '$_output'" 2>/dev/null
             test $status -eq 0 && set _created 1
 
         # ── tar.lz ────────────────────────────────────────────────────────────
@@ -349,12 +349,12 @@ function compress --description "Universal archive creator with smart format sel
                 __cmp_fail "lzip not installed"
                 return 1
             end
-            eval "tar -${_tar_verbose}cf - $\_tar_exclude $_sources | lzip -$_level > '$_output'" 2>/dev/null
+            eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | lzip -$_level > '$_output'" 2>/dev/null
             test $status -eq 0 && set _created 1
 
         # ── tar (uncompressed) ────────────────────────────────────────────────
         case tar
-            eval "tar -${_tar_verbose}cf '$_output' $\_tar_exclude $_sources" 2>/dev/null
+            eval "tar -$_tar_verbose""cf '$_output' $_tar_exclude $_sources" 2>/dev/null
             test $status -eq 0 && set _created 1
 
         # ── ZIP ───────────────────────────────────────────────────────────────
@@ -479,7 +479,7 @@ print('Created:', archive)
         printf "  $BOLD$GREEN║$R  $BOLD%-14s$R  $CYAN%-40s$R$GREEN║$R\n" \
             "Ratio:" "$ratio% ($savings% space saved)"
         printf "  $BOLD$GREEN║$R  $BOLD%-14s$R  %-40s$GREEN║$R\n" \
-            "Time:" "${elapsed}s"
+            "Time:" "$elapsed"s
         printf "  $BOLD$GREEN╚══════════════════════════════════════════════════════╝$R\n"
         printf "\n"
 
@@ -519,7 +519,7 @@ print('Created:', archive)
         # List split parts if splitting was used
         if test -n "$_split"
             printf "  $BOLD Split parts:$R\n"
-            ls -lh ${_output}.* 2>/dev/null | while read -l line
+            ls -lh $_output.* 2>/dev/null | while read -l line
                 printf "    $DIM%s$R\n" $line
             end
             printf "\n"
