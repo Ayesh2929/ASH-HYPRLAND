@@ -3,24 +3,42 @@
 
 render_desktop_svg() {
   local theme=$1
-  local bg="${THEME_COLORS[${theme}.bg]:-#1e1e2e}"
-  local bg_dim="${THEME_COLORS[${theme}.bg_dim]:-#181825}"
-  local bg1="${THEME_COLORS[${theme}.bg1]:-#313244}"
-  local bg2="${THEME_COLORS[${theme}.bg2]:-#45475a}"
-  local fg="${THEME_COLORS[${theme}.fg]:-#cdd6f4}"
-  local fg_dim="${THEME_COLORS[${theme}.fg_dim]:-#a6adc8}"
-  local red="${THEME_COLORS[${theme}.red]:-#f38ba8}"
-  local orange="${THEME_COLORS[${theme}.orange]:-#fab387}"
-  local yellow="${THEME_COLORS[${theme}.yellow]:-#f9e2af}"
-  local green="${THEME_COLORS[${theme}.green]:-#a6e3a1}"
-  local aqua="${THEME_COLORS[${theme}.aqua]:-#94e2d5}"
-  local blue="${THEME_COLORS[${theme}.blue]:-#89b4fa}"
-  local purple="${THEME_COLORS[${theme}.purple]:-#cba6f7}"
-  local accent="${THEME_COLORS[${theme}.accent]:-#89b4fa}"
-  local shadow="${THEME_COLORS[${theme}.shadow]:-rgba(0,0,0,0.45)}"
-  local glass="${THEME_COLORS[${theme}.glass]:-rgba(30,30,46,0.72)}"
-  local border="${THEME_COLORS[${theme}.border]:-rgba(137,180,250,0.30)}"
-  local glow="${THEME_COLORS[${theme}.glow]:-rgba(137,180,250,0.15)}"
+  local bg="${THEME_COLORS["${theme}.bg"]-}"
+  bg="${bg:-#1e1e2e}"
+  local bg_dim="${THEME_COLORS["${theme}.bg_dim"]-}"
+  bg_dim="${bg_dim:-#181825}"
+  local bg1="${THEME_COLORS["${theme}.bg1"]-}"
+  bg1="${bg1:-#313244}"
+  local bg2="${THEME_COLORS["${theme}.bg2"]-}"
+  bg2="${bg2:-#45475a}"
+  local fg="${THEME_COLORS["${theme}.fg"]-}"
+  fg="${fg:-#cdd6f4}"
+  local fg_dim="${THEME_COLORS["${theme}.fg_dim"]-}"
+  fg_dim="${fg_dim:-#a6adc8}"
+  local red="${THEME_COLORS["${theme}.red"]-}"
+  red="${red:-#f38ba8}"
+  local orange="${THEME_COLORS["${theme}.orange"]-}"
+  orange="${orange:-#fab387}"
+  local yellow="${THEME_COLORS["${theme}.yellow"]-}"
+  yellow="${yellow:-#f9e2af}"
+  local green="${THEME_COLORS["${theme}.green"]-}"
+  green="${green:-#a6e3a1}"
+  local aqua="${THEME_COLORS["${theme}.aqua"]-}"
+  aqua="${aqua:-#94e2d5}"
+  local blue="${THEME_COLORS["${theme}.blue"]-}"
+  blue="${blue:-#89b4fa}"
+  local purple="${THEME_COLORS["${theme}.purple"]-}"
+  purple="${purple:-#cba6f7}"
+  local accent="${THEME_COLORS["${theme}.accent"]-}"
+  accent="${accent:-#89b4fa}"
+  local shadow="${THEME_COLORS["${theme}.shadow"]-}"
+  shadow="${shadow:-rgba(0,0,0,0.45)}"
+  local glass="${THEME_COLORS["${theme}.glass"]-}"
+  glass="${glass:-rgba(30,30,46,0.72)}"
+  local border="${THEME_COLORS["${theme}.border"]-}"
+  border="${border:-rgba(137,180,250,0.30)}"
+  local glow="${THEME_COLORS["${theme}.glow"]-}"
+  glow="${glow:-rgba(137,180,250,0.15)}"
 
   cat <<SVG
 <?xml version="1.0" encoding="UTF-8"?>
@@ -984,4 +1002,6 @@ render_desktop_svg() {
 SVG
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  render_desktop_svg "$@"
+fi
