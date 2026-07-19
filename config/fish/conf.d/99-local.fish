@@ -126,9 +126,7 @@ function ash-local-init --description "Initialize local override directory"
     mkdir -p "$HOME/.config/fish/hosts"
     mkdir -p "$HOME/.config/fish/users"
 
-    # Create template local.fish
-    cat > "$local_dir/00-local.fish" << 'LOCALEOF'
-# ╔══════════════════════════════════════════════════════════════════════════════╗
+    echo '# ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║  🐟 ASH DOTFILES — Local Overrides                                         ║
 # ║  Machine: HOST | User: USER                                                 ║
 # ║  This file is NOT tracked by git — add your personal overrides here        ║
@@ -189,9 +187,9 @@ function ash-local-init --description "Initialize local override directory"
 # ⌨️  PERSONAL ALIASES & ABBREVIATIONS
 # ══════════════════════════════════════════════════════════════════════════════
 
-# abbr --add myalias 'my long command here'
-# abbr --add proj    'cd ~/projects'
-# abbr --add work    'cd ~/work/my-company'
+# abbr --add myalias \'my long command here\'
+# abbr --add proj    \'cd ~/projects\'
+# abbr --add work    \'cd ~/work/my-company\'
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 🐟 PERSONAL FUNCTIONS
@@ -199,9 +197,7 @@ function ash-local-init --description "Initialize local override directory"
 
 # function my-function --description "My custom function"
 #     echo "Hello from local config!"
-# end
-
-LOCALEOF
+# end' > "$local_dir/00-local.fish"
 
     # Replace placeholders
     sed -i "s/HOST/$_ash_hostname/" "$local_dir/00-local.fish"

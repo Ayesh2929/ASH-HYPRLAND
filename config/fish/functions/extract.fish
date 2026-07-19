@@ -343,7 +343,7 @@ function extract --description "Universal archive extractor (40+ formats)"
 
             # ── tar family ────────────────────────────────────────────────────
             case '*.tar'
-                set -l cmd "tar -x${vflag}f '$f' -C '$extract_to'"
+                set -l cmd "tar -x"$vflag"f '$f' -C '$extract_to'"
                 test $_dry_run -eq 1 && __extr_info "DRY: $cmd" && return 0
                 eval $cmd 2>/dev/null && set extracted 1
 

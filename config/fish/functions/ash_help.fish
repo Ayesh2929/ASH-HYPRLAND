@@ -578,7 +578,7 @@ function ash_help --description "ASH Dotfiles interactive help system"
             test -n "$parts[4]" && begin
                 echo ""
                 echo "  $BOLD Example:$R"
-                echo "    $C6$ $parts[4]$R"
+                echo "    $C6\$ $parts[4]$R"
             end
             echo ""
         end

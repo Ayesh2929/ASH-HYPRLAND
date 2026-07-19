@@ -267,7 +267,7 @@ function weather --description "Rich terminal weather with forecasts and alerts"
                 set format_flag "?format=j1"
         end
 
-        curl -s --max-time 8 "${url}${format_flag}" 2>/dev/null
+        curl -s --max-time 8 "$url$format_flag" 2>/dev/null
     end
 
     # ── Auto-detect location via IP ────────────────────────────────────────────

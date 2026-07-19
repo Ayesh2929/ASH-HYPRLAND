@@ -587,7 +587,7 @@ function ash_theme_sync --description "Sync ASH theme across all shell component
     end
 
     test $_quiet -eq 0 && test $_verbose -eq 0 && \
-        echo "  $GREEN✓$R Theme synced: $CYAN$ASH_THEME_NAME$R ($DIM${elapsed_ms}ms$R)"
+        echo "  $GREEN✓$R Theme synced: $CYAN$ASH_THEME_NAME$R ($DIM"$elapsed_ms"ms$R)"
 
     # ── Cleanup ───────────────────────────────────────────────────────────────
     set --erase _sync_verbose

@@ -206,7 +206,7 @@ function mcfly-top --description "Show most selected McFly commands"
     printf "  $bold%-8s  %-8s  %s$reset\n" "Selected" "Run" "Command"
     printf "  $dim%s$reset\n" "──────────────────────────────────────────────────────"
 
-    sqlite3 -separator $'\t' $MCFLY_HISTFILE \
+    sqlite3 -separator "\t" $MCFLY_HISTFILE \
         "SELECT selected_count, run_count, cmd
          FROM commands
          WHERE cmd NOT LIKE 'mcfly%'

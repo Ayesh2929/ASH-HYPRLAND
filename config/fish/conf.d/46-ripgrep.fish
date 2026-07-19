@@ -49,8 +49,7 @@ set --export RIPGREP_CONFIG_PATH $_ash_rg_config
 
 # ── Write config if missing ───────────────────────────────────────────────────
 if not test -f $_ash_rg_config
-    cat > $_ash_rg_config << 'RGEOF'
-# ── ripgrep Configuration — ASH DOTFILES v5.0 ──────────────────────────────
+    echo '# ── ripgrep Configuration — ASH DOTFILES v5.0 ──────────────────────────────
 
 # Smart case: case-insensitive unless pattern has uppercase
 --smart-case
@@ -126,14 +125,12 @@ if not test -f $_ash_rg_config
 --colors=line:fg:137,180,250
 --colors=path:fg,166,227,161
 --colors=path:style:bold
---colors=column:fg:148,226,213
-RGEOF
+--colors=column:fg:148,226,213' > $_ash_rg_config
 end
 
 # ── Write .ignore file ────────────────────────────────────────────────────────
 if not test -f $_ash_rg_ignore
-    cat > $_ash_rg_ignore << 'IGEOF'
-# ripgrep global .ignore — ASH DOTFILES v5.0
+    echo '# ripgrep global .ignore — ASH DOTFILES v5.0
 .git/
 node_modules/
 target/
@@ -177,8 +174,7 @@ bun.lockb
 Cargo.lock
 poetry.lock
 .terraform/
-.vagrant/
-IGEOF
+.vagrant/' > $_ash_rg_ignore
 end
 
 # ╔══════════════════════════════════════════════════════════════════════════════╗

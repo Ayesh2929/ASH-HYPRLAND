@@ -53,82 +53,80 @@ function __ash_atuin_write_config --description "Generate optimal atuin config.t
     # Read ASH theme accent color for UI theming
     set -l accent (set -q ASH_THEME_ACCENT && echo $ASH_THEME_ACCENT || echo "#cba6f7")
 
-    cat > $_ash_atuin_config_file << TOML
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  Atuin Configuration — ASH DOTFILES v5.0                                   ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
-
-# ── Core Settings ─────────────────────────────────────────────────────────────
-db_path   = "~/.local/share/atuin/history.db"
-key_path  = "~/.local/share/atuin/key"
-session_path = "~/.local/share/atuin/session"
-
-# Store exit codes (0 = success, non-0 = failure)
-history_filter = []
-
-# Dialect for date parsing
-dialect = "uk"
-
-# Update checks
-auto_sync  = true
-update_check = false
-
-# ── Display Settings ──────────────────────────────────────────────────────────
-[ui]
-# Style options: "auto" | "full" | "compact"
-style = "full"
-
-# Search mode: "prefix" | "fulltext" | "fuzzy" | "skim"
-search_mode = "fuzzy"
-
-# Filter mode: "global" | "host" | "session" | "directory"
-filter_mode = "global"
-
-# Filter mode when pressing Up key
-filter_mode_shell_up_key_binding = "directory"
-
-# Show preview of selected command
-show_preview = true
-
-# Show help text
-show_help = true
-
-# Show tabs for filtering
-show_tabs = true
-
-# Inline height (0 = fullscreen)
-inline_height = 30
-
-# Invert display (history at bottom)
-invert = false
-
-# Exit immediately on selection (no re-edit)
-exit_mode = "return-query"
-
-# Maximum length of history preview
-max_preview_height = 4
-
-# ── Sync Settings ─────────────────────────────────────────────────────────────
-[sync]
-# Sync frequency
-sync_frequency = "10m"
-
-# Enable sync (set ATUIN_SYNC_ADDRESS for self-hosted)
-# sync_address = "https://api.atuin.sh"
-
-# ── Stats Settings ────────────────────────────────────────────────────────────
-[stats]
-# Commands to ignore in stats
-common_prefix = ["sudo", "time", "watch", "env"]
-common_subcommands = ["git", "cargo", "npm", "pnpm", "yarn", "docker", "kubectl", "brew"]
-
-# ── Key Bindings ──────────────────────────────────────────────────────────────
-[keys]
-# Ctrl-R → full history search
-# Up     → directory-scoped history
-# These are set in shell integration below
-
-TOML
+    printf "%s\n" \
+        '# ╔══════════════════════════════════════════════════════════════════════════════╗' \
+        '# ║  Atuin Configuration — ASH DOTFILES v5.0                                   ║' \
+        '# ╚══════════════════════════════════════════════════════════════════════════════╝' \
+        '' \
+        '# ── Core Settings ─────────────────────────────────────────────────────────────' \
+        'db_path   = "~/.local/share/atuin/history.db"' \
+        'key_path  = "~/.local/share/atuin/key"' \
+        'session_path = "~/.local/share/atuin/session"' \
+        '' \
+        '# Store exit codes (0 = success, non-0 = failure)' \
+        'history_filter = []' \
+        '' \
+        '# Dialect for date parsing' \
+        'dialect = "uk"' \
+        '' \
+        '# Update checks' \
+        'auto_sync  = true' \
+        'update_check = false' \
+        '' \
+        '# ── Display Settings ──────────────────────────────────────────────────────────' \
+        '[ui]' \
+        '# Style options: "auto" | "full" | "compact"' \
+        'style = "full"' \
+        '' \
+        '# Search mode: "prefix" | "fulltext" | "fuzzy" | "skim"' \
+        'search_mode = "fuzzy"' \
+        '' \
+        '# Filter mode: "global" | "host" | "session" | "directory"' \
+        'filter_mode = "global"' \
+        '' \
+        '# Filter mode when pressing Up key' \
+        'filter_mode_shell_up_key_binding = "directory"' \
+        '' \
+        '# Show preview of selected command' \
+        'show_preview = true' \
+        '' \
+        '# Show help text' \
+        'show_help = true' \
+        '' \
+        '# Show tabs for filtering' \
+        'show_tabs = true' \
+        '' \
+        '# Inline height (0 = fullscreen)' \
+        'inline_height = 30' \
+        '' \
+        '# Invert display (history at bottom)' \
+        'invert = false' \
+        '' \
+        '# Exit immediately on selection (no re-edit)' \
+        'exit_mode = "return-query"' \
+        '' \
+        '# Maximum length of history preview' \
+        'max_preview_height = 4' \
+        '' \
+        '# ── Sync Settings ─────────────────────────────────────────────────────────────' \
+        '[sync]' \
+        '# Sync frequency' \
+        'sync_frequency = "10m"' \
+        '' \
+        '# Enable sync (set ATUIN_SYNC_ADDRESS for self-hosted)' \
+        '# sync_address = "https://api.atuin.sh"' \
+        '' \
+        '# ── Stats Settings ────────────────────────────────────────────────────────────' \
+        '[stats]' \
+        '# Commands to ignore in stats' \
+        'common_prefix = ["sudo", "time", "watch", "env"]' \
+        'common_subcommands = ["git", "cargo", "npm", "pnpm", "yarn", "docker", "kubectl", "brew"]' \
+        '' \
+        '# ── Key Bindings ──────────────────────────────────────────────────────────────' \
+        '[keys]' \
+        '# Ctrl-R → full history search' \
+        '# Up     → directory-scoped history' \
+        '# These are set in shell integration below' > $_ash_atuin_config_file
 
     echo "[$_at_green"✓"$_at_reset] atuin config created: $_ash_atuin_config_file"
 end

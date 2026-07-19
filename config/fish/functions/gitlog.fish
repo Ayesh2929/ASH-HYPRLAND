@@ -584,14 +584,14 @@ $BOLD  Subject:  %C(white)%s%C(reset)
             printf "\n  $BOLD$PURPLE  📝 Git Blame: $_target$R\n\n"
 
             if command -q delta
-                git blame --color-lines --color-by-age $\_follow "$_target" 2>/dev/null | \
+                git blame --color-lines --color-by-age $_follow "$_target" 2>/dev/null | \
                     delta --blame-format='{commit}  {author:<15}  {age:<12}  {timestamp}' 2>/dev/null || \
                     git blame "$_target" 2>/dev/null | less -R
             else
                 git blame \
                     --color-by-age \
                     --date=short \
-                    $\_follow \
+                    $_follow \
                     "$_target" \
                     2>/dev/null | \
                 while read -l line

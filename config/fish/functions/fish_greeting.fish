@@ -616,7 +616,7 @@ function fish_greeting --description "ASH ultra system greeting dashboard"
     end
     __row " " "CPU" (string sub --length 28 (string replace -r '\s+' ' ' $_cpu)) "$_cpu_bar"
     __row "  " "CPU Cores" "$_cpu_cores"
-    test -n "$_cpu_temp" && __row " " "CPU Temp"   "${_cpu_temp}°C"
+    test -n "$_cpu_temp" && __row " " "CPU Temp"   "$_cpu_temp°C"
 
     # GPU row
     if test -n "$_gpu" && test "$_gpu" != Unknown

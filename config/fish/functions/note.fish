@@ -234,7 +234,7 @@ function note --description "Terminal note-taking system with markdown & tagging
 
         set -l entries
 
-        for f in $_notes_dir/*.md $_notes_dir/*.txt 2>/dev/null
+        for f in $_notes_dir/*.md $_notes_dir/*.txt
             test -f $f || continue
             set -l title (__note_meta $f title | string replace '"' '')
             set -l tags  (__note_meta $f tags)

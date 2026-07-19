@@ -156,7 +156,7 @@ function docker_cleanup --description "Complete Docker resource cleanup system"
         else if test $b -ge 1024 2>/dev/null
             math --scale 1 "$b / 1024" | read -l n; echo "$n KiB"
         else
-            echo "${b}B"
+            echo "$b"B
         end
     end
 

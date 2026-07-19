@@ -83,8 +83,7 @@ end
 
 # ── Generate ansible.cfg if missing ───────────────────────────────────────────
 if not test -f $ANSIBLE_CONFIG
-    cat > $ANSIBLE_CONFIG << 'EOF'
-# ╔══════════════════════════════════════════════════════════════════════════════╗
+    echo "# ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║  ansible.cfg — ASH DOTFILES v5.0                                           ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
@@ -122,8 +121,7 @@ become_ask_pass    = False
 
 [ssh_connection]
 pipelining         = True
-control_path       = /tmp/ansible-ssh-%%h-%%p-%%r
-EOF
+control_path       = /tmp/ansible-ssh-%%h-%%p-%%r" > $ANSIBLE_CONFIG
 end
 
 # ╔══════════════════════════════════════════════════════════════════════════════╗

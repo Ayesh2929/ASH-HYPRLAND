@@ -881,7 +881,7 @@ function ash_update --description "ASH ultra update orchestrator"
         __upd_substep ok "Completion caches cleared"
 
         # Notify running Neovim instances
-        for sock in "$XDG_RUNTIME_DIR/nvim."*".sock" 2>/dev/null
+        for sock in "$XDG_RUNTIME_DIR/nvim."*".sock"
             test -S $sock || continue
             nvim --server $sock \
                 --remote-send \

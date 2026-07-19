@@ -376,19 +376,18 @@ function tf-state-smart --description "Interactive Terraform state management"
 
     switch $action
         case ls list
-            $_ash_tf_bin state list 2>/dev/null | \
-                if command -q fzf
-                    fzf --ansi \
-                        --border-label "  🗃️  State Resources " \
-                        --border rounded \
-                        --prompt "  📋 " \
-                        --multi \
-                        --preview "$_ash_tf_bin state show {} 2>/dev/null | head -30" \
-                        --preview-window 'right:50%:border-rounded:wrap' \
-                        --header '  Tab:multi  Enter:select  Ctrl-D:show  '
-                else
-                    cat
-                end
+            if command -q fzf
+                $_ash_tf_bin state list 2>/dev/null | fzf --ansi \
+                    --border-label "  🗃️  State Resources " \
+                    --border rounded \
+                    --prompt "  📋 " \
+                    --multi \
+                    --preview "$_ash_tf_bin state show {} 2>/dev/null | head -30" \
+                    --preview-window 'right:50%:border-rounded:wrap' \
+                    --header '  Tab:multi  Enter:select  Ctrl-D:show  '
+            else
+                $_ash_tf_bin state list 2>/dev/null
+            end
 
         case show
             set -l resource $argv[2]

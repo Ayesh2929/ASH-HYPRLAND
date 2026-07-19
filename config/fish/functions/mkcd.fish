@@ -919,8 +919,8 @@ MIT — see [LICENSE](LICENSE)
 
     # ── Python virtual environment ─────────────────────────────────────────────
     if test $_venv -eq 1 && test "$_template" = python \
-       || test $_venv -eq 1 && (test "$_template" = data || test "$_template" = ml \
-          || test "$_template" = data-science || test "$_template" = ml)
+       || test $_venv -eq 1 && begin; test "$_template" = data || test "$_template" = ml \
+          || test "$_template" = data-science || test "$_template" = ml; end
 
         if test $_dry_run -eq 1
             __mk_dry "python3 -m venv .venv"

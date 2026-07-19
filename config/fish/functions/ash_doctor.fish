@@ -734,7 +734,7 @@ function ash_doctor --description "ASH ultra system diagnostics"
                 __doc_info "SSH public keys" "none found"
 
             # Check key permissions
-            for key in "$HOME/.ssh/id_"* 2>/dev/null
+            for key in "$HOME/.ssh/id_"*
                 string match -q '*.pub' $key && continue
                 test -f $key || continue
                 set -l perm (stat -c '%a' $key 2>/dev/null)

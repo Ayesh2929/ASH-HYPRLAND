@@ -797,7 +797,7 @@ function __ash_nvim_on_theme_change --on-event ash_theme_changed \
     echo $theme_name > "$HOME/.local/share/ash/state/nvim-theme-signal" 2>/dev/null
 
     # Send signal to all running nvim instances via nvim socket
-    for sock in "$HOME/.local/share/nvim/server-"*.sock 2>/dev/null
+    for sock in "$HOME/.local/share/nvim/server-"*.sock
         test -S $sock || continue
         nvim --server $sock \
              --remote-send "<cmd>lua if pcall(require, 'ash') then require('ash').sync_theme() end<cr>" \

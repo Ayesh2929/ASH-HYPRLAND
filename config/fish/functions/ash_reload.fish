@@ -139,7 +139,7 @@ function ash_reload --description "ASH smart shell environment reload"
         end
 
         # Local overrides
-        for f in "$HOME/.config/fish/local.d/"*.fish 2>/dev/null
+        for f in "$HOME/.config/fish/local.d/"*.fish
             test -f $f || continue
             printf "  $YELLOW%-50s$R  $YELLOW%s$R\n" \
                 (string replace "$HOME/" "~/" $f) "local"

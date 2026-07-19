@@ -52,8 +52,7 @@ function __ash_tf_write_settings --description "Generate optimized thefuck setti
 
     mkdir -p (dirname $_ash_tf_settings) 2>/dev/null
 
-    cat > $_ash_tf_settings << 'PYEOF'
-# ╔══════════════════════════════════════════════════════════════════════════════╗
+    echo "# ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║  thefuck settings — ASH DOTFILES v5.0                                      ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
@@ -158,8 +157,7 @@ priority        = {}
 
 # ── Aliases ───────────────────────────────────────────────────────────────────
 # Commands to avoid correcting
-# history_limit = 2000
-PYEOF
+# history_limit = 2000" > $_ash_tf_settings
 
     echo "["(date '+%H:%M:%S')"] settings created" >> $_ash_tf_log 2>/dev/null
 end

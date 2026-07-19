@@ -297,10 +297,10 @@ function compress --description "Universal archive creator with smart format sel
 
             if command -q pigz
                 # Parallel gzip (much faster on multi-core)
-                eval "tar -$_tar_verbose"cf" - $_tar_exclude $_sources | pigz $gzip_level > '$_output'" 2>/dev/null
+                eval "tar -$_tar_verbose""cf - $_tar_exclude $_sources | pigz $gzip_level > '$_output'" 2>/dev/null
                 __cmp_info "Using pigz (parallel gzip)"
             else
-                eval "tar -$_tar_verbose"czf" '$_output' $_tar_exclude $_sources" 2>/dev/null
+                eval "tar -$_tar_verbose""czf '$_output' $_tar_exclude $_sources" 2>/dev/null
             end
             test $status -eq 0 && set _created 1
 

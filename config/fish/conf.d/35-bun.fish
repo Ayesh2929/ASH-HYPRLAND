@@ -416,8 +416,7 @@ function bun-init-smart --description "Initialize a new bun project"
     bun init --yes 2>/dev/null
 
     # Write bunfig.toml
-    cat > bunfig.toml << 'TOML'
-# ── Bun Configuration ────────────────────────────────────────────────────────
+    echo '# ── Bun Configuration ────────────────────────────────────────────────────────
 [install]
 # Save exact versions
 exact = true
@@ -445,8 +444,7 @@ coverageReporter = ["text", "lcov"]
 
 [run]
 # Shell for bun run
-shell = "bun"
-TOML
+shell = "bun"' > bunfig.toml
 
     echo $_bn_green"  ✓ bunfig.toml created"$_bn_reset
 

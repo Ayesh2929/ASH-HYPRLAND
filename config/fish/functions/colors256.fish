@@ -419,7 +419,7 @@ function colors256 --description "Terminal color explorer: 256 colors, truecolor
         # 8 colors
         printf "    8-color:      "
         for c in 31 32 33 34 35 36 37
-            printf "\033[${c}m████\033[0m"
+            printf "\033["$c"m████\033[0m"
         end
         printf "\n"
 

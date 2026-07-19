@@ -61,14 +61,13 @@ end
 
 # ── Write stdlib extensions if missing ────────────────────────────────────────
 if not test -f "$_ash_direnv_lib_dir/ash.sh"
-    cat > "$_ash_direnv_lib_dir/ash.sh" << 'ASHLIB'
-# ── ASH direnv stdlib extensions ─────────────────────────────────────────────
+    echo '# ── ASH direnv stdlib extensions ─────────────────────────────────────────────
 
 # use_node: Auto-switch Node version from .nvmrc
 use_node() {
     local version="${1:-}"
     if [ -f .nvmrc ] && [ -z "$version" ]; then
-        version=$(cat .nvmrc | tr -d '[:space:]')
+        version=$(cat .nvmrc | tr -d \'[:space:]\')
     fi
     if [ -n "$version" ] && command -v fnm >/dev/null 2>&1; then
         eval "$(fnm env --use-on-cd --shell bash)"
@@ -202,9 +201,7 @@ watch_file_pattern() {
     for f in $pattern; do
         [ -f "$f" ] && watch_file "$f"
     done
-}
-
-ASHLIB
+}' > "$_ash_direnv_lib_dir/ash.sh"
 end
 
 # ╔══════════════════════════════════════════════════════════════════════════════╗
