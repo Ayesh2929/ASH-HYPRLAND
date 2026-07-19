@@ -1,0 +1,243 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 OMEGA — Maximal Bar Layout                               ║
+// ║                                                                              ║
+// ║  Complete and rich bar layout including extensive resource monitoring,       ║
+// ║  task counts, system logs, hardware temperatures, and media controls.       ║
+// ║                                                                              ║
+// ║  Activate: ash bar layout maximal-bar                                       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+[{
+    "name":             "maximal-bar",
+    "output":           ["DP-1", "eDP-1"],
+    "position":         "top",
+    "height":           38,
+    "margin-top":       0,
+    "margin-left":      0,
+    "margin-right":     0,
+    "margin-bottom":    0,
+    "layer":            "top",
+    "exclusive":        true,
+    "passthrough":      false,
+    "gtk-layer-shell":  true,
+    "spacing":          4,
+    "ipc":              true,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap",
+        "custom/separator-dot",
+        "hyprland/window"
+    ],
+
+    "modules-center": [
+        "clock",
+        "custom/separator-dot",
+        "custom/weather"
+    ],
+
+    "modules-right": [
+        "custom/ash-mode",
+        "custom/media",
+        "custom/separator-dot",
+        "pulseaudio",
+        "pulseaudio#microphone",
+        "backlight",
+        "battery",
+        "network",
+        "bluetooth",
+        "custom/separator-dot",
+        "cpu",
+        "memory",
+        "disk",
+        "temperature",
+        "custom/separator-dot",
+        "privacy",
+        "idle_inhibitor",
+        "custom/separator-dot",
+        "tray",
+        "custom/notifications",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format":           "{icon}",
+        "format-icons": {
+            "1":"󰆍","2":"󰖟","3":"󰅩","4":"󱁉","5":"󰝚",
+            "6":"󰊗","7":"󰙯","8":"󰍡","9":"󰙺","10":"󰓅",
+            "urgent":"󰀦","active":"󰮯","default":"󰊠"
+        },
+        "sort-by-number":       true,
+        "on-click":             "activate",
+        "on-scroll-up":         "hyprctl dispatch workspace -1",
+        "on-scroll-down":       "hyprctl dispatch workspace +1",
+        "persistent-workspaces": {"1":[],"2":[],"3":[],"4":[],"5":[]}
+    },
+
+    "hyprland/submap": {
+        "format":       "󰌌 {}",
+        "always-on":    false,
+        "tooltip":      true
+    },
+
+    "hyprland/window": {
+        "format":       "{}",
+        "max-length":   40,
+        "separate-outputs": true,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "󰈹 $1",
+            "(.*)nvim(.*)":           "󰅩 Neovim",
+            "(.*)kitty(.*)":          "󰆍 Terminal"
+        }
+    },
+
+    "clock": {
+        "format":       "  {:%H:%M}",
+        "format-alt":   "  {:%A, %B %d  ·  %H:%M:%S}",
+        "tooltip-format": "<big>{:%A, %B %d %Y}</big>\n<tt><small>{calendar}</small></tt>",
+        "interval":     1
+    },
+
+    "custom/weather": {
+        "format":       "{}",
+        "tooltip":      true,
+        "interval":     1800,
+        "exec":         "~/.config/waybar/scripts/weather.sh --waybar",
+        "return-type":  "json",
+        "signal":       8
+    },
+
+    "custom/ash-mode": {
+        "format":       "{}",
+        "return-type":  "json",
+        "exec":         "echo \"{\\\"text\\\":\\\"$(cat ~/.local/state/ash-dotfiles/current-mode 2>/dev/null || echo '󰒲 ')\\\"}\"",
+        "interval":     5,
+        "signal":       9
+    },
+
+    "custom/media": {
+        "format":       "{icon} {}",
+        "return-type":  "json",
+        "max-length":   30,
+        "format-icons": {"Playing":"󰎇","Paused":"󰏤","Stopped":"󰓛"},
+        "exec":         "~/.config/waybar/scripts/media-player.sh --waybar 2>/dev/null",
+        "on-click":     "playerctl play-pause",
+        "signal":       7,
+        "interval":     2
+    },
+
+    "pulseaudio": {
+        "format":           "{icon} {volume}%",
+        "format-muted":     "󰖁",
+        "format-icons":     {"default":["󰕿","󰖀","󰕾"]},
+        "scroll-step":      2,
+        "on-click":         "pavucontrol",
+        "on-click-right":   "wpctl set-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up":     "wpctl set-volume -l 1.0 @DEFAULT_SINK@ 2%+",
+        "on-scroll-down":   "wpctl set-volume @DEFAULT_SINK@ 2%-"
+    },
+
+    "pulseaudio#microphone": {
+        "format":           "{format_source}",
+        "format-source":    "󰍬 {volume}%",
+        "format-source-muted": "󰍭",
+        "on-click-right":   "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+        "on-scroll-up":     "wpctl set-volume @DEFAULT_SOURCE@ 5%+",
+        "on-scroll-down":   "wpctl set-volume @DEFAULT_SOURCE@ 5%-"
+    },
+
+    "backlight": {
+        "format":       "{icon} {percent}%",
+        "format-icons": ["󰋙","󰋘","󰋗","󰋖","󰃝","󰃞","󰃟","󰃠"],
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+
+    "battery": {
+        "states":       {"warning":30,"critical":15,"danger":5},
+        "format":       "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged":  "󰚥 {capacity}%",
+        "format-icons": ["󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"],
+        "interval":     30
+    },
+
+    "network": {
+        "format-wifi":          "󰤨 {signalStrength}%",
+        "format-ethernet":      "󰈀",
+        "format-disconnected":  "󰤭",
+        "on-click":             "~/.config/rofi/menus/wifi/wifi.sh",
+        "interval":             5
+    },
+
+    "bluetooth": {
+        "format":           "󰂯",
+        "format-connected": "󰂱 {device_alias}",
+        "on-click":         "blueman-manager",
+        "interval":         30
+    },
+
+    "cpu": {
+        "format":   "󰻠 {usage}%",
+        "interval": 3,
+        "states":   {"warning":70,"critical":90}
+    },
+
+    "memory": {
+        "format":   "󰍛 {percentage}%",
+        "interval": 5,
+        "states":   {"warning":75,"critical":90}
+    },
+
+    "disk": {
+        "interval": 30,
+        "format":   "󰋊 {percentage_used}%",
+        "path":     "/"
+    },
+
+    "temperature": {
+        "thermal-zone": 2,
+        "hwmon-path":   "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        "format-critical": "{temperatureC}°C ",
+        "format": "{temperatureC}°C "
+    },
+
+    "privacy": {
+        "icon-size": 14,
+        "transition-duration": 250,
+        "modules": [
+            {"type":"screenshare"},
+            {"type":"audio-in"},
+            {"type":"audio-out"}
+        ]
+    },
+
+    "idle_inhibitor": {
+        "format":       "{icon}",
+        "format-icons": {"activated":"󰒳","deactivated":"󰒲"}
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing":   8
+    },
+
+    "custom/notifications": {
+        "format":       "{icon}",
+        "return-type":  "json",
+        "exec":         "swaync-client -swb",
+        "format-icons": ["󰂚","󱏧"],
+        "on-click":     "swaync-client --toggle-panel",
+        "signal":       2
+    },
+
+    "custom/power": {
+        "format":       "󰐥",
+        "on-click":     "~/.config/rofi/menus/powermenu/powermenu.sh"
+    },
+
+    "custom/separator-dot": {
+        "format":   "  ",
+        "tooltip":  false
+    }
+}]
