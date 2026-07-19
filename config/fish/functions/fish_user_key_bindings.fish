@@ -520,7 +520,7 @@ function fish_user_key_bindings --description "ASH ultra keyboard bindings"
     __bind insert \ew '__show_tree'
 
     # ── Ctrl-/ → toggle inline autosuggestion ────────────────────────────────
-    __bind insert \c/ 'toggle-comment'
+    __bind insert \c_ 'toggle-comment'
 
     # ── Escape (insert mode) → accept suggestion or enter normal mode ─────────
     if test "$bind_mode" = vi

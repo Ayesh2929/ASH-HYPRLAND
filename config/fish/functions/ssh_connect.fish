@@ -420,7 +420,7 @@ function ssh_connect --description "Smart SSH connection manager with config bro
             end
 
             # Check for duplicate
-            if grep -qi "^Host $alias_name$" $target_config 2>/dev/null
+            if grep -qi "^Host $alias_name\$" $target_config 2>/dev/null
                 printf "  $YELLOW⚠$R  Host '$alias_name' already exists in $target_config\n"
                 read -P "  Overwrite? [y/N] " confirm
                 string match -qi 'y*' $confirm || return 0

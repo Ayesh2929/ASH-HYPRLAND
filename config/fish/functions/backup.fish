@@ -632,7 +632,7 @@ function backup --description "Smart file/directory backup system"
                 (math --scale 1 "$src_bytes / 1048576" 2>/dev/null | read -l m; echo "$m MiB")
             printf "  $BOLD$GREEN║$R  $BOLD%-14s$R  $CYAN%-40s$R$GREEN║$R\n" "Compressed:" \
                 (math --scale 1 "$out_bytes / 1048576" 2>/dev/null | read -l m; echo "$m MiB ($ratio%)")
-            printf "  $BOLD$GREEN║$R  $BOLD%-14s$R  %-40s$GREEN║$R\n" "Time:" "${elapsed}s"
+            printf "  $BOLD$GREEN║$R  $BOLD%-14s$R  %-40s$GREEN║$R\n" "Time:" "$elapsed"s
             printf "  $BOLD$GREEN╚══════════════════════════════════════════════════════╝$R\n"
             printf "\n"
         end
