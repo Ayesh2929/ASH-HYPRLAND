@@ -195,6 +195,7 @@ jobs:
       has_web:           ${{ steps.filter.outputs.web }}
       web_exists:        ${{ steps.web.outputs.exists }}
       web_lock_exists:   ${{ steps.web.outputs.lock_exists }}
+      api_exists:        ${{ steps.api.outputs.exists }}
       # Pipeline decisions
       run_full:          ${{ steps.decide.outputs.run_full }}
       run_screenshots:   ${{ steps.decide.outputs.run_screenshots }}
@@ -218,6 +219,7 @@ jobs:
           sparse-checkout: |
             .github
             web
+            api
             themes
             assets/screenshots
             plugins
@@ -227,6 +229,11 @@ jobs:
         run: |
           [[ -f web/package.json ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
           [[ -f web/package-lock.json ]] && echo "lock_exists=true" >> "$GITHUB_OUTPUT" || echo "lock_exists=false" >> "$GITHUB_OUTPUT"
+
+      - name: "🔎 Detect API project"
+        id: api
+        run: |
+          [[ -f api/requirements.txt ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
 
       - name: "🔍 Path filter"
         id: filter
@@ -522,6 +529,7 @@ jobs:
           skip-setup-trivy: true
 
       - name: "🐍 Safety (Python)"
+        if: needs.intelligence.outputs.api_exists == 'true'
         working-directory: api
         run: |
           pip install safety --quiet
@@ -1020,8 +1028,11 @@ jobs:
     timeout-minutes: 10
     needs: [intelligence, sec-secrets]
     if: |
-      needs.intelligence.outputs.has_api == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+      needs.intelligence.outputs.api_exists == 'true' &&
+      (
+        needs.intelligence.outputs.has_api == 'true' ||
+        needs.intelligence.outputs.run_full == 'true'
+      )
 
     steps:
       - name: "📥 Checkout"
@@ -2309,8 +2320,11 @@ jobs:
     timeout-minutes: 25
     needs: [lint-python, lint-configs]
     if: |
-      needs.intelligence.outputs.has_api == 'true' ||
-      needs.intelligence.outputs.run_full == 'true'
+      needs.intelligence.outputs.api_exists == 'true' &&
+      (
+        needs.intelligence.outputs.has_api == 'true' ||
+        needs.intelligence.outputs.run_full == 'true'
+      )
 
     services:
       redis:
@@ -2894,6 +2908,7 @@ jobs:
     timeout-minutes: 20
     needs: [test-api, sec-deps]
     if: |
+      needs.intelligence.outputs.api_exists == 'true' &&
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push'
 
