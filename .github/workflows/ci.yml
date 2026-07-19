@@ -158,6 +158,9 @@ env:
   SVG_DIR:                 "assets/brand/svg-masters"
   THEMES_DIR:              "themes/presets"
 
+permissions:
+  contents: read
+
 defaults:
   run:
     shell: bash
@@ -205,6 +208,7 @@ jobs:
       matrix_themes:     ${{ steps.matrices.outputs.themes }}
       matrix_distros:    ${{ steps.matrices.outputs.distros }}
       matrix_platforms:  ${{ steps.matrices.outputs.platforms }}
+      matrix_languages:  ${{ steps.matrices.outputs.languages }}
 
     steps:
       - name: "📥 Sparse checkout"
@@ -344,6 +348,10 @@ jobs:
         id: matrices
         env:
           _TARGET: ${{ github.event.inputs.target_themes || 'all' }}
+          _RUN_FULL: ${{ steps.decide.outputs.run_full }}
+          _HAS_API: ${{ steps.filter.outputs.api }}
+          _HAS_WEB: ${{ steps.filter.outputs.web }}
+          _WEB_EXISTS: ${{ steps.web.outputs.exists }}
         run: |
           set -euo pipefail
 
@@ -374,15 +382,25 @@ jobs:
 
           PLATFORMS_JSON='["linux/amd64","linux/arm64"]'
 
+          LANGUAGES_JSON='[]'
+          if [[ "$_RUN_FULL" == "true" || "$_HAS_API" == "true" ]]; then
+            LANGUAGES_JSON=$(echo "$LANGUAGES_JSON" | jq '. + ["python"]')
+          fi
+          if [[ "$_WEB_EXISTS" == "true" && ("$_RUN_FULL" == "true" || "$_HAS_WEB" == "true") ]]; then
+            LANGUAGES_JSON=$(echo "$LANGUAGES_JSON" | jq '. + ["javascript-typescript"]')
+          fi
+
           {
             echo "themes=$(echo "$THEMES_JSON"   | jq -c .)"
             echo "distros=$(echo "$DISTROS_JSON"  | jq -c .)"
             echo "platforms=$(echo "$PLATFORMS_JSON" | jq -c .)"
+            echo "languages=$(echo "$LANGUAGES_JSON" | jq -c .)"
           } >> "$GITHUB_OUTPUT"
 
           THEME_COUNT=$(echo "$THEMES_JSON" | jq 'length')
           echo "  Theme matrix:    $THEME_COUNT themes"
           echo "  Distro matrix:   $(echo "$DISTROS_JSON"  | jq 'length') distros"
+          echo "  Lang matrix:     $(echo "$LANGUAGES_JSON" | jq 'length') languages"
 
 
 # ┌─────────────────────────────────────────────────────────────────────────────
@@ -533,6 +551,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: intelligence
+    if: |
+      needs.intelligence.outputs.matrix_languages != '[]' &&
+      needs.intelligence.outputs.matrix_languages != ''
     permissions:
       actions: read
       contents: read
@@ -540,7 +561,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [python, javascript-typescript]
+        language: ${{ fromJSON(needs.intelligence.outputs.matrix_languages) }}
 
     steps:
       - name: "📥 Checkout"
@@ -578,6 +599,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     needs: intelligence
+    permissions:
+      contents: read
 
     steps:
       - name: "📥 Checkout"
@@ -728,8 +751,10 @@ jobs:
 
       - name: "⚙️ Install Luacheck"
         run: |
-          sudo apt-get install -y lua5.4 luarocks --no-install-recommends
-          sudo luarocks install luacheck
+          sudo apt-get install -y lua-check || {
+            sudo apt-get install -y lua5.4 luarocks --no-install-recommends
+            sudo luarocks install luacheck
+          }
           luacheck --version
 
       - name: "🔍 Luacheck"
@@ -1229,7 +1254,7 @@ jobs:
             optipng pngquant --no-install-recommends
 
           # resvg — fast, accurate SVG renderer
-          curl -fsSL \
+          curl --retry 5 --retry-delay 5 --retry-connrefused -fsSL \
             "https://github.com/RazrFalcon/resvg/releases/download/v${RESVG_VERSION}/resvg-linux-x86_64.zip" \
             -o /tmp/resvg.zip 2>/dev/null || true
           if [[ -f /tmp/resvg.zip ]]; then
@@ -1978,15 +2003,43 @@ jobs:
       - name: "📥 Checkout"
         uses: actions/checkout@v4
 
+      - name: "💾 Cache BATS helpers"
+        id: cache-bats
+        uses: actions/cache@v4
+        with:
+          path: |
+            tests/helpers/bats-support
+            tests/helpers/bats-assert
+          key: bats-helpers-v1
+
       - name: "⚙️ Install bats"
         run: |
           sudo apt-get install -y bats jq --no-install-recommends
-          git clone --depth=1 \
-            https://github.com/bats-core/bats-support.git \
-            tests/helpers/bats-support 2>/dev/null || true
-          git clone --depth=1 \
-            https://github.com/bats-core/bats-assert.git \
-            tests/helpers/bats-assert 2>/dev/null || true
+
+          retry() {
+            local n=1
+            local max=5
+            local delay=3
+            while true; do
+              "$@" && break || {
+                if [[ $n -lt $max ]]; then
+                  ((n++))
+                  echo "Command failed. Attempt $n/$max in ${delay}s..."
+                  sleep $delay
+                else
+                  echo "The command has failed after $n attempts."
+                  return 1
+                fi
+              }
+            done
+          }
+
+          if [[ ! -d tests/helpers/bats-support ]]; then
+            retry git clone --depth=1 https://github.com/bats-core/bats-support.git tests/helpers/bats-support
+          fi
+          if [[ ! -d tests/helpers/bats-assert ]]; then
+            retry git clone --depth=1 https://github.com/bats-core/bats-assert.git tests/helpers/bats-assert
+          fi
 
       - name: "🔧 Test env"
         run: |
@@ -2424,7 +2477,7 @@ jobs:
           sudo apt-get install -y imagemagick webp time --no-install-recommends
           # hyperfine
           HF_VER="1.18.0"
-          curl -fsSL \
+          curl --retry 5 --retry-delay 5 --retry-connrefused -fsSL \
             "https://github.com/sharkdp/hyperfine/releases/download/v${HF_VER}/hyperfine_${HF_VER}_amd64.deb" \
             -o /tmp/hf.deb 2>/dev/null \
             && sudo dpkg -i /tmp/hf.deb 2>/dev/null || true
