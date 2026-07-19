@@ -56,8 +56,9 @@ detect_content_type() {
     fi
 
     # Code (heuristic: contains braces/semicolons/function keywords)
+    local code_pat='[{\}].*;'
     if [[ "$content" =~ (function|def |class |const |import |require)[[:space:]] ]] || \
-       [[ "$content" =~ [\{\}].*[;] ]]; then
+       [[ "$content" =~ $code_pat ]]; then
         echo "code"
         return
     fi

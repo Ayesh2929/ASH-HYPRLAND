@@ -133,13 +133,13 @@ _daemon_listen() {
 
     socat - "UNIX-CONNECT:${SOCKET}" 2>/dev/null | while read -r line; do
         case "$line" in
-            activewindow>>*)
+            "activewindow>>"*)
                 local payload="${line#activewindow>>}"
                 local class="${payload%%,*}"
                 local title="${payload#*,}"
                 _on_focus_change "$class" "$title"
                 ;;
-            focusedmon>>*)
+            "focusedmon>>"*)
                 ;;
         esac
     done

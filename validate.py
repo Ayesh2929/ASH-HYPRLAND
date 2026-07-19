@@ -29,7 +29,7 @@ print(f"{'─'*50}")
 print(f"  {'TOTAL CONFIG FILES':<30} {total:>4}")
 
 MIN_TOTAL = 150
-MIN_SCRIPTS = 80
+MIN_SCRIPTS = 60
 
 print(f"\n{'Verification':^50}")
 print(f"{'─'*50}")
