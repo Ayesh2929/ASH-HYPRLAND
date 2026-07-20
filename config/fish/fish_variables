@@ -1,0 +1,383 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                  ║
+# ║   🐟 ASH DOTFILES v5.0 OMEGA — Fish Universal Variables                        ║
+# ║                                                                                  ║
+# ║   ⚠️  THIS FILE IS MANAGED BY FISH SHELL                                        ║
+# ║   ⚠️  Do NOT edit manually — use:  set -U variable_name value                  ║
+# ║   ⚠️  Or use:  ash config set fish.<variable> <value>                           ║
+# ║                                                                                  ║
+# ║   Universal variables persist across ALL Fish sessions and survive              ║
+# ║   shell restarts. They are stored in binary format by Fish 3.x+                ║
+# ║   This file is the human-readable source-of-truth for initial values.          ║
+# ║                                                                                  ║
+# ║   Categories:                                                                    ║
+# ║     • Fish built-in universal variables                                          ║
+# ║     • ASH dotfiles universal state                                               ║
+# ║     • User PATH (fish_user_paths — Fish's idempotent PATH mechanism)            ║
+# ║     • Tool-specific persistent settings                                          ║
+# ║                                                                                  ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🛤️  FISH USER PATHS — The correct Fish way to extend PATH
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# fish_user_paths is prepended to PATH automatically by Fish.
+# Use `fish_add_path` to modify — it handles deduplication.
+# Listed in priority order (index 1 = highest priority).
+#
+# NOTE: Actual runtime values managed by fish_add_path in config.fish.
+#       These represent the intended canonical order for documentation.
+#
+# MANAGED ENTRIES (do not edit — use fish_add_path):
+#   [1]  $HOME/.local/bin           — User-installed binaries
+#   [2]  $HOME/bin                  — Personal scripts
+#   [3]  $XDG_DATA_HOME/ash/bin    — ASH CLI tool
+#   [4]  $XDG_DATA_HOME/cargo/bin  — Rust binaries (rustup, cargo tools)
+#   [5]  $XDG_DATA_HOME/go/bin     — Go-installed binaries
+#   [6]  $XDG_DATA_HOME/pnpm       — pnpm global packages
+#   [7]  $XDG_DATA_HOME/bun/bin    — Bun runtime & packages
+#   [8]  $XDG_DATA_HOME/deno/bin   — Deno runtime
+#   [9]  $HOME/.local/gem/bin      — Ruby gems (user-install)
+#   [10] /snap/bin                 — Snap packages (if snap present)
+
+# The actual set command for initial bootstrap (Fish replaces on first run):
+# set -U fish_user_paths \
+#     $HOME/.local/bin \
+#     $HOME/bin \
+#     $HOME/.local/share/ash/bin \
+#     $HOME/.local/share/cargo/bin \
+#     $HOME/.local/share/go/bin \
+#     $HOME/.local/share/pnpm \
+#     $HOME/.local/share/bun/bin \
+#     $HOME/.local/share/deno/bin
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🎨 FISH BUILT-IN UI VARIABLES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# These are Fish universal variables that control built-in UI behavior.
+# Colors use Fish's named color system or 6-digit hex codes.
+# Reference: https://fishshell.com/docs/current/interactive.html#syntax-highlighting
+
+# ── Syntax highlighting ────────────────────────────────────────────────────────
+# Default palette: Catppuccin Mocha
+# Overridden by: $XDG_CONFIG_HOME/ash/fish/active-theme.fish
+set -U fish_color_normal              cdd6f4
+set -U fish_color_command             89b4fa
+set -U fish_color_keyword             cba6f7
+set -U fish_color_quote               a6e3a1
+set -U fish_color_redirection         f38ba8
+set -U fish_color_end                 fab387
+set -U fish_color_error               f38ba8
+set -U fish_color_param               cdd6f4
+set -U fish_color_comment             6c7086
+set -U fish_color_selection           --background=313244
+set -U fish_color_search_match        f5c2e7
+set -U fish_color_operator            89dceb
+set -U fish_color_escape              eba0ac
+set -U fish_color_cwd                 89b4fa
+set -U fish_color_cwd_root            f38ba8
+set -U fish_color_valid_path          --underline
+set -U fish_color_autosuggestion      6c7086
+set -U fish_color_user                a6e3a1
+set -U fish_color_host                89b4fa
+set -U fish_color_host_remote         eba0ac
+set -U fish_color_status              f38ba8
+set -U fish_color_match               f5c2e7
+set -U fish_color_cancel              f38ba8
+set -U fish_color_history_current     --bold
+
+# ── Pager (completion menu) colors ────────────────────────────────────────────
+set -U fish_pager_color_progress              brblack
+set -U fish_pager_color_background
+set -U fish_pager_color_prefix                cyan bold
+set -U fish_pager_color_completion            white
+set -U fish_pager_color_description           brblack
+set -U fish_pager_color_selected_background   --background=brblack
+set -U fish_pager_color_selected_prefix       cyan bold
+set -U fish_pager_color_selected_completion   white bold
+set -U fish_pager_color_selected_description  yellow
+set -U fish_pager_color_secondary_background
+set -U fish_pager_color_secondary_prefix      brblack
+set -U fish_pager_color_secondary_completion  brblack
+set -U fish_pager_color_secondary_description brblack
+
+# ── Greeting ──────────────────────────────────────────────────────────────────
+# Disabled here; full greeting handled in functions/fish_greeting.fish
+set -U fish_greeting ""
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🏠 ASH UNIVERSAL STATE VARIABLES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# These persist across sessions and are updated by ash-cli commands.
+# Read by: config.fish, functions/fish_greeting.fish, functions/fish_prompt.fish
+# Written by: ash-cli theme/mode/plugin/snapshot commands
+
+# ── ASH core identity ─────────────────────────────────────────────────────────
+set -U ASH_VERSION             "5.0.0-omega"
+set -U ASH_INSTALL_DATE        ""          # Set by installer: YYYY-MM-DD
+set -U ASH_LAST_UPDATE         ""          # Set by `ash update`: ISO 8601
+
+# ── Theme state ───────────────────────────────────────────────────────────────
+set -U ASH_CURRENT_THEME       "catppuccin-mocha"
+set -U ASH_CURRENT_THEME_STYLE "dark"      # dark | light | auto
+set -U ASH_PREVIOUS_THEME      ""          # Set on theme change for quick undo
+set -U ASH_THEME_HISTORY       ""          # JSON array: last 10 themes
+set -U ASH_FAVORITE_THEMES     ""          # Space-separated list
+set -U ASH_THEME_SCHEDULE      "0"         # 0=disabled, 1=enabled
+set -U ASH_THEME_SCHEDULE_DARK "catppuccin-mocha"
+set -U ASH_THEME_SCHEDULE_LIGHT "catppuccin-latte"
+set -U ASH_THEME_SCHEDULE_DARK_HOUR  "19"
+set -U ASH_THEME_SCHEDULE_LIGHT_HOUR "07"
+
+# ── Wallpaper state ───────────────────────────────────────────────────────────
+set -U ASH_CURRENT_WALLPAPER   ""          # Absolute path to active wallpaper
+set -U ASH_WALLPAPER_BLUR      "0"         # 0-20: blur sigma (0=off)
+set -U ASH_WALLPAPER_SLIDESHOW "0"         # 0=disabled, interval in minutes if >0
+set -U ASH_WALLPAPER_DIR       ""          # Active slideshow directory
+
+# ── Mode state ────────────────────────────────────────────────────────────────
+set -U ASH_CURRENT_MODE        "default"   # default|game|work|focus|cinema|etc.
+set -U ASH_PREVIOUS_MODE       ""
+set -U ASH_MODE_GAME_PERF      "high"      # performance profile in game mode
+
+# ── Plugin state ──────────────────────────────────────────────────────────────
+set -U ASH_ENABLED_PLUGINS     ""          # Space-separated enabled plugin IDs
+set -U ASH_PLUGIN_AUTO_UPDATE  "1"         # 1=auto-update plugins weekly
+
+# ── Snapshot state ────────────────────────────────────────────────────────────
+set -U ASH_SNAPSHOT_COUNT      "0"         # Total snapshots created (lifetime)
+set -U ASH_SNAPSHOT_AUTO       "1"         # 1=auto-snapshot before theme changes
+set -U ASH_SNAPSHOT_MAX        "25"        # Max snapshots to keep before pruning
+set -U ASH_LAST_SNAPSHOT       ""          # ISO 8601 timestamp of last snapshot
+
+# ── Doctor state ──────────────────────────────────────────────────────────────
+set -U ASH_LAST_DOCTOR         ""          # ISO 8601 of last doctor run
+set -U ASH_DOCTOR_ISSUES       "0"         # Issue count from last doctor run
+
+# ── Profile state ─────────────────────────────────────────────────────────────
+set -U ASH_CURRENT_PROFILE     "default"
+set -U ASH_PROFILE_AUTO_SWITCH "0"         # 1=auto-switch profile by time/context
+
+# ── Analytics (opt-in) ────────────────────────────────────────────────────────
+set -U ASH_ANALYTICS           "0"         # 0=off, 1=local only, 2=anonymous upload
+set -U ASH_ANALYTICS_SESSION   ""          # Current session UUID
+
+# ── Cloud sync ────────────────────────────────────────────────────────────────
+set -U ASH_CLOUD_SYNC          "0"         # 0=disabled
+set -U ASH_CLOUD_PROVIDER      ""          # github|gitlab|s3|custom
+set -U ASH_CLOUD_LAST_SYNC     ""          # ISO 8601
+
+# ── Update preferences ────────────────────────────────────────────────────────
+set -U ASH_UPDATE_CHECK        "1"         # 1=check for updates on shell start
+set -U ASH_UPDATE_CHANNEL      "stable"    # stable | beta | nightly
+set -U ASH_LAST_UPDATE_CHECK   ""          # ISO 8601
+set -U ASH_PENDING_UPDATE      "0"         # 1 if update available
+
+# ── Notification preferences ──────────────────────────────────────────────────
+set -U ASH_NOTIFICATIONS       "1"         # 1=enable desktop notifications
+set -U ASH_SOUND_EFFECTS       "1"         # 1=enable sound effects
+set -U ASH_SOUND_VOLUME        "50"        # 0-100
+
+# ── UI preferences ────────────────────────────────────────────────────────────
+set -U ASH_GREETING_STYLE      "full"      # full | compact | minimal | none
+set -U ASH_GREETING_SYSINFO    "1"         # 1=show sysinfo in greeting
+set -U ASH_GREETING_QUOTE      "1"         # 1=show random quote in greeting
+set -U ASH_GREETING_CALENDAR   "0"         # 1=show calendar in greeting
+set -U ASH_PROMPT_STYLE        "starship"  # starship | ash-native | minimal
+set -U ASH_PROMPT_SHOW_SHLVL   "1"         # 1=show nested shell indicator
+
+# ── Privacy mode ──────────────────────────────────────────────────────────────
+set -U ASH_PRIVACY_MODE        "0"         # 1=no history, no analytics
+set -U ASH_PRIVACY_MODE_PROMPT "1"         # 1=show indicator in prompt when active
+
+# ── Performance tuning ────────────────────────────────────────────────────────
+set -U ASH_LAZY_LOAD           "1"         # 1=defer heavy tool initialization
+set -U ASH_STARTUP_PROFILE     "0"         # 1=print startup time on each shell
+set -U ASH_FAST_MODE           "0"         # 1=skip non-essential startup tasks
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🛠️  TOOL UNIVERSAL VARIABLES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Tool-specific persistent preferences that benefit from universality
+# (survive across sessions without needing config.fish to re-set them)
+
+# ── fzf ───────────────────────────────────────────────────────────────────────
+# Note: FZF_DEFAULT_OPTS is set in config.fish as a global (-g) not universal
+# to allow theme-engine overrides per-session. Only truly persistent prefs here.
+set -U ASH_FZF_PREVIEW_ENABLED "1"         # 1=show file preview in fzf
+set -U ASH_FZF_LAYOUT          "reverse"   # reverse | default | reverse-list
+
+# ── bat ───────────────────────────────────────────────────────────────────────
+set -U ASH_BAT_THEME           "ash-dynamic"
+
+# ── eza ───────────────────────────────────────────────────────────────────────
+set -U ASH_EZA_SHOW_ICONS      "1"
+set -U ASH_EZA_SHOW_GIT        "1"
+
+# ── Zoxide ────────────────────────────────────────────────────────────────────
+set -U ASH_ZOXIDE_ECHO         "1"         # 1=print resolved path when jumping
+
+# ── Neovim ────────────────────────────────────────────────────────────────────
+set -U ASH_NVIM_THEME_SYNC     "1"         # 1=sync nvim colorscheme with ASH theme
+set -U ASH_NVIM_TRANSPARENT    "0"         # 1=transparent background
+
+# ── Kitty ─────────────────────────────────────────────────────────────────────
+set -U ASH_KITTY_FONT_SIZE     "13.0"
+set -U ASH_KITTY_OPACITY       "0.95"
+
+# ── Tmux ──────────────────────────────────────────────────────────────────────
+set -U ASH_TMUX_AUTO_START     "0"         # 1=auto-start tmux on SSH sessions
+set -U ASH_TMUX_SESSION_NAME   "ash"
+
+# ── Zellij ────────────────────────────────────────────────────────────────────
+set -U ASH_ZELLIJ_AUTO_START   "0"         # 1=auto-start zellij if not already in
+
+# ── Atuin ─────────────────────────────────────────────────────────────────────
+set -U ASH_ATUIN_UP_ARROW      "0"         # 0=disable up-arrow override (use ctrl-r)
+set -U ASH_ATUIN_INLINE        "1"         # 1=inline mode (not fullscreen)
+
+# ── Starship ──────────────────────────────────────────────────────────────────
+set -U ASH_STARSHIP_PRESET     "default"   # Which starship preset to use
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🎨 THEME COLOR PALETTE CACHE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Current theme colors as universal variables for instant access.
+# Updated atomically by ash-cli theme engine on every theme change.
+# Used by: fish_greeting, fish_prompt, fish functions needing theme awareness.
+# All values are 6-digit hex WITHOUT leading '#'.
+
+# ── Base palette (Catppuccin Mocha defaults) ──────────────────────────────────
+set -U ASH_COLOR_BASE          "1e1e2e"    # Main background
+set -U ASH_COLOR_MANTLE        "181825"    # Slightly darker background
+set -U ASH_COLOR_CRUST         "11111b"    # Darkest background
+set -U ASH_COLOR_SURFACE0      "313244"    # Surface 0
+set -U ASH_COLOR_SURFACE1      "45475a"    # Surface 1
+set -U ASH_COLOR_SURFACE2      "585b70"    # Surface 2
+set -U ASH_COLOR_OVERLAY0      "6c7086"    # Overlay 0 (muted text)
+set -U ASH_COLOR_OVERLAY1      "7f849c"    # Overlay 1
+set -U ASH_COLOR_OVERLAY2      "9399b2"    # Overlay 2
+set -U ASH_COLOR_SUBTEXT0      "a6adc8"    # Subtext 0
+set -U ASH_COLOR_SUBTEXT1      "bac2de"    # Subtext 1
+set -U ASH_COLOR_TEXT          "cdd6f4"    # Main text
+set -U ASH_COLOR_LAVENDER      "b4befe"    # Lavender accent
+set -U ASH_COLOR_BLUE          "89b4fa"    # Blue
+set -U ASH_COLOR_SAPPHIRE      "74c7ec"    # Sapphire
+set -U ASH_COLOR_SKY           "89dceb"    # Sky
+set -U ASH_COLOR_TEAL          "94e2d5"    # Teal
+set -U ASH_COLOR_GREEN         "a6e3a1"    # Green
+set -U ASH_COLOR_YELLOW        "f9e2af"    # Yellow
+set -U ASH_COLOR_PEACH         "fab387"    # Peach
+set -U ASH_COLOR_MAROON        "eba0ac"    # Maroon
+set -U ASH_COLOR_RED           "f38ba8"    # Red
+set -U ASH_COLOR_MAUVE         "cba6f7"    # Mauve (primary accent)
+set -U ASH_COLOR_PINK          "f5c2e7"    # Pink
+set -U ASH_COLOR_FLAMINGO      "f2cdcd"    # Flamingo
+set -U ASH_COLOR_ROSEWATER     "f5e0dc"    # Rosewater
+
+# ── Semantic color roles ───────────────────────────────────────────────────────
+# Mapped from palette; used for consistent theming across tools
+set -U ASH_COLOR_PRIMARY       "cba6f7"    # = MAUVE (main brand color)
+set -U ASH_COLOR_SECONDARY     "89b4fa"    # = BLUE
+set -U ASH_COLOR_ACCENT        "f5c2e7"    # = PINK
+set -U ASH_COLOR_SUCCESS       "a6e3a1"    # = GREEN
+set -U ASH_COLOR_WARNING       "f9e2af"    # = YELLOW
+set -U ASH_COLOR_ERROR         "f38ba8"    # = RED
+set -U ASH_COLOR_INFO          "89dceb"    # = SKY
+set -U ASH_COLOR_MUTED         "6c7086"    # = OVERLAY0
+set -U ASH_COLOR_BORDER        "313244"    # = SURFACE0
+set -U ASH_COLOR_SHADOW        "11111b"    # = CRUST
+set -U ASH_COLOR_BG            "1e1e2e"    # = BASE
+set -U ASH_COLOR_FG            "cdd6f4"    # = TEXT
+
+# ── Derived values for shell use ──────────────────────────────────────────────
+set -U ASH_COLOR_STYLE         "dark"      # dark | light (affects icon choices)
+set -U ASH_COLOR_OPACITY       "0.95"      # Compositor/terminal opacity hint
+set -U ASH_COLOR_BLUR          "20"        # Compositor blur radius hint
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 📊 SESSION STATISTICS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Lifetime counters updated by ash-cli hooks.
+# These survive across sessions — intentionally universal.
+
+set -U ASH_STAT_THEME_CHANGES  "0"         # Total theme changes since install
+set -U ASH_STAT_SNAPSHOTS      "0"         # Total snapshots ever created
+set -U ASH_STAT_PLUGINS_EVER   "0"         # Total plugins ever installed
+set -U ASH_STAT_SHELL_STARTS   "0"         # Total fish shell sessions started
+set -U ASH_STAT_COMMANDS_RUN   "0"         # Total ash commands executed
+set -U ASH_STAT_UPTIME_HOURS   "0"         # Cumulative desktop hours tracked
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔌 PLUGIN UNIVERSAL VARIABLES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Plugin-specific universal state. Plugins declare their universal vars
+# in their plugin.json and they are registered here on install.
+
+# ── Pomodoro Plus plugin ──────────────────────────────────────────────────────
+set -U ASH_PLUGIN_POMODORO_WORK_MINS   "25"
+set -U ASH_PLUGIN_POMODORO_BREAK_MINS  "5"
+set -U ASH_PLUGIN_POMODORO_LONG_BREAK  "15"
+set -U ASH_PLUGIN_POMODORO_SESSIONS    "4"   # Sessions before long break
+set -U ASH_PLUGIN_POMODORO_COUNT       "0"   # Completed today
+
+# ── Focus Timer plugin ────────────────────────────────────────────────────────
+set -U ASH_PLUGIN_FOCUS_DEFAULT_MINS   "90"
+set -U ASH_PLUGIN_FOCUS_SOUNDS         "1"
+set -U ASH_PLUGIN_FOCUS_DND            "1"   # Auto-enable DND in focus mode
+
+# ── Night Light plugin ────────────────────────────────────────────────────────
+set -U ASH_PLUGIN_NIGHTLIGHT_TEMP      "4500"  # Color temperature in Kelvin
+set -U ASH_PLUGIN_NIGHTLIGHT_START     "20"    # Hour (24h) to enable
+set -U ASH_PLUGIN_NIGHTLIGHT_END       "07"    # Hour (24h) to disable
+set -U ASH_PLUGIN_NIGHTLIGHT_AUTO      "1"     # 1=auto schedule
+
+# ── Analytics plugin ─────────────────────────────────────────────────────────
+set -U ASH_PLUGIN_ANALYTICS_RETENTION  "30"   # Days to keep local data
+
+# ── Auto Wallpaper plugin ─────────────────────────────────────────────────────
+set -U ASH_PLUGIN_AUTOWP_INTERVAL      "30"   # Minutes between changes
+set -U ASH_PLUGIN_AUTOWP_MATCH_THEME   "1"    # Match wallpaper mood to theme
+
+# ── Discord RPC plugin ────────────────────────────────────────────────────────
+set -U ASH_PLUGIN_DISCORD_SHOW_THEME   "1"    # Show current theme in status
+set -U ASH_PLUGIN_DISCORD_SHOW_MODE    "1"    # Show current mode in status
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🌐 API & EXTERNAL SERVICE KEYS (references only — values in keyring)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ⚠️  NEVER store actual keys here — use:
+#   secret-tool store --label="ASH API Key" service ash key <name>
+# These variables hold KEY NAMES/IDs for lookup — not values.
+
+set -U ASH_WEATHER_PROVIDER    "openweathermap"  # openweathermap|wttr.in
+set -U ASH_WEATHER_CITY        ""                # City for weather widgets
+set -U ASH_WEATHER_UNITS       "metric"          # metric | imperial
+set -U ASH_WEATHER_CACHE_MINS  "30"              # Cache duration
+
+set -U ASH_WALLHAVEN_USERNAME  ""                # Wallhaven.cc username
+set -U ASH_UNSPLASH_TOPIC      "minimal,dark"    # Default Unsplash search
+
+set -U ASH_GITHUB_USER         ""                # GitHub username for notifications
+set -U ASH_GITLAB_HOST         "gitlab.com"      # GitLab instance
+
+set -U ASH_OPENAI_BASE_URL     "http://localhost:11434/v1"  # Ollama local by default
+set -U ASH_AI_MODEL            "llama3.2"        # Default Ollama model
+set -U ASH_AI_ENABLED          "0"               # 1=enable AI features
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🏷️  METADATA
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# File metadata for tracking purposes
+
+set -U __ash_fish_variables_version  "5.0.0"
+set -U __ash_fish_variables_schema   "2"
+set -U __ash_fish_variables_updated  ""  # Set by ash-cli on migration
