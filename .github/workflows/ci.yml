@@ -131,7 +131,7 @@ env:
   ASH_ENV:                "ci"
 
   # ── Tooling versions ────────────────────────────────────────────────────────
-  NODE_VERSION:            "20.x"
+  NODE_VERSION:            "22.x"
   PYTHON_VERSION:          "3.12"
   GO_VERSION:              "1.22"
   RUST_VERSION:            "stable"
@@ -1905,6 +1905,7 @@ jobs:
 
       - name: "📥 Baseline screenshots"
         uses: dawidd6/action-download-artifact@v6
+        continue-on-error: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: ci.yml
