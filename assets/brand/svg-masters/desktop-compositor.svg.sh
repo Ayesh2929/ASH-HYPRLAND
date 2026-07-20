@@ -945,7 +945,9 @@ render_desktop_svg() {
         for i in "${!dock_apps[@]}"; do
           local y=$(( i * 32 + 12 ))
           local is_active=0
-          [[ $i -eq 0 || $i -eq 1 ]] && is_active=1
+          if [[ $i -eq 0 || $i -eq 1 ]]; then
+            is_active=1
+          fi
 
           if [[ $is_active -eq 1 ]]; then
             echo "<rect x='0' y='$(( y - 10 ))' width='180' height='26' rx='6' fill='${accent}' opacity='0.18'/>"
