@@ -705,7 +705,7 @@ if command -sq ffmpeg
     alias ffscreenshot "ffmpeg -i $argv[1] -vframes 1 -q:v 2"
     alias ffwallpaper "ffmpeg -i $argv[1] -q:v 1 -vframes 1 \
                          $ASH_WALLPAPERS_DIR/(basename $argv[1] | \
-                         string replace -r '\.[^.]+$' '.jpg')"
+                         string replace -r '\.[^.]+\$' '.jpg')"
 end
 
 

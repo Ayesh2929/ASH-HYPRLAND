@@ -990,25 +990,25 @@ MIT — see [LICENSE](LICENSE)
         printf "  $BOLD$CYAN💡 Next steps:$R\n"
         switch $_template
             case python py
-                printf "    $DIM$ source .venv/bin/activate.fish$R\n"
-                printf "    $DIM$ pip install -e '.[dev]'$R\n"
+                printf "    $DIM\$ source .venv/bin/activate.fish$R\n"
+                printf "    $DIM\$ pip install -e '.[dev]'$R\n"
             case node nodejs
-                printf "    $DIM$ pnpm install$R\n"
-                printf "    $DIM$ pnpm dev$R\n"
+                printf "    $DIM\$ pnpm install$R\n"
+                printf "    $DIM\$ pnpm dev$R\n"
             case rust rs
-                printf "    $DIM$ cargo build$R\n"
-                printf "    $DIM$ cargo run$R\n"
+                printf "    $DIM\$ cargo build$R\n"
+                printf "    $DIM\$ cargo run$R\n"
             case go golang
-                printf "    $DIM$ go mod tidy$R\n"
-                printf "    $DIM$ make run$R\n"
+                printf "    $DIM\$ go mod tidy$R\n"
+                printf "    $DIM\$ make run$R\n"
             case web static
-                printf "    $DIM$ python3 -m http.server 3000$R\n"
+                printf "    $DIM\$ python3 -m http.server 3000$R\n"
             case api
-                printf "    $DIM$ cp .env.example .env$R\n"
-                printf "    $DIM$ docker compose up$R\n"
+                printf "    $DIM\$ cp .env.example .env$R\n"
+                printf "    $DIM\$ docker compose up$R\n"
             case data ml
-                printf "    $DIM$ source .venv/bin/activate.fish$R\n"
-                printf "    $DIM$ jupyter lab$R\n"
+                printf "    $DIM\$ source .venv/bin/activate.fish$R\n"
+                printf "    $DIM\$ jupyter lab$R\n"
         end
     else
         printf "  $DIM  You are now in: %s$R\n" (string replace $HOME '~' (pwd))

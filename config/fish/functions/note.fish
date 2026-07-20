@@ -264,7 +264,7 @@ function note --description "Terminal note-taking system with markdown & tagging
                 __note_frontmatter "Quick Note" "" > $file
             end
 
-            $\_editor $file
+            $_editor $file
             test -s $file && printf "\n  $GREEN✓$R  Saved: $DIM%s$R\n\n" (basename $file) \
                 || rm -f $file
 

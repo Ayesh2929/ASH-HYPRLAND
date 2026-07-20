@@ -366,7 +366,7 @@ function tf-workspace-smart --description "Smart Terraform workspace management"
             and echo $_tf_yellow"  ✓ Deleted workspace: $ws"$_tf_reset
 
         case '*'
-            echo "  Usage: tf-workspace-smart <list|switch|new|delete> [name]"
+            echo '  Usage: tf-workspace-smart <list|switch|new|delete> [name]'
     end
 end
 

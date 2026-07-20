@@ -461,37 +461,31 @@ shell = "bun"' > bunfig.toml
             echo $_bn_cyan"  Installing hono..."$_bn_reset
             bun add hono 2>/dev/null
 
-            cat > src/index.ts << 'TS'
-import { Hono } from 'hono'
-import { logger } from 'hono/logger'
-import { cors } from 'hono/cors'
+            echo 'import { Hono } from \'hono\'
+import { logger } from \'hono/logger\'
+import { cors } from \'hono/cors\'
 
 const app = new Hono()
 
-app.use('*', logger())
-app.use('*', cors())
+app.use(\'*\', logger())
+app.use(\'*\', cors())
 
-app.get('/', (c) => c.json({ message: 'Hello from Bun + Hono!' }))
-app.get('/health', (c) => c.json({ status: 'ok', ts: Date.now() }))
+app.get(\'/\', (c) => c.json({ message: \'Hello from Bun + Hono!\' }))
+app.get(\'/health\', (c) => c.json({ status: \'ok\', ts: Date.now() }))
 
 export default {
     port: process.env.PORT ?? 3000,
     fetch: app.fetch,
-}
-TS
+}' > src/index.ts
             echo $_bn_green"  ✓ Hono API template created"$_bn_reset
 
         case lib library
             # Library setup
             mkdir -p src tests
-            cat > src/index.ts << 'TS'
-export * from './lib'
-TS
-            cat > src/lib.ts << 'TS'
-export function hello(name: string): string {
-    return `Hello, ${name}!`
-}
-TS
+            echo 'export * from \'./lib\'' > src/index.ts
+            echo 'export function hello(name: string): string {
+    return `Hello, ${name}!`;
+}' > src/lib.ts
 
         case '*' app
             # Default app

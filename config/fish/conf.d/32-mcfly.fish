@@ -231,7 +231,7 @@ function mcfly-fails --description "Show commands with highest failure rates"
     echo $_mf_bold$_mf_red"  ✗ High-Failure Commands"$_mf_reset
     echo ""
 
-    sqlite3 -separator $'\t' $MCFLY_HISTFILE \
+    sqlite3 -separator "\t" $MCFLY_HISTFILE \
         "SELECT
             cmd,
             COUNT(*) as total,
