@@ -247,11 +247,11 @@ _daemon_listen() {
     # Listen for IPC events
     socat - "UNIX-CONNECT:${SOCKET}" 2>/dev/null | while read -r line; do
         case "$line" in
-            monitoradded>>*)
+            "monitoradded>>"*)
                 local mon="${line#monitoradded>>}"
                 _on_monitor_added "$mon"
                 ;;
-            monitorremoved>>*)
+            "monitorremoved>>"*)
                 local mon="${line#monitorremoved>>}"
                 _on_monitor_removed "$mon"
                 ;;

@@ -114,15 +114,15 @@ render_test() {
 
     local icon color label
     case "$status" in
-        pass)  icon="✓" color="${GREEN}${B}"   label="PASS"  ((TESTS_PASSED++))  || true ;;
-        fail)  icon="✗" color="${RED}${B}"     label="FAIL"  ((TESTS_FAILED++))  || true
+        pass)  icon="✓" color="${GREEN}${B}"   label="PASS"  TESTS_PASSED=$((TESTS_PASSED + 1)) ;;
+        fail)  icon="✗" color="${RED}${B}"     label="FAIL"  TESTS_FAILED=$((TESTS_FAILED + 1))
                FAILED_TESTS+=("${name}: ${detail}") ;;
-        skip)  icon="↷" color="${SLATE}${D}"   label="SKIP"  ((TESTS_SKIPPED++)) || true ;;
-        error) icon="!" color="${CRIMSON}${B}" label="ERROR" ((TESTS_ERRORED++)) || true
+        skip)  icon="↷" color="${SLATE}${D}"   label="SKIP"  TESTS_SKIPPED=$((TESTS_SKIPPED + 1)) ;;
+        error) icon="!" color="${CRIMSON}${B}" label="ERROR" TESTS_ERRORED=$((TESTS_ERRORED + 1))
                FAILED_TESTS+=("${name}: ERROR: ${detail}") ;;
     esac
 
-    ((TESTS_RUN++)) || true
+    TESTS_RUN=$((TESTS_RUN + 1))
 
     printf "    %s%s%s %-50s %s%-6s%s %s%s%s\n" \
         "${color}" "$icon " "$R" \

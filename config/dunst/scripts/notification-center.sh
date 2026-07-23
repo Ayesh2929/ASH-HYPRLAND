@@ -1106,4 +1106,36 @@ cmd_search_rofi() {
 
     local entries=()
     entries+=("<span foreground='#cba6f7'>🔍 Results for: \"${query}\" (${count})</span>")
-    entries+=("──────────────────────────────────────────────
+    entries+=("──────────────────────────────────────────────")
+
+    # Format the results into entries for Rofi
+    while IFS= read -r entry; do
+        local ts app summary body urgency category is_pinned is_read
+        ts="$(printf '%s' "${entry}" | jq -r '.unix_time // 0')"
+        app="$(printf '%s' "${entry}" | jq -r '.app // "unknown"')"
+        summary="$(printf '%s' "${entry}" | jq -r '.summary // ""')"
+        body="$(printf '%s' "${entry}" | jq -r '.body // ""')"
+        urgency="$(printf '%s' "${entry}" | jq -r '.urgency // "normal"')"
+        category="$(printf '%s' "${entry}" | jq -r '.category // "other"')"
+        is_pinned="$(printf '%s' "${entry}" | jq -r '.is_pinned // "false"')"
+        is_read="$(printf '%s' "${entry}" | jq -r '.is_read // "false"')"
+
+        entries+=("$(_format_rofi_entry \
+            "${app}" "${summary}" "${body}" \
+            "${urgency}" "${ts}" "${category}" \
+            "${is_pinned}" "${is_read}")")
+    done < <(printf '%s' "${results}" | jq -c '.[]' 2>/dev/null)
+
+    entries+=("──────────────────────────────────────────────")
+    entries+=("↩️ Back")
+
+    local choice
+    choice="$(printf '%s\n' "${entries[@]}" | \
+        _rofi_run "🔍 Search Results" "Query: ${query}")"
+
+    if [[ -z "${choice}" ]] || [[ "${choice}" == *"Back"* ]] || [[ "${choice}" == "── "* ]]; then
+        return 0
+    fi
+
+    _show_notification_actions "${choice}"
+}

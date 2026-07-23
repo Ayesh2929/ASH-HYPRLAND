@@ -3,24 +3,25 @@
 
 render_desktop_svg() {
   local theme=$1
-  local bg="${THEME_COLORS[${theme}.bg]:-#1e1e2e}"
-  local bg_dim="${THEME_COLORS[${theme}.bg_dim]:-#181825}"
-  local bg1="${THEME_COLORS[${theme}.bg1]:-#313244}"
-  local bg2="${THEME_COLORS[${theme}.bg2]:-#45475a}"
-  local fg="${THEME_COLORS[${theme}.fg]:-#cdd6f4}"
-  local fg_dim="${THEME_COLORS[${theme}.fg_dim]:-#a6adc8}"
-  local red="${THEME_COLORS[${theme}.red]:-#f38ba8}"
-  local orange="${THEME_COLORS[${theme}.orange]:-#fab387}"
-  local yellow="${THEME_COLORS[${theme}.yellow]:-#f9e2af}"
-  local green="${THEME_COLORS[${theme}.green]:-#a6e3a1}"
-  local aqua="${THEME_COLORS[${theme}.aqua]:-#94e2d5}"
-  local blue="${THEME_COLORS[${theme}.blue]:-#89b4fa}"
-  local purple="${THEME_COLORS[${theme}.purple]:-#cba6f7}"
-  local accent="${THEME_COLORS[${theme}.accent]:-#89b4fa}"
-  local shadow="${THEME_COLORS[${theme}.shadow]:-rgba(0,0,0,0.45)}"
-  local glass="${THEME_COLORS[${theme}.glass]:-rgba(30,30,46,0.72)}"
-  local border="${THEME_COLORS[${theme}.border]:-rgba(137,180,250,0.30)}"
-  local glow="${THEME_COLORS[${theme}.glow]:-rgba(137,180,250,0.15)}"
+  local k
+  k="${theme}.bg";        local bg="${THEME_COLORS[$k]-}";        bg="${bg:-#1e1e2e}"
+  k="${theme}.bg_dim";    local bg_dim="${THEME_COLORS[$k]-}";    bg_dim="${bg_dim:-#181825}"
+  k="${theme}.bg1";       local bg1="${THEME_COLORS[$k]-}";       bg1="${bg1:-#313244}"
+  k="${theme}.bg2";       local bg2="${THEME_COLORS[$k]-}";       bg2="${bg2:-#45475a}"
+  k="${theme}.fg";        local fg="${THEME_COLORS[$k]-}";        fg="${fg:-#cdd6f4}"
+  k="${theme}.fg_dim";    local fg_dim="${THEME_COLORS[$k]-}";    fg_dim="${fg_dim:-#a6adc8}"
+  k="${theme}.red";       local red="${THEME_COLORS[$k]-}";       red="${red:-#f38ba8}"
+  k="${theme}.orange";    local orange="${THEME_COLORS[$k]-}";    orange="${orange:-#fab387}"
+  k="${theme}.yellow";    local yellow="${THEME_COLORS[$k]-}";    yellow="${yellow:-#f9e2af}"
+  k="${theme}.green";     local green="${THEME_COLORS[$k]-}";     green="${green:-#a6e3a1}"
+  k="${theme}.aqua";      local aqua="${THEME_COLORS[$k]-}";      aqua="${aqua:-#94e2d5}"
+  k="${theme}.blue";      local blue="${THEME_COLORS[$k]-}";      blue="${blue:-#89b4fa}"
+  k="${theme}.purple";    local purple="${THEME_COLORS[$k]-}";    purple="${purple:-#cba6f7}"
+  k="${theme}.accent";    local accent="${THEME_COLORS[$k]-}";    accent="${accent:-#89b4fa}"
+  k="${theme}.shadow";    local shadow="${THEME_COLORS[$k]-}";    shadow="${shadow:-rgba(0,0,0,0.45)}"
+  k="${theme}.glass";     local glass="${THEME_COLORS[$k]-}";     glass="${glass:-rgba(30,30,46,0.72)}"
+  k="${theme}.border";    local border="${THEME_COLORS[$k]-}";    border="${border:-rgba(137,180,250,0.30)}"
+  k="${theme}.glow";      local glow="${THEME_COLORS[$k]-}";      glow="${glow:-rgba(137,180,250,0.15)}"
 
   cat <<SVG
 <?xml version="1.0" encoding="UTF-8"?>
@@ -944,7 +945,9 @@ render_desktop_svg() {
         for i in "${!dock_apps[@]}"; do
           local y=$(( i * 32 + 12 ))
           local is_active=0
-          [[ $i -eq 0 || $i -eq 1 ]] && is_active=1
+          if [[ $i -eq 0 || $i -eq 1 ]]; then
+            is_active=1
+          fi
 
           if [[ $is_active -eq 1 ]]; then
             echo "<rect x='0' y='$(( y - 10 ))' width='180' height='26' rx='6' fill='${accent}' opacity='0.18'/>"
@@ -984,4 +987,6 @@ render_desktop_svg() {
 SVG
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  render_desktop_svg "$@"
+fi

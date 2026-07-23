@@ -747,7 +747,7 @@ run_hook() {
     timeout 30 bash "${hook_file}" \
         --plugin-id="${plugin_id}" \
         --hook="${hook_name}" \
-        &>>"${PLUGIN_LOG}" || exit_code=$?
+        >>"${PLUGIN_LOG}" 2>&1 || exit_code=$?
 
     if (( exit_code != 0 )); then
         log_warn "Hook ${hook_name} exited with code ${exit_code} for ${plugin_id}"

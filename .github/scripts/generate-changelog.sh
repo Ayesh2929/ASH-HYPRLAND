@@ -306,11 +306,11 @@ parse_commits() {
 
     # ── Add to section ──────────────────────────────────────────────────────
     local section_key="${type}"
-    if [[ ! -v TYPE_TITLES["${section_key}"] ]]; then
+    if [[ -z "${TYPE_TITLES["${section_key}"]:-}" ]]; then
       section_key="chore"
     fi
 
-    if [[ -v SECTIONS["${section_key}"] ]]; then
+    if [[ -n "${SECTIONS["${section_key}"]:-}" ]]; then
       SECTIONS["${section_key}"]="${SECTIONS["${section_key}"]}"$'\n'"${entry_line}"
     else
       SECTIONS["${section_key}"]="${entry_line}"
@@ -327,7 +327,7 @@ parse_commits() {
     fi
 
     # ── Track contributors ──────────────────────────────────────────────────
-    if [[ ! -v AUTHOR_MAP["${email}"] ]]; then
+    if [[ -z "${AUTHOR_MAP["${email}"]:-}" ]]; then
       AUTHOR_MAP["${email}"]="${author}"
       ALL_AUTHORS+=("${author}")
     fi
@@ -471,7 +471,7 @@ breaking= int("${BREAKING_COUNT}")
 authors = ${#ALL_AUTHORS[@]}
 
 sections = {}
-EOF
+PYTHON_EOF
 
   # This is simplified; full JSON would use Python for proper escaping
   python3 -c "

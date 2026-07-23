@@ -58,6 +58,15 @@ declare -A THEME_COLORS=(
   ["dark-kanagawa.glow"]="rgba(126,156,216,0.15)"
 )
 
+# Source the SVG compositor engine
+source "${SVG_DIR}/desktop-compositor.svg.sh"
+
+# Handle GHA pipeline single-SVG generation command
+if [[ "${1:-}" == "generate_desktop_svg" ]]; then
+  render_desktop_svg "${2:-}"
+  exit 0
+fi
+
 # ── Resolution Targets ─────────────────────────────────────────────────────────
 declare -A RESOLUTIONS=(
   ["1080p"]="1920x1080"

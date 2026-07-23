@@ -116,34 +116,34 @@ _daemon_listen() {
 
     socat - "UNIX-CONNECT:${SOCKET}" 2>/dev/null | while read -r line; do
         case "$line" in
-            openwindow>>*)
+            "openwindow>>"*)
                 local payload="${line#openwindow>>}"
                 IFS=',' read -r addr ws class title <<< "$payload"
                 _on_window_open "$addr" "$ws" "$class" "$title"
                 ;;
-            closewindow>>*)
+            "closewindow>>"*)
                 local addr="${line#closewindow>>}"
                 _on_window_close "$addr"
                 ;;
-            movewindow>>*)
+            "movewindow>>"*)
                 local payload="${line#movewindow>>}"
                 IFS=',' read -r addr ws <<< "$payload"
                 _on_window_move "$addr" "$ws"
                 ;;
-            windowtitle>>*)
+            "windowtitle>>"*)
                 local addr="${line#windowtitle>>}"
                 _on_window_title "$addr"
                 ;;
-            changefloatingmode>>*)
+            "changefloatingmode>>"*)
                 local payload="${line#changefloatingmode>>}"
                 IFS=',' read -r addr floating <<< "$payload"
                 _on_window_float "$addr" "$floating"
                 ;;
-            fullscreen>>*)
+            "fullscreen>>"*)
                 local state="${line#fullscreen>>}"
                 _on_fullscreen "$state"
                 ;;
-            urgent>>*)
+            "urgent>>"*)
                 local addr="${line#urgent>>}"
                 _on_urgent "$addr"
                 ;;
