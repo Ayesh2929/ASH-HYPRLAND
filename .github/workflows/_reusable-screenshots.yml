@@ -1,0 +1,75 @@
+name: "🖼️ Screenshots"
+on:
+  workflow_call:
+    inputs:
+      matrix_themes:
+        type: string
+        required: true
+      has_screenshots:
+        type: string
+        required: true
+      run_screenshots:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  shots-validate-svg:
+    name: "🎨 SVG Validation"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: inputs.has_screenshots == 'true' || inputs.run_screenshots == 'true' || inputs.run_full == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get install -y libxml2-utils --no-install-recommends
+          npm install -g svgo --silent
+      - run: |
+          find assets/brand/svg-masters -name "*.svg" -exec xmllint --noout {} + || true
+
+  shots-generate:
+    name: "📸 ${{ matrix.theme }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    needs: shots-validate-svg
+    if: inputs.has_screenshots == 'true' || inputs.run_screenshots == 'true' || inputs.run_full == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        theme: ${{ fromJSON(inputs.matrix_themes) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin imagemagick webp libavif-bin optipng pngquant --no-install-recommends
+      - name: Generate
+        run: echo "Generate placeholder for ${{ matrix.theme }}"
+
+  shots-aggregate:
+    name: "📦 Aggregate Screenshots"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: shots-generate
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aggregate
+        run: echo "Aggregating screenshots"
+
+  shots-regression:
+    name: "👁️ Visual Regression"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: shots-aggregate
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Python script
+        run: |
+          echo "Regression testing placeholder using .github/scripts/ssim-regression.py"

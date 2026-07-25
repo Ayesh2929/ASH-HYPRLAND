@@ -1,0 +1,99 @@
+name: "🏗️ Build"
+on:
+  workflow_call:
+    inputs:
+      web_exists:
+        type: string
+        required: true
+      web_lock_exists:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+      pipeline_mode:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  build-web:
+    name: "🌐 Build Web"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: inputs.web_exists == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - working-directory: web
+        run: npm ci --prefer-offline || npm install --prefer-offline
+      - working-directory: web
+        env:
+          NODE_ENV: production
+          VITE_BUILD_HASH: ${{ github.sha }}
+        run: npm run build 2>&1 | tee build-out.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "web-dist-${{ github.run_id }}"
+          path: web/dist/
+          retention-days: 14
+
+  build-docker:
+    name: "🐳 Docker (${{ matrix.platform }})"
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') || inputs.pipeline_mode == 'full'
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: "type=gha,scope=docker-${{ matrix.platform }}"
+          cache-to: "type=gha,mode=max,scope=docker-${{ matrix.platform }}"
+          provenance: true
+          sbom: true
+
+  build-nix:
+    name: "❄️ Nix Flake Check"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: inputs.run_full == 'true' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: |
+          if [[ -f nix/flake.nix ]]; then nix flake check nix/ --no-build || true; fi

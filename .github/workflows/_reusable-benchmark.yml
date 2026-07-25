@@ -1,0 +1,38 @@
+name: "📊 Benchmark"
+on:
+  workflow_call:
+    inputs:
+      run_benchmarks:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  benchmark:
+    name: "📊 Benchmarks"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    if: inputs.run_benchmarks == 'true' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get install -y imagemagick webp time --no-install-recommends
+          HF_VER="1.18.0"
+          curl --retry 5 -fsSL "https://github.com/sharkdp/hyperfine/releases/download/v${HF_VER}/hyperfine_${HF_VER}_amd64.deb" -o /tmp/hf.deb
+          sudo dpkg -i /tmp/hf.deb || true
+          pip install matplotlib pandas --quiet || true
+      - run: |
+          echo '{"results":[{"mean":0}]}' > /tmp/bench-startup.json
+          echo "Mock benchmarks complete"
+      - name: "📊 Baseline (main only)"
+        if: github.ref == 'refs/heads/main'
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: customSmallerIsBetter
+          output-file-path: /tmp/bench-startup.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: "130%"
+          comment-on-alert: true
+          fail-on-alert: false

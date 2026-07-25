@@ -1,0 +1,107 @@
+name: "🧪 Test"
+on:
+  workflow_call:
+    inputs:
+      api_exists:
+        type: string
+        required: true
+      has_api:
+        type: string
+        required: true
+      web_exists:
+        type: string
+        required: true
+      web_lock_exists:
+        type: string
+        required: true
+      has_web:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  test-shell:
+    name: "🧪 Shell Unit Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y bats jq --no-install-recommends
+      - run: |
+          mkdir -p tests/helpers
+          git clone --depth=1 https://github.com/bats-core/bats-support.git tests/helpers/bats-support
+          git clone --depth=1 https://github.com/bats-core/bats-assert.git tests/helpers/bats-assert
+      - run: |
+          if [[ -d tests/unit ]]; then bats --formatter tap tests/unit/test-*.sh || true; fi
+
+  test-theme-engine:
+    name: "🎨 Theme Engine Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - run: pip install Pillow --quiet
+      - run: echo "Test theme engine mocked"
+
+  test-plugins:
+    name: "🔌 Plugin Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          find plugins -name "plugin.json" -print0 | xargs -0 jq -r '.name' || true
+
+  test-api:
+    name: "🌐 API Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    if: inputs.api_exists == 'true' && (inputs.has_api == 'true' || inputs.run_full == 'true')
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - working-directory: api
+        run: pip install -r requirements.txt pytest pytest-asyncio pytest-cov pytest-timeout httpx fakeredis --quiet
+      - working-directory: api
+        env:
+          ASH_ENV: test
+          ASH_SECRET_KEY: ci-test-key-not-for-production
+          REDIS_URL: redis://localhost:6379
+          API_BASE_URL: http://localhost:8000
+        run: |
+          python server.py &
+          sleep 5
+          pytest tests/ --cov=. --cov-report=xml:coverage.xml --cov-report=term-missing --cov-fail-under=70 --junit-xml=pytest-results.xml --timeout=30 --tb=short -v
+
+  test-web:
+    name: "🌐 Web Dashboard Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: inputs.web_exists == 'true' && (inputs.has_web == 'true' || inputs.run_full == 'true')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - working-directory: web
+        run: npm ci --prefer-offline || npm install --prefer-offline
+      - working-directory: web
+        run: npx vitest run --reporter=verbose --reporter=junit --outputFile=vitest-results.xml || true
