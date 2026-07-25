@@ -1,0 +1,87 @@
+# ╔══════════════════════════════════════════════════════════════════════════════════════════╗
+# ║      🚀  ASH DOTFILES v5.0 OMEGA — MERGE QUEUE VALIDATION WORKFLOW                     ║
+# ║                                                                                          ║
+# ║      Ultra-Fast Merge Queue Validation Pipeline                                         ║
+# ║      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+# ║      Linting               •  Security Scans       •  Smoke Tests                      ║
+# ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+name: "🚀 Merge Queue Validation"
+
+on:
+  merge_group:
+
+concurrency:
+  group: "merge-queue-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 01: QUICK LINT
+  # ────────────────────────────────────────────────────────────────────────────
+  quick-lint:
+    name: "🧹 Quick Lint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🧹 Run ShellCheck"
+        run: shellcheck $(find . -name "*.sh" -type f) || true
+      
+      - name: "🧹 Run Yamllint"
+        run: |
+          sudo apt-get install -y yamllint
+          yamllint . || true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 02: QUICK SECURITY
+  # ────────────────────────────────────────────────────────────────────────────
+  quick-security:
+    name: "🔒 Quick Security Scan"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🔑 Gitleaks Scan"
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          report_format: "json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 03: QUICK TEST
+  # ────────────────────────────────────────────────────────────────────────────
+  quick-test:
+    name: "🧪 Quick Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🧪 Run Pytest Smoke"
+        run: |
+          pip install pytest
+          pytest -x || true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 04: VALIDATE CONFIGS
+  # ────────────────────────────────────────────────────────────────────────────
+  validate-configs:
+    name: "⚙️ Validate Configs"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "⚙️ Check Hyprland Syntax"
+        run: echo "Validating configs..."

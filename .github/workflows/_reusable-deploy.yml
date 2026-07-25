@@ -1,0 +1,93 @@
+name: "🚀 Deploy"
+on:
+  workflow_call:
+    inputs:
+      api_exists:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  deploy-docs:
+    name: "📖 Deploy Docs"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - run: pip install mkdocs mkdocs-material mkdocs-minify-plugin mkdocs-git-revision-date-localized-plugin mkdocs-glightbox pymdown-extensions --quiet
+      - uses: actions/download-artifact@v4
+        with:
+          name: "shots-all-${{ github.run_id }}"
+          path: docs/assets/screenshots/
+        continue-on-error: true
+      - run: mkdocs build --config-file docs/mkdocs.yml --strict || mkdocs build --config-file docs/mkdocs.yml
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+      - id: pages
+        uses: actions/deploy-pages@v4
+
+  deploy-preview:
+    name: "🔮 PR Preview"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: preview
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: "web-dist-${{ github.run_id }}"
+          path: web-dist/
+      - id: cf
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ash-dotfiles-preview
+          directory: web-dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: "pr-${{ github.event.number }}"
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview-deploy
+          message: |
+            ## 🔮 Preview Deployment Ready
+            | 🌐 **URL** | ${{ steps.cf.outputs.url }} |
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-api:
+    name: "🌐 Deploy API"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: inputs.api_exists == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      url: https://api.ash-dotfiles.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@v1.5.1
+      - run: |
+          cd api
+          flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

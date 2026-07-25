@@ -1,0 +1,40 @@
+name: "⚙️ Unified Setup"
+on:
+  workflow_call:
+    inputs:
+      cache_key:
+        type: string
+        required: false
+        default: "default-cache"
+
+jobs:
+  setup:
+    name: "⚙️ Unified Setup Cache"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            package.json
+            requirements.txt
+
+      - name: "Cache Layer 1: GitHub Actions (pip/npm)"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/pip
+          key: ${{ runner.os }}-pkg-${{ inputs.cache_key }}-${{ hashFiles('**/package-lock.json', '**/requirements.txt') }}
+
+      - name: "Cache Layer 3: Nix Binary Cache"
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: "Cache Layer 4: Tool Binaries"
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin
+          key: ${{ runner.os }}-tools-${{ hashFiles('.github/workflows/*.yml') }}
+
+      - name: "Cache Analytics"
+        run: echo "Cache setup complete. Layer 2 (Docker) handled in build-docker."

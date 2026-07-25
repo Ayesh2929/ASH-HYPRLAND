@@ -1,0 +1,228 @@
+name: "🚀 ASH Dotfiles — Ultra CI/CD v5.0"
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+      - "feature/**"
+    paths-ignore:
+      - "**.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "docs/changelog/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".editorconfig"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  pull_request_target:
+    branches: [main]
+    types: [labeled]
+
+  merge_group:
+    types: [checks_requested]
+
+  workflow_dispatch:
+    inputs:
+      pipeline_mode:
+        description: "🎛️ Pipeline Mode"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - full
+          - screenshots-only
+          - security-only
+          - benchmark-only
+          - deploy-only
+          - lint-only
+          - dry-run
+      target_themes:
+        description: "🎨 Themes (comma-separated or 'all')"
+        required: false
+        default: "dark-rosepine,light-catppuccin"
+        type: string
+      enable_benchmarks:
+        description: "📊 Run benchmarks"
+        required: false
+        default: false
+        type: boolean
+      deploy_preview:
+        description: "🌐 Deploy preview"
+        required: false
+        default: false
+        type: boolean
+      debug_mode:
+        description: "🐛 Debug output"
+        required: false
+        default: false
+        type: boolean
+      notify_discord:
+        description: "💬 Send Discord notification"
+        required: false
+        default: true
+        type: boolean
+
+  schedule:
+    - cron: "0 2 * * *"
+    - cron: "0 4 * * 1"
+    - cron: "0 6 1 * *"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  ASH_VERSION: "5.0.0-omega"
+  ASH_PIPELINE_VERSION: "3.0.0"
+  ASH_ENV: "ci"
+  NODE_VERSION: "22.x"
+  PYTHON_VERSION: "3.12"
+  GO_VERSION: "1.22"
+  RUST_VERSION: "stable"
+  RESVG_VERSION: "0.42.0"
+  WEBP_QUALITY: "92"
+  WEBP_METHOD: "6"
+  AVIF_MIN: "20"
+  AVIF_MAX: "35"
+  THUMB_W: "640"
+  THUMB_H: "360"
+  SHOT_W: "2560"
+  SHOT_H: "1440"
+  MAX_STARTUP_MS: "500"
+  MAX_WEBP_KB: "250"
+  MAX_THUMB_KB: "45"
+  MAX_BUNDLE_KB: "512"
+  SHOTS_DIR: "assets/screenshots/desktop"
+  SVG_DIR: "assets/brand/svg-masters"
+  THEMES_DIR: "themes/presets"
+
+permissions:
+  contents: read
+  actions: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  intelligence:
+    uses: ./.github/workflows/_reusable-intelligence.yml
+
+  security:
+    needs: intelligence
+    uses: ./.github/workflows/_reusable-security.yml
+    with:
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+      matrix_languages: ${{ needs.intelligence.outputs.matrix_languages }}
+    secrets: inherit
+
+  lint:
+    needs: intelligence
+    uses: ./.github/workflows/_reusable-lint.yml
+    with:
+      has_scripts: ${{ needs.intelligence.outputs.has_scripts }}
+      has_nvim: ${{ needs.intelligence.outputs.has_nvim }}
+      has_fish: ${{ needs.intelligence.outputs.has_fish }}
+      has_hypr: ${{ needs.intelligence.outputs.has_hypr }}
+      has_web: ${{ needs.intelligence.outputs.has_web }}
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
+      has_api: ${{ needs.intelligence.outputs.has_api }}
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  screenshots:
+    needs: [intelligence, lint]
+    uses: ./.github/workflows/_reusable-screenshots.yml
+    with:
+      matrix_themes: ${{ needs.intelligence.outputs.matrix_themes }}
+      has_screenshots: ${{ needs.intelligence.outputs.has_screenshots }}
+      run_screenshots: ${{ needs.intelligence.outputs.run_screenshots }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  test:
+    needs: [intelligence, lint]
+    uses: ./.github/workflows/_reusable-test.yml
+    with:
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+      has_api: ${{ needs.intelligence.outputs.has_api }}
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
+      has_web: ${{ needs.intelligence.outputs.has_web }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  benchmark:
+    needs: [intelligence, test]
+    uses: ./.github/workflows/_reusable-benchmark.yml
+    with:
+      run_benchmarks: ${{ needs.intelligence.outputs.run_benchmarks }}
+    secrets: inherit
+
+  build:
+    needs: [intelligence, test, screenshots]
+    uses: ./.github/workflows/_reusable-build.yml
+    with:
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+      pipeline_mode: ${{ needs.intelligence.outputs.pipeline_mode }}
+    secrets: inherit
+
+  deploy:
+    needs: [intelligence, build]
+    uses: ./.github/workflows/_reusable-deploy.yml
+    with:
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+    secrets: inherit
+
+  update-manifest:
+    name: "📋 Commit Manifest"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: [screenshots, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - run: echo "Inline manifest update"
+
+  summary:
+    name: "📊 Pipeline Summary"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: always()
+    needs: [intelligence, security, lint, screenshots, test, benchmark, build, deploy]
+    steps:
+      - run: echo "Inline summary"
+
+  notify:
+    name: "💬 Notifications"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    needs: [summary]
+    if: always()
+    steps:
+      - run: echo "Inline notify"
+
+  cleanup:
+    name: "🧹 Cleanup"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: [summary]
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - run: echo "Inline cleanup"

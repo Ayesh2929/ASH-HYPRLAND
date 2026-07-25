@@ -1,0 +1,289 @@
+name: "🧠 Intelligence"
+on:
+  workflow_call:
+    outputs:
+      has_screenshots:
+        description: "Screenshots change flag"
+        value: ${{ jobs.intelligence.outputs.has_screenshots }}
+      has_themes:
+        description: "Themes change flag"
+        value: ${{ jobs.intelligence.outputs.has_themes }}
+      has_plugins:
+        description: "Plugins change flag"
+        value: ${{ jobs.intelligence.outputs.has_plugins }}
+      has_scripts:
+        description: "Scripts change flag"
+        value: ${{ jobs.intelligence.outputs.has_scripts }}
+      has_nvim:
+        description: "Nvim change flag"
+        value: ${{ jobs.intelligence.outputs.has_nvim }}
+      has_fish:
+        description: "Fish change flag"
+        value: ${{ jobs.intelligence.outputs.has_fish }}
+      has_waybar:
+        description: "Waybar change flag"
+        value: ${{ jobs.intelligence.outputs.has_waybar }}
+      has_hypr:
+        description: "Hypr change flag"
+        value: ${{ jobs.intelligence.outputs.has_hypr }}
+      has_api:
+        description: "API change flag"
+        value: ${{ jobs.intelligence.outputs.has_api }}
+      has_web:
+        description: "Web change flag"
+        value: ${{ jobs.intelligence.outputs.has_web }}
+      web_exists:
+        description: "Web dir exists"
+        value: ${{ jobs.intelligence.outputs.web_exists }}
+      web_lock_exists:
+        description: "Web lock exists"
+        value: ${{ jobs.intelligence.outputs.web_lock_exists }}
+      api_exists:
+        description: "API dir exists"
+        value: ${{ jobs.intelligence.outputs.api_exists }}
+      run_full:
+        description: "Run full pipeline"
+        value: ${{ jobs.intelligence.outputs.run_full }}
+      run_screenshots:
+        description: "Run screenshots"
+        value: ${{ jobs.intelligence.outputs.run_screenshots }}
+      run_security:
+        description: "Run security"
+        value: ${{ jobs.intelligence.outputs.run_security }}
+      run_benchmarks:
+        description: "Run benchmarks"
+        value: ${{ jobs.intelligence.outputs.run_benchmarks }}
+      run_deploy:
+        description: "Run deploy"
+        value: ${{ jobs.intelligence.outputs.run_deploy }}
+      is_release:
+        description: "Is release branch"
+        value: ${{ jobs.intelligence.outputs.is_release }}
+      is_nightly:
+        description: "Is nightly schedule"
+        value: ${{ jobs.intelligence.outputs.is_nightly }}
+      pipeline_mode:
+        description: "Pipeline mode"
+        value: ${{ jobs.intelligence.outputs.pipeline_mode }}
+      matrix_themes:
+        description: "Matrix of themes"
+        value: ${{ jobs.intelligence.outputs.matrix_themes }}
+      matrix_distros:
+        description: "Matrix of distros"
+        value: ${{ jobs.intelligence.outputs.matrix_distros }}
+      matrix_platforms:
+        description: "Matrix of platforms"
+        value: ${{ jobs.intelligence.outputs.matrix_platforms }}
+      matrix_languages:
+        description: "Matrix of languages"
+        value: ${{ jobs.intelligence.outputs.matrix_languages }}
+
+jobs:
+  intelligence:
+    name: "🧠 Pipeline Intelligence"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      has_screenshots:   ${{ steps.filter.outputs.screenshots }}
+      has_themes:        ${{ steps.filter.outputs.themes }}
+      has_plugins:       ${{ steps.filter.outputs.plugins }}
+      has_scripts:       ${{ steps.filter.outputs.scripts }}
+      has_nvim:          ${{ steps.filter.outputs.nvim }}
+      has_fish:          ${{ steps.filter.outputs.fish }}
+      has_waybar:        ${{ steps.filter.outputs.waybar }}
+      has_hypr:          ${{ steps.filter.outputs.hypr }}
+      has_api:           ${{ steps.filter.outputs.api }}
+      has_web:           ${{ steps.filter.outputs.web }}
+      web_exists:        ${{ steps.web.outputs.exists }}
+      web_lock_exists:   ${{ steps.web.outputs.lock_exists }}
+      api_exists:        ${{ steps.api.outputs.exists }}
+      run_full:          ${{ steps.decide.outputs.run_full }}
+      run_screenshots:   ${{ steps.decide.outputs.run_screenshots }}
+      run_security:      ${{ steps.decide.outputs.run_security }}
+      run_benchmarks:    ${{ steps.decide.outputs.run_benchmarks }}
+      run_deploy:        ${{ steps.decide.outputs.run_deploy }}
+      is_release:        ${{ steps.decide.outputs.is_release }}
+      is_nightly:        ${{ steps.decide.outputs.is_nightly }}
+      pipeline_mode:     ${{ steps.decide.outputs.pipeline_mode }}
+      matrix_themes:     ${{ steps.matrices.outputs.themes }}
+      matrix_distros:    ${{ steps.matrices.outputs.distros }}
+      matrix_platforms:  ${{ steps.matrices.outputs.platforms }}
+      matrix_languages:  ${{ steps.matrices.outputs.languages }}
+    steps:
+      - name: "📥 Sparse checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          sparse-checkout: |
+            .github
+            web
+            api
+            themes
+            assets
+            plugins
+
+      - name: "🔎 Detect web project"
+        id: web
+        run: |
+          [[ -f web/package.json ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+          [[ -f web/package-lock.json ]] && echo "lock_exists=true" >> "$GITHUB_OUTPUT" || echo "lock_exists=false" >> "$GITHUB_OUTPUT"
+
+      - name: "🔎 Detect API project"
+        id: api
+        run: |
+          [[ -f api/requirements.txt ]] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+
+      - name: "🔍 Path filter"
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            screenshots:
+              - 'assets/screenshots/**'
+              - 'assets/brand/svg-masters/**'
+            themes:
+              - 'themes/**'
+              - 'ash-cli/engines/color-engine/**'
+            plugins:
+              - 'plugins/**'
+            scripts:
+              - 'scripts/**'
+              - 'ash-cli/**'
+            nvim:
+              - 'config/nvim/**'
+            fish:
+              - 'config/fish/**'
+            waybar:
+              - 'config/waybar/**'
+            hypr:
+              - 'config/hypr/**'
+            api:
+              - 'api/**'
+            web:
+              - 'web/**'
+
+      - name: "🤔 Decision engine"
+        id: decide
+        env:
+          _EVENT:  ${{ github.event_name }}
+          _BRANCH: ${{ github.ref_name }}
+          _MODE:   ${{ github.event.inputs.pipeline_mode || 'standard' }}
+          _CRON:   ${{ github.event.schedule || '' }}
+          _BENCH:  ${{ github.event.inputs.enable_benchmarks || 'false' }}
+        run: |
+          set -euo pipefail
+
+          RUN_FULL="false"
+          RUN_SCREENSHOTS="false"
+          RUN_SECURITY="false"
+          RUN_BENCHMARKS="$_BENCH"
+          RUN_DEPLOY="false"
+          IS_RELEASE="false"
+          IS_NIGHTLY="false"
+          MODE="$_MODE"
+
+          if [[ "$_EVENT" == "schedule" ]]; then
+            case "$_CRON" in
+              "0 2 * * *")
+                IS_NIGHTLY="true"; MODE="full"
+                RUN_FULL="true"; RUN_SCREENSHOTS="true"
+                RUN_SECURITY="true"; RUN_BENCHMARKS="true"
+                ;;
+              "0 4 * * 1")
+                MODE="security-only"; RUN_SECURITY="true"
+                ;;
+              "0 6 1 * *")
+                MODE="benchmark-only"; RUN_BENCHMARKS="true"
+                ;;
+            esac
+          fi
+
+          if [[ "$_BRANCH" =~ ^release/ ]]; then
+            IS_RELEASE="true"
+            RUN_FULL="true"; RUN_SCREENSHOTS="true"
+            RUN_SECURITY="true"; RUN_BENCHMARKS="true"
+            RUN_DEPLOY="true"
+          fi
+
+          if [[ "$_BRANCH" == "main" && "$_EVENT" == "push" ]]; then
+            RUN_SCREENSHOTS="true"; RUN_SECURITY="true"; RUN_DEPLOY="true"
+          fi
+
+          case "$MODE" in
+            full)
+              RUN_FULL="true"; RUN_SCREENSHOTS="true"
+              RUN_SECURITY="true"; RUN_BENCHMARKS="true"
+              ;;
+            screenshots-only) RUN_SCREENSHOTS="true" ;;
+            security-only)    RUN_SECURITY="true"    ;;
+            benchmark-only)   RUN_BENCHMARKS="true"  ;;
+            deploy-only)      RUN_DEPLOY="true"       ;;
+            lint-only)        : ;;
+          esac
+
+          {
+            echo "run_full=$RUN_FULL"
+            echo "run_screenshots=$RUN_SCREENSHOTS"
+            echo "run_security=$RUN_SECURITY"
+            echo "run_benchmarks=$RUN_BENCHMARKS"
+            echo "run_deploy=$RUN_DEPLOY"
+            echo "is_release=$IS_RELEASE"
+            echo "is_nightly=$IS_NIGHTLY"
+            echo "pipeline_mode=$MODE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: "📐 Build matrices"
+        id: matrices
+        env:
+          _TARGET: ${{ github.event.inputs.target_themes || 'all' }}
+          _RUN_FULL: ${{ steps.decide.outputs.run_full }}
+          _HAS_API: ${{ steps.filter.outputs.api }}
+          _HAS_WEB: ${{ steps.filter.outputs.web }}
+          _WEB_EXISTS: ${{ steps.web.outputs.exists }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$_TARGET" == "all" ]]; then
+            THEMES_JSON='["dark-rosepine","light-catppuccin","dark-catppuccin",
+              "dark-tokyonight","dark-gruvbox","dark-nord","dark-dracula",
+              "dark-onedark","dark-everforest","dark-kanagawa","neon-cyberpunk",
+              "neon-synthwave","nature-forest","nature-ocean","space-nebula",
+              "retro-vaporwave","anime-evangelion"]'
+          else
+            THEMES_JSON="["
+            first=true
+            IFS=',' read -ra LIST <<< "$_TARGET"
+            for t in "${LIST[@]}"; do
+              t="${t// /}"
+              [[ "$first" == "true" ]] && first=false || THEMES_JSON+=","
+              THEMES_JSON+="\"$t\""
+            done
+            THEMES_JSON+="]"
+          fi
+
+          DISTROS_JSON='[
+            {"name":"arch",     "image":"archlinux:latest",          "pkg":"pacman"},
+            {"name":"fedora",   "image":"fedora:40",                 "pkg":"dnf"},
+            {"name":"ubuntu",   "image":"ubuntu:24.04",              "pkg":"apt"},
+            {"name":"opensuse", "image":"opensuse/tumbleweed:latest","pkg":"zypper"}
+          ]'
+
+          PLATFORMS_JSON='["linux/amd64","linux/arm64"]'
+
+          LANGUAGES_JSON='[]'
+          if [[ "$_RUN_FULL" == "true" || "$_HAS_API" == "true" ]]; then
+            LANGUAGES_JSON=$(echo "$LANGUAGES_JSON" | jq '. + ["python"]')
+          fi
+          if [[ "$_WEB_EXISTS" == "true" && ("$_RUN_FULL" == "true" || "$_HAS_WEB" == "true") ]]; then
+            LANGUAGES_JSON=$(echo "$LANGUAGES_JSON" | jq '. + ["javascript-typescript"]')
+          fi
+
+          {
+            echo "themes=$(echo "$THEMES_JSON"   | jq -c .)"
+            echo "distros=$(echo "$DISTROS_JSON"  | jq -c .)"
+            echo "platforms=$(echo "$PLATFORMS_JSON" | jq -c .)"
+            echo "languages=$(echo "$LANGUAGES_JSON" | jq -c .)"
+          } >> "$GITHUB_OUTPUT"

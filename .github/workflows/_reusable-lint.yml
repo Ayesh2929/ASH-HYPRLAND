@@ -1,0 +1,128 @@
+name: "✅ Linting"
+on:
+  workflow_call:
+    inputs:
+      has_scripts:
+        type: string
+        required: true
+      has_nvim:
+        type: string
+        required: true
+      has_fish:
+        type: string
+        required: true
+      has_hypr:
+        type: string
+        required: true
+      has_web:
+        type: string
+        required: true
+      web_exists:
+        type: string
+        required: true
+      web_lock_exists:
+        type: string
+        required: true
+      has_api:
+        type: string
+        required: true
+      api_exists:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+    secrets:
+      inherit: true
+
+jobs:
+  lint-shell:
+    name: "🐚 ShellCheck"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    if: inputs.has_scripts == 'true' || inputs.run_full == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y shellcheck --no-install-recommends
+      - run: |
+          find . -type f \( -name "*.sh" -o -name "*.bash" \) ! -path "./.git/*" ! -path "./node_modules/*" ! -path "./.vendor/*" | xargs shellcheck --shell=bash --severity=warning --exclude=SC1091,SC2034,SC2155,SC2317
+
+  lint-lua:
+    name: "🌙 Luacheck"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: inputs.has_nvim == 'true' || inputs.run_full == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y lua-check
+      - run: luacheck config/nvim/ --config .luacheckrc --formatter plain --max-line-length 120 --globals vim --no-unused-args
+
+  lint-configs:
+    name: "📋 Config Validation"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g ajv-cli @taplo/cli --silent && pip install yamllint --quiet
+      - run: |
+          taplo check $(find . -name "*.toml" ! -path "./.git/*" ! -path "./node_modules/*") || true
+
+  lint-typescript:
+    name: "💙 TypeScript & ESLint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: inputs.web_exists == 'true' && (inputs.has_web == 'true' || inputs.run_full == 'true')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - working-directory: web
+        run: npm ci --prefer-offline || npm install --prefer-offline
+      - working-directory: web
+        run: npx tsc --noEmit --strict --pretty
+      - working-directory: web
+        run: npx eslint --ext .ts,.tsx --format stylish src/
+
+  lint-python:
+    name: "🐍 Python Lint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: inputs.api_exists == 'true' && (inputs.has_api == 'true' || inputs.run_full == 'true')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - run: pip install ruff mypy black bandit --quiet
+      - working-directory: api
+        run: |
+          ruff check .
+          mypy --ignore-missing-imports --strict .
+          bandit -r . -ll -f json -o bandit-out.json --exclude ./.venv || true
+          black --check --diff .
+
+  lint-hyprland:
+    name: "🪟 Hyprland Config Lint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    if: inputs.has_hypr == 'true' || inputs.run_full == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for f in $(find config/hypr -name "*.conf" 2>/dev/null); do
+            OPEN=$(grep -o '{' "$f" | wc -l || true)
+            CLOSE=$(grep -o '}' "$f" | wc -l || true)
+            [[ "$OPEN" != "$CLOSE" ]] && exit 1 || true
+          done
+
+  lint-fish:
+    name: "🐟 Fish Lint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    if: inputs.has_fish == 'true' || inputs.run_full == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y fish --no-install-recommends
+      - run: |
+          for f in $(find config/fish -name "*.fish" 2>/dev/null); do fish --no-execute "$f"; done
