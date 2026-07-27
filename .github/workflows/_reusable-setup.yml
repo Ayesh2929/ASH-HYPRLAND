@@ -12,7 +12,7 @@ jobs:
     name: "⚙️ Unified Setup Cache"
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github
@@ -20,7 +20,7 @@ jobs:
             requirements.txt
 
       - name: "Cache Layer 1: GitHub Actions (pip/npm)"
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.npm
@@ -31,7 +31,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: "Cache Layer 4: Tool Binaries"
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /usr/local/bin
           key: ${{ runner.os }}-tools-${{ hashFiles('.github/workflows/*.yml') }}
