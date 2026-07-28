@@ -790,11 +790,11 @@ end
 alias linecount  "wc -l"
 alias stripblank "grep \
                     --invert-match \
-                    '^[[:space:]]*$'"              # Remove blank lines
+                    '^[[:space:]]*\$'"              # Remove blank lines
 alias stripdups  "awk '!seen[\$0]++'"             # Remove duplicate lines
-alias trimws     "sed 's/^[[:space:]]*//;s/[[:space:]]*$//'"  # Trim whitespace
+alias trimws     "sed 's/^[[:space:]]*//;s/[[:space:]]*\$//'"  # Trim whitespace
 alias dos2unix   "sed --in-place 's/\r//'"        # Convert line endings
-alias unix2dos   "sed --in-place 's/$/\r/'"       # Convert line endings
+alias unix2dos   "sed --in-place 's/\$/\r/'"       # Convert line endings
 alias nl         "nl \
                     --number-all \
                     --number-format=rz"            # Number lines
