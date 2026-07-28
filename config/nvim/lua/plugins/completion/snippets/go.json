@@ -1,0 +1,277 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "🐹 ASH Go Ultra Snippets v5.0",
+  
+    "ASH HTTP Handler": {
+      "prefix": ["hand", "handler", "http"],
+      "description": "🐹 HTTP handler with full middleware pattern",
+      "body": [
+        "// ${1:HandlerName} handles ${2:description}.",
+        "//",
+        "// @Summary ${2:description}",
+        "// @Tags ${3:tag}",
+        "// @Accept json",
+        "// @Produce json",
+        "// @Param request body ${4:RequestBody} true \"Request body\"",
+        "// @Success 200 {object} ${5:ResponseBody}",
+        "// @Failure 400 {object} ErrorResponse",
+        "// @Failure 500 {object} ErrorResponse",
+        "// @Router /${6:path} [${7|get,post,put,patch,delete|}]",
+        "func (h *${8:Handler}) ${1:HandlerName}(w http.ResponseWriter, r *http.Request) {",
+        "\tctx := r.Context()",
+        "\tlog := h.log.With(slog.String(\"handler\", \"${1:HandlerName}\"))",
+        "",
+        "\tvar req ${4:RequestBody}",
+        "\tif err := json.NewDecoder(r.Body).Decode(&req); err != nil {",
+        "\t\th.respondError(w, r, http.StatusBadRequest, err)",
+        "\t\treturn",
+        "\t}",
+        "",
+        "\tif err := req.Validate(); err != nil {",
+        "\t\th.respondError(w, r, http.StatusBadRequest, err)",
+        "\t\treturn",
+        "\t}",
+        "",
+        "\tresult, err := h.${9:service}.${10:Method}(ctx, req)",
+        "\tif err != nil {",
+        "\t\tlog.ErrorContext(ctx, \"${10:Method} failed\", slog.Any(\"error\", err))",
+        "\t\th.respondError(w, r, http.StatusInternalServerError, err)",
+        "\t\treturn",
+        "\t}",
+        "",
+        "\th.respondJSON(w, http.Status${11:OK}, result)",
+        "}"
+      ]
+    },
+  
+    "ASH Goroutine with WaitGroup": {
+      "prefix": ["gor", "goroutine", "wg"],
+      "description": "🐹 Goroutine pool with WaitGroup and error collection",
+      "body": [
+        "var (",
+        "\twg   sync.WaitGroup",
+        "\tmu   sync.Mutex",
+        "\terrs []error",
+        ")",
+        "",
+        "for ${1:_, item} := range ${2:items} {",
+        "\twg.Add(1)",
+        "\tgo func(${3:item} ${4:ItemType}) {",
+        "\t\tdefer wg.Done()",
+        "\t\tif err := ${5:process}(ctx, ${3:item}); err != nil {",
+        "\t\t\tmu.Lock()",
+        "\t\t\terrs = append(errs, fmt.Errorf(\"${5:process} %v: %w\", ${3:item}, err))",
+        "\t\t\tmu.Unlock()",
+        "\t\t}",
+        "\t}(${3:item})",
+        "}",
+        "",
+        "wg.Wait()",
+        "",
+        "if len(errs) > 0 {",
+        "\treturn errors.Join(errs...)",
+        "}"
+      ]
+    },
+  
+    "ASH Error Wrap": {
+      "prefix": ["ec", "err_check"],
+      "description": "🐹 Error check with wrapping",
+      "body": [
+        "if err != nil {",
+        "\treturn ${1:nil, }fmt.Errorf(\"${2:operation}: %w\", err)",
+        "}"
+      ]
+    },
+  
+    "ASH Interface Definition": {
+      "prefix": ["iface", "interface"],
+      "description": "🐹 Interface with multiple methods",
+      "body": [
+        "// ${1:InterfaceName} defines ${2:interface description}.",
+        "type ${1:InterfaceName} interface {",
+        "\t${3:MethodName}(ctx context.Context, ${4:param} ${5:type}) (${6:ReturnType}, error)",
+        "\t${7:AnotherMethod}(ctx context.Context) error",
+        "}"
+      ]
+    },
+  
+    "ASH Struct Constructor": {
+      "prefix": ["new", "constructor"],
+      "description": "🐹 Struct with functional options constructor",
+      "body": [
+        "// ${1:TypeName} is ${2:description}.",
+        "type ${1:TypeName} struct {",
+        "\t${3:field}   ${4:string}",
+        "\t${5:timeout} time.Duration",
+        "\tlog      *slog.Logger",
+        "}",
+        "",
+        "// ${1:TypeName}Option configures a ${1:TypeName}.",
+        "type ${1:TypeName}Option func(*${1:TypeName})",
+        "",
+        "// With${6:Timeout} sets the ${6:timeout}.",
+        "func With${6:Timeout}(d time.Duration) ${1:TypeName}Option {",
+        "\treturn func(t *${1:TypeName}) { t.${5:timeout} = d }",
+        "}",
+        "",
+        "// New${1:TypeName} creates a new ${1:TypeName}.",
+        "func New${1:TypeName}(${3:field} ${4:string}, opts ...${1:TypeName}Option) *${1:TypeName} {",
+        "\tt := &${1:TypeName}{",
+        "\t\t${3:field}:   ${3:field},",
+        "\t\t${5:timeout}: ${7:30 * time.Second},",
+        "\t\tlog:      slog.Default(),",
+        "\t}",
+        "\tfor _, opt := range opts {",
+        "\t\topt(t)",
+        "\t}",
+        "\treturn t",
+        "}"
+      ]
+    },
+  
+    "ASH Table Test": {
+      "prefix": ["tdt", "table_test", "test"],
+      "description": "🐹 Table-driven test with subtests",
+      "body": [
+        "func Test${1:FunctionName}(t *testing.T) {",
+        "\tt.Parallel()",
+        "",
+        "\ttests := []struct {",
+        "\t\tname    string",
+        "\t\t${2:input}  ${3:type}",
+        "\t\t${4:want}   ${5:type}",
+        "\t\twantErr bool",
+        "\t}{",
+        "\t\t{",
+        "\t\t\tname:    \"${6:success case}\",",
+        "\t\t\t${2:input}:  ${7:value},",
+        "\t\t\t${4:want}:   ${8:expected},",
+        "\t\t\twantErr: false,",
+        "\t\t},",
+        "\t\t{",
+        "\t\t\tname:    \"${9:error case}\",",
+        "\t\t\t${2:input}:  ${10:invalid},",
+        "\t\t\twantErr: true,",
+        "\t\t},",
+        "\t}",
+        "",
+        "\tfor _, tt := range tests {",
+        "\t\ttt := tt",
+        "\t\tt.Run(tt.name, func(t *testing.T) {",
+        "\t\t\tt.Parallel()",
+        "\t\t\tgot, err := ${1:FunctionName}(tt.${2:input})",
+        "\t\t\tif (err != nil) != tt.wantErr {",
+        "\t\t\t\tt.Errorf(\"${1:FunctionName}() error = %v, wantErr %v\", err, tt.wantErr)",
+        "\t\t\t\treturn",
+        "\t\t\t}",
+        "\t\t\tif !tt.wantErr {",
+        "\t\t\t\trequire.Equal(t, tt.${4:want}, got)",
+        "\t\t\t}",
+        "\t\t})",
+        "\t}",
+        "}"
+      ]
+    },
+  
+    "ASH Context with Cancel": {
+      "prefix": ["ctx", "context"],
+      "description": "🐹 Context with timeout and cancel",
+      "body": [
+        "ctx, cancel := context.WithTimeout(",
+        "\tr.Context(),",
+        "\t${1:30}*time.Second,",
+        ")",
+        "defer cancel()"
+      ]
+    },
+  
+    "ASH Channel Pattern": {
+      "prefix": ["chan", "channel"],
+      "description": "🐹 Buffered channel with select",
+      "body": [
+        "${1:ch} := make(chan ${2:int}, ${3:100})",
+        "",
+        "go func() {",
+        "\tdefer close(${1:ch})",
+        "\tfor ${4:_, v} := range ${5:items} {",
+        "\t\tselect {",
+        "\t\tcase ${1:ch} <- ${6:v}:",
+        "\t\tcase <-ctx.Done():",
+        "\t\t\treturn",
+        "\t\t}",
+        "\t}",
+        "}()",
+        "",
+        "for v := range ${1:ch} {",
+        "\t${7:// process v}",
+        "}"
+      ]
+    },
+  
+    "ASH Slog Structured Log": {
+      "prefix": ["log", "slog"],
+      "description": "🐹 slog structured logging",
+      "body": [
+        "slog.${1|Info,Debug,Warn,Error|}(",
+        "\t\"${2:message}\",",
+        "\tslog.String(\"${3:key}\", ${4:value}),",
+        "\tslog.Int(\"${5:count}\", ${6:n}),",
+        "\tslog.Any(\"error\", ${7:err}),",
+        ")"
+      ]
+    },
+  
+    "ASH SQL Query": {
+      "prefix": ["sql", "query"],
+      "description": "🐹 sqlx query with struct scanning",
+      "body": [
+        "const query${1:Name} = `",
+        "\tSELECT",
+        "\t\t${2:id},",
+        "\t\t${3:name},",
+        "\t\t${4:created_at}",
+        "\tFROM ${5:table_name}",
+        "\tWHERE ${6:condition} = $1",
+        "\tORDER BY ${7:id} DESC",
+        "\tLIMIT $2",
+        "`",
+        "",
+        "var results []${8:ResultType}",
+        "if err := db.SelectContext(ctx, &results, query${1:Name}, ${9:param}, ${10:limit}); err != nil {",
+        "\treturn nil, fmt.Errorf(\"query ${1:Name}: %w\", err)",
+        "}"
+      ]
+    },
+  
+    "ASH gRPC Service": {
+      "prefix": ["grpc", "service"],
+      "description": "🐹 gRPC service implementation",
+      "body": [
+        "// ${1:ServiceName} implements pb.${1:ServiceName}Server.",
+        "type ${1:ServiceName} struct {",
+        "\tpb.Unimplemented${1:ServiceName}Server",
+        "\t${2:repo}  ${3:Repository}",
+        "\tlog    *slog.Logger",
+        "}",
+        "",
+        "// New${1:ServiceName} creates a new ${1:ServiceName}.",
+        "func New${1:ServiceName}(${2:repo} ${3:Repository}) *${1:ServiceName} {",
+        "\treturn &${1:ServiceName}{",
+        "\t\t${2:repo}: ${2:repo},",
+        "\t\tlog:   slog.Default().With(slog.String(\"service\", \"${1:ServiceName}\")),",
+        "\t}",
+        "}",
+        "",
+        "// ${4:MethodName} implements pb.${1:ServiceName}Server.",
+        "func (s *${1:ServiceName}) ${4:MethodName}(",
+        "\tctx context.Context,",
+        "\treq *pb.${5:Request},",
+        ") (*pb.${6:Response}, error) {",
+        "\ts.log.InfoContext(ctx, \"${4:MethodName}\", slog.Any(\"req\", req))",
+        "\t${7:// implementation}",
+        "\treturn &pb.${6:Response}{}, nil",
+        "}"
+      ]
+    }
+  }

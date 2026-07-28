@@ -1,0 +1,61 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v5.0 OMEGA — StyLua Formatter Configuration                  ║
+# ║  https://github.com/JohnnyMorganz/StyLua                                   ║
+# ║                                                                              ║
+# ║  Philosophy:                                                                 ║
+# ║    • Consistency over personal preference                                   ║
+# ║    • Maximum readability at 100 columns                                     ║
+# ║    • Enforced by CI/CD — zero tolerance for drift                           ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ── Core formatting ──────────────────────────────────────────────────────────
+
+# Maximum column width before StyLua wraps expressions
+column_width = 100
+
+# Number of spaces per indent level (matches .editorconfig)
+indent_width = 2
+
+# Use spaces, not tabs (Lua community standard)
+indent_type = "Spaces"
+
+# Trailing commas in multi-line tables / function calls
+# "Always"  → clean diffs when adding items
+# "Never"   → tighter look (not recommended for lists)
+# "Smart"   → trailing comma only when wrapping
+call_parentheses = "Always"
+
+# Line endings: "Unix" (LF) | "Windows" (CRLF) | "Mixed"
+line_endings = "Unix"
+
+# Quote style for string literals
+# "AutoPreferDouble" → uses double unless single avoids an escape
+# "AutoPreferSingle" → uses single unless double avoids an escape
+# "ForceDouble"      → always double
+# "ForceSingle"      → always single
+quote_style = "AutoPreferDouble"
+
+# ── Collapse thresholds ───────────────────────────────────────────────────────
+# A table literal is collapsed onto one line when its character count
+# (including the braces) is ≤ this value.
+# Set lower to keep tables more expanded; higher to prefer one-liners.
+collapse_simple_statement = "Never"
+
+# ── Sorting ───────────────────────────────────────────────────────────────────
+# StyLua does NOT sort table keys — use a plugin or manual discipline.
+
+# ── File overrides ────────────────────────────────────────────────────────────
+# Per-directory / per-glob overrides (StyLua v0.20+)
+[[overrides]]
+  # Neovim runtime after-directory uses the same rules
+  files    = { include = ["after/**/*.lua"] }
+  column_width = 100
+
+[[overrides]]
+  # Plugin spec files can be slightly wider to keep lazy specs readable
+  files    = { include = ["lua/plugins/**/*.lua"] }
+  column_width = 120
+
+[[overrides]]
+  # Snippet JSON files are not Lua — exclude them
+  files    = { exclude = ["lua/plugins/completion/snippets/**"] }

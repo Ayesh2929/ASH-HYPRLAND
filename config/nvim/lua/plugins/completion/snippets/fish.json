@@ -1,0 +1,329 @@
+{
+    "ASH Fish Script": {
+      "prefix": ["fish", "script", "shebang"],
+      "description": "🐠 Full Fish script with ASH pattern",
+      "body": [
+        "#!/usr/bin/env fish",
+        "# ╔══════════════════════════════════════════════════════╗",
+        "# ║  🐠 ${1:script_name} — ${2:description}             ║",
+        "# ║  Author:  ${3:ash}                                   ║",
+        "# ╚══════════════════════════════════════════════════════╝",
+        "",
+        "# ── Constants ─────────────────────────────────────────",
+        "set -l SCRIPT_NAME (basename (status filename))",
+        "set -l SCRIPT_DIR  (dirname (status filename))",
+        "",
+        "# ── Colours ───────────────────────────────────────────",
+        "set -l RED    (set_color red)",
+        "set -l GREEN  (set_color green)",
+        "set -l YELLOW (set_color yellow)",
+        "set -l BLUE   (set_color blue)",
+        "set -l BOLD   (set_color --bold)",
+        "set -l RESET  (set_color normal)",
+        "",
+        "# ── Logging ────────────────────────────────────────────",
+        "function log_info;  echo \"$BLUE[INFO]$RESET  $argv\"; end",
+        "function log_ok;    echo \"$GREEN[ OK ]$RESET  $argv\"; end",
+        "function log_warn;  echo \"$YELLOW[WARN]$RESET  $argv\" >&2; end",
+        "function log_error; echo \"$RED[ERR ]$RESET  $argv\" >&2; end",
+        "function log_die;   log_error $argv; exit 1; end",
+        "",
+        "# ── Main ──────────────────────────────────────────────",
+        "function main",
+        "  log_info \"Starting $SCRIPT_NAME\"",
+        "",
+        "  ${0:# body}",
+        "",
+        "  log_ok \"Done\"",
+        "end",
+        "",
+        "main $argv"
+      ]
+    },
+  
+    "Fish Function": {
+      "prefix": ["fn", "func", "function"],
+      "description": "🐠 Fish function with description",
+      "body": [
+        "function ${1:function_name}",
+        "  # ${2:Function description}",
+        "  # Usage: ${1:function_name} [options] <arg>",
+        "  set -l ${3:arg} $argv[1]",
+        "",
+        "  ${0:# body}",
+        "end"
+      ]
+    },
+  
+    "Fish Function with Args": {
+      "prefix": ["fnarg", "func_args"],
+      "description": "🐠 Fish function with argument parsing",
+      "body": [
+        "function ${1:fn_name} --description '${2:description}'",
+        "  argparse \\",
+        "    'h/help' \\",
+        "    'v/verbose' \\",
+        "    'n/name=' \\",
+        "    -- $argv",
+        "  or return 1",
+        "",
+        "  if set -q _flag_help",
+        "    echo 'Usage: ${1:fn_name} [options]'",
+        "    return 0",
+        "  end",
+        "",
+        "  set -l name (set -q _flag_name; and echo $_flag_name; or echo '${3:default}')",
+        "  set -q _flag_verbose; and set -l verbose true; or set -l verbose false",
+        "",
+        "  ${0:# body}",
+        "end"
+      ]
+    },
+  
+    "Fish If Condition": {
+      "prefix": ["if", "ifc"],
+      "description": "🐠 Fish if statement",
+      "body": [
+        "if ${1:condition}",
+        "  ${2:# true branch}",
+        "else if ${3:other}",
+        "  ${4:# else if branch}",
+        "else",
+        "  ${5:# else branch}",
+        "end"
+      ]
+    },
+  
+    "Fish If Command": {
+      "prefix": ["ifcmd", "if_command"],
+      "description": "🐠 If command succeeds",
+      "body": [
+        "if ${1:command} ${2:args}",
+        "  ${3:# success}",
+        "else",
+        "  ${4:# failure}",
+        "end"
+      ]
+    },
+  
+    "Fish Switch": {
+      "prefix": ["switch", "case"],
+      "description": "🐠 Fish switch/case",
+      "body": [
+        "switch $${1:variable}",
+        "  case '${2:pattern1}'",
+        "    ${3:# case 1}",
+        "  case '${4:pattern2}' '${5:pattern3}'",
+        "    ${6:# case 2}",
+        "  case '*'",
+        "    ${7:# default}",
+        "end"
+      ]
+    },
+  
+    "Fish For Loop": {
+      "prefix": ["for", "foreach"],
+      "description": "🐠 Fish for loop",
+      "body": [
+        "for ${1:item} in ${2:$items}",
+        "  ${0:echo $${1:item}}",
+        "end"
+      ]
+    },
+  
+    "Fish While Loop": {
+      "prefix": ["while"],
+      "description": "🐠 Fish while loop",
+      "body": [
+        "while ${1:condition}",
+        "  ${0:# body}",
+        "end"
+      ]
+    },
+  
+    "Fish Set Variable": {
+      "prefix": ["set", "var"],
+      "description": "🐠 Set Fish variable",
+      "body": [
+        "set ${1|-l local,-g global,-x export,-U universal|} ${2:name} ${3:value}"
+      ]
+    },
+  
+    "Fish Abbr": {
+      "prefix": ["abbr", "abbreviation"],
+      "description": "🐠 Shell abbreviation",
+      "body": [
+        "abbr --add ${1:abbr_name} ${2:'expanded command'}"
+      ]
+    },
+  
+    "Fish Alias": {
+      "prefix": ["alias"],
+      "description": "🐠 Fish alias",
+      "body": [
+        "alias ${1:name} '${2:command}'"
+      ]
+    },
+  
+    "Fish Event": {
+      "prefix": ["event", "on_event"],
+      "description": "🐠 Fish event handler",
+      "body": [
+        "function ${1:handler_name} --on-event ${2:fish_prompt}",
+        "  ${0:# event body}",
+        "end"
+      ]
+    },
+  
+    "Fish Completions": {
+      "prefix": ["comp", "completions"],
+      "description": "🐠 Fish completions script",
+      "body": [
+        "# Completions for ${1:command}",
+        "# Place in ~/.config/fish/completions/${1:command}.fish",
+        "",
+        "# Disable file completions",
+        "complete -c ${1:command} -f",
+        "",
+        "# Subcommands",
+        "complete -c ${1:command} -n '__fish_use_subcommand' \\",
+        "  -a '${2:subcommand}' -d '${3:Subcommand description}'",
+        "",
+        "# Flags",
+        "complete -c ${1:command} -s h -l help    -d 'Show help'",
+        "complete -c ${1:command} -s v -l verbose -d 'Verbose output'",
+        "complete -c ${1:command} -s o -l output  -d 'Output file' -r -F"
+      ]
+    },
+  
+    "Fish Path Add": {
+      "prefix": ["path", "fish_path"],
+      "description": "🐠 Add to PATH",
+      "body": [
+        "fish_add_path ${1:~/.local/bin}"
+      ]
+    },
+  
+    "Fish Command Check": {
+      "prefix": ["chk", "check_cmd"],
+      "description": "🐠 Check if command exists",
+      "body": [
+        "if not command -q ${1:command}",
+        "  ${2:echo \"Error: ${1:command} not found\"}",
+        "  return 1",
+        "end"
+      ]
+    },
+  
+    "Fish String Ops": {
+      "prefix": ["str", "string_ops"],
+      "description": "🐠 String manipulation",
+      "body": [
+        "# Fish string operations",
+        "set -l str '${1:Hello, World!}'",
+        "",
+        "string length '$str'                  # → 13",
+        "string upper '$str'                   # → HELLO, WORLD!",
+        "string lower '$str'                   # → hello, world!",
+        "string sub -s ${2:1} -l ${3:5} '$str'      # → Hello",
+        "string replace '${4:World}' '${5:Fish}' '$str'  # → Hello, Fish!",
+        "string split '${6:, }' '$str'             # → ['Hello', 'World!']",
+        "string match -r '${7:^H.*}' '$str'        # regex match",
+        "string trim '$str'                    # strip whitespace"
+      ]
+    },
+  
+    "Fish Math": {
+      "prefix": ["math", "calc"],
+      "description": "🐠 Math expressions",
+      "body": [
+        "set -l result (math '${1:2 ** 10}')",
+        "set -l pi     (math 'pi')",
+        "echo \"$result\"  # → 1024"
+      ]
+    },
+  
+    "Fish Status Check": {
+      "prefix": ["status", "exit_code"],
+      "description": "🐠 Check command exit status",
+      "body": [
+        "${1:command}",
+        "if test $status -eq ${2:0}",
+        "  ${3:# success}",
+        "else",
+        "  ${4:# failure}",
+        "end"
+      ]
+    },
+  
+    "Fish Fish Config": {
+      "prefix": ["fishconf", "config"],
+      "description": "🐠 config.fish section block",
+      "body": [
+        "# ── ${1:Section Name} ──────────────────────────────────────",
+        "if status is-interactive",
+        "  ${0:# interactive shell config}",
+        "end"
+      ]
+    },
+  
+    "Fish Prompt": {
+      "prefix": ["prompt", "fish_prompt"],
+      "description": "🐠 Fish prompt function",
+      "body": [
+        "function fish_prompt",
+        "  set -l last_status $status",
+        "  set -l cwd (prompt_pwd --dir-length=${1:3})",
+        "",
+        "  # Git branch",
+        "  set -l branch ''",
+        "  if git rev-parse --is-inside-work-tree &>/dev/null",
+        "    set branch \" (\"(git branch --show-current 2>/dev/null)\")\"",
+        "  end",
+        "",
+        "  set -l status_sym",
+        "  if test $last_status -eq 0",
+        "    set status_sym (set_color green)'❯'(set_color normal)",
+        "  else",
+        "    set status_sym (set_color red)'❯'(set_color normal)",
+        "  end",
+        "",
+        "  printf '%s%s%s%s %s ' \\",
+        "    (set_color blue) $cwd \\",
+        "    (set_color yellow) $branch \\",
+        "    $status_sym",
+        "end"
+      ]
+    },
+  
+    "Fish Greeting": {
+      "prefix": ["greeting", "fish_greeting"],
+      "description": "🐠 Fish greeting function",
+      "body": [
+        "function fish_greeting",
+        "  set -l hour (date +%H)",
+        "  if test $hour -lt 12",
+        "    echo '🌅 Good morning!'",
+        "  else if test $hour -lt 17",
+        "    echo '☀️  Good afternoon!'",
+        "  else",
+        "    echo '🌙 Good evening!'",
+        "  end",
+        "  echo \"🐠 Fish $FISH_VERSION | $(uname -s) | $(date '+%Y-%m-%d')\"",
+        "end"
+      ]
+    },
+  
+    "Fish Key Binding": {
+      "prefix": ["bind", "keybind"],
+      "description": "🐠 Key binding",
+      "body": [
+        "function fish_user_key_bindings",
+        "  bind ${1:ctrl-f} '${2:forward-word}'",
+        "  bind ${3:ctrl-b} '${4:backward-word}'",
+        "  bind ${5:ctrl-p} '${6:up-or-search}'",
+        "  bind ${7:ctrl-n} '${8:down-or-search}'",
+        "end"
+      ]
+    }
+  }
