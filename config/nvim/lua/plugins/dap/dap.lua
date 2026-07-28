@@ -930,7 +930,7 @@ local function setup_highlights()
               exception    = "💥 Exception",
               pause        = "⏸ Paused",
               entry        = "🚀 Entry point",
-              goto         = "⏩ Goto",
+              ["goto"]     = "⏩ Goto",
               ["function breakpoint"] = "🔴 Function breakpoint",
             }
             _dap_status = string.format(" 🐛 %s", reason_map[body.reason] or body.reason)

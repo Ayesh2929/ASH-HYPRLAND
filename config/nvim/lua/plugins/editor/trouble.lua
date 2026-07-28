@@ -523,15 +523,17 @@ local ICONS = {
           ["s"]         = {
             action = function(view)
               local cfg = view.config
-              local sev = cfg.filter and cfg.filter.severity
               local next_sev = {
-                nil                              = vim.diagnostic.severity.ERROR,
                 [vim.diagnostic.severity.ERROR]  = vim.diagnostic.severity.WARN,
                 [vim.diagnostic.severity.WARN]   = vim.diagnostic.severity.INFO,
                 [vim.diagnostic.severity.INFO]   = vim.diagnostic.severity.HINT,
                 [vim.diagnostic.severity.HINT]   = nil,
               }
-              cfg.filter = { severity = next_sev[sev] }
+              local target_sev = next_sev[sev]
+              if sev == nil then
+                target_sev = vim.diagnostic.severity.ERROR
+              end
+              cfg.filter = { severity = target_sev }
               view:refresh()
             end,
             desc = "cycle severity filter",

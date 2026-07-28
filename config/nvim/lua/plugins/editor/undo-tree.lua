@@ -75,7 +75,7 @@ local function setup_highlights()
   
     -- Create undo directory if it doesn't exist
     if vim.fn.isdirectory(undo_dir) == 0 then
-      vim.fn.mkdir(undo_dir, "p", 0o700)
+      vim.fn.mkdir(undo_dir, "p", 448)
     end
   
     vim.opt.undodir     = undo_dir

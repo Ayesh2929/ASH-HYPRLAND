@@ -62,7 +62,7 @@ return {
         if ok then
           if vim.bo[buf].modified then
             local choice = vim.fn.confirm(
-              "Save changes to "" .. vim.fn.bufname(buf) .. ""?",
+              'Save changes to "' .. vim.fn.bufname(buf) .. '"?',
               "&Yes\n&No\n&Cancel"
             )
             if choice == 1 then
