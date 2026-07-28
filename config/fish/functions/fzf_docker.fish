@@ -513,7 +513,7 @@ function fzf_docker_image --description "🖼  Docker image manager"
     set -l result (docker images \
         --format "{{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}\t{{.CreatedSince}}" \
         2>/dev/null \
-        | column -t -s $'\t' \
+        | column -t -s \t \
         | fzf \
             $__FD_FZF_OPTS \
             --multi \
@@ -669,7 +669,7 @@ function fzf_docker_volume --description "💾 Docker volume manager"
 
     set -l result (docker volume ls \
         --format "{{.Name}}\t{{.Driver}}\t{{.Mountpoint}}" 2>/dev/null \
-        | column -t -s $'\t' \
+        | column -t -s \t \
         | fzf \
             $__FD_FZF_OPTS \
             --multi \
@@ -718,7 +718,7 @@ function fzf_docker_network --description "🌐 Docker network manager"
 
     set -l result (docker network ls \
         --format "{{.Name}}\t{{.Driver}}\t{{.Scope}}\t{{.ID}}" 2>/dev/null \
-        | column -t -s $'\t' \
+        | column -t -s \t \
         | fzf \
             $__FD_FZF_OPTS \
             --prompt "  🌐 Networks ❯ " \
@@ -860,7 +860,7 @@ function fzf_docker_logs --description "📜 Docker log browser"
 
     if test -z "$id"
         set id (docker ps -a --format "{{.ID}}\t{{.Names}}\t{{.Status}}" \
-            | column -t -s $'\t' \
+            | column -t -s \t \
             | fzf $__FD_FZF_OPTS \
                 --prompt "  📜 Logs ❯ " \
                 --no-preview --no-multi \
@@ -907,7 +907,7 @@ function fzf_docker_exec --description "🖥️  Shell into container"
 
     if test -z "$id"
         set id (docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image}}" \
-            | column -t -s $'\t' \
+            | column -t -s \t \
             | fzf $__FD_FZF_OPTS \
                 --prompt "  🖥️  Exec ❯ " \
                 --no-preview --no-multi \

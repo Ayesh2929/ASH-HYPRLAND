@@ -671,7 +671,7 @@ function gen_password \
     if set -q _flag_clipboard
         if __pw_clip $first_pw $clip_time
             if not set -q _flag_quiet
-                __pw_ok "Copied to clipboard  →  auto-clears in ${clip_time}s"
+                __pw_ok "Copied to clipboard  →  auto-clears in $clip_time""s"
             end
         else
             set -q _flag_quiet; or __pw_wrn "Clipboard tool not found"

@@ -790,7 +790,7 @@ function qr_code \
 
         __qr_section "📊" "QR STATISTICS"
         __qr_kv "QR Version"    "$qr_ver"
-        __qr_kv "Module grid"  "${qr_mod}×${qr_mod}"
+        __qr_kv "Module grid"  "$qr_mod×$qr_mod"
         __qr_kv "ECC capacity"  "$qr_cap of data restorable"
         __qr_kv "Data bytes"    $input_len
         __qr_kv "Encoding"      (command -q qrencode; and qrencode --help 2>&1 | grep -o 'kanji\|utf8'; or echo "UTF-8")
@@ -844,7 +844,7 @@ function qr_code \
                 __qr_kv "Size"       (test -f "$outfile"; and du -h "$outfile" | cut -f1; or echo "n/a")
                 __qr_kv "Foreground" "#$fg"
                 __qr_kv "Background" "#$bg"
-                __qr_kv "Module size" "${size}px"
+                __qr_kv "Module size" "$size""px"
 
                 # Preview
                 if set -q _flag_preview

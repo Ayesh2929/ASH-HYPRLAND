@@ -367,10 +367,10 @@ except Exception as e:
         set -l secs2 (math "$rem2 % 60")
 
         set -l out ""
-        test $days  -gt 0 && set out "$out${days}d "
-        test $hours -gt 0 && set out "$out${hours}h "
-        test $mins  -gt 0 && set out "$out${mins}m "
-        test $secs2 -gt 0 && set out "$out${secs2}s"
+        test $days  -gt 0 && set out "$out$days"d" "
+        test $hours -gt 0 && set out "$out$hours"h" "
+        test $mins  -gt 0 && set out "$out$mins"m" "
+        test $secs2 -gt 0 && set out "$out$secs2"s
         echo (string trim "$out")
     end
 

@@ -559,7 +559,7 @@ complete -c hyprctl -n "__hypr_sub_is hyprpaper; and test (count (commandline -p
 
 # hyprpaper wallpaper: monitor,path
 complete -c hyprctl -n "__hypr_sub_is hyprpaper; and __fish_seen_subcommand_from wallpaper" \
-    -f -a "(__hypr_monitors | awk '{print \$1}' | sed 's/$/,/')" -d "Monitor (append path)"
+    -f -a "(__hypr_monitors | awk '{print \$1}' | sed 's/\$/,/')" -d "Monitor (append path)"
 
 # hyprpaper preload / unload: image path
 complete -c hyprctl -n "__hypr_sub_is hyprpaper; and __fish_seen_subcommand_from preload" \
