@@ -1,0 +1,1347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ASH DOTFILES v5.0 OMEGA — KVANTUM THEME SVG                              ║
+║                                                                            ║
+║  This SVG defines ALL visual elements for Qt widgets via Kvantum.         ║
+║  Each element is identified by its ID matching kvconfig element names.     ║
+║                                                                            ║
+║  Structure:                                                                ║
+║  • Each widget element has states: normal, focused, pressed, toggled,      ║
+║    disabled, mouseover                                                     ║
+║  • Elements use Catppuccin Mocha palette                                   ║
+║  • Glassmorphism achieved through layered opacity + subtle gradients       ║
+║  • All measurements in px — Kvantum scales via frame/interior margins      ║
+║                                                                            ║
+║  Color Reference:                                                          ║
+║  crust    #11111b  mantle  #181825  base    #1e1e2e                       ║
+║  surface0 #313244  surface1 #45475a  surface2 #585b70                     ║
+║  overlay0 #6c7086  overlay1 #7f849c  overlay2 #9399b2                     ║
+║  text     #cdd6f4  subtext1 #bac2de  subtext0 #a6adc8                     ║
+║  mauve    #cba6f7  lavender #b4befe  blue     #89b4fa                     ║
+║  sapphire #74c7ec  teal     #94e2d5  green    #a6e3a1                     ║
+║  yellow   #f9e2af  peach    #fab387  red      #f38ba8                     ║
+╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="1.1"
+  width="1000"
+  height="2400">
+
+  <defs>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         GRADIENTS — Shared visual building blocks
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Button normal gradient — Surface0 to Surface1 -->
+    <linearGradient id="grad-btn-normal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#45475a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#313244" stop-opacity="0.90"/>
+    </linearGradient>
+
+    <!-- Button hover gradient — Surface1 to Surface2 -->
+    <linearGradient id="grad-btn-hover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#585b70" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#45475a" stop-opacity="0.90"/>
+    </linearGradient>
+
+    <!-- Button pressed gradient — deep inset -->
+    <linearGradient id="grad-btn-press" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="0.90"/>
+    </linearGradient>
+
+    <!-- Button toggled/checked gradient — accent -->
+    <linearGradient id="grad-btn-toggle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.14"/>
+    </linearGradient>
+
+    <!-- Window background gradient -->
+    <linearGradient id="grad-window" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1e1e2e" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#181825" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Input field gradient — slightly deeper than surface -->
+    <linearGradient id="grad-input" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#181825" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#1e1e2e" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Progress bar fill — Mauve gradient -->
+    <linearGradient id="grad-progress-fill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="50%"  stop-color="#b4befe" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Slider groove fill -->
+    <linearGradient id="grad-groove-fill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Scrollbar slider normal -->
+    <linearGradient id="grad-scroll-normal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#6c7086" stop-opacity="0.70"/>
+      <stop offset="100%" stop-color="#585b70" stop-opacity="0.70"/>
+    </linearGradient>
+
+    <!-- Scrollbar slider hover -->
+    <linearGradient id="grad-scroll-hover" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#9399b2" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#7f849c" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Scrollbar slider active -->
+    <linearGradient id="grad-scroll-active" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Tab active gradient -->
+    <linearGradient id="grad-tab-active" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#313244" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#1e1e2e" stop-opacity="1.00"/>
+    </linearGradient>
+
+    <!-- Tooltip gradient -->
+    <linearGradient id="grad-tooltip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#45475a" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#313244" stop-opacity="0.96"/>
+    </linearGradient>
+
+    <!-- Menu gradient -->
+    <linearGradient id="grad-menu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#313244" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#292a3a" stop-opacity="0.96"/>
+    </linearGradient>
+
+    <!-- MenuItem hover -->
+    <linearGradient id="grad-menuitem-hover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <!-- MenuItem press -->
+    <linearGradient id="grad-menuitem-press" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="0.90"/>
+    </linearGradient>
+
+    <!-- Header section hover -->
+    <linearGradient id="grad-header-hover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#45475a" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#313244" stop-opacity="0.80"/>
+    </linearGradient>
+
+    <!-- Checkbox checked -->
+    <linearGradient id="grad-check-checked" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="0.90"/>
+    </linearGradient>
+
+    <!-- Slider handle normal -->
+    <radialGradient id="grad-handle-normal" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#b4befe" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0.90"/>
+    </radialGradient>
+
+    <!-- Slider handle hover -->
+    <radialGradient id="grad-handle-hover" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#cba6f7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#b4befe" stop-opacity="0.90"/>
+    </radialGradient>
+
+    <!-- Slider handle active -->
+    <radialGradient id="grad-handle-active" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#f5c2e7" stop-opacity="1.00"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.90"/>
+    </radialGradient>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         FILTERS — Glow, shadow, blur effects
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Button glow filter -->
+    <filter id="filter-btn-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0     0     0     0.6 0" result="colored"/>
+      <feMerge>
+        <feMergeNode in="colored"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Accent glow for focused elements -->
+    <filter id="filter-accent-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0     0     0     0.45 0" result="colored"/>
+      <feMerge>
+        <feMergeNode in="colored"/>
+        <feMergeNode in="colored"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Menu/Tooltip drop shadow -->
+    <filter id="filter-shadow-deep" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8"
+        flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+
+    <!-- Subtle element shadow -->
+    <filter id="filter-shadow-subtle" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3"
+        flood-color="#000000" flood-opacity="0.30"/>
+    </filter>
+
+    <!-- Progress glow -->
+    <filter id="filter-progress-glow" x="-5%" y="-20%" width="110%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0     0     0     0.5 0" result="colored"/>
+      <feMerge>
+        <feMergeNode in="colored"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Check mark glow -->
+    <filter id="filter-check-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5"/>
+    </filter>
+
+  </defs>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 1 — WINDOW BACKGROUND
+       ID: Window — used as application window background fill
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Window::normal — Standard window background -->
+  <rect id="Window-normal"
+    x="0" y="0" width="100" height="100"
+    fill="url(#grad-window)"/>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 2 — PUSH BUTTON (PanelButtonCommand)
+       States: normal | focused | pressed | toggled | disabled | mouseover
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- PanelButtonCommand::normal -->
+  <g id="PanelButtonCommand-normal">
+    <!-- Background fill -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-normal)"
+      stroke="#45475a"
+      stroke-width="1"/>
+    <!-- Top highlight line (glass specular) -->
+    <rect x="2" y="1.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.07)"/>
+    <!-- Bottom depth shadow -->
+    <rect x="2" y="27.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.15)"/>
+  </g>
+
+  <!-- PanelButtonCommand::focused — Focus ring + slight accent tint -->
+  <g id="PanelButtonCommand-focused">
+    <!-- Background -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-normal)"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <!-- Glass highlight -->
+    <rect x="2" y="1.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.08)"/>
+    <!-- Focus ring outer -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="none"
+      stroke="rgba(203,166,247,0.35)"
+      stroke-width="3"/>
+  </g>
+
+  <!-- PanelButtonCommand::pressed — Accent fill, inverted text context -->
+  <g id="PanelButtonCommand-pressed">
+    <!-- Accent background -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-press)"
+      stroke="rgba(203,166,247,0.50)"
+      stroke-width="1"
+      filter="url(#filter-btn-glow)"/>
+    <!-- Inner shadow (pressed depth) -->
+    <rect x="2" y="1.5" width="96" height="3"
+      rx="1" ry="1"
+      fill="rgba(0,0,0,0.12)"/>
+    <!-- Bottom specular (slight bounce light) -->
+    <rect x="2" y="26" width="96" height="1.5"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.18)"/>
+  </g>
+
+  <!-- PanelButtonCommand::toggled — Subtle accent tint -->
+  <g id="PanelButtonCommand-toggled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-toggle)"
+      stroke="rgba(203,166,247,0.35)"
+      stroke-width="1"/>
+    <!-- Active indicator line — bottom accent bar -->
+    <rect x="12" y="27" width="76" height="2"
+      rx="1" ry="1"
+      fill="#cba6f7"
+      opacity="0.85"/>
+    <!-- Glass highlight -->
+    <rect x="2" y="1.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.07)"/>
+  </g>
+
+  <!-- PanelButtonCommand::disabled — Faded, low contrast -->
+  <g id="PanelButtonCommand-disabled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="#313244"
+      fill-opacity="0.45"
+      stroke="#45475a"
+      stroke-width="1"
+      stroke-opacity="0.40"/>
+  </g>
+
+  <!-- PanelButtonCommand::mouseover — Hover lift -->
+  <g id="PanelButtonCommand-mouseover">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-hover)"
+      stroke="rgba(205,214,244,0.18)"
+      stroke-width="1"/>
+    <!-- Enhanced glass highlight on hover -->
+    <rect x="2" y="1.5" width="96" height="1.5"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.10)"/>
+    <!-- Subtle bottom shadow -->
+    <rect x="2" y="27" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.18)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 3 — TOOL BUTTON (PanelButtonTool)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="PanelButtonTool-normal">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="transparent"
+      stroke="transparent"/>
+  </g>
+
+  <g id="PanelButtonTool-focused">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="rgba(203,166,247,0.08)"
+      stroke="rgba(203,166,247,0.35)"
+      stroke-width="1.5"/>
+  </g>
+
+  <g id="PanelButtonTool-pressed">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="rgba(203,166,247,0.18)"
+      stroke="rgba(203,166,247,0.50)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="PanelButtonTool-toggled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="rgba(203,166,247,0.14)"
+      stroke="rgba(203,166,247,0.30)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="PanelButtonTool-disabled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="transparent"
+      stroke="transparent"/>
+  </g>
+
+  <g id="PanelButtonTool-mouseover">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="7" ry="7"
+      fill="rgba(205,214,244,0.07)"
+      stroke="rgba(205,214,244,0.12)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 4 — LINE EDIT / TEXT INPUT
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="LineEdit-normal">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-input)"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+    <!-- Inset shadow at top -->
+    <rect x="2" y="1.5" width="96" height="2"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.14)"/>
+  </g>
+
+  <g id="LineEdit-focused">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-input)"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <!-- Focus ring -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="none"
+      stroke="rgba(203,166,247,0.22)"
+      stroke-width="3"/>
+    <!-- Inset shadow -->
+    <rect x="2" y="1.5" width="96" height="2"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.10)"/>
+  </g>
+
+  <g id="LineEdit-disabled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="#181825"
+      fill-opacity="0.50"
+      stroke="rgba(205,214,244,0.05)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="LineEdit-mouseover">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-input)"
+      stroke="rgba(205,214,244,0.16)"
+      stroke-width="1"/>
+    <rect x="2" y="1.5" width="96" height="2"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.12)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 5 — CHECKBOX INDICATOR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- CheckBox::normal — Empty check box -->
+  <g id="CheckBox-normal">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="#313244"
+      stroke="rgba(205,214,244,0.18)"
+      stroke-width="1.5"/>
+  </g>
+
+  <!-- CheckBox::focused -->
+  <g id="CheckBox-focused">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="#313244"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+  </g>
+
+  <!-- CheckBox::pressed — Check appearing -->
+  <g id="CheckBox-pressed">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="url(#grad-check-checked)"
+      stroke="rgba(203,166,247,0.50)"
+      stroke-width="1"/>
+    <!-- Check mark path -->
+    <path d="M4 9 L7.5 12.5 L14 5.5"
+      fill="none"
+      stroke="#11111b"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </g>
+
+  <!-- CheckBox::toggled — Checked state -->
+  <g id="CheckBox-toggled">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="url(#grad-check-checked)"
+      stroke="rgba(203,166,247,0.50)"
+      stroke-width="1"
+      filter="url(#filter-check-glow)"/>
+    <!-- Glow behind check -->
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="#cba6f7"
+      opacity="0.15"
+      filter="url(#filter-accent-glow)"/>
+    <!-- Check mark — crisp rendering -->
+    <path d="M4 9 L7.5 12.5 L14 5.5"
+      fill="none"
+      stroke="#11111b"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <!-- Subtle inner highlight -->
+    <path d="M4 9 L7.5 12.5 L14 5.5"
+      fill="none"
+      stroke="rgba(255,255,255,0.22)"
+      stroke-width="0.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </g>
+
+  <!-- CheckBox::disabled -->
+  <g id="CheckBox-disabled">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="#313244"
+      fill-opacity="0.40"
+      stroke="rgba(205,214,244,0.07)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- CheckBox::mouseover — Hover pre-check -->
+  <g id="CheckBox-mouseover">
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="#45475a"
+      stroke="rgba(205,214,244,0.22)"
+      stroke-width="1.5"/>
+    <!-- Faint mauve tint on hover -->
+    <rect x="1" y="1" width="16" height="16"
+      rx="4" ry="4"
+      fill="rgba(203,166,247,0.08)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 6 — RADIO BUTTON
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="RadioButton-normal">
+    <circle cx="9" cy="9" r="7.5"
+      fill="#313244"
+      stroke="rgba(205,214,244,0.18)"
+      stroke-width="1.5"/>
+  </g>
+
+  <g id="RadioButton-focused">
+    <circle cx="9" cy="9" r="7.5"
+      fill="#313244"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+  </g>
+
+  <g id="RadioButton-toggled">
+    <circle cx="9" cy="9" r="7.5"
+      fill="#313244"
+      stroke="rgba(203,166,247,0.50)"
+      stroke-width="1.5"/>
+    <!-- Inner dot glow -->
+    <circle cx="9" cy="9" r="5"
+      fill="url(#grad-check-checked)"
+      filter="url(#filter-check-glow)"/>
+    <!-- Inner dot -->
+    <circle cx="9" cy="9" r="3.5"
+      fill="url(#grad-check-checked)"/>
+    <!-- Dot highlight -->
+    <circle cx="7.5" cy="7.5" r="1.2"
+      fill="rgba(255,255,255,0.35)"/>
+  </g>
+
+  <g id="RadioButton-disabled">
+    <circle cx="9" cy="9" r="7.5"
+      fill="#313244"
+      fill-opacity="0.40"
+      stroke="rgba(205,214,244,0.07)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="RadioButton-mouseover">
+    <circle cx="9" cy="9" r="7.5"
+      fill="#45475a"
+      stroke="rgba(205,214,244,0.22)"
+      stroke-width="1.5"/>
+    <circle cx="9" cy="9" r="7.5"
+      fill="rgba(203,166,247,0.08)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 7 — COMBO BOX
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="ComboBox-normal">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-normal)"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+    <!-- Dropdown arrow section divider -->
+    <line x1="79" y1="4" x2="79" y2="26"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+    <!-- Dropdown arrow -->
+    <path d="M85 12 L89 17 L93 12"
+      fill="none"
+      stroke="#7f849c"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <!-- Glass highlight -->
+    <rect x="2" y="1.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.06)"/>
+  </g>
+
+  <g id="ComboBox-focused">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-normal)"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <line x1="79" y1="4" x2="79" y2="26"
+      stroke="rgba(203,166,247,0.20)"
+      stroke-width="1"/>
+    <path d="M85 12 L89 17 L93 12"
+      fill="none"
+      stroke="#cba6f7"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <!-- Focus ring -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="none"
+      stroke="rgba(203,166,247,0.22)"
+      stroke-width="3"/>
+  </g>
+
+  <g id="ComboBox-mouseover">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-btn-hover)"
+      stroke="rgba(205,214,244,0.15)"
+      stroke-width="1"/>
+    <line x1="79" y1="4" x2="79" y2="26"
+      stroke="rgba(205,214,244,0.12)"
+      stroke-width="1"/>
+    <path d="M85 12 L89 17 L93 12"
+      fill="none"
+      stroke="#9399b2"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </g>
+
+  <g id="ComboBox-disabled">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="#313244"
+      fill-opacity="0.45"
+      stroke="rgba(205,214,244,0.05)"
+      stroke-width="1"/>
+    <path d="M85 12 L89 17 L93 12"
+      fill="none"
+      stroke="rgba(108,112,134,0.50)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 8 — TAB BAR (Tab)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Tab::normal — Inactive tab -->
+  <g id="Tab-normal">
+    <rect x="0.5" y="0.5" width="99" height="32"
+      rx="8" ry="8"
+      fill="transparent"
+      stroke="transparent"/>
+  </g>
+
+  <!-- Tab::focused / active tab -->
+  <g id="Tab-toggled">
+    <rect x="0.5" y="0.5" width="99" height="32"
+      rx="8" ry="8"
+      fill="url(#grad-tab-active)"
+      stroke="#45475a"
+      stroke-width="1"/>
+    <!-- Active indicator — top accent bar -->
+    <rect x="12" y="0.5" width="76" height="2.5"
+      rx="1.25" ry="1.25"
+      fill="#cba6f7"
+      opacity="0.90"/>
+    <!-- Top accent glow -->
+    <rect x="12" y="0.5" width="76" height="5"
+      rx="2.5" ry="2.5"
+      fill="rgba(203,166,247,0.15)"/>
+    <!-- Glass highlight -->
+    <rect x="2" y="2.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.06)"/>
+  </g>
+
+  <g id="Tab-mouseover">
+    <rect x="0.5" y="0.5" width="99" height="32"
+      rx="8" ry="8"
+      fill="rgba(69,71,90,0.35)"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="Tab-disabled">
+    <rect x="0.5" y="0.5" width="99" height="32"
+      rx="8" ry="8"
+      fill="transparent"
+      stroke="transparent"
+      opacity="0.4"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 9 — TAB FRAME
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="TabFrame-normal">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="8" ry="8"
+      fill="#1e1e2e"
+      stroke="#313244"
+      stroke-width="1"/>
+    <!-- Subtle top shadow inside tab frame -->
+    <rect x="2" y="2" width="96" height="3"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.10)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 10 — SCROLLBAR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- ScrollbarGroove — track background -->
+  <g id="ScrollbarGroove-normal">
+    <rect x="0" y="0" width="100" height="100"
+      fill="rgba(49,50,68,0.30)"
+      rx="5" ry="5"/>
+  </g>
+
+  <!-- ScrollbarSlider — draggable thumb -->
+  <g id="ScrollbarSlider-normal">
+    <rect x="1.5" y="1.5" width="97" height="97"
+      rx="5" ry="5"
+      fill="url(#grad-scroll-normal)"/>
+  </g>
+
+  <g id="ScrollbarSlider-mouseover">
+    <rect x="1.5" y="1.5" width="97" height="97"
+      rx="5" ry="5"
+      fill="url(#grad-scroll-hover)"/>
+  </g>
+
+  <g id="ScrollbarSlider-pressed">
+    <rect x="1.5" y="1.5" width="97" height="97"
+      rx="5" ry="5"
+      fill="url(#grad-scroll-active)"
+      filter="url(#filter-progress-glow)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 11 — SLIDER
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- SliderGroove — slider track -->
+  <g id="SliderGroove-normal">
+    <rect x="0" y="3" width="100" height="6"
+      rx="3" ry="3"
+      fill="rgba(49,50,68,0.90)"
+      stroke="rgba(205,214,244,0.07)"
+      stroke-width="1"/>
+    <!-- Inset shadow -->
+    <rect x="0" y="3" width="100" height="2"
+      rx="1" ry="1"
+      fill="rgba(0,0,0,0.18)"/>
+  </g>
+
+  <!-- SliderGroove fill (highlighted portion) -->
+  <g id="SliderGroove-focused">
+    <rect x="0" y="3" width="100" height="6"
+      rx="3" ry="3"
+      fill="url(#grad-groove-fill)"
+      filter="url(#filter-progress-glow)"/>
+  </g>
+
+  <!-- SliderHandle — draggable knob -->
+  <g id="SliderHandle-normal">
+    <circle cx="10" cy="10" r="9"
+      fill="url(#grad-handle-normal)"
+      stroke="rgba(180,190,254,0.45)"
+      stroke-width="1.5"
+      filter="url(#filter-shadow-subtle)"/>
+    <!-- Specular highlight -->
+    <circle cx="7.5" cy="7.5" r="2.5"
+      fill="rgba(255,255,255,0.28)"/>
+  </g>
+
+  <g id="SliderHandle-mouseover">
+    <circle cx="10" cy="10" r="10"
+      fill="url(#grad-handle-hover)"
+      stroke="rgba(203,166,247,0.55)"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <circle cx="7.5" cy="7.5" r="2.5"
+      fill="rgba(255,255,255,0.30)"/>
+    <!-- Hover ring -->
+    <circle cx="10" cy="10" r="13"
+      fill="none"
+      stroke="rgba(203,166,247,0.15)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="SliderHandle-pressed">
+    <circle cx="10" cy="10" r="11"
+      fill="url(#grad-handle-active)"
+      stroke="rgba(245,194,231,0.60)"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <circle cx="7.5" cy="7.5" r="2.5"
+      fill="rgba(255,255,255,0.35)"/>
+    <!-- Active ring -->
+    <circle cx="10" cy="10" r="15"
+      fill="none"
+      stroke="rgba(203,166,247,0.12)"
+      stroke-width="2"/>
+  </g>
+
+  <g id="SliderHandle-disabled">
+    <circle cx="10" cy="10" r="8"
+      fill="#45475a"
+      fill-opacity="0.50"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 12 — PROGRESS BAR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Progressbar — track -->
+  <g id="Progressbar-normal">
+    <rect x="0.5" y="0.5" width="99" height="11"
+      rx="5.5" ry="5.5"
+      fill="rgba(49,50,68,0.90)"
+      stroke="rgba(205,214,244,0.07)"
+      stroke-width="1"/>
+    <!-- Inset shadow -->
+    <rect x="0.5" y="0.5" width="99" height="4"
+      rx="2" ry="2"
+      fill="rgba(0,0,0,0.14)"/>
+  </g>
+
+  <!-- ProgressbarContents — fill bar -->
+  <g id="ProgressbarContents-normal">
+    <rect x="0.5" y="0.5" width="99" height="11"
+      rx="5" ry="5"
+      fill="url(#grad-progress-fill)"
+      filter="url(#filter-progress-glow)"/>
+    <!-- Shimmer overlay — animated by Kvantum via mask -->
+    <rect x="0.5" y="0.5" width="35" height="11"
+      rx="5" ry="5"
+      fill="rgba(255,255,255,0.15)"
+      opacity="0.60"/>
+    <!-- Top specular line -->
+    <rect x="2" y="1.5" width="96" height="1.5"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.22)"/>
+    <!-- Bottom depth line -->
+    <rect x="2" y="9" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.10)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 13 — MENU
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Menu container -->
+  <g id="Menu-normal">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="12" ry="12"
+      fill="url(#grad-menu)"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"
+      filter="url(#filter-shadow-deep)"/>
+    <!-- Inner border highlight -->
+    <rect x="1.5" y="1.5" width="97" height="97"
+      rx="11" ry="11"
+      fill="none"
+      stroke="rgba(255,255,255,0.05)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- MenuItem — individual menu entry -->
+  <g id="MenuItem-normal">
+    <rect x="0" y="0" width="100" height="30"
+      fill="transparent"/>
+  </g>
+
+  <g id="MenuItem-focused">
+    <!-- Hover highlight -->
+    <rect x="3" y="1" width="94" height="28"
+      rx="7" ry="7"
+      fill="url(#grad-menuitem-hover)"
+      stroke="rgba(203,166,247,0.15)"
+      stroke-width="1"/>
+    <!-- Left accent bar -->
+    <rect x="3" y="8" width="3" height="14"
+      rx="1.5" ry="1.5"
+      fill="#cba6f7"
+      opacity="0.85"/>
+  </g>
+
+  <g id="MenuItem-pressed">
+    <rect x="3" y="1" width="94" height="28"
+      rx="7" ry="7"
+      fill="url(#grad-menuitem-press)"/>
+    <rect x="3" y="8" width="3" height="14"
+      rx="1.5" ry="1.5"
+      fill="#11111b"
+      opacity="0.60"/>
+  </g>
+
+  <g id="MenuItem-toggled">
+    <rect x="3" y="1" width="94" height="28"
+      rx="7" ry="7"
+      fill="rgba(203,166,247,0.14)"
+      stroke="rgba(203,166,247,0.20)"
+      stroke-width="1"/>
+    <rect x="3" y="8" width="3" height="14"
+      rx="1.5" ry="1.5"
+      fill="#cba6f7"
+      opacity="0.90"/>
+  </g>
+
+  <!-- Menu separator -->
+  <g id="MenuSeparator-normal">
+    <line x1="10" y1="4" x2="90" y2="4"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 14 — TOOLTIP
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Tooltip-normal">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-tooltip)"
+      stroke="rgba(205,214,244,0.12)"
+      stroke-width="1"
+      filter="url(#filter-shadow-deep)"/>
+    <!-- Top highlight -->
+    <rect x="2" y="1.5" width="96" height="1"
+      rx="0.5" ry="0.5"
+      fill="rgba(255,255,255,0.09)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 15 — TOOLBAR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Toolbar-normal">
+    <rect x="0" y="0" width="100" height="100"
+      fill="#181825"
+      stroke="none"/>
+    <!-- Bottom separator -->
+    <line x1="0" y1="99" x2="100" y2="99"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 16 — GROUPBOX FRAME
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="GroupBox-normal">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="10" ry="10"
+      fill="none"
+      stroke="rgba(205,214,244,0.09)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="GroupBox-focused">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="10" ry="10"
+      fill="none"
+      stroke="rgba(203,166,247,0.30)"
+      stroke-width="1.5"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 17 — GENERIC FRAME
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Frame-normal">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="8" ry="8"
+      fill="none"
+      stroke="rgba(205,214,244,0.09)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 18 — DOCK WIDGET TITLE
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="DockWidgetTitle-normal">
+    <rect x="0" y="0" width="100" height="30"
+      fill="#181825"
+      rx="0" ry="0"/>
+    <line x1="0" y1="29" x2="100" y2="29"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="DockWidgetTitle-focused">
+    <rect x="0" y="0" width="100" height="30"
+      fill="#181825"/>
+    <!-- Left accent bar -->
+    <rect x="0" y="4" width="3" height="22"
+      rx="1.5" ry="1.5"
+      fill="#cba6f7"
+      opacity="0.80"/>
+    <line x1="0" y1="29" x2="100" y2="29"
+      stroke="rgba(203,166,247,0.15)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 19 — HEADER SECTION (Tree/Table headers)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="HeaderSection-normal">
+    <rect x="0" y="0" width="100" height="30"
+      fill="#181825"
+      stroke="none"/>
+    <line x1="99" y1="5" x2="99" y2="25"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+    <line x1="0" y1="29" x2="100" y2="29"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="HeaderSection-mouseover">
+    <rect x="0" y="0" width="100" height="30"
+      fill="url(#grad-header-hover)"
+      stroke="none"/>
+    <line x1="99" y1="5" x2="99" y2="25"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+    <line x1="0" y1="29" x2="100" y2="29"
+      stroke="rgba(205,214,244,0.12)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="HeaderSection-pressed">
+    <rect x="0" y="0" width="100" height="30"
+      fill="rgba(203,166,247,0.14)"/>
+    <line x1="0" y1="29" x2="100" y2="29"
+      stroke="rgba(203,166,247,0.25)"
+      stroke-width="1"/>
+    <!-- Sort indicator accent -->
+    <rect x="0" y="27" width="100" height="2"
+      fill="rgba(203,166,247,0.60)"/>
+  </g>
+
+  <g id="HeaderSection-toggled">
+    <rect x="0" y="0" width="100" height="30"
+      fill="rgba(203,166,247,0.10)"/>
+    <rect x="0" y="27" width="100" height="2.5"
+      fill="rgba(203,166,247,0.65)"/>
+    <line x1="99" y1="5" x2="99" y2="25"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 20 — ITEM VIEW (ListView/TreeView rows)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="ItemView-normal">
+    <rect x="0" y="0" width="100" height="28"
+      fill="transparent"/>
+  </g>
+
+  <g id="ItemView-focused">
+    <!-- Selected row -->
+    <rect x="2" y="1" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(203,166,247,0.18)"
+      stroke="rgba(203,166,247,0.22)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="ItemView-pressed">
+    <rect x="2" y="1" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(203,166,247,0.28)"
+      stroke="rgba(203,166,247,0.35)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="ItemView-toggled">
+    <rect x="2" y="1" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(203,166,247,0.20)"
+      stroke="rgba(203,166,247,0.25)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- Alternate row color -->
+  <g id="ItemView-normal-alt">
+    <rect x="0" y="0" width="100" height="28"
+      fill="rgba(49,50,68,0.25)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 21 — STATUS BAR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="StatusBar-normal">
+    <rect x="0" y="0" width="100" height="100"
+      fill="#181825"/>
+    <!-- Top separator -->
+    <line x1="0" y1="0" x2="100" y2="0"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 22 — MENU BAR
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="MenuBar-normal">
+    <rect x="0" y="0" width="100" height="100"
+      fill="#181825"/>
+    <!-- Bottom separator -->
+    <line x1="0" y1="99" x2="100" y2="99"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- MenuBarItem — individual menu bar button -->
+  <g id="MenuBarItem-normal">
+    <rect x="0" y="0" width="100" height="30"
+      fill="transparent"
+      rx="0" ry="0"/>
+  </g>
+
+  <g id="MenuBarItem-focused">
+    <rect x="2" y="2" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(203,166,247,0.14)"
+      stroke="rgba(203,166,247,0.20)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="MenuBarItem-pressed">
+    <rect x="2" y="2" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(203,166,247,0.22)"
+      stroke="rgba(203,166,247,0.30)"
+      stroke-width="1"/>
+  </g>
+
+  <g id="MenuBarItem-mouseover">
+    <rect x="2" y="2" width="96" height="26"
+      rx="6" ry="6"
+      fill="rgba(205,214,244,0.07)"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 23 — FOCUS RECT
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Focus-normal">
+    <rect x="1" y="1" width="98" height="98"
+      rx="7" ry="7"
+      fill="none"
+      stroke="rgba(203,166,247,0.55)"
+      stroke-width="2"
+      stroke-dasharray="4,3"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 24 — RUBBER BAND (Drag selection)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="RubberBand-normal">
+    <rect x="0.5" y="0.5" width="99" height="99"
+      rx="4" ry="4"
+      fill="rgba(203,166,247,0.08)"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      stroke-dasharray="5,3"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 25 — SPLITTER
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Splitter-normal">
+    <rect x="0" y="0" width="100" height="100"
+      fill="rgba(69,71,90,0.30)"/>
+    <!-- Center dots pattern -->
+    <circle cx="50" cy="46" r="2" fill="rgba(205,214,244,0.20)"/>
+    <circle cx="50" cy="50" r="2" fill="rgba(205,214,244,0.25)"/>
+    <circle cx="50" cy="54" r="2" fill="rgba(205,214,244,0.20)"/>
+  </g>
+
+  <g id="Splitter-mouseover">
+    <rect x="0" y="0" width="100" height="100"
+      fill="rgba(203,166,247,0.12)"/>
+    <circle cx="50" cy="46" r="2" fill="rgba(203,166,247,0.60)"/>
+    <circle cx="50" cy="50" r="2" fill="rgba(203,166,247,0.80)"/>
+    <circle cx="50" cy="54" r="2" fill="rgba(203,166,247,0.60)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 26 — DIAL (Circular knob)
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <g id="Dial-normal">
+    <!-- Outer ring -->
+    <circle cx="50" cy="50" r="48"
+      fill="rgba(49,50,68,0.90)"
+      stroke="rgba(205,214,244,0.12)"
+      stroke-width="1.5"/>
+    <!-- Inner face -->
+    <circle cx="50" cy="50" r="40"
+      fill="rgba(30,30,46,0.95)"
+      stroke="rgba(205,214,244,0.06)"
+      stroke-width="1"/>
+    <!-- Tick marks at 12 positions -->
+    <circle cx="50" cy="7"  r="2.5" fill="rgba(203,166,247,0.60)"/>
+    <circle cx="74" cy="14" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="88" cy="33" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="88" cy="67" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="74" cy="86" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="50" cy="93" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="26" cy="86" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="12" cy="67" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="12" cy="33" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <circle cx="26" cy="14" r="2"   fill="rgba(203,166,247,0.40)"/>
+    <!-- Center highlight -->
+    <circle cx="44" cy="44" r="8"
+      fill="rgba(255,255,255,0.06)"/>
+    <!-- Pointer dot -->
+    <circle cx="50" cy="15" r="4"
+      fill="#cba6f7"
+      filter="url(#filter-accent-glow)"/>
+  </g>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECTION 27 — SPIN BOX ARROWS
+       ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- SpinBox — includes up/down arrows drawn inline -->
+  <g id="SpinBox-normal">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-input)"
+      stroke="rgba(205,214,244,0.10)"
+      stroke-width="1"/>
+    <!-- Up arrow button area separator -->
+    <line x1="79" y1="2" x2="79" y2="14"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+    <!-- Down arrow button area separator -->
+    <line x1="79" y1="16" x2="79" y2="28"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+    <!-- Horizontal center divider -->
+    <line x1="80" y1="15" x2="98" y2="15"
+      stroke="rgba(205,214,244,0.08)"
+      stroke-width="1"/>
+    <!-- Up arrow -->
+    <path d="M85 12 L89 8 L93 12"
+      fill="none"
+      stroke="#7f849c"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <!-- Down arrow -->
+    <path d="M85 18 L89 22 L93 18"
+      fill="none"
+      stroke="#7f849c"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <!-- Inset shadow -->
+    <rect x="2" y="1.5" width="96" height="2"
+      rx="0.5" ry="0.5"
+      fill="rgba(0,0,0,0.14)"/>
+  </g>
+
+  <g id="SpinBox-focused">
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="url(#grad-input)"
+      stroke="#cba6f7"
+      stroke-width="1.5"
+      filter="url(#filter-accent-glow)"/>
+    <!-- Focus ring -->
+    <rect x="0.5" y="0.5" width="99" height="29"
+      rx="8" ry="8"
+      fill="none"
+      stroke="rgba(203,166,247,0.20)"
+      stroke-width="3"/>
+    <line x1="79" y1="2" x2="79" y2="14" stroke="rgba(203,166,247,0.15)" stroke-width="1"/>
+    <line x1="79" y1="16" x2="79" y2="28" stroke="rgba(203,166,247,0.15)" stroke-width="1"/>
+    <line x1="80" y1="15" x2="98" y2="15" stroke="rgba(203,166,247,0.15)" stroke-width="1"/>
+    <path d="M85 12 L89 8 L93 12"
+      fill="none" stroke="#cba6f7"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M85 18 L89 22 L93 18"
+      fill="none" stroke="#cba6f7"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+</svg>

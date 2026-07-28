@@ -1,0 +1,773 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  ASH DOTFILES v5.0 OMEGA — WLOGOUT ULTRA STYLESHEET                       ║
+   ║                                                                            ║
+   ║  ██╗░░░░░░█████╗░░██████╗░░█████╗░██╗░░░██╗████████╗                    ║
+   ║  ██║░░░░░██╔══██╗██╔════╝░██╔══██╗██║░░░██║╚══██╔══╝                   ║
+   ║  ██║░░░░░██║░░██║██║░░██╗░██║░░██║██║░░░██║░░░██║░░░                   ║
+   ║  ██║░░░░░██║░░██║██║░░╚██╗██║░░██║██║░░░██║░░░██║░░░                   ║
+   ║  ███████╗╚█████╔╝╚██████╔╝╚█████╔╝╚██████╔╝░░░██║░░░                   ║
+   ║  ╚══════╝░╚════╝░░╚═════╝░░╚════╝░░╚═════╝░░░░╚═╝░░░                   ║
+   ║                                                                            ║
+   ║  Design: Premium Glassmorphism • Animated • Accessible                    ║
+   ║  Icons:  Custom SVG Nerd Font style                                       ║
+   ║  Theme:  Catppuccin Mocha + ASH Dynamic Color Engine                     ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
+
+   @import "colors.css";
+
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🎬  KEYFRAME ANIMATIONS
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   /* Entry: backdrop fades in */
+   @keyframes backdrop-in {
+       from {
+           opacity: 0;
+           backdrop-filter: blur(0px);
+       }
+       to {
+           opacity: 1;
+           backdrop-filter: blur(var(--blur-xl));
+       }
+   }
+   
+   /* Entry: container scales in from center */
+   @keyframes container-in {
+       from {
+           opacity: 0;
+           transform: scale(0.88) translateY(24px);
+           filter: blur(8px);
+       }
+       to {
+           opacity: 1;
+           transform: scale(1) translateY(0);
+           filter: blur(0px);
+       }
+   }
+   
+   /* Entry: buttons cascade in with stagger */
+   @keyframes button-in {
+       from {
+           opacity: 0;
+           transform: translateY(20px) scale(0.90);
+           filter: blur(4px);
+       }
+       to {
+           opacity: 1;
+           transform: translateY(0) scale(1);
+           filter: blur(0px);
+       }
+   }
+   
+   /* Ambient orb pulse */
+   @keyframes orb-pulse {
+       0%, 100% {
+           transform: scale(1);
+           opacity: 0.5;
+       }
+       50% {
+           transform: scale(1.12);
+           opacity: 0.75;
+       }
+   }
+   
+   /* Slow drift for background orbs */
+   @keyframes orb-drift {
+       0%   { transform: translate(0px, 0px) scale(1); }
+       33%  { transform: translate(18px, -12px) scale(1.06); }
+       66%  { transform: translate(-10px, 16px) scale(0.96); }
+       100% { transform: translate(0px, 0px) scale(1); }
+   }
+   
+   /* Subtle shimmer on hover */
+   @keyframes shimmer {
+       0%   { background-position: -200% center; }
+       100% { background-position:  200% center; }
+   }
+   
+   /* Icon float animation */
+   @keyframes icon-float {
+       0%, 100% { transform: translateY(0px); }
+       50%       { transform: translateY(-4px); }
+   }
+   
+   /* Focus ring pulse */
+   @keyframes focus-ring {
+       0%, 100% { box-shadow: 0 0 0 2px var(--border-focus), 0 0 20px var(--glow-accent); }
+       50%       { box-shadow: 0 0 0 3px var(--border-focus), 0 0 36px var(--glow-accent-strong); }
+   }
+   
+   /* Glow breathe on active button */
+   @keyframes glow-breathe {
+       0%, 100% { opacity: 0.6; }
+       50%       { opacity: 1.0; }
+   }
+   
+   /* Scan line animation on hover */
+   @keyframes scan-line {
+       0%   { transform: translateY(-100%); opacity: 0; }
+       20%  { opacity: 0.4; }
+       80%  { opacity: 0.4; }
+       100% { transform: translateY(100%); opacity: 0; }
+   }
+   
+   /* Warning pulse for destructive actions */
+   @keyframes danger-pulse {
+       0%, 100% {
+           box-shadow:
+               0 0 0 1px var(--btn-shutdown-border),
+               0 0 20px var(--btn-shutdown-glow);
+       }
+       50% {
+           box-shadow:
+               0 0 0 2px rgba(243, 139, 168, 0.5),
+               0 0 40px rgba(243, 139, 168, 0.4);
+       }
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🌐  WINDOW ROOT — Full-screen overlay
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   * {
+       all: unset;
+       box-sizing: border-box;
+       -webkit-font-smoothing: antialiased;
+   }
+   
+   window {
+       background:         transparent;
+       font-family:        var(--font-sans);
+       font-size:          var(--text-base);
+       color:              var(--text-primary);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🌫️  BACKGROUND — Premium glass overlay with ambient orbs
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   box#warningbox,
+   box#logout-info,
+   .wlogout-background {
+       background: transparent;
+   }
+   
+   /* Main background container */
+   #window {
+       background:
+           /* Noise texture overlay — premium grain */
+           url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
+           /* Radial depth gradient */
+           radial-gradient(
+               ellipse 80% 70% at 50% 40%,
+               rgba(49, 50, 68, 0.45) 0%,
+               rgba(30, 30, 46, 0.65) 40%,
+               rgba(17, 17, 27, 0.88) 100%
+           );
+       backdrop-filter:    blur(var(--blur-xl)) saturate(180%) brightness(0.85);
+       animation:          backdrop-in var(--dur-entry) var(--ease-out) forwards;
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      📦  MAIN CONTAINER — Central panel
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   box {
+       background:         transparent;
+   }
+   
+   /* The grid container holding all buttons */
+   box#buttons {
+       /* Layout */
+       display:            flex;
+       flex-direction:     row;
+       justify-content:    center;
+       align-items:        center;
+       gap:                var(--space-5);
+       padding:            var(--space-12) var(--space-16);
+   
+       /* Glass panel */
+       background:         rgba(24, 24, 37, 0.60);
+       backdrop-filter:    blur(var(--blur-lg)) saturate(160%);
+       border-radius:      var(--radius-2xl);
+       border:             1px solid var(--border-subtle);
+   
+       /* Depth shadow */
+       box-shadow:
+           var(--shadow-xl),
+           inset 0 1px 0 rgba(205, 214, 244, 0.06),
+           inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+   
+       /* Entry animation */
+       animation:          container-in var(--dur-entry) var(--ease-spring) forwards;
+       animation-delay:    80ms;
+       opacity:            0;
+   
+       /* Relative for pseudo-element orbs */
+       position:           relative;
+       overflow:           hidden;
+   }
+   
+   /* Ambient purple orb — top left */
+   box#buttons::before {
+       content:            "";
+       position:           absolute;
+       top:                -80px;
+       left:               -60px;
+       width:              300px;
+       height:             300px;
+       border-radius:      50%;
+       background:         radial-gradient(
+           circle,
+           rgba(203, 166, 247, 0.12) 0%,
+           transparent 70%
+       );
+       animation:          orb-drift 12s ease-in-out infinite;
+       pointer-events:     none;
+   }
+   
+   /* Ambient blue orb — bottom right */
+   box#buttons::after {
+       content:            "";
+       position:           absolute;
+       bottom:             -60px;
+       right:              -80px;
+       width:              280px;
+       height:             280px;
+       border-radius:      50%;
+       background:         radial-gradient(
+           circle,
+           rgba(137, 180, 250, 0.10) 0%,
+           transparent 70%
+       );
+       animation:          orb-drift 16s ease-in-out infinite reverse;
+       pointer-events:     none;
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🔘  BUTTON BASE — Shared styles for all action buttons
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button {
+       /* Layout */
+       display:                flex;
+       flex-direction:         column;
+       align-items:            center;
+       justify-content:        center;
+       gap:                    var(--space-4);
+   
+       /* Dimensions */
+       min-width:              130px;
+       min-height:             150px;
+       padding:                var(--space-8) var(--space-6);
+   
+       /* Glass surface */
+       background:             var(--bg-button);
+       backdrop-filter:        blur(var(--blur-md));
+       border-radius:          var(--radius-xl);
+       border:                 1px solid var(--border-default);
+   
+       /* Depth */
+       box-shadow:
+           var(--shadow-md),
+           inset 0 1px 0 rgba(255, 255, 255, 0.05),
+           inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+   
+       /* Typography */
+       font-family:            var(--font-sans);
+       font-size:              var(--text-sm);
+       font-weight:            var(--weight-semi);
+       letter-spacing:         0.08em;
+       text-transform:         uppercase;
+       color:                  var(--text-secondary);
+   
+       /* Interaction */
+       cursor:                 pointer;
+       outline:                none;
+   
+       /* Transitions */
+       transition:
+           transform           var(--dur-base)  var(--ease-spring),
+           background          var(--dur-base)  var(--ease-smooth),
+           border-color        var(--dur-base)  var(--ease-smooth),
+           box-shadow          var(--dur-base)  var(--ease-smooth),
+           color               var(--dur-fast)  var(--ease-smooth),
+           filter              var(--dur-base)  var(--ease-smooth);
+   
+       /* Staggered entry animation — overridden per nth-child */
+       animation:              button-in var(--dur-slow) var(--ease-spring) both;
+       animation-delay:        200ms;
+   
+       /* Position for pseudo-elements */
+       position:               relative;
+       overflow:               hidden;
+   }
+   
+   /* Shimmer overlay on hover — moves left to right */
+   button::before {
+       content:                "";
+       position:               absolute;
+       inset:                  0;
+       border-radius:          inherit;
+       background:             linear-gradient(
+           105deg,
+           transparent 20%,
+           rgba(255, 255, 255, 0.05) 50%,
+           transparent 80%
+       );
+       background-size:        200% 100%;
+       opacity:                0;
+       transition:             opacity var(--dur-base) var(--ease-smooth);
+       pointer-events:         none;
+   }
+   
+   /* Scan line effect on hover */
+   button::after {
+       content:                "";
+       position:               absolute;
+       left:                   0;
+       right:                  0;
+       height:                 40%;
+       background:             linear-gradient(
+           180deg,
+           transparent 0%,
+           rgba(255, 255, 255, 0.04) 50%,
+           transparent 100%
+       );
+       opacity:                0;
+       pointer-events:         none;
+       transition:             opacity var(--dur-fast) var(--ease-smooth);
+   }
+   
+   /* ── Staggered Entry Delays ────────────────────────────────────────────────── */
+   
+   button:nth-child(1) { animation-delay: 160ms; }
+   button:nth-child(2) { animation-delay: 230ms; }
+   button:nth-child(3) { animation-delay: 300ms; }
+   button:nth-child(4) { animation-delay: 370ms; }
+   button:nth-child(5) { animation-delay: 440ms; }
+   button:nth-child(6) { animation-delay: 510ms; }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🖼️  BUTTON ICON — SVG background image
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button image,
+   button .icon {
+       min-width:              56px;
+       min-height:             56px;
+       transition:
+           transform   var(--dur-base) var(--ease-spring),
+           filter      var(--dur-base) var(--ease-smooth),
+           opacity     var(--dur-base) var(--ease-smooth);
+       filter:                 drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      📝  BUTTON LABEL TEXT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button label {
+       font-family:            var(--font-sans);
+       font-size:              var(--text-sm);
+       font-weight:            var(--weight-semi);
+       letter-spacing:         0.10em;
+       text-transform:         uppercase;
+       color:                  var(--text-muted);
+       transition:
+           color       var(--dur-fast) var(--ease-smooth),
+           transform   var(--dur-base) var(--ease-spring);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ✨  HOVER STATE — Premium lift + glow
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button:hover {
+       background:             var(--bg-button-hover);
+       transform:              translateY(-6px) scale(1.03);
+       filter:                 brightness(1.08);
+   }
+   
+   button:hover::before {
+       opacity:                1;
+       animation:              shimmer 1.2s ease-in-out infinite;
+   }
+   
+   button:hover::after {
+       opacity:                1;
+       animation:              scan-line 1.8s ease-in-out infinite;
+   }
+   
+   button:hover image,
+   button:hover .icon {
+       transform:              scale(1.12) translateY(-2px);
+       animation:              icon-float 2.5s ease-in-out infinite;
+   }
+   
+   button:hover label {
+       transform:              translateY(1px);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      👆  ACTIVE / CLICK STATE
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button:active {
+       transform:              translateY(-1px) scale(0.96);
+       filter:                 brightness(1.15);
+       transition-duration:    60ms;
+   }
+   
+   button:active image,
+   button:active .icon {
+       transform:              scale(0.92);
+       transition-duration:    60ms;
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🎯  FOCUS STATE — Keyboard navigation
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button:focus {
+       outline:                none;
+       border-color:           var(--border-accent);
+       animation:              focus-ring 1.8s ease-in-out infinite;
+   }
+   
+   button:focus label {
+       color:                  var(--text-accent);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🔐  BUTTON: LOCK
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #lock {
+       border-color:           var(--btn-lock-border);
+   }
+   
+   #lock image {
+       -gtk-icon-source:       url("icons/lock.svg");
+       filter:
+           drop-shadow(0 0 8px var(--btn-lock-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #lock label {
+       color:                  var(--btn-lock-color);
+   }
+   
+   #lock:hover {
+       background:             var(--btn-lock-bg);
+       border-color:           var(--btn-lock-color);
+       box-shadow:
+           var(--shadow-lg),
+           0 0 32px var(--btn-lock-glow),
+           0 0 60px rgba(116, 199, 236, 0.15),
+           inset 0 1px 0 rgba(116, 199, 236, 0.12);
+   }
+   
+   #lock:hover image {
+       filter:
+           drop-shadow(0 0 16px var(--btn-lock-glow))
+           drop-shadow(0 0 32px rgba(116, 199, 236, 0.4))
+           brightness(1.2);
+   }
+   
+   #lock:hover label {
+       color:                  var(--sapphire);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🚪  BUTTON: LOGOUT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #logout {
+       border-color:           var(--btn-logout-border);
+   }
+   
+   #logout image {
+       -gtk-icon-source:       url("icons/logout.svg");
+       filter:
+           drop-shadow(0 0 8px var(--btn-logout-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #logout label {
+       color:                  var(--btn-logout-color);
+   }
+   
+   #logout:hover {
+       background:             var(--btn-logout-bg);
+       border-color:           var(--btn-logout-color);
+       box-shadow:
+           var(--shadow-lg),
+           0 0 32px var(--btn-logout-glow),
+           0 0 60px rgba(180, 190, 254, 0.12),
+           inset 0 1px 0 rgba(180, 190, 254, 0.10);
+   }
+   
+   #logout:hover image {
+       filter:
+           drop-shadow(0 0 16px var(--btn-logout-glow))
+           drop-shadow(0 0 28px rgba(180, 190, 254, 0.4))
+           brightness(1.2);
+   }
+   
+   #logout:hover label {
+       color:                  var(--lavender);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      😴  BUTTON: SUSPEND
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #suspend {
+       border-color:           var(--btn-suspend-border);
+   }
+   
+   #suspend image {
+       -gtk-icon-source:       url("icons/suspend.svg");
+       filter:
+           drop-shadow(0 0 8px var(--btn-suspend-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #suspend label {
+       color:                  var(--btn-suspend-color);
+   }
+   
+   #suspend:hover {
+       background:             var(--btn-suspend-bg);
+       border-color:           var(--btn-suspend-color);
+       box-shadow:
+           var(--shadow-lg),
+           0 0 32px var(--btn-suspend-glow),
+           0 0 60px rgba(148, 226, 213, 0.12),
+           inset 0 1px 0 rgba(148, 226, 213, 0.10);
+   }
+   
+   #suspend:hover image {
+       filter:
+           drop-shadow(0 0 16px var(--btn-suspend-glow))
+           drop-shadow(0 0 28px rgba(148, 226, 213, 0.4))
+           brightness(1.2);
+   }
+   
+   #suspend:hover label {
+       color:                  var(--teal);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      💾  BUTTON: HIBERNATE
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #hibernate {
+       border-color:           var(--btn-hibernate-border);
+   }
+   
+   #hibernate image {
+       -gtk-icon-source:       url("icons/hibernate.svg");
+       filter:
+           drop-shadow(0 0 8px var(--btn-hibernate-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #hibernate label {
+       color:                  var(--btn-hibernate-color);
+   }
+   
+   #hibernate:hover {
+       background:             var(--btn-hibernate-bg);
+       border-color:           var(--btn-hibernate-color);
+       box-shadow:
+           var(--shadow-lg),
+           0 0 32px var(--btn-hibernate-glow),
+           0 0 60px rgba(203, 166, 247, 0.15),
+           inset 0 1px 0 rgba(203, 166, 247, 0.12);
+   }
+   
+   #hibernate:hover image {
+       filter:
+           drop-shadow(0 0 18px var(--btn-hibernate-glow))
+           drop-shadow(0 0 36px rgba(203, 166, 247, 0.5))
+           brightness(1.2);
+   }
+   
+   #hibernate:hover label {
+       color:                  var(--mauve);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ⚡  BUTTON: SHUTDOWN — Danger state
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #shutdown {
+       border-color:           var(--btn-shutdown-border);
+   }
+   
+   #shutdown image {
+       -gtk-icon-source:       url("icons/shutdown.svg");
+       filter:
+           drop-shadow(0 0 10px var(--btn-shutdown-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #shutdown label {
+       color:                  var(--btn-shutdown-color);
+   }
+   
+   #shutdown:hover {
+       background:             var(--btn-shutdown-bg);
+       border-color:           var(--btn-shutdown-color);
+       animation:
+           button-in var(--dur-slow) var(--ease-spring) both,
+           danger-pulse 2s ease-in-out infinite;
+       box-shadow:
+           var(--shadow-lg),
+           0 0 40px var(--btn-shutdown-glow),
+           0 0 80px rgba(243, 139, 168, 0.20);
+   }
+   
+   #shutdown:hover image {
+       filter:
+           drop-shadow(0 0 20px var(--btn-shutdown-glow))
+           drop-shadow(0 0 40px rgba(243, 139, 168, 0.5))
+           brightness(1.25);
+   }
+   
+   #shutdown:hover label {
+       color:                  var(--red);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      🔄  BUTTON: REBOOT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   #reboot {
+       border-color:           var(--btn-reboot-border);
+   }
+   
+   #reboot image {
+       -gtk-icon-source:       url("icons/reboot.svg");
+       filter:
+           drop-shadow(0 0 8px var(--btn-reboot-glow))
+           drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+   }
+   
+   #reboot label {
+       color:                  var(--btn-reboot-color);
+   }
+   
+   #reboot:hover {
+       background:             var(--btn-reboot-bg);
+       border-color:           var(--btn-reboot-color);
+       box-shadow:
+           var(--shadow-lg),
+           0 0 32px var(--btn-reboot-glow),
+           0 0 60px rgba(250, 179, 135, 0.12),
+           inset 0 1px 0 rgba(250, 179, 135, 0.10);
+   }
+   
+   #reboot:hover image {
+       filter:
+           drop-shadow(0 0 16px var(--btn-reboot-glow))
+           drop-shadow(0 0 28px rgba(250, 179, 135, 0.45))
+           brightness(1.2);
+       /* Spin on hover for reboot */
+       animation:
+           icon-float 2s ease-in-out infinite;
+   }
+   
+   #reboot:hover label {
+       color:                  var(--peach);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ⌨️  KEYBIND HINT — Keyboard shortcut indicator
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   button .keybind,
+   button .shortcut {
+       position:               absolute;
+       top:                    var(--space-2);
+       right:                  var(--space-3);
+       font-family:            var(--font-mono);
+       font-size:              var(--text-xs);
+       font-weight:            var(--weight-semi);
+       color:                  var(--overlay-0);
+       background:             rgba(255, 255, 255, 0.05);
+       border:                 1px solid var(--border-subtle);
+       border-radius:          var(--radius-sm);
+       padding:                2px 6px;
+       letter-spacing:         0.05em;
+       transition:             all var(--dur-fast) var(--ease-smooth);
+       pointer-events:         none;
+   }
+   
+   button:hover .keybind,
+   button:hover .shortcut {
+       color:                  var(--text-secondary);
+       background:             rgba(255, 255, 255, 0.08);
+       border-color:           var(--border-default);
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      📱  RESPONSIVE — Smaller screens
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   @media (max-width: 1280px) {
+       button {
+           min-width:          110px;
+           min-height:         130px;
+           padding:            var(--space-6) var(--space-5);
+           gap:                var(--space-3);
+       }
+   
+       button image {
+           min-width:          48px;
+           min-height:         48px;
+       }
+   
+       button label {
+           font-size:          var(--text-xs);
+       }
+   
+       box#buttons {
+           gap:                var(--space-4);
+           padding:            var(--space-8) var(--space-10);
+       }
+   }
+   
+   @media (max-width: 900px) {
+       box#buttons {
+           flex-wrap:          wrap;
+           max-width:          520px;
+           gap:                var(--space-3);
+           padding:            var(--space-6) var(--space-8);
+       }
+   
+       button {
+           min-width:          100px;
+           min-height:         120px;
+       }
+   }
+   
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ♿  ACCESSIBILITY — Reduced motion support
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+   
+   @media (prefers-reduced-motion: reduce) {
+       *,
+       *::before,
+       *::after {
+           animation-duration:     0.01ms !important;
+           animation-iteration-count: 1 !important;
+           transition-duration:    0.01ms !important;
+       }
+   
+       button:hover {
+           transform:              translateY(-2px);
+       }
+   }

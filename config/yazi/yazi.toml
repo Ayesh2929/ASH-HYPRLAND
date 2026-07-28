@@ -1,0 +1,281 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v5.0 OMEGA — YAZI ULTRA CONFIGURATION                       ║
+# ║                                                                            ║
+# ║  ██╗░░░██╗░█████╗░███████╗██╗                                             ║
+# ║  ╚██╗░██╔╝██╔══██╗╚════██║██║                                            ║
+# ║  ░╚████╔╝░███████║░░███╔═╝██║                                            ║
+# ║  ░░╚██╔╝░░██╔══██║██╔══╝░░██║                                            ║
+# ║  ░░░██║░░░██║░░██║███████╗██║                                            ║
+# ║  ░░░╚═╝░░░╚═╝░░╚═╝╚══════╝╚═╝                                            ║
+# ║                                                                            ║
+# ║  Premium Terminal File Manager — ASH Integration                           ║
+# ║  Features: GPU preview • Git status • Smart filter • Full border          ║
+# ║  Version: yazi v0.3.0+                                                    ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🖥️  MANAGER — Panel layout and behavior
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[manager]
+
+# ── Panel Ratios ──────────────────────────────────────────────────────────────
+# Three-panel layout: parent | current | preview
+# Format: [parent_width, current_width, preview_width]
+# Premium: parent=20%, current=40%, preview=40%
+ratio = [1, 2, 2]
+
+# ── Sorting ───────────────────────────────────────────────────────────────────
+# sort_by: "modified" | "created" | "extension" | "alphabetical" | "natural"
+#          | "size" | "none"
+sort_by = "natural"
+
+# Sort in reverse order (newest first for modified, Z-A for alpha)
+sort_reverse = false
+
+# Directories always listed before files
+sort_dir_first = true
+
+# Case-insensitive alphabetical sorting
+sort_sensitive = false
+
+# Show file sizes while sorting by size (costs extra stat() calls)
+sort_translit = false
+
+# ── Display Options ───────────────────────────────────────────────────────────
+# Show hidden files (dotfiles) by default
+show_hidden = false
+
+# Show symlink targets in the listing
+show_symlink = true
+
+# Line mode: "none" | "size" | "permissions" | "owner" | "mtime" | "btime"
+linemode = "size"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  👁️  PREVIEW — File preview engine configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[preview]
+
+# ── Image Protocol ────────────────────────────────────────────────────────────
+# "auto"     = auto-detect best available
+# "kitty"    = Kitty terminal graphics protocol (BEST — GPU accelerated)
+# "iterm2"   = iTerm2 inline image protocol
+# "sixel"    = Sixel bitmap graphics
+# "halfblock"= Unicode half-block characters (▀▄) — most compatible
+# "braille"  = Braille dots (limited)
+# For ASH + Kitty on Wayland: use "kitty"
+image_quality = 90
+
+# Maximum image size to preview (bytes) — 0 = unlimited
+# 32MB limit to avoid OOM on huge raw images
+max_width = 600
+max_height = 900
+
+# ── Image Cache ───────────────────────────────────────────────────────────────
+# Cache location for generated thumbnails
+# Uses XDG_CACHE_HOME by default
+
+# ── Previewer Commands ────────────────────────────────────────────────────────
+# Previewers are defined per file type using MIME or extension matching
+# Format: { mime = "pattern", run = "command" }
+
+[[preview.wrap]]
+max_width = 120
+
+# ── Media Preview ─────────────────────────────────────────────────────────────
+# Tab preview — show preview on Tab press
+tab_size = 2
+
+# ── Code Syntax Highlighting ──────────────────────────────────────────────────
+# Uses bat for syntax highlighting
+# bat theme must match ASH theme — injected by ash theme engine
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔍  OPENER — File open actions
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[opener]
+
+# ── Text Files ────────────────────────────────────────────────────────────────
+edit = [
+    # Primary: Neovim (ASH default editor)
+    { run = 'nvim "$@"',                block = true,  desc = "Neovim",        for = "unix" },
+    # Alternative: Helix
+    { run = 'hx "$@"',                  block = true,  desc = "Helix",         for = "unix" },
+    # Alternative: Kate (Qt-based)
+    { run = 'kate "$@"',                orphan = true, desc = "Kate",          for = "unix" },
+    # Fallback: nano
+    { run = 'nano "$@"',                block = true,  desc = "Nano",          for = "unix" },
+]
+
+# ── Graphical Editors ─────────────────────────────────────────────────────────
+open = [
+    # Text files — default to Neovim
+    { run = 'nvim "$@"',                block = true,  desc = "Neovim",        for = "unix" },
+]
+
+# ── Image Viewers ─────────────────────────────────────────────────────────────
+image = [
+    # Primary: imv (lightweight Wayland image viewer)
+    { run = 'imv "$@"',                 orphan = true, desc = "imv",           for = "unix" },
+    # Alternative: feh
+    { run = 'feh "$@"',                 orphan = true, desc = "feh",           for = "unix" },
+    # Alternative: eog (GNOME Image Viewer)
+    { run = 'eog "$@"',                 orphan = true, desc = "Image Viewer",  for = "unix" },
+    # Alternative: Gimp
+    { run = 'gimp "$@"',                orphan = true, desc = "GIMP",          for = "unix" },
+]
+
+# ── Video ─────────────────────────────────────────────────────────────────────
+video = [
+    # Primary: mpv (ASH default media player)
+    { run = 'mpv "$@"',                 orphan = true, desc = "mpv",           for = "unix" },
+    # Alternative: vlc
+    { run = 'vlc "$@"',                 orphan = true, desc = "VLC",           for = "unix" },
+    # Alternative: celluloid (mpv frontend)
+    { run = 'celluloid "$@"',           orphan = true, desc = "Celluloid",     for = "unix" },
+]
+
+# ── Audio ─────────────────────────────────────────────────────────────────────
+audio = [
+    { run = 'mpv "$@"',                 orphan = true, desc = "mpv",           for = "unix" },
+    { run = 'rhythmbox "$@"',           orphan = true, desc = "Rhythmbox",     for = "unix" },
+]
+
+# ── PDF / Documents ───────────────────────────────────────────────────────────
+pdf = [
+    { run = 'zathura "$@"',             orphan = true, desc = "Zathura",       for = "unix" },
+    { run = 'evince "$@"',              orphan = true, desc = "Evince",        for = "unix" },
+    { run = 'okular "$@"',              orphan = true, desc = "Okular",        for = "unix" },
+]
+
+# ── Archives ──────────────────────────────────────────────────────────────────
+archive = [
+    # Extract in place
+    { run = 'ouch decompress "$@"',     block = true,  desc = "Extract",       for = "unix" },
+    # Open with file roller
+    { run = 'file-roller "$@"',         orphan = true, desc = "Archive Manager", for = "unix" },
+    # List contents first
+    { run = 'ouch list "$@" | less',    block = true,  desc = "List Contents", for = "unix" },
+]
+
+# ── Web Browser ───────────────────────────────────────────────────────────────
+browser = [
+    { run = 'xdg-open "$@"',            orphan = true, desc = "Browser",       for = "unix" },
+    { run = 'firefox "$@"',             orphan = true, desc = "Firefox",       for = "unix" },
+]
+
+# ── Fallback ──────────────────────────────────────────────────────────────────
+fallback = [
+    { run = 'xdg-open "$@"',            orphan = true, desc = "Default App",   for = "unix" },
+    { run = 'nvim "$@"',                block = true,  desc = "Neovim",        for = "unix" },
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📎  PLUGINS — Previewers by file type
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[plugin]
+
+# ── Fetchers ──────────────────────────────────────────────────────────────────
+# Fetchers run on every file to gather metadata (git status, etc.)
+fetchers = [
+    # Git status integration — shows ✓ ● ✗ on files
+    { id = "git", name = "*",           run = "git" },
+]
+
+# ── Preloaders ────────────────────────────────────────────────────────────────
+# Preloaders generate previews in the background for fast switching
+preloaders = [
+    # Image thumbnails via Kitty protocol
+    { mime = "image/*",                 run = "default" },
+    # Video thumbnails via ffmpegthumbnailer
+    { mime = "video/*",                 run = "default" },
+    # PDF first page via pdftoppm
+    { mime = "application/pdf",         run = "default" },
+]
+
+# ── Previewers ────────────────────────────────────────────────────────────────
+# Previewers render content in the preview pane
+
+previewers = [
+    # ── Directories ────────────────────────────────────────────────────────
+    { mime = "inode/directory",          run = "default" },
+
+    # ── Code / Text (syntax highlighted via bat) ────────────────────────────
+    { mime = "text/*",                   run = "code" },
+    { mime = "application/json",         run = "code" },
+    { mime = "application/toml",         run = "code" },
+    { mime = "application/yaml",         run = "code" },
+    { mime = "application/xml",          run = "code" },
+    { mime = "application/javascript",   run = "code" },
+    { mime = "application/typescript",   run = "code" },
+    { name = "*.sh",                     run = "code" },
+    { name = "*.fish",                   run = "code" },
+    { name = "*.py",                     run = "code" },
+    { name = "*.rs",                     run = "code" },
+    { name = "*.go",                     run = "code" },
+    { name = "*.lua",                    run = "code" },
+    { name = "*.md",                     run = "code" },
+    { name = "*.toml",                   run = "code" },
+    { name = "Makefile",                 run = "code" },
+    { name = "Dockerfile",               run = "code" },
+    { name = "*.conf",                   run = "code" },
+    { name = "*.ini",                    run = "code" },
+    { name = "*.css",                    run = "code" },
+    { name = "*.html",                   run = "code" },
+
+    # ── Images (Kitty GPU-accelerated) ─────────────────────────────────────
+    { mime = "image/jpeg",               run = "default" },
+    { mime = "image/jpg",                run = "default" },
+    { mime = "image/png",                run = "default" },
+    { mime = "image/gif",                run = "default" },
+    { mime = "image/webp",               run = "default" },
+    { mime = "image/avif",               run = "default" },
+    { mime = "image/heic",               run = "default" },
+    { mime = "image/svg+xml",            run = "default" },
+    { mime = "image/*",                  run = "default" },
+
+    # ── Video thumbnails ───────────────────────────────────────────────────
+    { mime = "video/*",                  run = "default" },
+
+    # ── Audio (metadata via exiftool) ──────────────────────────────────────
+    { mime = "audio/*",                  run = "default" },
+
+    # ── PDF (first page preview) ───────────────────────────────────────────
+    { mime = "application/pdf",          run = "pdf" },
+
+    # ── Archives (list contents) ───────────────────────────────────────────
+    { mime = "application/zip",          run = "archive" },
+    { mime = "application/x-tar",        run = "archive" },
+    { mime = "application/x-bzip2",      run = "archive" },
+    { mime = "application/x-7z-compressed", run = "archive" },
+    { mime = "application/x-rar",        run = "archive" },
+    { mime = "application/gzip",         run = "archive" },
+    { mime = "application/x-xz",         run = "archive" },
+    { mime = "application/zstd",         run = "archive" },
+
+    # ── Fallback ───────────────────────────────────────────────────────────
+    { name = "*",                         run = "default" },
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🛠️  INPUT — Text input widget settings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[input]
+
+# Cursor style for input: "block" | "underline" | "bar"
+cursor = "bar"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📊  LOG — Logging configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[log]
+
+# Enable debug logging to ~/.local/state/yazi/yazi.log
+# "error" | "warn" | "info" | "debug" | "trace"
+enabled = false

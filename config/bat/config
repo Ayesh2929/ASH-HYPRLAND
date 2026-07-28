@@ -1,0 +1,150 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v5.0 OMEGA — BAT ULTRA CONFIGURATION                        ║
+# ║                                                                            ║
+# ║  ██████╗░░█████╗░████████╗                                                ║
+# ║  ██╔══██╗██╔══██╗╚══██╔══╝                                               ║
+# ║  ██████╦╝███████║░░░██║░░░                                               ║
+# ║  ██╔══██╗██╔══██║░░░██║░░░                                               ║
+# ║  ██████╦╝██║░░██║░░░██║░░░                                               ║
+# ║  ╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░                                               ║
+# ║                                                                            ║
+# ║  Premium Syntax Highlighting Pager — ASH Integration                      ║
+# ║  Theme: ASH Dynamic (Catppuccin Mocha base)                               ║
+# ║  Features: Git integration • Line numbers • Auto-paging                   ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  THEME — ASH Dynamic color scheme
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Active syntax highlighting theme
+# Options: run `bat --list-themes` to see all available
+# ASH engine updates this via template substitution
+# "ash-dynamic" = our custom Catppuccin Mocha tmTheme
+--theme="ash-dynamic"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📐  DISPLAY — Visual output settings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Decorations ───────────────────────────────────────────────────────────────
+# Which UI decorations to show
+# Values: "auto" | "never" | "always"
+# Components: header, grid, rule, numbers, snip
+--decorations="always"
+
+# ── Style ─────────────────────────────────────────────────────────────────────
+# Comma-separated list of style components:
+# full        = all components
+# auto        = smart selection based on terminal
+# plain       = no decorations (raw output)
+# changes     = git change indicators (requires git repo)
+# header      = filename header
+# header-filename = filename in header
+# header-filesize = file size in header
+# grid        = border grid lines
+# rule        = rule line between files
+# numbers     = line numbers
+# snip        = snip separator between ranges
+--style="numbers,changes,header,grid"
+
+# ── Line Numbers ──────────────────────────────────────────────────────────────
+# Always show line numbers (overridden by --style)
+# --number
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📄  PAGING — Pager configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Pager ─────────────────────────────────────────────────────────────────────
+# External pager for long output
+# "less" = standard | "more" | "delta" | "never" (disable pager)
+# LESS flags:
+#   -R = pass raw ANSI (required for colors)
+#   -F = quit if output fits on one screen
+#   -X = don't clear screen on exit
+#   -S = don't wrap long lines
+#   --mouse = enable mouse scroll
+--pager="less --RAW-CONTROL-CHARS --quit-if-one-screen --no-init --mouse"
+
+# ── Paging mode ───────────────────────────────────────────────────────────────
+# "auto"   = page if output > terminal height
+# "always" = always use pager
+# "never"  = never use pager
+--paging="auto"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔠  LANGUAGE — Syntax detection
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Language overrides ────────────────────────────────────────────────────────
+# Map file extensions/names to languages
+# Format: "ExtOrName:Language"
+--map-syntax="*.conf:INI"
+--map-syntax="*.cfg:INI"
+--map-syntax="*.env:Shell"
+--map-syntax=".env.*:Shell"
+--map-syntax="Dockerfile.*:Dockerfile"
+--map-syntax="*.yuck:Lisp"
+--map-syntax="*.rasi:CSS"
+--map-syntax="*.kdl:JSON"
+--map-syntax="hyprland.conf:Bash"
+--map-syntax="hyprlock.conf:Bash"
+--map-syntax="hypridle.conf:Bash"
+--map-syntax="waybar/config:JSON"
+--map-syntax="mako/config:INI"
+--map-syntax="dunstrc:INI"
+--map-syntax="*.fish:Fish"
+--map-syntax="gitconfig:INI"
+--map-syntax=".gitignore:Git Ignore"
+--map-syntax="*.toml:TOML"
+--map-syntax="Cargo.lock:TOML"
+--map-syntax="*.jsonc:JSON"
+--map-syntax="*.zathurarc:Bash"
+--map-syntax="zathurarc:Bash"
+--map-syntax="*.tmTheme:XML"
+--map-syntax="mimeapps.list:INI"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  COLOR — Terminal color support
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Color mode ────────────────────────────────────────────────────────────────
+# "auto"     = detect terminal support
+# "always"   = force colors (for piping)
+# "never"    = no colors
+--color="always"
+
+# ── True color ────────────────────────────────────────────────────────────────
+# Enable 24-bit color output (requires COLORTERM=truecolor in env)
+# Automatically detected from COLORTERM env var
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📏  WRAPPING & TABS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Line wrapping ─────────────────────────────────────────────────────────────
+# "auto"   = wrap at terminal width
+# "never"  = don't wrap (use horizontal scroll)
+# "character" = wrap at any character
+--wrap="auto"
+
+# ── Tab width ─────────────────────────────────────────────────────────────────
+# Number of spaces per tab character
+--tabs=4
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  UNICODE — Character handling
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Enable Unicode support (Nerd Fonts)
+# (automatic in modern terminals)
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔀  DIFF — Git integration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Show git change indicators in gutter
+# "+" = added line | "-" = removed | "~" = modified
+# Requires file to be in a git repository
+# (enabled via --style=changes above)

@@ -1,0 +1,341 @@
+;;;; ╔══════════════════════════════════════════════════════════════════╗
+;;;; ║  ASH — EWW MUSIC PLAYER WIDGET                                  ║
+;;;; ║  Ultra Premium Music Player — Full Controls + Art               ║
+;;;; ╚══════════════════════════════════════════════════════════════════╝
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  HELPERS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;; Format seconds → "m:ss"
+(defpoll media-pos-fmt :interval "1s"
+  :initial "0:00"
+  `playerctl position 2>/dev/null \
+   | awk '{m=int($1/60); s=int($1%60); printf "%d:%02d", m, s}' \
+   || echo "0:00"`)
+
+(defpoll media-len-fmt :interval "5s"
+  :initial "0:00"
+  `playerctl metadata mpris:length 2>/dev/null \
+   | awk '{us=$1/1000000; m=int(us/60); s=int(us%60); printf "%d:%02d", m, s}' \
+   || echo "0:00"`)
+
+;; Progress percentage (0-100)
+(defpoll media-progress :interval "1s"
+  :initial "0"
+  `playerctl position 2>/dev/null | awk -v len="$(
+      playerctl metadata mpris:length 2>/dev/null \
+      | awk '{printf "%.0f", $1/1000000}')" \
+   '{if(len>0) printf "%.0f", ($1/len)*100; else print 0}' \
+   || echo "0"`)
+
+;; Album art (cached)
+(defpoll media-art-cached :interval "5s"
+  :initial ""
+  `art=$(playerctl metadata mpris:artUrl 2>/dev/null | sed 's|file://||')
+   if [ -n "$art" ] && [ -f "$art" ]; then
+     cache_dir="$HOME/.cache/ash/music-art"
+     mkdir -p "$cache_dir"
+     hash=$(echo "$art" | md5sum | cut -d' ' -f1)
+     cached="$cache_dir/${hash}.png"
+     if [ ! -f "$cached" ]; then
+       convert "$art" -resize 280x280^ -gravity center -extent 280x280 "$cached" 2>/dev/null
+     fi
+     echo "$cached"
+   else
+     echo ""
+   fi`)
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  ALBUM ART WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-art []
+  (overlay
+    :class "music-art-container"
+    ;; Blurred background
+    (box
+      :class  "music-art-bg"
+      :style  {media-art-cached != ""
+                ? "background-image: url('${media-art-cached}');"
+                : ""})
+    ;; Album image
+    (box :class "music-art-wrapper"
+      (image
+        :class   "music-art__img"
+        :path    {media-art-cached != ""
+                    ? media-art-cached
+                    : ""}
+        :image-width  180
+        :image-height 180
+        :visible {media-art-cached != ""}))
+    ;; Fallback when no art
+    (box
+      :class   "music-art__fallback"
+      :visible {media-art-cached == ""}
+      (label
+        :class "music-art__fallback-icon"
+        :text  {media-player == "spotify"   ? "󰓇" :
+                media-player == "firefox"   ? "󰈹" :
+                media-player == "mpv"       ? "󰐹" :
+                media-player == "vlc"       ? "󰕼" :
+                media-player == "rhythmbox" ? "󰓃" :
+                                             "󰎆"}))
+    ;; Playing/paused overlay
+    (box
+      :class   "music-art__state-overlay
+                ${media-status == 'Playing' ? '' : ' music-art__state-overlay--visible'}"
+      (label
+        :class "music-art__state-icon"
+        :text  {media-status == "Paused" ? "󰏤" : "󰐍"}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  TRACK INFO
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-info []
+  (box
+    :class       "music-info"
+    :orientation "v"
+    :space-evenly false
+    :spacing     4
+    ;; Player badge
+    (box :class "music-info__player-row"
+      :orientation "h" :space-evenly false :spacing 6
+      (box :class "badge badge--accent"
+        (label :text {media-player == "spotify"   ? "󰓇 Spotify" :
+                      media-player == "firefox"   ? "󰈹 Firefox" :
+                      media-player == "mpv"       ? "󰐹 MPV" :
+                      media-player == "vlc"       ? "󰕼 VLC" :
+                      media-player == "mpd"       ? "󰝚 MPD" :
+                      media-player == "rhythmbox" ? "󰓃 Rhythmbox" :
+                      "󰎆 Music"}))
+      (box :hexpand true)
+      ;; Shuffle / loop state
+      (label
+        :class   "music-info__flag ${media-shuffle == 'true' ? 'music-info__flag--active' : ''}"
+        :text    "󰒝"
+        :tooltip "Shuffle ${media-shuffle == 'true' ? 'On' : 'Off'}")
+      (label
+        :class   "music-info__flag ${media-loop != 'None' ? 'music-info__flag--active' : ''}"
+        :text    {media-loop == "Track"    ? "󰑘" :
+                  media-loop == "Playlist" ? "󰑖" :
+                                            "󰑗"}
+        :tooltip "Loop: ${media-loop}"))
+    ;; Title
+    (label
+      :class     "music-info__title"
+      :text      {media-title != "" ? media-title : "Nothing Playing"}
+      :truncate  true
+      :limit-width 32
+      :tooltip   {media-title})
+    ;; Artist
+    (label
+      :class     "music-info__artist"
+      :text      {media-artist != "" ? media-artist : "—"}
+      :truncate  true
+      :limit-width 28)
+    ;; Album
+    (label
+      :class     "music-info__album"
+      :text      {media-album != "" ? "󰀥  ${media-album}" : ""}
+      :visible   {media-album != ""}
+      :truncate  true
+      :limit-width 28)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  PROGRESS BAR
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-progress []
+  (box
+    :class       "music-progress"
+    :orientation "v"
+    :space-evenly false
+    :spacing     4
+    ;; Slider track
+    (scale
+      :class    "music-progress__slider"
+      :value    {media-progress}
+      :min      0
+      :max      100
+      :onchange "playerctl position $(awk 'BEGIN{printf \"%.1f\", ({} / 100) * ${media-len}}')"
+      :tooltip  "Seek")
+    ;; Time labels
+    (box
+      :class       "music-progress__times"
+      :orientation "h"
+      :space-evenly false
+      (label :class "music-progress__elapsed" :text {media-pos-fmt})
+      (box   :hexpand true)
+      (label :class "music-progress__total"   :text {media-len-fmt}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  PLAYBACK CONTROLS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-controls []
+  (box
+    :class       "music-controls"
+    :orientation "h"
+    :space-evenly false
+    :spacing     0
+    ;; Shuffle
+    (button
+      :class   "music-btn music-btn--sm
+                ${media-shuffle == 'true' ? ' music-btn--active' : ''}"
+      :onclick "playerctl shuffle Toggle"
+      :tooltip "Toggle Shuffle"
+      (label :text "󰒝"))
+    (box :hexpand true)
+    ;; Previous
+    (button
+      :class   "music-btn"
+      :onclick "playerctl previous"
+      :tooltip "Previous Track"
+      (label :text "󰒮"))
+    ;; Play / Pause (large)
+    (button
+      :class   "music-btn music-btn--play"
+      :onclick "playerctl play-pause"
+      :tooltip {media-status == "Playing" ? "Pause" : "Play"}
+      (label
+        :class "music-btn__play-icon"
+        :text  {media-status == "Playing" ? "󰏤" : "󰐍"}))
+    ;; Next
+    (button
+      :class   "music-btn"
+      :onclick "playerctl next"
+      :tooltip "Next Track"
+      (label :text "󰒭"))
+    (box :hexpand true)
+    ;; Loop
+    (button
+      :class   "music-btn music-btn--sm
+                ${media-loop != 'None' ? ' music-btn--active' : ''}"
+      :onclick "playerctl loop ${media-loop == 'None'     ? 'Track' :
+                                  media-loop == 'Track'    ? 'Playlist' :
+                                                             'None'}"
+      :tooltip "Loop: ${media-loop}"
+      (label :text {media-loop == "Track"    ? "󰑘" :
+                    media-loop == "Playlist" ? "󰑖" :
+                                             "󰑗"}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  VOLUME CONTROL
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-volume []
+  (box
+    :class       "music-volume"
+    :orientation "h"
+    :space-evenly false
+    :spacing     8
+    (button
+      :class   "music-btn music-btn--sm"
+      :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+      :tooltip {muted == "true" ? "Unmute" : "Mute"}
+      (label
+        :text {muted == "true" ? "󰖁" :
+               volume >= 60    ? "󰕾" :
+               volume >= 25    ? "󰖀" :
+                                 "󰕿"}))
+    (scale
+      :class    "music-volume__slider"
+      :value    {volume}
+      :min      0
+      :max      100
+      :hexpand  true
+      :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%"
+      :tooltip  "${volume}% Volume")
+    (label
+      :class "music-volume__value"
+      :text  "${volume}%")))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  WAVE VISUALIZER BAR
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-viz []
+  (box
+    :class   "music-viz"
+    :visible {media-status == "Playing"}
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")
+    (box :class "wave-bar ${media-status == 'Playing' ? 'wave-bar--playing' : 'wave-bar--paused'}")))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  MAIN MUSIC WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget music-player []
+  (box
+    :class       "music-player"
+    :orientation "v"
+    :space-evenly false
+    :spacing     0
+    ;; Top: Art + Info (side by side)
+    (box
+      :class       "music-top"
+      :orientation "h"
+      :space-evenly false
+      :spacing     16
+      (music-art)
+      (box
+        :class       "music-top__right"
+        :orientation "v"
+        :space-evenly false
+        :spacing     12
+        ;; Close button
+        (box
+          :class       "music-top__header"
+          :orientation "h"
+          :space-evenly false
+          (label :class "music-top__title-label" :text "Now Playing")
+          (box   :hexpand true)
+          (button
+            :class   "icon-btn icon-btn--sm"
+            :onclick "eww close music-window"
+            (label :text "󰅖")))
+        ;; Track info
+        (music-info)
+        ;; Visualizer
+        (music-viz)))
+    ;; Separator
+    (box :class "sep" :style "margin: 12px 0;")
+    ;; Progress
+    (music-progress)
+    ;; Controls
+    (music-controls)
+    ;; Volume
+    (box :class "sep" :style "margin: 8px 0;")
+    (music-volume)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  MUSIC WINDOW
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwindow music-window
+  :monitor     0
+  :geometry    (geometry
+                  :x      "-12px"
+                  :y      "50px"
+                  :width  "360px"
+                  :anchor "top right")
+  :stacking    "overlay"
+  :exclusive   false
+  :focusable   true
+  :namespace   "ash-music"
+  (music-player))

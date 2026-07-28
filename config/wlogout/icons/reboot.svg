@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+
+    <filter id="rb-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.980 0.702 0.529 0 0
+                0.980 0.702 0.529 0 0
+                0.980 0.702 0.529 0 0
+                0     0     0     1 0" result="c"/>
+      <feMerge>
+        <feMergeNode in="c"/>
+        <feMergeNode in="c"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="rb-soft">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.8"/>
+    </filter>
+
+    <!-- Arrow gradient: Peach → Yellow -->
+    <linearGradient id="rb-arrow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#fab387"/>
+      <stop offset="100%" stop-color="#f9e2af"/>
+    </linearGradient>
+
+    <!-- Circular arrows gradient -->
+    <linearGradient id="rb-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#fab387" stop-opacity="0.95"/>
+      <stop offset="50%"  stop-color="#f9e2af" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fab387" stop-opacity="0.70"/>
+    </linearGradient>
+
+    <!-- Highlight gradient -->
+    <linearGradient id="rb-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.28)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.00)"/>
+    </linearGradient>
+
+    <!-- Aura radial -->
+    <radialGradient id="rb-aura" cx="50%" cy="50%" r="50%">
+      <stop offset="65%"  stop-color="rgba(250,179,135,0.00)"/>
+      <stop offset="100%" stop-color="rgba(250,179,135,0.18)"/>
+    </radialGradient>
+
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30"
+    fill="rgba(250,179,135,0.06)"
+    stroke="rgba(250,179,135,0.14)"
+    stroke-width="0.5"/>
+
+  <!-- Ambient aura -->
+  <circle cx="32" cy="32" r="26"
+    fill="url(#rb-aura)"
+    filter="url(#rb-soft)"/>
+
+  <!-- ── Circular arrows ────────────────────────────────────────────────── -->
+  <g filter="url(#rb-glow)">
+
+    <!-- Top arc (upper half circle, CW) -->
+    <!-- Arc from left (190°) clockwise to right (350°) — upper rotation -->
+    <path d="M12 34 A20 20 0 0 1 52 34"
+      fill="none"
+      stroke="url(#rb-ring-grad)"
+      stroke-width="5"
+      stroke-linecap="round"/>
+
+    <!-- Top arc highlight -->
+    <path d="M12 34 A20 20 0 0 1 52 34"
+      fill="none"
+      stroke="url(#rb-highlight)"
+      stroke-width="1.8"
+      stroke-linecap="round"/>
+
+    <!-- Bottom arc (lower half circle, CW) -->
+    <path d="M52 34 A20 20 0 0 1 12 34"
+      fill="none"
+      stroke="url(#rb-ring-grad)"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity="0.75"/>
+
+    <!-- ── Arrowhead at top-right (direction of top arc) ────────────────── -->
+    <polygon points="52,27  52,37  60,32"
+      fill="url(#rb-arrow-grad)"
+      stroke="rgba(250,179,135,0.5)"
+      stroke-width="0.8"
+      stroke-linejoin="round"/>
+
+    <!-- Arrowhead highlight -->
+    <line x1="52" y1="28" x2="59" y2="32"
+      stroke="rgba(255,255,255,0.35)"
+      stroke-width="1.2"
+      stroke-linecap="round"/>
+
+    <!-- ── Arrowhead at bottom-left (direction of bottom arc) ─────────── -->
+    <polygon points="12,27  12,37  4,32"
+      fill="url(#rb-arrow-grad)"
+      stroke="rgba(250,179,135,0.5)"
+      stroke-width="0.8"
+      stroke-linejoin="round"
+      opacity="0.85"/>
+
+  </g>
+
+  <!-- ── Center symbol — refresh indicator ─────────────────────────────── -->
+  <g filter="url(#rb-glow)" opacity="0.9">
+    <!-- Center circle -->
+    <circle cx="32" cy="32" r="7"
+      fill="rgba(250,179,135,0.20)"
+      stroke="url(#rb-arrow-grad)"
+      stroke-width="2"/>
+
+    <!-- Small inner circle (dot) -->
+    <circle cx="32" cy="32" r="3"
+      fill="url(#rb-arrow-grad)"
+      stroke="rgba(255,255,255,0.30)"
+      stroke-width="0.8"/>
+
+    <!-- Center highlight -->
+    <circle cx="30.5" cy="30.5" r="1.2"
+      fill="rgba(255,255,255,0.55)"/>
+  </g>
+
+  <!-- ── Speed lines (motion) ───────────────────────────────────────────── -->
+  <g opacity="0.30" stroke="#fab387" stroke-linecap="round">
+    <line x1="6" y1="22" x2="14" y2="22" stroke-width="1.5"/>
+    <line x1="4" y1="27" x2="10" y2="27" stroke-width="1.2"/>
+    <line x1="54" y1="42" x2="58" y2="42" stroke-width="1.5"/>
+    <line x1="54" y1="37" x2="60" y2="37" stroke-width="1.2"/>
+  </g>
+
+</svg>

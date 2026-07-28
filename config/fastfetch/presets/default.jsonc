@@ -1,0 +1,310 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH FASTFETCH — DEFAULT PRESET                                            ║
+// ║                                                                            ║
+// ║  ██████╗░███████╗███████╗░█████╗░██╗░░░██╗██╗░░░░░████████╗             ║
+// ║  ██╔══██╗██╔════╝██╔════╝██╔══██╗██║░░░██║██║░░░░░╚══██╔══╝            ║
+// ║  ██║░░██║█████╗░░█████╗░░███████║██║░░░██║██║░░░░░░░░██║░░░            ║
+// ║  ██║░░██║██╔══╝░░██╔══╝░░██╔══██║██║░░░██║██║░░░░░░░░██║░░░            ║
+// ║  ██████╔╝███████╗██║░░░░░██║░░██║╚██████╔╝███████╗░░░██║░░░            ║
+// ║  ╚═════╝░╚══════╝╚═╝░░░░░╚═╝░░╚═╝░╚═════╝░╚══════╝░░░╚═╝░░░            ║
+// ║                                                                            ║
+// ║  Style    : Balanced — logo + full system info                            ║
+// ║  Icons    : Nerd Fonts v3 required                                        ║
+// ║  Colors   : Catppuccin Mocha (ASH Dark)                                  ║
+// ║  Usage    : fastfetch --config ~/.config/fastfetch/presets/default.jsonc  ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+    // ── Display Settings ──────────────────────────────────────────────────────
+
+    "display": {
+        "color": {
+            "keys":      "35",   // Mauve — module keys
+            "title":     "94",   // Bright blue — title
+            "separator": "90"    // Dark gray
+        },
+        "separator": "  \u001b[90m│\u001b[0m  ",
+        "keyWidth": 16,
+        "padding": { "left": 1 },
+        "brightColor": true,
+        "colorLogo": true,
+        "bar": {
+            "charElapsed": "▰",
+            "charTotal":   "▱",
+            "width": 12,
+            "border": false
+        },
+        "percentType": 9,       // colored percentage + bar
+        "sizeUnit": "auto",
+        "sizeNdigits": 2,
+        "temperatureUnit": "celsius"
+    },
+
+    // ── Logo ──────────────────────────────────────────────────────────────────
+
+    "logo": {
+        "source": "auto",
+        "type": "auto",
+        "padding": {
+            "top": 0,
+            "left": 1,
+            "right": 2
+        },
+        "position": "left"
+    },
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  MODULES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    "modules": [
+
+        // ── Header ─────────────────────────────────────────────────────────
+        {
+            "type": "title",
+            "format": "\u001b[1;35m{user-name}\u001b[0m\u001b[2;37m@\u001b[0m\u001b[1;34m{host-name}\u001b[0m",
+            "key": ""
+        },
+        {
+            "type": "separator",
+            "string": "═",
+            "color": { "separator": "35" }
+        },
+
+        // ── System ─────────────────────────────────────────────────────────
+        {
+            "type": "os",
+            "key": "  OS         ",
+            "keyColor": "34",
+            "format": "{pretty-name} {arch}"
+        },
+        {
+            "type": "kernel",
+            "key": "  Kernel     ",
+            "keyColor": "34",
+            "format": "{sysname} {release}"
+        },
+        {
+            "type": "host",
+            "key": "󰌢  Host       ",
+            "keyColor": "34"
+        },
+        {
+            "type": "bios",
+            "key": "  BIOS       ",
+            "keyColor": "34"
+        },
+        {
+            "type": "uptime",
+            "key": "  Uptime     ",
+            "keyColor": "34"
+        },
+        {
+            "type": "bootmgr",
+            "key": "  Boot       ",
+            "keyColor": "34"
+        },
+        {
+            "type": "break"
+        },
+
+        // ── Desktop ────────────────────────────────────────────────────────
+        {
+            "type": "wm",
+            "key": "  WM         ",
+            "keyColor": "35"
+        },
+        {
+            "type": "wmtheme",
+            "key": "  WM Theme   ",
+            "keyColor": "35"
+        },
+        {
+            "type": "de",
+            "key": "  DE         ",
+            "keyColor": "35"
+        },
+        {
+            "type": "gtk",
+            "key": "  GTK3       ",
+            "keyColor": "35",
+            "version": 3
+        },
+        {
+            "type": "gtk",
+            "key": "  GTK4       ",
+            "keyColor": "35",
+            "version": 4
+        },
+        {
+            "type": "icons",
+            "key": "  Icons      ",
+            "keyColor": "35"
+        },
+        {
+            "type": "cursor",
+            "key": "  Cursor     ",
+            "keyColor": "35"
+        },
+        {
+            "type": "font",
+            "key": "  Font       ",
+            "keyColor": "35"
+        },
+        {
+            "type": "wallpaper",
+            "key": "  Wallpaper  ",
+            "keyColor": "35"
+        },
+        {
+            "type": "break"
+        },
+
+        // ── Software ───────────────────────────────────────────────────────
+        {
+            "type": "shell",
+            "key": "  Shell      ",
+            "keyColor": "36"
+        },
+        {
+            "type": "terminal",
+            "key": "  Terminal   ",
+            "keyColor": "36"
+        },
+        {
+            "type": "terminalfont",
+            "key": "  Term Font  ",
+            "keyColor": "36"
+        },
+        {
+            "type": "editor",
+            "key": "  Editor     ",
+            "keyColor": "36"
+        },
+        {
+            "type": "browser",
+            "key": "  Browser    ",
+            "keyColor": "36"
+        },
+        {
+            "type": "packages",
+            "key": "󰏖  Packages   ",
+            "keyColor": "36"
+        },
+        {
+            "type": "break"
+        },
+
+        // ── Hardware ───────────────────────────────────────────────────────
+        {
+            "type": "cpu",
+            "key": "  CPU        ",
+            "keyColor": "33",
+            "showPeCoreCount": true,
+            "temp": true,
+            "format": "{name} ({num-cores}c/{num-threads}t) @ {max-frequency} [{temp}]",
+            "tempColor": {
+                "green":  60,
+                "yellow": 80,
+                "red":    90
+            }
+        },
+        {
+            "type": "cpu",
+            "key": "  CPU Load   ",
+            "keyColor": "33",
+            "format": "{1}% (1m) · {5}% (5m) · {15}% (15m)"
+        },
+        {
+            "type": "gpu",
+            "key": "󰍹  GPU        ",
+            "keyColor": "33",
+            "temp": true,
+            "format": "{name} [{temp}]",
+            "tempColor": {
+                "green":  70,
+                "yellow": 85,
+                "red":    95
+            }
+        },
+        {
+            "type": "memory",
+            "key": "  RAM        ",
+            "keyColor": "33",
+            "format": "{used} / {total} ({percentage}%)"
+        },
+        {
+            "type": "swap",
+            "key": "  Swap       ",
+            "keyColor": "33",
+            "format": "{used} / {total} ({percentage}%)"
+        },
+        {
+            "type": "disk",
+            "key": "󰋊  Disk /     ",
+            "keyColor": "33",
+            "folders": "/",
+            "format": "{used} / {total} ({percentage}%)"
+        },
+        {
+            "type": "disk",
+            "key": "󰋊  Disk /home ",
+            "keyColor": "33",
+            "folders": "/home",
+            "format": "{used} / {total} ({percentage}%)"
+        },
+        {
+            "type": "break"
+        },
+
+        // ── Network & Misc ─────────────────────────────────────────────────
+        {
+            "type": "localip",
+            "key": "󰖩  LAN IP     ",
+            "keyColor": "36",
+            "showIpv4": true,
+            "showIpv6": false,
+            "defaultRouteOnly": true
+        },
+        {
+            "type": "publicip",
+            "key": "󰈀  WAN IP     ",
+            "keyColor": "36",
+            "timeout": 2000
+        },
+        {
+            "type": "bluetooth",
+            "key": "  Bluetooth  ",
+            "keyColor": "36"
+        },
+        {
+            "type": "sound",
+            "key": "󰕾  Audio      ",
+            "keyColor": "36"
+        },
+        {
+            "type": "battery",
+            "key": "  Battery    ",
+            "keyColor": "32",
+            "format": "{percentage}% ({status}) · {temp}"
+        },
+        {
+            "type": "poweradapter",
+            "key": "󱊦  Adapter    ",
+            "keyColor": "32"
+        },
+        {
+            "type": "break"
+        },
+
+        // ── Color Strip ────────────────────────────────────────────────────
+        {
+            "type": "colors",
+            "paddingLeft": 2,
+            "symbol": "circle",
+            "format": " {color}{symbol}"
+        }
+    ]
+}

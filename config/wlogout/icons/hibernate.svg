@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+
+    <filter id="hib-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0.796 0.651 0.969 0 0
+                0     0     0     1 0" result="c"/>
+      <feMerge>
+        <feMergeNode in="c"/>
+        <feMergeNode in="c"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="hib-soft">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+    </filter>
+
+    <!-- Snowflake gradient: Mauve → Lavender -->
+    <linearGradient id="hib-flake-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#b4befe"/>
+    </linearGradient>
+
+    <!-- Crystal facet gradient -->
+    <linearGradient id="hib-crystal-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#f5c2e7" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#cba6f7" stop-opacity="0.7"/>
+    </linearGradient>
+
+    <!-- Outer ring gradient -->
+    <radialGradient id="hib-ring-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="80%"  stop-color="rgba(203,166,247,0.00)"/>
+      <stop offset="100%" stop-color="rgba(203,166,247,0.20)"/>
+    </radialGradient>
+
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30"
+    fill="rgba(203,166,247,0.06)"
+    stroke="rgba(203,166,247,0.14)"
+    stroke-width="0.5"/>
+
+  <!-- Ambient aura -->
+  <circle cx="32" cy="32" r="26"
+    fill="url(#hib-ring-grad)"
+    filter="url(#hib-soft)"/>
+
+  <!-- ── Snowflake / Crystal ────────────────────────────────────────────── -->
+  <g filter="url(#hib-glow)" transform="translate(32,32)">
+
+    <!-- 6 main arms -->
+    <g stroke="url(#hib-flake-grad)" stroke-width="3" stroke-linecap="round">
+      <line x1="0" y1="-20" x2="0" y2="20"/>
+      <line x1="-17.3" y1="-10" x2="17.3" y2="10"/>
+      <line x1="-17.3" y1="10" x2="17.3" y2="-10"/>
+    </g>
+
+    <!-- Arm tips — facets at 60° intervals -->
+    <g stroke="url(#hib-flake-grad)" stroke-width="2" stroke-linecap="round" opacity="0.85">
+      <!-- Top arm tips -->
+      <line x1="-5" y1="-13" x2="0" y2="-18"/>
+      <line x1="5" y1="-13" x2="0" y2="-18"/>
+      <!-- Bottom arm tips -->
+      <line x1="-5" y1="13" x2="0" y2="18"/>
+      <line x1="5" y1="13" x2="0" y2="18"/>
+      <!-- Upper-right arm tips -->
+      <line x1="11.5" y1="-10.5" x2="16" y2="-8.5"/>
+      <line x1="14.5" y1="-4.5" x2="16" y2="-8.5"/>
+      <!-- Lower-left arm tips -->
+      <line x1="-11.5" y1="10.5" x2="-16" y2="8.5"/>
+      <line x1="-14.5" y1="4.5" x2="-16" y2="8.5"/>
+      <!-- Upper-left arm tips -->
+      <line x1="-11.5" y1="-10.5" x2="-16" y2="-8.5"/>
+      <line x1="-14.5" y1="-4.5" x2="-16" y2="-8.5"/>
+      <!-- Lower-right arm tips -->
+      <line x1="11.5" y1="10.5" x2="16" y2="8.5"/>
+      <line x1="14.5" y1="4.5" x2="16" y2="8.5"/>
+    </g>
+
+    <!-- Inner hexagon rings (crystal lattice) -->
+    <polygon points="0,-8 6.9,-4 6.9,4 0,8 -6.9,4 -6.9,-4"
+      fill="none"
+      stroke="url(#hib-crystal-grad)"
+      stroke-width="1.4"
+      opacity="0.70"/>
+
+    <polygon points="0,-4 3.5,-2 3.5,2 0,4 -3.5,2 -3.5,-2"
+      fill="rgba(203,166,247,0.25)"
+      stroke="url(#hib-crystal-grad)"
+      stroke-width="1"
+      opacity="0.80"/>
+
+    <!-- Center crystal facet -->
+    <circle cx="0" cy="0" r="3.5"
+      fill="url(#hib-crystal-grad)"
+      stroke="rgba(255,255,255,0.40)"
+      stroke-width="0.8"/>
+
+    <!-- Center sparkle highlight -->
+    <circle cx="-1" cy="-1" r="1.2"
+      fill="rgba(255,255,255,0.70)"/>
+
+  </g>
+
+  <!-- ── Floating micro-crystals ────────────────────────────────────────── -->
+  <g opacity="0.55">
+    <!-- Top left crystal -->
+    <g transform="translate(10,12) rotate(20) scale(0.55)">
+      <line x1="0" y1="-8" x2="0" y2="8"
+        stroke="#cba6f7" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-6.9" y1="-4" x2="6.9" y2="4"
+        stroke="#cba6f7" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-6.9" y1="4" x2="6.9" y2="-4"
+        stroke="#cba6f7" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <!-- Bottom right crystal -->
+    <g transform="translate(52,50) rotate(-15) scale(0.40)">
+      <line x1="0" y1="-8" x2="0" y2="8"
+        stroke="#b4befe" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-6.9" y1="-4" x2="6.9" y2="4"
+        stroke="#b4befe" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-6.9" y1="4" x2="6.9" y2="-4"
+        stroke="#b4befe" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <!-- Top right dot -->
+    <circle cx="50" cy="12" r="2.5"
+      fill="#cba6f7" opacity="0.6"/>
+    <!-- Bottom left dot -->
+    <circle cx="12" cy="52" r="2"
+      fill="#b4befe" opacity="0.5"/>
+  </g>
+
+</svg>
