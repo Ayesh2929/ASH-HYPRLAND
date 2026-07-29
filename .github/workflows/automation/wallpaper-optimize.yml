@@ -1007,7 +1007,7 @@ jobs:
           REPORT_EOF
 
       - name: "📤 Upload optimized artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "wallpaper-opt-${{ matrix.wallpaper.basename }}-${{ needs.detect-wallpapers.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/optimized/${{ matrix.wallpaper.basename }}/"
@@ -1044,7 +1044,7 @@ jobs:
             2>/dev/null || true
 
       - name: "📥 Download all optimized artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "wallpaper-opt-*-${{ needs.detect-wallpapers.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/all-optimized"

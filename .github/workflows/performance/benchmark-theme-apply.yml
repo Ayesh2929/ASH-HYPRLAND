@@ -928,7 +928,7 @@ jobs:
 
       - name: "📤 Upload benchmark artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-theme-apply-${{ matrix.target.name }}-${{ needs.preflight.outputs.bench_id }}"
           path: |
@@ -1265,7 +1265,7 @@ jobs:
 
       - name: "📤 Upload pipeline results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-pipeline-${{ matrix.theme.name }}-${{ needs.preflight.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/pipeline/${{ matrix.theme.name }}/"
@@ -1292,7 +1292,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas jinja2 tabulate rich
 
       - name: "📥 Download all benchmark artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "bench-*-${{ needs.preflight.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/collected"
@@ -1636,7 +1636,7 @@ jobs:
 
       - name: "📤 Upload consolidated report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-report-theme-apply-${{ needs.preflight.outputs.bench_id }}"
           path: |

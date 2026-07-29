@@ -439,7 +439,7 @@ jobs:
           echo "  📋 Tables: $(sqlite3 "${DB_PATH}" '.tables')"
 
       - name: "📤 Upload bootstrap artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "regress-bootstrap-${{ steps.session.outputs.id }}"
           path: |
@@ -743,7 +743,7 @@ jobs:
           PYTHON_EOF
 
       - name: "📤 Upload domain data"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "regress-data-${{ matrix.domain.name }}-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/${{ matrix.domain.name }}/"
@@ -789,7 +789,7 @@ jobs:
             jq sqlite3 bc 2>/dev/null || true
 
       - name: "📥 Download all domain data"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "regress-data-*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/collected"
@@ -1395,7 +1395,7 @@ jobs:
           ANALYSIS_EOF
 
       - name: "📤 Upload analysis"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "regress-analysis-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.REPORTS_DIR }}/analysis.json"
@@ -1426,13 +1426,13 @@ jobs:
             2>/dev/null || true
 
       - name: "📥 Download analysis"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "regress-analysis-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.REPORTS_DIR }}"
 
       - name: "📥 Download domain data"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "regress-data-*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/collected"
@@ -2188,7 +2188,7 @@ jobs:
           VIZ_EOF
 
       - name: "📤 Upload charts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "regress-charts-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.REPORTS_DIR }}/charts/"
@@ -2221,7 +2221,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends jq 2>/dev/null || true
 
       - name: "📥 Download analysis"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "regress-analysis-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.REPORTS_DIR }}"
@@ -2818,7 +2818,7 @@ jobs:
 
       - name: "📤 Upload final reports"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "regression-report-final-${{ needs.bootstrap.outputs.session_id }}"
           path: |

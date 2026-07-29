@@ -261,7 +261,7 @@ jobs:
           ls -lh /tmp/ash-e2e-container.tar.gz 2>/dev/null || true
 
       - name: "📤 Upload Container"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "e2e-container"
           path: /tmp/ash-e2e-container.tar.gz
@@ -287,7 +287,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: "📥 Restore Container"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "e2e-container"
           path: /tmp/
@@ -536,7 +536,7 @@ jobs:
 
       - name: "📤 Upload E2E Results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "e2e-results-${{ matrix.suite }}"
           path: |
@@ -751,7 +751,7 @@ jobs:
 
       - name: "📤 Upload Performance Results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "e2e-performance-results"
           path: perf-results.json
@@ -770,7 +770,7 @@ jobs:
 
     steps:
       - name: "📥 Download Performance Results"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "e2e-performance-results"
           path: ./perf/

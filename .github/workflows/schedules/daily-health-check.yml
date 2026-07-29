@@ -817,7 +817,7 @@ jobs:
           mkdir -p "${WORK_DIR}" "${RESULTS_DIR}"
 
       - name: "📥 Download check results"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "health-*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/collected"
@@ -1266,7 +1266,7 @@ jobs:
 
       - name: "📤 Upload health report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "daily-health-${{ needs.bootstrap.outputs.session_id }}"
           path: |

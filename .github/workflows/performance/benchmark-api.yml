@@ -1435,7 +1435,7 @@ jobs:
           echo "${API_BASE_URL}" > "${BENCH_DIR}/api.url"
 
       - name: "📤 Upload server artifact"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "api-server-${{ steps.id.outputs.bench_id }}"
           path: |
@@ -2285,7 +2285,7 @@ jobs:
 
       - name: "📤 Upload endpoint artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "api-ep-${{ matrix.endpoint.group }}-${{ matrix.endpoint.name }}-${{ needs.api-server.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/${{ matrix.endpoint.group }}/${{ matrix.endpoint.name }}/"
@@ -3179,7 +3179,7 @@ jobs:
 
       - name: "📤 Upload load test artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "api-load-${{ matrix.scenario.name }}-${{ needs.api-server.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/load/${{ matrix.scenario.name }}/"
@@ -3636,7 +3636,7 @@ jobs:
 
       - name: "📤 Upload WebSocket artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "api-ws-${{ needs.api-server.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/websocket/"
@@ -3674,7 +3674,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends jq 2>/dev/null || true
 
       - name: "📥 Download all artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "api-*-${{ needs.api-server.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/collected"
@@ -4177,7 +4177,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "api-report-final-${{ needs.api-server.outputs.bench_id }}"
           path: |

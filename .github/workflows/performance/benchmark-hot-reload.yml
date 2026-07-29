@@ -870,7 +870,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "reload-${{ matrix.target.name }}-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/${{ matrix.target.name }}/"
@@ -1158,7 +1158,7 @@ jobs:
 
       - name: "📤 Upload cascade results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "reload-cascade-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/cascade/"
@@ -1314,7 +1314,7 @@ jobs:
 
       - name: "📤 Upload stress results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "reload-stress-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/stress/"
@@ -1341,7 +1341,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas rich tabulate
 
       - name: "📥 Download all artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "reload-*-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/collected"
@@ -1530,7 +1530,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "reload-report-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.REPORTS_DIR }}/"

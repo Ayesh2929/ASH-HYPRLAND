@@ -790,7 +790,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "memory-${{ matrix.scenario.name }}-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/${{ matrix.scenario.name }}/"
@@ -837,7 +837,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas rich tabulate jinja2
 
       - name: "📥 Download artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "memory-*-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/all"
@@ -1123,7 +1123,7 @@ jobs:
 
       - name: "📤 Upload final reports"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "memory-report-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.REPORTS_DIR }}/"

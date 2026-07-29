@@ -528,7 +528,7 @@ jobs:
           echo "  ✅ GPG signing complete"
 
       - name: "📤 Upload Build Assets"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "release-assets-${{ needs.validate-tag.outputs.version }}"
           path: dist/
@@ -708,7 +708,7 @@ jobs:
 
       - name: "📥 Download Build Assets"
         if: needs.build-assets.result == 'success'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "release-assets-${{ needs.validate-tag.outputs.version }}"
           path: dist/

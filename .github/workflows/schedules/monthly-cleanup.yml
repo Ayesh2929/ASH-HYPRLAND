@@ -417,7 +417,7 @@ jobs:
 
       - name: "📤 Upload cleanup log"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "cleanup-artifacts-log-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/artifacts-result.json"
@@ -1279,7 +1279,7 @@ jobs:
 
       - name: "📤 Upload health report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "health-scorecard-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/"
@@ -1319,7 +1319,7 @@ jobs:
           mkdir -p "${WORK_DIR}" "${REPORT_DIR}"
 
       - name: "📥 Download cleanup logs"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/collected"
@@ -1461,7 +1461,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "monthly-cleanup-report-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.REPORT_DIR }}/"
