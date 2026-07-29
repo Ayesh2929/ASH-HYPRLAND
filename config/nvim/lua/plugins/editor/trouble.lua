@@ -523,6 +523,7 @@ local ICONS = {
           ["s"]         = {
             action = function(view)
               local cfg = view.config
+              local sev = cfg.filter and cfg.filter.severity
               local next_sev = {
                 [vim.diagnostic.severity.ERROR]  = vim.diagnostic.severity.WARN,
                 [vim.diagnostic.severity.WARN]   = vim.diagnostic.severity.INFO,

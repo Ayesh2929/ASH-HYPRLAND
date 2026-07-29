@@ -367,6 +367,7 @@ return {
   
       ---Line-number area click handler (registered as ScLa)
       _G.ScLa = function(args)
+        local icons = Ash.icons
         if args.button == "l" then
           vim.api.nvim_win_set_cursor(args.mousepos.winid, { args.mousepos.line, 0 })
         elseif args.button == "r" then

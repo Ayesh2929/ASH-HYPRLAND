@@ -36,6 +36,7 @@ local function map(modes, lhs, rhs, opts)
   local x   = "x"
   local c   = "c"
   local t   = "t"
+  local o   = "o"
   local nv  = { "n", "v" }
   local ni  = { "n", "i" }
   local nvi = { "n", "v", "i" }

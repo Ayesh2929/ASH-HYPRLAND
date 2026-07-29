@@ -117,7 +117,7 @@ get_file_icon() {
         psd|xcf|ai)                 echo "󰋩" ;;
 
         # Video
-        mp4|mkv|avi|mov|wmv|flv|webm|m4v|ts|vob|3gp|ogv)
+        mp4|mkv|avi|mov|wmv|flv|webm|m4v|vob|3gp|ogv)
                                     echo "󰎁" ;;
 
         # Audio
@@ -164,7 +164,7 @@ get_file_icon() {
         json|jsonc)                 echo "󰅩" ;;
         yaml|yml)                   echo "󰰐" ;;
         toml)                       echo "󰅪" ;;
-        xml|svg|xhtml)              echo "󰗀" ;;
+        xml|xhtml)              echo "󰗀" ;;
         ini|conf|cfg|config)        echo "󰒓" ;;
         env|dotenv)                 echo "󰙟" ;;
         lock)                       echo "󰌋" ;;
@@ -615,6 +615,7 @@ new_dir() {
 
 jump_to_path() {
     local target
+    # shellcheck disable=SC2088
     target=$(rofi -dmenu \
         -p "󱁉 Jump to path" \
         -filter "~/" \
@@ -823,7 +824,6 @@ fi
 
 # Backspace: Navigate up
 if [[ "${ROFI_RETV}" -eq 24 ]]; then
-    local parent
     parent=$(dirname "$(get_cwd)")
     set_cwd "$parent"
     build_dir_entries

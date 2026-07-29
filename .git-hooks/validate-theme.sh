@@ -10,23 +10,23 @@ IFS=$'\n\t'
 
 # ── ANSI MASTER PALETTE ───────────────────────────────────────────────────────
 readonly ESC=$'\033'
-readonly R="${ESC}[0m"      readonly B="${ESC}[1m"
-readonly D="${ESC}[2m"      readonly I="${ESC}[3m"
+readonly R="${ESC}[0m";      readonly B="${ESC}[1m"
+readonly D="${ESC}[2m";      readonly I="${ESC}[3m"
 readonly U="${ESC}[4m"
 
-readonly BLACK="${ESC}[30m"     readonly RED="${ESC}[31m"
-readonly GREEN="${ESC}[32m"     readonly YELLOW="${ESC}[33m"
-readonly BLUE="${ESC}[34m"      readonly MAGENTA="${ESC}[35m"
-readonly CYAN="${ESC}[36m"      readonly WHITE="${ESC}[37m"
-readonly ORANGE="${ESC}[38;5;208m"  readonly PURPLE="${ESC}[38;5;135m"
-readonly PINK="${ESC}[38;5;213m"    readonly LIME="${ESC}[38;5;154m"
-readonly GOLD="${ESC}[38;5;220m"    readonly SKY="${ESC}[38;5;117m"
-readonly LAVENDER="${ESC}[38;5;183m" readonly MINT="${ESC}[38;5;121m"
-readonly PEACH="${ESC}[38;5;217m"   readonly ROSE="${ESC}[38;5;211m"
-readonly TEAL="${ESC}[38;5;43m"     readonly CORAL="${ESC}[38;5;203m"
-readonly CREAM="${ESC}[38;5;230m"   readonly SLATE="${ESC}[38;5;245m"
-readonly AMBER="${ESC}[38;5;214m"   readonly EMERALD="${ESC}[38;5;120m"
-readonly VIOLET="${ESC}[38;5;177m"  readonly CRIMSON="${ESC}[38;5;161m"
+readonly BLACK="${ESC}[30m";     readonly RED="${ESC}[31m"
+readonly GREEN="${ESC}[32m";     readonly YELLOW="${ESC}[33m"
+readonly BLUE="${ESC}[34m";      readonly MAGENTA="${ESC}[35m"
+readonly CYAN="${ESC}[36m";      readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m";  readonly PURPLE="${ESC}[38;5;135m"
+readonly PINK="${ESC}[38;5;213m";    readonly LIME="${ESC}[38;5;154m"
+readonly GOLD="${ESC}[38;5;220m";    readonly SKY="${ESC}[38;5;117m"
+readonly LAVENDER="${ESC}[38;5;183m"; readonly MINT="${ESC}[38;5;121m"
+readonly PEACH="${ESC}[38;5;217m";   readonly ROSE="${ESC}[38;5;211m"
+readonly TEAL="${ESC}[38;5;43m";     readonly CORAL="${ESC}[38;5;203m"
+readonly CREAM="${ESC}[38;5;230m";   readonly SLATE="${ESC}[38;5;245m"
+readonly AMBER="${ESC}[38;5;214m";   readonly EMERALD="${ESC}[38;5;120m"
+readonly VIOLET="${ESC}[38;5;177m";  readonly CRIMSON="${ESC}[38;5;161m"
 readonly INDIGO="${ESC}[38;5;105m"
 
 readonly BG_MIDNIGHT="${ESC}[48;5;16m"
@@ -492,8 +492,7 @@ except Exception as e:
             fi
         fi
     elif command -v python3 &>/dev/null; then
-        local output
-        if ! output="$(python3 -m json.tool "$theme_path" > /dev/null 2>&1)"; then
+        if ! python3 -m json.tool "$theme_path" > /dev/null 2>&1; then
             check "json_valid" "JSON syntax" "📋" "fail" \
                 "Invalid JSON" 10
             return 1
@@ -686,7 +685,7 @@ validate_hex_formats() {
 
     # Run comprehensive hex audit
     local audit_result
-    audit_result="$(python3 - "$theme_path" <<'PYEOF'
+    if ! audit_result="$(python3 - "$theme_path" 2>/dev/null <<'PYEOF'
 import json, sys, re
 
 HEX_PATTERN = re.compile(r'^#[0-9a-fA-F]{6}$')
@@ -721,7 +720,9 @@ if issues:
 else:
     print("OK")
 PYEOF
-    2>/dev/null || echo "ERROR")"
+)"; then
+        audit_result="ERROR"
+    fi
 
     if [[ "$audit_result" == "OK" ]]; then
         check "hex_format_all" "All hex colors valid format" "🔬" "pass" \
@@ -1043,7 +1044,7 @@ validate_schema() {
        python3 -c "import jsonschema" &>/dev/null 2>&1; then
 
         local result
-        result="$(python3 - "$theme_path" "$SCHEMA_FILE" <<'PYEOF'
+        if ! result="$(python3 - "$theme_path" "$SCHEMA_FILE" 2>/dev/null <<'PYEOF'
 import json, sys
 try:
     import jsonschema
@@ -1062,7 +1063,9 @@ except ImportError:
 except Exception as e:
     print(f"ERROR:{e}")
 PYEOF
-        2>/dev/null || echo "ERROR:validation failed")"
+)"; then
+            result="ERROR:validation failed"
+        fi
 
         if [[ "$result" == "OK" ]]; then
             check "schema_valid" "JSON Schema (Draft 7)" "📐" "pass" \

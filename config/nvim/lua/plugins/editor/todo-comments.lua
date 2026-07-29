@@ -456,12 +456,12 @@ local COLOURS = {
         -- ── Trouble pickers ───────────────────────────────────────────────────
         {
           "<leader>xT",
-          trouble_todo(),
+          todo_trouble(),
           desc = "📝 Todo (Trouble)",
         },
         {
           "<leader>xF",
-          trouble_todo({ filter = { tag = { "TODO", "FIXME", "BUG" } } }),
+          todo_trouble({ filter = { tag = { "TODO", "FIXME", "BUG" } } }),
           desc = "📝 TODO/FIXME/BUG (Trouble)",
         },
   

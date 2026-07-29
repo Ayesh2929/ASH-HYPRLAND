@@ -484,9 +484,9 @@ if [[ "${ROFI_RETV}" -eq 11 ]]; then
     IFS=$'\x1f' read -ra parts <<< "$meta"
     meta_value="${parts[2]:-}"
     if [[ -n "$meta_value" ]]; then
-        local label="${MODE_LABELS[$meta_value]:-$meta_value}"
-        local icon="${MODE_ICONS[$meta_value]:-󰒲}"
-        local desc="${MODE_DESCRIPTIONS[$meta_value]:-No description}"
+        label="${MODE_LABELS[$meta_value]:-$meta_value}"
+        icon="${MODE_ICONS[$meta_value]:-󰒲}"
+        desc="${MODE_DESCRIPTIONS[$meta_value]:-No description}"
         notify_ms "${icon} ${label} Mode" \
             "$(echo -e "$desc" | head -6)" "low"
     fi

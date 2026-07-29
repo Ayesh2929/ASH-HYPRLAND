@@ -894,7 +894,6 @@ fi
 
 # Ctrl+B: Browse palettes
 if [[ "${ROFI_RETV}" -eq 22 ]]; then
-    local new_palette
     new_palette=$(printf '%s\n' \
         "catppuccin-mocha" \
         "catppuccin-latte" \

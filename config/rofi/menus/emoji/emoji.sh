@@ -297,8 +297,8 @@ build_symbol_entries() {
     printf '─── PUNCTUATION ──────────────────────\0nonselectable\x1ftrue\n'
     printf '"  left double quotation\0info\x1fcopy-type\x1fmeta\x1f"|left double quote\n'
     printf '"  right double quotation\0info\x1fcopy-type\x1fmeta\x1f"|right double quote\n'
-    printf ''  left single quotation\0info\x1fcopy-type\x1fmeta\x1f'|left single quote\n'
-    printf ''  right single quotation\0info\x1fcopy-type\x1fmeta\x1f'|right single quote\n'
+    printf "'  left single quotation\0info\x1fcopy-type\x1fmeta\x1f'|left single quote\n"
+    printf "'  right single quotation\0info\x1fcopy-type\x1fmeta\x1f'|right single quote\n"
     printf '…  horizontal ellipsis\0info\x1fcopy-type\x1fmeta\x1f…|ellipsis\n'
     printf '—  em dash\0info\x1fcopy-type\x1fmeta\x1f—|em dash\n'
     printf '–  en dash\0info\x1fcopy-type\x1fmeta\x1f–|en dash\n'
@@ -377,7 +377,7 @@ dispatch_action() {
             }
             ;;
         clear-recent)
-            > "$RECENT_FILE" 2>/dev/null && \
+            true > "$RECENT_FILE" 2>/dev/null && \
                 notify_emoji "Recent cleared" "" "low"
             ;;
         none|"")
@@ -395,7 +395,7 @@ handle_direct_args() {
         --recent)   build_recent_entries ;;
         --symbols)  build_symbol_entries ;;
         --skin)     cycle_skin_tone      ;;
-        --clear)    > "$RECENT_FILE" && notify_emoji "Recent cleared" "" ;;
+        --clear)    true > "$RECENT_FILE" && notify_emoji "Recent cleared" "" ;;
         --search)
             local query="${2:-}"
             [[ -n "$query" ]] && grep -i "$query" "$EMOJI_DATA" | head -20
