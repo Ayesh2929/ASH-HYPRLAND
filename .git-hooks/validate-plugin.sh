@@ -9,18 +9,18 @@ IFS=$'\n\t'
 
 # ── ANSI PALETTE ──────────────────────────────────────────────────────────────
 readonly ESC=$'\033'
-readonly R="${ESC}[0m"  readonly B="${ESC}[1m"  readonly D="${ESC}[2m"
-readonly RED="${ESC}[31m"           readonly GREEN="${ESC}[32m"
-readonly YELLOW="${ESC}[33m"        readonly BLUE="${ESC}[34m"
-readonly CYAN="${ESC}[36m"          readonly WHITE="${ESC}[37m"
-readonly ORANGE="${ESC}[38;5;208m"  readonly PURPLE="${ESC}[38;5;135m"
-readonly GOLD="${ESC}[38;5;220m"    readonly LAVENDER="${ESC}[38;5;183m"
-readonly MINT="${ESC}[38;5;121m"    readonly PEACH="${ESC}[38;5;217m"
-readonly LIME="${ESC}[38;5;154m"    readonly TEAL="${ESC}[38;5;43m"
-readonly CORAL="${ESC}[38;5;203m"   readonly CREAM="${ESC}[38;5;230m"
-readonly SLATE="${ESC}[38;5;245m"   readonly AMBER="${ESC}[38;5;214m"
-readonly EMERALD="${ESC}[38;5;120m" readonly INDIGO="${ESC}[38;5;105m"
-readonly CRIMSON="${ESC}[38;5;161m" readonly VIOLET="${ESC}[38;5;177m"
+readonly R="${ESC}[0m";  readonly B="${ESC}[1m";  readonly D="${ESC}[2m"
+readonly RED="${ESC}[31m";           readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m";        readonly BLUE="${ESC}[34m"
+readonly CYAN="${ESC}[36m";          readonly WHITE="${ESC}[37m"
+readonly ORANGE="${ESC}[38;5;208m";  readonly PURPLE="${ESC}[38;5;135m"
+readonly GOLD="${ESC}[38;5;220m";    readonly LAVENDER="${ESC}[38;5;183m"
+readonly MINT="${ESC}[38;5;121m";    readonly PEACH="${ESC}[38;5;217m"
+readonly LIME="${ESC}[38;5;154m";    readonly TEAL="${ESC}[38;5;43m"
+readonly CORAL="${ESC}[38;5;203m";   readonly CREAM="${ESC}[38;5;230m"
+readonly SLATE="${ESC}[38;5;245m";   readonly AMBER="${ESC}[38;5;214m"
+readonly EMERALD="${ESC}[38;5;120m"; readonly INDIGO="${ESC}[38;5;105m"
+readonly CRIMSON="${ESC}[38;5;161m"; readonly VIOLET="${ESC}[38;5;177m"
 readonly BG_MIDNIGHT="${ESC}[48;5;16m"
 
 # ── CONSTANTS ─────────────────────────────────────────────────────────────────

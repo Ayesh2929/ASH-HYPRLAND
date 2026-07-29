@@ -171,7 +171,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -396,7 +396,7 @@ jobs:
           echo "  🔢 Content hash: ${HASH}"
 
       - name: "📤 Upload data"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "readme-data-${{ steps.session.outputs.id }}"
           path: "${{ env.WORK_DIR }}/"
@@ -416,7 +416,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -434,7 +434,7 @@ jobs:
           mkdir -p "${WORK_DIR}/sections"
 
       - name: "📥 Download data"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "readme-data-${{ needs.collect-data.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}"
@@ -997,7 +997,7 @@ jobs:
           echo "  ✅ README committed and pushed"
 
       - name: "📤 Upload section artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "readme-sections-${{ needs.collect-data.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/sections/"
@@ -1015,7 +1015,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: main
 

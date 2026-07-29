@@ -167,7 +167,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -388,7 +388,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install suite dependencies"
         run: |
@@ -570,7 +570,7 @@ jobs:
 
       - name: "📤 Upload test results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "unit-${{ matrix.suite.name }}-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/"
@@ -591,7 +591,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install dependencies"
         run: |
@@ -789,7 +789,7 @@ jobs:
 
       - name: "📤 Upload integration results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "integration-results-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/"
@@ -850,7 +850,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install linter"
         run: |
@@ -903,7 +903,7 @@ jobs:
 
       - name: "📤 Upload lint results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "lint-${{ matrix.linter.name }}-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/"
@@ -924,7 +924,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install benchmark tools"
         run: |
@@ -1121,7 +1121,7 @@ jobs:
 
       - name: "📤 Upload benchmark artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "benchmarks-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/"
@@ -1147,7 +1147,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🌍 Simulate ${{ matrix.distro }} environment"
         id: distro_test
@@ -1230,7 +1230,7 @@ jobs:
 
       - name: "📤 Upload distro results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "distro-${{ matrix.distro }}-${{ needs.bootstrap.outputs.session_id }}"
           path: "/tmp/distro-${{ matrix.distro }}.json"
@@ -1257,7 +1257,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install report tools"
         run: |
@@ -1268,7 +1268,7 @@ jobs:
           mkdir -p "${WORK_DIR}" "${RESULTS_DIR}"
 
       - name: "📥 Download all test artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/all"
@@ -1448,7 +1448,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "nightly-report-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/"

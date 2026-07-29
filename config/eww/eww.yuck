@@ -1,0 +1,285 @@
+;;;; ╔══════════════════════════════════════════════════════════════════╗
+;;;; ║  ASH DOTFILES v5.0 — EWW ULTRA CONFIGURATION                   ║
+;;;; ║  Main Entry Point — Variables, Polls, Includes, Windows         ║
+;;;; ╚══════════════════════════════════════════════════════════════════╝
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  INCLUDES
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(include "./widgets/bar/bar.yuck")
+(include "./widgets/dashboard/dashboard.yuck")
+(include "./widgets/music/music.yuck")
+(include "./widgets/calendar/calendar.yuck")
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  GLOBAL VARIABLES — Static
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defvar bar-visible      true)
+(defvar dashboard-open   false)
+(defvar music-open       false)
+(defvar calendar-open    false)
+(defvar reveal-sys       false)
+(defvar reveal-net       false)
+(defvar reveal-media     false)
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  GLOBAL POLLS — System Data Streams
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;;; Time & Date
+(defpoll time       :interval "1s"
+  :initial "00:00:00"
+  `date +"%H:%M:%S"`)
+
+(defpoll date-full  :interval "60s"
+  :initial "Monday, January 01"
+  `date +"%A, %B %d"`)
+
+(defpoll date-short :interval "60s"
+  :initial "01/01"
+  `date +"%d/%m/%Y"`)
+
+(defpoll week-num   :interval "3600s"
+  :initial "W01"
+  `date +"%V" | xargs -I{} echo "W{}"`)
+
+(defpoll unix-time  :interval "1s"
+  :initial "0"
+  `date +%s`)
+
+;;; System Resources
+(defpoll cpu-usage   :interval "2s"
+  :initial "0"
+  `top -bn1 | grep "Cpu(s)" | awk '{print int($2)}'`)
+
+(defpoll cpu-temp    :interval "5s"
+  :initial "0°C"
+  `sensors 2>/dev/null | grep -m1 "Core 0" | awk '{print int($3)"°C"}' || echo "N/A"`)
+
+(defpoll cpu-freq    :interval "5s"
+  :initial "0 GHz"
+  `grep "cpu MHz" /proc/cpuinfo | awk '{sum+=$4; n++} END {printf "%.1f GHz", sum/n/1000}'`)
+
+(defpoll ram-used    :interval "3s"
+  :initial "0"
+  `free -m | awk '/Mem:/{printf "%.0f", $3/$2*100}'`)
+
+(defpoll ram-detail  :interval "3s"
+  :initial "0G / 0G"
+  `free -h | awk '/Mem:/{print $3 " / " $2}'`)
+
+(defpoll gpu-usage   :interval "3s"
+  :initial "0"
+  `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null \
+   || cat /sys/class/drm/card0/device/gpu_busy_percent 2>/dev/null \
+   || echo "0"`)
+
+(defpoll gpu-temp    :interval "5s"
+  :initial "0°C"
+  `nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null \
+   | awk '{print $1"°C"}' \
+   || sensors 2>/dev/null | grep -m1 "edge" | awk '{print int($2)"°C"}' \
+   || echo "N/A"`)
+
+(defpoll disk-usage  :interval "30s"
+  :initial "0"
+  `df -h / | awk 'NR==2{print int($5)}'`)
+
+(defpoll disk-detail :interval "30s"
+  :initial "0G / 0G"
+  `df -h / | awk 'NR==2{print $3 " / " $2}'`)
+
+(defpoll swap-usage  :interval "10s"
+  :initial "0"
+  `free -m | awk '/Swap:/{if($2>0) printf "%.0f", $3/$2*100; else print "0"}'`)
+
+;;; Battery
+(defpoll battery-pct    :interval "30s"
+  :initial "100"
+  `cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "100"`)
+
+(defpoll battery-status :interval "15s"
+  :initial "Discharging"
+  `cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "AC"`)
+
+(defpoll battery-time   :interval "60s"
+  :initial ""
+  `acpi -b 2>/dev/null | grep -oP '\d+:\d+:\d+' | head -1 || echo ""`)
+
+;;; Network
+(defpoll net-ssid    :interval "10s"
+  :initial "Not Connected"
+  `iwgetid -r 2>/dev/null || echo "Ethernet"`)
+
+(defpoll net-up      :interval "3s"
+  :initial "0 KB/s"
+  `cat /proc/net/dev | awk 'NR>2{sum+=$10} END{
+     if(sum<1024) printf "%.0f B/s", sum;
+     else if(sum<1048576) printf "%.1f KB/s", sum/1024;
+     else printf "%.1f MB/s", sum/1048576}'`)
+
+(defpoll net-down    :interval "3s"
+  :initial "0 KB/s"
+  `cat /proc/net/dev | awk 'NR>2{sum+=$2} END{
+     if(sum<1024) printf "%.0f B/s", sum;
+     else if(sum<1048576) printf "%.1f KB/s", sum/1024;
+     else printf "%.1f MB/s", sum/1048576}'`)
+
+(defpoll net-ping    :interval "15s"
+  :initial "0ms"
+  `ping -c1 -W1 1.1.1.1 2>/dev/null | tail -1 | awk -F'/' '{print int($5)"ms"}' || echo "timeout"`)
+
+(defpoll vpn-active  :interval "10s"
+  :initial "false"
+  `ip tuntap show 2>/dev/null | grep -q tun && echo "true" || echo "false"`)
+
+;;; Audio
+(defpoll volume      :interval "1s"
+  :initial "0"
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null \
+   | awk '{printf "%.0f", $2*100}' \
+   || pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null \
+   | grep -oP '\d+%' | head -1 | tr -d '%' \
+   || echo "0"`)
+
+(defpoll muted       :interval "1s"
+  :initial "false"
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q MUTED && echo "true" || echo "false"`)
+
+(defpoll mic-vol     :interval "2s"
+  :initial "0"
+  `wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | awk '{printf "%.0f", $2*100}' || echo "0"`)
+
+(defpoll mic-muted   :interval "2s"
+  :initial "false"
+  `wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q MUTED && echo "true" || echo "false"`)
+
+;;; Brightness
+(defpoll brightness  :interval "2s"
+  :initial "100"
+  `brightnessctl -m 2>/dev/null | awk -F, '{print int($4)}' || echo "100"`)
+
+;;; Media / Music
+(defpoll media-status  :interval "2s"
+  :initial "Stopped"
+  `playerctl status 2>/dev/null || echo "Stopped"`)
+
+(defpoll media-title   :interval "2s"
+  :initial "Nothing Playing"
+  `playerctl metadata title 2>/dev/null | head -c 40 || echo "Nothing Playing"`)
+
+(defpoll media-artist  :interval "2s"
+  :initial ""
+  `playerctl metadata artist 2>/dev/null | head -c 30 || echo ""`)
+
+(defpoll media-album   :interval "5s"
+  :initial ""
+  `playerctl metadata album 2>/dev/null | head -c 30 || echo ""`)
+
+(defpoll media-art     :interval "5s"
+  :initial ""
+  `playerctl metadata mpris:artUrl 2>/dev/null \
+   | sed 's|file://||' \
+   || echo ""`)
+
+(defpoll media-pos     :interval "1s"
+  :initial "0"
+  `playerctl position 2>/dev/null | awk '{printf "%.0f", $1}' || echo "0"`)
+
+(defpoll media-len     :interval "5s"
+  :initial "0"
+  `playerctl metadata mpris:length 2>/dev/null | awk '{printf "%.0f", $1/1000000}' || echo "0"`)
+
+(defpoll media-player  :interval "5s"
+  :initial "none"
+  `playerctl -l 2>/dev/null | head -1 | tr -d '\n' || echo "none"`)
+
+(defpoll media-shuffle :interval "3s"
+  :initial "false"
+  `playerctl shuffle 2>/dev/null | tr '[:upper:]' '[:lower:]' || echo "false"`)
+
+(defpoll media-loop    :interval "3s"
+  :initial "None"
+  `playerctl loop 2>/dev/null || echo "None"`)
+
+;;; Workspaces (Hyprland)
+(defpoll workspaces    :interval "0.5s"
+  :initial "[]"
+  `hyprctl workspaces -j 2>/dev/null || echo "[]"`)
+
+(defpoll active-ws     :interval "0.5s"
+  :initial "1"
+  `hyprctl activewindow -j 2>/dev/null | jq -r '.workspace.id // 1' || echo "1"`)
+
+(defpoll active-win    :interval "1s"
+  :initial ""
+  `hyprctl activewindow -j 2>/dev/null \
+   | jq -r '.title // empty' 2>/dev/null \
+   | head -c 50 \
+   || echo ""`)
+
+(defpoll window-count  :interval "1s"
+  :initial "0"
+  `hyprctl clients -j 2>/dev/null | jq 'length' || echo "0"`)
+
+;;; System Info (slower polls)
+(defpoll kernel       :interval "3600s"
+  :initial ""
+  `uname -r`)
+
+(defpoll hostname      :interval "3600s"
+  :initial "ash"
+  `hostname`)
+
+(defpoll username      :interval "3600s"
+  :initial "user"
+  `whoami`)
+
+(defpoll uptime-str    :interval "60s"
+  :initial "0m"
+  `uptime -p | sed 's/up //'`)
+
+(defpoll pkg-count     :interval "3600s"
+  :initial "0"
+  `pacman -Q 2>/dev/null | wc -l || dpkg -l 2>/dev/null | wc -l || echo "0"`)
+
+(defpoll updates-avail :interval "3600s"
+  :initial "0"
+  `checkupdates 2>/dev/null | wc -l || echo "0"`)
+
+;;; Weather
+(defpoll weather-temp  :interval "1800s"
+  :initial "?"
+  `curl -sf "wttr.in/?format=%t" 2>/dev/null | tr -d '+' || echo "?"`)
+
+(defpoll weather-icon  :interval "1800s"
+  :initial "🌡️"
+  `curl -sf "wttr.in/?format=%c" 2>/dev/null || echo "🌡️"`)
+
+(defpoll weather-desc  :interval "1800s"
+  :initial "Unknown"
+  `curl -sf "wttr.in/?format=%C" 2>/dev/null || echo "Unknown"`)
+
+;;; Notifications (swaync)
+(defpoll notif-count   :interval "2s"
+  :initial "0"
+  `swaync-client -c 2>/dev/null || echo "0"`)
+
+(defpoll dnd-active    :interval "5s"
+  :initial "false"
+  `swaync-client -D 2>/dev/null && echo "true" || echo "false"`)
+
+;;; Theme
+(defpoll ash-theme     :interval "5s"
+  :initial "catppuccin-mocha"
+  `cat ~/.config/ash/state/current-theme.json 2>/dev/null \
+   | jq -r '.name // "catppuccin-mocha"' \
+   || echo "catppuccin-mocha"`)
+
+(defpoll ash-mode      :interval "5s"
+  :initial "default"
+  `cat ~/.config/ash/state/current-mode.json 2>/dev/null \
+   | jq -r '.mode // "default"' \
+   || echo "default"`)

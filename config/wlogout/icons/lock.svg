@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+
+    <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+
+    <!-- Outer glow -->
+    <filter id="lock-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.455 0.780 0.925 0 0
+                0.455 0.780 0.925 0 0
+                0.455 0.780 0.925 0 0
+                0     0     0     1 0" result="colored-blur"/>
+      <feMerge>
+        <feMergeNode in="colored-blur"/>
+        <feMergeNode in="colored-blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Inner glow -->
+    <filter id="lock-inner-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- ── Gradients ─────────────────────────────────────────────────────── -->
+
+    <!-- Shackle gradient: Sapphire → Sky -->
+    <linearGradient id="lock-shackle-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#74c7ec"/>
+      <stop offset="100%" stop-color="#89dceb"/>
+    </linearGradient>
+
+    <!-- Body gradient: Sapphire → Blue -->
+    <linearGradient id="lock-body-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#89b4fa" stop-opacity="0.95"/>
+      <stop offset="60%"  stop-color="#74c7ec" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#4b9cc5" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Keyhole gradient -->
+    <radialGradient id="lock-keyhole-grad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%"   stop-color="#cdd6f4" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0.6"/>
+    </radialGradient>
+
+    <!-- Body glass highlight -->
+    <linearGradient id="lock-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.00"/>
+    </linearGradient>
+
+    <!-- Shackle glass highlight -->
+    <linearGradient id="lock-shackle-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.00"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- ── Background circle (subtle) ────────────────────────────────────── -->
+  <circle cx="32" cy="32" r="30"
+    fill="rgba(116,199,236,0.06)"
+    stroke="rgba(116,199,236,0.15)"
+    stroke-width="0.5"/>
+
+  <!-- ── Shackle (the U-shape arc) ─────────────────────────────────────── -->
+  <g filter="url(#lock-glow)">
+    <!-- Shackle body — thick arc -->
+    <path d="M18 32 L18 22 Q18 10 32 10 Q46 10 46 22 L46 32"
+      fill="none"
+      stroke="url(#lock-shackle-grad)"
+      stroke-width="5.5"
+      stroke-linecap="round"/>
+
+    <!-- Shackle highlight -->
+    <path d="M18 32 L18 22 Q18 10 32 10 Q46 10 46 22 L46 32"
+      fill="none"
+      stroke="url(#lock-shackle-highlight)"
+      stroke-width="2"
+      stroke-linecap="round"
+      opacity="0.5"/>
+  </g>
+
+  <!-- ── Lock body ──────────────────────────────────────────────────────── -->
+  <g filter="url(#lock-inner-glow)">
+    <!-- Main body rectangle with rounded corners -->
+    <rect x="12" y="30" width="40" height="28"
+      rx="7" ry="7"
+      fill="url(#lock-body-grad)"
+      stroke="rgba(116,199,236,0.45)"
+      stroke-width="1.2"/>
+
+    <!-- Glass highlight on body top -->
+    <rect x="12" y="30" width="40" height="14"
+      rx="7" ry="7"
+      fill="url(#lock-highlight)"/>
+
+    <!-- Subtle body rim -->
+    <rect x="13" y="31" width="38" height="26"
+      rx="6.5" ry="6.5"
+      fill="none"
+      stroke="rgba(255,255,255,0.12)"
+      stroke-width="0.8"/>
+  </g>
+
+  <!-- ── Keyhole ────────────────────────────────────────────────────────── -->
+  <g filter="url(#lock-inner-glow)">
+    <!-- Keyhole outer circle -->
+    <circle cx="32" cy="41" r="5.5"
+      fill="none"
+      stroke="url(#lock-keyhole-grad)"
+      stroke-width="2"
+      opacity="0.9"/>
+
+    <!-- Keyhole inner fill -->
+    <circle cx="32" cy="41" r="3.5"
+      fill="rgba(30,30,46,0.85)"/>
+
+    <!-- Keyhole stem -->
+    <rect x="30" y="44" width="4" height="6.5"
+      rx="1.5" ry="1.5"
+      fill="rgba(30,30,46,0.85)"/>
+
+    <!-- Keyhole highlight -->
+    <circle cx="30.5" cy="39.5" r="1.2"
+      fill="rgba(255,255,255,0.4)"
+      opacity="0.8"/>
+  </g>
+
+  <!-- ── Corner screws (detail) ─────────────────────────────────────────── -->
+  <circle cx="17.5" cy="35.5" r="1.2" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="46.5" cy="35.5" r="1.2" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="17.5" cy="54.5" r="1.2" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="46.5" cy="54.5" r="1.2" fill="rgba(255,255,255,0.12)"/>
+
+</svg>

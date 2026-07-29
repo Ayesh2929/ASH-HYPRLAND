@@ -70,7 +70,7 @@ else
     [[ "$TOTAL" -ge 25 ]] && CSS_CLASS="critical-updates"
 
     # Package preview (first 8 packages)
-    local PREVIEW=""
+    PREVIEW=""
     if [[ -n "$PACMAN_LIST" ]]; then
         PREVIEW+="Pacman (${PACMAN_COUNT}):\n"
         while IFS= read -r pkg; do

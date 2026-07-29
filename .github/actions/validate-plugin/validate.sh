@@ -514,11 +514,13 @@ check_shellcheck() {
 
       # Show top issues
       if [[ -n "${SC_OUTPUT}" && "${SC_OUTPUT}" != "[]" ]]; then
-        echo "${SC_OUTPUT}" | python3 << 'SC_DISPLAY_EOF'
+        export SC_OUTPUT
+        python3 << 'SC_DISPLAY_EOF'
 import json
+import os
 import sys
 
-data = json.load(sys.stdin) if sys.stdin else []
+data = json.loads(os.environ.get("SC_OUTPUT", "[]"))
 
 RED    = "\033[38;2;243;139;168m"
 YELLOW = "\033[38;2;249;226;175m"

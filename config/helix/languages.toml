@@ -1,0 +1,459 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v5.0 — HELIX LANGUAGES CONFIGURATION                       ║
+# ║                                                                            ║
+# ║  Comprehensive LSP + formatter + linter setup for:                         ║
+# ║  Rust • Python • Go • TypeScript • JavaScript • Lua • C/C++ • Bash       ║
+# ║  Nix • TOML • JSON • YAML • Markdown • CSS • HTML • SQL                  ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🦀  RUST — rust-analyzer
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name        = "rust"
+scope       = "source.rust"
+file-types  = ["rs"]
+indent      = { tab-width = 4, unit = "    " }
+roots       = ["Cargo.toml", "Cargo.lock"]
+
+language-servers = ["rust-analyzer"]
+
+auto-format = true
+
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[language-server.rust-analyzer.config]
+# Enable all features
+checkOnSave.command = "clippy"
+checkOnSave.extraArgs = [
+    "--all-targets",
+    "--all-features",
+    "--",
+    "-W", "clippy::pedantic",
+    "-A", "clippy::must_use_candidate",
+]
+cargo.allFeatures          = true
+cargo.buildScripts.enable  = true
+procMacro.enable           = true
+inlayHints.parameterHints.enable = true
+inlayHints.typeHints.enable      = true
+inlayHints.chainingHints.enable  = true
+inlayHints.closingBraceHints     = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🐍  PYTHON — pyright + ruff
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name        = "python"
+scope       = "source.python"
+file-types  = ["py", "pyi", "pyc", "pyw"]
+indent      = { tab-width = 4, unit = "    " }
+roots       = [
+    "pyproject.toml", "setup.py", "setup.cfg",
+    "requirements.txt", "Pipfile", ".python-version"
+]
+
+language-servers = ["pyright", "ruff"]
+
+auto-format = true
+
+# Formatters: ruff format (fast), black (fallback)
+formatter = { command = "ruff", args = ["format", "--quiet", "-"] }
+
+[language-server.pyright]
+command = "pyright-langserver"
+args    = ["--stdio"]
+
+[language-server.pyright.config.python.analysis]
+typeCheckingMode      = "basic"
+autoImportCompletions = true
+useLibraryCodeForTypes = true
+
+[language-server.ruff]
+command = "ruff-lsp"
+
+[language-server.ruff.config.settings]
+args = ["--select", "ALL", "--ignore", "D", "ANN", "T201"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🐹  GO — gopls
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name        = "go"
+scope       = "source.go"
+file-types  = ["go"]
+indent      = { tab-width = 4, unit = "\t" }
+roots       = ["go.work", "go.mod"]
+
+language-servers = ["gopls"]
+
+auto-format = true
+formatter   = { command = "goimports" }
+
+[language-server.gopls]
+command = "gopls"
+
+[language-server.gopls.config.hints]
+assignVariableTypes    = true
+compositeLiteralFields = true
+constantValues         = true
+functionTypeParameters = true
+parameterNames         = true
+rangeVariableTypes     = true
+
+[language-server.gopls.config.analyses]
+unusedparams  = true
+unusedwrite   = true
+fieldalignment = true
+shadow        = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🟨  TYPESCRIPT — typescript-language-server
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name        = "typescript"
+scope       = "source.ts"
+file-types  = ["ts", "mts", "cts"]
+indent      = { tab-width = 2, unit = "  " }
+roots       = [
+    "package.json", "tsconfig.json",
+    "tsconfig.base.json", ".node-version", ".nvmrc"
+]
+
+language-servers = ["typescript-language-server", "eslint"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name        = "tsx"
+scope       = "source.tsx"
+file-types  = ["tsx"]
+indent      = { tab-width = 2, unit = "  " }
+roots       = ["package.json", "tsconfig.json"]
+
+language-servers = ["typescript-language-server", "eslint"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name        = "javascript"
+scope       = "source.js"
+file-types  = ["js", "mjs", "cjs"]
+indent      = { tab-width = 2, unit = "  " }
+roots       = ["package.json"]
+
+language-servers = ["typescript-language-server", "eslint"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name        = "jsx"
+scope       = "source.jsx"
+file-types  = ["jsx"]
+indent      = { tab-width = 2, unit = "  " }
+
+language-servers = ["typescript-language-server", "eslint"]
+
+auto-format = true
+
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args    = ["--stdio"]
+
+[language-server.typescript-language-server.config.typescript.inlayHints]
+includeInlayParameterNameHints              = "all"
+includeInlayParameterNameHintsWhenArgumentMatchesName = false
+includeInlayFunctionParameterTypeHints       = true
+includeInlayVariableTypeHints                = true
+includeInlayPropertyDeclarationTypeHints     = true
+includeInlayFunctionLikeReturnTypeHints      = true
+includeInlayEnumMemberValueHints             = true
+
+[language-server.eslint]
+command = "vscode-eslint-language-server"
+args    = ["--stdio"]
+
+[language-server.eslint.config]
+format = true
+nodePath = ""
+workingDirectory = { mode = "auto" }
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌙  LUA — lua-language-server
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "lua"
+scope      = "source.lua"
+file-types = ["lua"]
+indent     = { tab-width = 4, unit = "    " }
+roots      = [".luarc.json", ".luacheckrc", "stylua.toml"]
+
+language-servers = ["lua-language-server"]
+
+auto-format = true
+formatter   = { command = "stylua", args = ["-"] }
+
+[language-server.lua-language-server]
+command = "lua-language-server"
+
+[language-server.lua-language-server.config.Lua]
+runtime.version  = "LuaJIT"
+workspace.library = ["/usr/share/nvim/runtime/lua"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🏗️  C / C++ — clangd
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "c"
+scope      = "source.c"
+file-types = ["c", "h"]
+indent     = { tab-width = 4, unit = "    " }
+roots      = ["compile_commands.json", "compile_flags.txt", ".clangd"]
+
+language-servers = ["clangd"]
+
+auto-format = true
+
+[[language]]
+name       = "cpp"
+scope      = "source.cpp"
+file-types = ["cc", "cpp", "cxx", "c++", "hh", "hpp", "hxx"]
+indent     = { tab-width = 4, unit = "    " }
+roots      = ["compile_commands.json", "compile_flags.txt", ".clangd"]
+
+language-servers = ["clangd"]
+
+auto-format = true
+
+[language-server.clangd]
+command = "clangd"
+args    = [
+    "--background-index",
+    "--clang-tidy",
+    "--all-scopes-completion",
+    "--completion-style=detailed",
+    "--function-arg-placeholders",
+    "--header-insertion=iwyu",
+    "--pch-storage=memory",
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🐚  BASH — bash-language-server
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "bash"
+scope      = "source.bash"
+file-types = ["sh", "bash", "zsh", ".env", ".envrc"]
+indent     = { tab-width = 4, unit = "    " }
+
+language-servers = ["bash-language-server"]
+
+auto-format = true
+formatter   = { command = "shfmt", args = ["-i", "4", "-ci"] }
+
+[language-server.bash-language-server]
+command = "bash-language-server"
+args    = ["start"]
+
+[language-server.bash-language-server.config]
+highlightParsingErrors = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ❄️  NIX — nil or nixd
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "nix"
+scope      = "source.nix"
+file-types = ["nix"]
+indent     = { tab-width = 2, unit = "  " }
+roots      = ["flake.nix", "default.nix", "shell.nix"]
+
+language-servers = ["nixd"]
+
+auto-format = true
+formatter   = { command = "alejandra" }
+
+[language-server.nixd]
+command = "nixd"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📦  TOML — taplo
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "toml"
+scope      = "source.toml"
+file-types = ["toml", "Cargo.lock"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["taplo"]
+
+auto-format = true
+
+[language-server.taplo]
+command = "taplo"
+args    = ["lsp", "stdio"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📊  JSON / JSONC — vscode-json-language-server
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "json"
+scope      = "source.json"
+file-types = ["json", "jsonc", "json5"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["vscode-json-language-server"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "json"] }
+
+[language-server.vscode-json-language-server]
+command = "vscode-json-language-server"
+args    = ["--stdio"]
+
+[language-server.vscode-json-language-server.config]
+provideFormatter = true
+
+[language-server.vscode-json-language-server.config.json]
+schemas = [
+  { fileMatch = ["package.json"], url = "https://json.schemastore.org/package.json" }
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📝  YAML — yaml-language-server
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "yaml"
+scope      = "source.yaml"
+file-types = ["yaml", "yml"]
+indent     = { tab-width = 2, unit = "  " }
+roots      = [".yamllint", ".yamllint.yml", ".yamllint.yaml"]
+
+language-servers = ["yaml-language-server"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "yaml"] }
+
+[language-server.yaml-language-server]
+command = "yaml-language-server"
+args    = ["--stdio"]
+
+[language-server.yaml-language-server.config.yaml]
+format.enable   = true
+validate        = true
+hover           = true
+completion      = true
+schemaStore.enable = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📄  MARKDOWN — marksman
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "markdown"
+scope      = "source.md"
+file-types = ["md", "mdx", "markdown"]
+indent     = { tab-width = 2, unit = "  " }
+roots      = [".marksman.toml"]
+
+language-servers = ["marksman"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "markdown"] }
+
+[language-server.marksman]
+command = "marksman"
+args    = ["server"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  HTML / CSS — vscode servers
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "html"
+scope      = "text.html.basic"
+file-types = ["html", "htm"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["vscode-html-language-server"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "html"] }
+
+[language-server.vscode-html-language-server]
+command = "vscode-html-language-server"
+args    = ["--stdio"]
+
+[[language]]
+name       = "css"
+scope      = "source.css"
+file-types = ["css"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["vscode-css-language-server"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "css"] }
+
+[[language]]
+name       = "scss"
+scope      = "source.scss"
+file-types = ["scss"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["vscode-css-language-server"]
+
+auto-format = true
+formatter   = { command = "prettier", args = ["--parser", "scss"] }
+
+[language-server.vscode-css-language-server]
+command = "vscode-css-language-server"
+args    = ["--stdio"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🐳  DOCKER
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "dockerfile"
+scope      = "source.dockerfile"
+file-types = ["Dockerfile", "dockerfile", "Containerfile"]
+roots      = ["Dockerfile", "Containerfile"]
+indent     = { tab-width = 4, unit = "    " }
+
+language-servers = ["docker-langserver"]
+
+[language-server.docker-langserver]
+command = "docker-langserver"
+args    = ["--stdio"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ☸️  GRAPHQL
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[[language]]
+name       = "graphql"
+scope      = "source.graphql"
+file-types = ["gql", "graphql"]
+indent     = { tab-width = 2, unit = "  " }
+
+language-servers = ["graphql-language-service"]
+
+[language-server.graphql-language-service]
+command = "graphql-lsp"
+args    = ["server", "-m", "stream"]

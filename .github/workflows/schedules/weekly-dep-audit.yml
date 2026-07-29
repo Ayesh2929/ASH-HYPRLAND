@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -204,7 +204,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install audit tools"
         run: |
@@ -439,7 +439,7 @@ jobs:
 
       - name: "📤 Upload ecosystem findings"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "dep-audit-${{ matrix.eco.name }}-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.FINDINGS_DIR }}/${{ matrix.eco.name }}/"
@@ -464,7 +464,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install SBOM tools"
         run: |
@@ -620,7 +620,7 @@ jobs:
           SBOM_EOF
 
       - name: "📤 Upload SBOM"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "sbom-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.SBOM_DIR }}/"
@@ -646,7 +646,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Tools"
         run: |
@@ -656,7 +656,7 @@ jobs:
           mkdir -p "${WORK_DIR}" "${FINDINGS_DIR}"
 
       - name: "📥 Download all audit artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "dep-audit-*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.FINDINGS_DIR }}/all"
@@ -823,7 +823,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "dep-audit-report-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/"

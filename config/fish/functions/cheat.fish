@@ -1358,7 +1358,7 @@ function __cheat_search -a term
     end
 
     # Search user sheets
-    for f in $__CHEAT_USER_DIR/*.md 2>/dev/null
+    for f in (ls $__CHEAT_USER_DIR/*.md 2>/dev/null)
         if test -f $f
             set -l matches (grep -in "$term" $f 2>/dev/null)
             if test -n "$matches"
@@ -1391,7 +1391,7 @@ function __cheat_interactive
     set -l topics git fish docker neovim systemd ssh curl ripgrep python eza fzf tmux kubectl regex
 
     # Add user sheets
-    for f in $__CHEAT_USER_DIR/*.md 2>/dev/null
+    for f in (ls $__CHEAT_USER_DIR/*.md 2>/dev/null)
         if test -f $f
             set -a topics "[user] "(basename $f .md)
         end

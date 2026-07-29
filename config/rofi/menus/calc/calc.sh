@@ -637,7 +637,7 @@ dispatch_action() {
             }
             ;;
         clear-history)
-            > "$HISTORY_FILE" 2>/dev/null && \
+            true > "$HISTORY_FILE" 2>/dev/null && \
                 notify_calc "History cleared" "" "low"
             ;;
         none|"")
@@ -662,7 +662,7 @@ handle_direct_args() {
             get_history | head -10
             ;;
         --clear)
-            > "$HISTORY_FILE" && echo "History cleared"
+            true > "$HISTORY_FILE" && echo "History cleared"
             ;;
         --help|-h)
             echo "ASH Calculator v5.0"
@@ -748,7 +748,6 @@ fi
 # ── Ctrl+M: Store memory ──────────────────────────────────────────────────────
 if [[ "${ROFI_RETV}" -eq 13 ]]; then
     # Store last result
-    local last_result
     last_result=$(get_history | head -1 | cut -d'|' -f2 || echo "")
     [[ -n "$last_result" ]] && store_memory "$last_result"
     evaluate_and_display "${ROFI_DATA:-}"

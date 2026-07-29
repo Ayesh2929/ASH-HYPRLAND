@@ -171,7 +171,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -617,7 +617,7 @@ jobs:
           COMPILE_EOF
 
       - name: "📤 Upload stats data"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "stats-data-${{ steps.session.outputs.id }}"
           path: "${{ env.WORK_DIR }}/"
@@ -637,7 +637,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install chart stack"
         run: |
@@ -653,7 +653,7 @@ jobs:
           mkdir -p "${WORK_DIR}/charts" "${OUTPUT_DIR}/charts"
 
       - name: "📥 Download stats data"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "stats-data-${{ needs.collect-stats.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}"
@@ -1127,7 +1127,7 @@ jobs:
           done
 
       - name: "📤 Upload chart artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "stats-charts-${{ needs.collect-stats.outputs.session_id }}"
           path: "${{ env.OUTPUT_DIR }}/charts/"
@@ -1145,13 +1145,13 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: "📥 Download stats"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "stats-data-${{ needs.collect-stats.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}"

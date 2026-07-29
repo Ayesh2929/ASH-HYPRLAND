@@ -1338,26 +1338,27 @@ print(round(score, 1))
   log_stat "report" "Score: ${OVERALL_SCORE}/100 | Status: ${STATUS}"
 
   # ── Collect all analysis results ──────────────────────────────────────────
-  python3 << REPORT_PY
+  export OUTPUT_ABS OUTPUT_FORMATS REPORT_TITLE OVERALL_SCORE STATUS SESSION_ID DURATION TOTAL_REGRESSIONS RESOLVED_BENCHMARKS NOW CHART_STYLE INCLUDE_SYSTEM_INFO INCLUDE_GIT_INFO
+  python3 << 'REPORT_PY'
 import json
 import os
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
-OUTPUT_DIR     = "${OUTPUT_ABS}"
-OUTPUT_FORMATS = "${OUTPUT_FORMATS}"
-REPORT_TITLE   = "${REPORT_TITLE}"
-SCORE          = float("${OVERALL_SCORE}")
-STATUS         = "${STATUS}"
-SESSION_ID     = "${SESSION_ID}"
-DURATION_S     = int("${DURATION}")
-REGRESSIONS    = int("${TOTAL_REGRESSIONS}")
-BENCHMARKS_RAN = "${RESOLVED_BENCHMARKS}"
-NOW            = "${NOW}"
-CHART_STYLE    = "${CHART_STYLE}"
-INCLUDE_SYSINFO= "${INCLUDE_SYSTEM_INFO}" == "true"
-INCLUDE_GIT    = "${INCLUDE_GIT_INFO}" == "true"
+OUTPUT_DIR     = os.environ.get("OUTPUT_ABS", "")
+OUTPUT_FORMATS = os.environ.get("OUTPUT_FORMATS", "")
+REPORT_TITLE   = os.environ.get("REPORT_TITLE", "")
+SCORE          = float(os.environ.get("OVERALL_SCORE", "0"))
+STATUS         = os.environ.get("STATUS", "")
+SESSION_ID     = os.environ.get("SESSION_ID", "")
+DURATION_S     = int(os.environ.get("DURATION", "0"))
+REGRESSIONS    = int(os.environ.get("TOTAL_REGRESSIONS", "0"))
+BENCHMARKS_RAN = os.environ.get("RESOLVED_BENCHMARKS", "")
+NOW            = os.environ.get("NOW", "")
+CHART_STYLE    = os.environ.get("CHART_STYLE", "")
+INCLUDE_SYSINFO= os.environ.get("INCLUDE_SYSTEM_INFO", "") == "true"
+INCLUDE_GIT    = os.environ.get("INCLUDE_GIT_INFO", "") == "true"
 REPO           = os.environ.get("GITHUB_REPOSITORY","ash/dotfiles")
 SHA            = os.environ.get("GITHUB_SHA","")[:8]
 BRANCH         = os.environ.get("GITHUB_REF_NAME","unknown")

@@ -81,7 +81,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🆔 Generate ID"
         id: id
@@ -247,7 +247,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Setup environment"
         run: |
@@ -532,7 +532,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "startup-bench-${{ matrix.command.name }}-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/${{ matrix.command.name }}/"
@@ -592,7 +592,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Install tools"
         run: |
@@ -855,7 +855,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "startup-shell-${{ matrix.shell.name }}-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/${{ matrix.shell.name }}/"
@@ -883,7 +883,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Install tools"
         run: |
@@ -891,7 +891,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas rich jinja2 tabulate
 
       - name: "📥 Download artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "startup-*-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/all"
@@ -1034,7 +1034,7 @@ jobs:
 
       - name: "📤 Upload consolidated report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "startup-report-${{ needs.setup.outputs.bench_id }}"
           path: "${{ env.REPORTS_DIR }}/"

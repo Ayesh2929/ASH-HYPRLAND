@@ -1,0 +1,356 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "🐍 ASH Python Ultra Snippets v5.0",
+  
+    "ASH FastAPI Endpoint": {
+      "prefix": ["fapi", "fastapi", "endpoint"],
+      "description": "🐍 FastAPI async endpoint with full typing",
+      "body": [
+        "@router.${1|get,post,put,patch,delete|}(",
+        "    \"/${2:path}\",",
+        "    response_model=${3:ResponseModel},",
+        "    status_code=${4:200},",
+        "    summary=\"${5:Endpoint summary}\",",
+        "    tags=[\"${6:tag}\"],",
+        ")",
+        "async def ${7:endpoint_name}(",
+        "    ${8:param}: ${9:str},",
+        "    db: AsyncSession = Depends(get_db),",
+        "    current_user: User = Depends(get_current_user),",
+        ") -> ${3:ResponseModel}:",
+        "    \"\"\"${5:Endpoint summary}.",
+        "",
+        "    Args:",
+        "        ${8:param}: ${10:param description}",
+        "        db: Database session",
+        "        current_user: Authenticated user",
+        "",
+        "    Returns:",
+        "        ${3:ResponseModel}: ${11:return description}",
+        "    \"\"\"",
+        "    ${12:pass}"
+      ]
+    },
+  
+    "ASH Pydantic Model": {
+      "prefix": ["pyd", "pydantic", "model"],
+      "description": "🐍 Pydantic v2 BaseModel with validators",
+      "body": [
+        "class ${1:ModelName}(BaseModel):",
+        "    \"\"\"${2:Model description}.\"\"\"",
+        "",
+        "    model_config = ConfigDict(",
+        "        from_attributes=True,",
+        "        str_strip_whitespace=True,",
+        "        validate_default=True,",
+        "    )",
+        "",
+        "    ${3:field}: ${4:str} = Field(",
+        "        ...,",
+        "        description=\"${5:Field description}\",",
+        "        min_length=${6:1},",
+        "    )",
+        "    ${7:optional_field}: ${8:str | None} = Field(",
+        "        default=None,",
+        "        description=\"${9:Optional field}\",",
+        "    )",
+        "",
+        "    @field_validator(\"${3:field}\")",
+        "    @classmethod",
+        "    def validate_${3:field}(cls, v: ${4:str}) -> ${4:str}:",
+        "        \"\"\"Validate ${3:field}.\"\"\"",
+        "        ${10:return v}"
+      ]
+    },
+  
+    "ASH Async Function": {
+      "prefix": ["adef", "async_def", "async"],
+      "description": "🐍 Async function with full type annotations",
+      "body": [
+        "async def ${1:function_name}(",
+        "    ${2:param}: ${3:type},",
+        ") -> ${4:None}:",
+        "    \"\"\"${5:Async function description}.",
+        "",
+        "    Args:",
+        "        ${2:param}: ${6:Param description}",
+        "",
+        "    Returns:",
+        "        ${4:None}: ${7:Return description}",
+        "",
+        "    Raises:",
+        "        ${8:ValueError}: ${9:When invalid}",
+        "    \"\"\"",
+        "    ${10:pass}"
+      ]
+    },
+  
+    "ASH Dataclass": {
+      "prefix": ["dc", "dataclass"],
+      "description": "🐍 Full dataclass with type hints & post_init",
+      "body": [
+        "@dataclass(frozen=${1:False}, slots=${2:True})",
+        "class ${3:ClassName}:",
+        "    \"\"\"${4:Class description}.\"\"\"",
+        "",
+        "    ${5:field}: ${6:str}",
+        "    ${7:optional}: ${8:int} = field(default=${9:0})",
+        "    _${10:private}: ${11:list} = field(default_factory=list, init=False, repr=False)",
+        "",
+        "    def __post_init__(self) -> None:",
+        "        \"\"\"Post-init validation.\"\"\"",
+        "        ${12:pass}",
+        "",
+        "    def __repr__(self) -> str:",
+        "        return f\"${3:ClassName}(${5:field}={self.${5:field}!r})\""
+      ]
+    },
+  
+    "ASH Context Manager": {
+      "prefix": ["ctx", "contextmanager"],
+      "description": "🐍 Async context manager with __aenter__/__aexit__",
+      "body": [
+        "class ${1:ContextManager}:",
+        "    \"\"\"${2:Context manager description}.\"\"\"",
+        "",
+        "    def __init__(self, ${3:param}: ${4:type}) -> None:",
+        "        self.${3:param} = ${3:param}",
+        "",
+        "    async def __aenter__(self) -> \"${1:ContextManager}\":",
+        "        \"\"\"Set up context.\"\"\"",
+        "        ${5:pass}",
+        "        return self",
+        "",
+        "    async def __aexit__(",
+        "        self,",
+        "        exc_type: type[BaseException] | None,",
+        "        exc_val: BaseException | None,",
+        "        exc_tb: object,",
+        "    ) -> bool:",
+        "        \"\"\"Tear down context.\"\"\"",
+        "        ${6:pass}",
+        "        return False"
+      ]
+    },
+  
+    "ASH SQLAlchemy Model": {
+      "prefix": ["sqla", "sqlalchemy", "orm"],
+      "description": "🐍 SQLAlchemy 2.0 declarative model",
+      "body": [
+        "class ${1:ModelName}(Base):",
+        "    \"\"\"${2:Table description}.\"\"\"",
+        "",
+        "    __tablename__ = \"${3:table_name}\"",
+        "",
+        "    id: Mapped[int] = mapped_column(",
+        "        Integer, primary_key=True, autoincrement=True",
+        "    )",
+        "    ${4:name}: Mapped[str] = mapped_column(",
+        "        String(${5:255}), nullable=False, index=True",
+        "    )",
+        "    ${6:created_at}: Mapped[datetime] = mapped_column(",
+        "        DateTime(timezone=True), server_default=func.now()",
+        "    )",
+        "    ${7:updated_at}: Mapped[datetime] = mapped_column(",
+        "        DateTime(timezone=True), onupdate=func.now(), nullable=True",
+        "    )",
+        "",
+        "    def __repr__(self) -> str:",
+        "        return f\"<${1:ModelName} id={self.id} ${4:name}={self.${4:name}!r}>\""
+      ]
+    },
+  
+    "ASH pytest Test": {
+      "prefix": ["test", "pytest"],
+      "description": "🐍 pytest async test with fixtures",
+      "body": [
+        "@pytest.mark.asyncio",
+        "async def test_${1:function_name}(",
+        "    ${2:fixture}: ${3:type},",
+        "    monkeypatch: pytest.MonkeyPatch,",
+        ") -> None:",
+        "    \"\"\"Test ${4:scenario description}.\"\"\"",
+        "    # ── Arrange ─────────────────────────────────────────────",
+        "    ${5:# setup}",
+        "",
+        "    # ── Act ─────────────────────────────────────────────────",
+        "    result = await ${6:function_under_test}(${7:args})",
+        "",
+        "    # ── Assert ──────────────────────────────────────────────",
+        "    assert result == ${8:expected}, f\"Expected {${8:expected}}, got {result}\""
+      ]
+    },
+  
+    "ASH Decorator Pattern": {
+      "prefix": ["dec", "decorator"],
+      "description": "🐍 Parameterised decorator with wraps",
+      "body": [
+        "import functools",
+        "from typing import Callable, TypeVar",
+        "",
+        "F = TypeVar(\"F\", bound=Callable[..., object])",
+        "",
+        "",
+        "def ${1:decorator_name}(${2:param}: ${3:type} = ${4:default}) -> Callable[[F], F]:",
+        "    \"\"\"${5:Decorator description}.",
+        "",
+        "    Args:",
+        "        ${2:param}: ${6:Param description}",
+        "    \"\"\"",
+        "    def decorator(func: F) -> F:",
+        "        @functools.wraps(func)",
+        "        def wrapper(*args: object, **kwargs: object) -> object:",
+        "            ${7:# pre-logic}",
+        "            result = func(*args, **kwargs)",
+        "            ${8:# post-logic}",
+        "            return result",
+        "        return wrapper  # type: ignore[return-value]",
+        "    return decorator"
+      ]
+    },
+  
+    "ASH TypedDict": {
+      "prefix": ["td", "typeddict"],
+      "description": "🐍 TypedDict with required and optional fields",
+      "body": [
+        "class ${1:DictName}(TypedDict, total=False):",
+        "    \"\"\"${2:TypedDict description}.\"\"\"",
+        "",
+        "    ${3:required_field}: Required[${4:str}]",
+        "    ${5:optional_field}: ${6:int}"
+      ]
+    },
+  
+    "ASH Protocol": {
+      "prefix": ["proto", "protocol"],
+      "description": "🐍 Protocol for structural subtyping",
+      "body": [
+        "from typing import Protocol, runtime_checkable",
+        "",
+        "",
+        "@runtime_checkable",
+        "class ${1:ProtocolName}(Protocol):",
+        "    \"\"\"${2:Protocol description}.\"\"\"",
+        "",
+        "    ${3:required_attr}: ${4:str}",
+        "",
+        "    def ${5:required_method}(self, ${6:param}: ${7:type}) -> ${8:None}: ..."
+      ]
+    },
+  
+    "ASH Property": {
+      "prefix": ["prop", "property"],
+      "description": "🐍 Full property with getter/setter/deleter",
+      "body": [
+        "@property",
+        "def ${1:name}(self) -> ${2:str}:",
+        "    \"\"\"Get ${1:name}.\"\"\"",
+        "    return self._${1:name}",
+        "",
+        "@${1:name}.setter",
+        "def ${1:name}(self, value: ${2:str}) -> None:",
+        "    \"\"\"Set ${1:name}.\"\"\"",
+        "    if not isinstance(value, ${2:str}):",
+        "        raise TypeError(f\"Expected ${2:str}, got {type(value).__name__}\")",
+        "    self._${1:name} = value",
+        "",
+        "@${1:name}.deleter",
+        "def ${1:name}(self) -> None:",
+        "    \"\"\"Delete ${1:name}.\"\"\"",
+        "    del self._${1:name}"
+      ]
+    },
+  
+    "ASH Generator": {
+      "prefix": ["gen", "generator"],
+      "description": "🐍 Typed generator function",
+      "body": [
+        "from collections.abc import Generator",
+        "",
+        "",
+        "def ${1:generate}(${2:items}: list[${3:type}]) -> Generator[${3:type}, None, None]:",
+        "    \"\"\"${4:Generator description}.",
+        "",
+        "    Yields:",
+        "        ${3:type}: ${5:Yield description}",
+        "    \"\"\"",
+        "    for ${6:item} in ${2:items}:",
+        "        if ${7:condition}:",
+        "            yield ${6:item}"
+      ]
+    },
+  
+    "ASH Enum Class": {
+      "prefix": ["enum", "enum_class"],
+      "description": "🐍 StrEnum / IntEnum with methods",
+      "body": [
+        "from enum import StrEnum, auto",
+        "",
+        "",
+        "class ${1:EnumName}(StrEnum):",
+        "    \"\"\"${2:Enum description}.\"\"\"",
+        "",
+        "    ${3:VALUE_ONE} = auto()",
+        "    ${4:VALUE_TWO} = auto()",
+        "    ${5:VALUE_THREE} = auto()",
+        "",
+        "    @classmethod",
+        "    def from_string(cls, value: str) -> \"${1:EnumName}\":",
+        "        \"\"\"Parse from string, case-insensitive.\"\"\"",
+        "        try:",
+        "            return cls(value.lower())",
+        "        except ValueError:",
+        "            raise ValueError(f\"Invalid ${1:EnumName}: {value!r}\")"
+      ]
+    },
+  
+    "ASH __all__ Export": {
+      "prefix": ["all", "exports"],
+      "description": "🐍 __all__ public exports declaration",
+      "body": [
+        "__all__ = [",
+        "    \"${1:ClassName}\",",
+        "    \"${2:function_name}\",",
+        "    \"${3:CONSTANT}\",",
+        "]"
+      ]
+    },
+  
+    "ASH Main Guard": {
+      "prefix": ["main", "ifmain"],
+      "description": "🐍 Async main with proper entry point",
+      "body": [
+        "import asyncio",
+        "import sys",
+        "",
+        "",
+        "async def main() -> int:",
+        "    \"\"\"Main entry point.\"\"\"",
+        "    ${1:pass}",
+        "    return 0",
+        "",
+        "",
+        "if __name__ == \"__main__\":",
+        "    sys.exit(asyncio.run(main()))"
+      ]
+    },
+  
+    "ASH Loguru Logger": {
+      "prefix": ["log", "logger"],
+      "description": "🐍 Loguru structured logging setup",
+      "body": [
+        "from loguru import logger",
+        "",
+        "logger.add(",
+        "    \"logs/${1:app}.log\",",
+        "    rotation=\"${2:10 MB}\",",
+        "    retention=\"${3:7 days}\",",
+        "    level=\"${4:INFO}\",",
+        "    format=\"{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} — {message}\",",
+        "    serialize=${5:False},",
+        ")",
+        "",
+        "logger.info(\"${6:Application started}\")"
+      ]
+    }
+  }

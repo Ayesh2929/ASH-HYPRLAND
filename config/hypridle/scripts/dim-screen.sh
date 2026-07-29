@@ -768,14 +768,14 @@ print(f'{result:.6f}')
 "
     elif [[ "$HAS_BC" == "true" ]]; then
         # Simplified cubic ease with bc
-        echo "$progress $easing" | bc -l 2>/dev/null << 'EOF'
+        bc -l 2>/dev/null << EOF
 define ease(p) {
     if (p < 0.5) {
         return 4 * p * p * p;
     }
     return 1 - (-2 * p + 2)^3 / 2;
 }
-ease($1)
+ease($progress)
 EOF
     else
         # No math available — return linear

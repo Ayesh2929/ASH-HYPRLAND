@@ -167,7 +167,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -322,7 +322,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install image generation stack"
         run: |
@@ -1336,7 +1336,7 @@ jobs:
           ls -la "${OUTPUT_FINAL}/"
 
       - name: "📤 Upload preview artifacts"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "theme-preview-${{ matrix.theme.name }}-${{ needs.detect-themes.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/final/${{ matrix.theme.name }}/"
@@ -1359,13 +1359,13 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: "📥 Download all preview artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "theme-preview-*-${{ needs.detect-themes.outputs.session_id }}"
           path: "${{ env.WORK_DIR }}/downloaded"

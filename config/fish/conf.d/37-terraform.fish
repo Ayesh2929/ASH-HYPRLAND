@@ -226,7 +226,7 @@ function tf-plan-save --description "Create a saved Terraform plan file"
 
             # Show summary
             echo ""
-            echo "_tf_bold"  Changes Summary:"$_tf_reset
+            echo $_tf_bold"  Changes Summary:"$_tf_reset
             $_ash_tf_bin show -json $plan_file 2>/dev/null | \
                 command -q python3 && python3 -c "
 import json, sys
@@ -359,7 +359,10 @@ function tf-workspace-smart --description "Smart Terraform workspace management"
             and echo $_tf_green"  ✓ Created workspace: $ws"$_tf_reset
 
         case delete rm
-            test -z "$ws" && begin; echo "  Usage: tf-workspace-smart delete <name>"; return 1; end
+            if test -z "$ws"
+                echo '  Usage: tf-workspace-smart delete <name>'
+                return 1
+            end
             read -P "  Delete workspace '$ws'? [y/N] " confirm
             string match -qi 'y*' $confirm || return 0
             $_ash_tf_bin workspace delete $ws
@@ -406,7 +409,10 @@ function tf-state-smart --description "Interactive Terraform state management"
                 command -q bat && bat --language=hcl --style=plain --color=always || cat
 
         case mv move rename
-            test (count $argv) -lt 3 && begin; echo "  Usage: tf-state-smart mv <from> <to>"; return 1; end
+            if test (count $argv) -lt 3
+                echo '  Usage: tf-state-smart mv <from> <to>'
+                return 1
+            end
             echo $_tf_yellow"  Moving: $argv[2] → $argv[3]"$_tf_reset
             read -P "  Confirm? [y/N] " confirm
             string match -qi 'y*' $confirm || return 0
@@ -432,7 +438,10 @@ function tf-state-smart --description "Interactive Terraform state management"
             and echo $_tf_green"  ✓ Removed from state"$_tf_reset
 
         case import
-            test (count $argv) -lt 3 && begin; echo "  Usage: tf-state-smart import <resource> <id>"; return 1; end
+            if test (count $argv) -lt 3
+                echo '  Usage: tf-state-smart import <resource> <id>'
+                return 1
+            end
             echo $_tf_cyan"  Importing: $argv[2] (id: $argv[3])"$_tf_reset
             $_ash_tf_bin import $argv[2] $argv[3]
             and echo $_tf_green"  ✓ Imported"$_tf_reset
@@ -579,7 +588,7 @@ function tf-info --description "Show Terraform environment information"
     echo "  "$bold"Tools:"$reset
     for tool in tfsec checkov terrascan infracost terragrunt tfenv
         if command -q $tool
-            echo "    "$green"✓ "$reset$tool" "($dim(command -v $tool)$reset)
+            echo "    "$green"✓ "$reset$tool" ("$dim(command -v $tool)$reset")"
         end
     end
     echo ""

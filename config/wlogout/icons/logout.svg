@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+
+    <filter id="logout-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.706 0.745 0.996 0 0
+                0.706 0.745 0.996 0 0
+                0.706 0.745 0.996 0 0
+                0     0     0     1 0" result="c"/>
+      <feMerge>
+        <feMergeNode in="c"/>
+        <feMergeNode in="c"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="logout-soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <linearGradient id="logout-door-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#b4befe" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#89b4fa" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <linearGradient id="logout-arrow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#cdd6f4"/>
+      <stop offset="100%" stop-color="#b4befe"/>
+    </linearGradient>
+
+    <linearGradient id="logout-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.00"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30"
+    fill="rgba(180,190,254,0.06)"
+    stroke="rgba(180,190,254,0.12)"
+    stroke-width="0.5"/>
+
+  <!-- ── Door frame ──────────────────────────────────────────────────────── -->
+  <g filter="url(#logout-soft)">
+    <!-- Outer door frame -->
+    <path d="M10 10 L10 54 L38 54 L38 44 L36 44 L36 52 L12 52 L12 12 L36 12 L36 20 L38 20 L38 10 Z"
+      fill="url(#logout-door-grad)"
+      stroke="rgba(180,190,254,0.40)"
+      stroke-width="0.8"
+      stroke-linejoin="round"/>
+
+    <!-- Door left highlight -->
+    <rect x="10" y="10" width="6" height="44"
+      rx="2"
+      fill="url(#logout-highlight)"
+      opacity="0.7"/>
+
+    <!-- Hinge top -->
+    <rect x="9" y="16" width="4" height="6"
+      rx="1"
+      fill="rgba(180,190,254,0.5)"
+      stroke="rgba(255,255,255,0.15)"
+      stroke-width="0.5"/>
+
+    <!-- Hinge bottom -->
+    <rect x="9" y="42" width="4" height="6"
+      rx="1"
+      fill="rgba(180,190,254,0.5)"
+      stroke="rgba(255,255,255,0.15)"
+      stroke-width="0.5"/>
+
+    <!-- Door handle knob -->
+    <circle cx="34" cy="32" r="2.5"
+      fill="rgba(205,214,244,0.7)"
+      stroke="rgba(255,255,255,0.3)"
+      stroke-width="0.8"/>
+    <circle cx="33.2" cy="31.2" r="0.8"
+      fill="rgba(255,255,255,0.5)"/>
+  </g>
+
+  <!-- ── Exit arrow ──────────────────────────────────────────────────────── -->
+  <g filter="url(#logout-glow)" transform="translate(2, 0)">
+    <!-- Arrow shaft -->
+    <line x1="30" y1="32" x2="54" y2="32"
+      stroke="url(#logout-arrow-grad)"
+      stroke-width="3.5"
+      stroke-linecap="round"/>
+
+    <!-- Arrow head -->
+    <polyline points="46,24 54,32 46,40"
+      fill="none"
+      stroke="url(#logout-arrow-grad)"
+      stroke-width="3.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+
+    <!-- Arrow glow overlay -->
+    <line x1="30" y1="32" x2="54" y2="32"
+      stroke="rgba(255,255,255,0.3)"
+      stroke-width="1.2"
+      stroke-linecap="round"/>
+  </g>
+
+</svg>

@@ -108,7 +108,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🆔 Generate benchmark ID"
         id: id
@@ -371,7 +371,7 @@ jobs:
           key: "color-fixtures-${{ needs.generate-fixtures.outputs.bench_id }}"
 
       - name: "📤 Upload fixtures as artifact"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "color-fixtures-${{ steps.id.outputs.bench_id }}"
           path: "${{ env.FIXTURES_DIR }}"
@@ -451,7 +451,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install extraction tools"
         run: |
@@ -483,7 +483,7 @@ jobs:
           rm /tmp/hyperfine.deb 2>/dev/null || true
 
       - name: "📥 Download test fixtures"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "color-fixtures-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.FIXTURES_DIR }}"
@@ -1228,7 +1228,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "color-bench-${{ matrix.algo.name }}-${{ matrix.resolution }}-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/${{ matrix.algo.name }}/${{ matrix.resolution }}/"
@@ -1256,7 +1256,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install tools"
         run: |
@@ -1267,7 +1267,7 @@ jobs:
             numpy matplotlib rich 2>/dev/null || true
 
       - name: "📥 Download fixtures"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "color-fixtures-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.FIXTURES_DIR }}"
@@ -1501,7 +1501,7 @@ jobs:
 
       - name: "📤 Upload throughput results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "color-throughput-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/throughput/"
@@ -1518,7 +1518,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install tools"
         run: |
@@ -1532,7 +1532,7 @@ jobs:
             -O /tmp/hyperfine.deb && sudo dpkg -i /tmp/hyperfine.deb || true
 
       - name: "📥 Download fixtures"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "color-fixtures-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.FIXTURES_DIR }}"
@@ -1877,7 +1877,7 @@ jobs:
 
       - name: "📤 Upload pipeline results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "color-pipeline-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/full-pipeline/"
@@ -1895,7 +1895,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Install tools"
         run: |
@@ -1904,7 +1904,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas rich tabulate
 
       - name: "📥 Download all artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "color-*-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.BENCH_DIR }}/collected"
@@ -2070,7 +2070,7 @@ jobs:
 
       - name: "📤 Upload final report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "color-report-${{ needs.generate-fixtures.outputs.bench_id }}"
           path: "${{ env.REPORTS_DIR }}/"

@@ -174,7 +174,7 @@ get_processes() {
     my_uid=$(id -u)
 
     # Use ps for reliable process listing
-    local ps_args=(-eo pid,ppid,user,pcpu,pmem,rss,etime,comm,cmd)
+    local ps_args=(-eo "pid,ppid,user,pcpu,pmem,rss,etime,comm,cmd")
     local sort_key
 
     case "$sort_by" in
@@ -529,7 +529,7 @@ dispatch_action() {
             local zombies
             zombies=$(ps aux 2>/dev/null | awk '$8 == "Z" {print $2}' | head -10)
             if [[ -n "$zombies" ]]; then
-                echo "$zombies" | xargs -I{} kill -SIGCHLD $(ps -o ppid= -p {} 2>/dev/null) 2>/dev/null || true
+                echo "$zombies" | xargs -I{} sh -c 'kill -SIGCHLD "$(ps -o ppid= -p "$1" 2>/dev/null)" 2>/dev/null || true' -- {}
                 notify_pk "🧹 Zombie cleanup" "Attempted to reap $(echo "$zombies" | wc -l) zombies" "low"
             else
                 notify_pk "✓ No zombies" "No defunct processes found" "low"
@@ -717,7 +717,6 @@ if [[ "${ROFI_RETV}" -eq 21 ]]; then
     meta_value="${parts[2]:-}"
     IFS='|' read -r pid name rest <<< "$meta_value"
     if [[ -n "$pid" ]]; then
-        local confirm
         confirm=$(printf "Yes, force kill\nCancel" | \
             rofi -dmenu \
                 -p "Force kill: ${name} (${pid})?" \

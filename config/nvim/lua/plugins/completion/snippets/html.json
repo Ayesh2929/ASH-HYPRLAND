@@ -1,0 +1,468 @@
+{
+    "ASH HTML5 Document": {
+      "prefix": ["html5", "doc", "html"],
+      "description": "🌐 Full HTML5 document",
+      "body": [
+        "<!DOCTYPE html>",
+        "<html lang=\"${1:en}\" data-theme=\"${2:dark}\">",
+        "  <head>",
+        "    <meta charset=\"UTF-8\" />",
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />",
+        "    <meta name=\"description\" content=\"${3:Page description}\" />",
+        "    <meta name=\"author\" content=\"${4:ash}\" />",
+        "    <meta property=\"og:title\" content=\"${5:Page Title}\" />",
+        "    <meta property=\"og:description\" content=\"${3:Page description}\" />",
+        "    <meta property=\"og:type\" content=\"website\" />",
+        "    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />",
+        "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />",
+        "    <title>${5:Page Title}</title>",
+        "    <style>",
+        "      :root {",
+        "        --color-bg:   #1a1b26;",
+        "        --color-fg:   #c0caf5;",
+        "        --color-acc:  #7aa2f7;",
+        "      }",
+        "      * { box-sizing: border-box; margin: 0; padding: 0; }",
+        "      body { background: var(--color-bg); color: var(--color-fg); font-family: system-ui, sans-serif; }",
+        "    </style>",
+        "  </head>",
+        "  <body>",
+        "    <header>",
+        "      <nav aria-label=\"Main navigation\">",
+        "        ${6:<!-- navigation -->}",
+        "      </nav>",
+        "    </header>",
+        "",
+        "    <main id=\"main\" tabindex=\"-1\">",
+        "      ${0}",
+        "    </main>",
+        "",
+        "    <footer>",
+        "      ${7:<!-- footer -->}",
+        "    </footer>",
+        "  </body>",
+        "</html>"
+      ]
+    },
+  
+    "HTML Head Meta": {
+      "prefix": ["meta", "head"],
+      "description": "🌐 Complete meta tags block",
+      "body": [
+        "<meta charset=\"UTF-8\" />",
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />",
+        "<meta name=\"description\" content=\"${1:description}\" />",
+        "<meta name=\"keywords\" content=\"${2:keywords}\" />",
+        "<meta name=\"author\" content=\"${3:author}\" />",
+        "<meta name=\"robots\" content=\"index, follow\" />",
+        "",
+        "<!-- Open Graph -->",
+        "<meta property=\"og:title\" content=\"${4:title}\" />",
+        "<meta property=\"og:description\" content=\"${1:description}\" />",
+        "<meta property=\"og:image\" content=\"${5:/og-image.png}\" />",
+        "<meta property=\"og:url\" content=\"${6:https://example.com}\" />",
+        "<meta property=\"og:type\" content=\"website\" />",
+        "",
+        "<!-- Twitter -->",
+        "<meta name=\"twitter:card\" content=\"summary_large_image\" />",
+        "<meta name=\"twitter:title\" content=\"${4:title}\" />",
+        "<meta name=\"twitter:description\" content=\"${1:description}\" />",
+        "<meta name=\"twitter:image\" content=\"${5:/og-image.png}\" />"
+      ]
+    },
+  
+    "Semantic Article": {
+      "prefix": ["article", "art"],
+      "description": "🌐 Semantic article element",
+      "body": [
+        "<article class=\"${1:article}\" itemscope itemtype=\"https://schema.org/Article\">",
+        "  <header>",
+        "    <h2 itemprop=\"name\">${2:Article Title}</h2>",
+        "    <time itemprop=\"datePublished\" datetime=\"${3:2024-01-01}\">${4:January 1, 2024}</time>",
+        "  </header>",
+        "  <section itemprop=\"articleBody\">",
+        "    ${0}",
+        "  </section>",
+        "  <footer>",
+        "    <address itemprop=\"author\">${5:Author Name}</address>",
+        "  </footer>",
+        "</article>"
+      ]
+    },
+  
+    "Semantic Section": {
+      "prefix": ["section", "sec"],
+      "description": "🌐 Semantic section with aria",
+      "body": [
+        "<section",
+        "  id=\"${1:section-id}\"",
+        "  class=\"${2:section}\"",
+        "  aria-labelledby=\"${1:section-id}-heading\"",
+        ">",
+        "  <h2 id=\"${1:section-id}-heading\">${3:Section Title}</h2>",
+        "  ${0}",
+        "</section>"
+      ]
+    },
+  
+    "Navigation": {
+      "prefix": ["nav", "navigation"],
+      "description": "🌐 Accessible navigation",
+      "body": [
+        "<nav aria-label=\"${1:Primary}\" class=\"${2:nav}\">",
+        "  <ul role=\"list\" class=\"${2:nav}__list\">",
+        "    <li class=\"${2:nav}__item\">",
+        "      <a href=\"${3:/}\" class=\"${2:nav}__link\" ${4:aria-current=\"page\"}>${5:Home}</a>",
+        "    </li>",
+        "    <li class=\"${2:nav}__item\">",
+        "      <a href=\"${6:/about}\" class=\"${2:nav}__link\">${7:About}</a>",
+        "    </li>",
+        "  </ul>",
+        "</nav>"
+      ]
+    },
+  
+    "Accessible Button": {
+      "prefix": ["btn", "button"],
+      "description": "🌐 Accessible button",
+      "body": [
+        "<button",
+        "  type=\"${1|button,submit,reset|}\"",
+        "  class=\"btn btn--${2|primary,secondary,ghost,danger|}\"",
+        "  ${3:id=\"${4:btn-id}\"}",
+        "  ${5:aria-label=\"${6:Action description}\"}",
+        "  ${7:aria-expanded=\"false\"}",
+        "  ${8:disabled}",
+        ">",
+        "  ${9:<!-- icon -->}",
+        "  <span>${10:Label}</span>",
+        "</button>"
+      ]
+    },
+  
+    "Accessible Form": {
+      "prefix": ["form", "aform"],
+      "description": "🌐 Accessible form",
+      "body": [
+        "<form",
+        "  id=\"${1:form-id}\"",
+        "  class=\"${2:form}\"",
+        "  action=\"${3:#}\"",
+        "  method=\"${4|post,get|}\"",
+        "  novalidate",
+        "  aria-label=\"${5:Form purpose}\"",
+        ">",
+        "  <fieldset>",
+        "    <legend>${5:Form purpose}</legend>",
+        "",
+        "    <div class=\"form__group\">",
+        "      <label for=\"${6:field-id}\">${7:Label}</label>",
+        "      <input",
+        "        type=\"${8|text,email,password,number,tel,url,search|}\"",
+        "        id=\"${6:field-id}\"",
+        "        name=\"${6:field-id}\"",
+        "        class=\"form__input\"",
+        "        autocomplete=\"${9:off}\"",
+        "        required",
+        "        aria-required=\"true\"",
+        "        aria-describedby=\"${6:field-id}-hint\"",
+        "      />",
+        "      <p id=\"${6:field-id}-hint\" class=\"form__hint\">${10:Hint text}</p>",
+        "    </div>",
+        "",
+        "    <button type=\"submit\" class=\"btn btn--primary\">${11:Submit}</button>",
+        "  </fieldset>",
+        "</form>"
+      ]
+    },
+  
+    "Input Field": {
+      "prefix": ["input", "inp"],
+      "description": "🌐 Labelled input field",
+      "body": [
+        "<div class=\"field\">",
+        "  <label for=\"${1:id}\" class=\"field__label\">${2:Label}</label>",
+        "  <input",
+        "    type=\"${3|text,email,password,number,tel,url,search,date|}\"",
+        "    id=\"${1:id}\"",
+        "    name=\"${1:id}\"",
+        "    class=\"field__input\"",
+        "    placeholder=\"${4:placeholder}\"",
+        "    ${5:value=\"${6:}\"}",
+        "    ${7:required}",
+        "    ${8:autocomplete=\"${9:off}\"}",
+        "    aria-describedby=\"${1:id}-error\"",
+        "  />",
+        "  <span id=\"${1:id}-error\" class=\"field__error\" role=\"alert\" hidden></span>",
+        "</div>"
+      ]
+    },
+  
+    "Select Field": {
+      "prefix": ["select", "dropdown"],
+      "description": "🌐 Accessible select dropdown",
+      "body": [
+        "<div class=\"field\">",
+        "  <label for=\"${1:id}\">${2:Label}</label>",
+        "  <select id=\"${1:id}\" name=\"${1:id}\" class=\"field__select\" required>",
+        "    <option value=\"\" disabled selected>${3:Select an option}</option>",
+        "    <option value=\"${4:val1}\">${5:Option 1}</option>",
+        "    <option value=\"${6:val2}\">${7:Option 2}</option>",
+        "  </select>",
+        "</div>"
+      ]
+    },
+  
+    "Image Responsive": {
+      "prefix": ["img", "picture"],
+      "description": "🌐 Responsive image with picture",
+      "body": [
+        "<picture>",
+        "  <source",
+        "    media=\"(min-width: ${1:768}px)\"",
+        "    srcset=\"${2:/img/hero-lg.webp}\"",
+        "    type=\"image/webp\"",
+        "  />",
+        "  <source srcset=\"${3:/img/hero-sm.webp}\" type=\"image/webp\" />",
+        "  <img",
+        "    src=\"${4:/img/hero.jpg}\"",
+        "    alt=\"${5:Descriptive alt text}\"",
+        "    class=\"${6:img}\"",
+        "    width=\"${7:800}\"",
+        "    height=\"${8:600}\"",
+        "    loading=\"${9|lazy,eager|}\"",
+        "    decoding=\"async\"",
+        "  />",
+        "</picture>"
+      ]
+    },
+  
+    "Dialog Modal": {
+      "prefix": ["dialog", "modal"],
+      "description": "🌐 Native dialog/modal",
+      "body": [
+        "<dialog",
+        "  id=\"${1:modal-id}\"",
+        "  class=\"modal\"",
+        "  aria-modal=\"true\"",
+        "  aria-labelledby=\"${1:modal-id}-title\"",
+        ">",
+        "  <article class=\"modal__content\">",
+        "    <header class=\"modal__header\">",
+        "      <h2 id=\"${1:modal-id}-title\">${2:Modal Title}</h2>",
+        "      <button",
+        "        class=\"modal__close\"",
+        "        aria-label=\"Close dialog\"",
+        "        data-close-dialog",
+        "      >",
+        "        ×",
+        "      </button>",
+        "    </header>",
+        "",
+        "    <div class=\"modal__body\">",
+        "      ${0}",
+        "    </div>",
+        "",
+        "    <footer class=\"modal__footer\">",
+        "      <button type=\"button\" class=\"btn btn--ghost\" data-close-dialog>Cancel</button>",
+        "      <button type=\"button\" class=\"btn btn--primary\">${3:Confirm}</button>",
+        "    </footer>",
+        "  </article>",
+        "</dialog>"
+      ]
+    },
+  
+    "Details Disclosure": {
+      "prefix": ["details", "disclosure", "accordion"],
+      "description": "🌐 Details/summary disclosure",
+      "body": [
+        "<details class=\"disclosure\" ${1:open}>",
+        "  <summary class=\"disclosure__trigger\">",
+        "    <span>${2:Summary Title}</span>",
+        "    <svg aria-hidden=\"true\" class=\"disclosure__icon\" viewBox=\"0 0 24 24\">",
+        "      <path d=\"M19 9l-7 7-7-7\" />",
+        "    </svg>",
+        "  </summary>",
+        "  <div class=\"disclosure__content\">",
+        "    ${0}",
+        "  </div>",
+        "</details>"
+      ]
+    },
+  
+    "Table Accessible": {
+      "prefix": ["table", "tbl"],
+      "description": "🌐 Accessible data table",
+      "body": [
+        "<figure>",
+        "  <figcaption>${1:Table caption}</figcaption>",
+        "  <div class=\"table-wrapper\" role=\"region\" tabindex=\"0\">",
+        "    <table class=\"table\">",
+        "      <caption class=\"sr-only\">${1:Table caption}</caption>",
+        "      <thead>",
+        "        <tr>",
+        "          <th scope=\"col\">${2:Column 1}</th>",
+        "          <th scope=\"col\">${3:Column 2}</th>",
+        "          <th scope=\"col\">${4:Column 3}</th>",
+        "        </tr>",
+        "      </thead>",
+        "      <tbody>",
+        "        <tr>",
+        "          <td>${5:Cell 1}</td>",
+        "          <td>${6:Cell 2}</td>",
+        "          <td>${7:Cell 3}</td>",
+        "        </tr>",
+        "      </tbody>",
+        "      <tfoot>",
+        "        <tr>",
+        "          <td colspan=\"3\">${8:Footer}</td>",
+        "        </tr>",
+        "      </tfoot>",
+        "    </table>",
+        "  </div>",
+        "</figure>"
+      ]
+    },
+  
+    "Card Component": {
+      "prefix": ["card"],
+      "description": "🌐 Reusable card component",
+      "body": [
+        "<article class=\"card\" aria-label=\"${1:Card title}\">",
+        "  <div class=\"card__media\">",
+        "    <img src=\"${2:/img/card.jpg}\" alt=\"${3:}\" class=\"card__img\" loading=\"lazy\" />",
+        "  </div>",
+        "  <div class=\"card__body\">",
+        "    <span class=\"card__badge\">${4:Category}</span>",
+        "    <h3 class=\"card__title\">${1:Card title}</h3>",
+        "    <p class=\"card__desc\">${5:Card description text.}</p>",
+        "  </div>",
+        "  <footer class=\"card__footer\">",
+        "    <a href=\"${6:#}\" class=\"card__cta btn btn--primary\">${7:Read more}</a>",
+        "  </footer>",
+        "</article>"
+      ]
+    },
+  
+    "Breadcrumb Nav": {
+      "prefix": ["breadcrumb", "crumb"],
+      "description": "🌐 Accessible breadcrumb navigation",
+      "body": [
+        "<nav aria-label=\"Breadcrumb\" class=\"breadcrumb\">",
+        "  <ol class=\"breadcrumb__list\" role=\"list\">",
+        "    <li class=\"breadcrumb__item\">",
+        "      <a href=\"/\" class=\"breadcrumb__link\">Home</a>",
+        "    </li>",
+        "    <li class=\"breadcrumb__item\">",
+        "      <a href=\"/${1:section}\" class=\"breadcrumb__link\">${2:Section}</a>",
+        "    </li>",
+        "    <li class=\"breadcrumb__item\" aria-current=\"page\">",
+        "      ${3:Current Page}",
+        "    </li>",
+        "  </ol>",
+        "</nav>"
+      ]
+    },
+  
+    "Skip Link": {
+      "prefix": ["skip", "skiplink"],
+      "description": "🌐 Skip navigation link for a11y",
+      "body": [
+        "<a href=\"#${1:main}\" class=\"skip-link\">Skip to main content</a>"
+      ]
+    },
+  
+    "SVG Icon": {
+      "prefix": ["svg", "icon"],
+      "description": "🌐 Inline SVG icon",
+      "body": [
+        "<svg",
+        "  xmlns=\"http://www.w3.org/2000/svg\"",
+        "  viewBox=\"0 0 24 24\"",
+        "  width=\"${1:24}\"",
+        "  height=\"${1:24}\"",
+        "  fill=\"${2:none}\"",
+        "  stroke=\"${3:currentColor}\"",
+        "  stroke-width=\"${4:2}\"",
+        "  aria-hidden=\"true\"",
+        "  class=\"icon icon--${5:name}\"",
+        ">",
+        "  ${0}",
+        "</svg>"
+      ]
+    },
+  
+    "Schema.org": {
+      "prefix": ["schema", "jsonld"],
+      "description": "🌐 JSON-LD structured data",
+      "body": [
+        "<script type=\"application/ld+json\">",
+        "{",
+        "  \"@context\": \"https://schema.org\",",
+        "  \"@type\": \"${1|WebPage,Article,Product,Organization,Person|}\",",
+        "  \"name\": \"${2:Page Name}\",",
+        "  \"description\": \"${3:Description}\",",
+        "  \"url\": \"${4:https://example.com}\"",
+        "}",
+        "</script>"
+      ]
+    },
+  
+    "Loading Spinner": {
+      "prefix": ["spinner", "loading"],
+      "description": "🌐 Accessible loading indicator",
+      "body": [
+        "<div",
+        "  class=\"spinner\"",
+        "  role=\"status\"",
+        "  aria-label=\"${1:Loading}\"",
+        "  aria-live=\"polite\"",
+        ">",
+        "  <span class=\"sr-only\">${1:Loading}…</span>",
+        "</div>"
+      ]
+    },
+  
+    "Alert Message": {
+      "prefix": ["alert", "message"],
+      "description": "🌐 Accessible alert/notification",
+      "body": [
+        "<div",
+        "  class=\"alert alert--${1|info,success,warning,error|}\"",
+        "  role=\"${2|alert,status|}\"",
+        "  aria-live=\"${3|assertive,polite|}\"",
+        ">",
+        "  <svg aria-hidden=\"true\" class=\"alert__icon\"></svg>",
+        "  <p class=\"alert__message\">${4:Message text}</p>",
+        "  <button type=\"button\" class=\"alert__dismiss\" aria-label=\"Dismiss\">×</button>",
+        "</div>"
+      ]
+    },
+  
+    "Link": {
+      "prefix": ["a", "link", "anchor"],
+      "description": "🌐 Anchor link",
+      "body": [
+        "<a",
+        "  href=\"${1:#}\"",
+        "  class=\"${2:link}\"",
+        "  ${3:target=\"_blank\" rel=\"noopener noreferrer\"}",
+        "  ${4:aria-label=\"${5:description}\"}",
+        ">",
+        "  ${6:Link text}",
+        "</a>"
+      ]
+    },
+  
+    "List": {
+      "prefix": ["ul", "list"],
+      "description": "🌐 Unordered list",
+      "body": [
+        "<ul class=\"${1:list}\" role=\"list\">",
+        "  <li class=\"${1:list}__item\">${2:Item 1}</li>",
+        "  <li class=\"${1:list}__item\">${3:Item 2}</li>",
+        "  <li class=\"${1:list}__item\">${0}</li>",
+        "</ul>"
+      ]
+    }
+  }

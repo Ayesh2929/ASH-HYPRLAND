@@ -1,0 +1,307 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "🦀 ASH Rust Ultra Snippets v5.0",
+  
+    "ASH Tokio Async Main": {
+      "prefix": ["amain", "async_main", "tokio"],
+      "description": "🦀 Tokio async main with error handling",
+      "body": [
+        "use std::error::Error;",
+        "",
+        "#[tokio::main]",
+        "async fn main() -> Result<(), Box<dyn Error>> {",
+        "    tracing_subscriber::fmt()",
+        "        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())",
+        "        .init();",
+        "",
+        "    tracing::info!(\"${1:Application} starting up\");",
+        "",
+        "    ${2:// main body}",
+        "",
+        "    Ok(())",
+        "}"
+      ]
+    },
+  
+    "ASH Struct with Builder": {
+      "prefix": ["stb", "struct_builder"],
+      "description": "🦀 Struct with derive macros and builder pattern",
+      "body": [
+        "#[derive(Debug, Clone, PartialEq, Eq, Hash)]",
+        "#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
+        "pub struct ${1:StructName} {",
+        "    pub ${2:field}: ${3:String},",
+        "    pub ${4:optional}: Option<${5:u32}>,",
+        "}",
+        "",
+        "impl ${1:StructName} {",
+        "    /// Creates a new [`${1:StructName}`].",
+        "    pub fn new(${2:field}: impl Into<${3:String}>) -> Self {",
+        "        Self {",
+        "            ${2:field}: ${2:field}.into(),",
+        "            ${4:optional}: None,",
+        "        }",
+        "    }",
+        "",
+        "    /// Sets [`${1:StructName}::${4:optional}`].",
+        "    #[must_use]",
+        "    pub fn with_${4:optional}(mut self, ${4:optional}: ${5:u32}) -> Self {",
+        "        self.${4:optional} = Some(${4:optional});",
+        "        self",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Error Type": {
+      "prefix": ["err", "error_type", "thiserror"],
+      "description": "🦀 thiserror custom error enum",
+      "body": [
+        "use thiserror::Error;",
+        "",
+        "#[derive(Debug, Error)]",
+        "pub enum ${1:AppError} {",
+        "    #[error(\"${2:Not found}: {0}\")]",
+        "    ${3:NotFound}(${4:String}),",
+        "",
+        "    #[error(\"${5:Invalid input}: {0}\")]",
+        "    ${6:InvalidInput}(${7:String}),",
+        "",
+        "    #[error(\"${8:Internal error}\")]",
+        "    ${9:Internal}(#[from] ${10:anyhow::Error}),",
+        "",
+        "    #[error(\"IO error: {0}\")]",
+        "    Io(#[from] std::io::Error),",
+        "}"
+      ]
+    },
+  
+    "ASH Trait Definition": {
+      "prefix": ["trait", "trait_def"],
+      "description": "🦀 Trait with associated types and default impl",
+      "body": [
+        "/// ${1:Trait description}.",
+        "pub trait ${2:TraitName}: Send + Sync + 'static {",
+        "    /// Associated output type.",
+        "    type ${3:Output};",
+        "    /// Associated error type.",
+        "    type ${4:Error}: std::error::Error + Send + Sync + 'static;",
+        "",
+        "    /// ${5:Required method}.",
+        "    fn ${6:required}(&self) -> Result<Self::${3:Output}, Self::${4:Error}>;",
+        "",
+        "    /// ${7:Default method}.",
+        "    fn ${8:with_default}(&self) -> bool {",
+        "        ${9:true}",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Enum with Methods": {
+      "prefix": ["enum", "enum_impl"],
+      "description": "🦀 Enum with Display + From + methods",
+      "body": [
+        "#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]",
+        "#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
+        "#[cfg_attr(feature = \"serde\", serde(rename_all = \"snake_case\"))]",
+        "pub enum ${1:EnumName} {",
+        "    ${2:Variant1},",
+        "    ${3:Variant2}(${4:String}),",
+        "    ${5:Variant3} { ${6:field}: ${7:u32} },",
+        "}",
+        "",
+        "impl std::fmt::Display for ${1:EnumName} {",
+        "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {",
+        "        match self {",
+        "            Self::${2:Variant1} => write!(f, \"${8:variant1}\"),",
+        "            Self::${3:Variant2}(v) => write!(f, \"${9:variant2}({v})\"),",
+        "            Self::${5:Variant3} { ${6:field} } => write!(f, \"${10:variant3}({${6:field}})\"),",
+        "        }",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Iterator Impl": {
+      "prefix": ["iter", "iterator_impl"],
+      "description": "🦀 Custom Iterator implementation",
+      "body": [
+        "pub struct ${1:IterName}<'a> {",
+        "    ${2:data}: &'a [${3:Item}],",
+        "    ${4:pos}: usize,",
+        "}",
+        "",
+        "impl<'a> ${1:IterName}<'a> {",
+        "    pub fn new(${2:data}: &'a [${3:Item}]) -> Self {",
+        "        Self { ${2:data}, ${4:pos}: 0 }",
+        "    }",
+        "}",
+        "",
+        "impl<'a> Iterator for ${1:IterName}<'a> {",
+        "    type Item = &'a ${3:Item};",
+        "",
+        "    fn next(&mut self) -> Option<Self::Item> {",
+        "        if self.${4:pos} < self.${2:data}.len() {",
+        "            let item = &self.${2:data}[self.${4:pos}];",
+        "            self.${4:pos} += 1;",
+        "            Some(item)",
+        "        } else {",
+        "            None",
+        "        }",
+        "    }",
+        "",
+        "    fn size_hint(&self) -> (usize, Option<usize>) {",
+        "        let remaining = self.${2:data}.len() - self.${4:pos};",
+        "        (remaining, Some(remaining))",
+        "    }",
+        "}",
+        "",
+        "impl ExactSizeIterator for ${1:IterName}<'_> {}"
+      ]
+    },
+  
+    "ASH Axum Handler": {
+      "prefix": ["axum", "handler"],
+      "description": "🦀 Axum async HTTP handler",
+      "body": [
+        "/// ${1:Handler description}.",
+        "///",
+        "/// # Errors",
+        "/// Returns [`${2:AppError}`] if ${3:condition}.",
+        "#[tracing::instrument(skip(state))]",
+        "pub async fn ${4:handler_name}(",
+        "    State(state): State<Arc<${5:AppState}>>,",
+        "    Path(${6:id}): Path<${7:Uuid}>,",
+        "    Json(payload): Json<${8:RequestBody}>,",
+        ") -> Result<Json<${9:ResponseBody}>, ${2:AppError}> {",
+        "    tracing::debug!(${6:id} = %${6:id}, \"${1:Handler description}\");",
+        "",
+        "    let result = state",
+        "        .${10:service}",
+        "        .${11:method}(${6:id}, payload)",
+        "        .await",
+        "        .map_err(${2:AppError}::from)?;",
+        "",
+        "    Ok(Json(result))",
+        "}"
+      ]
+    },
+  
+    "ASH Serde Impl": {
+      "prefix": ["serde", "serialize"],
+      "description": "🦀 Custom Serialize/Deserialize implementation",
+      "body": [
+        "impl serde::Serialize for ${1:TypeName} {",
+        "    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>",
+        "    where",
+        "        S: serde::Serializer,",
+        "    {",
+        "        use serde::ser::SerializeStruct;",
+        "        let mut state = serializer.serialize_struct(\"${1:TypeName}\", ${2:2})?;",
+        "        state.serialize_field(\"${3:field}\", &self.${3:field})?;",
+        "        state.end()",
+        "    }",
+        "}",
+        "",
+        "impl<'de> serde::Deserialize<'de> for ${1:TypeName} {",
+        "    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>",
+        "    where",
+        "        D: serde::Deserializer<'de>,",
+        "    {",
+        "        ${4:// deserialize impl}",
+        "        todo!()",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Test Module": {
+      "prefix": ["tests", "test_mod"],
+      "description": "🦀 Test module with setup",
+      "body": [
+        "#[cfg(test)]",
+        "mod tests {",
+        "    use super::*;",
+        "    use pretty_assertions::assert_eq;",
+        "",
+        "    fn setup() -> ${1:TestFixture} {",
+        "        ${2:// setup code}",
+        "        todo!()",
+        "    }",
+        "",
+        "    #[test]",
+        "    fn test_${3:scenario}() {",
+        "        // ── Arrange ───────────────────────────────────────",
+        "        let fixture = setup();",
+        "",
+        "        // ── Act ───────────────────────────────────────────",
+        "        let result = ${4:function_under_test}(${5:args});",
+        "",
+        "        // ── Assert ────────────────────────────────────────",
+        "        assert_eq!(result, ${6:expected});",
+        "    }",
+        "",
+        "    #[tokio::test]",
+        "    async fn test_${7:async_scenario}() {",
+        "        let result = ${8:async_function}().await;",
+        "        assert!(result.is_ok(), \"Expected Ok, got {result:?}\");",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Arc Mutex Pattern": {
+      "prefix": ["arc", "shared_state"],
+      "description": "🦀 Arc<Mutex<T>> shared state pattern",
+      "body": [
+        "use std::sync::{Arc, Mutex};",
+        "",
+        "type Shared${1:State} = Arc<Mutex<${1:State}>>;",
+        "",
+        "let shared = Arc::new(Mutex::new(${1:State}::default()));",
+        "",
+        "// In async context — prefer tokio::sync::Mutex",
+        "use tokio::sync::Mutex as AsyncMutex;",
+        "type AsyncShared${1:State} = Arc<AsyncMutex<${1:State}>>;",
+        "",
+        "let async_shared = Arc::new(AsyncMutex::new(${1:State}::default()));",
+        "let guard = async_shared.lock().await;",
+        "// use guard.${2:method}();"
+      ]
+    },
+  
+    "ASH Closure with Move": {
+      "prefix": ["clos", "closure"],
+      "description": "🦀 Move closure with captured variables",
+      "body": [
+        "let ${1:var} = ${2:value};",
+        "let ${3:closure} = move |${4:arg}: ${5:type}| -> ${6:ReturnType} {",
+        "    // Captures: ${1:var}",
+        "    ${7:// body}",
+        "};"
+      ]
+    },
+  
+    "ASH From/Into Impl": {
+      "prefix": ["from", "from_impl"],
+      "description": "🦀 From trait implementation",
+      "body": [
+        "impl From<${1:SourceType}> for ${2:TargetType} {",
+        "    fn from(value: ${1:SourceType}) -> Self {",
+        "        Self {",
+        "            ${3:field}: value.${4:source_field}${5:.into()},",
+        "        }",
+        "    }",
+        "}"
+      ]
+    },
+  
+    "ASH Derive Macro": {
+      "prefix": ["der", "derive"],
+      "description": "🦀 Common derive attribute combo",
+      "body": [
+        "#[derive(${1|Debug,Debug Clone,Debug Clone PartialEq,Debug Clone PartialEq Eq Hash,Debug Clone PartialEq Eq Hash serde::Serialize serde::Deserialize|})]"
+      ]
+    }
+  }

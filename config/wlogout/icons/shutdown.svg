@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+
+    <filter id="sd-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.953 0.545 0.659 0 0
+                0.953 0.545 0.659 0 0
+                0.953 0.545 0.659 0 0
+                0     0     0     1 0" result="c"/>
+      <feMerge>
+        <feMergeNode in="c"/>
+        <feMergeNode in="c"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="sd-soft">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+    </filter>
+
+    <!-- Power ring gradient: Red → Maroon -->
+    <linearGradient id="sd-ring-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#eba0ac" stop-opacity="0.80"/>
+    </linearGradient>
+
+    <!-- Power button fill -->
+    <radialGradient id="sd-btn-grad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#f38ba8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#d0627e" stop-opacity="0.7"/>
+    </radialGradient>
+
+    <!-- Outer ring glow gradient -->
+    <radialGradient id="sd-aura-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="60%"  stop-color="rgba(243,139,168,0.00)"/>
+      <stop offset="100%" stop-color="rgba(243,139,168,0.20)"/>
+    </radialGradient>
+
+    <!-- Notch gradient -->
+    <linearGradient id="sd-notch-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#f5c2e7"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30"
+    fill="rgba(243,139,168,0.07)"
+    stroke="rgba(243,139,168,0.16)"
+    stroke-width="0.5"/>
+
+  <!-- Outer ambient aura -->
+  <circle cx="32" cy="32" r="28"
+    fill="url(#sd-aura-grad)"
+    filter="url(#sd-soft)"/>
+
+  <!-- ── Power ring arc (open at top) ───────────────────────────────────── -->
+  <g filter="url(#sd-glow)">
+
+    <!-- Outer decorative ring (subtle) -->
+    <circle cx="32" cy="32" r="23"
+      fill="none"
+      stroke="rgba(243,139,168,0.15)"
+      stroke-width="1.5"/>
+
+    <!-- Main power arc — 300° arc with gap at top -->
+    <!-- Arc: starts at ~120° (top-left) sweeps 300° to ~60° (top-right) -->
+    <path d="M20.5 13.5 A20 20 0 1 1 43.5 13.5"
+      fill="none"
+      stroke="url(#sd-ring-grad)"
+      stroke-width="5"
+      stroke-linecap="round"/>
+
+    <!-- Arc highlight (inner bright line) -->
+    <path d="M20.5 13.5 A20 20 0 1 1 43.5 13.5"
+      fill="none"
+      stroke="rgba(255,255,255,0.25)"
+      stroke-width="1.5"
+      stroke-linecap="round"/>
+
+    <!-- Arc tip glows — round termination effects -->
+    <circle cx="20.5" cy="13.5" r="3.5"
+      fill="#f38ba8"
+      opacity="0.9"/>
+    <circle cx="43.5" cy="13.5" r="3.5"
+      fill="#f38ba8"
+      opacity="0.9"/>
+
+    <!-- Tip highlights -->
+    <circle cx="19.5" cy="12.5" r="1.2"
+      fill="rgba(255,255,255,0.6)"/>
+    <circle cx="42.5" cy="12.5" r="1.2"
+      fill="rgba(255,255,255,0.6)"/>
+
+  </g>
+
+  <!-- ── Power button symbol (vertical bar) ────────────────────────────── -->
+  <g filter="url(#sd-glow)">
+
+    <!-- Stem / vertical bar -->
+    <rect x="29.5" y="10" width="5" height="22"
+      rx="2.5" ry="2.5"
+      fill="url(#sd-btn-grad)"
+      stroke="rgba(243,139,168,0.50)"
+      stroke-width="0.8"/>
+
+    <!-- Stem highlight -->
+    <rect x="29.5" y="10" width="2.5" height="22"
+      rx="2.5" ry="2.5"
+      fill="rgba(255,255,255,0.20)"/>
+
+    <!-- Stem tip glow dot -->
+    <circle cx="32" cy="11.5" r="3"
+      fill="rgba(243,139,168,0.35)"
+      filter="url(#sd-soft)"/>
+
+  </g>
+
+  <!-- ── Energy rings (decorative) ──────────────────────────────────────── -->
+  <g opacity="0.25" stroke="#f38ba8" fill="none">
+    <circle cx="32" cy="32" r="27" stroke-width="0.5" stroke-dasharray="2,3"/>
+  </g>
+
+  <!-- ── Corner danger indicators ──────────────────────────────────────── -->
+  <g opacity="0.35" fill="#f38ba8">
+    <polygon points="8,8 14,8 8,14"    opacity="0.5"/>
+    <polygon points="56,8 50,8 56,14"  opacity="0.5"/>
+    <polygon points="8,56 14,56 8,50"  opacity="0.4"/>
+    <polygon points="56,56 50,56 56,50" opacity="0.4"/>
+  </g>
+
+</svg>

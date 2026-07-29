@@ -1,0 +1,136 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH FASTFETCH — MINIMAL PRESET                                            ║
+// ║                                                                            ║
+// ║  ███╗░░░███╗██╗███╗░░██╗██╗███╗░░░███╗░█████╗░██╗░░░░░                  ║
+// ║  ████╗░████║██║████╗░██║██║████╗░████║██╔══██╗██║░░░░░                  ║
+// ║  ██╔████╔██║██║██╔██╗██║██║██╔████╔██║███████║██║░░░░░                  ║
+// ║  ██║╚██╔╝██║██║██║╚████║██║██║╚██╔╝██║██╔══██║██║░░░░░                  ║
+// ║  ██║░╚═╝░██║██║██║░╚███║██║██║░╚═╝░██║██║░░██║███████╗                  ║
+// ║  ╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝╚═╝╚═╝░░░░░╚═╝╚═╝░░╚═╝╚══════╝                  ║
+// ║                                                                            ║
+// ║  Style   : Ultra-clean • No logo • Essential info only                    ║
+// ║  Lines   : ~12 lines total                                                ║
+// ║  Usage   : fastfetch --config ~/.config/fastfetch/presets/minimal.jsonc   ║
+// ║  Best for: Floating terminal • Scratchpad • Quick glance                  ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+    // ── Display ───────────────────────────────────────────────────────────────
+
+    "display": {
+        "color": {
+            "keys":      "35",
+            "title":     "35",
+            "separator": "90"
+        },
+        // Minimal separator — just a space after icon
+        "separator": " ",
+        "keyWidth": 14,
+        "padding": { "left": 2 },
+        "brightColor": true,
+        "colorLogo": false,
+        "percentType": 5,
+        "sizeUnit": "auto",
+        "sizeNdigits": 1,
+        "temperatureUnit": "celsius",
+        "bar": {
+            "charElapsed": "■",
+            "charTotal":   "□",
+            "width": 8,
+            "border": false
+        }
+    },
+
+    // ── No Logo ───────────────────────────────────────────────────────────────
+
+    "logo": {
+        "source": "none",
+        "type": "none"
+    },
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  MODULES — Minimal Essential Set
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    "modules": [
+
+        // ── Title: user@host ───────────────────────────────────────────────
+        {
+            "type": "title",
+            "format": "\u001b[1;35m{user-name}\u001b[2;37m@\u001b[0m\u001b[1;35m{host-name}\u001b[0m",
+            "key": ""
+        },
+
+        // ── Thin separator line ────────────────────────────────────────────
+        {
+            "type": "separator",
+            "string": "·",
+            "color": { "separator": "90" }
+        },
+
+        // OS + kernel on one line via custom format
+        {
+            "type": "os",
+            "key": "  \u001b[90mOS\u001b[0m       ",
+            "format": "{pretty-name}"
+        },
+        {
+            "type": "kernel",
+            "key": "  \u001b[90mKernel\u001b[0m   ",
+            "format": "{release}"
+        },
+        {
+            "type": "uptime",
+            "key": "  \u001b[90mUptime\u001b[0m   "
+        },
+        {
+            "type": "shell",
+            "key": "  \u001b[90mShell\u001b[0m    ",
+            "format": "{name} {version}"
+        },
+        {
+            "type": "wm",
+            "key": "  \u001b[90mWM\u001b[0m       "
+        },
+        {
+            "type": "cpu",
+            "key": "  \u001b[90mCPU\u001b[0m      ",
+            "format": "{name} ({num-cores}c)",
+            "temp": false,
+            "showPeCoreCount": false
+        },
+        {
+            "type": "memory",
+            "key": "  \u001b[90mRAM\u001b[0m      ",
+            "format": "{used} / {total}"
+        },
+        {
+            "type": "disk",
+            "key": "  \u001b[90mDisk\u001b[0m     ",
+            "folders": "/",
+            "format": "{used} / {total}"
+        },
+        {
+            "type": "localip",
+            "key": "󰖩  \u001b[90mIP\u001b[0m       ",
+            "showIpv4": true,
+            "showIpv6": false,
+            "defaultRouteOnly": true
+        },
+        {
+            "type": "battery",
+            "key": "  \u001b[90mBattery\u001b[0m  ",
+            "format": "{percentage}% [{status}]"
+        },
+
+        // ── Color dots ────────────────────────────────────────────────────
+        { "type": "break" },
+        {
+            "type": "colors",
+            "paddingLeft": 2,
+            "symbol": "circle"
+        }
+    ]
+}

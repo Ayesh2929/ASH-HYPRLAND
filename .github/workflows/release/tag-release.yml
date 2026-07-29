@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -206,7 +206,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ env.TAG_NAME }}
@@ -528,7 +528,7 @@ jobs:
           echo "  ✅ GPG signing complete"
 
       - name: "📤 Upload Build Assets"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "release-assets-${{ needs.validate-tag.outputs.version }}"
           path: dist/
@@ -555,7 +555,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ env.TAG_NAME }}
@@ -708,7 +708,7 @@ jobs:
 
       - name: "📥 Download Build Assets"
         if: needs.build-assets.result == 'success'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "release-assets-${{ needs.validate-tag.outputs.version }}"
           path: dist/

@@ -1,0 +1,502 @@
+{
+    "ASH CSS Variables": {
+      "prefix": ["vars", "root", "custom_props"],
+      "description": "🎨 Complete design token system",
+      "body": [
+        ":root {",
+        "  /* ── Colour palette ─────────────────────────────── */",
+        "  --clr-base:      ${1:#1a1b26};",
+        "  --clr-surface:   ${2:#1e2030};",
+        "  --clr-overlay:   ${3:#414868};",
+        "  --clr-text:      ${4:#c0caf5};",
+        "  --clr-subtext:   ${5:#9399b2};",
+        "  --clr-accent:    ${6:#7aa2f7};",
+        "  --clr-green:     ${7:#9ece6a};",
+        "  --clr-red:       ${8:#f38ba8};",
+        "  --clr-yellow:    ${9:#e0af68};",
+        "",
+        "  /* ── Typography ─────────────────────────────────── */",
+        "  --font-sans:     ${10:system-ui, sans-serif};",
+        "  --font-mono:     ${11:'JetBrains Mono', monospace};",
+        "  --font-size-xs:  clamp(0.694rem, 0.5vw + 0.5rem, 0.75rem);",
+        "  --font-size-sm:  clamp(0.833rem, 0.5vw + 0.65rem, 0.875rem);",
+        "  --font-size-md:  clamp(1rem,     0.5vw + 0.8rem, 1rem);",
+        "  --font-size-lg:  clamp(1.2rem,   1vw   + 0.9rem, 1.25rem);",
+        "  --font-size-xl:  clamp(1.44rem,  1.5vw + 1rem,   2rem);",
+        "  --font-size-2xl: clamp(1.728rem, 2vw   + 1rem,   3rem);",
+        "  --line-height:   1.6;",
+        "",
+        "  /* ── Spacing ────────────────────────────────────── */",
+        "  --space-1:  0.25rem;",
+        "  --space-2:  0.5rem;",
+        "  --space-3:  0.75rem;",
+        "  --space-4:  1rem;",
+        "  --space-6:  1.5rem;",
+        "  --space-8:  2rem;",
+        "  --space-12: 3rem;",
+        "  --space-16: 4rem;",
+        "",
+        "  /* ── Border ─────────────────────────────────────── */",
+        "  --radius-sm: 0.25rem;",
+        "  --radius-md: 0.5rem;",
+        "  --radius-lg: 1rem;",
+        "  --radius-full: 9999px;",
+        "  --border: 1px solid var(--clr-overlay);",
+        "",
+        "  /* ── Shadow ─────────────────────────────────────── */",
+        "  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);",
+        "  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);",
+        "  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);",
+        "",
+        "  /* ── Animation ──────────────────────────────────── */",
+        "  --ease-out:  cubic-bezier(0, 0, 0.2, 1);",
+        "  --ease-in:   cubic-bezier(0.4, 0, 1, 1);",
+        "  --ease-io:   cubic-bezier(0.4, 0, 0.2, 1);",
+        "  --dur-fast:  150ms;",
+        "  --dur-base:  250ms;",
+        "  --dur-slow:  400ms;",
+        "",
+        "  /* ── Z-index ─────────────────────────────────────── */",
+        "  --z-below:   -1;",
+        "  --z-base:     0;",
+        "  --z-raised:   10;",
+        "  --z-dropdown: 100;",
+        "  --z-modal:    1000;",
+        "  --z-toast:    2000;",
+        "}"
+      ]
+    },
+  
+    "CSS Reset": {
+      "prefix": ["reset", "normalize"],
+      "description": "🎨 Modern CSS reset",
+      "body": [
+        "/* ── Modern CSS Reset ───────────────────────────────── */",
+        "*, *::before, *::after {",
+        "  box-sizing: border-box;",
+        "}",
+        "",
+        "* {",
+        "  margin:  0;",
+        "  padding: 0;",
+        "}",
+        "",
+        "html {",
+        "  hanging-punctuation: first last;",
+        "  color-scheme: light dark;",
+        "}",
+        "",
+        "body {",
+        "  min-height: 100svh;",
+        "  line-height: ${1:1.6};",
+        "  -webkit-font-smoothing: antialiased;",
+        "  text-rendering: optimizeSpeed;",
+        "}",
+        "",
+        "img, picture, video, canvas, svg {",
+        "  display: block;",
+        "  max-width: 100%;",
+        "}",
+        "",
+        "input, button, textarea, select {",
+        "  font: inherit;",
+        "}",
+        "",
+        "p, h1, h2, h3, h4, h5, h6 {",
+        "  overflow-wrap: break-word;",
+        "}",
+        "",
+        "h1, h2, h3, h4, h5, h6 {",
+        "  text-wrap: balance;",
+        "}",
+        "",
+        "p, li, figcaption {",
+        "  text-wrap: pretty;",
+        "  max-ch: 75;",
+        "}",
+        "",
+        "ul[role='list'],",
+        "ol[role='list'] {",
+        "  list-style: none;",
+        "}",
+        "",
+        "#root, #__next {",
+        "  isolation: isolate;",
+        "}"
+      ]
+    },
+  
+    "CSS Flexbox": {
+      "prefix": ["flex", "flexbox"],
+      "description": "🎨 Flexbox layout",
+      "body": [
+        ".${1:container} {",
+        "  display:         flex;",
+        "  flex-direction:  ${2|row,column,row-reverse,column-reverse|};",
+        "  flex-wrap:       ${3|nowrap,wrap,wrap-reverse|};",
+        "  justify-content: ${4|flex-start,flex-end,center,space-between,space-around,space-evenly|};",
+        "  align-items:     ${5|stretch,flex-start,flex-end,center,baseline|};",
+        "  gap:             ${6:var(--space-4)};",
+        "}"
+      ]
+    },
+  
+    "CSS Grid": {
+      "prefix": ["grid", "gridlayout"],
+      "description": "🎨 CSS Grid layout",
+      "body": [
+        ".${1:grid} {",
+        "  display:               grid;",
+        "  grid-template-columns: ${2:repeat(auto-fit, minmax(min(100%, ${3:20rem}), 1fr))};",
+        "  grid-template-rows:    ${4:auto};",
+        "  gap:                   ${5:var(--space-4)};",
+        "  align-items:           ${6:start};",
+        "}"
+      ]
+    },
+  
+    "CSS Container Query": {
+      "prefix": ["cq", "container_query"],
+      "description": "🎨 Container query",
+      "body": [
+        ".${1:wrapper} {",
+        "  container-type: ${2|inline-size,size|};",
+        "  container-name: ${3:${1:wrapper}};",
+        "}",
+        "",
+        "@container ${3:${1:wrapper}} (min-width: ${4:600px}) {",
+        "  .${5:child} {",
+        "    ${0}",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Layer": {
+      "prefix": ["layer", "cascade"],
+      "description": "🎨 CSS cascade layers",
+      "body": [
+        "@layer ${1:reset, base, components, utilities};",
+        "",
+        "@layer ${2:base} {",
+        "  ${0}",
+        "}"
+      ]
+    },
+  
+    "CSS Media Query": {
+      "prefix": ["mq", "media", "responsive"],
+      "description": "🎨 Responsive media query",
+      "body": [
+        "@media (${1|min-width,max-width,prefers-color-scheme,prefers-reduced-motion,hover|}: ${2:768px}) {",
+        "  ${0}",
+        "}"
+      ]
+    },
+  
+    "CSS Media Dark": {
+      "prefix": ["dark", "darkmode"],
+      "description": "🎨 Dark mode media query",
+      "body": [
+        "@media (prefers-color-scheme: dark) {",
+        "  :root {",
+        "    --clr-base:   ${1:#1a1b26};",
+        "    --clr-text:   ${2:#c0caf5};",
+        "    --clr-accent: ${3:#7aa2f7};",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Reduced Motion": {
+      "prefix": ["motion", "reduced"],
+      "description": "🎨 Prefers reduced motion",
+      "body": [
+        "@media (prefers-reduced-motion: reduce) {",
+        "  *, *::before, *::after {",
+        "    animation-duration:   0.01ms !important;",
+        "    animation-iteration-count: 1 !important;",
+        "    transition-duration:  0.01ms !important;",
+        "    scroll-behavior:      auto !important;",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Animation": {
+      "prefix": ["anim", "animation", "keyframes"],
+      "description": "🎨 Animation with keyframes",
+      "body": [
+        "@keyframes ${1:fade-in} {",
+        "  from { ${2:opacity: 0; transform: translateY(${3:-1rem}); } }",
+        "  to   { ${4:opacity: 1; transform: translateY(0); } }",
+        "}",
+        "",
+        ".${5:animated} {",
+        "  animation:",
+        "    ${1:fade-in}",
+        "    ${6:var(--dur-base, 250ms)}",
+        "    ${7:var(--ease-out, ease-out)}",
+        "    ${8:both};",
+        "",
+        "  @media (prefers-reduced-motion: reduce) {",
+        "    animation: none;",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Transition": {
+      "prefix": ["trans", "transition"],
+      "description": "🎨 Transition shorthand",
+      "body": [
+        "transition:",
+        "  ${1:color}         var(--dur-fast, 150ms) var(--ease-io),",
+        "  ${2:background}    var(--dur-fast, 150ms) var(--ease-io),",
+        "  ${3:transform}     var(--dur-base, 250ms) var(--ease-out),",
+        "  ${4:opacity}       var(--dur-fast, 150ms) var(--ease-io);"
+      ]
+    },
+  
+    "CSS Custom Property": {
+      "prefix": ["prop", "var", "cp"],
+      "description": "🎨 CSS custom property",
+      "body": ["--${1:property-name}: ${2:value};"]
+    },
+  
+    "CSS Var Usage": {
+      "prefix": ["var", "use_var"],
+      "description": "🎨 CSS var() with fallback",
+      "body": ["var(--${1:property}, ${2:fallback})"]
+    },
+  
+    "CSS Clamp": {
+      "prefix": ["clamp", "fluid"],
+      "description": "🎨 Fluid clamp value",
+      "body": ["clamp(${1:1rem}, ${2:2.5vw + 1rem}, ${3:2rem})"]
+    },
+  
+    "CSS BEM Block": {
+      "prefix": ["bem", "block"],
+      "description": "🎨 BEM block with elements and modifiers",
+      "body": [
+        ".${1:block} {",
+        "  ${2:}",
+        "}",
+        "",
+        ".${1:block}__${3:element} {",
+        "  ${4:}",
+        "}",
+        "",
+        ".${1:block}--${5:modifier} {",
+        "  ${6:}",
+        "}",
+        "",
+        ".${1:block}__${3:element}--${5:modifier} {",
+        "  ${0}",
+        "}"
+      ]
+    },
+  
+    "CSS Glassmorphism": {
+      "prefix": ["glass", "glassmorphism"],
+      "description": "🎨 Glassmorphism card style",
+      "body": [
+        ".${1:glass} {",
+        "  background:    rgba(${2:255, 255, 255}, ${3:0.05});",
+        "  backdrop-filter:       blur(${4:12px}) saturate(${5:180%});",
+        "  -webkit-backdrop-filter: blur(${4:12px}) saturate(${5:180%});",
+        "  border:        1px solid rgba(${6:255, 255, 255}, ${7:0.1});",
+        "  border-radius: ${8:var(--radius-lg, 1rem)};",
+        "  box-shadow:    0 8px 32px rgba(0, 0, 0, ${9:0.3});",
+        "}"
+      ]
+    },
+  
+    "CSS Neumorphism": {
+      "prefix": ["neu", "neumorphism", "soft_ui"],
+      "description": "🎨 Neumorphism soft UI style",
+      "body": [
+        ".${1:neu} {",
+        "  background:   ${2:#1e2030};",
+        "  border-radius: ${3:var(--radius-lg, 1rem)};",
+        "  box-shadow:",
+        "    ${4:6px} ${5:6px} ${6:12px} rgba(0, 0, 0, ${7:0.4}),",
+        "   -${4:6px} -${5:6px} ${6:12px} rgba(255, 255, 255, ${8:0.05});",
+        "}"
+      ]
+    },
+  
+    "CSS Scroll Snap": {
+      "prefix": ["snap", "scroll_snap"],
+      "description": "🎨 Scroll snap container",
+      "body": [
+        ".${1:slider} {",
+        "  display:        flex;",
+        "  overflow-x:     auto;",
+        "  scroll-snap-type: x ${2|mandatory,proximity|};",
+        "  scroll-behavior: smooth;",
+        "  -ms-overflow-style: none;",
+        "  scrollbar-width: none;",
+        "",
+        "  &::-webkit-scrollbar { display: none; }",
+        "}",
+        "",
+        ".${1:slider}__item {",
+        "  flex:           0 0 ${3:100%};",
+        "  scroll-snap-align: ${4|start,center,end|};",
+        "}"
+      ]
+    },
+  
+    "CSS Aspect Ratio": {
+      "prefix": ["aspect", "ratio"],
+      "description": "🎨 Aspect ratio box",
+      "body": [
+        ".${1:media} {",
+        "  aspect-ratio: ${2:16 / 9};",
+        "  overflow:     hidden;",
+        "",
+        "  & > * {",
+        "    width:  100%;",
+        "    height: 100%;",
+        "    object-fit: ${3|cover,contain,fill|};",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Gradient": {
+      "prefix": ["gradient", "grad"],
+      "description": "🎨 CSS gradient background",
+      "body": [
+        "background: linear-gradient(",
+        "  ${1:135deg},",
+        "  ${2:#7aa2f7} 0%,",
+        "  ${3:#bb9af7} 50%,",
+        "  ${4:#f7768e} 100%",
+        ");"
+      ]
+    },
+  
+    "CSS Conic Gradient": {
+      "prefix": ["conic", "conic_grad"],
+      "description": "🎨 Conic gradient (pie/spinner)",
+      "body": [
+        "background: conic-gradient(",
+        "  from ${1:0deg},",
+        "  ${2:#7aa2f7} ${3:0%},",
+        "  ${4:#bb9af7} ${5:50%},",
+        "  ${2:#7aa2f7} ${6:100%}",
+        ");"
+      ]
+    },
+  
+    "CSS Text Gradient": {
+      "prefix": ["textgrad", "text_gradient"],
+      "description": "🎨 Gradient text",
+      "body": [
+        ".${1:gradient-text} {",
+        "  background: linear-gradient(${2:90deg}, ${3:#7aa2f7}, ${4:#bb9af7});",
+        "  background-clip:        text;",
+        "  -webkit-background-clip: text;",
+        "  -webkit-text-fill-color: transparent;",
+        "  color:                  transparent;",
+        "}"
+      ]
+    },
+  
+    "CSS Screen Reader Only": {
+      "prefix": ["sr", "visually_hidden", "sr_only"],
+      "description": "🎨 Screen reader only utility",
+      "body": [
+        ".sr-only {",
+        "  position: absolute;",
+        "  width:    1px;",
+        "  height:   1px;",
+        "  padding:  0;",
+        "  margin:   -1px;",
+        "  overflow: hidden;",
+        "  clip:     rect(0, 0, 0, 0);",
+        "  white-space: nowrap;",
+        "  border-width: 0;",
+        "}"
+      ]
+    },
+  
+    "CSS Focus Ring": {
+      "prefix": ["focus", "focus_ring"],
+      "description": "🎨 Accessible focus styles",
+      "body": [
+        ":focus-visible {",
+        "  outline:        ${1:2px solid var(--clr-accent)};",
+        "  outline-offset: ${2:3px};",
+        "  border-radius:  ${3:var(--radius-sm)};",
+        "}"
+      ]
+    },
+  
+    "CSS Loading Skeleton": {
+      "prefix": ["skeleton", "shimmer"],
+      "description": "🎨 Loading skeleton shimmer",
+      "body": [
+        "@keyframes shimmer {",
+        "  0%   { background-position: -200% 0; }",
+        "  100% { background-position:  200% 0; }",
+        "}",
+        "",
+        ".${1:skeleton} {",
+        "  background: linear-gradient(",
+        "    90deg,",
+        "    var(--clr-surface) 25%,",
+        "    var(--clr-overlay) 50%,",
+        "    var(--clr-surface) 75%",
+        "  );",
+        "  background-size: 200% 100%;",
+        "  animation: shimmer 1.5s infinite;",
+        "  border-radius: var(--radius-sm);",
+        ""  ,
+        "  @media (prefers-reduced-motion: reduce) {",
+        "    animation: none;",
+        "    background: var(--clr-surface);",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "CSS Tooltip": {
+      "prefix": ["tooltip", "tip"],
+      "description": "🎨 CSS-only tooltip",
+      "body": [
+        "[data-tooltip] {",
+        "  position: relative;",
+        "",
+        "  &::before,",
+        "  &::after {",
+        "    position:   absolute;",
+        "    bottom:     calc(100% + 0.5rem);",
+        "    left:       50%;",
+        "    transform:  translateX(-50%);",
+        "    opacity:    0;",
+        "    pointer-events: none;",
+        "    transition: opacity var(--dur-fast) var(--ease-out);",
+        "  }",
+        "",
+        "  &::before {",
+        "    content:    attr(data-tooltip);",
+        "    background: var(--clr-overlay);",
+        "    color:      var(--clr-text);",
+        "    padding:    0.25rem 0.5rem;",
+        "    border-radius: var(--radius-sm);",
+        "    font-size:  0.8rem;",
+        "    white-space: nowrap;",
+        "  }",
+        "",
+        "  &:hover::before,",
+        "  &:focus-visible::before {",
+        "    opacity: 1;",
+        "  }",
+        "}"
+      ]
+    }
+  }

@@ -1,0 +1,483 @@
+{
+    "ASH C++ Module": {
+      "prefix": ["module", "hpp", "header"],
+      "description": "⚙️  C++ header with ASH pattern",
+      "body": [
+        "#pragma once",
+        "// ╔══════════════════════════════════════════════════════╗",
+        "// ║  ⚙️  ${1:ClassName} — ${2:description}               ║",
+        "// ║  Author:  ${3:ash}                                   ║",
+        "// ╚══════════════════════════════════════════════════════╝",
+        "",
+        "#include <${4:string}>",
+        "#include <${5:memory}>",
+        "#include <${6:stdexcept}>",
+        "",
+        "namespace ${7:ash} {",
+        "",
+        "/// @brief ${2:description}",
+        "/// @tparam T Value type",
+        "class ${1:ClassName} {",
+        "public:",
+        "  // ── Constructors ──────────────────────────────────────",
+        "  explicit ${1:ClassName}(${8:std::string} ${9:param});",
+        "  ~${1:ClassName}() = default;",
+        "",
+        "  ${1:ClassName}(const ${1:ClassName}&)            = ${10|default,delete|};",
+        "  ${1:ClassName}& operator=(const ${1:ClassName}&) = ${10|default,delete|};",
+        "  ${1:ClassName}(${1:ClassName}&&)            noexcept = default;",
+        "  ${1:ClassName}& operator=(${1:ClassName}&&) noexcept = default;",
+        "",
+        "  // ── Public API ────────────────────────────────────────",
+        "  [[nodiscard]] ${11:std::string} ${12:method}() const;",
+        "  void ${13:mutate}(${14:std::string} value);",
+        "",
+        "private:",
+        "  // ── Fields ────────────────────────────────────────────",
+        "  ${8:std::string} ${15:m_param};",
+        "};",
+        "",
+        "} // namespace ${7:ash}"
+      ]
+    },
+  
+    "C++ Class": {
+      "prefix": ["class", "cls"],
+      "description": "⚙️  C++ class definition",
+      "body": [
+        "class ${1:ClassName} ${2:: public ${3:BaseClass} }{",
+        "public:",
+        "  explicit ${1:ClassName}(${4:int value}) noexcept",
+        "    : ${5:m_value}(${4:value}) {}",
+        "",
+        "  ~${1:ClassName}() ${6:= default};",
+        "",
+        "  ${1:ClassName}(const ${1:ClassName}&)                = ${7|default,delete|};",
+        "  ${1:ClassName}& operator=(const ${1:ClassName}&)     = ${7|default,delete|};",
+        "  ${1:ClassName}(${1:ClassName}&&) noexcept            = default;",
+        "  ${1:ClassName}& operator=(${1:ClassName}&&) noexcept = default;",
+        "",
+        "  [[nodiscard]] ${8:int} ${9:value}() const noexcept { return ${5:m_value}; }",
+        "  void set_${9:value}(${8:int} v) noexcept { ${5:m_value} = v; }",
+        "",
+        "private:",
+        "  ${8:int} ${5:m_value};",
+        "};"
+      ]
+    },
+  
+    "C++ Template Class": {
+      "prefix": ["template", "tclass"],
+      "description": "⚙️  C++ template class",
+      "body": [
+        "template<typename T${1:, typename Alloc = std::allocator<T>}>",
+        "class ${2:Container} {",
+        "public:",
+        "  using value_type    = T;",
+        "  using size_type     = std::size_t;",
+        "  using iterator      = T*;",
+        "  using const_iterator= const T*;",
+        "",
+        "  ${2:Container}() = default;",
+        "  explicit ${2:Container}(size_type n)",
+        "    : m_data(std::make_unique<T[]>(n)), m_size(n) {}",
+        "",
+        "  [[nodiscard]] T& operator[](size_type i) noexcept {",
+        "    return m_data[i];",
+        "  }",
+        "",
+        "  [[nodiscard]] const T& operator[](size_type i) const noexcept {",
+        "    return m_data[i];",
+        "  }",
+        "",
+        "  [[nodiscard]] size_type size() const noexcept { return m_size; }",
+        "  [[nodiscard]] bool      empty() const noexcept { return m_size == 0; }",
+        "",
+        "  iterator       begin()  noexcept { return m_data.get(); }",
+        "  iterator       end()    noexcept { return m_data.get() + m_size; }",
+        "  const_iterator cbegin() const noexcept { return m_data.get(); }",
+        "  const_iterator cend()   const noexcept { return m_data.get() + m_size; }",
+        "",
+        "private:",
+        "  std::unique_ptr<T[]> m_data;",
+        "  size_type            m_size{0};",
+        "};"
+      ]
+    },
+  
+    "C++ Struct": {
+      "prefix": ["struct", "st"],
+      "description": "⚙️  C++ struct with comparison",
+      "body": [
+        "struct ${1:Point} {",
+        "  ${2:double} ${3:x}{};",
+        "  ${2:double} ${4:y}{};",
+        "",
+        "  // Three-way comparison (C++20)",
+        "  auto operator<=>(const ${1:Point}&) const = default;",
+        "",
+        "  friend std::ostream& operator<<(std::ostream& os, const ${1:Point}& p) {",
+        "    return os << '(' << p.${3:x} << \", \" << p.${4:y} << ')';",
+        "  }",
+        "};"
+      ]
+    },
+  
+    "C++ Enum Class": {
+      "prefix": ["enum", "enum_class"],
+      "description": "⚙️  Scoped enum class",
+      "body": [
+        "enum class ${1:Status} : ${2:uint8_t} {",
+        "  ${3:Pending} = 0,",
+        "  ${4:Active}  = 1,",
+        "  ${5:Done}    = 2,",
+        "  ${6:Error}   = 3,",
+        "};",
+        "",
+        "[[nodiscard]] constexpr std::string_view to_string(${1:Status} s) noexcept {",
+        "  switch (s) {",
+        "    case ${1:Status}::${3:Pending}: return \"${3:Pending}\";",
+        "    case ${1:Status}::${4:Active}:  return \"${4:Active}\";",
+        "    case ${1:Status}::${5:Done}:    return \"${5:Done}\";",
+        "    case ${1:Status}::${6:Error}:   return \"${6:Error}\";",
+        "  }",
+        "  return \"Unknown\";",
+        "}"
+      ]
+    },
+  
+    "C++ Interface": {
+      "prefix": ["interface", "abstract"],
+      "description": "⚙️  Pure virtual interface",
+      "body": [
+        "class I${1:InterfaceName} {",
+        "public:",
+        "  virtual ~I${1:InterfaceName}() = default;",
+        "",
+        "  virtual ${2:void} ${3:method}(${4:}) = 0;",
+        "  [[nodiscard]] virtual ${5:bool} ${6:query}() const = 0;",
+        "",
+        "protected:",
+        "  I${1:InterfaceName}() = default;",
+        "  I${1:InterfaceName}(const I${1:InterfaceName}&)            = default;",
+        "  I${1:InterfaceName}& operator=(const I${1:InterfaceName}&) = default;",
+        "};"
+      ]
+    },
+  
+    "C++ RAII": {
+      "prefix": ["raii", "resource"],
+      "description": "⚙️  RAII resource wrapper",
+      "body": [
+        "class ${1:Resource} {",
+        "public:",
+        "  explicit ${1:Resource}(${2:Handle} handle) : m_handle(handle) {",
+        "    if (!m_handle) throw std::runtime_error(\"Invalid handle\");",
+        "  }",
+        "",
+        "  ~${1:Resource}() noexcept {",
+        "    if (m_handle) ${3:close}(m_handle);",
+        "  }",
+        "",
+        "  // Non-copyable",
+        "  ${1:Resource}(const ${1:Resource}&)            = delete;",
+        "  ${1:Resource}& operator=(const ${1:Resource}&) = delete;",
+        "",
+        "  // Movable",
+        "  ${1:Resource}(${1:Resource}&& other) noexcept",
+        "    : m_handle(std::exchange(other.m_handle, nullptr)) {}",
+        "",
+        "  ${1:Resource}& operator=(${1:Resource}&& other) noexcept {",
+        "    if (this != &other) {",
+        "      if (m_handle) ${3:close}(m_handle);",
+        "      m_handle = std::exchange(other.m_handle, nullptr);",
+        "    }",
+        "    return *this;",
+        "  }",
+        "",
+        "  [[nodiscard]] ${2:Handle} get() const noexcept { return m_handle; }",
+        "  [[nodiscard]] explicit operator bool() const noexcept { return m_handle != nullptr; }",
+        "",
+        "private:",
+        "  ${2:Handle} m_handle;",
+        "};"
+      ]
+    },
+  
+    "C++ Singleton": {
+      "prefix": ["singleton"],
+      "description": "⚙️  Thread-safe singleton (Meyers)",
+      "body": [
+        "class ${1:Singleton} {",
+        "public:",
+        "  [[nodiscard]] static ${1:Singleton}& instance() {",
+        "    static ${1:Singleton} inst;",
+        "    return inst;",
+        "  }",
+        "",
+        "  ${1:Singleton}(const ${1:Singleton}&)            = delete;",
+        "  ${1:Singleton}& operator=(const ${1:Singleton}&) = delete;",
+        "",
+        "  void ${2:method}() {",
+        "    ${3:// body}",
+        "  }",
+        "",
+        "private:",
+        "  ${1:Singleton}() = default;",
+        "  ~${1:Singleton}() = default;",
+        "};"
+      ]
+    },
+  
+    "C++ Smart Pointers": {
+      "prefix": ["smart", "ptr", "unique"],
+      "description": "⚙️  Smart pointer patterns",
+      "body": [
+        "// Unique ownership",
+        "auto ${1:ptr} = std::make_unique<${2:Type}>(${3:args});",
+        "",
+        "// Shared ownership",
+        "auto ${4:shared} = std::make_shared<${2:Type}>(${3:args});",
+        "std::weak_ptr<${2:Type}> ${5:weak} = ${4:shared};",
+        "",
+        "// Check and use weak_ptr",
+        "if (auto locked = ${5:weak}.lock()) {",
+        "  ${6:locked->method();}",
+        "}"
+      ]
+    },
+  
+    "C++ Lambda": {
+      "prefix": ["lambda", "fn"],
+      "description": "⚙️  Lambda expression",
+      "body": [
+        "auto ${1:fn} = [${2:&, this}](${3:int x}) ${4:-> int} {",
+        "  ${5:return x * 2;}",
+        "};"
+      ]
+    },
+  
+    "C++ Range For": {
+      "prefix": ["for", "range_for"],
+      "description": "⚙️  Range-based for loop",
+      "body": [
+        "for (${1:const auto&} ${2:item} : ${3:container}) {",
+        "  ${0:// body}",
+        "}"
+      ]
+    },
+  
+    "C++ Structured Binding": {
+      "prefix": ["sb", "structured"],
+      "description": "⚙️  Structured bindings (C++17)",
+      "body": [
+        "auto [${1:key}, ${2:value}] = ${3:map.begin()};"
+      ]
+    },
+  
+    "C++ Optional": {
+      "prefix": ["opt", "optional"],
+      "description": "⚙️  std::optional pattern",
+      "body": [
+        "[[nodiscard]] std::optional<${1:int}> ${2:find}(${3:int key}) const {",
+        "  ${4:if (auto it = m_map.find(key); it != m_map.end()) {",
+        "    return it->second;",
+        "  }}",
+        "  return std::nullopt;",
+        "}",
+        "",
+        "// Usage:",
+        "if (auto result = ${2:find}(${5:42})) {",
+        "  ${6:use(*result);}",
+        "} else {",
+        "  ${7:// not found}",
+        "}"
+      ]
+    },
+  
+    "C++ Expected": {
+      "prefix": ["expected", "result"],
+      "description": "⚙️  std::expected (C++23)",
+      "body": [
+        "[[nodiscard]] std::expected<${1:int}, ${2:std::string}> ${3:parse}(std::string_view s) {",
+        "  ${4:if (s.empty()) {",
+        "    return std::unexpected(\"empty input\");",
+        "  }}",
+        "  ${5:// parse and return}",
+        "  return ${6:42};",
+        "}",
+        "",
+        "// Usage:",
+        "auto result = ${3:parse}(\"${7:42}\");",
+        "if (result) {",
+        "  ${8:use(*result);}",
+        "} else {",
+        "  ${9:handle(result.error());}",
+        "}"
+      ]
+    },
+  
+    "C++ Variant": {
+      "prefix": ["variant", "sum_type"],
+      "description": "⚙️  std::variant with std::visit",
+      "body": [
+        "using ${1:Shape} = std::variant<${2:Circle}, ${3:Square}, ${4:Triangle}>;",
+        "",
+        "// Visitor using overloaded",
+        "struct ${5:Visitor} {",
+        "  ${6:double} operator()(const ${2:Circle}& c)   { return ${7:c.area()}; }",
+        "  ${6:double} operator()(const ${3:Square}& s)   { return ${8:s.area()}; }",
+        "  ${6:double} operator()(const ${4:Triangle}& t) { return ${9:t.area()}; }",
+        "};",
+        "",
+        "${1:Shape} shape = ${2:Circle}{${10:5.0}};",
+        "auto result = std::visit(${5:Visitor}{}, shape);"
+      ]
+    },
+  
+    "C++ Concepts": {
+      "prefix": ["concept", "requires"],
+      "description": "⚙️  C++20 concept definition",
+      "body": [
+        "template<typename T>",
+        "concept ${1:Numeric} = requires(T a, T b) {",
+        "  { a + b } -> std::convertible_to<T>;",
+        "  { a - b } -> std::convertible_to<T>;",
+        "  { a * b } -> std::convertible_to<T>;",
+        "  { a / b } -> std::convertible_to<T>;",
+        "  std::is_arithmetic_v<T>;",
+        "};",
+        "",
+        "template<${1:Numeric} T>",
+        "T ${2:add}(T a, T b) { return a + b; }"
+      ]
+    },
+  
+    "C++ Coroutine": {
+      "prefix": ["coro", "coroutine", "generator"],
+      "description": "⚙️  C++20 generator coroutine",
+      "body": [
+        "#include <coroutine>",
+        "#include <generator>  // C++23, or use custom",
+        "",
+        "std::generator<${1:int}> ${2:range}(${1:int} start, ${1:int} stop, ${1:int} step = 1) {",
+        "  for (auto i = start; i < stop; i += step) {",
+        "    co_yield i;",
+        "  }",
+        "}",
+        "",
+        "// Usage:",
+        "for (auto n : ${2:range}(${3:0}, ${4:10})) {",
+        "  ${5:std::cout << n << '\\n';}",
+        "}"
+      ]
+    },
+  
+    "C++ Test": {
+      "prefix": ["test", "catch2", "gtest"],
+      "description": "⚙️  Unit test (Catch2 style)",
+      "body": [
+        "#include <catch2/catch_test_macros.hpp>",
+        "#include <catch2/generators/catch_generators.hpp>",
+        "",
+        "TEST_CASE(\"${1:ClassName} – ${2:scenario}\", \"[${3:unit}]\") {",
+        "  GIVEN(\"${4:initial state}\") {",
+        "    ${5:auto obj = ${6:ClassName}${7:{}};  }",
+        "",
+        "    WHEN(\"${8:action performed}\") {",
+        "      ${9:obj.method();}",
+        "",
+        "      THEN(\"${10:expected result}\") {",
+        "        REQUIRE(${11:obj.value() == 42});",
+        "      }",
+        "    }",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "C++ Benchmark": {
+      "prefix": ["bench", "benchmark"],
+      "description": "⚙️  Google Benchmark",
+      "body": [
+        "#include <benchmark/benchmark.h>",
+        "",
+        "static void BM_${1:FunctionName}(benchmark::State& state) {",
+        "  ${2:// setup}",
+        "  for (auto _ : state) {",
+        "    ${3:// code to benchmark}",
+        "    benchmark::DoNotOptimize(${4:result});",
+        "    benchmark::ClobberMemory();",
+        "  }",
+        "  state.SetBytesProcessed(state.iterations() * ${5:sizeof(Type)});",
+        "}",
+        "",
+        "BENCHMARK(BM_${1:FunctionName})",
+        "  ->RangeMultiplier(2)",
+        "  ->Range(1 << 8, 1 << 16)",
+        "  ->Unit(benchmark::kMicrosecond);",
+        "",
+        "BENCHMARK_MAIN();"
+      ]
+    },
+  
+    "C++ Printf Style": {
+      "prefix": ["print", "cout"],
+      "description": "⚙️  Formatted output (std::format)",
+      "body": [
+        "std::cout << std::format(\"${1:{}}: {}\\n\", ${2:name}, ${3:value});"
+      ]
+    },
+  
+    "C++ String Format": {
+      "prefix": ["fmt", "format"],
+      "description": "⚙️  std::format string",
+      "body": [
+        "auto ${1:msg} = std::format(\"${2:{} = {}}\", ${3:name}, ${4:value});"
+      ]
+    },
+  
+    "C++ Span": {
+      "prefix": ["span"],
+      "description": "⚙️  std::span non-owning view",
+      "body": [
+        "void ${1:process}(std::span<${2:const int}> ${3:data}) {",
+        "  for (auto ${4:elem} : ${3:data}) {",
+        "    ${0:// use elem}",
+        "  }",
+        "}"
+      ]
+    },
+  
+    "C++ String View": {
+      "prefix": ["sv", "string_view"],
+      "description": "⚙️  std::string_view parameter",
+      "body": [
+        "[[nodiscard]] ${1:bool} ${2:starts_with}(std::string_view ${3:haystack}, std::string_view ${4:needle}) noexcept {",
+        "  return ${3:haystack}.starts_with(${4:needle});",
+        "}"
+      ]
+    },
+  
+    "C++ Algorithm": {
+      "prefix": ["algo", "ranges"],
+      "description": "⚙️  std::ranges algorithms",
+      "body": [
+        "#include <algorithm>",
+        "#include <ranges>",
+        "",
+        "// Filter + transform (C++20 ranges)",
+        "auto ${1:result} = ${2:data}",
+        "  | std::views::filter([](${3:int x}) { return ${4:x > 0}; })",
+        "  | std::views::transform([](${3:int x}) { return ${5:x * 2}; })",
+        "  | std::ranges::to<std::vector>();",
+        "",
+        "// Sort",
+        "std::ranges::sort(${2:data}, std::greater{});",
+        "",
+        "// Find",
+        "auto it = std::ranges::find_if(${2:data},",
+        "  [](${3:int x}) { return ${4:x > 0}; });"
+      ]
+    }
+  }

@@ -41,7 +41,7 @@ jobs:
       sbom-path: ${{ steps.sbom.outputs.path }}
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Generate SBOM with Syft"
         id: sbom
@@ -51,7 +51,7 @@ jobs:
           output-file: sbom.cdx.json
 
       - name: "📤 Upload SBOM Artifact"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom
           path: sbom.cdx.json
@@ -80,7 +80,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "📥 Download SBOM"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: sbom
 
@@ -109,7 +109,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: "🔍 Run Dependency Review"
         uses: actions/dependency-review-action@v4

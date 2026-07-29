@@ -1,0 +1,381 @@
+;;;; ╔══════════════════════════════════════════════════════════════════╗
+;;;; ║  ASH — EWW BAR WIDGET                                           ║
+;;;; ║  Ultra Premium Status Bar — Glassmorphism                       ║
+;;;; ╚══════════════════════════════════════════════════════════════════╝
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  HELPER WIDGETS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;; Workspace button — single workspace pill
+(defwidget ws-btn [id active]
+  (button
+    :class {active == id
+              ? "ws-btn ws-btn--active"
+              : "ws-btn"}
+    :onclick "hyprctl dispatch workspace ${id}"
+    :tooltip "Workspace ${id}"
+    (label :class "ws-btn__num" :text "${id}")))
+
+;; Workspaces — dynamic list from hyprland
+(defwidget workspaces []
+  (box
+    :class       "bar-workspaces"
+    :orientation "h"
+    :space-evenly false
+    :spacing     4
+    (for ws in {workspaces}
+      (ws-btn
+        :id     {ws.id}
+        :active {active-ws}))
+    ;; Empty workspace shortcut buttons
+    (button
+      :class   "ws-btn ws-btn--new"
+      :onclick "hyprctl dispatch workspace empty"
+      :tooltip "New empty workspace"
+      (label :text "+"))))
+
+;; Active window title
+(defwidget win-title []
+  (box
+    :class       "bar-win-title"
+    :orientation "h"
+    :space-evenly false
+    :spacing     6
+    (label
+      :class "bar-win-title__icon"
+      :text  "󰆧")
+    (label
+      :class     "bar-win-title__text"
+      :text      {active-win == "" ? "Desktop" : active-win}
+      :truncate  true
+      :limit-width 40)))
+
+;; System tray placeholder
+(defwidget sys-tray []
+  (box
+    :class       "bar-tray"
+    :orientation "h"
+    :space-evenly false
+    :spacing     4
+    (systray
+      :class        "bar-tray__systray"
+      :icon-size    16
+      :spacing      4
+      :prepend-new  true)))
+
+;; Volume widget
+(defwidget vol-widget []
+  (button
+    :class   "bar-module bar-module--vol"
+    :onclick "eww open --toggle music-window"
+    :onrightclick "pavucontrol &"
+    :onscroll   "if [ '{}' = 'up' ]; then wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+; else wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-; fi"
+    :tooltip "${volume}% Volume${muted == 'true' ? ' (Muted)' : ''}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     5
+      (label
+        :class "bar-module__icon ${muted == 'true' ? 'bar-module__icon--muted' : ''}"
+        :text  {muted == "true" ? "󰖁" :
+                volume >= 70   ? "󰕾" :
+                volume >= 30   ? "󰖀" :
+                                 "󰕿"})
+      (label
+        :class "bar-module__value"
+        :text  "${volume}%"))))
+
+;; Brightness widget
+(defwidget bright-widget []
+  (button
+    :class   "bar-module bar-module--bright"
+    :onscroll "if [ '{}' = 'up' ]; then brightnessctl set 5%+; else brightnessctl set 5%-; fi"
+    :tooltip "${brightness}% Brightness"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     5
+      (label
+        :class "bar-module__icon"
+        :text  {brightness >= 75 ? "󰃠" :
+                brightness >= 40 ? "󰃟" :
+                                   "󰃞"})
+      (label
+        :class "bar-module__value"
+        :text  "${brightness}%"))))
+
+;; Network widget
+(defwidget net-widget []
+  (button
+    :class       "bar-module bar-module--net"
+    :onclick     "rofi -show wifi 2>/dev/null || nm-connection-editor &"
+    :tooltip     "${net-ssid}\n↓ ${net-down}  ↑ ${net-up}\nPing: ${net-ping}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     5
+      (label
+        :class "bar-module__icon ${net-ssid == 'Not Connected' ? 'bar-module__icon--off' : ''}"
+        :text  {net-ssid == "Not Connected" ? "󰤭" :
+                net-ssid == "Ethernet"       ? "󰈀" :
+                                               "󰤨"})
+      (label
+        :class "bar-module__value"
+        :text  {net-ssid == "Not Connected" ? "Offline" :
+                net-ssid == "Ethernet"       ? "LAN" :
+                net-ssid}
+        :truncate true
+        :limit-width 10)
+      (revealer
+        :reveal    {vpn-active == "true"}
+        :transition "slideleft"
+        (label :class "bar-module__badge bar-module__badge--vpn"
+               :text " 󰒄")))))
+
+;; Battery widget
+(defwidget bat-widget []
+  (button
+    :class   "bar-module bar-module--battery
+              ${battery-pct <= 15 ? ' bar-module--battery-critical' :
+                battery-pct <= 30 ? ' bar-module--battery-low' : ''}"
+    :visible {battery-status != "AC"}
+    :tooltip "${battery-pct}% — ${battery-status}${battery-time != '' ? '\nTime: ' + battery-time : ''}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     5
+      (label
+        :class "bar-module__icon ${battery-status == 'Charging' ? 'bar-module__icon--charging' : ''}"
+        :text  {battery-status == "Charging" ?
+                  (battery-pct >= 90 ? "󰂅" :
+                   battery-pct >= 80 ? "󰂄" :
+                   battery-pct >= 70 ? "󰂃" :
+                   battery-pct >= 60 ? "󰂂" :
+                   battery-pct >= 50 ? "󰂁" :
+                   battery-pct >= 40 ? "󰂀" :
+                   battery-pct >= 30 ? "󰁿" :
+                   battery-pct >= 20 ? "󰁾" :
+                                       "󰁽") :
+                  (battery-pct >= 90 ? "󰁹" :
+                   battery-pct >= 80 ? "󰂂" :
+                   battery-pct >= 70 ? "󰂁" :
+                   battery-pct >= 60 ? "󰂀" :
+                   battery-pct >= 50 ? "󰁿" :
+                   battery-pct >= 40 ? "󰁾" :
+                   battery-pct >= 30 ? "󰁽" :
+                   battery-pct >= 20 ? "󰁼" :
+                   battery-pct >= 10 ? "󰁻" :
+                                       "󰁺")})
+      (label
+        :class "bar-module__value"
+        :text  "${battery-pct}%"))))
+
+;; Clock widget
+(defwidget clock-widget []
+  (button
+    :class   "bar-module bar-module--clock"
+    :onclick "eww open --toggle calendar-window"
+    :tooltip "${date-full}\nWeek ${week-num}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "bar-module__icon" :text "󱑍")
+      (label :class "bar-module__clock-time" :text {time})
+      (label :class "bar-module__clock-sep"  :text "·")
+      (label :class "bar-module__clock-date" :text {date-short}))))
+
+;; Notification bell
+(defwidget notif-widget []
+  (button
+    :class   "bar-module bar-module--notif
+              ${notif-count > 0 ? ' bar-module--notif-active' : ''}
+              ${dnd-active == 'true' ? ' bar-module--notif-dnd' : ''}"
+    :onclick "swaync-client -t"
+    :tooltip "${notif-count} notification${notif-count != 1 ? 's' : ''}${dnd-active == 'true' ? '\nDo Not Disturb' : ''}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     4
+      (label
+        :class "bar-module__icon"
+        :text  {dnd-active == "true" ? "󰂛" :
+                notif-count  > 0     ? "󰂚" :
+                                       "󰂜"})
+      (label
+        :class   "bar-module__badge-count"
+        :visible {notif-count > 0}
+        :text    "${notif-count}"))))
+
+;; Media mini widget
+(defwidget media-mini []
+  (button
+    :class   "bar-module bar-module--media
+              ${media-status == 'Playing' ? ' bar-module--media-playing' : ''}"
+    :visible {media-status != "Stopped" && media-status != ""}
+    :onclick "eww open --toggle music-window"
+    :tooltip "${media-artist}\n${media-title}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      ;; Wave visualizer (playing only)
+      (box
+        :class   "wave-viz"
+        :visible {media-status == "Playing"}
+        (box :class "wave-bar wave-bar--playing")
+        (box :class "wave-bar wave-bar--playing")
+        (box :class "wave-bar wave-bar--playing")
+        (box :class "wave-bar wave-bar--playing")
+        (box :class "wave-bar wave-bar--playing"))
+      ;; Pause icon when paused
+      (label
+        :class   "bar-module__icon"
+        :visible {media-status == "Paused"}
+        :text    "󰏤")
+      ;; Track info
+      (box
+        :orientation "h"
+        :space-evenly false
+        :spacing     3
+        (label
+          :class     "bar-module__media-artist"
+          :text      {media-artist}
+          :truncate  true
+          :limit-width 12)
+        (label :class "bar-module__media-sep" :text "—")
+        (label
+          :class     "bar-module__media-title"
+          :text      {media-title}
+          :truncate  true
+          :limit-width 18)))))
+
+;; Weather mini
+(defwidget weather-mini []
+  (button
+    :class   "bar-module bar-module--weather"
+    :tooltip "${weather-desc}"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     4
+      (label :class "bar-module__weather-icon" :text {weather-icon})
+      (label :class "bar-module__value"        :text {weather-temp}))))
+
+;; Power button
+(defwidget power-btn []
+  (button
+    :class   "bar-module bar-module--power"
+    :onclick "wlogout &"
+    :tooltip "Power Menu"
+    (label :class "bar-module__icon" :text "󰐦")))
+
+;; Dashboard toggle
+(defwidget dash-btn []
+  (button
+    :class   "bar-module bar-module--dash
+              ${dashboard-open ? ' bar-module--active' : ''}"
+    :onclick "eww open --toggle dashboard-window"
+    :tooltip "System Dashboard"
+    (label :class "bar-module__icon" :text "󰕮")))
+
+;; ASH mode indicator
+(defwidget mode-widget []
+  (button
+    :class   "bar-module bar-module--mode
+              ${ash-mode != 'default' ? ' bar-module--mode-active' : ''}"
+    :visible {ash-mode != "default"}
+    :onclick "ash mode default"
+    :tooltip "Current mode: ${ash-mode}\nClick to reset"
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     5
+      (label
+        :class "bar-module__icon"
+        :text  {ash-mode == "game"    ? "󰊗" :
+                ash-mode == "focus"   ? "󰱫" :
+                ash-mode == "work"    ? "󰒲" :
+                ash-mode == "cinema"  ? "󰚺" :
+                ash-mode == "battery" ? "󰁻" :
+                ash-mode == "stream"  ? "󰑊" :
+                ash-mode == "privacy" ? "󰌾" :
+                                        "󰮔"})
+      (label
+        :class "bar-module__value"
+        :text  {ash-mode}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  BAR LAYOUT SECTIONS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget bar-left []
+  (box
+    :class       "bar-section bar-section--left"
+    :orientation "h"
+    :space-evenly false
+    :spacing     4
+    (dash-btn)
+    (box :class "sep sep--vertical")
+    (workspaces)
+    (box :class "sep sep--vertical")
+    (win-title)
+    (mode-widget)))
+
+(defwidget bar-center []
+  (box
+    :class       "bar-section bar-section--center"
+    :orientation "h"
+    :space-evenly false
+    :spacing     4
+    (media-mini)
+    (clock-widget)))
+
+(defwidget bar-right []
+  (box
+    :class       "bar-section bar-section--right"
+    :orientation "h"
+    :space-evenly false
+    :spacing     4
+    (weather-mini)
+    (box :class "sep sep--vertical")
+    (sys-tray)
+    (box :class "sep sep--vertical")
+    (vol-widget)
+    (bright-widget)
+    (bat-widget)
+    (net-widget)
+    (notif-widget)
+    (box :class "sep sep--vertical")
+    (power-btn)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  MAIN BAR WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget bar []
+  (centerbox
+    :class       "bar"
+    :orientation "h"
+    (bar-left)
+    (bar-center)
+    (bar-right)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  BAR WINDOW
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwindow bar-window
+  :monitor     0
+  :geometry    (geometry
+                  :x      "0px"
+                  :y      "0px"
+                  :width  "100%"
+                  :height "40px"
+                  :anchor "top center")
+  :stacking    "bottom"
+  :exclusive   true
+  :focusable   false
+  :namespace   "ash-bar"
+  (bar))

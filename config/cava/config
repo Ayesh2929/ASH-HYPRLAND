@@ -1,0 +1,474 @@
+#  ╔══════════════════════════════════════════════════════════════════════════════╗
+#  ║  ░█████╗░░██████╗██╗░░██╗  ░█████╗░░█████╗░██╗░░░██╗░█████╗░            ║
+#  ║  ██╔══██╗██╔════╝██║░░██║  ██╔══██╗██╔══██╗██║░░░██║██╔══██╗           ║
+#  ║  ███████║╚█████╗░███████║  ██║░░╚═╝███████║╚██╗░██╔╝███████║           ║
+#  ║  ██╔══██║░╚═══██╗██╔══██║  ██║░░██╗██╔══██║░╚████╔╝░██╔══██║           ║
+#  ║  ██║░░██║██████╔╝██║░░██║  ╚█████╔╝██║░░██║░░╚██╔╝░░██║░░██║           ║
+#  ║  ╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝           ║
+#  ║                                                                            ║
+#  ║  ASH DOTFILES v5.0 OMEGA — CAVA ULTRA AUDIO VISUALIZER                   ║
+#  ║  Console-based Audio Visualizer • Premium • Real-time • Beautiful         ║
+#  ║                                                                            ║
+#  ║  Features:                                                                 ║
+#  ║  ⚡ GLSL shader support (bar_spectrum + northern_lights)                  ║
+#  ║  🎨 ASH Dynamic Color Engine integration                                  ║
+#  ║  🔊 PipeWire / PulseAudio / ALSA auto-detection                          ║
+#  ║  🎵 Ultra-smooth 60fps visualization                                      ║
+#  ║  🌈 200-bar resolution with stereo separation                            ║
+#  ║  📊 Perceptual frequency weighting (A-weighting)                         ║
+#  ║                                                                            ║
+#  ║  Compatibility: cava v0.10.0+                                             ║
+#  ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎵  [general] — Core Visualizer Settings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[general]
+
+    # ── Frequency Range ──────────────────────────────────────────────────────
+    # Human hearing: 20Hz - 20kHz
+    # Sub-bass:  20  -  60 Hz  (rumble, kick drum body)
+    # Bass:      60  - 250 Hz  (warmth, bass guitar)
+    # Low-mid:  250  - 500 Hz  (muddiness zone)
+    # Mid:      500  - 2kHz    (vocals, guitar, presence)
+    # High-mid:   2k -   4kHz  (clarity, attack transients)
+    # Presence:   4k -   6kHz  (consonants, definition)
+    # Brilliance: 6k -  20kHz  (air, shimmer, cymbals)
+    #
+    # ASH recommended range: full spectrum with bass emphasis
+    lower_cutoff_freq = 20
+    upper_cutoff_freq = 20000
+
+    # ── Bar Count ────────────────────────────────────────────────────────────
+    # Higher = more frequency resolution, more beautiful
+    # Recommended: 50-200 depending on terminal width
+    # For shader output: 200 (shader handles rendering)
+    # For terminal output: auto (fits terminal width)
+    bars = 200
+
+    # ── Frame Rate ───────────────────────────────────────────────────────────
+    # Target frames per second for visualization
+    # 60 = butter-smooth, matches most display refresh rates
+    # Higher values increase CPU usage proportionally
+    # Range: 1 - 200
+    framerate = 60
+
+    # ── Sensitivity ──────────────────────────────────────────────────────────
+    # Auto-sensitivity adjusts gain based on input level
+    # 1 = on (recommended — adapts to music volume automatically)
+    # 0 = off (use manual gain below)
+    autosens = 1
+
+    # Manual sensitivity (only if autosens = 0)
+    # Range: 1 - 1000 (100 = neutral, higher = more amplification)
+    sensitivity = 100
+
+    # ── Averaging ────────────────────────────────────────────────────────────
+    # Average bars (smooths out impulse spikes across neighbors)
+    # 0 = no averaging
+    # 1 = average with immediate neighbors
+    # 2 = wider averaging
+    # ASH: 0 for maximum responsiveness with shader gravity
+    overshoot = 20
+
+    # ── Channels ─────────────────────────────────────────────────────────────
+    # stereo = split left/right (beautiful mirror effect)
+    # mono   = combined channel (simpler, wider bars)
+    # left   = left channel only
+    # right  = right channel only
+    channels = stereo
+
+    # ── Stereo Arrangement ───────────────────────────────────────────────────
+    # When channels = stereo, how to arrange L/R
+    # normal    = L on left, R on right (natural)
+    # mirror    = both expand from center (explosion effect — BEST for ASH)
+    # combine   = channels overlap in one display
+    stereo_arrangement = mirror
+
+    # ── Mode ─────────────────────────────────────────────────────────────────
+    # normal = standard frequency bars
+    # parabola = parabolic interpolation (smoother curves)
+    mode = normal
+
+    # ── Frequency Weighting ──────────────────────────────────────────────────
+    # none     = flat (shows raw FFT data)
+    # A        = A-weighting (human hearing sensitivity — RECOMMENDED)
+    # B        = B-weighting
+    # C        = C-weighting
+    # D        = D-weighting
+    # Musical  = emphasis on musical content
+    # Mel      = mel scale (perceptual pitch)
+    frequency_scale = log
+
+    # ── Waveform ─────────────────────────────────────────────────────────────
+    # If > 0, shows raw waveform instead of spectrum
+    # Useful for oscilloscope-style visualization
+    waveform = 0
+
+    # ── Zero Test ────────────────────────────────────────────────────────────
+    # Test if source outputs zeros (silence detection)
+    zero_test = 0
+
+    # ── Noise Reduction ──────────────────────────────────────────────────────
+    # 0.0 = no noise reduction (maximum detail)
+    # 0.77 = default noise gate
+    # 1.0 = maximum noise reduction
+    noise_reduction = 0.77
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔊  [input] — Audio Source Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[input]
+
+    # ── Audio Method ─────────────────────────────────────────────────────────
+    # auto        = auto-detect best available (recommended)
+    # pipewire    = PipeWire (modern Wayland audio — PREFERRED)
+    # pulse       = PulseAudio
+    # alsa        = ALSA direct
+    # fifo        = read from named pipe (MPD integration)
+    # sndio       = sndio (OpenBSD/FreeBSD)
+    # oss         = OSS (legacy)
+    # jack        = JACK audio
+    # portaudio   = PortAudio cross-platform
+    method = pipewire
+
+    # ── Audio Source ─────────────────────────────────────────────────────────
+    # auto         = default sink monitor (capture system audio output)
+    # /dev/dsp     = OSS device
+    # hw:0,0       = ALSA hardware device
+    # default      = PulseAudio default monitor
+    # For PipeWire: use monitor source (captures all playback)
+    source = auto
+
+    # ── Sample Rate ──────────────────────────────────────────────────────────
+    # Sample rate in Hz — must match your audio interface
+    # 44100 = CD quality (most common)
+    # 48000 = professional/studio (PipeWire default)
+    # 96000 = high-definition
+    sample_rate = 44100
+
+    # ── Sample Size ──────────────────────────────────────────────────────────
+    # Bits per sample
+    # 16 = standard quality
+    # 32 = high precision (more accurate FFT)
+    sample_size = 16
+
+    # ── Channels ─────────────────────────────────────────────────────────────
+    # Number of input channels to read (1=mono, 2=stereo)
+    channels = 2
+
+    # ── FIFO Path ────────────────────────────────────────────────────────────
+    # Used when method = fifo (e.g., MPD visualization)
+    # Configure MPD to output to this pipe:
+    #   audio_output { type "fifo" path "/tmp/mpd.fifo" format "44100:16:2" }
+    # source = /tmp/mpd.fifo
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🖥️  [output] — Display / Rendering Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[output]
+
+    # ── Output Method ────────────────────────────────────────────────────────
+    # ncurses    = terminal rendering (classic, most compatible)
+    # noncurses  = terminal without ncurses (faster in some cases)
+    # raw        = raw data output (for pipe to other programs)
+    # nyan       = nyan-cat style rainbow (fun!)
+    # opengl     = OpenGL rendering (GLSL shaders — PREMIUM ASH MODE)
+    # sdl2       = SDL2 window rendering
+    # sdl2_gles  = SDL2 with OpenGL ES
+    #
+    # ASH ULTRA: use opengl for GLSL shader support
+    # Fallback to ncurses if OpenGL not available
+    method = opengl
+
+    # ── Raw Output Format ────────────────────────────────────────────────────
+    # Used when method = raw
+    # bit_format: 8bit | 16bit
+    # data_format: binary | ascii
+    # ascii_delimiters: characters between bars (e.g. "\n", ";")
+    bit_format = 16bit
+    data_format = binary
+    ascii_max_range = 1000
+    ascii_delimiters = "\n"
+
+    # ── Bar Orientation ──────────────────────────────────────────────────────
+    # bottom = bars grow upward from bottom (classic)
+    # top    = bars grow downward from top
+    # left   = bars grow rightward from left (sideways)
+    # right  = bars grow leftward from right (sideways)
+    orientation = bottom
+
+    # ── Bar Style (ncurses/noncurses) ────────────────────────────────────────
+    # unicode_block = filled block characters (▁▂▃▄▅▆▇█)
+    # half_block    = finer resolution with half blocks
+    # braille       = braille dots for ultra-fine resolution
+    # Determines look in terminal mode (shader overrides in opengl mode)
+    bar_style = braille
+
+    # ── Bar Width & Spacing ───────────────────────────────────────────────────
+    # bar_width: characters per bar (terminal mode)
+    # bar_spacing: characters between bars
+    # Ignored in OpenGL mode (shader controls geometry)
+    bar_width = 2
+    bar_spacing = 1
+
+    # ── Bar Delimiter ────────────────────────────────────────────────────────
+    # Character at the very bottom of each bar (visual anchor)
+    # '' = no delimiter, '─' = line, '═' = double line
+    bar_delimiter = 0
+
+    # ── Bit Resolution (terminal) ─────────────────────────────────────────────
+    # 8  = 256 height levels
+    # 16 = 65536 height levels (sub-character precision)
+    bit_format = 16bit
+
+    # ── OpenGL / SDL Window Settings ─────────────────────────────────────────
+    # Window dimensions for standalone OpenGL/SDL rendering
+    # Ignored when embedded in terminal (Kitty, etc.)
+    opengl_width = 1920
+    opengl_height = 200
+
+    # ── GLSL Shader ──────────────────────────────────────────────────────────
+    # Path to fragment shader (absolute or relative to this config)
+    # ASH ships with two premium shaders:
+    #   bar_spectrum.frag    — classic spectrum bars with glow effects
+    #   northern_lights.frag — flowing aurora-style visualization
+    #
+    # Switch shaders via ASH: ash theme apply <name>
+    # Or manually edit this line and restart cava
+    opengl_shader = ~/.config/cava/shaders/bar_spectrum.frag
+
+    # ── Terminal Color Support ────────────────────────────────────────────────
+    # Fallback for ncurses mode (when OpenGL unavailable)
+    # 16   = standard 16 terminal colors
+    # 256  = 256-color palette
+    # 16M  = true 24-bit color (requires: export COLORTERM=truecolor)
+    terminal_color_type = 16M
+
+    # ── Foreground / Background Colors (ncurses fallback) ────────────────────
+    # Format: 'COLOR;COLOR;COLOR' (gradient stops, 1-8 values)
+    # Colors: black, red, green, yellow, blue, magenta, cyan, white
+    #       or hex: '#rrggbb' (requires terminal_color_type = 16M)
+    #
+    # ASH Dynamic: these are overwritten by ash theme engine
+    # Default: Catppuccin Mocha Mauve → Blue → Teal gradient
+    foreground = '#cba6f7;#89b4fa;#74c7ec;#94e2d5;#a6e3a1'
+    background = '#1e1e2e'
+
+    # ── Gradient ─────────────────────────────────────────────────────────────
+    # Enable gradient coloring of bars (bottom to top)
+    # 0 = solid color
+    # 1 = gradient (uses gradient_color_1 through gradient_color_8)
+    gradient = 1
+
+    # Gradient color stops (bottom → top of bar)
+    # ASH Dark theme: Deep blue → Mauve → Pink (depth to highlight)
+    gradient_count = 8
+    gradient_color_1 = '#313244'
+    gradient_color_2 = '#585b70'
+    gradient_color_3 = '#7f849c'
+    gradient_color_4 = '#89b4fa'
+    gradient_color_5 = '#b4befe'
+    gradient_color_6 = '#cba6f7'
+    gradient_color_7 = '#f5c2e7'
+    gradient_color_8 = '#f38ba8'
+
+    # ── Overlay / Mono Color Mode ─────────────────────────────────────────────
+    # mono = single color for all bars (simpler but faster)
+    # Colors for mono mode:
+    # mono_color = '#cba6f7'
+
+    # ── Sine Mode ─────────────────────────────────────────────────────────────
+    # Draws a smooth sine curve through bar tops
+    # (visual only, doesn't affect audio analysis)
+    # 0 = off, 1 = on
+    # Incompatible with braille bar_style
+    # sine = 0
+
+    # ── Opacity ───────────────────────────────────────────────────────────────
+    # Bar opacity for opengl mode (0.0 = invisible, 1.0 = fully opaque)
+    # Allows background content to show through (e.g. wallpaper)
+    opacity = 1.0
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎛️  [smoothing] — Animation & Motion Quality
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[smoothing]
+
+    # ── Integral Smoothing ────────────────────────────────────────────────────
+    # Temporal smoothing: mixes current frame with previous frames
+    # Higher = smoother transitions, more "inertia" feel
+    # 0 = no smoothing (instant response, jittery)
+    # 77 = default (good balance)
+    # 90+ = very smooth, dreamy / slow response
+    # Range: 0 - 100
+    integral = 77
+
+    # ── Gravity ──────────────────────────────────────────────────────────────
+    # How fast bars fall after a peak (like gravity pulling them down)
+    # Lower = bars fall faster (snappy)
+    # Higher = bars float down slowly (liquid/heavy feel)
+    # 0 = instant drop (no gravity)
+    # Range: 0 - 100
+    # ASH: 75 = satisfying heavy-liquid drop
+    gravity = 75
+
+    # ── Overshoot ────────────────────────────────────────────────────────────
+    # Allow bars to briefly exceed actual level (spring physics)
+    # Creates a "bounce" effect on transients
+    # 0 = no overshoot (precise)
+    # Higher = more spring/bounce
+    # Range: 0 - 200
+    # ASH: 20 = subtle natural spring
+    overshoot = 20
+
+    # ── Waves ────────────────────────────────────────────────────────────────
+    # Add a wave effect across all bars (undulating motion)
+    # 0 = no wave (clean bars)
+    # 1+ = wave amplitude
+    # ASH: 0 = clean, let shader handle wave effects
+    waves = 0
+
+    # ── Equalizer ────────────────────────────────────────────────────────────
+    # Per-bar frequency equalizer for visual balance
+    # Format: "bar_num:multiplier bar_num:multiplier ..."
+    # Boost bass bars slightly for visual impact
+    # equalizer = "1:1.5 2:1.4 3:1.3 4:1.2 5:1.1"
+
+    # ── Gravity Direction ─────────────────────────────────────────────────────
+    # Which direction bars fall after peaks
+    # down = fall toward bottom (standard)
+    # up   = fall toward top (inverted)
+    gravity_direction = down
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎹  [eq] — Frequency Equalizer (Visual Balance)
+#
+#  Fine-tune visual amplitudes per frequency range.
+#  Human perception: bass feels louder than treble at same dB.
+#  These values compensate for perceptual imbalance.
+#
+#  Bar mapping (200 bars, 20Hz - 20kHz log scale):
+#  Bars 1-20    ≈ 20Hz  -  80Hz   (sub-bass)
+#  Bars 21-50   ≈ 80Hz  - 250Hz   (bass)
+#  Bars 51-100  ≈ 250Hz -  1kHz   (low-mid)
+#  Bars 101-140 ≈ 1kHz  -  4kHz   (mid/high-mid)
+#  Bars 141-180 ≈ 4kHz  -  10kHz  (presence)
+#  Bars 181-200 ≈ 10kHz -  20kHz  (air/brilliance)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[eq]
+
+    # Sub-bass boost (kick drum, bass rumble — visually impactful)
+    1 = 1.8
+    2 = 1.7
+    3 = 1.6
+    4 = 1.5
+    5 = 1.45
+
+    # Bass (warmth, bass guitar)
+    6 = 1.4
+    7 = 1.35
+    8 = 1.30
+    9 = 1.25
+    10 = 1.20
+
+    # Low-mid transition
+    11 = 1.15
+    12 = 1.10
+    13 = 1.05
+    14 = 1.00
+    15 = 0.95
+
+    # Mid (neutral — vocals sit here)
+    16 = 0.95
+    17 = 0.95
+    18 = 0.95
+    19 = 0.95
+    20 = 0.95
+
+    # Upper-mid (presence, attack)
+    21 = 0.90
+    22 = 0.90
+    23 = 0.90
+    24 = 0.90
+    25 = 0.90
+
+    # High-mid to high (gradual roll-off for balance)
+    26 = 0.85
+    27 = 0.85
+    28 = 0.85
+    29 = 0.85
+    30 = 0.85
+
+    # Presence (slight boost for visual excitement)
+    31 = 0.90
+    32 = 0.90
+    33 = 0.90
+    34 = 0.90
+    35 = 0.90
+
+    # Brilliance / air (boost high end — visually exciting)
+    36 = 1.00
+    37 = 1.05
+    38 = 1.10
+    39 = 1.15
+    40 = 1.20
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  ASH THEME INTEGRATION
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#  ASH Theme Engine automatically updates:
+#  ┌─────────────────────────────┬──────────────────────────────────────────┐
+#  │ Config Key                  │ Source                                   │
+#  ├─────────────────────────────┼──────────────────────────────────────────┤
+#  │ foreground                  │ theme accent color gradient              │
+#  │ background                  │ theme base color                         │
+#  │ gradient_color_1..8         │ theme color spectrum (8 stops)           │
+#  │ opengl_shader               │ selected shader mode                     │
+#  └─────────────────────────────┴──────────────────────────────────────────┘
+#
+#  Theme gradient presets by category:
+#  ┌──────────────────────┬──────────────────────────────────────────────┐
+#  │ Theme                │ Gradient Style                               │
+#  ├──────────────────────┼──────────────────────────────────────────────┤
+#  │ catppuccin-mocha     │ Surface → Blue → Mauve → Pink               │
+#  │ tokyo-night          │ Dark → Cyan → Blue → Purple                 │
+#  │ gruvbox-dark         │ Dark → Orange → Yellow → Green              │
+#  │ nord                 │ Dark → Frost blue → Polar night             │
+#  │ dracula              │ Dark → Purple → Pink → Red                  │
+#  │ rose-pine            │ Dark → Pine → Rose → Gold                   │
+#  │ cyberpunk-2077       │ Black → Cyan → Yellow → White               │
+#  │ synthwave-84         │ Dark → Purple → Pink → Hot pink             │
+#  │ matrix               │ Black → Dark green → Bright green           │
+#  │ aurora-borealis      │ Dark → Teal → Green → Magenta              │
+#  │ vaporwave            │ Dark → Pink → Purple → Cyan                 │
+#  └──────────────────────┴──────────────────────────────────────────────┘
+#
+#  Reload after theme change: pkill -USR1 cava
+#  Or via ASH:               ash theme apply <name>
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#  Keyboard shortcuts (while cava is running):
+#  ┌─────────┬──────────────────────────────────────────┐
+#  │ Key     │ Action                                   │
+#  ├─────────┼──────────────────────────────────────────┤
+#  │ q / ESC │ Quit                                     │
+#  │ r       │ Reload config (hot-reload)               │
+#  │ c       │ Cycle through gradient colors            │
+#  │ f       │ Toggle mono/gradient foreground          │
+#  │ b       │ Toggle background                        │
+#  │ +/-     │ Increase/decrease sensitivity            │
+#  │ 0-9     │ Set sensitivity preset                   │
+#  │ a       │ Toggle A-weighting                       │
+#  │ s       │ Toggle stereo/mono                       │
+#  │ Up/Down │ Increase/decrease bar height             │
+#  └─────────┴──────────────────────────────────────────┘
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

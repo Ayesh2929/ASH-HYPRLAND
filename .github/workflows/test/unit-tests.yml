@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -221,7 +221,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🛠️ Install Test Framework (BATS)"
         shell: bash
@@ -393,7 +393,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📥 Restore BATS Cache"
         uses: actions/cache/restore@v4
@@ -634,7 +634,7 @@ jobs:
 
       - name: "📤 Upload Test Results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "unit-test-results-${{ matrix.suite }}"
           path: test-results/
@@ -656,10 +656,10 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📥 Download All Test Results"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "unit-test-results-*"
           merge-multiple: true
@@ -821,7 +821,7 @@ jobs:
 
       - name: "📤 Upload Coverage Report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "unit-test-coverage"
           path: coverage-report.json
@@ -839,7 +839,7 @@ jobs:
 
     steps:
       - name: "📥 Download Coverage"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: "unit-test-coverage"
           path: ./coverage/

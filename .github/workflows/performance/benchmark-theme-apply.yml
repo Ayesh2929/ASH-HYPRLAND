@@ -106,7 +106,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
@@ -226,7 +226,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "⚡ Set CPU governor to performance"
         run: |
@@ -418,7 +418,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install benchmark tools (cached)"
         uses: actions/cache@v4
@@ -928,7 +928,7 @@ jobs:
 
       - name: "📤 Upload benchmark artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-theme-apply-${{ matrix.target.name }}-${{ needs.preflight.outputs.bench_id }}"
           path: |
@@ -1008,7 +1008,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Install dependencies"
         run: |
@@ -1265,7 +1265,7 @@ jobs:
 
       - name: "📤 Upload pipeline results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-pipeline-${{ matrix.theme.name }}-${{ needs.preflight.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/pipeline/${{ matrix.theme.name }}/"
@@ -1283,7 +1283,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Install report tools"
         run: |
@@ -1292,7 +1292,7 @@ jobs:
           pip3 install --quiet --user matplotlib pandas jinja2 tabulate rich
 
       - name: "📥 Download all benchmark artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "bench-*-${{ needs.preflight.outputs.bench_id }}"
           path: "${{ env.BENCHMARK_DIR }}/collected"
@@ -1636,7 +1636,7 @@ jobs:
 
       - name: "📤 Upload consolidated report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "bench-report-theme-apply-${{ needs.preflight.outputs.bench_id }}"
           path: |
@@ -1667,7 +1667,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 

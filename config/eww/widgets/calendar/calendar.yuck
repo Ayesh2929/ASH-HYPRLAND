@@ -1,0 +1,330 @@
+;;;; ╔══════════════════════════════════════════════════════════════════╗
+;;;; ║  ASH — EWW CALENDAR WIDGET                                      ║
+;;;; ║  Ultra Premium Calendar — Month View + Clock                    ║
+;;;; ╚══════════════════════════════════════════════════════════════════╝
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  CALENDAR-SPECIFIC POLLS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defpoll cal-year    :interval "3600s"
+  :initial "2025"
+  `date +"%Y"`)
+
+(defpoll cal-month   :interval "3600s"
+  :initial "January"
+  `date +"%B"`)
+
+(defpoll cal-month-n :interval "3600s"
+  :initial "1"
+  `date +"%m"`)
+
+(defpoll cal-day     :interval "60s"
+  :initial "1"
+  `date +"%d" | sed 's/^0//'`)
+
+(defpoll cal-weekday :interval "60s"
+  :initial "Mon"
+  `date +"%a"`)
+
+;; Build calendar grid as JSON
+(defpoll cal-grid    :interval "60s"
+  :initial "[]"
+  `python3 -c "
+import calendar, json, datetime
+now = datetime.date.today()
+cal = calendar.monthcalendar(now.year, now.month)
+print(json.dumps({'weeks': cal, 'today': now.day}))
+" 2>/dev/null || echo '{"weeks":[],"today":1}'`)
+
+;; World clocks
+(defpoll wc-utc      :interval "60s"
+  :initial "00:00"
+  `TZ=UTC date +"%H:%M"`)
+
+(defpoll wc-ny       :interval "60s"
+  :initial "00:00"
+  `TZ=America/New_York date +"%H:%M"`)
+
+(defpoll wc-london   :interval "60s"
+  :initial "00:00"
+  `TZ=Europe/London date +"%H:%M"`)
+
+(defpoll wc-tokyo    :interval "60s"
+  :initial "00:00"
+  `TZ=Asia/Tokyo date +"%H:%M"`)
+
+;; Upcoming events (khal)
+(defpoll cal-events  :interval "300s"
+  :initial "[]"
+  `khal list today 7d --format '{"title":"{title}","time":"{start-time}","end":"{end-time}","calendar":"{calendar}"}' \
+   2>/dev/null | head -8 | jq -s '.' 2>/dev/null || echo "[]"`)
+
+;; Day of year / days remaining
+(defpoll day-of-year :interval "3600s"
+  :initial "1"
+  `date +"%j" | sed 's/^0*//'`)
+
+(defpoll days-left   :interval "3600s"
+  :initial "364"
+  `python3 -c "
+import datetime
+today = datetime.date.today()
+year_end = datetime.date(today.year, 12, 31)
+print((year_end - today).days)
+" 2>/dev/null || echo "0"`)
+
+(defpoll year-progress :interval "3600s"
+  :initial "0"
+  `python3 -c "
+import datetime
+today = datetime.date.today()
+start = datetime.date(today.year, 1, 1)
+end   = datetime.date(today.year, 12, 31)
+pct   = (today - start).days / (end - start).days * 100
+print(int(pct))
+" 2>/dev/null || echo "0"`)
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  ANALOG CLOCK WIDGET (SVG)
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defpoll clock-hour-deg   :interval "60s"
+  :initial "0"
+  `date +"%H %M" | awk '{printf "%.1f", ($1 % 12) * 30 + $2 * 0.5}'`)
+
+(defpoll clock-minute-deg :interval "1s"
+  :initial "0"
+  `date +"%M %S" | awk '{printf "%.1f", $1 * 6 + $2 * 0.1}'`)
+
+(defpoll clock-second-deg :interval "1s"
+  :initial "0"
+  `date +"%S" | awk '{printf "%.0f", $1 * 6}'`)
+
+(defwidget analog-clock []
+  (overlay
+    :class  "analog-clock"
+    :width  120
+    :height 120
+    ;; SVG clock face
+    (box :class "analog-clock__face"
+      (label :class "analog-clock__placeholder" :text ""))
+    ;; Time display in center
+    (box
+      :class       "analog-clock__center"
+      :orientation "v"
+      :space-evenly false
+      :spacing     1
+      (label :class "analog-clock__digital" :text {time})
+      (label :class "analog-clock__date-sm" :text {cal-weekday}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  CALENDAR HERO — Month + Day display
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget cal-hero []
+  (box
+    :class       "cal-hero"
+    :orientation "h"
+    :space-evenly false
+    :spacing     16
+    ;; Left: Big date number
+    (box
+      :class       "cal-hero__date-block"
+      :orientation "v"
+      :space-evenly false
+      :spacing     0
+      (label :class "cal-hero__day-num" :text {cal-day})
+      (label :class "cal-hero__weekday" :text {cal-weekday}))
+    ;; Vertical separator
+    (box :class "sep sep--vertical")
+    ;; Right: Month + Year + Meta
+    (box
+      :class       "cal-hero__meta"
+      :orientation "v"
+      :space-evenly false
+      :spacing     3
+      (label :class "cal-hero__month" :text {cal-month})
+      (label :class "cal-hero__year"  :text {cal-year})
+      (box
+        :class       "cal-hero__pills"
+        :orientation "h"
+        :space-evenly false
+        :spacing     4
+        (box :class "badge badge--blue"
+          (label :text "Day ${day-of-year}"))
+        (box :class "badge badge--accent"
+          (label :text "W${week-num}"))))
+    (box :hexpand true)
+    ;; Close button
+    (button
+      :class   "icon-btn icon-btn--sm"
+      :onclick "eww close calendar-window"
+      :tooltip "Close"
+      (label :text "󰅖"))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  CALENDAR GRID WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;; GTK Calendar (built-in, most reliable for grid)
+(defwidget cal-grid-widget []
+  (box
+    :class       "cal-grid-wrapper"
+    :orientation "v"
+    :space-evenly false
+    :spacing     8
+    ;; Day headers
+    (box
+      :class       "cal-day-headers"
+      :orientation "h"
+      :space-evenly true
+      (label :class "cal-day-hdr" :text "Mo")
+      (label :class "cal-day-hdr" :text "Tu")
+      (label :class "cal-day-hdr" :text "We")
+      (label :class "cal-day-hdr" :text "Th")
+      (label :class "cal-day-hdr" :text "Fr")
+      (label :class "cal-day-hdr cal-day-hdr--weekend" :text "Sa")
+      (label :class "cal-day-hdr cal-day-hdr--weekend" :text "Su"))
+    ;; GTK native calendar
+    (calendar
+      :class       "gtk-cal"
+      :show-heading false
+      :show-day-names false
+      :show-week-numbers false
+      :onclick "")))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  WORLD CLOCKS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget world-clocks []
+  (box
+    :class       "world-clocks"
+    :orientation "v"
+    :space-evenly false
+    :spacing     8
+    (label :class "section-label" :text "World Time")
+    (box
+      :class       "world-clock-grid"
+      :orientation "h"
+      :space-evenly true
+      :spacing     4
+      ;; UTC
+      (box :class "world-clock-item" :orientation "v" :space-evenly false :spacing 2
+        (label :class "world-clock-item__time" :text {wc-utc})
+        (label :class "world-clock-item__zone" :text "UTC")
+        (label :class "world-clock-item__city" :text "🌐"))
+      ;; New York
+      (box :class "world-clock-item" :orientation "v" :space-evenly false :spacing 2
+        (label :class "world-clock-item__time" :text {wc-ny})
+        (label :class "world-clock-item__zone" :text "EST/EDT")
+        (label :class "world-clock-item__city" :text "🗽"))
+      ;; London
+      (box :class "world-clock-item" :orientation "v" :space-evenly false :spacing 2
+        (label :class "world-clock-item__time" :text {wc-london})
+        (label :class "world-clock-item__zone" :text "GMT/BST")
+        (label :class "world-clock-item__city" :text "🇬🇧"))
+      ;; Tokyo
+      (box :class "world-clock-item" :orientation "v" :space-evenly false :spacing 2
+        (label :class "world-clock-item__time" :text {wc-tokyo})
+        (label :class "world-clock-item__zone" :text "JST")
+        (label :class "world-clock-item__city" :text "🗼")))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  YEAR PROGRESS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget year-progress-widget []
+  (box
+    :class       "year-progress"
+    :orientation "v"
+    :space-evenly false
+    :spacing     6
+    (box
+      :class       "year-progress__header"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "year-progress__label" :text "${cal-year} Progress")
+      (box   :hexpand true)
+      (label :class "year-progress__pct"   :text "${year-progress}%")
+      (label :class "year-progress__days"  :text "${days-left} days left"))
+    (box :class "ash-progress__track"
+      (box
+        :class "ash-progress__fill ash-progress__fill--mauve"
+        :style "min-width: ${year-progress}%;"))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  UPCOMING EVENTS
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget cal-events-widget []
+  (box
+    :class       "cal-events"
+    :orientation "v"
+    :space-evenly false
+    :spacing     8
+    (box
+      :class       "cal-events__header"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "section-label" :text "Upcoming")
+      (box   :hexpand true)
+      (label :class "cal-events__sub" :text "Next 7 days"))
+    (box
+      :class       "cal-events__list"
+      :orientation "v"
+      :space-evenly false
+      :spacing     4
+      ;; Static entries (khal events are complex to iterate in eww)
+      ;; For a real setup, use a script that outputs pre-formatted text
+      (label
+        :class "cal-events__empty"
+        :text  "No upcoming events"
+        :visible {cal-events == "[]"}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  MAIN CALENDAR WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget calendar-widget []
+  (box
+    :class       "calendar-widget"
+    :orientation "v"
+    :space-evenly false
+    :spacing     14
+    ;; Hero date display
+    (cal-hero)
+    ;; Calendar grid
+    (cal-grid-widget)
+    ;; Separator
+    (box :class "sep")
+    ;; Year progress
+    (year-progress-widget)
+    ;; Separator
+    (box :class "sep")
+    ;; World clocks
+    (world-clocks)
+    ;; Separator
+    (box :class "sep")
+    ;; Upcoming events
+    (cal-events-widget)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  CALENDAR WINDOW
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwindow calendar-window
+  :monitor     0
+  :geometry    (geometry
+                  :x      "-12px"
+                  :y      "50px"
+                  :width  "320px"
+                  :anchor "top right")
+  :stacking    "overlay"
+  :exclusive   false
+  :focusable   true
+  :namespace   "ash-calendar"
+  (calendar-widget))

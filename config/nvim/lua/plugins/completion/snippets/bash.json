@@ -1,0 +1,369 @@
+{
+    "ASH Bash Script": {
+      "prefix": ["bash", "script", "shebang"],
+      "description": "🐚 Full Bash script with ASH pattern",
+      "body": [
+        "#!/usr/bin/env bash",
+        "# ╔══════════════════════════════════════════════════════╗",
+        "# ║  🐚 ${1:script_name} — ${2:description}             ║",
+        "# ║  Author:  ${3:ash}                                   ║",
+        "# ║  Version: ${4:1.0.0}                                 ║",
+        "# ╚══════════════════════════════════════════════════════╝",
+        "",
+        "set -euo pipefail",
+        "IFS=$'\\n\\t'",
+        "",
+        "# ── Constants ─────────────────────────────────────────",
+        "readonly SCRIPT_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"",
+        "readonly SCRIPT_NAME=\"$(basename \"$0\")\"",
+        "readonly VERSION=\"${4:1.0.0}\"",
+        "",
+        "# ── Colours ───────────────────────────────────────────",
+        "readonly RED='\\033[0;31m'",
+        "readonly GREEN='\\033[0;32m'",
+        "readonly YELLOW='\\033[0;33m'",
+        "readonly BLUE='\\033[0;34m'",
+        "readonly BOLD='\\033[1m'",
+        "readonly RESET='\\033[0m'",
+        "",
+        "# ── Logging ────────────────────────────────────────────",
+        "log::info()  { printf \"${BLUE}[INFO]${RESET}  %s\\n\" \"$*\"; }",
+        "log::ok()    { printf \"${GREEN}[ OK ]${RESET}  %s\\n\" \"$*\"; }",
+        "log::warn()  { printf \"${YELLOW}[WARN]${RESET}  %s\\n\" \"$*\" >&2; }",
+        "log::error() { printf \"${RED}[ERR ]${RESET}  %s\\n\" \"$*\" >&2; }",
+        "log::die()   { log::error \"$*\"; exit 1; }",
+        "",
+        "# ── Utilities ─────────────────────────────────────────",
+        "require() {",
+        "  for cmd in \"$@\"; do",
+        "    command -v \"$cmd\" &>/dev/null \\",
+        "      || log::die \"Required command not found: $cmd\"",
+        "  done",
+        "}",
+        "",
+        "# ── Main ──────────────────────────────────────────────",
+        "main() {",
+        "  require ${5:git curl}",
+        "",
+        "  log::info \"Starting ${1:script_name} v${VERSION}\"",
+        "",
+        "  ${0:# body}",
+        "",
+        "  log::ok \"Done\"",
+        "}",
+        "",
+        "main \"$@\""
+      ]
+    },
+  
+    "Bash Strict Mode": {
+      "prefix": ["strict", "safe", "set_e"],
+      "description": "🐚 Bash strict mode",
+      "body": [
+        "set -euo pipefail",
+        "IFS=$'\\n\\t'"
+      ]
+    },
+  
+    "Bash Function": {
+      "prefix": ["fn", "func", "function"],
+      "description": "🐚 Bash function with docs",
+      "body": [
+        "# ${1:Function description}",
+        "# Usage: ${2:function_name} <arg1> [arg2]",
+        "# Arguments:",
+        "#   arg1  — ${3:description}",
+        "${2:function_name}() {",
+        "  local ${4:arg1}=\"${5:$1}\"",
+        "",
+        "  ${0:# body}",
+        "}"
+      ]
+    },
+  
+    "Bash Argument Parsing": {
+      "prefix": ["args", "argparse", "getopts"],
+      "description": "🐚 Argument parsing with getopts",
+      "body": [
+        "usage() {",
+        "  cat <<EOF",
+        "Usage: $SCRIPT_NAME [OPTIONS]",
+        "",
+        "Options:",
+        "  -h          Show this help",
+        "  -v          Verbose mode",
+        "  -o <file>   Output file",
+        "  -n <name>   Name parameter",
+        "EOF",
+        "  exit \"${1:0}\"",
+        "}",
+        "",
+        "VERBOSE=false",
+        "OUTPUT=\"${2:output.txt}\"",
+        "NAME=\"${3:default}\"",
+        "",
+        "while getopts ':hvo:n:' opt; do",
+        "  case \"$opt\" in",
+        "    h) usage ;;",
+        "    v) VERBOSE=true ;;",
+        "    o) OUTPUT=\"$OPTARG\" ;;",
+        "    n) NAME=\"$OPTARG\" ;;",
+        "    :) log::die \"Option -$OPTARG requires an argument\" ;;",
+        "   \\?) log::die \"Unknown option: -$OPTARG\" ;;",
+        "  esac",
+        "done",
+        "shift $((OPTIND - 1))"
+      ]
+    },
+  
+    "Bash If Exists": {
+      "prefix": ["ifex", "if_exists"],
+      "description": "🐚 Check if command exists",
+      "body": [
+        "if command -v ${1:command} &>/dev/null; then",
+        "  ${2:# command exists}",
+        "else",
+        "  ${3:log::die \"${1:command} is not installed\"}",
+        "fi"
+      ]
+    },
+  
+    "Bash If File": {
+      "prefix": ["iff", "if_file"],
+      "description": "🐚 File existence checks",
+      "body": [
+        "if [[ ${1|-f,-d,-e,-r,-w,-x|} \"${2:$FILE}\" ]]; then",
+        "  ${3:# exists}",
+        "else",
+        "  ${4:log::die \"File not found: ${2:$FILE}\"}",
+        "fi"
+      ]
+    },
+  
+    "Bash Trap": {
+      "prefix": ["trap", "cleanup"],
+      "description": "🐚 Trap for cleanup",
+      "body": [
+        "cleanup() {",
+        "  local exit_code=$?",
+        "  ${1:# cleanup code}",
+        "  ${2:rm -rf \"$TMPDIR\"}",
+        "  exit $exit_code",
+        "}",
+        "",
+        "trap cleanup EXIT INT TERM HUP"
+      ]
+    },
+  
+    "Bash Temp Dir": {
+      "prefix": ["tmp", "tmpdir"],
+      "description": "🐚 Temp directory with cleanup",
+      "body": [
+        "TMPDIR=$(mktemp -d)",
+        "trap 'rm -rf \"$TMPDIR\"' EXIT INT TERM"
+      ]
+    },
+  
+    "Bash For Loop": {
+      "prefix": ["for", "forloop"],
+      "description": "🐚 For loop patterns",
+      "body": [
+        "for ${1:item} in ${2:\"${items[@]}\"}; do",
+        "  ${3:echo \"$${1:item}\"}",
+        "done"
+      ]
+    },
+  
+    "Bash While Loop": {
+      "prefix": ["while", "whileloop"],
+      "description": "🐚 While loop",
+      "body": [
+        "while ${1:IFS= read -r line}; do",
+        "  ${2:echo \"$line\"}",
+        "done ${3:< \"$FILE\"}"
+      ]
+    },
+  
+    "Bash Array": {
+      "prefix": ["arr", "array"],
+      "description": "🐚 Bash array operations",
+      "body": [
+        "${1:items}=(",
+        "  \"${2:item1}\"",
+        "  \"${3:item2}\"",
+        "  \"${4:item3}\"",
+        ")",
+        "",
+        "# Length: ${\"$\"}{#${1:items}[@]}",
+        "# Access: ${\"$\"}{${1:items}[0]}",
+        "# All:    ${\"$\"}{${1:items}[@]}",
+        "# Slice:  ${\"$\"}{${1:items}[@]:${5:1}:${6:2}}"
+      ]
+    },
+  
+    "Bash Associative Array": {
+      "prefix": ["dict", "assoc", "hashmap"],
+      "description": "🐚 Bash associative array",
+      "body": [
+        "declare -A ${1:map}",
+        "",
+        "${1:map}[\"${2:key}\"]=\"${3:value}\"",
+        "${1:map}[\"${4:key2}\"]=\"${5:value2}\"",
+        "",
+        "# Access: ${\"$\"}{${1:map}[\"${2:key}\"]}",
+        "# Keys:   ${\"$\"}{!${1:map}[@]}",
+        "# Values: ${\"$\"}{${1:map}[@]}",
+        "",
+        "for key in \"${!${1:map}[@]}\"; do",
+        "  echo \"$key => ${\"$\"}{${1:map}[\"$key\"]}\"",
+        "done"
+      ]
+    },
+  
+    "Bash Here Doc": {
+      "prefix": ["heredoc", "hd"],
+      "description": "🐚 Here document",
+      "body": [
+        "cat <<'${1:EOF}'",
+        "${2:content}",
+        "${1:EOF}"
+      ]
+    },
+  
+    "Bash Here String": {
+      "prefix": ["herestr", "hs"],
+      "description": "🐚 Here string",
+      "body": ["${1:command} <<< \"${2:string}\""]
+    },
+  
+    "Bash Process Sub": {
+      "prefix": ["procsub", "ps"],
+      "description": "🐚 Process substitution",
+      "body": [
+        "diff <(${1:command1}) <(${2:command2})"
+      ]
+    },
+  
+    "Bash String Ops": {
+      "prefix": ["str", "string_ops"],
+      "description": "🐚 Common string operations",
+      "body": [
+        "str=\"${1:Hello, World!}\"",
+        "",
+        "# Length:       ${\"$\"}{#str}",
+        "# Uppercase:    ${\"$\"}{str^^}",
+        "# Lowercase:    ${\"$\"}{str,,}",
+        "# Substring:    ${\"$\"}{str:${2:0}:${3:5}}",
+        "# Replace:      ${\"$\"}{str/${4:World}/${5:Bash}}",
+        "# Replace all:  ${\"$\"}{str//${4:l}/${5:r}}",
+        "# Strip prefix: ${\"$\"}{str#${6:Hello, }}",
+        "# Strip suffix: ${\"$\"}{str%${7:!}}",
+        "# Default val:  ${\"$\"}{str:-${8:default}}"
+      ]
+    },
+  
+    "Bash Log with Level": {
+      "prefix": ["log", "logging"],
+      "description": "🐚 Logging functions",
+      "body": [
+        "declare -A LOG_LEVELS=([debug]=0 [info]=1 [warn]=2 [error]=3)",
+        "LOG_LEVEL=\"${1:info}\"",
+        "",
+        "_log() {",
+        "  local level=\"$1\"; shift",
+        "  [[ ${LOG_LEVELS[$level]} -ge ${LOG_LEVELS[$LOG_LEVEL]} ]] || return 0",
+        "  printf \"[%s] [%-5s] %s\\n\" \"$(date '+%Y-%m-%d %H:%M:%S')\" \"${level^^}\" \"$*\"",
+        "}",
+        "",
+        "log_debug() { _log debug \"$*\"; }",
+        "log_info()  { _log info  \"$*\"; }",
+        "log_warn()  { _log warn  \"$*\" >&2; }",
+        "log_error() { _log error \"$*\" >&2; }"
+      ]
+    },
+  
+    "Bash Retry": {
+      "prefix": ["retry", "retryloop"],
+      "description": "🐚 Retry with exponential backoff",
+      "body": [
+        "retry() {",
+        "  local -r max=\"${1:5}\"",
+        "  local attempt=0",
+        "  until \"$@\"; do",
+        "    attempt=$(( attempt + 1 ))",
+        "    [[ $attempt -ge $max ]] && { log_error \"Failed after $max attempts\"; return 1; }",
+        "    local wait=$(( 2 ** attempt ))",
+        "    log_warn \"Attempt $attempt/$max failed; retrying in ${wait}s…\"",
+        "    sleep \"$wait\"",
+        "  done",
+        "}"
+      ]
+    },
+  
+    "Bash Spinner": {
+      "prefix": ["spinner", "progress"],
+      "description": "🐚 CLI spinner",
+      "body": [
+        "spin() {",
+        "  local -r pid=$!",
+        "  local -r frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'",
+        "  local i=0",
+        "  tput civis",
+        "  while kill -0 \"$pid\" 2>/dev/null; do",
+        "    printf \"\\r${BLUE}%s${RESET} %s\" \"${frames:i++%${#frames}:1}\" \"${1:Working…}\"",
+        "    sleep 0.08",
+        "  done",
+        "  tput cnorm",
+        "  printf \"\\r\\033[K\"",
+        "}"
+      ]
+    },
+  
+    "Bash OS Detect": {
+      "prefix": ["os", "detect_os"],
+      "description": "🐚 Detect OS and distro",
+      "body": [
+        "detect_os() {",
+        "  case \"$(uname -s)\" in",
+        "    Linux)",
+        "      if [[ -f /etc/os-release ]]; then",
+        "        # shellcheck source=/dev/null",
+        "        source /etc/os-release",
+        "        echo \"$ID\"",
+        "      fi",
+        "      ;;",
+        "    Darwin) echo 'macos' ;;",
+        "    *)      echo 'unknown' ;;",
+        "  esac",
+        "}",
+        "",
+        "OS=$(detect_os)",
+        "case \"$OS\" in",
+        "  arch)   ${1:# pacman} ;;",
+        "  fedora) ${2:# dnf}    ;;",
+        "  ubuntu|debian) ${3:# apt} ;;",
+        "  macos)  ${4:# brew}   ;;",
+        "  *)      log_error \"Unsupported OS: $OS\"; exit 1 ;;",
+        "esac"
+      ]
+    },
+  
+    "Bash Check Root": {
+      "prefix": ["root", "check_root"],
+      "description": "🐚 Check root/sudo",
+      "body": [
+        "if [[ $EUID -ne 0 ]]; then",
+        "  log::die \"This script must be run as root (use sudo)\"",
+        "fi"
+      ]
+    },
+  
+    "Bash Git Root": {
+      "prefix": ["gitroot", "git_dir"],
+      "description": "🐚 Find git repository root",
+      "body": [
+        "GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) \\",
+        "  || log::die \"Not inside a git repository\""
+      ]
+    }
+  }

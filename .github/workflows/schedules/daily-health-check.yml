@@ -148,7 +148,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -263,7 +263,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔧 Verify repository structure"
         id: structure
@@ -661,7 +661,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🔒 Verify security posture"
         id: security
@@ -806,7 +806,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "📦 Tools"
         run: |
@@ -817,7 +817,7 @@ jobs:
           mkdir -p "${WORK_DIR}" "${RESULTS_DIR}"
 
       - name: "📥 Download check results"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "health-*-${{ needs.bootstrap.outputs.session_id }}"
           path: "${{ env.RESULTS_DIR }}/collected"
@@ -1266,7 +1266,7 @@ jobs:
 
       - name: "📤 Upload health report"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "daily-health-${{ needs.bootstrap.outputs.session_id }}"
           path: |

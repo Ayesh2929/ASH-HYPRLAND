@@ -348,7 +348,7 @@ function __myip_display_default
             __myip_field "City:"        $city                $CLR_WHITE
             __myip_field "Region:"      $region              $CLR_WHITE
             __myip_field "Country:"     "$country ($country_code)" $CLR_WHITE
-            __myip_field "Coordinates:" "${lat}°, ${lon}°"  $CLR_DIM
+            __myip_field "Coordinates:" "$lat°, $lon°"  $CLR_DIM
             __myip_field "Timezone:"    $tz                  $CLR_BCYAN
             __myip_field "ISP:"         $isp                 $CLR_DIM
             __myip_field "Org:"         $org                 $CLR_DIM
@@ -768,13 +768,13 @@ end
 function __myip_watch
     set -l interval 30
     echo ""
-    __myip_info "Watch mode — refreshing every ${interval}s (Ctrl+C to stop)"
+    __myip_info "Watch mode — refreshing every "$interval"s (Ctrl+C to stop)"
     echo ""
 
     while true
         clear
         myip
-        echo $CLR_DIM"  Refreshing in ${interval}s... (Ctrl+C to stop)"$CLR_RESET
+        echo $CLR_DIM"  Refreshing in "$interval"s... (Ctrl+C to stop)"$CLR_RESET
         sleep $interval
     end
 end

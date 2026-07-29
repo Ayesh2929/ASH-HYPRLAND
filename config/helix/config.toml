@@ -1,0 +1,432 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ASH DOTFILES v5.0 OMEGA — HELIX ULTRA CONFIGURATION                      ║
+# ║                                                                            ║
+# ║  ██╗  ██╗███████╗██╗     ██╗██╗  ██╗                                     ║
+# ║  ██║  ██║██╔════╝██║     ██║╚██╗██╔╝                                    ║
+# ║  ███████║█████╗  ██║     ██║ ╚███╔╝░                                    ║
+# ║  ██╔══██║██╔══╝  ██║     ██║ ██╔██╗░                                    ║
+# ║  ██║  ██║███████╗███████╗██║██╔╝╚██╗                                    ║
+# ║  ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝░░╚═╝                                    ║
+# ║                                                                            ║
+# ║  Premium Modal Text Editor — ASH Integration                              ║
+# ║  Theme: ASH Dynamic (Catppuccin Mocha)                                    ║
+# ║  Features: LSP • Tree-sitter • Multi-cursor • Fuzzy finder               ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  THEME
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ASH Dynamic theme — auto-updated by ash theme engine
+# Alternative built-ins: catppuccin_mocha | tokyonight | gruvbox | nord
+theme = "ash-dynamic"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⚙️  EDITOR — Core editor settings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor]
+
+# ── View ──────────────────────────────────────────────────────────────────────
+
+# Line number style: "absolute" | "relative" | "relative-absolute"
+# relative-absolute: relative numbers with 0-line showing absolute
+line-number = "relative"
+
+# Highlight the cursor line
+cursorline = true
+
+# Highlight the cursor column
+cursorcolumn = false
+
+# Show the cursor position in the status bar
+# (always shown — part of statusline)
+
+# Color modes (Normal/Insert/Select have different cursor colors)
+color-modes = true
+
+# ── Scrolloff ─────────────────────────────────────────────────────────────────
+
+# Keep N lines/columns visible around the cursor
+scrolloff = 8
+scroll-lines = 3
+
+# ── Tab & Indent ──────────────────────────────────────────────────────────────
+
+# Default tab width (overridden per language)
+tab-width = 4
+
+# Insert spaces instead of tabs
+insert-final-newline = true
+
+# ── Whitespace ────────────────────────────────────────────────────────────────
+
+# Show whitespace characters
+[editor.whitespace.render]
+space   = "none"     # "none" | "all" | "trailing"
+nbsp    = "none"
+tab     = "all"      # Show tab markers
+newline = "none"
+
+# Whitespace characters used for rendering
+[editor.whitespace.characters]
+space   = "·"
+nbsp    = "⍽"
+tab     = "→"
+newline = "⏎"
+tabpad  = "·"
+
+# ── Completion ────────────────────────────────────────────────────────────────
+
+# Characters that trigger auto-completion
+# (set per language in languages.toml)
+
+# Timeout before showing completions (ms)
+completion-timeout = 250
+
+# Minimum word length for completion trigger
+completion-trigger-len = 2
+
+# Show documentation in completion menu
+# "never" | "always" | "hover"
+auto-completion = true
+auto-format = true
+auto-save = false
+
+# ── Text width ────────────────────────────────────────────────────────────────
+
+# Soft-wrap: show ruler at this column
+text-width = 100
+
+# Rulers (vertical lines) — shown at these columns
+rulers = [80, 100, 120]
+
+# ── Middle Click ──────────────────────────────────────────────────────────────
+
+# Middle-click paste from primary selection
+# (Wayland: uses primary selection)
+
+# ── Shell ─────────────────────────────────────────────────────────────────────
+
+# Shell used for :sh and shell pipe commands
+shell = ["fish", "-c"]
+
+# ── Buffer behavior ───────────────────────────────────────────────────────────
+
+# Don't auto-close brackets (we use the LSP for this)
+# auto-pairs = false
+
+# ── Undercurl ─────────────────────────────────────────────────────────────────
+
+# Use undercurl for diagnostics (requires terminal support)
+undercurl = true
+
+# ── Mouse ─────────────────────────────────────────────────────────────────────
+
+mouse = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📄  EDITOR FILE PICKER
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.file-picker]
+
+# Show hidden files in file picker
+hidden = false
+
+# Follow symlinks
+follow-symlinks = true
+
+# Deduplicate symlinks (don't show twice)
+deduplicate-links = true
+
+# Show git-ignored files
+git-ignore = true
+
+# Use global gitignore
+git-global = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🖥️  STATUS LINE — Custom status bar layout
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.statusline]
+
+# Left section: mode, file path, diagnostics
+left = [
+    "mode",
+    "spinner",
+    "file-name",
+    "read-only-indicator",
+    "file-modification-indicator",
+]
+
+# Center section: version control branch
+center = [
+    "version-control",
+]
+
+# Right section: diagnostics, LSP, encoding, file type, position
+right = [
+    "diagnostics",
+    "selections",
+    "register",
+    "position",
+    "file-encoding",
+    "file-line-ending",
+    "file-type",
+]
+
+# Mode names (what shows for each vim mode)
+[editor.statusline.mode]
+normal  = " NORMAL "
+insert  = " INSERT "
+select  = " SELECT "
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🖱️  CURSOR — Shape and color per mode
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.cursor-shape]
+
+# "block" | "bar" | "underline" | "hidden"
+normal = "block"
+insert = "bar"
+select = "underline"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔬  LSP — Language Server Protocol
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.lsp]
+
+# Display inline LSP messages
+display-messages = true
+
+# Show inlay hints (type annotations, parameter names)
+display-inlay-hints = true
+
+# Show diagnostic messages below code lines
+display-signature-help-docs = true
+
+# Auto-signature help popup
+auto-signature-help = true
+
+# Goto references includes declaration
+goto-reference-include-declaration = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔍  GUTTERS — Left gutter content
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.gutters]
+
+# Components shown in gutter (left to right)
+layout = [
+    "diagnostics",   # LSP diagnostic markers
+    "spacer",        # spacing
+    "line-numbers",  # line numbers
+    "spacer",        # spacing
+    "diff",          # git diff indicators (+/-/~)
+]
+
+# Gutter component options
+[editor.gutters.line-numbers]
+min-width = 3
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔎  SEARCH — Search behavior
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.search]
+
+# Case-insensitive search by default
+# Smart case: insensitive unless pattern contains uppercase
+smart-case = true
+
+# Wrap search at end of file
+wrap-around = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌳  TREE-SITTER — Syntax highlighting & text objects
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Note: tree-sitter is always enabled, configured per language in languages.toml
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📐  INDENT — Indentation guides
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.indent-guides]
+
+# Show indent guides
+render = true
+
+# Guide character: "│" | "┆" | "┊" | "╎" | "╏"
+character = "╎"
+
+# Skip the first N indent levels (reduce visual noise)
+skip-levels = 1
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔗  SOFT-WRAP — Long line handling
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[editor.soft-wrap]
+
+# Enable soft-wrap (long lines wrap at window edge)
+enable = false
+
+# Max line wrap characters
+max-wrap = 25
+
+# Wrap indicator shown at wrap points
+wrap-indicator = "↩ "
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⌨️  KEYBINDINGS — Custom key mappings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[keys.normal]
+
+# ── File Operations ────────────────────────────────────────────────────────────
+
+# Save file
+"C-s" = ":write"
+
+# Save and quit
+"C-S-s" = [":write", ":quit"]
+
+# ── Window / Split Management ─────────────────────────────────────────────────
+
+# Vertical split
+"C-v" = ":vsplit"
+
+# Horizontal split
+"C-x" = ":hsplit"
+
+# Close current window
+"C-w" = ":close"
+
+# ── Navigation ────────────────────────────────────────────────────────────────
+
+# Jump to definition (alternative)
+"gd" = "goto_definition"
+
+# Jump to references
+"gr" = "goto_reference"
+
+# Jump to type definition
+"gy" = "goto_type_definition"
+
+# Jump to implementation
+"gi" = "goto_implementation"
+
+# Go back (after goto)
+"gb" = "jump_backward"
+
+# Go forward
+"gf" = "jump_forward"
+
+# ── Code Actions ──────────────────────────────────────────────────────────────
+
+# Rename symbol
+"<space>r" = "rename_symbol"
+
+# Code action
+"<space>a" = "code_action"
+
+# Format document
+"<space>f" = ":format"
+
+# Toggle diagnostics panel
+"<space>d" = "diagnostics_picker"
+
+# ── Picker Shortcuts ──────────────────────────────────────────────────────────
+
+# File picker
+"<space>e" = "file_picker"
+"<space>p" = "file_picker_in_current_directory"
+
+# Buffer picker
+"<space>b" = "buffer_picker"
+
+# Symbol picker (workspace)
+"<space>s" = "workspace_symbol_picker"
+
+# Global search (ripgrep)
+"<space>/" = "global_search"
+
+# ── Buffers ───────────────────────────────────────────────────────────────────
+
+# Next/previous buffer
+"]b" = ":buffer-next"
+"[b" = ":buffer-previous"
+
+# Close buffer
+"<space>q" = ":buffer-close"
+
+# ── Multi-cursor ──────────────────────────────────────────────────────────────
+
+# Select all occurrences of word under cursor
+"<space>w" = ["move_word_right", "select_all_word_ranges"]
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+
+# Undo/redo tree
+"U"       = "redo"
+
+# Open shell command
+"!"       = ":sh "
+
+# Show hover documentation
+"K"       = "hover"
+
+# ── Git ───────────────────────────────────────────────────────────────────────
+
+# Go to next/previous hunk
+"]g" = "goto_next_change"
+"[g" = "goto_prev_change"
+
+# Stage hunk
+"<space>gs" = ":sh git add -p"
+
+# ── Diagnostic Navigation ─────────────────────────────────────────────────────
+
+"]d" = "goto_next_diag"
+"[d" = "goto_prev_diag"
+
+# ── ASH Integration ───────────────────────────────────────────────────────────
+
+# Open Lazygit
+"<space>g" = ":sh kitty --single-instance -- lazygit &"
+
+# Open yazi at current file
+"<space>y" = ":sh kitty --single-instance -- yazi %{buffer_name} &"
+
+[keys.insert]
+
+# ── Escape alternatives ───────────────────────────────────────────────────────
+
+# jk and kj escape from insert mode (ergonomic)
+"j" = { k = "normal_mode" }
+"k" = { j = "normal_mode" }
+
+# Ctrl+[ also escapes (terminal-compatible)
+"C-[" = "normal_mode"
+
+# ── Completion Navigation ─────────────────────────────────────────────────────
+
+# Navigate completions with Tab
+"Tab"   = ["move_parent_node_end", "insert_newline"]
+"S-Tab" = "move_parent_node_start"
+
+[keys.select]
+
+# ── Clipboard operations in select mode ──────────────────────────────────────
+
+# Copy to system clipboard
+"Y" = ["yank_main_selection_to_clipboard"]
+
+# Paste from clipboard
+"P" = ["paste_clipboard_before"]

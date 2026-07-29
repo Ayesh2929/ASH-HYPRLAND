@@ -10,11 +10,11 @@ IFS=$'\n\t'
 
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 readonly ESC=$'\033'
-readonly R="${ESC}[0m"   readonly B="${ESC}[1m"   readonly D="${ESC}[2m"
-readonly RED="${ESC}[31m"     readonly GREEN="${ESC}[32m"
-readonly YELLOW="${ESC}[33m"  readonly CYAN="${ESC}[36m"
-readonly GOLD="${ESC}[38;5;220m"   readonly MINT="${ESC}[38;5;121m"
-readonly LAVENDER="${ESC}[38;5;183m" readonly SLATE="${ESC}[38;5;245m"
+readonly R="${ESC}[0m";   readonly B="${ESC}[1m";   readonly D="${ESC}[2m"
+readonly RED="${ESC}[31m";     readonly GREEN="${ESC}[32m"
+readonly YELLOW="${ESC}[33m";  readonly CYAN="${ESC}[36m"
+readonly GOLD="${ESC}[38;5;220m";   readonly MINT="${ESC}[38;5;121m"
+readonly LAVENDER="${ESC}[38;5;183m"; readonly SLATE="${ESC}[38;5;245m"
 readonly BG_MIDNIGHT="${ESC}[48;5;16m"
 
 # ── PATHS ─────────────────────────────────────────────────────────────────────

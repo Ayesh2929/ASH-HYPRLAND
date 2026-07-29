@@ -288,7 +288,7 @@ function note --description "Terminal note-taking system with markdown & tagging
                 __note_frontmatter "$_title" "$_tags" > $file
             end
 
-            $\_editor $file
+            $_editor $file
 
             if test -s $file
                 __note_reindex
@@ -381,7 +381,7 @@ function note --description "Terminal note-taking system with markdown & tagging
                 return $status
             end
 
-            $\_editor $file
+            $_editor $file
             __note_reindex
             printf "  $GREEN✓$R  Updated: $DIM%s$R\n\n" (basename $file)
 
@@ -538,7 +538,7 @@ with open('$file', 'w') as f:
             end
 
             printf "  $CYAN📔$R  Opening journal: $BOLD%s$R\n\n" $day_name
-            $\_editor $file
+            $_editor $file
             __note_reindex
 
         # ── APPEND: Add text to existing note ─────────────────────────────────

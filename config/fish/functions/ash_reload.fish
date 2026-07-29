@@ -351,10 +351,7 @@ function ash_reload --description "ASH smart shell environment reload"
 
     if test $_theme -eq 1 && command -q nvim
         set -l notified 0
-        for sock in \
-            "$XDG_RUNTIME_DIR/nvim."*".sock" \
-            "$HOME/.local/share/nvim/server-"*".sock" \
-            2>/dev/null
+        for sock in (ls "$XDG_RUNTIME_DIR/nvim."*".sock" "$HOME/.local/share/nvim/server-"*".sock" 2>/dev/null)
             test -S $sock || continue
             nvim --server $sock \
                 --remote-send \

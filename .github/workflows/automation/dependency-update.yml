@@ -199,7 +199,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -559,7 +559,7 @@ jobs:
 
       - name: "📤 Upload scan results"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "dep-scan-${{ matrix.ecosystem.name }}-${{ github.run_id }}"
           path: "${{ env.WORK_DIR }}/${{ matrix.ecosystem.name }}/"
@@ -578,7 +578,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -595,7 +595,7 @@ jobs:
           mkdir -p "${WORK_DIR}"
 
       - name: "📥 Download all scan results"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "dep-scan-*-${{ github.run_id }}"
           path: "${{ env.WORK_DIR }}/scans"
@@ -981,7 +981,7 @@ jobs:
 
       - name: "📤 Upload update artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: "dep-update-report-${{ github.run_id }}"
           path: |
@@ -1002,7 +1002,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "🤖 Analyze & enhance Dependabot PR"
         uses: actions/github-script@v7

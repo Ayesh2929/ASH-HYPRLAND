@@ -1,0 +1,454 @@
+;;;; ╔══════════════════════════════════════════════════════════════════╗
+;;;; ║  ASH — EWW DASHBOARD WIDGET                                     ║
+;;;; ║  Ultra System Dashboard — Real-time Monitoring                  ║
+;;;; ╚══════════════════════════════════════════════════════════════════╝
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  HELPER: Circular Ring (SVG)
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;; r=26 → circumference ≈ 163.4
+(defwidget ring-gauge [value label icon color size ?sublabel]
+  (overlay
+    :class "ring-gauge"
+    (circular-progress
+      :class      "ring-gauge__progress ring-gauge__progress--${color}"
+      :value      {value}
+      :start-at   75
+      :thickness  5
+      :min        0
+      :max        100
+      :width      {size}
+      :height     {size}
+      :clockwise  true
+      :line-cap   "round")
+    (box
+      :class       "ring-gauge__content"
+      :orientation "v"
+      :space-evenly false
+      :spacing     1
+      (label :class "ring-gauge__icon ring-gauge__icon--${color}"
+             :text  icon)
+      (label :class "ring-gauge__value" :text "${value}%")
+      (label :class "ring-gauge__label" :text label)
+      (label
+        :class   "ring-gauge__sublabel"
+        :visible {sublabel != ""}
+        :text    {sublabel == "" ? "" : sublabel}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  HELPER: Stat Row (linear bar)
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget stat-bar [icon label value detail color]
+  (box
+    :class       "stat-bar"
+    :orientation "v"
+    :space-evenly false
+    :spacing     4
+    (box
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "stat-bar__icon stat-bar__icon--${color}" :text icon)
+      (label :class "stat-bar__label" :text label)
+      (box   :hexpand true)
+      (label :class "stat-bar__detail" :text detail)
+      (label :class "stat-bar__value stat-bar__value--${color}" :text "${value}%"))
+    (box :class "ash-progress__track"
+      (box
+        :class   "ash-progress__fill ash-progress__fill--${color}"
+        :style   "min-width: ${value}%;"))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  HELPER: Info Row
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget info-row [icon label value ?color]
+  (box
+    :class       "info-row"
+    :orientation "h"
+    :space-evenly false
+    :spacing     8
+    (label :class "info-row__icon info-row__icon--${color == "" ? "default" : color}"
+           :text  icon)
+    (label :class "info-row__label" :text label)
+    (box   :hexpand true)
+    (label :class "info-row__value info-row__value--${color == "" ? "default" : color}"
+           :text  value)))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: System Header
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dash-header []
+  (box
+    :class       "dash-header"
+    :orientation "h"
+    :space-evenly false
+    :spacing     12
+    ;; Avatar / Logo
+    (box :class "dash-header__avatar"
+      (label :class "dash-header__avatar-icon" :text "󰊠"))
+    ;; User info
+    (box
+      :class       "dash-header__user"
+      :orientation "v"
+      :space-evenly false
+      :spacing     2
+      (label :class "dash-header__username"
+             :text  {username})
+      (label :class "dash-header__hostname"
+             :text  "󰒋  ${hostname}"))
+    (box :hexpand true)
+    ;; System badges
+    (box
+      :class       "dash-header__badges"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (box :class "badge badge--accent"
+        (label :text "󰣇 ${kernel}"))
+      (box :class "badge badge--blue"
+        (label :text "󱑿 ${uptime-str}"))
+      (box
+        :class   "badge badge--yellow"
+        :visible {updates-avail > 0}
+        (label   :text "󰚰 ${updates-avail}"))
+      (box :class "badge badge--green"
+        (label :text "󰏖 ${pkg-count}")))
+    ;; Close button
+    (button
+      :class   "icon-btn icon-btn--sm dash-header__close"
+      :onclick "eww close dashboard-window"
+      :tooltip "Close Dashboard"
+      (label :text "󰅖"))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: CPU + RAM Rings
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget resource-rings []
+  (box
+    :class       "resource-rings"
+    :orientation "h"
+    :space-evenly true
+    :spacing     8
+    (ring-gauge
+      :value    {cpu-usage}
+      :label    "CPU"
+      :icon     "󰻠"
+      :color    "mauve"
+      :size     80
+      :sublabel {cpu-freq})
+    (ring-gauge
+      :value    {ram-used}
+      :label    "RAM"
+      :icon     "󰍛"
+      :color    "blue"
+      :size     80
+      :sublabel {ram-detail})
+    (ring-gauge
+      :value    {gpu-usage}
+      :label    "GPU"
+      :icon     "󰍹"
+      :color    "peach"
+      :size     80
+      :sublabel {gpu-temp})
+    (ring-gauge
+      :value    {disk-usage}
+      :label    "DISK"
+      :icon     "󰋊"
+      :color    "green"
+      :size     80
+      :sublabel {disk-detail})
+    (ring-gauge
+      :value    {swap-usage}
+      :label    "SWAP"
+      :icon     "󰓡"
+      :color    "yellow"
+      :size     80
+      :sublabel "")))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: Network Details
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dash-network []
+  (box
+    :class       "dash-card"
+    :orientation "v"
+    :space-evenly false
+    :spacing     10
+    ;; Card header
+    (box
+      :class       "dash-card__header"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "dash-card__header-icon" :text "󰖩")
+      (label :class "dash-card__header-title" :text "Network")
+      (box   :hexpand true)
+      (box
+        :class {net-ssid == "Not Connected" ? "dot dot--red" : "dot dot--green dot--pulse"}))
+    ;; Network info
+    (box
+      :class       "dash-card__body"
+      :orientation "v"
+      :space-evenly false
+      :spacing     6
+      (info-row
+        :icon  "󰤨"
+        :label {net-ssid == "Ethernet" ? "Interface" : "SSID"}
+        :value {net-ssid}
+        :color "blue")
+      (info-row
+        :icon  "󰦅"
+        :label "Download"
+        :value "↓ ${net-down}"
+        :color "green")
+      (info-row
+        :icon  "󰦤"
+        :label "Upload"
+        :value "↑ ${net-up}"
+        :color "peach")
+      (info-row
+        :icon  "󱁸"
+        :label "Ping"
+        :value {net-ping}
+        :color {net-ping == "timeout" ? "red" : "default"})
+      (info-row
+        :icon  "󰒄"
+        :label "VPN"
+        :value {vpn-active == "true" ? "Active" : "Off"}
+        :color {vpn-active == "true" ? "green" : "default"}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: Battery + Audio
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dash-power []
+  (box
+    :class       "dash-card"
+    :orientation "v"
+    :space-evenly false
+    :spacing     10
+    (box
+      :class       "dash-card__header"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "dash-card__header-icon" :text "󰂜")
+      (label :class "dash-card__header-title" :text "Power & Audio")
+      (box   :hexpand true))
+    (box
+      :class       "dash-card__body"
+      :orientation "v"
+      :space-evenly false
+      :spacing     8
+      ;; Battery bar
+      (stat-bar
+        :icon   {battery-status == "Charging" ? "󰂄" : "󰁹"}
+        :label  "Battery"
+        :value  {battery-pct}
+        :detail "${battery-status}${battery-time != '' ? ' · ' + battery-time : ''}"
+        :color  {battery-pct <= 20 ? "red" :
+                 battery-pct <= 40 ? "yellow" :
+                 battery-status == "Charging" ? "green" : "blue"})
+      ;; Volume bar
+      (stat-bar
+        :icon   {muted == "true" ? "󰖁" : "󰕾"}
+        :label  "Volume"
+        :value  {volume}
+        :detail {muted == "true" ? "Muted" : "${volume}%"}
+        :color  "mauve")
+      ;; Brightness bar
+      (stat-bar
+        :icon   "󰃟"
+        :label  "Brightness"
+        :value  {brightness}
+        :detail "${brightness}%"
+        :color  "yellow")
+      ;; Mic bar
+      (stat-bar
+        :icon   {mic-muted == "true" ? "󰍭" : "󰍬"}
+        :label  "Microphone"
+        :value  {mic-vol}
+        :detail {mic-muted == "true" ? "Muted" : "${mic-vol}%"}
+        :color  {mic-muted == "true" ? "red" : "teal"}))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: Weather + System Info
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dash-weather []
+  (box
+    :class       "dash-card dash-card--weather"
+    :orientation "v"
+    :space-evenly false
+    :spacing     10
+    (box
+      :class       "dash-card__header"
+      :orientation "h"
+      :space-evenly false
+      :spacing     6
+      (label :class "dash-card__header-icon" :text "󰖐")
+      (label :class "dash-card__header-title" :text "Environment")
+      (box   :hexpand true)
+      (label :class "dash-card__header-sub" :text {date-full}))
+    ;; Weather hero
+    (box
+      :class       "weather-hero"
+      :orientation "h"
+      :space-evenly false
+      :spacing     16
+      (label :class "weather-hero__icon"  :text {weather-icon})
+      (box
+        :class       "weather-hero__info"
+        :orientation "v"
+        :space-evenly false
+        :spacing     3
+        (label :class "weather-hero__temp" :text {weather-temp})
+        (label :class "weather-hero__desc" :text {weather-desc})))
+    ;; CPU temp + GPU temp
+    (box
+      :class       "temp-row"
+      :orientation "h"
+      :space-evenly true
+      :spacing     8
+      (box
+        :class       "temp-chip"
+        :orientation "v"
+        :space-evenly false
+        :spacing     2
+        (label :class "temp-chip__icon" :text "󱃲")
+        (label :class "temp-chip__value" :text {cpu-temp})
+        (label :class "temp-chip__label" :text "CPU"))
+      (box
+        :class       "temp-chip"
+        :orientation "v"
+        :space-evenly false
+        :spacing     2
+        (label :class "temp-chip__icon" :text "󰢮")
+        (label :class "temp-chip__value" :text {gpu-temp})
+        (label :class "temp-chip__label" :text "GPU")))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  SECTION: Quick Actions
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dash-actions []
+  (box
+    :class       "dash-card dash-card--actions"
+    :orientation "v"
+    :space-evenly false
+    :spacing     10
+    (label :class "section-label" :text "Quick Actions")
+    (box
+      :class       "action-grid"
+      :orientation "h"
+      :space-evenly true
+      :spacing     6
+      ;; Theme picker
+      (button
+        :class   "action-btn"
+        :onclick "ash theme pick && eww close dashboard-window"
+        :tooltip "Pick Theme"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--mauve" :text "󰉦")
+          (label :class "action-btn__label" :text "Theme")))
+      ;; Game mode
+      (button
+        :class   "action-btn ${ash-mode == 'game' ? 'action-btn--active' : ''}"
+        :onclick "ash mode ${ash-mode == 'game' ? 'default' : 'game'}"
+        :tooltip "Toggle Game Mode"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--peach" :text "󰊗")
+          (label :class "action-btn__label" :text "Gaming")))
+      ;; Focus mode
+      (button
+        :class   "action-btn ${ash-mode == 'focus' ? 'action-btn--active' : ''}"
+        :onclick "ash mode ${ash-mode == 'focus' ? 'default' : 'focus'}"
+        :tooltip "Toggle Focus Mode"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--blue" :text "󰱫")
+          (label :class "action-btn__label" :text "Focus")))
+      ;; DND
+      (button
+        :class   "action-btn ${dnd-active == 'true' ? 'action-btn--active' : ''}"
+        :onclick "swaync-client -d"
+        :tooltip "Toggle Do Not Disturb"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--yellow" :text "󰂛")
+          (label :class "action-btn__label" :text "DND")))
+      ;; Screenshot
+      (button
+        :class   "action-btn"
+        :onclick "ash shot area && eww close dashboard-window"
+        :tooltip "Screenshot Area"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--teal" :text "󰹑")
+          (label :class "action-btn__label" :text "Shot")))
+      ;; Power menu
+      (button
+        :class   "action-btn action-btn--danger"
+        :onclick "wlogout & && eww close dashboard-window"
+        :tooltip "Power Menu"
+        (box :orientation "v" :space-evenly false :spacing 4
+          (label :class "action-btn__icon action-btn__icon--red" :text "󰐦")
+          (label :class "action-btn__label" :text "Power"))))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  MAIN DASHBOARD WIDGET
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwidget dashboard []
+  (box
+    :class       "dashboard"
+    :orientation "v"
+    :space-evenly false
+    :spacing     12
+    ;; Header
+    (dash-header)
+    ;; Resource rings
+    (box :class "dash-section-label section-label" :text "Resources")
+    (resource-rings)
+    ;; Two column grid
+    (box
+      :class       "dash-grid"
+      :orientation "h"
+      :space-evenly true
+      :spacing     10
+      ;; Left column
+      (box
+        :class       "dash-col"
+        :orientation "v"
+        :space-evenly false
+        :spacing     10
+        (dash-network)
+        (dash-weather))
+      ;; Right column
+      (box
+        :class       "dash-col"
+        :orientation "v"
+        :space-evenly false
+        :spacing     10
+        (dash-power)
+        (dash-actions)))))
+
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;;;  DASHBOARD WINDOW
+;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(defwindow dashboard-window
+  :monitor     0
+  :geometry    (geometry
+                  :x      "0px"
+                  :y      "50px"
+                  :width  "640px"
+                  :anchor "top left")
+  :stacking    "overlay"
+  :exclusive   false
+  :focusable   true
+  :namespace   "ash-dashboard"
+  (dashboard))

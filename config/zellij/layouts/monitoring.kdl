@@ -1,0 +1,173 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  ASH DOTFILES v5.0 — ZELLIJ LAYOUT: MONITORING                           ║
+// ║                                                                            ║
+// ║  Premium System Monitoring Dashboard                                       ║
+// ║                                                                            ║
+// ║  Structure:                                                                ║
+// ║  ┌────────────────────────────────────────────────────────────┐           ║
+// ║  │  [tab-bar]                                                 │           ║
+// ║  ├──────────────────────┬─────────────────────────────────────┤           ║
+// ║  │                      │          CPU / GPU / RAM            │           ║
+// ║  │    BTOP              │           (fastfetch)               │           ║
+// ║  │  (System overview)   ├─────────────────────────────────────┤           ║
+// ║  │                      │          Network / Disk             │           ║
+// ║  │                      │           (iftop/df)                │           ║
+// ║  ├──────────────────────┼─────────────────────────────────────┤           ║
+// ║  │    LOGS              │          PROCESSES                  │           ║
+// ║  │  (journalctl -f)     │           (ps/top)                  │           ║
+// ║  ├────────────────────────────────────────────────────────────┤           ║
+// ║  │  [status-bar]                                              │           ║
+// ║  └────────────────────────────────────────────────────────────┘           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+layout {
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  UI CHROME
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TAB 1: 󰨟 OVERVIEW — Main monitoring dashboard
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    tab name="󰨟  Overview" focus=true {
+
+        pane split_direction="vertical" {
+
+            // ── Left column: Btop (60%) ───────────────────────────────────
+            pane size="60%" split_direction="horizontal" {
+
+                // Btop full resource overview
+                pane size="70%" name="󰨟 System" {
+                    command "btop"
+                }
+
+                // Live logs
+                pane size="30%" name=" Logs" {
+                    command "journalctl"
+                    args "-f" "--no-pager" "--output=short-precise"
+                }
+            }
+
+            // ── Right column: Detailed stats (40%) ───────────────────────
+            pane size="40%" split_direction="horizontal" {
+
+                // System info (auto-refreshing fastfetch)
+                pane size="40%" name=" Info" {
+                    command "fish"
+                    args "-c"
+                         "while true; clear; fastfetch --config hardware; sleep 10; end"
+                }
+
+                // Disk usage
+                pane size="30%" name="󰋊 Disk" {
+                    command "fish"
+                    args "-c"
+                         "while true; clear; df -h | head -20; sleep 5; end"
+                }
+
+                // Network connections
+                pane size="30%" name="󰖩 Network" {
+                    command "fish"
+                    args "-c"
+                         "watch -n2 'ss -tulnp | head -30'"
+                }
+            }
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TAB 2:   PROCESSES — Process management
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    tab name="  Processes" {
+        pane split_direction="horizontal" {
+
+            // Process list with sorting
+            pane size="70%" name=" Processes" {
+                command "fish"
+                args "-c" "procs --watch-interval 2 || ps aux --sort=-%cpu"
+            }
+
+            // Shell for manual intervention
+            pane size="30%" name=" Shell" {
+                command "fish"
+                args "-l"
+            }
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TAB 3:   LOGS — System log streams
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    tab name="  Logs" {
+        pane split_direction="vertical" {
+
+            // Kernel messages
+            pane size="50%" name=" Kernel" {
+                command "journalctl"
+                args "-f" "--no-pager" "-k"
+            }
+
+            pane size="50%" split_direction="horizontal" {
+
+                // Hyprland logs
+                pane size="50%" name=" Hyprland" {
+                    command "fish"
+                    args "-c"
+                         "tail -f ~/.local/share/hyprland/hyprland.log 2>/dev/null \
+                          || journalctl -f --no-pager -u hyprland"
+                }
+
+                // ASH CLI logs
+                pane size="50%" name="✨ ASH" {
+                    command "fish"
+                    args "-c"
+                         "tail -f ~/.local/share/ash/logs/ash-cli.log 2>/dev/null \
+                          || echo 'ASH log not found'"
+                }
+            }
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TAB 4: 󰋙 GPU — GPU monitoring
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    tab name="󰍹  GPU" {
+        pane split_direction="horizontal" {
+
+            // GPU stats (NVIDIA or AMD)
+            pane size="60%" name="󰍹 GPU Stats" {
+                command "fish"
+                args "-c"
+                     "if command -q nvidia-smi; \
+                        nvidia-smi dmon -s pucvmet; \
+                      else if test -f /sys/class/drm/card0/device/gpu_busy_percent; \
+                        watch -n1 'cat /sys/class/drm/card0/device/gpu_busy_percent \
+                                   | xargs -I{} echo GPU: {}%'; \
+                      else; \
+                        echo 'No GPU monitoring available'; \
+                      end"
+            }
+
+            // GPU temperature and power
+            pane size="40%" name=" Thermal" {
+                command "fish"
+                args "-c"
+                     "watch -n2 'sensors 2>/dev/null || echo Install lm_sensors'"
+            }
+        }
+    }
+}
