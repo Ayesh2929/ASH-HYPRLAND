@@ -1037,8 +1037,8 @@ plugin_remove() {
     # ── Remove files ───────────────────────────────────────────────────────
     local plugin_path="${PLUGIN_INSTALLED}/${plugin_id}"
     local disabled_path="${PLUGIN_DISABLED}/${plugin_id}"
-    rm -rf "${plugin_path}" "${disabled_path}"
-    rm -rf "${PLUGIN_HOOKS}/${plugin_id}"
+    rm -rf "${plugin_path:?}" "${disabled_path:?}"
+    rm -rf "${PLUGIN_HOOKS:?}/${plugin_id:?}"
 
     # ── Post-remove hook ───────────────────────────────────────────────────
     run_hook "${plugin_id}" "post_remove" || true
@@ -1104,7 +1104,7 @@ plugin_update() {
     run_hook "${plugin_id}" "pre_update" || true
 
     # Re-install (remove files, install fresh)
-    rm -rf "${PLUGIN_INSTALLED}/${plugin_id}"
+    rm -rf "${PLUGIN_INSTALLED:?}/${plugin_id:?}"
     plugin_install "${plugin_id}" && {
         run_hook "${plugin_id}" "post_update" || true
         sqlite3 "${PLUGIN_DB}" \
