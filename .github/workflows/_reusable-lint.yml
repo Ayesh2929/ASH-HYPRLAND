@@ -41,7 +41,7 @@ jobs:
     timeout-minutes: 12
     if: inputs.has_scripts == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get install -y shellcheck --no-install-recommends
       - run: |
           find . -type f \( -name "*.sh" -o -name "*.bash" \) ! -path "./.git/*" ! -path "./node_modules/*" ! -path "./.vendor/*" | xargs shellcheck --shell=bash --severity=warning --exclude=SC1091,SC2034,SC2155,SC2317
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 10
     if: inputs.has_nvim == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get install -y lua-check
       - run: luacheck config/nvim/ --config .luacheckrc --formatter plain --max-line-length 120 --globals vim --no-unused-args
 
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: npm install -g ajv-cli @taplo/cli --silent && pip install yamllint --quiet
       - run: |
           taplo check $(find . -name "*.toml" ! -path "./.git/*" ! -path "./node_modules/*") || true
@@ -72,8 +72,8 @@ jobs:
     timeout-minutes: 15
     if: inputs.web_exists == 'true' && (inputs.has_web == 'true' || inputs.run_full == 'true')
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
       - working-directory: web
@@ -89,8 +89,8 @@ jobs:
     timeout-minutes: 10
     if: inputs.api_exists == 'true' && (inputs.has_api == 'true' || inputs.run_full == 'true')
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.12
       - run: pip install ruff mypy black bandit --quiet
@@ -107,7 +107,7 @@ jobs:
     timeout-minutes: 8
     if: inputs.has_hypr == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: |
           for f in $(find config/hypr -name "*.conf" 2>/dev/null); do
             OPEN=$(grep -o '{' "$f" | wc -l || true)
@@ -121,7 +121,7 @@ jobs:
     timeout-minutes: 8
     if: inputs.has_fish == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get install -y fish --no-install-recommends
       - run: |
           for f in $(find config/fish -name "*.fish" 2>/dev/null); do fish --no-execute "$f"; done

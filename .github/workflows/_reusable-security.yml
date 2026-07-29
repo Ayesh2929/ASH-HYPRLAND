@@ -28,7 +28,7 @@ jobs:
       pull-requests: read
     steps:
       - name: "📥 Checkout (full history)"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: "🔍 Gitleaks"
@@ -45,7 +45,7 @@ jobs:
           extra_args: "--only-verified --json"
       - name: "📊 Upload reports"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "sec-secrets-${{ github.run_id }}"
           path: |
@@ -64,9 +64,9 @@ jobs:
       security-events: write
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: "🟢 Setup Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22.x
       - name: "🔍 NPM audit"
@@ -108,7 +108,7 @@ jobs:
         language: ${{ fromJSON(inputs.matrix_languages) }}
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: "🔬 Init CodeQL"
         uses: github/codeql-action/init@v4
         with:
@@ -128,7 +128,7 @@ jobs:
       contents: read
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: "🔐 Check executable permissions"
         run: |
           set -euo pipefail
