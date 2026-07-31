@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                               ║
+# ║  ⚡ ASH CLI ENGINE v5.0.0-omega — UNIFIED CONTROL CENTER                      ║
+# ║                                                                               ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+set -euo pipefail
+
+readonly ASH_VERSION="5.0.0-omega"
+WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly WORKSPACE
+
+# Colors
+C_MAUVE='\033[38;2;203;166;247m'
+C_BLUE='\033[38;2;137;180;250m'
+C_GREEN='\033[38;2;166;227;161m'
+C_RED='\033[38;2;243;139;168m'
+C_YELLOW='\033[38;2;249;226;175m'
+C_RESET='\033[0m'
+C_BOLD='\033[1m'
+
+show_help() {
+  echo -e "${C_MAUVE}${C_BOLD}⚡ ASH CLI ENGINE v${ASH_VERSION}${C_RESET}"
+  echo "Usage: ash <command> [args...]"
+  echo ""
+  echo "Commands:"
+  echo "  theme      - Theme engine commands (pick, apply, list, schedule, ai)"
+  echo "  mode       - Switch desktop modes (game, focus, battery, default)"
+  echo "  plugin     - Plugin system (install, remove, enable, disable, list)"
+  echo "  snapshot   - State snapshots (create, restore, diff, list)"
+  echo "  config     - Config manager (get, set, list, edit, reset)"
+  echo "  doctor     - Run system diagnosis and repair"
+  echo "  hw         - Retrieve system hardware reports"
+  echo "  net        - Geolocation, speed tests, and VPN controls"
+  echo "  update     - Perform system and dotfile update processes"
+  echo "  shot       - Take screenshots, screen recordings, or OCR text"
+  echo "  wallpaper  - Manage active wallpaper or download new ones"
+  echo "  backup     - Perform full and daily data backups"
+  echo ""
+  echo "Run 'ash <command> --help' for details on subcommands."
+}
+
+# Ensure sub-scripts run correctly
+delegate() {
+  local cmd="$1"
+  shift
+  local sub_script="${WORKSPACE}/ash-cli/commands/${cmd}/${cmd}.sh"
+  if [[ -f "${sub_script}" ]]; then
+    exec bash "${sub_script}" "$@"
+  else
+    # Fallback to local config script if present
+    local fallback_script="${WORKSPACE}/config/hypr/scripts/${cmd}.sh"
+    if [[ -f "${fallback_script}" ]]; then
+      exec bash "${fallback_script}" "$@"
+    else
+      echo -e "${C_RED}❌ Error: Subcommand handler for '${cmd}' not implemented.${C_RESET}" >&2
+      exit 1
+    fi
+  fi
+}
+
+if [[ $# -lt 1 ]]; then
+  show_help
+  exit 0
+fi
+
+case "$1" in
+  -h|--help|help)
+    show_help
+    exit 0
+    ;;
+  -v|--version|version)
+    echo "ash v${ASH_VERSION}"
+    exit 0
+    ;;
+  theme|mode|plugin|snapshot|config|doctor|hw|net|update|shot|wallpaper|backup)
+    cmd="$1"
+    shift
+    delegate "${cmd}" "$@"
+    ;;
+  *)
+    echo -e "${C_RED}❌ Error: Unknown command '$1'${C_RESET}" >&2
+    show_help
+    exit 1
+    ;;
+esac

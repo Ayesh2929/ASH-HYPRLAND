@@ -1,0 +1,3 @@
+# README.md
+
+This is a stub file for the **ASH Dotfiles v5.0 OMEGA** component `README.md`.
