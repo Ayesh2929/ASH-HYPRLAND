@@ -88,12 +88,12 @@ jobs:
           if [[ ! -f "$COLORS_FILE" ]]; then
             echo "⚠️ No colors.json for $THEME, generating placeholder"
             python3 -c "
-import json
-colors = {'background': '#1a1b26', 'foreground': '#c0caf5', 'accent': '#7aa2f7',
-          'red': '#f7768e', 'green': '#9ece6a', 'blue': '#7aa2f7', 'yellow': '#e0af68'}
-json.dump(colors, open('$COLORS_FILE', 'w') if True else None, indent=2)
-print('Generated placeholder colors')
-" || true
+            import json
+            colors = {'background': '#1a1b26', 'foreground': '#c0caf5', 'accent': '#7aa2f7',
+                      'red': '#f7768e', 'green': '#9ece6a', 'blue': '#7aa2f7', 'yellow': '#e0af68'}
+            json.dump(colors, open('$COLORS_FILE', 'w') if True else None, indent=2)
+            print('Generated placeholder colors')
+            " || true
           fi
 
           # Use generate-screenshots composite action if available, else Python fallback
@@ -103,52 +103,52 @@ print('Generated placeholder colors')
 
           # Generate desktop screenshot with Pillow
           python3 << 'PYEOF'
-import json
-from pathlib import Path
-try:
-    from PIL import Image, ImageDraw, ImageFont
-except ImportError:
-    print("Pillow not available, creating blank image")
-    import struct, zlib
-    # Create minimal PNG
-    exit(0)
+          import json
+          from pathlib import Path
+          try:
+              from PIL import Image, ImageDraw, ImageFont
+          except ImportError:
+              print("Pillow not available, creating blank image")
+              import struct, zlib
+              # Create minimal PNG
+              exit(0)
 
-theme = "$THEME"
-w, h = int("$SHOT_W"), int("$SHOT_H")
-out_dir = Path("output") / theme
-colors_path = Path(f"themes/presets/{theme}/colors.json")
+          theme = "$THEME"
+          w, h = int("$SHOT_W"), int("$SHOT_H")
+          out_dir = Path("output") / theme
+          colors_path = Path(f"themes/presets/{theme}/colors.json")
 
-try:
-    colors = json.loads(colors_path.read_text())
-except Exception:
-    colors = {"background": "#1a1b26", "foreground": "#c0caf5", "accent": "#7aa2f7"}
+          try:
+              colors = json.loads(colors_path.read_text())
+          except Exception:
+              colors = {"background": "#1a1b26", "foreground": "#c0caf5", "accent": "#7aa2f7"}
 
-bg = colors.get("background", "#1a1b26")
-fg = colors.get("foreground", "#c0caf5")
-accent = colors.get("accent", "#7aa2f7")
+          bg = colors.get("background", "#1a1b26")
+          fg = colors.get("foreground", "#c0caf5")
+          accent = colors.get("accent", "#7aa2f7")
 
-# Desktop mockup
-img = Image.new("RGB", (w, h), bg)
-draw = ImageDraw.Draw(img)
+          # Desktop mockup
+          img = Image.new("RGB", (w, h), bg)
+          draw = ImageDraw.Draw(img)
 
-# Top bar
-draw.rectangle([(0, 0), (w, 40)], fill=accent)
-draw.text((20, 10), f"ASH Dotfiles — {theme}", fill=fg)
+          # Top bar
+          draw.rectangle([(0, 0), (w, 40)], fill=accent)
+          draw.text((20, 10), f"ASH Dotfiles — {theme}", fill=fg)
 
-# Terminal area
-draw.rectangle([(40, 80), (w//2 - 20, h - 80)], fill="#11111b", outline=accent, width=2)
-draw.text((60, 100), f"$ ash --theme {theme}", fill=fg)
-draw.text((60, 130), "✓ Theme applied successfully", fill=colors.get("green", "#9ece6a"))
+          # Terminal area
+          draw.rectangle([(40, 80), (w//2 - 20, h - 80)], fill="#11111b", outline=accent, width=2)
+          draw.text((60, 100), f"$ ash --theme {theme}", fill=fg)
+          draw.text((60, 130), "✓ Theme applied successfully", fill=colors.get("green", "#9ece6a"))
 
-# Sidebar
-draw.rectangle([(w//2 + 20, 80), (w - 40, h - 80)], fill="#11111b", outline=accent, width=2)
-for i, label in enumerate(["Waybar", "Hyprland", "Rofi", "Kitty", "Fish"]):
-    y = 100 + i * 35
-    draw.text((w//2 + 40, y), f"● {label}", fill=fg)
+          # Sidebar
+          draw.rectangle([(w//2 + 20, 80), (w - 40, h - 80)], fill="#11111b", outline=accent, width=2)
+          for i, label in enumerate(["Waybar", "Hyprland", "Rofi", "Kitty", "Fish"]):
+              y = 100 + i * 35
+              draw.text((w//2 + 40, y), f"● {label}", fill=fg)
 
-img.save(out_dir / "desktop.png", "PNG")
-print(f"Generated desktop.png for {theme} ({w}x{h})")
-PYEOF
+          img.save(out_dir / "desktop.png", "PNG")
+          print(f"Generated desktop.png for {theme} ({w}x{h})")
+          PYEOF
 
       - name: "🖼️ Encode WebP + AVIF + Thumbnails"
         env:

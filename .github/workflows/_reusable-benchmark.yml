@@ -76,29 +76,29 @@ jobs:
           set -euo pipefail
           # Merge results into benchmark-action format
           python3 -c "
-import json, sys
-results = []
-for name, path in [('CLI Startup (ms)', '/tmp/bench-startup.json'),
-                    ('WebP Encode (ms)', '/tmp/bench-webp.json'),
-                    ('JSON Parse (ms)', '/tmp/bench-json.json')]:
-    try:
-        data = json.load(open(path))
-        mean = data['results'][0]['mean'] * 1000
-        results.append({'name': name, 'unit': 'ms', 'value': round(mean, 2)})
-    except Exception as e:
-        print(f'Warning: {name}: {e}', file=sys.stderr)
-json.dump(results, open('/tmp/bench-combined.json', 'w'), indent=2)
-print(f'Combined {len(results)} benchmarks')
-"
+          import json, sys
+          results = []
+          for name, path in [('CLI Startup (ms)', '/tmp/bench-startup.json'),
+                              ('WebP Encode (ms)', '/tmp/bench-webp.json'),
+                              ('JSON Parse (ms)', '/tmp/bench-json.json')]:
+              try:
+                  data = json.load(open(path))
+                  mean = data['results'][0]['mean'] * 1000
+                  results.append({'name': name, 'unit': 'ms', 'value': round(mean, 2)})
+              except Exception as e:
+                  print(f'Warning: {name}: {e}', file=sys.stderr)
+          json.dump(results, open('/tmp/bench-combined.json', 'w'), indent=2)
+          print(f'Combined {len(results)} benchmarks')
+          "
           # Summary table
           echo '## 📊 Benchmark Results' >> "$GITHUB_STEP_SUMMARY"
           echo '| Benchmark | Time |' >> "$GITHUB_STEP_SUMMARY"
           echo '|-----------|------|' >> "$GITHUB_STEP_SUMMARY"
           python3 -c "
-import json
-for r in json.load(open('/tmp/bench-combined.json')):
-    print(f'| {r["name"]} | {r["value"]:.1f}{r["unit"]} |')
-" >> "$GITHUB_STEP_SUMMARY"
+          import json
+          for r in json.load(open('/tmp/bench-combined.json')):
+              print(f'| {r[\"name\"]} | {r[\"value\"]:.1f}{r[\"unit\"]} |')
+          " >> "$GITHUB_STEP_SUMMARY"
 
       - name: "📊 Baseline comparison (main only)"
         if: github.ref == 'refs/heads/main'
