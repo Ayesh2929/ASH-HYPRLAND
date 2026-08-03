@@ -1,0 +1,364 @@
+{
+  "$$_comment": "🔥 ASH DOTFILES v5.0 — OBS CODING SCENE COLLECTION",
+
+  "name": "ASH Coding Collection",
+  "current_scene": "💻 Coding — Full",
+  "current_program_scene": "💻 Coding — Full",
+  "current_transition": "Fade",
+  "transition_duration": 250,
+
+  "scene_order": [
+    { "name": "💻 Coding — Full" },
+    { "name": "💻 Coding — Terminal" },
+    { "name": "💻 Coding — Split" },
+    { "name": "📷 Face Cam Only" },
+    { "name": "⏸️  BRB — Coding" },
+    { "name": "🔴 Starting Soon" }
+  ],
+
+  "sources": [
+
+    {
+      "id": "xshm_input",
+      "name": "🖥️ Screen — Editor",
+      "versioned_id": "xshm_input",
+      "settings": {
+        "capture_cursor": true,
+        "show_cursor": true
+      },
+      "mixers": 0,
+      "sync": 0,
+      "volume": 1.0,
+      "enabled": true
+    },
+
+    {
+      "id": "xshm_input",
+      "name": "🖥️ Screen — Terminal",
+      "versioned_id": "xshm_input",
+      "settings": {
+        "capture_cursor": true,
+        "show_cursor": true
+      },
+      "mixers": 0,
+      "sync": 0,
+      "volume": 1.0,
+      "enabled": true
+    },
+
+    {
+      "id": "pulse_input_capture",
+      "name": "🎙️ Microphone",
+      "versioned_id": "pulse_input_capture",
+      "settings": {
+        "device_id": "default"
+      },
+      "mixers": 1,
+      "sync": 0,
+      "volume": 1.0,
+      "enabled": true,
+      "filters": [
+        {
+          "id": "noise_suppress_filter_v2",
+          "name": "🔇 RNNoise",
+          "settings": { "method": "rnnoise" }
+        },
+        {
+          "id": "compressor_filter",
+          "name": "🎚️ Compressor",
+          "settings": {
+            "ratio": 4.0,
+            "threshold": -22.0,
+            "attack_time": 6,
+            "release_time": 200,
+            "output_gain": 2.0,
+            "detector": "RMS"
+          }
+        },
+        {
+          "id": "noise_gate_filter",
+          "name": "🚪 Noise Gate",
+          "settings": {
+            "open_threshold": -26.0,
+            "close_threshold": -32.0,
+            "attack_time": 25,
+            "hold_time": 200,
+            "release_time": 150
+          }
+        },
+        {
+          "id": "limiter_filter",
+          "name": "🔒 Limiter",
+          "settings": {
+            "threshold": -2.0,
+            "release_time": 60
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "pipewire-audio-capture-app",
+      "name": "🎵 Lo-fi Music",
+      "versioned_id": "pipewire-audio-capture-app",
+      "settings": {
+        "client_name": "spotify",
+        "stream_type": 0
+      },
+      "mixers": 2,
+      "sync": 0,
+      "volume": 0.25,
+      "enabled": true
+    },
+
+    {
+      "id": "v4l2_input",
+      "name": "📷 Webcam",
+      "versioned_id": "v4l2_input",
+      "settings": {
+        "device_id": "/dev/video0",
+        "pixelformat": 1196444237,
+        "resolution": 0,
+        "framerate": 0
+      },
+      "mixers": 0,
+      "enabled": true,
+      "filters": [
+        {
+          "id": "color_filter",
+          "name": "🎨 Color Grade",
+          "settings": {
+            "brightness":  0.0,
+            "contrast":    0.08,
+            "saturation":  0.0,
+            "gamma":       0.0
+          }
+        },
+        {
+          "id": "mask_filter",
+          "name": "⭕ Circle Crop",
+          "settings": {
+            "type":   "circle",
+            "color":  4278190080,
+            "opacity": 100.0
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "text_ft2_source_v2",
+      "name": "⏰ Clock",
+      "versioned_id": "text_ft2_source_v2",
+      "settings": {
+        "font": {
+          "face":  "JetBrainsMono Nerd Font",
+          "flags": 0,
+          "size":  28,
+          "style": "Bold"
+        },
+        "text":        "",
+        "from_file":   false,
+        "color1":      4292269556,
+        "color2":      4292269556,
+        "outline":     false,
+        "drop_shadow": true,
+        "antialiasing": true
+      },
+      "enabled": true
+    },
+
+    {
+      "id": "browser_source",
+      "name": "💬 Chat Overlay",
+      "versioned_id": "browser_source",
+      "settings": {
+        "url":    "https://streamelements.com/overlay/chat",
+        "width":  350,
+        "height": 800,
+        "fps":    30,
+        "css":    "body { background: transparent !important; font-family: 'JetBrainsMono Nerd Font', monospace; }",
+        "shutdown": false
+      },
+      "enabled": true
+    },
+
+    {
+      "id": "browser_source",
+      "name": "🔔 Alerts",
+      "versioned_id": "browser_source",
+      "settings": {
+        "url":    "https://streamelements.com/overlay/alerts",
+        "width":  1920,
+        "height": 1080,
+        "fps":    30,
+        "css":    "body { background: transparent !important; }",
+        "shutdown": true,
+        "reroute_audio": true
+      },
+      "enabled": true
+    },
+
+    {
+      "id": "image_source",
+      "name": "🎨 Coding Frame Overlay",
+      "versioned_id": "image_source",
+      "settings": {
+        "file":   "~/Pictures/obs-overlays/coding-frame.png",
+        "unload": false
+      },
+      "enabled": true
+    }
+  ],
+
+  "scene_collections": [
+    {
+      "name": "💻 Coding — Full",
+      "id": "coding-full",
+      "sources": [
+        {
+          "name": "🔔 Alerts",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "💬 Chat Overlay",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 1550.0, "y": 140.0 },
+          "bounds": { "x": 350.0,  "y": 800.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "⏰ Clock",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 30.0,  "y": 30.0  },
+          "bounds": { "x": 200.0, "y": 50.0  },
+          "bounds_type": 0
+        },
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 1580.0, "y": 20.0  },
+          "bounds": { "x": 320.0,  "y": 320.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "🎨 Coding Frame Overlay",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "🖥️ Screen — Editor",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "💻 Coding — Terminal",
+      "id": "coding-terminal",
+      "sources": [
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 1580.0, "y": 20.0  },
+          "bounds": { "x": 320.0,  "y": 320.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "🖥️ Screen — Terminal",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "💻 Coding — Split",
+      "id": "coding-split",
+      "sources": [
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 0.0,   "y": 540.0 },
+          "bounds": { "x": 960.0, "y": 540.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "🖥️ Screen — Terminal",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 960.0, "y": 540.0 },
+          "bounds": { "x": 960.0, "y": 540.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "🖥️ Screen — Editor",
+          "visible": true,
+          "locked": true,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 540.0  },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "📷 Face Cam Only",
+      "id": "face-cam",
+      "sources": [
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":    { "x": 0.0,    "y": 0.0    },
+          "bounds": { "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "⏸️  BRB — Coding",
+      "id": "brb-coding",
+      "sources": []
+    },
+
+    {
+      "name": "🔴 Starting Soon",
+      "id": "starting-soon-coding",
+      "sources": []
+    }
+  ],
+
+  "transitions": [
+    {
+      "id": "fade_transition",
+      "name": "Fade",
+      "settings": { "color": 4278190080 }
+    },
+    {
+      "id": "cut_transition",
+      "name": "Cut",
+      "settings": {}
+    }
+  ]
+}

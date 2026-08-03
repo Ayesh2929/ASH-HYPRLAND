@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "pipeline-metrics-${{ github.workflow }}-${{ github.ref }}"
+  group: "pipeline-metrics"
   cancel-in-progress: true
 
 permissions:
@@ -22,57 +22,141 @@ permissions:
   actions: read
 
 jobs:
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 01: COLLECT METRICS
-  # ────────────────────────────────────────────────────────────────────────────
-  collect-metrics:
-    name: "📊 Collect Pipeline Metrics"
+  collect-and-report:
+    name: "📊 Collect Metrics & Generate Report"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: "📥 Checkout"
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - name: "📊 Fetch Workflow Runs"
+      - name: "📊 Fetch & Analyze Workflow Runs"
+        id: metrics
         uses: actions/github-script@v7
         with:
           script: |
-            console.log("Fetching workflows...");
-            // Simulated metric collection logic for workflow times, errors, and cache usage
-            console.log("Metrics collected successfully.");
-
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 02: GENERATE REPORT
-  # ────────────────────────────────────────────────────────────────────────────
-  generate-report:
-    name: "📝 Generate Rich Report"
-    needs: [collect-metrics]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: "📝 Generate Markdown Report"
-        run: |
-          echo "## Pipeline Metrics Report" > report.md
-          echo "Summary of test flakes, cache hits, and time." >> report.md
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+            
+            // Fetch workflow runs from last 7 days
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              created: `>=${sevenDaysAgo}`,
+              per_page: 100
+            });
+            
+            // Calculate metrics
+            const completed = runs.filter(r => r.status === 'completed');
+            const successful = completed.filter(r => r.conclusion === 'success');
+            const failed = completed.filter(r => r.conclusion === 'failure');
+            
+            // Duration stats (in minutes)
+            const durations = completed
+              .filter(r => r.updated_at && r.run_started_at)
+              .map(r => (new Date(r.updated_at) - new Date(r.run_started_at)) / 60000)
+              .sort((a, b) => a - b);
+            
+            const avg = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
+            const p50 = durations.length > 0 ? durations[Math.floor(durations.length * 0.5)] : 0;
+            const p95 = durations.length > 0 ? durations[Math.floor(durations.length * 0.95)] : 0;
+            
+            // Failure rate by workflow
+            const byWorkflow = {};
+            for (const run of completed) {
+              const name = run.name || 'Unknown';
+              if (!byWorkflow[name]) byWorkflow[name] = { total: 0, failed: 0 };
+              byWorkflow[name].total++;
+              if (run.conclusion === 'failure') byWorkflow[name].failed++;
+            }
+            
+            // Flaky detection (fail rate 10-50%)
+            const flaky = Object.entries(byWorkflow)
+              .filter(([_, v]) => v.total >= 3 && v.failed / v.total > 0.1 && v.failed / v.total < 0.5)
+              .map(([name, v]) => ({ name, rate: (v.failed / v.total * 100).toFixed(1) }));
+            
+            // Top 5 most failed
+            const topFailed = Object.entries(byWorkflow)
+              .sort((a, b) => b[1].failed - a[1].failed)
+              .slice(0, 5)
+              .map(([name, v]) => ({ name, failed: v.failed, total: v.total }));
+            
+            // Estimate runner minutes (rough)
+            const totalMinutes = durations.reduce((a, b) => a + b, 0).toFixed(0);
+            
+            // Build report markdown
+            let report = `# 📈 Pipeline Metrics Report\n\n`;
+            report += `**Period**: Last 7 days (${sevenDaysAgo.split('T')[0]} → today)\n\n`;
+            report += `## Summary\n`;
+            report += `| Metric | Value |\n`;
+            report += `|--------|-------|\n`;
+            report += `| Total Runs | ${completed.length} |\n`;
+            report += `| ✅ Successful | ${successful.length} (${completed.length > 0 ? (successful.length/completed.length*100).toFixed(1) : 0}%) |\n`;
+            report += `| ❌ Failed | ${failed.length} (${completed.length > 0 ? (failed.length/completed.length*100).toFixed(1) : 0}%) |\n`;
+            report += `| ⏱️ Avg Duration | ${avg.toFixed(1)} min |\n`;
+            report += `| ⏱️ P50 Duration | ${p50.toFixed(1)} min |\n`;
+            report += `| ⏱️ P95 Duration | ${p95.toFixed(1)} min |\n`;
+            report += `| 💰 Est. Runner Minutes | ~${totalMinutes} min |\n\n`;
+            
+            if (topFailed.length > 0) {
+              report += `## Top 5 Most Failed Workflows\n`;
+              report += `| Workflow | Failed | Total | Rate |\n`;
+              report += `|----------|--------|-------|------|\n`;
+              for (const wf of topFailed) {
+                report += `| ${wf.name} | ${wf.failed} | ${wf.total} | ${(wf.failed/wf.total*100).toFixed(1)}% |\n`;
+              }
+              report += `\n`;
+            }
+            
+            if (flaky.length > 0) {
+              report += `## ⚠️ Flaky Workflows (10-50% failure rate)\n`;
+              report += `| Workflow | Failure Rate |\n`;
+              report += `|----------|-------------|\n`;
+              for (const f of flaky) {
+                report += `| ${f.name} | ${f.rate}% |\n`;
+              }
+              report += `\n`;
+            }
+            
+            // Write report
+            const fs = require('fs');
+            fs.writeFileSync('metrics-report.md', report);
+            core.summary.addRaw(report);
+            await core.summary.write();
+            
+            // Set outputs for notification
+            core.setOutput('total_runs', completed.length);
+            core.setOutput('success_rate', completed.length > 0 ? (successful.length/completed.length*100).toFixed(1) : '0');
+            core.setOutput('avg_duration', avg.toFixed(1));
+            core.setOutput('p95_duration', p95.toFixed(1));
+            core.setOutput('flaky_count', flaky.length);
 
       - name: "📤 Upload Report"
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: metrics-report
-          path: report.md
+          name: "pipeline-metrics-${{ github.run_id }}"
+          path: metrics-report.md
+          retention-days: 90
 
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 03: NOTIFY DISCORD
-  # ────────────────────────────────────────────────────────────────────────────
-  notify:
-    name: "🔔 Notify Discord"
-    needs: [generate-report]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: "🔔 Send Discord Webhook"
+      - name: "🔔 Notify Discord"
         if: env.DISCORD_WEBHOOK != ''
-        run: |
-          echo "Sending to discord webhook..."
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          PAYLOAD=$(cat <<EOF
+          {
+            "embeds": [{
+              "title": "📈 Weekly Pipeline Metrics",
+              "color": 5814783,
+              "fields": [
+                {"name": "Total Runs", "value": "${{ steps.metrics.outputs.total_runs }}", "inline": true},
+                {"name": "Success Rate", "value": "${{ steps.metrics.outputs.success_rate }}%", "inline": true},
+                {"name": "Avg Duration", "value": "${{ steps.metrics.outputs.avg_duration }} min", "inline": true},
+                {"name": "P95 Duration", "value": "${{ steps.metrics.outputs.p95_duration }} min", "inline": true},
+                {"name": "Flaky Tests", "value": "${{ steps.metrics.outputs.flaky_count }}", "inline": true}
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }]
+          }
+          EOF
+          )
+          curl -sSf -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK" || true

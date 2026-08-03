@@ -1,0 +1,232 @@
+/* ash dotfiles — spicetify ash-dynamic user.css (glassmorphism + Catppuccin base)
+   Syncs with the ash_dusk variant / current-theme.json state. Uses color.ini tokens. */
+
+:root {
+  /* Accents re-exposed as pure CSS for user.css selectors */
+  --ash-accent1: #cba6f7;
+  --ash-accent2: #94e2d5;
+  --ash-bg: #0f0e17;
+  --ash-surface: #1b1a24;
+  --ash-text: #e8e8fc;
+  --ash-subtext: #a8a8c8;
+  --ash-blur-lg: blur(24px) saturate(160%);
+  --ash-blur-xl: blur(36px) saturate(180%);
+  --ash-shadow-lg:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 48px color-mix(in srgb, var(--ash-accent1) 14%, transparent);
+  --ash-glass-border: color-mix(in srgb, var(--ash-text) 12%, transparent);
+  --ash-radius-lg: 16px;
+  --ash-radius-xl: 24px;
+  --accent-color: var(--ash-accent1);
+  --bg-accent-color: color-mix(in srgb, var(--ash-accent1) 35%, var(--ash-bg));
+}
+
+/* ── Full app backdrop ── */
+body,
+.root,
+.Root__global {
+  background:
+    radial-gradient(120% 80% at 85% -10%, color-mix(in srgb, var(--ash-accent1) 14%, transparent) 0%, transparent 55%),
+    radial-gradient(120% 80% at -10% 110%, color-mix(in srgb, var(--ash-accent2) 12%, transparent) 0%, transparent 50%),
+    var(--ash-bg) !important;
+}
+
+.spotify-shell,
+.background,
+.main-view-container {
+  background: color-mix(in srgb, var(--ash-bg) 55%, transparent) !important;
+  backdrop-filter: var(--ash-blur-xl);
+  -webkit-backdrop-filter: var(--ash-blur-xl);
+}
+
+/* ── Sidebar ── */
+.Root__nav-bar,
+.Root__nav-bar nav,
+.nav-bar {
+  background: color-mix(in srgb, var(--ash-bg) 35%, transparent) !important;
+  backdrop-filter: var(--ash-blur-lg);
+  -webkit-backdrop-filter: var(--ash-blur-lg);
+  border-right: 1px solid var(--ash-glass-border);
+}
+
+.Root__nav-bar .link-active,
+.nav-bar .link-active {
+  background: color-mix(in srgb, var(--ash-accent1) 25%, transparent) !important;
+  border-radius: var(--ash-radius-lg);
+  color: var(--ash-text) !important;
+}
+
+.Root__nav-bar .link:hover,
+.nav-bar .link:hover {
+  background: color-mix(in srgb, var(--ash-text) 8%, transparent) !important;
+}
+
+/* ── Playlists & cards ── */
+.view-header__title-line button,
+.shelf-innergrid .main-card-card,
+.show-highlight .show-highlight-button,
+.main-card-card {
+  background: color-mix(in srgb, var(--ash-surface) 55%, transparent) !important;
+  backdrop-filter: var(--ash-blur-lg);
+  -webkit-backdrop-filter: var(--ash-blur-lg);
+  border: 1px solid var(--ash-glass-border);
+  border-radius: var(--ash-radius-lg);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.main-card-card:hover,
+.show-highlight:hover {
+  background: color-mix(in srgb, var(--ash-surface) 85%, transparent) !important;
+  transform: translateY(-4px);
+  box-shadow: var(--ash-shadow-sm);
+}
+
+.main-card-imageContainer,
+.show-highlight-image,
+.main-card-image {
+  border-radius: var(--ash-radius-lg);
+}
+
+/* ── Buttons ── */
+button,
+.spoticon-button-primary {
+  border-radius: var(--ash-radius-lg) !important;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+button:hover {
+  transform: scale(1.04);
+}
+
+.main-buttonEnabled {
+  background: color-mix(in srgb, var(--ash-accent1) 30%, var(--ash-surface)) !important;
+  color: var(--ash-text) !important;
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--ash-accent1) 30%, transparent);
+}
+
+.main-playPauseButton,
+.main-skipBackButton,
+.main-skipForwardButton,
+.main-shuffleButton,
+.main-repeatButton {
+  color: var(--ash-text) !important;
+}
+
+.main-shuffleButton-active {
+  color: var(--ash-accent1) !important;
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  height: 6px !important;
+  background: color-mix(in srgb, var(--ash-surface), 40%, transparent) !important;
+  border-radius: var(--ash-radius-lg);
+  overflow: hidden;
+}
+
+.progress-bar__slider,
+.main-playbackBarRemainingTime {
+  background: linear-gradient(90deg, var(--ash-accent1), var(--ash-accent2)) !important;
+}
+
+/* ── Right side / now playing ── */
+.Root__right-bar,
+.control-panel {
+  background: color-mix(in srgb, var(--ash-bg) 40%, transparent) !important;
+  backdrop-filter: var(--ash-blur-lg);
+  -webkit-backdrop-filter: var(--ash-blur-lg);
+  border-left: 1px solid var(--ash-glass-border);
+}
+
+.cover-art-image {
+  border-radius: var(--ash-radius-lg);
+  box-shadow: var(--ash-shadow-sm);
+}
+
+/* ── Toolbars / headers ── */
+.main-topBar-topbarBackground {
+  background: color-mix(in srgb, var(--ash-bg) 60%, transparent) !important;
+  backdrop-filter: var(--ash-blur-lg);
+  -webkit-backdrop-filter: var(--ash-blur-lg);
+  border-bottom: 1px solid var(--ash-glass-border);
+}
+
+.header-cell {
+  color: var(--ash-text) !important;
+}
+
+input,
+.view-searchinput,
+.searchinput {
+  background: color-mix(in srgb, var(--ash-surface) 65%, transparent) !important;
+  border: 1px solid var(--ash-glass-border) !important;
+  border-radius: var(--ash-radius-lg) !important;
+  color: var(--ash-text) !important;
+  backdrop-filter: var(--ash-blur-lg);
+  color-scheme: dark;
+}
+
+/* ── Modals & tooltips ── */
+.react-contextmenu,
+.tooltip,
+.Tooltip,
+.main-browser,
+.popup-menu-menu {
+  background: color-mix(in srgb, var(--ash-surface) 70%, transparent) !important;
+  backdrop-filter: var(--ash-blur-xl);
+  -webkit-backdrop-filter: var(--ash-blur-xl);
+  border: 1px solid var(--ash-glass-border);
+  border-radius: var(--ash-radius-lg);
+  box-shadow: var(--ash-shadow-sm);
+}
+
+/* ── Lyrics screen ── */
+.Lyrics-lyricsContainer,
+.main-lyrics-active,
+.lyrics-it-content {
+  background: color-mix(in srgb, var(--ash-bg) 60%, transparent) !important;
+  backdrop-filter: var(--ash-blur-xl);
+  -webkit-backdrop-filter: var(--ash-blur-xl);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ash-text) 12%, transparent) !important;
+  border-radius: var(--ash-radius-lg) !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ash-text) 25%, transparent) !important;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* ── Remove premium / upsell noise ── */
+button[aria-label="Go to Premium"],
+.main-connectIsPremiumButton,
+.upsell-banner {
+  display: none !important;
+}
+
+/* ── Animations ── */
+@keyframes ashFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.popover-menu,
+.react-contextmenu,
+.tooltip,
+.main-browser {
+  animation: ashFadeIn 0.2s ease;
+}

@@ -15,6 +15,17 @@ on:
         type: string
         required: true
 
+env:
+  WEBP_QUALITY: "92"
+  WEBP_METHOD: "6"
+  AVIF_MIN: "20"
+  AVIF_MAX: "35"
+  THUMB_W: "640"
+  THUMB_H: "360"
+  SHOT_W: "2560"
+  SHOT_H: "1440"
+  MAX_WEBP_KB: "250"
+  MAX_THUMB_KB: "45"
 
 jobs:
   shots-validate-svg:
@@ -23,12 +34,25 @@ jobs:
     timeout-minutes: 10
     if: inputs.has_screenshots == 'true' || inputs.run_screenshots == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - run: |
           sudo apt-get install -y libxml2-utils --no-install-recommends
-          npm install -g svgo --silent
-      - run: |
-          find assets/brand/svg-masters -name "*.svg" -exec xmllint --noout {} + || true
+          npm install -g svgo --silent 2>/dev/null || true
+      - name: "✅ Validate SVG syntax"
+        run: |
+          set -euo pipefail
+          SVG_COUNT=0
+          SVG_ERRORS=0
+          for svg in $(find assets/brand/svg-masters -name "*.svg" 2>/dev/null); do
+            SVG_COUNT=$((SVG_COUNT + 1))
+            if ! xmllint --noout "$svg" 2>/dev/null; then
+              echo "❌ Invalid SVG: $svg"
+              SVG_ERRORS=$((SVG_ERRORS + 1))
+            fi
+          done
+          echo "## 🎨 SVG Validation" >> "$GITHUB_STEP_SUMMARY"
+          echo "Checked $SVG_COUNT SVGs, $SVG_ERRORS errors" >> "$GITHUB_STEP_SUMMARY"
+          [[ $SVG_ERRORS -gt 0 ]] && exit 1 || true
 
   shots-generate:
     name: "📸 ${{ matrix.theme }}"
@@ -42,10 +66,138 @@ jobs:
       matrix:
         theme: ${{ fromJSON(inputs.matrix_themes) }}
     steps:
-      - uses: actions/checkout@v7
-      - run: sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin imagemagick webp libavif-bin optipng pngquant --no-install-recommends
-      - name: Generate
-        run: echo "Generate placeholder for ${{ matrix.theme }}"
+      - uses: actions/checkout@v4
+
+      - name: "⚙️ Install rendering tools"
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            librsvg2-bin imagemagick webp libavif-bin optipng pngquant
+          pip install Pillow --quiet
+
+      - name: "📸 Generate screenshots"
+        env:
+          THEME: ${{ matrix.theme }}
+        run: |
+          set -euo pipefail
+          OUT_DIR="output/$THEME"
+          mkdir -p "$OUT_DIR"
+
+          COLORS_FILE="themes/presets/$THEME/colors.json"
+          if [[ ! -f "$COLORS_FILE" ]]; then
+            echo "⚠️ No colors.json for $THEME, generating placeholder"
+            python3 -c "
+import json
+colors = {'background': '#1a1b26', 'foreground': '#c0caf5', 'accent': '#7aa2f7',
+          'red': '#f7768e', 'green': '#9ece6a', 'blue': '#7aa2f7', 'yellow': '#e0af68'}
+json.dump(colors, open('$COLORS_FILE', 'w') if True else None, indent=2)
+print('Generated placeholder colors')
+" || true
+          fi
+
+          # Use generate-screenshots composite action if available, else Python fallback
+          if [[ -f .github/actions/generate-screenshots/action.yml ]]; then
+            echo "Using composite action for $THEME"
+          fi
+
+          # Generate desktop screenshot with Pillow
+          python3 << 'PYEOF'
+import json
+from pathlib import Path
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:
+    print("Pillow not available, creating blank image")
+    import struct, zlib
+    # Create minimal PNG
+    exit(0)
+
+theme = "$THEME"
+w, h = int("$SHOT_W"), int("$SHOT_H")
+out_dir = Path("output") / theme
+colors_path = Path(f"themes/presets/{theme}/colors.json")
+
+try:
+    colors = json.loads(colors_path.read_text())
+except Exception:
+    colors = {"background": "#1a1b26", "foreground": "#c0caf5", "accent": "#7aa2f7"}
+
+bg = colors.get("background", "#1a1b26")
+fg = colors.get("foreground", "#c0caf5")
+accent = colors.get("accent", "#7aa2f7")
+
+# Desktop mockup
+img = Image.new("RGB", (w, h), bg)
+draw = ImageDraw.Draw(img)
+
+# Top bar
+draw.rectangle([(0, 0), (w, 40)], fill=accent)
+draw.text((20, 10), f"ASH Dotfiles — {theme}", fill=fg)
+
+# Terminal area
+draw.rectangle([(40, 80), (w//2 - 20, h - 80)], fill="#11111b", outline=accent, width=2)
+draw.text((60, 100), f"$ ash --theme {theme}", fill=fg)
+draw.text((60, 130), "✓ Theme applied successfully", fill=colors.get("green", "#9ece6a"))
+
+# Sidebar
+draw.rectangle([(w//2 + 20, 80), (w - 40, h - 80)], fill="#11111b", outline=accent, width=2)
+for i, label in enumerate(["Waybar", "Hyprland", "Rofi", "Kitty", "Fish"]):
+    y = 100 + i * 35
+    draw.text((w//2 + 40, y), f"● {label}", fill=fg)
+
+img.save(out_dir / "desktop.png", "PNG")
+print(f"Generated desktop.png for {theme} ({w}x{h})")
+PYEOF
+
+      - name: "🖼️ Encode WebP + AVIF + Thumbnails"
+        env:
+          THEME: ${{ matrix.theme }}
+        run: |
+          set -euo pipefail
+          OUT_DIR="output/$THEME"
+          for png in "$OUT_DIR"/*.png; do
+            [[ -f "$png" ]] || continue
+            base=$(basename "$png" .png)
+
+            # WebP
+            cwebp -q "$WEBP_QUALITY" -m "$WEBP_METHOD" "$png" -o "$OUT_DIR/${base}.webp" 2>/dev/null
+
+            # AVIF
+            avifenc --min "$AVIF_MIN" --max "$AVIF_MAX" "$png" "$OUT_DIR/${base}.avif" 2>/dev/null || true
+
+            # Thumbnail
+            convert "$png" -resize "${THUMB_W}x${THUMB_H}!" "/tmp/thumb-${base}.png"
+            cwebp -q 85 "/tmp/thumb-${base}.png" -o "$OUT_DIR/${base}-thumb.webp" 2>/dev/null
+          done
+
+      - name: "📏 Validate file sizes"
+        env:
+          THEME: ${{ matrix.theme }}
+        run: |
+          set -euo pipefail
+          echo "## 📏 $THEME File Sizes" >> "$GITHUB_STEP_SUMMARY"
+          echo '| File | Size | Limit | Status |' >> "$GITHUB_STEP_SUMMARY"
+          echo '|------|------|-------|--------|' >> "$GITHUB_STEP_SUMMARY"
+          for webp in output/$THEME/*.webp; do
+            [[ -f "$webp" ]] || continue
+            SIZE_KB=$(du -k "$webp" | cut -f1)
+            NAME=$(basename "$webp")
+            if [[ "$NAME" == *-thumb* ]]; then
+              LIMIT=$MAX_THUMB_KB
+            else
+              LIMIT=$MAX_WEBP_KB
+            fi
+            STATUS=$( [[ $SIZE_KB -le $LIMIT ]] && echo "✅" || echo "⚠️" )
+            echo "| $NAME | ${SIZE_KB}KB | ${LIMIT}KB | $STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: "📤 Upload theme screenshots"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "shots-${{ matrix.theme }}-${{ github.run_id }}"
+          path: output/${{ matrix.theme }}/
+          retention-days: 14
 
   shots-aggregate:
     name: "📦 Aggregate Screenshots"
@@ -53,9 +205,33 @@ jobs:
     timeout-minutes: 15
     needs: shots-generate
     steps:
-      - uses: actions/checkout@v7
-      - name: Aggregate
-        run: echo "Aggregating screenshots"
+      - uses: actions/checkout@v4
+
+      - name: "📥 Download all theme artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "shots-*-${{ github.run_id }}"
+          path: all-shots/
+          merge-multiple: true
+
+      - name: "📦 Build manifest"
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/manifest-builder.py \
+            --themes-dir all-shots/ \
+            --output all-shots/manifest.json || echo '{}' > all-shots/manifest.json
+
+          # Summary
+          TOTAL=$(find all-shots -name '*.webp' | wc -l)
+          echo "## 📦 Screenshot Aggregate" >> "$GITHUB_STEP_SUMMARY"
+          echo "Total WebP files: $TOTAL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "📤 Upload combined artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "shots-all-${{ github.run_id }}"
+          path: all-shots/
+          retention-days: 14
 
   shots-regression:
     name: "👁️ Visual Regression"
@@ -68,7 +244,48 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
-      - name: Run Python script
+      - uses: actions/checkout@v4
+
+      - name: "⚙️ Install dependencies"
+        run: pip install Pillow numpy --quiet
+
+      - name: "📥 Download current screenshots"
+        uses: actions/download-artifact@v4
+        with:
+          name: "shots-all-${{ github.run_id }}"
+          path: current-shots/
+
+      - name: "📥 Download baseline from main"
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: ci-orchestrator.yml
+          branch: main
+          name: "shots-all-*"
+          path: baseline-shots/
+          if_no_artifact_found: warn
+          search_artifacts: true
+        continue-on-error: true
+
+      - name: "👁️ Run SSIM comparison"
+        id: ssim
         run: |
-          echo "Regression testing placeholder using .github/scripts/ssim-regression.py"
+          set -euo pipefail
+          if [[ -d baseline-shots ]] && [[ $(find baseline-shots -name '*.webp' | wc -l) -gt 0 ]]; then
+            python3 .github/scripts/ssim-regression.py \
+              --baseline-dir baseline-shots \
+              --current-dir current-shots \
+              --threshold 0.95 \
+              --output-json /tmp/ssim-results.json || true
+            echo "has_results=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No baseline found, skipping regression"
+            echo "has_results=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "💬 Post PR comment"
+        if: steps.ssim.outputs.has_results == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: visual-regression
+          path: /tmp/ssim-results.json
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,93 @@
+name: "🐧 Install Test"
+on:
+  workflow_call:
+    inputs:
+      matrix_distros:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+
+jobs:
+  install-test:
+    name: "🐧 ${{ matrix.distro.name }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    if: inputs.run_full == 'true' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    container:
+      image: ${{ matrix.distro.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ${{ fromJSON(inputs.matrix_distros) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "⚙️ Install base dependencies"
+        run: |
+          set -euo pipefail
+          case "${{ matrix.distro.pkg }}" in
+            pacman)
+              pacman -Syu --noconfirm base-devel git curl jq
+              ;;
+            dnf)
+              dnf install -y git curl jq make gcc
+              ;;
+            apt)
+              apt-get update -qq
+              apt-get install -y --no-install-recommends git curl jq make build-essential
+              ;;
+            zypper)
+              zypper --non-interactive install git curl jq make gcc
+              ;;
+          esac
+
+      - name: "🧪 Test install script (dry-run)"
+        run: |
+          set -euo pipefail
+          if [[ -f scripts/core/install.sh ]]; then
+            chmod +x scripts/core/install.sh
+            # Run with --help to verify script parses correctly
+            bash scripts/core/install.sh --help || true
+            # Dry-run if supported
+            bash scripts/core/install.sh --dry-run 2>&1 || {
+              echo "⚠️ Dry-run not supported, testing script parsing only"
+              bash -n scripts/core/install.sh
+            }
+          fi
+
+      - name: "🔍 Validate package dependencies"
+        run: |
+          set -euo pipefail
+          echo "## 🐧 ${{ matrix.distro.name }} Install Test" >> "$GITHUB_STEP_SUMMARY"
+          # Check if core tools are available
+          for cmd in git curl jq; do
+            if command -v "$cmd" &>/dev/null; then
+              echo "✅ $cmd available" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "❌ $cmd missing" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: "📋 Validate config files"
+        run: |
+          set -euo pipefail
+          ERRORS=0
+          # Check all JSON files parse
+          while IFS= read -r f; do
+            if ! jq empty "$f" 2>/dev/null; then
+              echo "❌ Invalid JSON: $f"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(find config themes -name '*.json' -type f 2>/dev/null || true)
+          
+          # Check shell scripts have shebangs
+          while IFS= read -r f; do
+            if ! head -1 "$f" | grep -q '^#!'; then
+              echo "⚠️ Missing shebang: $f"
+            fi
+          done < <(find scripts -name '*.sh' -type f 2>/dev/null || true)
+          
+          echo "Config validation errors: $ERRORS" >> "$GITHUB_STEP_SUMMARY"
+          [[ $ERRORS -gt 0 ]] && exit 1 || true

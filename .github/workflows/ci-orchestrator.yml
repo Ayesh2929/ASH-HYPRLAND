@@ -1,4 +1,4 @@
-name: "🚀 ASH Dotfiles — Ultra CI/CD v5.0"
+name: "🚀 ASH Dotfiles — Ultra CI/CD v7.0 SUPERNOVA"
 
 on:
   push:
@@ -195,6 +195,36 @@ jobs:
       api_exists: ${{ needs.intelligence.outputs.api_exists }}
     secrets: inherit
 
+  ## ── NEW STAGES ──────────────────────────────────────────────────────────
+
+  install-test:
+    needs: [intelligence, test]
+    if: needs.intelligence.outputs.run_full == 'true' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+    uses: ./.github/workflows/_reusable-install-test.yml
+    with:
+      matrix_distros: ${{ needs.intelligence.outputs.matrix_distros }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  e2e:
+    needs: [intelligence, build]
+    uses: ./.github/workflows/_reusable-e2e.yml
+    with:
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      has_web: ${{ needs.intelligence.outputs.has_web }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  release:
+    needs: [intelligence, deploy]
+    uses: ./.github/workflows/_reusable-release.yml
+    with:
+      is_release: ${{ needs.intelligence.outputs.is_release }}
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+    secrets: inherit
+
+  ## ── MANIFEST UPDATE (real) ──────────────────────────────────────────────
+
   update-manifest:
     name: "📋 Commit Manifest"
     runs-on: ubuntu-24.04
@@ -204,25 +234,169 @@ jobs:
     permissions:
       contents: write
     steps:
-      - run: echo "Inline manifest update"
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📥 Download screenshot manifest"
+        uses: actions/download-artifact@v4
+        with:
+          name: "shots-all-${{ github.run_id }}"
+          path: /tmp/shots/
+        continue-on-error: true
+
+      - name: "📋 Build manifest"
+        run: |
+          set -euo pipefail
+          if [[ -f /tmp/shots/manifest.json ]]; then
+            cp /tmp/shots/manifest.json assets/manifest.json
+            echo "📋 Updated manifest.json from screenshot pipeline"
+          else
+            python3 .github/scripts/manifest-builder.py \
+              --themes-dir themes/presets/ \
+              --output assets/manifest.json || true
+            echo "📋 Generated manifest from themes directory"
+          fi
+
+      - name: "📤 Commit manifest"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update manifest.json [skip ci]"
+          file_pattern: "assets/manifest.json"
+          commit_user_name: "ASH CI Bot"
+          commit_user_email: "ci@ash-dotfiles.dev"
+
+  ## ── PIPELINE SUMMARY (real) ─────────────────────────────────────────────
 
   summary:
     name: "📊 Pipeline Summary"
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: always()
-    needs: [intelligence, security, lint, screenshots, test, benchmark, build, deploy]
+    needs: [intelligence, security, lint, screenshots, test, benchmark, build, deploy, install-test, e2e]
     steps:
-      - run: echo "Inline summary"
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: "📊 Generate summary"
+        env:
+          INTELLIGENCE: ${{ needs.intelligence.result }}
+          SECURITY:     ${{ needs.security.result }}
+          LINT:         ${{ needs.lint.result }}
+          SCREENSHOTS:  ${{ needs.screenshots.result }}
+          TEST:         ${{ needs.test.result }}
+          BENCHMARK:    ${{ needs.benchmark.result }}
+          BUILD:        ${{ needs.build.result }}
+          DEPLOY:       ${{ needs.deploy.result }}
+          INSTALL_TEST: ${{ needs.install-test.result }}
+          E2E:          ${{ needs.e2e.result }}
+          RUN_ID:       ${{ github.run_id }}
+          RUN_NUMBER:   ${{ github.run_number }}
+          SHA:          ${{ github.sha }}
+          REF:          ${{ github.ref_name }}
+          EVENT:        ${{ github.event_name }}
+          REPO:         ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          status_emoji() {
+            case "$1" in
+              success)   echo "✅" ;;
+              failure)   echo "❌" ;;
+              cancelled) echo "🚫" ;;
+              skipped)   echo "⏭️" ;;
+              *)         echo "⏳" ;;
+            esac
+          }
+
+          {
+            echo "## 🚀 ASH Dotfiles CI/CD v7.0 SUPERNOVA — Run #${RUN_NUMBER}"
+            echo ""
+            echo "| Stage | Status |"
+            echo "|-------|--------|"
+            echo "| 🧠 Intelligence | $(status_emoji "$INTELLIGENCE") $INTELLIGENCE |"
+            echo "| 🔒 Security | $(status_emoji "$SECURITY") $SECURITY |"
+            echo "| ✅ Lint | $(status_emoji "$LINT") $LINT |"
+            echo "| 🖼️ Screenshots | $(status_emoji "$SCREENSHOTS") $SCREENSHOTS |"
+            echo "| 🧪 Tests | $(status_emoji "$TEST") $TEST |"
+            echo "| 📊 Benchmarks | $(status_emoji "$BENCHMARK") $BENCHMARK |"
+            echo "| 🏗️ Build | $(status_emoji "$BUILD") $BUILD |"
+            echo "| 🚀 Deploy | $(status_emoji "$DEPLOY") $DEPLOY |"
+            echo "| 🐧 Install Test | $(status_emoji "$INSTALL_TEST") $INSTALL_TEST |"
+            echo "| 🎭 E2E | $(status_emoji "$E2E") $E2E |"
+            echo ""
+            echo "**Commit**: \`${SHA::8}\` on \`${REF}\` via \`${EVENT}\`"
+            echo ""
+            echo "[View full run](https://github.com/${REPO}/actions/runs/${RUN_ID})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ## ── NOTIFICATIONS (real) ────────────────────────────────────────────────
 
   notify:
     name: "💬 Notifications"
     runs-on: ubuntu-24.04
     timeout-minutes: 8
-    needs: [summary]
-    if: always()
+    needs: [summary, security, lint, test, benchmark, screenshots, build, deploy]
+    if: always() && (failure() || (github.ref == 'refs/heads/main' && github.event_name == 'push') || startsWith(github.ref, 'refs/heads/release/'))
     steps:
-      - run: echo "Inline notify"
+      - name: "💬 Discord notification"
+        if: env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          LINT:     ${{ needs.lint.result }}
+          TEST:     ${{ needs.test.result }}
+          SECURITY: ${{ needs.security.result }}
+          BUILD:    ${{ needs.build.result }}
+          DEPLOY:   ${{ needs.deploy.result }}
+        run: |
+          set -euo pipefail
+
+          # Determine overall status
+          OVERALL="success"
+          for r in "$LINT" "$TEST" "$SECURITY" "$BUILD" "$DEPLOY"; do
+            [[ "$r" == "failure" ]] && OVERALL="failure" && break
+          done
+
+          COLOR=$([[ "$OVERALL" == "success" ]] && echo 5763719 || echo 15548997)
+          EMOJI=$([[ "$OVERALL" == "success" ]] && echo "✅" || echo "❌")
+          TITLE="$EMOJI ASH CI/CD — ${GITHUB_REF_NAME} #${GITHUB_RUN_NUMBER}"
+
+          curl -sSf -H "Content-Type: application/json" -d "{
+            \"embeds\": [{
+              \"title\": \"$TITLE\",
+              \"color\": $COLOR,
+              \"url\": \"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\",
+              \"fields\": [
+                {\"name\": \"Branch\", \"value\": \"${GITHUB_REF_NAME}\", \"inline\": true},
+                {\"name\": \"Commit\", \"value\": \"\`${GITHUB_SHA::8}\`\", \"inline\": true},
+                {\"name\": \"Lint\", \"value\": \"$LINT\", \"inline\": true},
+                {\"name\": \"Tests\", \"value\": \"$TEST\", \"inline\": true},
+                {\"name\": \"Build\", \"value\": \"$BUILD\", \"inline\": true},
+                {\"name\": \"Deploy\", \"value\": \"$DEPLOY\", \"inline\": true}
+              ],
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
+          }" "$DISCORD_WEBHOOK" || true
+
+  ## ── PR COMMENT BOT ──────────────────────────────────────────────────────
+
+  pr-comment:
+    needs: [lint, test, security, build, benchmark, screenshots, deploy]
+    if: always() && github.event_name == 'pull_request'
+    uses: ./.github/workflows/_reusable-pr-comment.yml
+    with:
+      lint_result: ${{ needs.lint.result }}
+      test_result: ${{ needs.test.result }}
+      security_result: ${{ needs.security.result }}
+      build_result: ${{ needs.build.result }}
+      benchmark_result: ${{ needs.benchmark.result }}
+      screenshots_result: ${{ needs.screenshots.result }}
+      deploy_result: ${{ needs.deploy.result }}
+    secrets: inherit
+
+  ## ── CLEANUP (real) ──────────────────────────────────────────────────────
 
   cleanup:
     name: "🧹 Cleanup"
@@ -230,5 +404,48 @@ jobs:
     timeout-minutes: 10
     needs: [summary]
     if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      actions: write
     steps:
-      - run: echo "Inline cleanup"
+      - name: "🧹 Prune old artifacts & stale runs"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Delete artifacts older than 30 days
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner, repo, per_page: 100
+            });
+
+            let deleted = 0;
+            for (const artifact of artifacts) {
+              if (new Date(artifact.created_at) < thirtyDaysAgo) {
+                try {
+                  await github.rest.actions.deleteArtifact({ owner, repo, artifact_id: artifact.id });
+                  deleted++;
+                } catch (e) { /* ignore */ }
+              }
+            }
+            core.info(`🗑️ Deleted ${deleted} old artifacts`);
+
+            // Cancel stale workflow runs (running > 2 hours)
+            const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+              owner, repo, status: 'in_progress', per_page: 50
+            });
+
+            let cancelled = 0;
+            for (const run of runs) {
+              if (run.id !== context.runId && new Date(run.run_started_at) < twoHoursAgo) {
+                try {
+                  await github.rest.actions.cancelWorkflowRun({ owner, repo, run_id: run.id });
+                  cancelled++;
+                } catch (e) { /* ignore */ }
+              }
+            }
+            core.info(`🛑 Cancelled ${cancelled} stale runs`);
+            core.summary.addRaw(`## 🧹 Cleanup\n- Deleted ${deleted} old artifacts\n- Cancelled ${cancelled} stale runs\n`);
+            await core.summary.write();

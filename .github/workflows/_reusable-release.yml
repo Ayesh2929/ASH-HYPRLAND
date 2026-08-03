@@ -1,0 +1,140 @@
+name: "📦 Release"
+on:
+  workflow_call:
+    inputs:
+      is_release:
+        type: string
+        required: true
+      api_exists:
+        type: string
+        required: true
+
+jobs:
+  prepare-release:
+    name: "📋 Prepare Release"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: inputs.is_release == 'true'
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.path }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "📋 Determine version"
+        id: version
+        run: |
+          set -euo pipefail
+          # Extract version from branch name (release/v1.2.3)
+          BRANCH="${GITHUB_REF_NAME}"
+          VERSION="${BRANCH#release/}"
+          VERSION="${VERSION#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            VERSION="0.0.0-dev"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "## 📦 Release v$VERSION" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "📝 Generate changelog"
+        id: changelog
+        run: |
+          set -euo pipefail
+          if [[ -x .github/scripts/generate-changelog.sh ]]; then
+            .github/scripts/generate-changelog.sh > CHANGELOG-release.md
+          else
+            echo "## Changes" > CHANGELOG-release.md
+            git log --oneline --no-merges $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~20)..HEAD >> CHANGELOG-release.md || true
+          fi
+          echo "path=CHANGELOG-release.md" >> "$GITHUB_OUTPUT"
+
+      - name: "🔖 Bump version"
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ -x .github/scripts/bump-version.sh ]]; then
+            .github/scripts/bump-version.sh "$VERSION" || true
+          fi
+
+  create-release:
+    name: "🚀 Create GitHub Release"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: prepare-release
+    if: inputs.is_release == 'true'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "📥 Download build artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts/
+          pattern: "*-${{ github.run_id }}"
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: "🔑 Generate checksums"
+        run: |
+          set -euo pipefail
+          cd release-artifacts 2>/dev/null || mkdir -p release-artifacts
+          find . -type f ! -name 'SHA256SUMS' -exec sha256sum {} + > SHA256SUMS || true
+
+      - name: "🚀 Create Release"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.prepare-release.outputs.version }}"
+          name: "ASH Dotfiles v${{ needs.prepare-release.outputs.version }}"
+          body_path: CHANGELOG-release.md
+          files: |
+            release-artifacts/SHA256SUMS
+          draft: false
+          prerelease: ${{ contains(needs.prepare-release.outputs.version, '-') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-aur:
+    name: "📦 Publish to AUR"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: [prepare-release, create-release]
+    if: inputs.is_release == 'true' && !contains(needs.prepare-release.outputs.version, '-')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "📦 Publish AUR package"
+        if: hashFiles('.github/actions/publish-aur/action.yml') != ''
+        uses: ./.github/actions/publish-aur
+        with:
+          version: ${{ needs.prepare-release.outputs.version }}
+        continue-on-error: true
+
+  notify-release:
+    name: "💬 Release Notification"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    needs: [prepare-release, create-release]
+    if: always() && inputs.is_release == 'true'
+    steps:
+      - name: "💬 Notify Discord"
+        if: env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          STATUS: ${{ needs.create-release.result }}
+        run: |
+          COLOR=$([[ "$STATUS" == "success" ]] && echo 5763719 || echo 15548997)
+          EMOJI=$([[ "$STATUS" == "success" ]] && echo "🎉" || echo "❌")
+          curl -sSf -H "Content-Type: application/json" -d "{
+            \"embeds\": [{
+              \"title\": \"$EMOJI ASH Dotfiles v${VERSION} Released\",
+              \"color\": $COLOR,
+              \"url\": \"https://github.com/${{ github.repository }}/releases/tag/v${VERSION}\",
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
+          }" "$DISCORD_WEBHOOK" || true

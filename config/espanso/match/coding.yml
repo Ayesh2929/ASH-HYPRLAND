@@ -1,0 +1,850 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — ESPANSO CODING MATCHES ULTRA                 ║
+# ║  💻 Shell • Git • Docker • Python • Rust • Go • TypeScript • Regex         ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+matches:
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🐚  SHELL / BASH
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Bash shebang
+  - trigger: ":shbash"
+    replace: "#!/usr/bin/env bash\nset -euo pipefail\nIFS=$'\\n\\t'\n"
+
+  # Fish shebang
+  - trigger: ":shfish"
+    replace: "#!/usr/bin/env fish\n"
+
+  # Python shebang
+  - trigger: ":shpy"
+    replace: "#!/usr/bin/env python3\n"
+
+  # Node shebang
+  - trigger: ":shnode"
+    replace: "#!/usr/bin/env node\n"
+
+  # Bash strict mode
+  - trigger: ":strict"
+    replace: "set -euo pipefail\nIFS=$'\\n\\t'"
+
+  # Bash function template
+  - trigger: ":bfunc"
+    replace: |
+      function_name() {
+        local arg1="${1:?Error: arg1 required}"
+        local arg2="${2:-default}"
+        echo "TODO"
+      }
+
+  # Check if command exists
+  - trigger: ":cmdexists"
+    replace: 'command -v "$1" &>/dev/null'
+
+  # Check if running as root
+  - trigger: ":isroot"
+    replace: '[[ "$(id -u)" -eq 0 ]]'
+
+  # Bash color output
+  - trigger: ":colors"
+    replace: |
+      RED='\033[0;31m'
+      GREEN='\033[0;32m'
+      YELLOW='\033[1;33m'
+      BLUE='\033[0;34m'
+      CYAN='\033[0;36m'
+      BOLD='\033[1m'
+      NC='\033[0m' # No Color
+
+  # Info / warning / error log functions
+  - trigger: ":logfuncs"
+    replace: |
+      log_info()  { printf "${CYAN}[INFO]${NC}  %s\n" "$*"; }
+      log_ok()    { printf "${GREEN}[OK]${NC}    %s\n" "$*"; }
+      log_warn()  { printf "${YELLOW}[WARN]${NC}  %s\n" "$*"; }
+      log_error() { printf "${RED}[ERROR]${NC} %s\n" "$*" >&2; }
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🌿  GIT
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Conventional commit: feat
+  - trigger: ":gcfeat"
+    replace: "feat: "
+
+  # fix
+  - trigger: ":gcfix"
+    replace: "fix: "
+
+  # docs
+  - trigger: ":gcdocs"
+    replace: "docs: "
+
+  # style
+  - trigger: ":gcstyle"
+    replace: "style: "
+
+  # refactor
+  - trigger: ":gcref"
+    replace: "refactor: "
+
+  # test
+  - trigger: ":gctest"
+    replace: "test: "
+
+  # chore
+  - trigger: ":gcchore"
+    replace: "chore: "
+
+  # perf
+  - trigger: ":gcperf"
+    replace: "perf: "
+
+  # ci
+  - trigger: ":gcci"
+    replace: "ci: "
+
+  # build
+  - trigger: ":gcbuild"
+    replace: "build: "
+
+  # revert
+  - trigger: ":gcrevert"
+    replace: "revert: "
+
+  # breaking change
+  - trigger: ":gcbreak"
+    replace: "feat!: "
+
+  # Full conventional commit template
+  - trigger: ":gcommit"
+    replace: |
+      feat(scope): short description
+
+      - Detail one
+      - Detail two
+
+      Closes #
+
+  # Git ignore common patterns
+  - trigger: ":gitignore"
+    replace: |
+      # ASH Dotfiles — .gitignore
+      .env
+      .env.local
+      .env.*.local
+      node_modules/
+      dist/
+      build/
+      .next/
+      .nuxt/
+      coverage/
+      *.log
+      .DS_Store
+      Thumbs.db
+      .idea/
+      .vscode/
+      *.swp
+      *.swo
+      __pycache__/
+      *.pyc
+      .pytest_cache/
+      .mypy_cache/
+      target/
+      Cargo.lock
+      vendor/
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🐍  PYTHON
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Type hints
+  - trigger: ":pytyping"
+    replace: "from typing import Any, Dict, List, Optional, Tuple, Union"
+
+  # Dataclass
+  - trigger: ":pydc"
+    replace: |
+      from dataclasses import dataclass, field
+      from typing import Optional
+
+      @dataclass
+      class ClassName:
+          name: str
+          value: int = 0
+          items: list = field(default_factory=list)
+
+  # Context manager
+  - trigger: ":pycm"
+    replace: |
+      from contextlib import contextmanager
+
+      @contextmanager
+      def managed_resource(*args, **kwargs):
+          try:
+              yield resource
+          finally:
+              pass  # cleanup
+
+  # Async function
+  - trigger: ":pyasync"
+    replace: |
+      import asyncio
+
+      async def main() -> None:
+          pass
+
+      if __name__ == "__main__":
+          asyncio.run(main())
+
+  # Type alias
+  - trigger: ":pytype"
+    replace: "from typing import TypeAlias\n\nMyType: TypeAlias = "
+
+  # Python main guard
+  - trigger: ":pymain"
+    replace: |
+      def main() -> None:
+          pass
+
+      if __name__ == "__main__":
+          main()
+
+  # f-string debug
+  - trigger: ":pyf"
+    replace: 'f"{variable=}"'
+
+  # List comprehension
+  - trigger: ":pylc"
+    replace: "[x for x in iterable if condition]"
+
+  # Dict comprehension
+  - trigger: ":pydc2"
+    replace: "{k: v for k, v in items.items() if condition}"
+
+  # Generator expression
+  - trigger: ":pyge"
+    replace: "(x for x in iterable if condition)"
+
+  # Walrus operator
+  - trigger: ":pywalrus"
+    replace: "if (n := len(data)) > 10:"
+
+  # match statement (Python 3.10+)
+  - trigger: ":pymatch"
+    replace: |
+      match command:
+          case "quit":
+              pass
+          case "hello":
+              pass
+          case _:
+              pass
+
+  # argparse template
+  - trigger: ":pyargs"
+    replace: |
+      import argparse
+
+      def parse_args() -> argparse.Namespace:
+          parser = argparse.ArgumentParser(
+              description="",
+              formatter_class=argparse.RawDescriptionHelpFormatter,
+          )
+          parser.add_argument("input", help="Input file")
+          parser.add_argument("-o", "--output", default="-", help="Output file")
+          parser.add_argument("-v", "--verbose", action="store_true")
+          return parser.parse_args()
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🦀  RUST
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Result type
+  - trigger: ":rsresult"
+    replace: "Result<T, Box<dyn std::error::Error>>"
+
+  # Option unwrap or
+  - trigger: ":rsuor"
+    replace: ".unwrap_or_else(|| )"
+
+  # Error propagation
+  - trigger: ":rsprop"
+    replace: ".map_err(|e| format!(\"Error: {e}\"))?"
+
+  # Derive macros
+  - trigger: ":rsderive"
+    replace: "#[derive(Debug, Clone, PartialEq, Eq, Hash)]"
+
+  # Struct template
+  - trigger: ":rsstruct"
+    replace: |
+      #[derive(Debug, Clone)]
+      pub struct Name {
+          pub field: Type,
+      }
+
+      impl Name {
+          pub fn new(field: Type) -> Self {
+              Self { field }
+          }
+      }
+
+  # Impl Display
+  - trigger: ":rsdisp"
+    replace: |
+      impl std::fmt::Display for Type {
+          fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+              write!(f, "{}", self.field)
+          }
+      }
+
+  # Async fn (Tokio)
+  - trigger: ":rsasync"
+    replace: |
+      #[tokio::main]
+      async fn main() -> Result<(), Box<dyn std::error::Error>> {
+          Ok(())
+      }
+
+  # Vec operations
+  - trigger: ":rsvec"
+    replace: "let mut v: Vec<> = Vec::with_capacity();"
+
+  # HashMap
+  - trigger: ":rshmap"
+    replace: "let mut map: std::collections::HashMap<K, V> = std::collections::HashMap::new();"
+
+  # Lifetime annotation
+  - trigger: ":rslife"
+    replace: "fn name<'a>(param: &'a str) -> &'a str {"
+
+  # Pattern matching
+  - trigger: ":rsmatch"
+    replace: |
+      match value {
+          Some(x) => x,
+          None => return Err("missing".into()),
+      }
+
+  # Closure
+  - trigger: ":rsclosure"
+    replace: "|x| x * 2"
+
+  # Iterator chain
+  - trigger: ":rsiter"
+    replace: ".iter().filter(|x| ).map(|x| ).collect::<Vec<_>>()"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🐹  GO
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Error check
+  - trigger: ":goerr"
+    replace: |
+      if err != nil {
+          return fmt.Errorf("name: %w", err)
+      }
+
+  # Main function
+  - trigger: ":gomain"
+    replace: |
+      package main
+
+      import "fmt"
+
+      func main() {
+          fmt.Println("Hello, World!")
+      }
+
+  # Goroutine with WaitGroup
+  - trigger: ":gowg"
+    replace: |
+      var wg sync.WaitGroup
+      wg.Add(1)
+      go func() {
+          defer wg.Done()
+          // work
+      }()
+      wg.Wait()
+
+  # Channel pattern
+  - trigger: ":gochan"
+    replace: |
+      ch := make(chan Type, bufferSize)
+      go func() {
+          defer close(ch)
+          ch <- value
+      }()
+      for v := range ch {
+          _ = v
+      }
+
+  # Struct with constructor
+  - trigger: ":gostruct"
+    replace: |
+      type Name struct {
+          Field Type `json:"field"`
+      }
+
+      func NewName(field Type) *Name {
+          return &Name{Field: field}
+      }
+
+  # Interface
+  - trigger: ":goint"
+    replace: |
+      type NameInterface interface {
+          Method() ReturnType
+      }
+
+  # Context pattern
+  - trigger: ":goctx"
+    replace: |
+      ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+      defer cancel()
+
+  # Table-driven test
+  - trigger: ":gotest"
+    replace: |
+      func TestName(t *testing.T) {
+          tests := []struct {
+              name     string
+              input    Type
+              expected Type
+          }{
+              {"case1", input, expected},
+          }
+          for _, tt := range tests {
+              t.Run(tt.name, func(t *testing.T) {
+                  got := FuncUnderTest(tt.input)
+                  if got != tt.expected {
+                      t.Errorf("got %v, want %v", got, tt.expected)
+                  }
+              })
+          }
+      }
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  📘  TYPESCRIPT / JAVASCRIPT
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # React functional component
+  - trigger: ":tsrfc"
+    replace: |
+      import type { FC } from 'react'
+
+      interface Props {
+        children?: React.ReactNode
+      }
+
+      const ComponentName: FC<Props> = ({ children }) => {
+        return (
+          <div>
+            {children}
+          </div>
+        )
+      }
+
+      export default ComponentName
+
+  # React hook
+  - trigger: ":tshook"
+    replace: |
+      import { useState, useEffect } from 'react'
+
+      function useHookName(param: ParamType): ReturnType {
+        const [state, setState] = useState<StateType>(initialValue)
+
+        useEffect(() => {
+          // effect
+          return () => {
+            // cleanup
+          }
+        }, [param])
+
+        return state
+      }
+
+      export { useHookName }
+
+  # TypeScript interface
+  - trigger: ":tsint"
+    replace: |
+      interface Name {
+        id: string
+        name: string
+        createdAt: Date
+      }
+
+  # TypeScript type
+  - trigger: ":tstype"
+    replace: "type Name = "
+
+  # Generic function
+  - trigger: ":tsgen"
+    replace: |
+      function name<T extends Record<string, unknown>>(
+        param: T,
+        options?: Partial<Options>,
+      ): Promise<T> {
+        return Promise.resolve(param)
+      }
+
+  # Async arrow function
+  - trigger: ":tsasync"
+    replace: |
+      const funcName = async (param: Type): Promise<ReturnType> => {
+        try {
+          const result = await operation()
+          return result
+        } catch (error) {
+          throw new Error(`Error: ${error}`)
+        }
+      }
+
+  # Zod schema
+  - trigger: ":tszod"
+    replace: |
+      import { z } from 'zod'
+
+      const Schema = z.object({
+        id: z.string().uuid(),
+        name: z.string().min(1).max(100),
+        email: z.string().email(),
+        createdAt: z.date().default(() => new Date()),
+      })
+
+      type SchemaType = z.infer<typeof Schema>
+
+  # Console.log with label
+  - trigger: ":cl"
+    replace: 'console.log("$|$:", $|$)'
+
+  # Console.error
+  - trigger: ":ce"
+    replace: 'console.error("Error:", error)'
+
+  # Optional chaining + nullish
+  - trigger: ":tsopt"
+    replace: "value?.property ?? defaultValue"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🐋  DOCKER / CONTAINERS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Multi-stage Dockerfile (Node)
+  - trigger: ":dfnode"
+    replace: |
+      FROM node:20-alpine AS base
+      WORKDIR /app
+
+      FROM base AS deps
+      COPY package*.json ./
+      RUN npm ci --only=production
+
+      FROM base AS builder
+      COPY package*.json ./
+      RUN npm ci
+      COPY . .
+      RUN npm run build
+
+      FROM base AS runner
+      ENV NODE_ENV=production
+      COPY --from=deps /app/node_modules ./node_modules
+      COPY --from=builder /app/dist ./dist
+      EXPOSE 3000
+      CMD ["node", "dist/index.js"]
+
+  # Multi-stage Dockerfile (Python)
+  - trigger: ":dfpython"
+    replace: |
+      FROM python:3.12-slim AS base
+      WORKDIR /app
+      ENV PYTHONUNBUFFERED=1 \
+          PYTHONDONTWRITEBYTECODE=1 \
+          PIP_NO_CACHE_DIR=1
+
+      FROM base AS builder
+      COPY requirements.txt .
+      RUN pip install --user -r requirements.txt
+
+      FROM base AS runner
+      COPY --from=builder /root/.local /root/.local
+      ENV PATH=/root/.local/bin:$PATH
+      COPY . .
+      EXPOSE 8000
+      CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0"]
+
+  # Multi-stage Dockerfile (Rust)
+  - trigger: ":dfrust"
+    replace: |
+      FROM rust:1.75-slim AS builder
+      WORKDIR /app
+      COPY Cargo.toml Cargo.lock ./
+      RUN mkdir src && echo 'fn main() {}' > src/main.rs
+      RUN cargo build --release
+      COPY src ./src
+      RUN touch src/main.rs && cargo build --release
+
+      FROM debian:bookworm-slim AS runner
+      RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+      COPY --from=builder /app/target/release/app /usr/local/bin/app
+      EXPOSE 8080
+      CMD ["app"]
+
+  # Docker Compose template
+  - trigger: ":dc"
+    replace: |
+      services:
+        app:
+          build:
+            context: .
+            dockerfile: Dockerfile
+          ports:
+            - "3000:3000"
+          environment:
+            - NODE_ENV=production
+          env_file:
+            - .env
+          depends_on:
+            db:
+              condition: service_healthy
+          restart: unless-stopped
+
+        db:
+          image: postgres:16-alpine
+          environment:
+            POSTGRES_DB: ${DB_NAME:-appdb}
+            POSTGRES_USER: ${DB_USER:-postgres}
+            POSTGRES_PASSWORD: ${DB_PASS:?required}
+          volumes:
+            - pgdata:/var/lib/postgresql/data
+          healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+          restart: unless-stopped
+
+      volumes:
+        pgdata:
+
+  # Kubernetes deployment
+  - trigger: ":k8sdeploy"
+    replace: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: app
+        namespace: default
+        labels:
+          app: app
+      spec:
+        replicas: 3
+        selector:
+          matchLabels:
+            app: app
+        template:
+          metadata:
+            labels:
+              app: app
+          spec:
+            containers:
+              - name: app
+                image: app:latest
+                ports:
+                  - containerPort: 8080
+                resources:
+                  requests:
+                    memory: "64Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "128Mi"
+                    cpu: "500m"
+                livenessProbe:
+                  httpGet:
+                    path: /health
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🔧  CONFIG FILES
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # GitHub Actions workflow
+  - trigger: ":ghaction"
+    replace: |
+      name: CI
+
+      on:
+        push:
+          branches: [main]
+        pull_request:
+          branches: [main]
+
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - name: Setup
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+                cache: 'npm'
+            - run: npm ci
+            - run: npm test
+
+  # ESLint config
+  - trigger: ":eslint"
+    replace: |
+      {
+        "extends": [
+          "eslint:recommended",
+          "plugin:@typescript-eslint/strict",
+          "plugin:@typescript-eslint/stylistic",
+          "prettier"
+        ],
+        "rules": {
+          "no-console": "warn",
+          "@typescript-eslint/no-unused-vars": "error"
+        }
+      }
+
+  # Prettier config
+  - trigger: ":prettier"
+    replace: |
+      {
+        "semi": false,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "tabWidth": 2,
+        "printWidth": 100,
+        "bracketSpacing": true,
+        "arrowParens": "always",
+        "endOfLine": "lf"
+      }
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🔍  REGEX PATTERNS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - trigger: ":rexemail"
+    replace: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+  - trigger: ":rexurl"
+    replace: 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+
+  - trigger: ":rexip4"
+    replace: '^(\d{1,3}\.){3}\d{1,3}$'
+
+  - trigger: ":rexip6"
+    replace: '^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
+
+  - trigger: ":rexuuid"
+    replace: '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+
+  - trigger: ":rexdate"
+    replace: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+
+  - trigger: ":rexhex"
+    replace: '^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$'
+
+  - trigger: ":rexphone"
+    replace: '^\+?[\d\s\-\(\)]{10,}$'
+
+  - trigger: ":rexslug"
+    replace: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+
+  - trigger: ":rexsemver"
+    replace: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  📝  CODE COMMENTS & DOCUMENTATION
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # TODO comment
+  - trigger: ":todo"
+    replace: "# TODO(ash): "
+
+  # FIXME
+  - trigger: ":fixme"
+    replace: "# FIXME(ash): "
+
+  # HACK
+  - trigger: ":hack"
+    replace: "# HACK(ash): "
+
+  # NOTE
+  - trigger: ":note"
+    replace: "# NOTE: "
+
+  # WARN
+  - trigger: ":warn"
+    replace: "# WARN: "
+
+  # Section divider (80 chars)
+  - trigger: ":div80"
+    replace: "# ════════════════════════════════════════════════════════════════════════════════"
+
+  # Section divider (60 chars)
+  - trigger: ":div60"
+    replace: "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # JSDoc block
+  - trigger: ":jsdoc"
+    replace: |
+      /**
+       * Description.
+       *
+       * @param {Type} name - Description
+       * @returns {ReturnType} Description
+       * @throws {ErrorType} When
+       * @example
+       *   const result = funcName(param)
+       */
+
+  # Python docstring
+  - trigger: ":pydoc"
+    replace: |
+      """Short description.
+
+      Args:
+          param: Description.
+
+      Returns:
+          Description.
+
+      Raises:
+          ValueError: When.
+
+      Example:
+          >>> func(param)
+          result
+      """
+
+  # Rust doc comment
+  - trigger: ":rsdoc"
+    replace: |
+      /// Short description.
+      ///
+      /// # Arguments
+      ///
+      /// * `param` - Description
+      ///
+      /// # Returns
+      ///
+      /// Description
+      ///
+      /// # Errors
+      ///
+      /// Returns `Err` when...
+      ///
+      /// # Examples
+      ///
+      /// ```rust
+      /// let result = func(param);
+      /// ```

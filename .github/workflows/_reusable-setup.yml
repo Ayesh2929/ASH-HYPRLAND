@@ -36,5 +36,22 @@ jobs:
           path: /usr/local/bin
           key: ${{ runner.os }}-tools-${{ hashFiles('.github/workflows/*.yml') }}
 
-      - name: "Cache Analytics"
-        run: echo "Cache setup complete. Layer 2 (Docker) handled in build-docker."
+      - name: "📊 Cache Analytics"
+        run: |
+          set -euo pipefail
+          echo "## ⚙️ Cache Status" >> "$GITHUB_STEP_SUMMARY"
+          
+          # Layer 1: npm/pip
+          NPM_SIZE=$(du -sh ~/.npm 2>/dev/null | cut -f1 || echo "0B")
+          PIP_SIZE=$(du -sh ~/.cache/pip 2>/dev/null | cut -f1 || echo "0B")
+          echo "- **npm cache**: $NPM_SIZE" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **pip cache**: $PIP_SIZE" >> "$GITHUB_STEP_SUMMARY"
+          
+          # Layer 4: Tools
+          TOOLS_SIZE=$(du -sh /usr/local/bin 2>/dev/null | cut -f1 || echo "0B")
+          echo "- **Tool Binaries**: $TOOLS_SIZE" >> "$GITHUB_STEP_SUMMARY"
+          
+          # Note on Layer 2
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "ℹ️ *Docker cache (Layer 2) is handled natively by buildx.*" >> "$GITHUB_STEP_SUMMARY"
+          echo "ℹ️ *Nix cache (Layer 3) is handled by Magic Nix Cache.*" >> "$GITHUB_STEP_SUMMARY"

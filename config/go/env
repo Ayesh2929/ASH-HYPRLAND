@@ -1,0 +1,174 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — GO ENVIRONMENT ULTRA                         ║
+# ║  🐹 GOPATH • Proxy • Privacy • Build • CGO • Cross-compile                 ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+#
+# This file is read by `go env` and stored at:
+#   $(go env GOENV)  →  typically ~/.config/go/env
+#
+# Edit with: go env -w KEY=VALUE
+# View all:  go env
+# Reset:     go env -u KEY
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📁  PATHS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Go workspace (GOPATH) — where go install puts binaries
+# Binary dir: $GOPATH/bin  (add to PATH in shell config)
+GOPATH=/home/user/go
+
+# Go cache (module download cache)
+GOMODCACHE=/home/user/go/pkg/mod
+
+# Build cache (faster rebuilds)
+GOCACHE=/home/user/.cache/go/build
+
+# Temp dir for Go tools
+GOTMPDIR=/tmp/go-tmp
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  MODULE PROXY & PRIVACY
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Module proxy — download modules through this proxy
+# Options:
+#   "https://proxy.golang.org,direct"  — official proxy (default)
+#   "https://goproxy.io,direct"        — alternative proxy
+#   "direct"                            — no proxy, direct VCS access
+#   "off"                               — no downloading at all
+#   "https://goproxy.cn,direct"        — China mirror
+GOPROXY=https://proxy.golang.org,direct
+
+# Checksum database — verify module checksums
+# Options:
+#   "sum.golang.org"  — official (default)
+#   "gosum.io"        — alternative
+#   "off"             — disable (NOT recommended)
+GOSUMDB=sum.golang.org
+
+# Don't use checksum DB for these module patterns
+# (useful for private modules)
+GONOSUMDB=*.corp.example.com,*.internal.*
+
+# Don't use proxy for these modules (private)
+GONOPROXY=*.corp.example.com,*.internal.*
+
+# Private modules — bypass proxy & checksum for these
+GOPRIVATE=*.corp.example.com,*.internal.*,github.com/your-private-org/*
+
+# Verifying sumdb — used for go mod verify
+GOSUMDB=sum.golang.org
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🏗️  BUILD SETTINGS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# CGO — C interop
+# "1" = enable CGO (required for some packages like sqlite)
+# "0" = disable CGO (fully static, faster cross-compilation)
+CGO_ENABLED=1
+
+# C compiler for CGO
+CC=gcc
+
+# C++ compiler for CGO
+CXX=g++
+
+# CGO flags — passed to C compiler
+CGO_CFLAGS=-O2 -g
+
+# CGO linker flags
+CGO_LDFLAGS=
+
+# Go toolchain to use (auto | local | download | specific version)
+# "auto"  = use whatever is installed
+# "local" = only use local toolchain
+GOTOOLCHAIN=auto
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎯  TARGET PLATFORM (native)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Default OS & arch (auto-detected, set to override)
+# GOOS=linux
+# GOARCH=amd64
+
+# ARM version (for ARM targets)
+# GOARM=7
+
+# MIPS version
+# GOMIPS=hardfloat
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⚡  PERFORMANCE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# GOMAXPROCS — max OS threads (set at runtime, not here)
+# Set in code: runtime.GOMAXPROCS(runtime.NumCPU())
+
+# Garbage collector target (percentage, default 100)
+# Lower = more GC, less memory; Higher = less GC, more memory
+GOGC=100
+
+# Memory limit for GC (bytes, 0 = no limit)
+# GOMEMLIMIT=4GiB
+
+# Concurrent GC (Go 1.21+)
+# GOEXPERIMENT=concurrent_gc
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔒  SECURITY
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Go vulnerability database URL
+GOVULN_DB=https://vuln.go.dev
+
+# Telemetry (Go 1.23+)
+# "on"  = send telemetry to Google
+# "off" = no telemetry
+GOTELEMETRY=off
+
+# Telemetry directory
+GOTELEMETRYDIR=/home/user/.local/share/go/telemetry
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🧪  TESTING
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Enable race detector by default (slow but catches races)
+# Set in: go test -race ./...
+# GORACE=log_path=/tmp/gorace
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔬  DEBUGGING
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Debugging flags for go build
+# GOFLAGS=-v -x
+
+# Enable debug scheduler tracing
+# GODEBUG=schedtrace=1000,scheddetail=1
+
+# Enable GC tracing
+# GODEBUG=gctrace=1
+
+# Enable memory allocator tracing
+# GODEBUG=allocfreetrace=1
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔧  MISC
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Work directory for Go workspace mode (go work)
+# GOWORK=off  # Disable workspace mode
+# GOWORK=/home/user/projects/go.work  # Use specific workspace file
+
+# Install suffix for go install (for different build tags)
+GOINSECURE=
+
+# Module mode
+# "mod"    = use module-aware mode (default)
+# "vendor" = use vendor directory
+# "off"    = fail if module is needed
+GOFLAGS=-mod=mod

@@ -1,0 +1,525 @@
+/* ╔══════════════════════════════════════════════════════════════════════════════╗
+   ║  🔥 ASH DOTFILES v5.0 OMEGA — FIREFOX USERCONTENT ULTRA                    ║
+   ║  🎨 Theming: about:pages • new tab • reader • native elements               ║
+   ╚══════════════════════════════════════════════════════════════════════════════╝ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  🎨  DESIGN TOKENS — mirrored from userChrome                                 */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+:root {
+  --ash-mauve:    #cba6f7;
+  --ash-red:      #f38ba8;
+  --ash-peach:    #fab387;
+  --ash-yellow:   #f9e2af;
+  --ash-green:    #a6e3a1;
+  --ash-sky:      #89dceb;
+  --ash-blue:     #89b4fa;
+  --ash-lavender: #b4befe;
+  --ash-pink:     #f5c2e7;
+
+  --ash-text:     #cdd6f4;
+  --ash-subtext1: #bac2de;
+  --ash-subtext0: #a6adc8;
+  --ash-overlay2: #9399b2;
+  --ash-overlay1: #7f849c;
+  --ash-overlay0: #6c7086;
+  --ash-surface2: #585b70;
+  --ash-surface1: #45475a;
+  --ash-surface0: #313244;
+  --ash-base:     #1e1e2e;
+  --ash-mantle:   #181825;
+  --ash-crust:    #11111b;
+
+  --ash-accent:      var(--ash-mauve);
+  --ash-accent-dim:  rgba(203, 166, 247, 0.15);
+  --ash-bg:          var(--ash-base);
+  --ash-bg-alt:      var(--ash-mantle);
+  --ash-bg-dark:     var(--ash-crust);
+  --ash-border:      var(--ash-surface0);
+  --ash-fg:          var(--ash-text);
+  --ash-fg-dim:      var(--ash-subtext0);
+
+  --ash-radius:      8px;
+  --ash-radius-lg:   12px;
+  --ash-radius-xl:   16px;
+  --ash-radius-pill: 9999px;
+
+  --ash-shadow:      0 4px 16px rgba(0,0,0,0.5);
+  --ash-shadow-lg:   0 8px 32px rgba(0,0,0,0.6);
+  --ash-dur-norm:    200ms;
+  --ash-ease:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  🌑  GLOBAL DARK MODE — FORCE ALL about:* PAGES                              */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url-prefix("about:") {
+  :root {
+    color-scheme:     dark !important;
+    background-color: var(--ash-base)   !important;
+    color:            var(--ash-fg)     !important;
+  }
+
+  body {
+    background-color: var(--ash-base) !important;
+    color:            var(--ash-fg)   !important;
+  }
+
+  a {
+    color: var(--ash-blue) !important;
+  }
+
+  a:hover {
+    color: var(--ash-lavender) !important;
+  }
+
+  a:visited {
+    color: var(--ash-mauve) !important;
+  }
+
+  /* Form elements */
+  input,
+  textarea,
+  select {
+    background-color: var(--ash-surface0) !important;
+    border:           1px solid var(--ash-border) !important;
+    border-radius:    var(--ash-radius) !important;
+    color:            var(--ash-fg) !important;
+    padding:          4px 8px !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--ash-accent) !important;
+    outline:      none !important;
+    box-shadow:   0 0 0 2px rgba(203, 166, 247, 0.3) !important;
+  }
+
+  button {
+    background-color: var(--ash-surface0) !important;
+    border:           1px solid var(--ash-border) !important;
+    border-radius:    var(--ash-radius) !important;
+    color:            var(--ash-fg) !important;
+    cursor:           pointer !important;
+    padding:          6px 14px !important;
+    transition:       background-color var(--ash-dur-norm) var(--ash-ease) !important;
+  }
+
+  button:hover {
+    background-color: var(--ash-surface1) !important;
+    border-color:     var(--ash-accent) !important;
+  }
+
+  button[primary] {
+    background-color: var(--ash-accent) !important;
+    color:            var(--ash-crust)  !important;
+    border-color:     var(--ash-accent) !important;
+  }
+
+  button[primary]:hover {
+    background-color: #b48ef0 !important;
+  }
+
+  /* Scrollbars */
+  * {
+    scrollbar-color: var(--ash-surface2) var(--ash-mantle) !important;
+    scrollbar-width: thin !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  🏠  ABOUT:BLANK & ABOUT:NEWTAB                                               */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:blank"),
+               url("about:newtab"),
+               url("about:home") {
+
+  :root,
+  body {
+    background-color: var(--ash-base) !important;
+    color:            var(--ash-fg)   !important;
+  }
+
+  /* Hide the activity stream if somehow visible */
+  .activity-stream,
+  .outer-wrapper {
+    background-color: var(--ash-base) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📖  ABOUT:READER                                                             */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url-prefix("about:reader") {
+
+  :root,
+  body {
+    background-color: var(--ash-mantle) !important;
+    color:            var(--ash-fg)     !important;
+    font-family:      "Inter", "Noto Sans", sans-serif !important;
+  }
+
+  .container {
+    background-color: var(--ash-mantle) !important;
+  }
+
+  .reader-content {
+    color: var(--ash-fg) !important;
+  }
+
+  p {
+    color: var(--ash-fg) !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--ash-fg) !important;
+  }
+
+  a {
+    color: var(--ash-accent) !important;
+  }
+
+  /* Reader toolbar */
+  .reader-toolbar,
+  .reader-controls {
+    background-color: var(--ash-crust) !important;
+    border-bottom:    1px solid var(--ash-border) !important;
+  }
+
+  .toolbar button {
+    color:         var(--ash-fg-dim) !important;
+    border-radius: var(--ash-radius) !important;
+    transition:    background-color var(--ash-dur-norm) var(--ash-ease),
+                   color            var(--ash-dur-norm) var(--ash-ease) !important;
+  }
+
+  .toolbar button:hover {
+    background-color: var(--ash-surface0) !important;
+    color:            var(--ash-fg) !important;
+  }
+
+  /* Estimated read time */
+  .reader-estimated-time {
+    color: var(--ash-overlay0) !important;
+    font-size: 0.85em !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📜  ABOUT:ADDONS (Extension Manager)                                         */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:addons") {
+
+  :root {
+    --in-content-page-background:              var(--ash-base)    !important;
+    --in-content-page-color:                   var(--ash-fg)      !important;
+    --in-content-box-background:               var(--ash-mantle)  !important;
+    --in-content-box-background-odd:           var(--ash-mantle)  !important;
+    --in-content-box-background-hover:         var(--ash-surface0)!important;
+    --in-content-box-background-active:        var(--ash-surface1)!important;
+    --in-content-border-hover:                 var(--ash-accent)  !important;
+    --in-content-border-invalid:               var(--ash-red)     !important;
+    --in-content-border-color:                 var(--ash-border)  !important;
+    --in-content-primary-button-background:    var(--ash-accent)  !important;
+    --in-content-primary-button-background-hover: #b48ef0         !important;
+    --in-content-primary-button-text-color:    var(--ash-crust)   !important;
+    --in-content-link-color:                   var(--ash-blue)    !important;
+    --in-content-link-color-hover:             var(--ash-lavender)!important;
+    --in-content-link-color-active:            var(--ash-blue)    !important;
+    --in-content-link-color-visited:           var(--ash-mauve)   !important;
+    --in-content-category-text:                var(--ash-fg-dim)  !important;
+    --in-content-category-text-active:         var(--ash-fg)      !important;
+    --in-content-category-text-selected:       var(--ash-accent)  !important;
+    --in-content-category-text-selected-hover: var(--ash-accent)  !important;
+    --in-content-category-background-hover:    var(--ash-surface0)!important;
+    --in-content-category-background-active:   var(--ash-surface1)!important;
+    --in-content-tab-color:                    var(--ash-fg-dim)  !important;
+    --in-content-table-background:             var(--ash-mantle)  !important;
+    --in-content-table-border-color:           var(--ash-border)  !important;
+    --in-content-table-header-background:      var(--ash-surface0)!important;
+    --in-content-focus-outline-color:          var(--ash-accent)  !important;
+    color-scheme: dark;
+  }
+
+  /* Extension cards */
+  .card {
+    background-color: var(--ash-mantle)  !important;
+    border:           1px solid var(--ash-border) !important;
+    border-radius:    var(--ash-radius-lg) !important;
+    box-shadow:       var(--ash-shadow) !important;
+    transition:       box-shadow var(--ash-dur-norm) var(--ash-ease),
+                      border-color var(--ash-dur-norm) var(--ash-ease) !important;
+  }
+
+  .card:hover {
+    border-color: var(--ash-accent) !important;
+    box-shadow:   var(--ash-shadow-lg) !important;
+  }
+
+  /* Rating stars */
+  .stars[data-score]::before {
+    color: var(--ash-yellow) !important;
+  }
+
+  /* Toggle switches */
+  .toggle-button[pressed] {
+    background-color: var(--ash-green) !important;
+  }
+
+  .toggle-button:not([pressed]) {
+    background-color: var(--ash-surface1) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📄  ABOUT:PREFERENCES (Settings)                                             */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:preferences"),
+               url-prefix("about:preferences#") {
+
+  :root {
+    --in-content-page-background:              var(--ash-base)    !important;
+    --in-content-page-color:                   var(--ash-fg)      !important;
+    --in-content-box-background:               var(--ash-mantle)  !important;
+    --in-content-box-background-hover:         var(--ash-surface0)!important;
+    --in-content-border-color:                 var(--ash-border)  !important;
+    --in-content-primary-button-background:    var(--ash-accent)  !important;
+    --in-content-primary-button-background-hover: #b48ef0         !important;
+    --in-content-primary-button-text-color:    var(--ash-crust)   !important;
+    --in-content-link-color:                   var(--ash-blue)    !important;
+    --in-content-focus-outline-color:          var(--ash-accent)  !important;
+    --in-content-category-text-selected:       var(--ash-accent)  !important;
+    --in-content-category-background-active:   var(--ash-accent-dim)!important;
+    color-scheme: dark;
+  }
+
+  /* Section headers */
+  h2,
+  .header-name {
+    color:          var(--ash-accent) !important;
+    font-size:      1.1em !important;
+    font-weight:    600 !important;
+    margin-bottom:  0.5em !important;
+  }
+
+  /* Groupboxes */
+  groupbox {
+    background-color: var(--ash-mantle) !important;
+    border:           1px solid var(--ash-border) !important;
+    border-radius:    var(--ash-radius-lg) !important;
+    padding:          12px !important;
+    margin-bottom:    12px !important;
+  }
+
+  /* Category sidebar */
+  .category {
+    border-radius: var(--ash-radius) !important;
+  }
+
+  .category[selected] {
+    background-color: var(--ash-accent-dim) !important;
+    color:            var(--ash-accent) !important;
+  }
+
+  /* Search box */
+  #searchInput {
+    border-radius: var(--ash-radius-pill) !important;
+  }
+
+  /* Checkboxes */
+  checkbox .checkbox-check,
+  input[type="checkbox"] {
+    accent-color: var(--ash-accent) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  🛡️  ABOUT:PROTECTIONS (Privacy Report)                                       */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:protections") {
+
+  body {
+    background-color: var(--ash-base) !important;
+    color:            var(--ash-fg)   !important;
+  }
+
+  .card-header {
+    background-color: var(--ash-mantle) !important;
+    border-bottom:    1px solid var(--ash-border) !important;
+  }
+
+  .card-body {
+    background-color: var(--ash-mantle) !important;
+  }
+
+  .stat-number {
+    color: var(--ash-accent) !important;
+  }
+
+  .etp-toggle-on {
+    background-color: var(--ash-green) !important;
+  }
+
+  /* Chart colors */
+  .protection-report-icon {
+    color: var(--ash-accent) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📊  ABOUT:PERFORMANCE                                                        */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:performance") {
+
+  body {
+    background-color: var(--ash-base)   !important;
+    color:            var(--ash-fg)     !important;
+    font-family:      "Inter", system-ui, sans-serif !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width:           100% !important;
+  }
+
+  th {
+    background-color: var(--ash-surface0) !important;
+    color:            var(--ash-accent)   !important;
+    padding:          8px 12px !important;
+    text-align:       left !important;
+    font-weight:      600 !important;
+    border-bottom:    2px solid var(--ash-accent) !important;
+  }
+
+  td {
+    padding:       8px 12px !important;
+    border-bottom: 1px solid var(--ash-border) !important;
+  }
+
+  tr:hover td {
+    background-color: var(--ash-surface0) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📋  ABOUT:DOWNLOADS                                                          */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url("about:downloads") {
+
+  :root {
+    --in-content-page-background: var(--ash-base)    !important;
+    --in-content-page-color:      var(--ash-fg)      !important;
+    --in-content-border-color:    var(--ash-border)  !important;
+    color-scheme: dark;
+  }
+
+  richlistitem {
+    border-radius:    var(--ash-radius) !important;
+    border-bottom:    1px solid var(--ash-border) !important;
+    padding:          8px !important;
+    transition:       background-color var(--ash-dur-norm) var(--ash-ease) !important;
+  }
+
+  richlistitem:hover {
+    background-color: var(--ash-surface0) !important;
+  }
+
+  richlistitem[selected] {
+    background-color: var(--ash-accent-dim) !important;
+  }
+
+  progressmeter,
+  progress {
+    accent-color: var(--ash-accent) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  🌐  NATIVE DARK MODE — ALL WEBSITES                                          */
+/*  Applies native OS color-scheme dark to all sites without their own dark mode */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Native form controls ── */
+@-moz-document url-prefix("") {
+
+  /* Custom scrollbars on all pages */
+  * {
+    scrollbar-color: rgba(88, 91, 112, 0.6) transparent !important;
+    scrollbar-width: thin !important;
+  }
+
+  /* Force focus outline on all sites */
+  :focus-visible {
+    outline:        2px solid rgba(203, 166, 247, 0.8) !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  📺  VIEW-SOURCE PAGES                                                        */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@-moz-document url-prefix("view-source:") {
+
+  body {
+    background-color: var(--ash-base) !important;
+    color:            var(--ash-fg)   !important;
+    font-family:      "JetBrainsMono Nerd Font", "Fira Code", monospace !important;
+    font-size:        13px !important;
+    line-height:      1.6 !important;
+    tab-size:         2 !important;
+  }
+
+  /* Line numbers */
+  .line-number {
+    color:              var(--ash-overlay0) !important;
+    background-color:   var(--ash-mantle) !important;
+    border-right:       1px solid var(--ash-border) !important;
+    padding-right:      12px !important;
+    min-width:          50px !important;
+    user-select:        none !important;
+  }
+
+  /* Syntax — tags */
+  .html-tag,
+  .xml-punctuation {
+    color: var(--ash-red) !important;
+  }
+
+  /* Syntax — attributes */
+  .html-attribute-name {
+    color: var(--ash-pink) !important;
+  }
+
+  /* Syntax — attribute values */
+  .html-attribute-value {
+    color: var(--ash-green) !important;
+  }
+
+  /* Syntax — comments */
+  .html-comment {
+    color:      var(--ash-overlay0) !important;
+    font-style: italic !important;
+  }
+
+  /* Syntax — entity */
+  .html-entity {
+    color: var(--ash-peach) !important;
+  }
+
+  /* Syntax — doctypes */
+  .html-doctype {
+    color:      var(--ash-overlay1) !important;
+    font-style: italic !important;
+  }
+}

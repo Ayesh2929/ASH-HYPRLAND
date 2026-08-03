@@ -1,0 +1,491 @@
+{
+  "$$_comment": "╔══════════════════════════════════════════════════════════╗",
+  "$$_comment2": "║  🔥 ASH DOTFILES v5.0 — OBS GAMING SCENE COLLECTION    ║",
+  "$$_comment3": "╚══════════════════════════════════════════════════════════╝",
+
+  "name": "ASH Gaming Collection",
+  "current_scene": "🎮 Gaming — Full",
+  "current_program_scene": "🎮 Gaming — Full",
+  "current_transition": "Fade",
+  "transition_duration": 300,
+
+  "scene_order": [
+    { "name": "🎮 Gaming — Full" },
+    { "name": "🎮 Gaming — Overlay" },
+    { "name": "🎮 Gaming — Cam Only" },
+    { "name": "📷 Just Chatting" },
+    { "name": "⏸️  BRB — Gaming" },
+    { "name": "🔴 Starting Soon" },
+    { "name": "✅ Stream Ended" }
+  ],
+
+  "groups": [],
+
+  "sources": [
+
+    {
+      "id": "xshm_input",
+      "name": "🖥️ Screen Capture",
+      "versioned_id": "xshm_input",
+      "settings": {
+        "capture_cursor": true,
+        "show_empty_names": false,
+        "show_cursor": true
+      },
+      "mixers": 0,
+      "sync": 0,
+      "volume": 1.0,
+      "balance": 0.5,
+      "enabled": true,
+      "push-to-mute": false,
+      "push-to-mute-delay": 0,
+      "push-to-talk": false,
+      "push-to-talk-delay": 0,
+      "hotkeys": {},
+      "deinterlace_field_order": 0,
+      "deinterlace_mode": 0,
+      "monitoring_type": 0,
+      "private_settings": {}
+    },
+
+    {
+      "id": "pipewire-audio-capture-app",
+      "name": "🔊 Game Audio",
+      "versioned_id": "pipewire-audio-capture-app",
+      "settings": {
+        "client_name": "Game",
+        "stream_type": 0
+      },
+      "mixers": 1,
+      "sync": 0,
+      "volume": 0.85,
+      "balance": 0.5,
+      "enabled": true,
+      "monitoring_type": 0,
+      "filters": [
+        {
+          "id": "compressor_filter",
+          "name": "🎚️ Game Compressor",
+          "settings": {
+            "ratio": 4.0,
+            "threshold": -18.0,
+            "attack_time": 10,
+            "release_time": 300,
+            "output_gain": 0.0,
+            "detector": "peak",
+            "sidechain_source": ""
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "pipewire-audio-capture-app",
+      "name": "🎵 Music (Game BGM)",
+      "versioned_id": "pipewire-audio-capture-app",
+      "settings": {
+        "client_name": "spotify",
+        "stream_type": 0
+      },
+      "mixers": 2,
+      "sync": 0,
+      "volume": 0.30,
+      "balance": 0.5,
+      "enabled": true,
+      "monitoring_type": 0
+    },
+
+    {
+      "id": "pulse_input_capture",
+      "name": "🎙️ Microphone",
+      "versioned_id": "pulse_input_capture",
+      "settings": {
+        "device_id": "default"
+      },
+      "mixers": 1,
+      "sync": 0,
+      "volume": 1.0,
+      "balance": 0.5,
+      "enabled": true,
+      "monitoring_type": 0,
+      "filters": [
+        {
+          "id": "noise_suppress_filter_v2",
+          "name": "🔇 Noise Suppression (RNNoise)",
+          "settings": {
+            "method": "rnnoise"
+          }
+        },
+        {
+          "id": "compressor_filter",
+          "name": "🎚️ Mic Compressor",
+          "settings": {
+            "ratio": 6.0,
+            "threshold": -20.0,
+            "attack_time": 6,
+            "release_time": 200,
+            "output_gain": 3.0,
+            "detector": "RMS",
+            "sidechain_source": ""
+          }
+        },
+        {
+          "id": "limiter_filter",
+          "name": "🔒 Limiter",
+          "settings": {
+            "threshold": -1.0,
+            "release_time": 60
+          }
+        },
+        {
+          "id": "gain_filter",
+          "name": "🔊 Input Gain",
+          "settings": {
+            "db": 5.0
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "v4l2_input",
+      "name": "📷 Webcam",
+      "versioned_id": "v4l2_input",
+      "settings": {
+        "device_id": "/dev/video0",
+        "pixelformat": 1196444237,
+        "standard": 0,
+        "dv_timing": 0,
+        "resolution": 0,
+        "framerate": 0,
+        "color_range": 0,
+        "io": 0,
+        "buffering": 0
+      },
+      "mixers": 0,
+      "sync": 0,
+      "volume": 1.0,
+      "enabled": true,
+      "monitoring_type": 0,
+      "filters": [
+        {
+          "id": "color_filter",
+          "name": "🎨 Color Correction",
+          "settings": {
+            "brightness": 0.0,
+            "contrast": 0.05,
+            "saturation": 0.05,
+            "hue_shift": 0.0,
+            "opacity": 100.0,
+            "color": 16777215,
+            "gamma": 0.0
+          }
+        },
+        {
+          "id": "mask_filter",
+          "name": "⭕ Circle Mask",
+          "settings": {
+            "type": "circle",
+            "color": 4278190080,
+            "opacity": 100.0,
+            "filter_source": "",
+            "stretch": false,
+            "mask_image": ""
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "text_ft2_source_v2",
+      "name": "⏰ Stream Clock",
+      "versioned_id": "text_ft2_source_v2",
+      "settings": {
+        "font": {
+          "face": "JetBrainsMono Nerd Font",
+          "flags": 0,
+          "size": 32,
+          "style": "Bold"
+        },
+        "text": "",
+        "from_file": false,
+        "log_mode": false,
+        "log_lines": 6,
+        "color1": 4292269556,
+        "color2": 4292269556,
+        "outline": false,
+        "drop_shadow": true,
+        "custom_width": 0,
+        "word_wrap": false,
+        "vertical": false,
+        "antialiasing": true
+      },
+      "mixers": 0,
+      "enabled": true
+    },
+
+    {
+      "id": "image_source",
+      "name": "🎨 ASH Overlay Frame",
+      "versioned_id": "image_source",
+      "settings": {
+        "file": "~/Pictures/obs-overlays/gaming-frame.png",
+        "unload": false
+      },
+      "mixers": 0,
+      "enabled": true
+    },
+
+    {
+      "id": "browser_source",
+      "name": "📊 Stats Widget",
+      "versioned_id": "browser_source",
+      "settings": {
+        "url": "http://localhost:7070/stats",
+        "width": 400,
+        "height": 150,
+        "fps": 30,
+        "css": "body { background: transparent !important; overflow: hidden; }",
+        "restart_when_active": false,
+        "shutdown": false,
+        "reroute_audio": false
+      },
+      "mixers": 0,
+      "enabled": true
+    },
+
+    {
+      "id": "browser_source",
+      "name": "🔔 Alerts (StreamElements)",
+      "versioned_id": "browser_source",
+      "settings": {
+        "url": "https://streamelements.com/overlay/",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "css": "body { background: transparent !important; }",
+        "restart_when_active": false,
+        "shutdown": true,
+        "reroute_audio": true
+      },
+      "mixers": 1,
+      "enabled": true
+    }
+  ],
+
+  "scene_collections": [
+    {
+      "name": "🎮 Gaming — Full",
+      "id": "gaming-full",
+      "sources": [
+        {
+          "name": "🔔 Alerts (StreamElements)",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2,
+          "bounds_alignment": 0
+        },
+        {
+          "name": "⏰ Stream Clock",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 30.0,  "y": 30.0   },
+          "bounds":{ "x": 200.0, "y": 50.0   },
+          "bounds_type": 0,
+          "bounds_alignment": 5
+        },
+        {
+          "name": "📊 Stats Widget",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 1500.0, "y": 20.0  },
+          "bounds":{ "x": 400.0,  "y": 150.0 },
+          "bounds_type": 2,
+          "bounds_alignment": 0
+        },
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 1620.0, "y": 780.0 },
+          "bounds":{ "x": 300.0,  "y": 300.0 },
+          "bounds_type": 2,
+          "bounds_alignment": 0,
+          "rot":   0.0,
+          "scale_filter": "lanczos"
+        },
+        {
+          "name": "🎨 ASH Overlay Frame",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2,
+          "bounds_alignment": 0
+        },
+        {
+          "name": "🖥️ Screen Capture",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2,
+          "bounds_alignment": 0
+        }
+      ],
+      "mixers": 0,
+      "sync": 0,
+      "volume": 1.0,
+      "balance": 0.5,
+      "enabled": true
+    },
+
+    {
+      "name": "🎮 Gaming — Overlay",
+      "id": "gaming-overlay",
+      "sources": [
+        {
+          "name": "🔔 Alerts (StreamElements)",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 10.0,  "y": 780.0  },
+          "bounds":{ "x": 300.0, "y": 300.0  },
+          "bounds_type": 2
+        },
+        {
+          "name": "🖥️ Screen Capture",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "🎮 Gaming — Cam Only",
+      "id": "gaming-cam",
+      "sources": [
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "📷 Just Chatting",
+      "id": "just-chatting",
+      "sources": [
+        {
+          "name": "🔔 Alerts (StreamElements)",
+          "visible": true,
+          "locked": true,
+          "pos":   { "x": 0.0,    "y": 0.0    },
+          "bounds":{ "x": 1920.0, "y": 1080.0 },
+          "bounds_type": 2
+        },
+        {
+          "name": "📷 Webcam",
+          "visible": true,
+          "locked": false,
+          "pos":   { "x": 310.0, "y": 90.0   },
+          "bounds":{ "x": 1300.0,"y": 900.0  },
+          "bounds_type": 2
+        }
+      ]
+    },
+
+    {
+      "name": "⏸️  BRB — Gaming",
+      "id": "brb-gaming",
+      "sources": []
+    },
+
+    {
+      "name": "🔴 Starting Soon",
+      "id": "starting-soon",
+      "sources": []
+    },
+
+    {
+      "name": "✅ Stream Ended",
+      "id": "stream-ended",
+      "sources": []
+    }
+  ],
+
+  "transitions": [
+    {
+      "id": "fade_transition",
+      "name": "Fade",
+      "settings": {
+        "color": 4278190080
+      }
+    },
+    {
+      "id": "cut_transition",
+      "name": "Cut",
+      "settings": {}
+    },
+    {
+      "id": "swipe_transition",
+      "name": "Swipe",
+      "settings": {
+        "swipe_dir_right": false
+      }
+    },
+    {
+      "id": "slide_transition",
+      "name": "Slide",
+      "settings": {
+        "slide_dir_right": false
+      }
+    },
+    {
+      "id": "fade_to_color_transition",
+      "name": "Fade to Color",
+      "settings": {
+        "switch_point": 50,
+        "color": 4278190080
+      }
+    },
+    {
+      "id": "luma_wipe_transition",
+      "name": "Luma Wipe",
+      "settings": {
+        "luma_image": ""
+      }
+    }
+  ],
+
+  "settings": {
+    "FPSCommon": 60,
+    "FPSType": 0,
+    "FPSNum": 60,
+    "FPSDen": 1,
+    "BaseCX": 1920,
+    "BaseCY": 1080,
+    "OutputCX": 1920,
+    "OutputCY": 1080,
+    "ScaleType": "lanczos",
+    "ColorFormat": "NV12",
+    "ColorSpace": "709",
+    "ColorRange": "Partial"
+  }
+}
