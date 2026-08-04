@@ -1,4 +1,4 @@
-name: "🚀 ASH Dotfiles — Ultra CI/CD v7.0 SUPERNOVA"
+name: "🚀 ASH Dotfiles — Ultra CI/CD v8.0 HYPERDRIVE"
 
 on:
   push:
@@ -81,8 +81,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
-  ASH_VERSION: "5.0.0-omega"
-  ASH_PIPELINE_VERSION: "3.0.0"
+  ASH_VERSION: "8.0.0-hyperdrive"
+  ASH_PIPELINE_VERSION: "8.0.0"
   ASH_ENV: "ci"
   NODE_VERSION: "22.x"
   PYTHON_VERSION: "3.12"
@@ -106,14 +106,16 @@ env:
   THEMES_DIR: "themes/presets"
 
 permissions:
-  actions: read
-  contents: write
-  deployments: write
-  id-token: write
-  packages: write
-  pages: write
-  pull-requests: write
-  security-events: write
+  actions: write          # cleanup: delete artifacts, cancel runs
+  attestations: write     # compliance: SBOM attestation
+  contents: write         # manifest commit, release
+  deployments: write      # deploy, rollback
+  id-token: write         # OIDC auth, Cosign signing
+  issues: write           # rollback incident creation
+  packages: write         # GHCR publish, Cosign sign
+  pages: write            # GitHub Pages deploy
+  pull-requests: write    # PR comment bot
+  security-events: write  # CodeQL, security scanning
 
 defaults:
   run:
@@ -131,6 +133,14 @@ jobs:
       web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
       api_exists: ${{ needs.intelligence.outputs.api_exists }}
       matrix_languages: ${{ needs.intelligence.outputs.matrix_languages }}
+    secrets: inherit
+
+  compliance:
+    needs: [intelligence, security]
+    uses: ./.github/workflows/_reusable-compliance.yml
+    with:
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
     secrets: inherit
 
   lint:
@@ -167,6 +177,17 @@ jobs:
       has_api: ${{ needs.intelligence.outputs.has_api }}
       web_exists: ${{ needs.intelligence.outputs.web_exists }}
       web_lock_exists: ${{ needs.intelligence.outputs.web_lock_exists }}
+      has_web: ${{ needs.intelligence.outputs.has_web }}
+      run_full: ${{ needs.intelligence.outputs.run_full }}
+    secrets: inherit
+
+  coverage:
+    needs: [intelligence, test]
+    uses: ./.github/workflows/_reusable-coverage.yml
+    with:
+      api_exists: ${{ needs.intelligence.outputs.api_exists }}
+      web_exists: ${{ needs.intelligence.outputs.web_exists }}
+      has_api: ${{ needs.intelligence.outputs.has_api }}
       has_web: ${{ needs.intelligence.outputs.has_web }}
       run_full: ${{ needs.intelligence.outputs.run_full }}
     secrets: inherit
@@ -274,7 +295,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: always()
-    needs: [intelligence, security, lint, screenshots, test, benchmark, build, deploy, install-test, e2e]
+    needs: [intelligence, security, compliance, lint, screenshots, test, coverage, benchmark, build, deploy, install-test, e2e]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -292,6 +313,8 @@ jobs:
           DEPLOY:       ${{ needs.deploy.result }}
           INSTALL_TEST: ${{ needs.install-test.result }}
           E2E:          ${{ needs.e2e.result }}
+          COMPLIANCE:   ${{ needs.compliance.result }}
+          COVERAGE:     ${{ needs.coverage.result }}
           RUN_ID:       ${{ github.run_id }}
           RUN_NUMBER:   ${{ github.run_number }}
           SHA:          ${{ github.sha }}
@@ -312,15 +335,17 @@ jobs:
           }
 
           {
-            echo "## 🚀 ASH Dotfiles CI/CD v7.0 SUPERNOVA — Run #${RUN_NUMBER}"
+            echo "## 🚀 ASH Dotfiles CI/CD v8.0 HYPERDRIVE — Run #${RUN_NUMBER}"
             echo ""
             echo "| Stage | Status |"
             echo "|-------|--------|"
             echo "| 🧠 Intelligence | $(status_emoji "$INTELLIGENCE") $INTELLIGENCE |"
             echo "| 🔒 Security | $(status_emoji "$SECURITY") $SECURITY |"
+            echo "| 📜 Compliance | $(status_emoji "$COMPLIANCE") $COMPLIANCE |"
             echo "| ✅ Lint | $(status_emoji "$LINT") $LINT |"
             echo "| 🖼️ Screenshots | $(status_emoji "$SCREENSHOTS") $SCREENSHOTS |"
             echo "| 🧪 Tests | $(status_emoji "$TEST") $TEST |"
+            echo "| 📊 Coverage | $(status_emoji "$COVERAGE") $COVERAGE |"
             echo "| 📊 Benchmarks | $(status_emoji "$BENCHMARK") $BENCHMARK |"
             echo "| 🏗️ Build | $(status_emoji "$BUILD") $BUILD |"
             echo "| 🚀 Deploy | $(status_emoji "$DEPLOY") $DEPLOY |"
