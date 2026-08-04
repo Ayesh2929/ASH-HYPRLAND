@@ -1,219 +1,265 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  ASH DOTFILES v5.0 OMEGA — CREATE CUSTOM MODE                               ║
+# ║  ASH DOTFILES v5.0 OMEGA — MODE CREATE                                      ║
 # ║  /ash-cli/commands/mode/create.sh                                            ║
 # ║                                                                              ║
-# ║  Create a new custom mode from a balanced template:                          ║
-# ║  • Generates init.sh + config.json + mode.conf                               ║
-# ║  • Validates naming conventions and collisions                               ║
-# ║  • Modes land in ~/.local/share/ash/modes/custom/<name>/                     ║
-# ║  • Registered for 'ash mode list' and 'ash mode <name>'                      ║
+# ║  Interactive custom mode creator:                                            ║
+# ║  • Template-based with full validation                                       ║
+# ║  • Interactive questionnaire for non-expert users                            ║
+# ║  • Generates init.sh, config.json, README.md                                 ║
+# ║  • Validates name, conflicts, schema                                         ║
+# ║  • Optionally inherits from existing mode                                    ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
-#
-# USAGE:
-#   ash mode create --name <mode> [options]
-#
-# OPTIONS:
-#   --name <mode>         Custom mode name (required, lowercase [a-z0-9-])
-#   --description <text>  Short description (shown in list/status)
-#   --icon <glyph>        Nerd Font icon glyph
-#   --overwrite           Replace an existing custom mode
-#   --dry-run             Preview without writing files
-#   --verbose             Show detailed output
-#
-# EXAMPLES:
-#   ash mode create --name deep-work --description "Extreme focus"
-#   ash mode create --name sleepy --overwrite
 
 set -euo pipefail
 
 __create_name=""
-__create_description="Custom mode"
-__create_icon="󰋙 "
-__create_overwrite=false
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 1 — ARGUMENT PARSING
-# ─────────────────────────────────────────────────────────────────────────────
+__create_inherit=""
+__create_interactive=true
+__create_description=""
+__create_icon=""
 
 __create_parse_args() {
     while [[ $# -gt 0 ]]; do
         case "${1}" in
-            --name)
-                [[ -n "${2:-}" ]] || ash_die "--name requires a value"
-                __create_name="${2}"
+            --name|-n)
+                __create_name="${2:?--name requires a value}"
                 shift 2
                 ;;
-            --description)
-                [[ -n "${2:-}" ]] || ash_die "--description requires a value"
-                __create_description="${2}"
+            --inherit|-i)
+                __create_inherit="${2:?--inherit requires a base mode name}"
+                shift 2
+                ;;
+            --description|-d)
+                __create_description="${2:?}"
                 shift 2
                 ;;
             --icon)
-                [[ -n "${2:-}" ]] || ash_die "--icon requires a value"
-                __create_icon="${2}"
+                __create_icon="${2:?}"
                 shift 2
                 ;;
-            --overwrite)    __create_overwrite=true    ; shift ;;
-            --dry-run)      ASH_DRY_RUN=true           ; shift ;;
-            --verbose)      ASH_VERBOSE=true           ; shift ;;
-            --help|-h)
-                printf '\n'
-                printf "${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}"
-                printf "  %s CREATE MODE — Custom Mode Wizard\n" "${MODE_ICONS[default]}"
-                printf "${MODE_COLOR_RESET}\n"
-                printf "  ${COLOR_ASH_MUTED}Create a custom mode from the balanced template.${MODE_COLOR_RESET}\n\n"
-                return 0
-                ;;
-            *)
-                ash_log_warn "Unknown option for create: '${1}'"
-                shift
-                ;;
+            --no-interactive)   __create_interactive=false  ; shift ;;
+            --dry-run)          ASH_DRY_RUN=true            ; shift ;;
+            --verbose)          ASH_VERBOSE=true            ; shift ;;
+            *)                  shift ;;
         esac
     done
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 2 — VALIDATION
-# ─────────────────────────────────────────────────────────────────────────────
+# Interactive name prompt with validation
+__create_prompt_name() {
+    while true; do
+        printf "  ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}Mode name${MODE_COLOR_RESET} "
+        printf "${COLOR_ASH_MUTED}(letters, digits, hyphens only)${MODE_COLOR_RESET}: "
+        read -r __create_name
 
-__create_validate_name() {
-    [[ -n "${__create_name}" ]] || \
-        ash_die "create requires --name <mode>. Run 'ash mode create --help'."
-
-    # Naming convention: lowercase alphanumeric + dashes, no leading digit/dash
-    [[ "${__create_name}" =~ ^[a-z][a-z0-9-]*$ ]] || \
-        ash_die "Invalid mode name '${__create_name}' — use lowercase letters, digits, and dashes."
-
-    # Must not collide with built-in modes
-    local m
-    for m in "${ASH_BUILTIN_MODES[@]}"; do
-        [[ "${m}" == "${__create_name}" ]] && \
-            ash_die "'${__create_name}' is a built-in mode — pick another name."
-    done
-
-    # Existing custom mode requires --overwrite
-    if [[ -d "${ASH_MODE_CUSTOM_DIR}/${__create_name}" ]]; then
-        if [[ "${__create_overwrite}" != "true" ]]; then
-            ash_die "Custom mode '${__create_name}' already exists — use --overwrite to replace it."
+        # Validate
+        if [[ ! "${__create_name}" =~ ^[a-z][a-z0-9-]{2,29}$ ]]; then
+            printf "  ${COLOR_ASH_ERROR}✗${MODE_COLOR_RESET} "
+            printf "Name must be 3–30 chars, lowercase, no spaces.\n"
+            continue
         fi
+
+        # Check conflicts with built-in modes
+        local m
+        for m in "${ASH_BUILTIN_MODES[@]}"; do
+            if [[ "${m}" == "${__create_name}" ]]; then
+                printf "  ${COLOR_ASH_ERROR}✗${MODE_COLOR_RESET} "
+                printf "'%s' conflicts with a built-in mode.\n" "${__create_name}"
+                __create_name=""
+                break
+            fi
+        done
+
+        # Check conflicts with existing custom modes
+        if [[ -d "${ASH_MODE_CUSTOM_DIR}/${__create_name}" ]]; then
+            printf "  ${COLOR_ASH_WARNING}⚠${MODE_COLOR_RESET} "
+            printf "Custom mode '%s' already exists. Overwrite? [y/N] " "${__create_name}"
+            read -r confirm
+            [[ "${confirm,,}" == "y" ]] && break
+            __create_name=""
+            continue
+        fi
+
+        [[ -n "${__create_name}" ]] && break
+    done
+}
+
+# Interactive description prompt
+__create_prompt_description() {
+    printf "  ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}Description${MODE_COLOR_RESET} "
+    printf "${COLOR_ASH_MUTED}(one line)${MODE_COLOR_RESET}: "
+    read -r __create_description
+    __create_description="${__create_description:-Custom ASH mode}"
+}
+
+# Interactive icon prompt
+__create_prompt_icon() {
+    printf "  ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}Icon${MODE_COLOR_RESET} "
+    printf "${COLOR_ASH_MUTED}(Nerd Font glyph or emoji, Enter to skip)${MODE_COLOR_RESET}: "
+    read -r __create_icon
+    __create_icon="${__create_icon:- }"
+}
+
+# Generate the custom mode files
+__create_generate_mode() {
+    local mode_dir="${ASH_MODE_CUSTOM_DIR}/${__create_name}"
+
+    if [[ "${ASH_DRY_RUN}" == "true" ]]; then
+        printf "\n  ${COLOR_ASH_WARNING}${MODE_COLOR_BOLD}[DRY RUN]${MODE_COLOR_RESET} "
+        printf "Would create mode at: ${COLOR_ASH_INFO}%s${MODE_COLOR_RESET}\n\n" \
+            "${mode_dir}"
+        return 0
     fi
-}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 3 — TEMPLATE GENERATION
-# ─────────────────────────────────────────────────────────────────────────────
+    mkdir -p "${mode_dir}"
 
-# Build the settings array variable name: deep-work → __DEEP_WORK_SETTINGS
-__create_array_name() {
-    echo "__$(printf '%s' "${__create_name}" | tr '[:lower:]-' '[:upper:]_')_SETTINGS"
-}
+    # ── Generate init.sh ────────────────────────────────────────────────────
+    # Determine base settings source
+    local inherit_settings=""
+    if [[ -n "${__create_inherit}" ]] && \
+       [[ -f "${__ASH_MODE_DIR}/${__create_inherit}.sh" ]]; then
+        inherit_settings="# Inheriting from: ${__create_inherit}"
+    fi
 
-__create_generate_init() {
-    local array_name
-    array_name="$(__create_array_name)"
-
-    cat > "${ASH_MODE_CUSTOM_DIR}/${__create_name}/init.sh" <<-EOF
+    cat > "${mode_dir}/init.sh" <<-EOF
 	#!/usr/bin/env bash
-	# ASH custom mode: ${__create_name}
-	# Generated by: ash mode create
+	# ═══════════════════════════════════════════════════════════
+	# ASH Custom Mode: ${__create_name}
+	# Created: $(date -u +%Y-%m-%d)
+	# Description: ${__create_description}
+	# ═══════════════════════════════════════════════════════════
+	# ${inherit_settings}
+	#
+	# EDIT THIS FILE to customize your mode settings.
+	# See docs/guides/theming-deep-dive.md for all available keys.
 
 	set -euo pipefail
 
-	__${__create_name}_build_settings() {
-	    declare -gA ${array_name}=(
-	        # ── Hyprland ────────────────────────────────────────────────────────
+	__${__create_name//-/_}_build_settings() {
+	    declare -gA __CUSTOM_SETTINGS=(
+	        # ── Hyprland Compositor ──────────────────────────────────────
 	        [hypr_animations]="true"
 	        [hypr_blur]="true"
 	        [hypr_shadow]="true"
-	        [hypr_rounding]="10"
+	        [hypr_rounding]="12"
 	        [hypr_gaps_in]="5"
 	        [hypr_gaps_out]="10"
 	        [hypr_border_size]="2"
 	        [hypr_vfr]="true"
 
-	        # ── Power ───────────────────────────────────────────────────────────
+	        # ── Power ────────────────────────────────────────────────────
 	        [cpu_governor]="schedutil"
 	        [power_profile]="balanced"
 
-	        # ── Display ─────────────────────────────────────────────────────────
+	        # ── Display ──────────────────────────────────────────────────
 	        [screen_brightness]="80"
-	        [night_light]="false"
 	        [idle_timeout]="300"
-	        [idle_lock_timeout]="600"
 
-	        # ── Notifications ───────────────────────────────────────────────────
+	        # ── Notifications ─────────────────────────────────────────────
 	        [do_not_disturb]="false"
-	        [notification_timeout]="5000"
 
-	        # ── Audio ───────────────────────────────────────────────────────────
-	        [audio_volume]="60"
-	        [noise_cancel]="false"
+	        # ── Audio ─────────────────────────────────────────────────────
+	        [audio_volume]="50"
 
-	        # ── Bar ─────────────────────────────────────────────────────────────
+	        # ── Bar ───────────────────────────────────────────────────────
 	        [waybar_visible]="true"
 	        [waybar_layout]="top-bar"
 
-	        # ── Clipboard ────────────────────────────────────────────────────────
-	        [clipboard_history]="true"
-
-	        # ── Control Keys ────────────────────────────────────────────────────
+	        # ── Metadata ──────────────────────────────────────────────────
 	        [no_notify]="false"
 	        [duration]="null"
+	        [description]="${__create_description}"
 	    )
 	}
 
-	__${__create_name}_build_settings
-	ash_mode_activate "${__create_name}" "${array_name}"
-	EOF
-}
+	ash_custom_mode_main() {
+	    __${__create_name//-/_}_build_settings
+	    ash_mode_activate "${__create_name}" "__CUSTOM_SETTINGS"
+	}
 
-__create_generate_metadata() {
-    cat > "${ASH_MODE_CUSTOM_DIR}/${__create_name}/config.json" <<-EOF
+	ash_custom_mode_main "\$@"
+	EOF
+    chmod +x "${mode_dir}/init.sh"
+
+    # ── Generate config.json ────────────────────────────────────────────────
+    cat > "${mode_dir}/config.json" <<-EOF
 	{
 	  "name": "${__create_name}",
+	  "version": "1.0.0",
 	  "description": "${__create_description}",
 	  "icon": "${__create_icon}",
-	  "built_in": false
+	  "author": "${USER}",
+	  "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+	  "inherits": "${__create_inherit:-null}",
+	  "tags": ["custom"],
+	  "compatibility": {
+	    "ash_version": ">=5.0.0",
+	    "compositor": ["hyprland"]
+	  }
 	}
 	EOF
 
-    # mode.conf — used by ash_mode_validate_name() for custom mode lookup
-    cat > "${ASH_MODE_CUSTOM_DIR}/${__create_name}/mode.conf" <<-EOF
-	# ASH custom mode: ${__create_name}
-	name=${__create_name}
-	description=${__create_description}
-	icon=${__create_icon}
-	EOF
-}
+    # ── Generate README.md ─────────────────────────────────────────────────
+    cat > "${mode_dir}/README.md" <<-EOF
+	# ${__create_icon} ${__create_name^} Mode
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 4 — ENTRY POINT
-# ─────────────────────────────────────────────────────────────────────────────
+	> ${__create_description}
+
+	## Usage
+
+	\`\`\`bash
+	ash mode ${__create_name}
+	ash mode ${__create_name} --duration 2h
+	\`\`\`
+
+	## Customization
+
+	Edit \`init.sh\` to configure mode settings.
+	See the [ASH documentation](https://ash-dotfiles.dev/guides/plugin-development.md)
+	for all available configuration keys.
+
+	## Settings Reference
+
+	| Key | Default | Description |
+	|-----|---------|-------------|
+	| \`hypr_animations\` | true | Enable compositor animations |
+	| \`hypr_blur\` | true | Enable background blur |
+	| \`do_not_disturb\` | false | Silence notifications |
+	| \`cpu_governor\` | schedutil | CPU frequency governor |
+
+	---
+	*Generated by ASH Mode Engine v${ASH_MODE_VERSION}*
+	EOF
+
+    # Success
+    printf "\n"
+    printf "  ${COLOR_ASH_SUCCESS}${MODE_COLOR_BOLD}✓${MODE_COLOR_RESET} "
+    printf "Mode ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}%s${MODE_COLOR_RESET} created!\n" \
+        "${__create_name}"
+    printf "\n"
+    printf "  ${COLOR_ASH_MUTED}Location:${MODE_COLOR_RESET} %s\n" "${mode_dir}"
+    printf "  ${COLOR_ASH_MUTED}Edit:${MODE_COLOR_RESET}     ${COLOR_ASH_INFO}%s/init.sh${MODE_COLOR_RESET}\n" \
+        "${mode_dir}"
+    printf "  ${COLOR_ASH_MUTED}Activate:${MODE_COLOR_RESET} ${COLOR_ASH_INFO}ash mode %s${MODE_COLOR_RESET}\n\n" \
+        "${__create_name}"
+}
 
 ash_create_mode_main() {
     __create_parse_args "$@"
-    __create_validate_name
 
-    local mode_dir="${ASH_MODE_CUSTOM_DIR}/${__create_name}"
-
-    if [[ "${ASH_DRY_RUN}" != "true" ]]; then
-        mkdir -p "${mode_dir}"
-        __create_generate_init
-        __create_generate_metadata
-        chmod +x "${mode_dir}/init.sh"
+    # ── Interactive prompts if name not provided ──────────────────────────────
+    if [[ -z "${__create_name}" ]] && [[ "${__create_interactive}" == "true" ]]; then
+        printf "\n"
+        printf "${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}  ✦ ASH Custom Mode Creator${MODE_COLOR_RESET}\n\n"
+        __create_prompt_name
+        __create_prompt_description
+        __create_prompt_icon
+    elif [[ -z "${__create_name}" ]]; then
+        ash_die "Mode name required. Use --name <name> or run without --no-interactive"
     fi
 
-    if [[ "${ASH_JSON_OUTPUT}" == "true" ]]; then
-        printf '{"status":"success","mode":"%s","path":"%s"}\n' \
-            "${__create_name}" "${mode_dir}"
-    else
-        printf "  ${COLOR_ASH_SUCCESS}${MODE_COLOR_BOLD}✓${MODE_COLOR_RESET} "
-        printf "Custom mode ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}%s${MODE_COLOR_RESET} created\n" \
-            "${__create_name}"
-        printf "  ${COLOR_ASH_MUTED}Activate with: ${COLOR_ASH_INFO}ash mode %s${MODE_COLOR_RESET}\n\n" \
-            "${__create_name}"
-    fi
+    __create_generate_mode
 }
 
 ash_create_mode_main "$@"

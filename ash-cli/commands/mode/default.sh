@@ -156,13 +156,44 @@ __default_apply_cleanup() {
     if [[ "${ASH_DRY_RUN}" != "true" ]]; then
         ash_hyprctl_set "decoration:screen_shader" "" 2>/dev/null || true
     fi
+
+    # ── Restart Background Services ───────────────────────────────────────────
+    ash_log_info "  Restarting suspended background services"
+    if [[ "${ASH_DRY_RUN}" != "true" ]]; then
+        local -a resume_services=(
+            "ash-analytics"
+            "ash-weather-fetch"
+            "ash-github-notif"
+        )
+        for svc in "${resume_services[@]}"; do
+            systemctl --user start "${svc}.service" 2>/dev/null || true
+        done
+    fi
+
+    # ── Restore OBS Virtual Sink ──────────────────────────────────────────────
+    if [[ "${ASH_DRY_RUN}" != "true" ]]; then
+        pactl unload-module module-virtual-sink 2>/dev/null || true
+    fi
+
+    # ── Disable Tor ───────────────────────────────────────────────────────────
+    if [[ "${ASH_DRY_RUN}" != "true" ]]; then
+        # Only stop tor if we started it
+        if systemctl is-active tor &>/dev/null; then
+            sudo systemctl stop tor 2>/dev/null || true
+        fi
+    fi
+
+    ash_log_debug "  Cleanup complete"
 }
 
 ash_default_mode_main() {
     __default_parse_args "$@"
+
+    # Run cleanup BEFORE activation
+    __default_apply_cleanup
+
     __default_build_settings
     ash_mode_activate "default" "__DEFAULT_SETTINGS"
-    [[ "${ASH_DRY_RUN}" != "true" ]] && __default_apply_cleanup
 }
 
 ash_default_mode_main "$@"

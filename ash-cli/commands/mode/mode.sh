@@ -16,9 +16,9 @@
 # USAGE:
 #   ash mode <subcommand> [options]
 #
-# MODES:
-#   game          Activate gaming mode (maximum performance)
-#   work          Activate work mode (productivity optimized)
+# SUBCOMMANDS:
+#   game          Activate gaming mode (max performance)
+#   work          Activate work mode (productivity focused)
 #   focus         Activate focus mode (distraction-free)
 #   cinema        Activate cinema mode (media optimized)
 #   present       Activate presentation mode
@@ -44,9 +44,11 @@ IFS=$'\n\t'
 # SECTION 1 — BOOTSTRAP & DEPENDENCY RESOLUTION
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Resolve the absolute path of the ash-cli root directory
+readonly __ASH_CLI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly __ASH_MODE_DIR="${__ASH_CLI_DIR}/commands/mode"
 readonly __ASH_LIB_DIR="${__ASH_CLI_DIR}/lib"
 readonly __ASH_DATA_DIR="${__ASH_CLI_DIR}/data"
-readonly __ASH_MODE_DIR="${__ASH_CLI_DIR}/commands/mode"
 
 # Source core libraries with existence validation
 __ash_require_lib() {
@@ -146,16 +148,16 @@ declare -A MODE_ACCENT_COLORS=(
 
 # Mode icons (Nerd Font glyphs with Unicode fallbacks)
 declare -A MODE_ICONS=(
-    [game]='󰊴 '        # nf-md-gamepad_variant
-    [work]='󰆓 '        # nf-md-briefcase
-    [focus]='󰄵 '       # nf-md-bullseye
-    [cinema]='󰚺 '      # nf-md-film
-    [present]='󰽕 '     # nf-md-presentation
-    [battery]='󰂃 '     # nf-md-battery_alert
-    [stream]='󰕃 '      # nf-md-broadcast
-    [privacy]='󰦝 '     # nf-md-incognito
-    [accessibility]='󰘶 ' # nf-md-human
-    [default]='󰋙 '     # nf-md-desktop_classic
+    [game]='󰊴'        # nf-md-gamepad_variant
+    [work]='󰃟'        # nf-md-briefcase
+    [focus]='󰓾'       # nf-md-bullseye
+    [cinema]='󰿎'      # nf-md-film
+    [present]='󰐨'     # nf-md-presentation
+    [battery]='󰂎'     # nf-md-battery_alert
+    [stream]='󰕍'      # nf-md-broadcast
+    [privacy]='󰗹'     # nf-md-incognito
+    [accessibility]='󰩗' # nf-md-human
+    [default]='󰍹'     # nf-md-desktop_classic
 )
 
 # Mode descriptors
@@ -466,41 +468,59 @@ ash_mode_acquire_lock() {
 
     while [[ -f "${ASH_MODE_LOCK_FILE}" ]] && [[ "${elapsed}" -lt "${timeout}" ]]; do
         if [[ "${ASH_FORCE}" == "true" ]]; then
-            rm -f "${ASH_MODE_LOCK_FILE}"
+            ash_log_warn "Force flag set — overriding existing mode lock"
             break
         fi
+        ash_log_debug "Waiting for mode lock (${elapsed}s/${timeout}s)..."
         sleep 1
-        (( elapsed += 1 ))
+        (( elapsed++ ))
     done
 
-    if [[ -f "${ASH_MODE_LOCK_FILE}" ]]; then
-        ash_die "Another mode switch is in progress (lock held). Use --force to override."
+    if [[ -f "${ASH_MODE_LOCK_FILE}" ]] && [[ "${ASH_FORCE}" != "true" ]]; then
+        local locked_by
+        locked_by=$(cat "${ASH_MODE_LOCK_FILE}" 2>/dev/null || echo "unknown")
+        ash_die "Mode switch already in progress (PID: ${locked_by}). Use --force to override."
     fi
 
-    mkdir -p "${ASH_RUNTIME_DIR}"
-    touch "${ASH_MODE_LOCK_FILE}"
-    ash_log_debug "Mode lock acquired: ${ASH_MODE_LOCK_FILE}"
+    echo "$$" > "${ASH_MODE_LOCK_FILE}"
+
+    # Automatically release lock on exit/signal
+    trap 'ash_mode_release_lock' EXIT INT TERM HUP
 }
 
-# Release the mode switch lock
+# Release the exclusive lock
 ash_mode_release_lock() {
-    rm -f "${ASH_MODE_LOCK_FILE}" 2>/dev/null || true
-    ash_log_debug "Mode lock released: ${ASH_MODE_LOCK_FILE}"
+    rm -f "${ASH_MODE_LOCK_FILE}"
+    trap - EXIT INT TERM HUP
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 5 — ACTIVATION ENGINE
+# SECTION 5 — CORE MODE ACTIVATION FRAMEWORK
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Activate a mode: apply its settings, persist state, broadcast IPC
-# $2 is the name of the sourced associative settings array (e.g. __GAME_SETTINGS)
+# The central mode activation function.
+# All mode scripts (game.sh, work.sh, etc.) call this with their configuration.
+#
+# Arguments:
+#   $1 - mode name
+#   $2 - associative array name containing mode settings (nameref)
 ash_mode_activate() {
     local mode="${1}"
+    local -n _settings="${2}"   # nameref to associative array
+
+    # ── Validation ──────────────────────────────────────────────────────────
+    ash_mode_validate_name "${mode}"
+
     local current_mode
     current_mode="$(ash_mode_get_current)"
-    local -n _settings="${2}"
 
-    # ── Dry-run Preview ────────────────────────────────────────────────────
+    if [[ "${current_mode}" == "${mode}" ]] && [[ "${ASH_FORCE}" != "true" ]]; then
+        ash_print_info "Mode ${MODE_ICONS[$mode]:-} ${mode} is already active"
+        ash_mode_status_brief
+        return 0
+    fi
+
+    # ── Dry Run ─────────────────────────────────────────────────────────────
     if [[ "${ASH_DRY_RUN}" == "true" ]]; then
         ash_mode_dry_run_preview "${mode}"
         return 0
@@ -522,16 +542,15 @@ ash_mode_activate() {
         ash_mode_print_activation_header "${mode}"
     fi
 
-    # ── Execute Mode Actions ────────────────────────────────────────────────
-    local total_steps="${#_settings[@]}"
-    local step=0
-    local action_key action_value
+    # ── Apply Mode Steps ────────────────────────────────────────────────────
+    local -i step=0
+    local -i total_steps=${#_settings[@]}
 
     for action_key in "${!_settings[@]}"; do
-        (( step += 1 ))
-        action_value="${_settings[${action_key}]}"
+        (( step++ ))
+        local action_value="${_settings[$action_key]}"
 
-        if [[ "${ASH_NO_ANIMATION}" != "true" ]]; then
+        if [[ "${ASH_QUIET}" != "true" ]] && [[ "${ASH_NO_ANIMATION}" != "true" ]]; then
             ash_mode_print_step "${step}" "${total_steps}" "${action_key}" "${action_value}"
         fi
 

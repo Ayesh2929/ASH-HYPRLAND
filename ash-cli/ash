@@ -1,86 +1,946 @@
 #!/usr/bin/env bash
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  ⚡ ASH CLI ENGINE v5.0.0-omega — UNIFIED CONTROL CENTER                      ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                              ║
+# ║   ░█████╗░░██████╗██╗░░██╗  ░█████╗░██╗░░░░░██╗                            ║
+# ║   ██╔══██╗██╔════╝██║░░██║  ██╔══██╗██║░░░░░██║                            ║
+# ║   ███████║╚█████╗░███████║  ██║░░╚═╝██║░░░░░██║                            ║
+# ║   ██╔══██║░╚═══██╗██╔══██║  ██║░░██╗██║░░░░░██║                            ║
+# ║   ██║░░██║██████╔╝██║░░██║  ╚█████╔╝███████╗██║                            ║
+# ║   ╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚══════╝╚═╝                            ║
+# ║                                                                              ║
+# ║   ASH CLI v5.0 OMEGA ULTRA — THE ULTIMATE DOTFILES COMMAND ENGINE           ║
+# ║   Author   : ash-dotfiles                                                    ║
+# ║   License  : MIT                                                             ║
+# ║   Version  : 5.0.0-omega                                                    ║
+# ║                                                                              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
 set -euo pipefail
+IFS=$'\n\t'
 
-readonly ASH_VERSION="5.0.0-omega"
-WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly WORKSPACE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 RUNTIME CONSTANTS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Colors
-C_MAUVE='\033[38;2;203;166;247m'
-C_BLUE='\033[38;2;137;180;250m'
-C_GREEN='\033[38;2;166;227;161m'
-C_RED='\033[38;2;243;139;168m'
-C_YELLOW='\033[38;2;249;226;175m'
-C_RESET='\033[0m'
-C_BOLD='\033[1m'
+declare -gr ASH_VERSION="5.0.0-omega"
+declare -gr ASH_CODENAME="OMEGA ULTRA"
+declare -gr ASH_BUILD_DATE="2025-01-01"
+declare -gr ASH_AUTHOR="ash-dotfiles"
+declare -gr ASH_LICENSE="MIT"
+declare -gr ASH_REPO="https://github.com/ash-dotfiles/ash-dotfiles"
 
-show_help() {
-  echo -e "${C_MAUVE}${C_BOLD}⚡ ASH CLI ENGINE v${ASH_VERSION}${C_RESET}"
-  echo "Usage: ash <command> [args...]"
-  echo ""
-  echo "Commands:"
-  echo "  theme      - Theme engine commands (pick, apply, list, schedule, ai)"
-  echo "  mode       - Switch desktop modes (game, focus, battery, default)"
-  echo "  plugin     - Plugin system (install, remove, enable, disable, list)"
-  echo "  snapshot   - State snapshots (create, restore, diff, list)"
-  echo "  config     - Config manager (get, set, list, edit, reset)"
-  echo "  doctor     - Run system diagnosis and repair"
-  echo "  hw         - Retrieve system hardware reports"
-  echo "  net        - Geolocation, speed tests, and VPN controls"
-  echo "  update     - Perform system and dotfile update processes"
-  echo "  shot       - Take screenshots, screen recordings, or OCR text"
-  echo "  wallpaper  - Manage active wallpaper or download new ones"
-  echo "  backup     - Perform full and daily data backups"
-  echo ""
-  echo "Run 'ash <command> --help' for details on subcommands."
-}
+declare -gr ASH_CLI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+declare -gr ASH_ROOT_DIR="$(cd "${ASH_CLI_DIR}/.." && pwd)"
+declare -gr ASH_LIB_DIR="${ASH_CLI_DIR}/lib"
+declare -gr ASH_CMD_DIR="${ASH_CLI_DIR}/commands"
+declare -gr ASH_ENG_DIR="${ASH_CLI_DIR}/engines"
+declare -gr ASH_DATA_DIR="${ASH_CLI_DIR}/data"
+declare -gr ASH_API_DIR="${ASH_CLI_DIR}/api"
 
-# Ensure sub-scripts run correctly
-delegate() {
-  local cmd="$1"
-  shift
-  local sub_script="${WORKSPACE}/ash-cli/commands/${cmd}/${cmd}.sh"
-  if [[ -f "${sub_script}" ]]; then
-    exec bash "${sub_script}" "$@"
-  else
-    # Fallback to local config script if present
-    local fallback_script="${WORKSPACE}/config/hypr/scripts/${cmd}.sh"
-    if [[ -f "${fallback_script}" ]]; then
-      exec bash "${fallback_script}" "$@"
-    else
-      echo -e "${C_RED}❌ Error: Subcommand handler for '${cmd}' not implemented.${C_RESET}" >&2
-      exit 1
+declare -gr ASH_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/ash"
+declare -gr ASH_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/ash"
+declare -gr ASH_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/ash"
+declare -gr ASH_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/ash"
+declare -gr ASH_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}/ash"
+
+declare -gr ASH_LOG_FILE="${ASH_STATE_HOME}/logs/ash-cli.log"
+declare -gr ASH_PID_FILE="${ASH_RUNTIME_DIR}/ash.pid"
+declare -gr ASH_SOCKET="${ASH_RUNTIME_DIR}/ash.sock"
+declare -gr ASH_LOCK_FILE="${ASH_RUNTIME_DIR}/ash.lock"
+
+declare -gr ASH_THEMES_DIR="${ASH_ROOT_DIR}/themes"
+declare -gr ASH_PLUGINS_DIR="${ASH_ROOT_DIR}/plugins"
+declare -gr ASH_WALLPAPERS_DIR="${ASH_ROOT_DIR}/wallpapers"
+declare -gr ASH_SCRIPTS_DIR="${ASH_ROOT_DIR}/scripts"
+declare -gr ASH_PROFILES_DIR="${ASH_ROOT_DIR}/profiles"
+declare -gr ASH_SNAPSHOTS_DIR="${ASH_DATA_HOME}/snapshots"
+
+declare -gr ASH_USER_CONFIG="${ASH_CONFIG_HOME}/ash.conf"
+declare -gr ASH_USER_THEME="${ASH_CONFIG_HOME}/current-theme.json"
+declare -gr ASH_USER_MODE="${ASH_CONFIG_HOME}/current-mode.json"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 TERMINAL CAPABILITY DETECTION
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+declare -g  ASH_TERM_COLORS=0
+declare -g  ASH_TERM_UNICODE=0
+declare -g  ASH_TERM_TRUECOLOR=0
+declare -g  ASH_TERM_WIDTH=80
+declare -g  ASH_TERM_HEIGHT=24
+
+_ash_detect_terminal() {
+    # Color support
+    if [[ -t 1 ]]; then
+        local ncolors
+        ncolors=$(tput colors 2>/dev/null || echo 0)
+        [[ $ncolors -ge 256 ]] && ASH_TERM_COLORS=256
+        [[ $ncolors -ge 8   ]] && [[ $ASH_TERM_COLORS -eq 0 ]] && ASH_TERM_COLORS=8
     fi
-  fi
+
+    # True color support
+    if [[ "${COLORTERM:-}" =~ ^(truecolor|24bit)$ ]]; then
+        ASH_TERM_TRUECOLOR=1
+        ASH_TERM_COLORS=16777216
+    fi
+
+    # Unicode support
+    if [[ "${LANG:-}${LC_ALL:-}" =~ [Uu][Tt][Ff]-?8 ]]; then
+        ASH_TERM_UNICODE=1
+    fi
+
+    # Terminal dimensions
+    if command -v tput &>/dev/null && [[ -t 1 ]]; then
+        ASH_TERM_WIDTH=$(tput cols  2>/dev/null || echo 80)
+        ASH_TERM_HEIGHT=$(tput lines 2>/dev/null || echo 24)
+    fi
 }
 
-if [[ $# -lt 1 ]]; then
-  show_help
-  exit 0
-fi
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 BOOTSTRAP — LOAD CORE LIBRARIES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-case "$1" in
-  -h|--help|help)
-    show_help
-    exit 0
-    ;;
-  -v|--version|version)
-    echo "ash v${ASH_VERSION}"
-    exit 0
-    ;;
-  theme|mode|plugin|snapshot|config|doctor|hw|net|update|shot|wallpaper|backup)
-    cmd="$1"
-    shift
-    delegate "${cmd}" "$@"
-    ;;
-  *)
-    echo -e "${C_RED}❌ Error: Unknown command '$1'${C_RESET}" >&2
-    show_help
-    exit 1
-    ;;
-esac
+declare -ga ASH_LOADED_LIBS=()
+
+_ash_require_lib() {
+    local lib_name="$1"
+    local lib_file="${ASH_LIB_DIR}/${lib_name}.sh"
+
+    # Prevent double-loading
+    for loaded in "${ASH_LOADED_LIBS[@]:-}"; do
+        [[ "$loaded" == "$lib_name" ]] && return 0
+    done
+
+    if [[ ! -f "$lib_file" ]]; then
+        printf '\033[0;31m[ASH FATAL]\033[0m Library not found: %s\n' "$lib_file" >&2
+        exit 127
+    fi
+
+    # shellcheck source=/dev/null
+    source "$lib_file"
+    ASH_LOADED_LIBS+=("$lib_name")
+}
+
+_ash_bootstrap() {
+    # Ordered library loading — dependencies first
+    local -a core_libs=(
+        "colors"
+        "logger"
+        "utils"
+        "validator"
+        "json-parser"
+        "config-parser"
+        "dependency-checker"
+        "notification"
+        "progress-bar"
+        "spinner"
+        "animation"
+        "table-renderer"
+        "box-renderer"
+        "prompt"
+        "semver"
+        "lockfile"
+        "trap-handler"
+        "cache"
+        "event-bus"
+        "ipc"
+        "http-client"
+        "plugin-loader"
+        "hook-runner"
+        "telemetry"
+        "core"
+    )
+
+    for lib in "${core_libs[@]}"; do
+        _ash_require_lib "$lib"
+    done
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 COMMAND REGISTRY
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+declare -gA ASH_COMMANDS=(
+    # ── Theme ──────────────────────────────────────────────────────────────
+    [theme]="commands/theme/theme.sh|🎨 Manage themes|theme"
+    [t]="commands/theme/theme.sh|🎨 Manage themes (alias)|theme"
+
+    # ── Mode ───────────────────────────────────────────────────────────────
+    [mode]="commands/mode/mode.sh|🎭 Switch desktop modes|mode"
+    [m]="commands/mode/mode.sh|🎭 Switch desktop modes (alias)|mode"
+
+    # ── Plugin ─────────────────────────────────────────────────────────────
+    [plugin]="commands/plugin/plugin.sh|🔌 Manage plugins|plugin"
+    [p]="commands/plugin/plugin.sh|🔌 Manage plugins (alias)|plugin"
+
+    # ── Snapshot ───────────────────────────────────────────────────────────
+    [snapshot]="commands/snapshot/snapshot.sh|📸 Config snapshots|snapshot"
+    [snap]="commands/snapshot/snapshot.sh|📸 Config snapshots (alias)|snapshot"
+
+    # ── Config ─────────────────────────────────────────────────────────────
+    [config]="commands/config/config.sh|⚙️  Configuration management|config"
+    [cfg]="commands/config/config.sh|⚙️  Configuration (alias)|config"
+
+    # ── Doctor ─────────────────────────────────────────────────────────────
+    [doctor]="commands/doctor/doctor.sh|🏥 System health checks|doctor"
+    [dr]="commands/doctor/doctor.sh|🏥 System health (alias)|doctor"
+
+    # ── Hardware ───────────────────────────────────────────────────────────
+    [hw]="commands/hw/hw.sh|🖥️  Hardware information|hw"
+    [hardware]="commands/hw/hw.sh|🖥️  Hardware information|hw"
+
+    # ── Network ────────────────────────────────────────────────────────────
+    [net]="commands/net/net.sh|🌐 Network management|net"
+    [network]="commands/net/net.sh|🌐 Network management|net"
+
+    # ── Update ─────────────────────────────────────────────────────────────
+    [update]="commands/update/update.sh|🔄 Update system components|update"
+    [upd]="commands/update/update.sh|🔄 Update (alias)|update"
+
+    # ── Screenshot ─────────────────────────────────────────────────────────
+    [shot]="commands/shot/shot.sh|📷 Screenshots & recording|shot"
+    [screenshot]="commands/shot/shot.sh|📷 Screenshots & recording|shot"
+
+    # ── Wallpaper ──────────────────────────────────────────────────────────
+    [wallpaper]="commands/wallpaper/wallpaper.sh|🖼️  Wallpaper management|wallpaper"
+    [wp]="commands/wallpaper/wallpaper.sh|🖼️  Wallpaper (alias)|wallpaper"
+
+    # ── Bar ────────────────────────────────────────────────────────────────
+    [bar]="commands/bar/bar.sh|📊 Waybar management|bar"
+
+    # ── Power ──────────────────────────────────────────────────────────────
+    [power]="commands/power/power.sh|⚡ Power management|power"
+    [pw]="commands/power/power.sh|⚡ Power (alias)|power"
+
+    # ── Monitor ────────────────────────────────────────────────────────────
+    [monitor]="commands/monitor/monitor.sh|🖥️  Display management|monitor"
+    [mon]="commands/monitor/monitor.sh|🖥️  Display (alias)|monitor"
+
+    # ── Audio ──────────────────────────────────────────────────────────────
+    [audio]="commands/audio/audio.sh|🔊 Audio management|audio"
+    [aud]="commands/audio/audio.sh|🔊 Audio (alias)|audio"
+
+    # ── Bluetooth ──────────────────────────────────────────────────────────
+    [bluetooth]="commands/bluetooth/bluetooth.sh|📡 Bluetooth management|bluetooth"
+    [bt]="commands/bluetooth/bluetooth.sh|📡 Bluetooth (alias)|bluetooth"
+
+    # ── Window ─────────────────────────────────────────────────────────────
+    [window]="commands/window/window.sh|🪟 Window management|window"
+    [win]="commands/window/window.sh|🪟 Window (alias)|window"
+
+    # ── Workspace ──────────────────────────────────────────────────────────
+    [workspace]="commands/workspace/workspace.sh|🗂️  Workspace management|workspace"
+    [ws]="commands/workspace/workspace.sh|🗂️  Workspace (alias)|workspace"
+
+    # ── Gaming ─────────────────────────────────────────────────────────────
+    [gaming]="commands/gaming/gaming.sh|🎮 Gaming optimizations|gaming"
+    [game]="commands/gaming/gaming.sh|🎮 Gaming (alias)|gaming"
+
+    # ── Backup ─────────────────────────────────────────────────────────────
+    [backup]="commands/backup/backup.sh|💾 Backup management|backup"
+    [bak]="commands/backup/backup.sh|💾 Backup (alias)|backup"
+
+    # ── Analytics ──────────────────────────────────────────────────────────
+    [analytics]="commands/analytics/analytics.sh|📊 Usage analytics|analytics"
+    [stats]="commands/analytics/analytics.sh|📊 Analytics (alias)|analytics"
+
+    # ── Profile ────────────────────────────────────────────────────────────
+    [profile]="commands/profile/profile.sh|👤 Profile management|profile"
+    [prof]="commands/profile/profile.sh|👤 Profile (alias)|profile"
+
+    # ── Cloud ──────────────────────────────────────────────────────────────
+    [cloud]="commands/cloud/cloud.sh|☁️  Cloud sync|cloud"
+
+    # ── Store ──────────────────────────────────────────────────────────────
+    [store]="commands/store/store.sh|🏪 Theme & plugin store|store"
+
+    # ── Session ────────────────────────────────────────────────────────────
+    [session]="commands/session/session.sh|💻 Session management|session"
+    [sess]="commands/session/session.sh|💻 Session (alias)|session"
+
+    # ── AI ─────────────────────────────────────────────────────────────────
+    [ai]="commands/ai/ai.sh|🤖 AI assistant|ai"
+
+    # ── Macro ──────────────────────────────────────────────────────────────
+    [macro]="commands/macro/macro.sh|⌨️  Macro recorder|macro"
+
+    # ── Remote ─────────────────────────────────────────────────────────────
+    [remote]="commands/remote/remote.sh|🌍 Remote management|remote"
+
+    # ── Benchmark ──────────────────────────────────────────────────────────
+    [benchmark]="commands/benchmark/benchmark.sh|⚡ Performance benchmarks|benchmark"
+    [bench]="commands/benchmark/benchmark.sh|⚡ Benchmark (alias)|benchmark"
+
+    # ── Migrate ────────────────────────────────────────────────────────────
+    [migrate]="commands/migrate/migrate.sh|📦 Migrate from other setups|migrate"
+    [mig]="commands/migrate/migrate.sh|📦 Migrate (alias)|migrate"
+)
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 GLOBAL FLAGS & OPTIONS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+declare -g ASH_FLAG_VERBOSE=0
+declare -g ASH_FLAG_QUIET=0
+declare -g ASH_FLAG_DEBUG=0
+declare -g ASH_FLAG_DRY_RUN=0
+declare -g ASH_FLAG_NO_COLOR=0
+declare -g ASH_FLAG_NO_UNICODE=0
+declare -g ASH_FLAG_NO_ANIMATION=0
+declare -g ASH_FLAG_JSON_OUTPUT=0
+declare -g ASH_FLAG_PORCELAIN=0
+declare -g ASH_FLAG_FORCE=0
+declare -g ASH_FLAG_YES=0
+declare -g ASH_FLAG_NO_HOOKS=0
+declare -g ASH_FLAG_NO_NOTIFY=0
+declare -g ASH_FLAG_PROFILE=""
+declare -g ASH_FLAG_LOG_LEVEL="INFO"
+declare -g ASH_FLAG_OUTPUT_FORMAT="text"
+declare -g ASH_FLAG_CONFIG_OVERRIDE=""
+
+_ash_parse_global_flags() {
+    local -a remaining_args=()
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -v|--verbose)
+                ASH_FLAG_VERBOSE=1
+                ASH_FLAG_LOG_LEVEL="DEBUG"
+                shift
+                ;;
+            -q|--quiet)
+                ASH_FLAG_QUIET=1
+                ASH_FLAG_LOG_LEVEL="ERROR"
+                shift
+                ;;
+            -d|--debug)
+                ASH_FLAG_DEBUG=1
+                ASH_FLAG_LOG_LEVEL="TRACE"
+                set -x
+                shift
+                ;;
+            -n|--dry-run)
+                ASH_FLAG_DRY_RUN=1
+                shift
+                ;;
+            --no-color|--no-colour)
+                ASH_FLAG_NO_COLOR=1
+                shift
+                ;;
+            --no-unicode)
+                ASH_FLAG_NO_UNICODE=1
+                shift
+                ;;
+            --no-animation)
+                ASH_FLAG_NO_ANIMATION=1
+                shift
+                ;;
+            --json)
+                ASH_FLAG_JSON_OUTPUT=1
+                ASH_FLAG_OUTPUT_FORMAT="json"
+                shift
+                ;;
+            --porcelain)
+                ASH_FLAG_PORCELAIN=1
+                ASH_FLAG_OUTPUT_FORMAT="porcelain"
+                ASH_FLAG_NO_COLOR=1
+                ASH_FLAG_NO_UNICODE=1
+                ASH_FLAG_NO_ANIMATION=1
+                shift
+                ;;
+            -f|--force)
+                ASH_FLAG_FORCE=1
+                shift
+                ;;
+            -y|--yes)
+                ASH_FLAG_YES=1
+                shift
+                ;;
+            --no-hooks)
+                ASH_FLAG_NO_HOOKS=1
+                shift
+                ;;
+            --no-notify)
+                ASH_FLAG_NO_NOTIFY=1
+                shift
+                ;;
+            --profile=*)
+                ASH_FLAG_PROFILE="${1#*=}"
+                shift
+                ;;
+            --profile)
+                ASH_FLAG_PROFILE="$2"
+                shift 2
+                ;;
+            --config=*)
+                ASH_FLAG_CONFIG_OVERRIDE="${1#*=}"
+                shift
+                ;;
+            --config)
+                ASH_FLAG_CONFIG_OVERRIDE="$2"
+                shift 2
+                ;;
+            --log-level=*)
+                ASH_FLAG_LOG_LEVEL="${1#*=}"
+                shift
+                ;;
+            --)
+                shift
+                remaining_args+=("$@")
+                break
+                ;;
+            -*)
+                # Unknown global flag — pass to subcommand
+                remaining_args+=("$1")
+                shift
+                ;;
+            *)
+                remaining_args+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    # Export remaining args for subcommand consumption
+    ASH_REMAINING_ARGS=("${remaining_args[@]:-}")
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 DISPLAY — BANNER & HELP
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_ash_print_banner() {
+    [[ $ASH_FLAG_QUIET -eq 1 ]] && return 0
+    [[ $ASH_FLAG_PORCELAIN -eq 1 ]] && return 0
+
+    local w="$ASH_TERM_WIDTH"
+
+    if [[ $ASH_TERM_TRUECOLOR -eq 1 ]] && [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+        # True color gradient banner
+        printf '\n'
+        printf '\033[38;2;203;166;247m'  # Mauve
+        cat << 'BANNER'
+   ╔═══════════════════════════════════════════════════════════════════╗
+   ║   ░█████╗░░██████╗██╗░░██╗  ██████╗░░█████╗░████████╗███████╗   ║
+   ║   ██╔══██╗██╔════╝██║░░██║  ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝   ║
+   ║   ███████║╚█████╗░███████║  ██║░░██║██║░░██║░░░██║░░░█████╗░░   ║
+   ║   ██╔══██║░╚═══██╗██╔══██║  ██║░░██║██║░░██║░░░██║░░░██╔══╝░░   ║
+   ║   ██║░░██║██████╔╝██║░░██║  ██████╔╝╚█████╔╝░░░██║░░░██║░░░░░   ║
+   ║   ╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝  ╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░░░░   ║
+   ╠═══════════════════════════════════════════════════════════════════╣
+BANNER
+        printf '\033[38;2;166;227;161m'  # Green
+        printf '   ║  ⚡ v5.0 OMEGA ULTRA  •  THE ULTIMATE DOTFILES COMMAND ENGINE  ║\n'
+        printf '\033[38;2;137;180;250m'  # Blue
+        printf '   ║  🏠 %s\n' "${ASH_REPO}  ║"
+        printf '\033[38;2;203;166;247m'  # Mauve
+        printf '   ╚═══════════════════════════════════════════════════════════════════╝\n'
+        printf '\033[0m\n'
+    elif [[ $ASH_TERM_COLORS -ge 8 ]] && [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+        printf '\n\033[1;35m'
+        printf '   ┌─── ASH DOTFILES v%s OMEGA ULTRA ─────────────────┐\n' "$ASH_VERSION"
+        printf '\033[0;35m'
+        printf '   │  The Ultimate Dotfiles Command Engine              │\n'
+        printf '   └────────────────────────────────────────────────────┘\n'
+        printf '\033[0m\n'
+    else
+        printf '\n  ASH DOTFILES v%s OMEGA ULTRA\n\n' "$ASH_VERSION"
+    fi
+}
+
+_ash_print_help() {
+    _ash_print_banner
+
+    if [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+        local c_header='\033[1;38;2;203;166;247m'   # Bold Mauve
+        local c_cmd='\033[38;2;137;180;250m'         # Blue
+        local c_alias='\033[38;2;116;199;236m'       # Teal
+        local c_desc='\033[38;2;205;214;244m'        # Text
+        local c_section='\033[1;38;2;166;227;161m'   # Bold Green
+        local c_flag='\033[38;2;250;179;135m'        # Peach
+        local c_dim='\033[38;2;108;112;134m'         # Overlay0
+        local c_reset='\033[0m'
+    else
+        local c_header='' c_cmd='' c_alias='' c_desc=''
+        local c_section='' c_flag='' c_dim='' c_reset=''
+    fi
+
+    cat << EOF
+${c_header}USAGE${c_reset}
+   ash [global-flags] <command> [command-flags] [arguments]
+
+${c_section}━━━ COMMANDS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${c_reset}
+
+   ${c_section}🎨  THEMING${c_reset}
+   ${c_cmd}theme${c_reset}   ${c_alias}(t)${c_reset}   ${c_desc}Apply, create, manage, and generate themes${c_reset}
+   ${c_cmd}wp${c_reset}            ${c_desc}Wallpaper management and slideshow${c_reset}
+
+   ${c_section}🎭  DESKTOP MODES${c_reset}
+   ${c_cmd}mode${c_reset}    ${c_alias}(m)${c_reset}   ${c_desc}Switch between desktop modes${c_reset}
+
+   ${c_section}🔌  PLUGINS${c_reset}
+   ${c_cmd}plugin${c_reset}  ${c_alias}(p)${c_reset}   ${c_desc}Install, remove, and manage plugins${c_reset}
+   ${c_cmd}store${c_reset}         ${c_desc}Browse the theme & plugin store${c_reset}
+
+   ${c_section}📸  SYSTEM STATE${c_reset}
+   ${c_cmd}snapshot${c_reset} ${c_alias}(snap)${c_reset} ${c_desc}Create and restore config snapshots${c_reset}
+   ${c_cmd}config${c_reset}  ${c_alias}(cfg)${c_reset}  ${c_desc}Read and write configuration values${c_reset}
+   ${c_cmd}backup${c_reset}  ${c_alias}(bak)${c_reset}  ${c_desc}Full system backup and restore${c_reset}
+
+   ${c_section}🏥  DIAGNOSTICS${c_reset}
+   ${c_cmd}doctor${c_reset}  ${c_alias}(dr)${c_reset}   ${c_desc}System health checks and auto-repair${c_reset}
+   ${c_cmd}hw${c_reset}            ${c_desc}Hardware detection and reporting${c_reset}
+   ${c_cmd}benchmark${c_reset} ${c_alias}(bench)${c_reset} ${c_desc}Performance benchmarking${c_reset}
+
+   ${c_section}🌐  CONNECTIVITY${c_reset}
+   ${c_cmd}net${c_reset}           ${c_desc}Network management (WiFi, VPN, DNS)${c_reset}
+   ${c_cmd}bluetooth${c_reset} ${c_alias}(bt)${c_reset} ${c_desc}Bluetooth device management${c_reset}
+
+   ${c_section}🖥️   DISPLAY & AUDIO${c_reset}
+   ${c_cmd}monitor${c_reset} ${c_alias}(mon)${c_reset}  ${c_desc}Display configuration and layouts${c_reset}
+   ${c_cmd}audio${c_reset}   ${c_alias}(aud)${c_reset}  ${c_desc}Audio device and EQ management${c_reset}
+   ${c_cmd}bar${c_reset}           ${c_desc}Waybar layout and module control${c_reset}
+
+   ${c_section}🪟  WINDOW MANAGEMENT${c_reset}
+   ${c_cmd}window${c_reset}  ${c_alias}(win)${c_reset}  ${c_desc}Focus, move, resize windows${c_reset}
+   ${c_cmd}workspace${c_reset} ${c_alias}(ws)${c_reset} ${c_desc}Workspace switching and layouts${c_reset}
+
+   ${c_section}📷  CAPTURE${c_reset}
+   ${c_cmd}shot${c_reset}          ${c_desc}Screenshots, screen recording, GIF${c_reset}
+
+   ${c_section}⚡  POWER${c_reset}
+   ${c_cmd}power${c_reset}   ${c_alias}(pw)${c_reset}   ${c_desc}Lock, suspend, shutdown, reboot${c_reset}
+   ${c_cmd}gaming${c_reset}  ${c_alias}(game)${c_reset} ${c_desc}Gaming optimizations and MangoHUD${c_reset}
+
+   ${c_section}🤖  AI & AUTOMATION${c_reset}
+   ${c_cmd}ai${c_reset}            ${c_desc}AI assistant, theme generation, chat${c_reset}
+   ${c_cmd}macro${c_reset}         ${c_desc}Record and playback command macros${c_reset}
+
+   ${c_section}👤  PROFILES & SYNC${c_reset}
+   ${c_cmd}profile${c_reset} ${c_alias}(prof)${c_reset} ${c_desc}Switch user profiles${c_reset}
+   ${c_cmd}session${c_reset} ${c_alias}(sess)${c_reset} ${c_desc}Save and restore desktop sessions${c_reset}
+   ${c_cmd}cloud${c_reset}         ${c_desc}Cloud sync for configs and themes${c_reset}
+   ${c_cmd}remote${c_reset}        ${c_desc}Manage remote machines${c_reset}
+
+   ${c_section}📊  UPDATES & STATS${c_reset}
+   ${c_cmd}update${c_reset}  ${c_alias}(upd)${c_reset}  ${c_desc}Update system components and dotfiles${c_reset}
+   ${c_cmd}analytics${c_reset} ${c_alias}(stats)${c_reset} ${c_desc}Usage statistics and insights${c_reset}
+
+   ${c_section}📦  MIGRATION${c_reset}
+   ${c_cmd}migrate${c_reset} ${c_alias}(mig)${c_reset}  ${c_desc}Migrate from HyDE, HyprDots, ML4W${c_reset}
+
+${c_section}━━━ GLOBAL FLAGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${c_reset}
+
+   ${c_flag}-v, --verbose${c_reset}          Enable verbose output
+   ${c_flag}-q, --quiet${c_reset}            Suppress all non-error output
+   ${c_flag}-d, --debug${c_reset}            Enable debug mode (set -x)
+   ${c_flag}-n, --dry-run${c_reset}          Preview actions without executing
+   ${c_flag}-f, --force${c_reset}            Skip confirmation prompts
+   ${c_flag}-y, --yes${c_reset}              Auto-confirm all interactive prompts
+   ${c_flag}    --json${c_reset}             Output in JSON format
+   ${c_flag}    --porcelain${c_reset}        Machine-readable output (no colors)
+   ${c_flag}    --no-color${c_reset}         Disable ANSI color output
+   ${c_flag}    --no-animation${c_reset}     Disable animations and spinners
+   ${c_flag}    --no-hooks${c_reset}         Skip pre/post hook execution
+   ${c_flag}    --no-notify${c_reset}        Disable desktop notifications
+   ${c_flag}    --profile=NAME${c_reset}     Use a specific user profile
+   ${c_flag}    --config=PATH${c_reset}      Override config file path
+   ${c_flag}    --log-level=LVL${c_reset}    Set log level (TRACE/DEBUG/INFO/WARN/ERROR)
+
+${c_section}━━━ EXAMPLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${c_reset}
+
+   ${c_dim}# Apply a theme${c_reset}
+   ash theme apply catppuccin-mocha
+
+   ${c_dim}# Generate AI theme from wallpaper${c_reset}
+   ash theme ai-generate --from-wallpaper ~/Pictures/sunset.jpg
+
+   ${c_dim}# Run health checks with auto-fix${c_reset}
+   ash doctor full --fix
+
+   ${c_dim}# Create a snapshot before major changes${c_reset}
+   ash snapshot create "before-update" --tag stable
+
+   ${c_dim}# Switch to gaming mode${c_reset}
+   ash mode game --apply-theme cyberpunk-2077
+
+   ${c_dim}# Install a plugin from the store${c_reset}
+   ash plugin install pomodoro-plus
+
+   ${c_dim}# Take an annotated screenshot${c_reset}
+   ash shot area --annotate --upload
+
+   ${c_dim}# Export current setup${c_reset}
+   ash backup create --encrypt --cloud
+
+${c_section}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${c_reset}
+
+   ${c_dim}Run 'ash <command> --help' for detailed command documentation.${c_reset}
+   ${c_dim}Documentation: ${ASH_REPO}/docs${c_reset}
+
+EOF
+}
+
+_ash_print_version() {
+    if [[ $ASH_FLAG_JSON_OUTPUT -eq 1 ]]; then
+        printf '{\n'
+        printf '  "version": "%s",\n'    "$ASH_VERSION"
+        printf '  "codename": "%s",\n'   "$ASH_CODENAME"
+        printf '  "build_date": "%s",\n' "$ASH_BUILD_DATE"
+        printf '  "author": "%s",\n'     "$ASH_AUTHOR"
+        printf '  "license": "%s",\n'    "$ASH_LICENSE"
+        printf '  "repo": "%s"\n'        "$ASH_REPO"
+        printf '}\n'
+    else
+        if [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+            printf '\033[1;38;2;203;166;247mASH DOTFILES\033[0m '
+            printf '\033[38;2;166;227;161mv%s\033[0m ' "$ASH_VERSION"
+            printf '\033[38;2;108;112;134m(%s)\033[0m\n' "$ASH_CODENAME"
+            printf '\033[38;2;108;112;134mBuild : %s\033[0m\n' "$ASH_BUILD_DATE"
+            printf '\033[38;2;108;112;134mAuthor: %s\033[0m\n' "$ASH_AUTHOR"
+            printf '\033[38;2;108;112;134mRepo  : %s\033[0m\n' "$ASH_REPO"
+        else
+            printf 'ASH DOTFILES v%s (%s)\n' "$ASH_VERSION" "$ASH_CODENAME"
+            printf 'Build : %s\n' "$ASH_BUILD_DATE"
+            printf 'Author: %s\n' "$ASH_AUTHOR"
+            printf 'Repo  : %s\n' "$ASH_REPO"
+        fi
+    fi
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 RUNTIME ENVIRONMENT SETUP
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_ash_setup_runtime_dirs() {
+    local -a required_dirs=(
+        "$ASH_CONFIG_HOME"
+        "$ASH_DATA_HOME"
+        "$ASH_CACHE_HOME"
+        "$ASH_STATE_HOME"
+        "$ASH_STATE_HOME/logs"
+        "$ASH_RUNTIME_DIR"
+        "$ASH_SNAPSHOTS_DIR"
+        "${ASH_CACHE_HOME}/themes"
+        "${ASH_CACHE_HOME}/wallpapers"
+        "${ASH_CACHE_HOME}/colors"
+        "${ASH_DATA_HOME}/history"
+        "${ASH_DATA_HOME}/favorites"
+    )
+
+    for dir in "${required_dirs[@]}"; do
+        if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir" 2>/dev/null || {
+                printf '\033[0;31m[ASH FATAL]\033[0m Cannot create directory: %s\n' "$dir" >&2
+                exit 1
+            }
+        fi
+    done
+}
+
+_ash_setup_default_config() {
+    [[ -f "$ASH_USER_CONFIG" ]] && return 0
+
+    cat > "$ASH_USER_CONFIG" << EOF
+# ┌─────────────────────────────────────────────────────────────┐
+# │  ASH DOTFILES v${ASH_VERSION} — User Configuration            │
+# │  Generated: $(date -Iseconds)                                │
+# └─────────────────────────────────────────────────────────────┘
+
+[general]
+version         = ${ASH_VERSION}
+profile         = default
+log_level       = INFO
+auto_update     = true
+update_interval = weekly
+telemetry       = false
+
+[theme]
+default         = catppuccin-mocha
+transition      = fade
+transition_dur  = 300
+auto_schedule   = false
+follow_system   = false
+follow_time     = true
+day_theme       = catppuccin-latte
+night_theme     = catppuccin-mocha
+
+[wallpaper]
+backend         = swww
+slideshow       = false
+slideshow_interval = 300
+fit             = fill
+blur_amount     = 0
+
+[animation]
+enabled         = true
+preset          = smooth
+reduce_motion   = false
+
+[notifications]
+enabled         = true
+sounds          = true
+volume_osd      = true
+brightness_osd  = true
+
+[performance]
+mode            = balanced
+hot_reload      = true
+cache_colors    = true
+parallel_apply  = true
+
+[ai]
+enabled         = false
+provider        = ollama
+model           = llava
+
+[cloud]
+enabled         = false
+provider        = none
+
+[privacy]
+analytics       = false
+crash_reports   = false
+EOF
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 COMMAND DISPATCHER
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_ash_dispatch() {
+    local command="${1:-}"
+    shift || true
+    local -a args=("$@")
+
+    # ── Handle empty invocation ──────────────────────────────────────────
+    if [[ -z "$command" ]]; then
+        _ash_print_help
+        return 0
+    fi
+
+    # ── Built-in commands ────────────────────────────────────────────────
+    case "$command" in
+        help|-h|--help)
+            _ash_print_help
+            return 0
+            ;;
+        version|-V|--version)
+            _ash_print_version
+            return 0
+            ;;
+        --completions|completions)
+            local shell="${args[0]:-bash}"
+            local comp_file="${ASH_CMD_DIR}/completion/ash.${shell}"
+            if [[ -f "$comp_file" ]]; then
+                cat "$comp_file"
+            else
+                ash_log_error "No completions available for shell: ${shell}"
+                return 1
+            fi
+            return 0
+            ;;
+    esac
+
+    # ── Lookup command in registry ───────────────────────────────────────
+    local registry_entry="${ASH_COMMANDS[$command]:-}"
+
+    if [[ -z "$registry_entry" ]]; then
+        _ash_handle_unknown_command "$command"
+        return 1
+    fi
+
+    # ── Parse registry entry ─────────────────────────────────────────────
+    local cmd_file desc category
+    IFS='|' read -r cmd_file desc category <<< "$registry_entry"
+
+    local full_cmd_path="${ASH_CLI_DIR}/${cmd_file}"
+
+    if [[ ! -f "$full_cmd_path" ]]; then
+        ash_log_error "Command file not found: ${full_cmd_path}"
+        ash_log_error "This is a bug — please report at: ${ASH_REPO}/issues"
+        return 127
+    fi
+
+    if [[ ! -x "$full_cmd_path" ]]; then
+        chmod +x "$full_cmd_path" 2>/dev/null || {
+            ash_log_error "Cannot execute: ${full_cmd_path}"
+            return 126
+        }
+    fi
+
+    # ── Pre-execution hooks ──────────────────────────────────────────────
+    if [[ $ASH_FLAG_NO_HOOKS -eq 0 ]]; then
+        ash_hook_run "pre_command" \
+            --command="$command" \
+            --args="${args[*]:-}" 2>/dev/null || true
+    fi
+
+    # ── Telemetry (anonymous, opt-in) ────────────────────────────────────
+    ash_telemetry_record_command "$command" 2>/dev/null || true
+
+    # ── Execute command ──────────────────────────────────────────────────
+    local exit_code=0
+
+    if [[ $ASH_FLAG_DRY_RUN -eq 1 ]]; then
+        ash_log_info "[DRY RUN] Would execute: ${cmd_file} ${args[*]:-}"
+    else
+        ASH_CURRENT_COMMAND="$command"
+        # shellcheck source=/dev/null
+        source "$full_cmd_path"
+
+        local cmd_func="ash_cmd_${category//-/_}"
+        if declare -f "$cmd_func" &>/dev/null; then
+            "$cmd_func" "${args[@]:-}" || exit_code=$?
+        else
+            ash_log_error "Command function not found: ${cmd_func}"
+            exit_code=1
+        fi
+    fi
+
+    # ── Post-execution hooks ─────────────────────────────────────────────
+    if [[ $ASH_FLAG_NO_HOOKS -eq 0 ]]; then
+        ash_hook_run "post_command" \
+            --command="$command" \
+            --exit_code="$exit_code" 2>/dev/null || true
+    fi
+
+    return $exit_code
+}
+
+_ash_handle_unknown_command() {
+    local cmd="$1"
+
+    # Fuzzy match — find similar commands
+    local -a suggestions=()
+    local cmd_lower="${cmd,,}"
+
+    for registered_cmd in "${!ASH_COMMANDS[@]}"; do
+        # Simple prefix match or substring match
+        if [[ "$registered_cmd" == "${cmd_lower}"* ]] || \
+           [[ "$registered_cmd" == *"${cmd_lower}"* ]]; then
+            suggestions+=("$registered_cmd")
+        fi
+    done
+
+    if [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+        printf '\n\033[1;31m✗\033[0m Unknown command: \033[1m%s\033[0m\n\n' "$cmd" >&2
+    else
+        printf '\nUnknown command: %s\n\n' "$cmd" >&2
+    fi
+
+    if [[ ${#suggestions[@]} -gt 0 ]]; then
+        printf 'Did you mean:\n' >&2
+        for sug in "${suggestions[@]}"; do
+            local entry="${ASH_COMMANDS[$sug]}"
+            local sug_desc
+            IFS='|' read -r _ sug_desc _ <<< "$entry"
+            if [[ $ASH_FLAG_NO_COLOR -eq 0 ]]; then
+                printf '   \033[38;2;137;180;250m%-15s\033[0m %s\n' "$sug" "$sug_desc" >&2
+            else
+                printf '   %-15s %s\n' "$sug" "$sug_desc" >&2
+            fi
+        done
+        printf '\n' >&2
+    fi
+
+    printf "Run 'ash help' to see all available commands.\n" >&2
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 SIGNAL & TRAP HANDLING
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_ash_cleanup() {
+    local exit_code="${1:-0}"
+
+    # Remove PID file
+    [[ -f "$ASH_PID_FILE" ]] && rm -f "$ASH_PID_FILE" 2>/dev/null || true
+
+    # Release locks
+    [[ -f "$ASH_LOCK_FILE" ]] && rm -f "$ASH_LOCK_FILE" 2>/dev/null || true
+
+    # Clear temp runtime files
+    find "${ASH_RUNTIME_DIR}" -maxdepth 1 -name "ash-tmp-*" \
+        -delete 2>/dev/null || true
+
+    exit "$exit_code"
+}
+
+_ash_setup_traps() {
+    trap '_ash_cleanup $?' EXIT
+    trap '_ash_cleanup 130' INT
+    trap '_ash_cleanup 143' TERM
+    trap '_ash_cleanup 1'   HUP
+
+    # Error trap with context
+    trap '_ash_error_handler $LINENO "$BASH_COMMAND" $?' ERR
+}
+
+_ash_error_handler() {
+    local line="$1"
+    local cmd="$2"
+    local code="${3:-1}"
+
+    # Don't report on intentional exits
+    [[ $code -eq 0 ]] && return 0
+
+    if [[ $ASH_FLAG_DEBUG -eq 1 ]]; then
+        ash_log_debug "Error at line ${line}: '${cmd}' (exit ${code})"
+    fi
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 PID MANAGEMENT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_ash_write_pid() {
+    mkdir -p "$(dirname "$ASH_PID_FILE")" 2>/dev/null || true
+    printf '%d\n' "$$" > "$ASH_PID_FILE" 2>/dev/null || true
+}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 MAIN ENTRY POINT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+main() {
+    # ── Phase 1: Terminal detection ──────────────────────────────────────
+    _ash_detect_terminal
+
+    # ── Phase 2: Parse global flags (before bootstrap) ───────────────────
+    _ash_parse_global_flags "$@"
+    set -- "${ASH_REMAINING_ARGS[@]:-}"
+
+    # ── Phase 3: Apply no-color / no-unicode overrides ───────────────────
+    [[ "${NO_COLOR:-}" != "" ]] && ASH_FLAG_NO_COLOR=1
+    [[ $ASH_TERM_COLORS -eq 0 ]] && ASH_FLAG_NO_COLOR=1
+    [[ $ASH_TERM_UNICODE -eq 0 ]] && ASH_FLAG_NO_UNICODE=1
+
+    # ── Phase 4: Setup runtime environment ───────────────────────────────
+    _ash_setup_runtime_dirs
+    _ash_setup_default_config
+    _ash_setup_traps
+    _ash_write_pid
+
+    # ── Phase 5: Bootstrap core libraries ────────────────────────────────
+    _ash_bootstrap
+
+    # ── Phase 6: Load user configuration ─────────────────────────────────
+    local config_file="${ASH_FLAG_CONFIG_OVERRIDE:-$ASH_USER_CONFIG}"
+    if [[ -f "$config_file" ]]; then
+        ash_config_load "$config_file" 2>/dev/null || true
+    fi
+
+    # ── Phase 7: Load active profile ─────────────────────────────────────
+    local active_profile="${ASH_FLAG_PROFILE:-$(ash_config_get general.profile 2>/dev/null || echo default)}"
+    local profile_config="${ASH_PROFILES_DIR}/${active_profile}/settings.conf"
+    if [[ -f "$profile_config" ]]; then
+        ash_config_load "$profile_config" 2>/dev/null || true
+    fi
+
+    # ── Phase 8: Dispatch command ─────────────────────────────────────────
+    _ash_dispatch "$@"
+}
+
+# ── Invoke main with all arguments ──────────────────────────────────────────
+main "$@"

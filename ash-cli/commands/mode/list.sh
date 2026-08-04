@@ -1,107 +1,99 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  ASH DOTFILES v5.0 OMEGA — MODE LIST                                         ║
-# ║  /ash-cli/commands/mode/list.sh                                               ║
+# ║  ASH DOTFILES v5.0 OMEGA — MODE LIST                                        ║
+# ║  /ash-cli/commands/mode/list.sh                                              ║
 # ║                                                                              ║
-# ║  List all available modes:                                                    ║
-# ║  • Built-in modes with icons and descriptions                                 ║
-# ║  • Custom modes from ~/.local/share/ash/modes/custom                          ║
-# ║  • Active mode highlighted                                                   ║
-# ║  • Formats: table (default), compact, minimal, json                           ║
-# ║  • Regex filter support                                                       ║
+# ║  Display all available modes with rich formatting:                           ║
+# ║  • Built-in modes with descriptions and status                               ║
+# ║  • Custom user modes from ~/.local/share/ash/modes/custom                    ║
+# ║  • Current active mode highlighted                                           ║
+# ║  • JSON output support for scripting                                         ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
-#
-# USAGE:
-#   ash mode list [options]
-#
-# OPTIONS:
-#   --format <table|compact|minimal|json>   Output format
-#   --filter <regex>                        Filter modes by name
-#   --no-custom                             Hide custom modes
-#
-# EXAMPLES:
-#   ash mode list
-#   ash mode list --format json
-#   ash mode list --filter ^b
 
 set -euo pipefail
 
-__list_format="table"
-__list_filter=""
+__list_format="table"   # table|compact|json|minimal
 __list_show_custom=true
+__list_filter=""
 
 __list_parse_args() {
     while [[ $# -gt 0 ]]; do
         case "${1}" in
-            --format)
-                __list_format="${2:?--format requires a value}"
+            --json)             __list_format="json"    ; ASH_JSON_OUTPUT=true ; shift ;;
+            --compact)          __list_format="compact"  ; shift ;;
+            --minimal)          __list_format="minimal"  ; shift ;;
+            --no-custom)        __list_show_custom=false ; shift ;;
+            --filter|-f)
+                __list_filter="${2:?}"
                 shift 2
                 ;;
-            --filter)
-                __list_filter="${2:?--filter requires a value}"
-                shift 2
-                ;;
-            --no-custom)    __list_show_custom=false  ; shift ;;
-            --json)         __list_format="json"      ; shift ;;
-            --compact)      __list_format="compact"   ; shift ;;
-            --minimal)      __list_format="minimal"   ; shift ;;
-            --verbose)      ASH_VERBOSE=true          ; shift ;;
-            --help|-h)
-                printf "  ${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}%s MODE LIST${MODE_COLOR_RESET}\n" \
-                    "${MODE_ICONS[default]}"
-                printf "  ${COLOR_ASH_MUTED}List available modes (built-in + custom)${MODE_COLOR_RESET}\n"
-                return 0
-                ;;
-            *)              shift ;;
+            --verbose)          ASH_VERBOSE=true         ; shift ;;
+            *)                  shift ;;
         esac
     done
 }
 
-# Render the human-readable table
+# Render table format
 __list_render_table() {
     local current_mode
     current_mode="$(ash_mode_get_current)"
 
-    printf '\n'
-    printf "  ${COLOR_ASH_SECONDARY}${MODE_COLOR_BOLD}Built-in Modes${MODE_COLOR_RESET}\n"
-    printf "  %s\n" "$(printf '─%.0s' $(seq 1 40))"
+    local term_width
+    term_width=$(tput cols 2>/dev/null || echo 80)
+    local box_width=$(( term_width < 88 ? term_width - 4 : 84 ))
 
+    printf '\n'
+
+    # ── Header ───────────────────────────────────────────────────────────────
+    printf "${COLOR_ASH_PRIMARY}${MODE_COLOR_BOLD}"
+    printf "  %-6s  %-20s  %-42s  %s\n" \
+        "ICON" "MODE" "DESCRIPTION" "STATUS"
+    printf "  %s\n" "$(printf '─%.0s' $(seq 1 $(( box_width - 2 ))))"
+    printf "${MODE_COLOR_RESET}"
+
+    # ── Built-in Modes ────────────────────────────────────────────────────────
     for mode in "${ASH_BUILTIN_MODES[@]}"; do
         # Apply filter
         if [[ -n "${__list_filter}" ]]; then
             [[ "${mode}" =~ ${__list_filter} ]] || continue
         fi
 
+        local icon="${MODE_ICONS[$mode]:-  }"
+        local accent="${MODE_ACCENT_COLORS[$mode]:-${COLOR_ASH_TEXT}}"
         local desc="${MODE_DESCRIPTIONS[$mode]:-}"
-
-        local desc_short="${desc:0:40}"
-        [[ "${#desc}" -gt 40 ]] && desc_short="${desc_short}…"
-
         local status=""
         local status_color="${COLOR_ASH_MUTED}"
-        [[ "${mode}" == "${current_mode}" ]] && {
+
+        # Truncate description
+        local desc_short
+        desc_short="${desc:0:40}"
+        [[ "${#desc}" -gt 40 ]] && desc_short="${desc_short}…"
+
+        # Mark current mode
+        if [[ "${mode}" == "${current_mode}" ]]; then
             status="● active"
             status_color="${COLOR_ASH_SUCCESS}"
-        }
+        fi
 
-        printf "  ${MODE_ACCENT_COLORS[$mode]:-${COLOR_ASH_PRIMARY}}${MODE_COLOR_BOLD}%-6s${MODE_COLOR_RESET}  " \
-            "${MODE_ICONS[$mode]:-󰋙 }"
-        printf "${MODE_ACCENT_COLORS[$mode]:-${COLOR_ASH_PRIMARY}}%-20s${MODE_COLOR_RESET}  " "${mode}"
+        printf "  ${accent}${MODE_COLOR_BOLD}%-6s${MODE_COLOR_RESET}  " "${icon}"
+        printf "${accent}${MODE_COLOR_BOLD}%-20s${MODE_COLOR_RESET}  " "${mode}"
         printf "${COLOR_ASH_MUTED}%-42s${MODE_COLOR_RESET}  " "${desc_short}"
         printf "${status_color}%s${MODE_COLOR_RESET}\n" "${status}"
     done
 
-    # ── Custom Modes ─────────────────────────────────────────────────────────
-    if [[ "${__list_show_custom}" == "true" ]]; then
+    # ── Custom Modes ──────────────────────────────────────────────────────────
+    if [[ "${__list_show_custom}" == "true" ]] && \
+       [[ -d "${ASH_MODE_CUSTOM_DIR}" ]]; then
         local -a custom_modes=()
-        if [[ -d "${ASH_MODE_CUSTOM_DIR}" ]]; then
-            while IFS= read -r -d '' dir; do
-                [[ -f "${dir}/init.sh" ]] && custom_modes+=("$(basename "${dir}")")
-            done < <(find "${ASH_MODE_CUSTOM_DIR}" -maxdepth 1 -mindepth 1 \
-                -type d -print0 2>/dev/null)
-        fi
+        while IFS= read -r -d '' dir; do
+            local name
+            name="$(basename "${dir}")"
+            [[ -f "${dir}/init.sh" ]] && custom_modes+=("${name}")
+        done < <(find "${ASH_MODE_CUSTOM_DIR}" -maxdepth 1 -mindepth 1 \
+            -type d -print0 2>/dev/null)
 
-        if [[ ${#custom_modes[@]} -gt 0 ]]; then
+        if [[ "${#custom_modes[@]}" -gt 0 ]]; then
+            printf '\n'
             printf "  ${COLOR_ASH_SECONDARY}${MODE_COLOR_BOLD}Custom Modes${MODE_COLOR_RESET}\n"
             printf "  %s\n" "$(printf '─%.0s' $(seq 1 40))"
 
@@ -114,13 +106,13 @@ __list_render_table() {
                 # Read config.json for metadata
                 local config_file="${ASH_MODE_CUSTOM_DIR}/${name}/config.json"
                 local custom_desc="Custom mode"
-                local custom_icon="󰋙 "
+                local custom_icon=" "
 
                 if [[ -f "${config_file}" ]]; then
                     custom_desc=$(ash_json_get "${config_file}" ".description" \
                         2>/dev/null || echo "Custom mode")
                     custom_icon=$(ash_json_get "${config_file}" ".icon" \
-                        2>/dev/null || echo "󰋙 ")
+                        2>/dev/null || echo " ")
                 fi
 
                 local desc_short="${custom_desc:0:40}"

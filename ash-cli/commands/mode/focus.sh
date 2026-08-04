@@ -1,45 +1,38 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  ASH DOTFILES v5.0 OMEGA — FOCUS MODE                                        ║
-# ║  /ash-cli/commands/mode/focus.sh                                              ║
+# ║  ASH DOTFILES v5.0 OMEGA — FOCUS MODE                                       ║
+# ║  /ash-cli/commands/mode/focus.sh                                             ║
 # ║                                                                              ║
-# ║  Distraction-free deep work environment:                                     ║
-# ║  • All notifications silenced                                                 ║
-# ║  • Pomodoro timer integration                                                 ║
-# ║  • Warm color temperature for long sessions                                   ║
-# ║  • Waybar hidden for clean desktop                                            ║
-# ║  • Strict mode blocks distraction websites                                    ║
-# ║  • Ambient sound support                                                      ║
+# ║  Deep work / distraction-free environment:                                   ║
+# ║  • All notifications silenced                                                ║
+# ║  • Waybar hidden (clean desktop)                                             ║
+# ║  • Minimal compositor effects                                                ║
+# ║  • Pomodoro timer integration                                                ║
+# ║  • Communication apps window-ruled to scratchpad                             ║
+# ║  • Calming color temperature                                                 ║
+# ║  • Optional ambient sounds                                                   ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 #
 # USAGE:
 #   ash mode focus [options]
 #
 # OPTIONS:
-#   --duration <time>     Auto-revert after time (e.g. 90m)
-#   --pomodoro            Start a pomodoro work session
-#   --ambient <name>      Play ambient sound (rain, ...)
-#   --strict              Block distraction websites via /etc/hosts
-#   --no-notify           Skip desktop notification
-#   --no-animation        Skip transition animation
-#   --dry-run             Preview without applying
-#   --verbose             Show detailed output
-#
-# EXAMPLES:
-#   ash mode focus
-#   ash mode focus --duration 90m
-#   ash mode focus --pomodoro --ambient rain
+#   --duration <time>     Auto-revert (e.g. 90m)
+#   --pomodoro [min]      Start Pomodoro (default: 25m work / 5m break)
+#   --ambient <sound>     Play ambient sound (rain|forest|cafe|white)
+#   --no-bar              Hide Waybar completely (default: hide)
+#   --strict              Block distracting websites via /etc/hosts
 
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 1 — ARGUMENT PARSING
+# ARGUMENT PARSING
 # ─────────────────────────────────────────────────────────────────────────────
 
 __focus_duration=""
 __focus_no_notify=false
-__focus_pomodoro=false
-__focus_pomodoro_duration="25"
+__focus_pomodoro=true         # Default: start Pomodoro
+__focus_pomodoro_duration=25  # minutes
 __focus_ambient=""
 __focus_strict=false
 
@@ -47,40 +40,46 @@ __focus_parse_args() {
     while [[ $# -gt 0 ]]; do
         case "${1}" in
             --duration)
-                [[ -n "${2:-}" ]] || ash_die "--duration requires a value (e.g. 90m)"
-                __focus_duration="${2}"
+                __focus_duration="${2:?--duration requires a value}"
                 shift 2
                 ;;
-            --pomodoro)         __focus_pomodoro=true            ; shift ;;
-            --ambient)
-                [[ -n "${2:-}" ]] || ash_die "--ambient requires a value"
-                __focus_ambient="${2}"
-                shift 2
-                ;;
-            --strict)           __focus_strict=true              ; shift ;;
-            --no-notify)        __focus_no_notify=true           ; shift ;;
-            --dry-run)          ASH_DRY_RUN=true                 ; shift ;;
-            --verbose)          ASH_VERBOSE=true                 ; shift ;;
-            --no-animation)     ASH_NO_ANIMATION=true            ; shift ;;
-            --help|-h)
-                printf '\n'
-                printf "${MODE_ACCENT_COLORS[focus]}${MODE_COLOR_BOLD}"
-                printf "  %s FOCUS MODE — Distraction-Free Deep Work\n" "${MODE_ICONS[focus]}"
-                printf "${MODE_COLOR_RESET}\n"
-                printf "  ${COLOR_ASH_TEXT}%s${MODE_COLOR_RESET}\n\n" \
-                    "${MODE_DESCRIPTIONS[focus]}"
-                return 0
-                ;;
-            *)
-                ash_log_warn "Unknown option for focus mode: '${1}'"
+            --pomodoro)
+                __focus_pomodoro=true
+                # Optional: --pomodoro 50 (for 50-minute sessions)
+                if [[ "${2:-}" =~ ^[0-9]+$ ]]; then
+                    __focus_pomodoro_duration="${2}"
+                    shift
+                fi
                 shift
                 ;;
+            --no-pomodoro)  __focus_pomodoro=false      ; shift ;;
+            --ambient)
+                __focus_ambient="${2:?--ambient requires a sound name}"
+                shift 2
+                ;;
+            --strict)       __focus_strict=true         ; shift ;;
+            --no-notify)    __focus_no_notify=true      ; shift ;;
+            --dry-run)      ASH_DRY_RUN=true            ; shift ;;
+            --verbose)      ASH_VERBOSE=true            ; shift ;;
+            --help|-h)      ash_focus_help; return 0    ;;
+            *)              shift ;;
         esac
     done
 }
 
+ash_focus_help() {
+    printf '\n'
+    printf "${MODE_ACCENT_COLORS[focus]}${MODE_COLOR_BOLD}  %s FOCUS MODE${MODE_COLOR_RESET}\n\n" \
+        "${MODE_ICONS[focus]}"
+    printf "  ${COLOR_ASH_MUTED}%s${MODE_COLOR_RESET}\n\n" \
+        "${MODE_DESCRIPTIONS[focus]}"
+    printf "  ${COLOR_ASH_SECONDARY}${MODE_COLOR_BOLD}TIP:${MODE_COLOR_RESET} "
+    printf "${COLOR_ASH_TEXT}Use 'ash mode focus --duration 90m --pomodoro 45' "
+    printf "for deep work sessions.${MODE_COLOR_RESET}\n\n"
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 2 — MODE CONFIGURATION
+# MODE CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
 __focus_build_settings() {
@@ -152,7 +151,7 @@ __focus_apply_extras() {
                     rain)
                         mpv --loop=inf --volume=40 --no-video \
                             "https://myinstants.com/media/sounds/rain.mp3" \
-                            &>/dev/null || true &
+                            &>/dev/null & || true
                         ;;
                     *)
                         ash_log_warn "Unknown ambient sound: ${__focus_ambient}"

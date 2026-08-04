@@ -241,10 +241,16 @@ __game_apply_extras() {
 # ─────────────────────────────────────────────────────────────────────────────
 
 ash_game_mode_main() {
+    # Parse this mode's specific arguments
     __game_parse_args "$@"
+
+    # Build the settings table
     __game_build_settings
+
+    # Activate via the central framework in mode.sh
     ash_mode_activate "game" "__GAME_SETTINGS"
 
+    # Apply game-specific extras not covered by the generic framework
     if [[ "${ASH_DRY_RUN}" != "true" ]]; then
         __game_apply_extras
     fi
