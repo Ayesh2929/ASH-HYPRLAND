@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH'S HYPRLAND DOTFILES v3.0 — MASTER INSTALLER                   ║
+# ║           ASH'S HYPRLAND DOTFILES v5.0 OMEGA — MASTER INSTALLER             ║
 # ║           Epic Production-Ready Wayland Desktop Environment                  ║
-# ║           Author: Ash | License: MIT | Version: 3.0.0                       ║
+# ║           Author: Ash | License: MIT | Version: 5.0.0-omega                 ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 #
 # 🚀 USAGE: bash install.sh [--phase N] [--skip-packages] [--force] [--dry-run]
@@ -65,7 +65,7 @@ readonly BG_WHITE='\033[47m'
 # ═══════════════════════════════════════════════════════════════════════════════
 # 📌 CONSTANTS & CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
-readonly DOTFILES_VERSION="3.0.0"
+readonly DOTFILES_VERSION="5.0.0-omega"
 readonly DOTFILES_NAME="ASH Hyprland Dotfiles"
 readonly DOTFILES_DIR="${HOME}/.dotfiles"
 readonly CONFIG_DIR="${HOME}/.config"
@@ -78,7 +78,7 @@ readonly BACKUP_DIR="${HOME}/.local/share/ash-dots/backups"
 readonly WALLPAPER_DIR="${HOME}/Pictures/Wallpapers"
 
 # GitHub repository
-readonly REPO_URL="https://github.com/yourusername/ash-dots"
+readonly REPO_URL="https://github.com/Ayesh2929/ASH-HYPRLAND"
 readonly REPO_BRANCH="main"
 
 # Timing
@@ -228,7 +228,7 @@ print_banner() {
     ║    ██║░░██║██████╔╝██║░░██║    ██████╔╝╚█████╔╝░░░██║░░░███████║            ║
     ║    ╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝    ╚═════╝░░╚════╝░░░░╚═╝░░░╚══════╝            ║
     ║                                                                               ║
-    ║          🚀 HYPRLAND DOTFILES v3.0 — EPIC PRODUCTION INSTALLER 🚀          ║
+    ║          🚀 HYPRLAND DOTFILES v5.0 OMEGA — EPIC PRODUCTION INSTALLER 🚀    ║
     ║                                                                               ║
     ║    ✨ Dynamic Theme Engine  •  50+ Waybar Modules  •  Cinematic Animations  ║
     ║    🎨 Wallpaper-Driven Colors  •  60+ Health Checks  •  Zero-Bug System     ║
@@ -1046,7 +1046,7 @@ setup_gpu_env() {
 create_user_overrides() {
     cat > "${CONFIG_DIR}/hypr/UserOverrides/user.conf" << 'EOF'
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH DOTFILES v3.0 — USER OVERRIDES                                 ║
+# ║           ASH DOTFILES v5.0 OMEGA — USER OVERRIDES                           ║
 # ║                                                                               ║
 # ║   🎯 PUT ALL YOUR PERSONAL CUSTOMIZATIONS HERE                               ║
 # ║   This file is NOT tracked by git — it survives all updates                  ║
@@ -1674,7 +1674,7 @@ main() {
     echo ""
     echo -e "${BOLD}${BMAGENTA}"
     echo "  ╔═══════════════════════════════════════════════════════════════════╗"
-    echo "  ║     🎉  ASH DOTFILES v3.0 — INSTALLATION COMPLETE  🎉           ║"
+    echo "  ║     🎉  ASH DOTFILES v5.0 OMEGA — INSTALLATION COMPLETE  🎉     ║"
     echo "  ║                                                                   ║"
     echo "  ║     Thank you for using ASH Dotfiles!                            ║"
     echo "  ║     Your epic Hyprland desktop is ready to launch.              ║"

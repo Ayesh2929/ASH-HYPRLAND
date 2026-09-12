@@ -3,14 +3,14 @@
 <div align="center">
 
 <!-- ANIMATED HEADER WITH CUSTOM GRADIENT -->
-<img src="https://capsule-render.vercel.app/api?type=venom&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=300&section=header&text=ASH%20DOTFILES&fontSize=90&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=⚡%20v3.0%20ULTRA%20•%20Next-Gen%20Hyprland%20Desktop%20Environment&descAlignY=55&descAlign=50&descSize=18&stroke=ffffff&strokeWidth=1" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:7c3aed,25:6d28d9,50:4f46e5,75:2563eb,100:0ea5e9&height=300&section=header&text=ASH%20DOTFILES&fontSize=90&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=⚡%20v5.0%20OMEGA%20•%20Next-Gen%20Hyprland%20Desktop%20Environment&descAlignY=55&descAlign=50&descSize=18&stroke=ffffff&strokeWidth=1" width="100%"/>
 
 <!-- PREMIUM BADGES WITH GLOW EFFECT -->
 <p>
-  <a href="#-install"><img src="https://img.shields.io/badge/⚡_VERSION-3.0_ULTRA-7c3aed?style=for-the-badge&labelColor=1a1a2e&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEzIDNoLTJ2MTBoLTN2Mmg4di0yaC0zeiIvPjwvc3ZnPg=="/></a>
+  <a href="#-install"><img src="https://img.shields.io/badge/⚡_VERSION-5.0_OMEGA-7c3aed?style=for-the-badge&labelColor=1a1a2e&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEzIDNoLTJ2MTBoLTN2Mmg4di0yaC0zeiIvPjwvc3ZnPg=="/></a>
   <a href="#-features"><img src="https://img.shields.io/badge/HYPRLAND-0.44+-2563eb?style=for-the-badge&labelColor=1a1a2e&logo=wayland&logoColor=white"/></a>
-  <a href="#-stats"><img src="https://img.shields.io/badge/FILES-271_PRODUCTION-059669?style=for-the-badge&labelColor=1a1a2e&logo=files&logoColor=white"/></a>
-  <a href="#-stats"><img src="https://img.shields.io/badge/LINES-85K+-d97706?style=for-the-badge&labelColor=1a1a2e&logo=codacy&logoColor=white"/></a>
+  <a href="#-stats"><img src="https://img.shields.io/badge/FILES-2631_TOTAL-059669?style=for-the-badge&labelColor=1a1a2e&logo=files&logoColor=white"/></a>
+  <a href="#-stats"><img src="https://img.shields.io/badge/LINES-778K+-d97706?style=for-the-badge&labelColor=1a1a2e&logo=codacy&logoColor=white"/></a>
 </p>
 
 <p>
@@ -25,7 +25,7 @@
 <br/>
 
 <a href="#-features">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=28&duration=2500&pause=800&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=120&lines=🎨+Wallpaper-Driven+Infinite+Themes;⚡+50%2B+CLI+Commands+%7C+Beats+HyDE;🚀+271+Files+%7C+Zero+Bugs+%7C+Production+Ready;🏆+The+Most+Complete+Hyprland+Setup" alt="Typing SVG"/>
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=28&duration=2500&pause=800&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=120&lines=🎨+Wallpaper-Driven+Infinite+Themes;⚡+50%2B+CLI+Commands+%7C+Beats+HyDE;🚀+2631+Files+%7C+Zero+Bugs+%7C+Production+Ready;🏆+The+Most+Complete+Hyprland+Setup" alt="Typing SVG"/>
 </a>
 
 <br/><br/>
@@ -68,7 +68,7 @@
    ║   ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ███████║  ║
    ║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝  ║
    ║                                                      ║
-   ║          ⚡  ULTRA v3.0  •  Production Ready  ⚡       ║
+   ║          ⚡  OMEGA v5.0  •  Production Ready  ⚡       ║
    ║                                                      ║
    ╚══════════════════════════════════════════════════════╝
 ```
@@ -90,21 +90,21 @@
 <tr>
 <td align="center" width="25%">
 
-<img src="https://img.shields.io/badge/271-files-7c3aed?style=for-the-badge&labelColor=0d1117" />
+<img src="https://img.shields.io/badge/2631-files-7c3aed?style=for-the-badge&labelColor=0d1117" />
 <br/>
 <sub><b>Production Files</b></sub>
 
 </td>
 <td align="center" width="25%">
 
-<img src="https://img.shields.io/badge/85K+-lines-2563eb?style=for-the-badge&labelColor=0d1117" />
+<img src="https://img.shields.io/badge/778K+-lines-2563eb?style=for-the-badge&labelColor=0d1117" />
 <br/>
 <sub><b>Lines of Code</b></sub>
 
 </td>
 <td align="center" width="25%">
 
-<img src="https://img.shields.io/badge/143+-themes-e11d48?style=for-the-badge&labelColor=0d1117" />
+<img src="https://img.shields.io/badge/363+-themes-e11d48?style=for-the-badge&labelColor=0d1117" />
 <br/>
 <sub><b>Theme Presets</b></sub>
 
@@ -127,13 +127,13 @@
 <br/>
 
 ```text
-Shell/Bash    ████████████████████████░░░   56.2%  •  47,770 lines
-Lua           ██████████░░░░░░░░░░░░░░░░   18.3%  •  15,555 lines
-CSS/SCSS      ████████░░░░░░░░░░░░░░░░░░   12.7%  •  10,795 lines
-Config/TOML   ████░░░░░░░░░░░░░░░░░░░░░░    6.4%  •   5,440 lines
-Fish          ███░░░░░░░░░░░░░░░░░░░░░░░    3.8%  •   3,230 lines
-Python        ██░░░░░░░░░░░░░░░░░░░░░░░░    1.5%  •   1,275 lines
-YAML/JSON     █░░░░░░░░░░░░░░░░░░░░░░░░░    1.1%  •     935 lines
+Shell/Bash    ██████████████████████░░░░░   20.9%  • 162,437 lines
+YAML          ████████████████░░░░░░░░░░░░░   15.8%  • 122,709 lines
+Lua           █████████░░░░░░░░░░░░░░░░░░    9.1%  •  70,545 lines
+Fish          █████████░░░░░░░░░░░░░░░░░░░░    8.6%  •  66,808 lines
+Config/TOML   ████████░░░░░░░░░░░░░░░░░░░░░    7.9%  •  61,602 lines
+JSON          ██████░░░░░░░░░░░░░░░░░░░░░░░    6.2%  •  48,470 lines
+Rasi          ███░░░░░░░░░░░░░░░░░░░░░░░░░░    3.1%  •  24,138 lines
 ```
 
 </details>
@@ -179,7 +179,7 @@ graph LR
 | Feature | Details |
 |:--------|:--------|
 | 🔮 **Dynamic Extraction** | 24 colors from any image via ImageMagick |
-| 🎭 **143+ Presets** | dark · neon · nature · space · anime · pastel |
+| 🎭 **363+ Presets** | bold · soft · rich · warm · vivid · named palettes |
 | 🤖 **AI Generation** | Ollama + algorithmic color theory |
 | ⏰ **Auto Schedule** | hourly · daily · seasonal · time-of-day |
 | 📤 **Export Formats** | shell · CSS · SCSS · JSON · Lua · Python · XResources |
@@ -208,7 +208,7 @@ graph LR
 $ ash --help
 
   ╭──────────────────────────────────╮
-  │     ASH CLI v3.0 ULTRA          │
+  │     ASH CLI v5.0 OMEGA          │
   │     50+ commands • 0 bugs       │
   ├──────────────────────────────────┤
   │  theme   - Theme engine         │
@@ -329,7 +329,7 @@ $ ash --help
 
 ```
                         ╔══════════════════════════════════════╗
-                        ║         ASH DOTFILES v3.0 ULTRA      ║
+                        ║         ASH DOTFILES v5.0 OMEGA      ║
                         ╚══════════════╤═══════════════════════╝
                                        │
               ┌────────────────────────┼────────────────────────┐
@@ -343,7 +343,7 @@ $ ash --help
  Hyprland  Waybar   Rofi  ASH-CLI  Plugins  Themes  Fish   Neovim  Scripts
     │         │         │   │         │         │   │         │         │
  ┌──┴──┐  ┌──┴──┐  ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐ ┌──┴──┐
- │Land │  │Bars │  │Menu │ │50+  │ │Mgmt │ │143+ │ │20fn │ │31pl │ │Auto │
+ │Land │  │Bars │  │Menu │ │50+  │ │Mgmt │ │363+ │ │20fn │ │31pl │ │Auto │
  │Conf │  │Mods │  │Conf │ │Cmds │ │Sys  │ │Sets │ │100ab│ │14lsp│ │Util │
  └─────┘  └─────┘  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘
 ```
@@ -362,7 +362,7 @@ $ ash --help
 <thead>
 <tr>
 <th width="22%">Feature</th>
-<th width="20%" align="center"><img src="https://img.shields.io/badge/ASH_v3.0-ULTRA-7c3aed?style=flat-square&labelColor=0d1117"/></th>
+<th width="20%" align="center"><img src="https://img.shields.io/badge/ASH_v5.0-OMEGA-7c3aed?style=flat-square&labelColor=0d1117"/></th>
 <th width="18%" align="center"><img src="https://img.shields.io/badge/HyDE-Project-374151?style=flat-square&labelColor=0d1117"/></th>
 <th width="18%" align="center"><img src="https://img.shields.io/badge/Hypr-Dots-374151?style=flat-square&labelColor=0d1117"/></th>
 <th width="22%" align="center"><img src="https://img.shields.io/badge/ML4W-Dotfiles-374151?style=flat-square&labelColor=0d1117"/></th>
@@ -374,7 +374,7 @@ $ ash --help
 <tr><td>🔌 <b>Plugin system</b></td><td align="center">✅ Full</td><td align="center">✅ Full</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
 <tr><td>📝 <b>Neovim IDE</b></td><td align="center">✅ <b>Complete</b></td><td align="center">❌ Basic</td><td align="center">❌ Basic</td><td align="center">❌ None</td></tr>
 <tr><td>🐟 <b>Shell functions</b></td><td align="center">✅ <b>20</b></td><td align="center">⚠️ 8</td><td align="center">⚠️ 5</td><td align="center">⚠️ 3</td></tr>
-<tr><td>🔄 <b>CI/CD pipeline</b></td><td align="center">✅ <b>6 jobs</b></td><td align="center">⚠️ 2 jobs</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td></tr>
+<tr><td>🔄 <b>CI/CD pipeline</b></td><td align="center">✅ <b>114 workflows</b></td><td align="center">⚠️ 2 jobs</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td></tr>
 <tr><td>📸 <b>Snapshot system</b></td><td align="center">✅ Full</td><td align="center">⚠️ Basic</td><td align="center">❌ None</td><td align="center">❌ None</td></tr>
 <tr><td>💾 <b>Session restore</b></td><td align="center">✅ Yes</td><td align="center">❌ No</td><td align="center">❌ No</td><td align="center">❌ No</td></tr>
 <tr><td>🤖 <b>AI themes</b></td><td align="center">✅ <b>Yes</b></td><td align="center">❌ No</td><td align="center">❌ No</td><td align="center">❌ No</td></tr>
@@ -437,7 +437,7 @@ $ ash --help
 <td>
 
 ```bash
-bash <(curl -sSL https://raw.githubusercontent.com/yourusername/ash-dots/main/scripts/quickstart.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/Ayesh2929/ASH-HYPRLAND/main/scripts/quickstart.sh)
 ```
 
 </td>
@@ -576,7 +576,7 @@ vainfo
       ash doctor
 # │                                              │
 # │  5. 📊 View system summary                   │
-      bash ~/.dotfiles/scripts/summary.sh
+      ash hw
 # │                                              │
 # │  6. 📸 Create initial snapshot               │
       ash snapshot create fresh-install
@@ -648,57 +648,41 @@ flowchart LR
 <table>
 <tr>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/20-7c3aed?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🌙 <b>Dark</b></sub>
+<img src="https://img.shields.io/badge/19-7c3aed?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>💪 <b>Bold</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/15-a855f7?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>⚡ <b>Neon</b></sub>
+<img src="https://img.shields.io/badge/19-3b82f6?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🌫️ <b>Soft</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/15-22c55e?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🌿 <b>Nature</b></sub>
+<img src="https://img.shields.io/badge/19-a855f7?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>👑 <b>Rich</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/10-0ea5e9?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🌊 <b>Ocean</b></sub>
+<img src="https://img.shields.io/badge/19-eab308?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>☀️ <b>Warm</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/10-1d4ed8?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🚀 <b>Space</b></sub>
+<img src="https://img.shields.io/badge/19-22c55e?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>✨ <b>Vivid</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/15-f472b6?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🍬 <b>Pastel</b></sub>
+<img src="https://img.shields.io/badge/266-0ea5e9?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🎯 <b>Named</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/10-e11d48?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🎌 <b>Anime</b></sub>
+<img src="https://img.shields.io/badge/∞-8b5cf6?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🤖 <b>AI-Generated</b></sub>
 </td>
 <td align="center" width="12.5%">
-<img src="https://img.shields.io/badge/10-eab308?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>📺 <b>Retro</b></sub>
+<img src="https://img.shields.io/badge/∞-f472b6?style=for-the-badge&labelColor=0d1117"/>
+<br/><sub>🖼️ <b>Wallpapers</b></sub>
 </td>
 </tr>
 <tr>
-<td align="center">
-<img src="https://img.shields.io/badge/10-6b7280?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🎨 <b>Minimal</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/8-d97706?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🍁 <b>Seasonal</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/10-8b5cf6?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>😊 <b>Mood</b></sub>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/10-06b6d4?style=for-the-badge&labelColor=0d1117"/>
-<br/><sub>🌈 <b>Gradient</b></sub>
-</td>
-<td align="center" colspan="4">
-<img src="https://img.shields.io/badge/TOTAL_143+-PRESETS-7c3aed?style=for-the-badge&labelColor=0d1117"/>
+<td align="center" colspan="8">
+<img src="https://img.shields.io/badge/TOTAL_363+_PRESETS-7c3aed?style=for-the-badge&labelColor=0d1117"/>
 </td>
 </tr>
 </table>
@@ -725,13 +709,13 @@ flowchart LR
    ash theme ai                  # 🤖  AI-generated theme via Ollama
 # ║                                                          ║
 # ║  AUTOMATION                                              ║
-   ash theme slideshow 30        # 🎬  Slideshow every 30 seconds
+   ash theme ai weather          # 🌦️  Weather-mood palette
    ash theme schedule hourly     # ⏰  Auto-change every hour
    ash theme schedule seasonal   # 🍁  Match season of year
 # ║                                                          ║
 # ║  PRESETS                                                 ║
-   ash-themes list               # 📋  List all 143+ presets
-   ash-themes apply nord         # ✨  Apply a named preset
+   ash theme list                # 📋  List all 363+ presets
+   ash theme apply nord          # ✨  Apply a named preset
    ash theme store browse        # 🏪  Browse community store
 # ║                                                          ║
 # ╚══════════════════════════════════════════════════════════╝
@@ -1041,7 +1025,7 @@ ash doctor
 
 ```
 ╔══════════════════════════════════════╗
-║       ASH DOCTOR v3.0 ULTRA         ║
+║       ASH DOCTOR v5.0 OMEGA         ║
 ╠══════════════════════════════════════╣
 ║                                      ║
 ║  🔍 SYSTEM CHECKS                   ║
@@ -1075,7 +1059,7 @@ ash doctor
 ║                                      ║
 ║  🎨 THEME ENGINE                     ║
 ║  ├─ ✅ ImageMagick installed         ║
-║  ├─ ✅ 143 presets available         ║
+║  ├─ ✅ 363 presets available         ║
 ║  ├─ ✅ SWWW daemon running           ║
 ║  └─ ✅ Color extraction working      ║
 ║                                      ║
@@ -1184,6 +1168,35 @@ ash doctor
 
 </td>
 </tr>
+<tr>
+<td align="center" width="20%">
+
+**🚀**
+<br/>
+[**Unique Features**](docs/UNIQUE-FEATURES.md)
+<br/>
+<sub>What makes ASH special</sub>
+
+</td>
+<td align="center" width="20%">
+
+**🎛️**
+<br/>
+[**Customization**](docs/CUSTOMIZATION.md)
+<br/>
+<sub>Make it yours</sub>
+
+</td>
+<td align="center" width="20%">
+
+**🖼️**
+<br/>
+[**Theme Gallery**](docs/theme-gallery.html)
+<br/>
+<sub>Interactive preset viewer</sub>
+
+</td>
+</tr>
 </table>
 
 </div>
@@ -1205,11 +1218,12 @@ ash update all
 
 <div align="center">
 
-| From Version | To Version | Migration Command |
-|:------------|:-----------|:------------------|
-| `v1.x` | `v3.0 ULTRA` | `bash migrate.sh --from-v1` |
-| `v2.x` | `v3.0 ULTRA` | `bash migrate.sh --from-v2` |
-| `v3.x` | `v3.0 ULTRA` | `ash update apply` |
+| From | To Version | Migration Command |
+|:-----|:-----------|:------------------|
+| `v3.x` / `v4.x` | `v5.0 OMEGA` | `ash update apply` |
+| `HyDE` | `v5.0 OMEGA` | `ash migrate from-hyde` |
+| `HyprDots` | `v5.0 OMEGA` | `ash migrate from-hyprdots` |
+| `ML4W Dotfiles` | `v5.0 OMEGA` | `ash migrate from-ml4w` |
 
 </div>
 
@@ -1227,8 +1241,8 @@ ash update all
 
 **1. Fork & Clone**
 ```bash
-git clone https://github.com/YOU/ash-dots
-cd ash-dots
+git clone https://github.com/Ayesh2929/ASH-HYPRLAND
+cd ASH-HYPRLAND
 ```
 
 </td>
@@ -1328,7 +1342,7 @@ git push origin feat/my-feature
 ```
   ╔═══════════════════════════════════════════════════════════╗
   ║                                                           ║
-  ║   271 files · 85,000+ lines · 143+ themes · 0 bugs       ║
+  ║   2,631 files · 778,000+ lines · 363+ themes · 0 bugs     ║
   ║                                                           ║
   ║              ⭐ Star this repo if it helped you ⭐         ║
   ║                                                           ║
@@ -1342,10 +1356,10 @@ git push origin feat/my-feature
 <br/>
 
 <!-- SOCIAL LINKS -->
-<a href="https://github.com/yourusername/ash-dots/stargazers"><img src="https://img.shields.io/github/stars/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=7c3aed"/></a>
-<a href="https://github.com/yourusername/ash-dots/network/members"><img src="https://img.shields.io/github/forks/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=2563eb"/></a>
-<a href="https://github.com/yourusername/ash-dots/issues"><img src="https://img.shields.io/github/issues/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=059669"/></a>
-<a href="https://github.com/yourusername/ash-dots/pulls"><img src="https://img.shields.io/github/issues-pr/yourusername/ash-dots?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=d97706"/></a>
+<a href="https://github.com/Ayesh2929/ASH-HYPRLAND/stargazers"><img src="https://img.shields.io/github/stars/Ayesh2929/ASH-HYPRLAND?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=7c3aed"/></a>
+<a href="https://github.com/Ayesh2929/ASH-HYPRLAND/network/members"><img src="https://img.shields.io/github/forks/Ayesh2929/ASH-HYPRLAND?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=2563eb"/></a>
+<a href="https://github.com/Ayesh2929/ASH-HYPRLAND/issues"><img src="https://img.shields.io/github/issues/Ayesh2929/ASH-HYPRLAND?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=059669"/></a>
+<a href="https://github.com/Ayesh2929/ASH-HYPRLAND/pulls"><img src="https://img.shields.io/github/issues-pr/Ayesh2929/ASH-HYPRLAND?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=d97706"/></a>
 
 <br/><br/>
 

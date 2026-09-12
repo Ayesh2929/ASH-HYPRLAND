@@ -980,7 +980,7 @@ render_desktop_svg() {
   <!-- Wallpaper attribution (bottom left) -->
   <text x="24" y="1428" font-family="JetBrainsMono Nerd Font, monospace"
         font-size="10" fill="${fg_dim}" opacity="0.25">
-    github.com/yourusername/ash-dotfiles
+    github.com/Ayesh2929/ASH-HYPRLAND
   </text>
 
 </svg>

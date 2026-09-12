@@ -8,8 +8,8 @@ Thank you for your interest in contributing!
 
 ```bash
 # Fork and clone
-git clone https://github.com/yourusername/ash-dots
-cd ash-dots
+git clone https://github.com/Ayesh2929/ASH-HYPRLAND
+cd ASH-HYPRLAND
 
 # Create feature branch
 git checkout -b feature/my-improvement
