@@ -7,6 +7,13 @@
 # A sourced library must not mutate the caller's shell options.
 # `set -e` inside a sourced file silently aborts the *parent* script
 # on the next non-zero test, which is a nightmare to debug.
+# ── Double-source guard ────────────────────────────────────────────────────
+# Every declaration below is readonly, so a second `source` of this file
+# fails with "readonly variable" before any function is defined. Returning
+# early makes the library safe to load from anywhere.
+[[ -n "${_ASH_SPINNER_LOADED:-}" ]] && return 0
+readonly _ASH_SPINNER_LOADED=1
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     set -euo pipefail
 fi

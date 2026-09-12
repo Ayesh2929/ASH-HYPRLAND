@@ -284,4 +284,186 @@ ash_colors_load_palette() {
             printf '%s=%d %d %d\n' "$k" "$r" "$g" "$b"
         done
     )
+
+    # Re-derive every token from the new palette. Without this a theme change
+    # only affected output that called the ash_c_* helpers directly, while the
+    # ~1,100 call sites using ${ASH_PRIMARY} kept the colours they were given at
+    # load time.
+    ash_colors_init_tokens
 }
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔷 DESIGN TOKENS
+#
+# The rest of the codebase writes colour into its output with bare variables:
+#
+#     printf '%s%s PASS%s\n' "${ASH_SUCCESS}" "${ICO_SUCCESS}" "${RST}"
+#
+# but nothing ever defined those names. Around 1,100 call sites referenced
+# ${RST}, ${ASH_PRIMARY}, ${ICO_SUCCESS} and friends — all of which expanded to
+# the empty string (or, under `set -u`, aborted the command with
+# "BOLD: unbound variable"). This section is the missing definition layer.
+#
+# The tokens are initialised at load time and RE-INITIALISED whenever the
+# palette changes, so `ash theme apply` recolours everything that uses them
+# without a restart. When colour is disabled each token is set to the empty
+# string rather than being left unset: unset would trip `set -u`, and escape
+# codes in piped output break log parsing and `--json` consumers.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Map a palette role to a foreground escape, or "" when colour is off.
+_ash_token() {
+    local role="$1"
+    _ash_colors_enabled || return 0
+    local rgb="${ASH_PALETTE[${role}]:-}"
+    [[ -n "${rgb}" ]] || return 0
+    # shellcheck disable=SC2086
+    set -- ${rgb}
+    ash_fg_rgb "$1" "$2" "$3"
+}
+
+ash_colors_init_tokens() {
+    # ── Text styling ──────────────────────────────────────────────────────────
+    if _ash_colors_enabled; then
+        RST=$'\033[0m'
+        BOLD=$'\033[1m'
+        DIM=$'\033[2m'
+        ITALIC=$'\033[3m'
+        UNDERLINE=$'\033[4m'
+        REVERSE=$'\033[7m'
+        STRIKE=$'\033[9m'
+    else
+        RST="" BOLD="" DIM="" ITALIC="" UNDERLINE="" REVERSE="" STRIKE=""
+    fi
+
+    # ── Semantic colours ──────────────────────────────────────────────────────
+    # PRIMARY drives headings, ACCENT drives interactive words, MUTED carries
+    # secondary text and hints. The four status colours must stay perceptually
+    # distinct from one another; they come from roles chosen for that purpose
+    # rather than from the theme's own accent, so a red-themed palette still
+    # shows green for success.
+    ASH_PRIMARY="$(_ash_token lavender)"
+    ASH_ACCENT="$(_ash_token mauve)"
+    ASH_MUTED="$(_ash_token overlay1)"
+    ASH_SUCCESS="$(_ash_token green)"
+    ASH_WARNING="$(_ash_token yellow)"
+    ASH_ERROR="$(_ash_token red)"
+    ASH_INFO="$(_ash_token sky)"
+    FG_BBLACK="$(_ash_token overlay0)"
+
+    # Icons are independent of the colour state; one definition, in one place.
+    ash_colors_init_icons
+
+    # Module-level roles shared by snapshot/, config/ and doctor/.
+    ash_colors_init_semantic_tokens
+
+    # Every token above is a plain global so that call sites can interpolate it
+    # directly; export the ones that are useful to child processes.
+    export RST BOLD DIM ITALIC UNDERLINE REVERSE STRIKE
+}
+
+# Module-level semantic tokens.
+#
+# Same story as the tokens above, one layer down: snapshot/, config/ and doctor/
+# all render snapshot tables and diffs with ${SNAP_COLOR_*}, and none of them
+# defined them. They live here rather than in a module because four modules
+# share the vocabulary, and a colour defined in one module is a colour the other
+# three cannot see.
+#
+# DIFF_ADD/DEL/MOD deliberately mirror the git convention (green/red/yellow)
+# instead of using the theme accent, because those three are read as a set and
+# their meaning is fixed by custom.
+ash_colors_init_semantic_tokens() {
+    SNAP_COLOR_ID="$(_ash_token sapphire)"
+    SNAP_COLOR_NAME="$(_ash_token lavender)"
+    SNAP_COLOR_SIZE="$(_ash_token teal)"
+    SNAP_COLOR_TAG="$(_ash_token pink)"
+    SNAP_COLOR_DATE="$(_ash_token overlay2)"
+    SNAP_COLOR_PINNED="$(_ash_token peach)"
+
+    SNAP_COLOR_DIFF_ADD="$(_ash_token green)"
+    SNAP_COLOR_DIFF_DEL="$(_ash_token red)"
+    SNAP_COLOR_DIFF_MOD="$(_ash_token yellow)"
+
+    export SNAP_COLOR_ID SNAP_COLOR_NAME SNAP_COLOR_SIZE SNAP_COLOR_TAG \
+           SNAP_COLOR_DATE SNAP_COLOR_PINNED \
+           SNAP_COLOR_DIFF_ADD SNAP_COLOR_DIFF_DEL SNAP_COLOR_DIFF_MOD
+}
+
+# Display width in terminal COLUMNS, not bytes or characters.
+#
+# `printf '%-38s'` measures BYTES. An emoji is 3-4 bytes for 2 columns, "│" is
+# 3 bytes for 1 column, and a combining accent is 2 bytes for 0 — so every row
+# containing one was padded by the wrong amount and the columns wandered.
+#
+# `wc -L` reports the maximum display width of a line, which for a single-line
+# string is exactly what is wanted: it counts leading AND trailing spaces, and
+# it resolves character widths the same way Python's east-asian-width does.
+# (Verified: "✅"→2, "⚠️"→1, "café"→4, "├─"→2.)
+#
+# ANSI escape sequences are zero-width and are stripped before measuring.
+_ash_display_width() {
+    local str="$1"
+
+    # Strip SGR sequences. Done with a bash regex rather than sed: the escape
+    # needs \x1b through two layers of quoting, and a single missed backslash
+    # makes sed fail silently and return an empty string — which reads as a
+    # width of zero and pads every row as if it were blank.
+    while [[ "$str" =~ $'\033\[[0-9;]*[a-zA-Z]' ]]; do
+        str="${str/"${BASH_REMATCH[0]}"/}"
+    done
+
+    local w
+    if w="$(printf '%s' "$str" | LC_ALL=C.UTF-8 wc -L 2>/dev/null)" && [[ -n "$w" ]]; then
+        printf '%s' "$w"
+    else
+        # Without a UTF-8 locale, or on a system whose wc has no -L, fall back
+        # to a byte count. Alignment is imperfect for wide glyphs but nothing
+        # breaks.
+        printf '%s' "${#str}"
+    fi
+}
+
+# Pad a string out to a display width, truncating with an ellipsis if it is
+# longer. The cut point is computed in characters, so multi-byte glyphs are
+# never sliced in half.
+_ash_pad() {
+    local str="$1" want="$2"
+    local w; w="$(_ash_display_width "$str")"
+
+    if (( w > want )); then
+        # Drop one character than the overflow, then add the ellipsis.
+        local over=$(( w - want + 1 ))
+        local chars=${#str}
+        local keep=$(( chars - over ))
+        (( keep < 1 )) && keep=1
+        str="${str:0:keep}…"
+        w="$(_ash_display_width "$str")"
+    fi
+
+    printf '%s' "$str"
+    local i
+    for (( i = w; i < want; i++ )); do printf ' '; done
+}
+
+# Icons are only a naming concern, so initialise them independently of the
+# colour state — script output without colour still wants its labels.
+ash_colors_init_icons() {
+    if [[ "${ASH_FLAG_NO_UNICODE:-0}" -eq 1 ]]; then
+        ICO_SUCCESS="[OK]" ICO_WARN="[!]"  ICO_ERROR="[X]"  ICO_INFO="[i]"
+        ICO_SNAPSHOT="[S]" ICO_CREATE="[+]" ICO_RESTORE="[R]" ICO_DELETE="[-]"
+        ICO_LIST="[=]" ICO_FILE="[f]" ICO_FOLDER="[d]" ICO_LOCK="[*]"
+        ICO_TAG="[#]" ICO_CLOCK="[t]" ICO_EXPORT="[>]" ICO_DIFF="[~]"
+        ICO_PIN="[P]" ICO_SKIP="[~]"
+    else
+        ICO_SUCCESS="✅" ICO_WARN="⚠️" ICO_ERROR="❌" ICO_INFO="ℹ️"
+        ICO_SNAPSHOT="📸" ICO_CREATE="✨" ICO_RESTORE="♻️" ICO_DELETE="🗑️"
+        ICO_LIST="📋" ICO_FILE="📄" ICO_FOLDER="📁" ICO_LOCK="🔒"
+        ICO_TAG="🏷️ " ICO_CLOCK="🕐" ICO_EXPORT="📤" ICO_DIFF="🔀"
+        ICO_PIN="📌" ICO_SKIP="▪️"
+    fi
+}
+
+# Initialise now, so that a script which sources colours.sh and immediately
+# formats output has every token available.
+ash_colors_init_tokens

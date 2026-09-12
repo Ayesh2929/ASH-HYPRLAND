@@ -34,7 +34,10 @@ declare -gr ASH_ROOT_DIR="$(cd "${ASH_CLI_DIR}/.." && pwd)"
 declare -gr ASH_LIB_DIR="${ASH_CLI_DIR}/lib"
 declare -gr ASH_CMD_DIR="${ASH_CLI_DIR}/commands"
 declare -gr ASH_ENG_DIR="${ASH_CLI_DIR}/engines"
-declare -gr ASH_DATA_DIR="${ASH_CLI_DIR}/data"
+#: Bundled read-only data that ships with the CLI (registries, defaults,
+#: package lists). Distinct from ASH_DATA_HOME, which is the user-writable
+#: XDG data directory.
+declare -gr ASH_CLI_DATA_DIR="${ASH_CLI_DIR}/data"
 declare -gr ASH_API_DIR="${ASH_CLI_DIR}/api"
 
 declare -gr ASH_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/ash"
@@ -43,7 +46,10 @@ declare -gr ASH_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/ash"
 declare -gr ASH_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/ash"
 declare -gr ASH_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}/ash"
 
-declare -gr ASH_LOG_FILE="${ASH_STATE_HOME}/logs/ash-cli.log"
+#: Default log destination. Deliberately NOT readonly: ash_log_set_file()
+#: reassigns it, and `--log-file` is a runtime choice rather than build
+#: metadata. Declaring it readonly made every call to the setter fail.
+declare -g ASH_LOG_FILE="${ASH_LOG_FILE:-${ASH_STATE_HOME}/logs/ash-cli.log}"
 declare -gr ASH_PID_FILE="${ASH_RUNTIME_DIR}/ash.pid"
 declare -gr ASH_SOCKET="${ASH_RUNTIME_DIR}/ash.sock"
 declare -gr ASH_LOCK_FILE="${ASH_RUNTIME_DIR}/ash.lock"
@@ -786,16 +792,29 @@ _ash_dispatch() {
         ash_log_info "[DRY RUN] Would execute: ${cmd_file} ${args[*]:-}"
     else
         ASH_CURRENT_COMMAND="$command"
-        # shellcheck source=/dev/null
-        source "$full_cmd_path"
-
         local cmd_func="ash_cmd_${category//-/_}"
-        if declare -f "$cmd_func" &>/dev/null; then
-            "$cmd_func" "${args[@]:-}" || exit_code=$?
-        else
-            ash_log_error "Command function not found: ${cmd_func}"
-            exit_code=1
-        fi
+
+        # Run the command in a SUBSHELL.
+        #
+        # Nearly every command file opens with `set -euo pipefail`. Sourcing one
+        # into this shell therefore rewrites the dispatcher's own error handling
+        # for the rest of the invocation — and a command that calls `exit` takes
+        # the dispatcher with it, skipping the post-execution hooks below.
+        #
+        # A subshell gives each command the strict mode it wants for its own body
+        # while leaving this shell's options untouched. The exit status is
+        # propagated through `exit_code` as before.
+        (
+            # shellcheck source=/dev/null
+            source "$full_cmd_path"
+
+            if declare -f "$cmd_func" &>/dev/null; then
+                "$cmd_func" "${args[@]:-}"
+            else
+                ash_log_error "Command function not found: ${cmd_func}"
+                exit 1
+            fi
+        ) || exit_code=$?
     fi
 
     # ── Post-execution hooks ─────────────────────────────────────────────

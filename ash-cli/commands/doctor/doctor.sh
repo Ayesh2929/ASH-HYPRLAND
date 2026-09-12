@@ -95,13 +95,17 @@ doc::result() {
 
     DOC_RESULTS+=("${sev}|${category}|${id}|${title}|${msg}|${fix}")
 
+    # `|| true` on every increment is load-bearing. `(( x++ ))` evaluates to the
+    # PRE-increment value, so the first result of a run counts from 0 and yields
+    # status 1 — and this file runs under `set -e`, so the very first call would
+    # abort the command before printing anything.
     case "${sev}" in
-        PASS) (( DOC_PASS_COUNT++ )) ;;
-        INFO) (( DOC_INFO_COUNT++ )) ;;
-        WARN) (( DOC_WARN_COUNT++ )) ;;
-        FAIL) (( DOC_FAIL_COUNT++ )) ;;
-        CRIT) (( DOC_CRIT_COUNT++ )) ;;
-        SKIP) (( DOC_SKIP_COUNT++ )) ;;
+        PASS) (( DOC_PASS_COUNT++ )) || true ;;
+        INFO) (( DOC_INFO_COUNT++ )) || true ;;
+        WARN) (( DOC_WARN_COUNT++ )) || true ;;
+        FAIL) (( DOC_FAIL_COUNT++ )) || true ;;
+        CRIT) (( DOC_CRIT_COUNT++ )) || true ;;
+        SKIP) (( DOC_SKIP_COUNT++ )) || true ;;
     esac
 }
 
@@ -559,4 +563,17 @@ doctor::main() {
     esac
 }
 
-doctor::main "$@"
+# Executing this file directly still works; sourcing it — which is how the
+# dispatcher loads it — must only define the entry point. The unconditional
+# `doctor::main "$@"` that used to sit here ran the entire command at source time.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    doctor::main "$@"
+fi
+
+# ── Dispatcher entry point ────────────────────────────────────────────────────
+# The ash dispatcher sources this file and calls ash_cmd_<category>. Without
+# this function the command reported "Command function not found" after already
+# having run itself once at source time.
+ash_cmd_doctor() {
+    doctor::main "$@"
+}

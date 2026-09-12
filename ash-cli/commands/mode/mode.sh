@@ -51,15 +51,52 @@ readonly __ASH_LIB_DIR="${__ASH_CLI_DIR}/lib"
 readonly __ASH_DATA_DIR="${__ASH_CLI_DIR}/data"
 
 # Source core libraries with existence validation
+# Load a core library once.
+#
+# This used to source unconditionally, which broke the whole command: when mode
+# runs under the `ash` dispatcher the libraries are ALREADY loaded, and every
+# one of them ends with a `readonly` declaration. Sourcing twice therefore dies
+# with "ASH_VALIDATOR_VERSION: readonly variable" before mode does anything.
+#
+# The dispatcher's own loader dedupes through ASH_LOADED_LIBS; this mirrors that
+# so mode works both standalone and as a subcommand.
 __ash_require_lib() {
     local lib="${__ASH_LIB_DIR}/${1}"
+
+    # Already loaded? Nothing to do.
+    if [[ -n "${ASH_LOADED_LIBS[*]:-}" ]]; then
+        local loaded
+        for loaded in "${ASH_LOADED_LIBS[@]}"; do
+            [[ "$loaded" == "$1" ]] && return 0
+        done
+    fi
+
+    # Each library also guards itself, but a library sourced before this file
+    # existed would not be recorded in ASH_LOADED_LIBS — so fall back to the
+    # per-library flag rather than relying on the list alone.
+    # Sanitise the name: a hyphen is legal in a filename but not in a bash
+    # variable, so `${!flag}` on "progress-bar" produced
+    # `_ASH_PROGRESS-BAR_LOADED: invalid variable name`.
+    local flag="_ASH_${1%.sh}"
+    flag="${flag^^}_LOADED"
+    flag="${flag//-/_}"
+    [[ -n "${!flag:-}" ]] && return 0
+
     if [[ ! -f "${lib}" ]]; then
         printf '\033[0;31m[FATAL]\033[0m Missing required library: %s\n' "${lib}" >&2
         exit 127
     fi
+
     # shellcheck source=/dev/null
     source "${lib}"
+    ASH_LOADED_LIBS+=("$1")
 }
+
+# The double-load guard appends to this; make sure it exists before the first
+# load. `declare -ga ASH_LOADED_LIBS=()` would RESET it and discard everything
+# the dispatcher had already recorded — which is exactly the bug this guard
+# exists to prevent, so test for existence first.
+declare -p ASH_LOADED_LIBS >/dev/null 2>&1 || declare -ga ASH_LOADED_LIBS=()
 
 __ash_require_lib "core.sh"
 __ash_require_lib "colors.sh"
@@ -87,11 +124,16 @@ __ash_require_lib "telemetry.sh"
 readonly ASH_MODE_VERSION="5.0.0"
 readonly ASH_MODE_BUILD_DATE="2025-01-01"
 
-# XDG-compliant paths
-readonly ASH_STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/ash"
-readonly ASH_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/ash"
-readonly ASH_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}/ash"
-readonly ASH_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/ash"
+# XDG-compliant paths.
+#
+# utils.sh is sourced above and already defines the _DIR forms, so these only
+# fill in a default when a variable is genuinely unset. Re-declaring them
+# readonly here would override a caller's exported value and lock the name
+# against every later library.
+: "${ASH_STATE_DIR:=${XDG_STATE_HOME:-${HOME}/.local/state}/ash}"
+: "${ASH_DATA_HOME:=${XDG_DATA_HOME:-${HOME}/.local/share}/ash}"
+: "${ASH_RUNTIME_DIR:=${XDG_RUNTIME_DIR:-/tmp}/ash}"
+: "${ASH_CONFIG_DIR:=${XDG_CONFIG_HOME:-${HOME}/.config}/ash}"
 
 # Mode system paths
 readonly ASH_MODE_STATE_FILE="${ASH_STATE_DIR}/current-mode.json"
@@ -101,8 +143,12 @@ readonly ASH_MODE_REGISTRY_FILE="${__ASH_DATA_DIR}/mode-registry.json"
 readonly ASH_MODE_CUSTOM_DIR="${ASH_DATA_HOME}/modes/custom"
 readonly ASH_MODE_CONFIG_FILE="${ASH_CONFIG_DIR}/mode-config.conf"
 
-# IPC socket for real-time updates
-readonly ASH_IPC_SOCKET="${ASH_RUNTIME_DIR}/ash.sock"
+# IPC socket for real-time updates.
+#
+# ipc.sh — sourced above — already declares this readonly, as
+# "${XDG_RUNTIME_DIR:-/tmp}/ash.sock". ASH_RUNTIME_DIR resolves to
+# "${XDG_RUNTIME_DIR:-/tmp}/ash" just above, so the two spellings give the same
+# path and re-declaring only produced "ASH_IPC_SOCKET: readonly variable".
 
 # UI Configuration
 readonly ASH_MODE_ANIMATION_DURATION=400  # milliseconds
@@ -1595,3 +1641,12 @@ ash_mode_main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     ash_mode_main "$@"
 fi
+
+# ── Dispatcher entry point ────────────────────────────────────────────────────
+# The ash dispatcher calls ash_cmd_<category> after sourcing. This file is
+# already a well-behaved library — main is guarded, nothing runs on source — it
+# simply never exposed the name the dispatcher looks for, so `ash mode` always
+# ended in "Command function not found".
+ash_cmd_mode() {
+    ash_mode_main "$@"
+}

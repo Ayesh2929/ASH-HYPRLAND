@@ -3,12 +3,25 @@
 # ║  ASH DOTFILES v5.0 OMEGA ◆ DOCTOR CHECK — HYPRLAND                                    ║
 # ║  Hyprland compositor: version, runtime, config, animations, keybinds, monitors        ║
 # ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
+# Sourced as a library by _common.sh, so shell options are only
+# tightened when this file is EXECUTED directly. A sourced file that
+# sets -e/-u rewrites the options of whoever loaded it — the first
+# module would make the whole doctor process abort on any non-zero
+# status or unset variable.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 IFS=$'\n\t'
 
-[[ -z "${DOC_VERSION:-}" ]] && {
-    printf 'ERROR: This check must be sourced via ash doctor\n' >&2; exit 1
-}
+# Guard against being sourced outside the doctor environment. This must NOT
+# `exit`: a sourced file that exits takes its caller with it, so one missed
+# dependency would kill doctor and the whole ash process instead of skipping one
+# module. `return 0` leaves the module unloaded, which _ash_check_load_all
+# reports as a skip.
+if [[ -z "${DOC_VERSION:-}" ]]; then
+    printf 'SKIP: %s needs the ash doctor environment — not sourced\n' "${BASH_SOURCE[0]##*/}" >&2
+    return 0
+fi
 
 readonly HL_CONF_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/hypr"
 
@@ -263,4 +276,19 @@ check_hyprland::run() {
     check_hyprland::ecosystem
 }
 
-check_hyprland::run
+
+# ── Entry points ──────────────────────────────────────────────────────────────
+# Nineteen of the check modules expose ash_check_<area>() and a _quick variant.
+# This one predates that convention and used a bare top-level call to check_hyprland::run,
+# which meant sourcing it ran the whole check. These wrappers give the loader a
+# single, uniform interface to drive.
+ash_check_hyprland() {
+    check_hyprland::run
+}
+
+# The doc:: API records its own results and has no cheap subset, so the quick
+# variant reports on the same areas. It exists so `ash doctor quick` can reach
+# this module at all.
+ash_check_hyprland_quick() {
+    check_hyprland::run
+}

@@ -61,7 +61,9 @@ ash_box_render() {
     local accent="${ASH_BOX_ACCENT:-}"
 
     local -a S
-    read -r -a S <<< "${ASH_BOX_STYLE[$style]:-${ASH_BOX_STYLE[single]}}"
+    # Explicit IFS: this is a space-separated string, and a caller that set
+    # IFS=$'\n\t' (as mode.sh does) would otherwise get one giant element.
+    IFS=' ' read -r -a S <<< "${ASH_BOX_STYLE[$style]:-${ASH_BOX_STYLE[single]}}"
     local TL="${S[0]:-┌}" TR="${S[1]:-┐}" BL="${S[2]:-└}" BR="${S[3]:-┘}" H="${S[4]:-─}" V="${S[5]:-│}"
 
     # ── Read the body ─────────────────────────────────────────────────────
@@ -130,6 +132,83 @@ ash_box_render() {
 }
 
 # Convenience wrappers -------------------------------------------------------
+# ── Manual box primitives ─────────────────────────────────────────────────────
+#
+# ash_box_render takes a title and reads its body from stdin. Sometimes the
+# caller needs to interleave its own content between the border rows instead —
+# mode.sh draws a banner whose middle rows come from ModeIcon tables and
+# coloured segments — so it needs the pieces rather than the assembled box:
+#
+#     ash_box_top    86
+#     ash_box_row    86 "  🎮🎯🎬 ASH DOTFILES v5.0 OMEGA — MODE ENGINE"
+#     ash_box_row    86 "  Desktop Environment Mode Switching System"
+#     ash_box_bottom 86
+#
+# Width is the TOTAL width including both border columns. Content is padded (or
+# trimmed with an ellipsis) to the inner width so the right border stays flush —
+# the same guarantee ash_box_render gives, applied row by row.
+_ash_box_chars() {
+    local style="${1:-$ASH_BOX_DEFAULT_STYLE}"
+    printf '%s' "${ASH_BOX_STYLE[$style]:-${ASH_BOX_STYLE[single]}}"
+}
+
+# ash_box_top [width] [style]
+ash_box_top() {
+    local width="${1:-${ASH_BOX_WIDTH:-80}}" style="${2:-$ASH_BOX_DEFAULT_STYLE}"
+    # IFS is set explicitly: the caller may have redefined it (mode.sh uses
+    # IFS=$'\n\t'), and without this the whole style string lands in C[0] and
+    # every later index is unbound.
+    local -a C
+    IFS=' ' read -r -a C <<< "$(_ash_box_chars "$style")"
+
+    local inner=$(( width - 2 ))
+    (( inner < 1 )) && inner=1
+
+    local rule="" i
+    for (( i = 0; i < inner; i++ )); do rule+="${C[4]}"; done
+
+    printf '%s%s%s' "${C[0]}" "$rule" "${C[1]}"
+}
+
+# ash_box_bottom [width] [style]
+ash_box_bottom() {
+    local width="${1:-${ASH_BOX_WIDTH:-80}}" style="${2:-$ASH_BOX_DEFAULT_STYLE}"
+    # IFS is set explicitly: the caller may have redefined it (mode.sh uses
+    # IFS=$'\n\t'), and without this the whole style string lands in C[0] and
+    # every later index is unbound.
+    local -a C
+    IFS=' ' read -r -a C <<< "$(_ash_box_chars "$style")"
+
+    local inner=$(( width - 2 ))
+    (( inner < 1 )) && inner=1
+
+    local rule="" i
+    for (( i = 0; i < inner; i++ )); do rule+="${C[4]}"; done
+
+    printf '%s%s%s' "${C[2]}" "$rule" "${C[3]}"
+}
+
+# ash_box_row <width> <content> [style]
+ash_box_row() {
+    local width="${1:-${ASH_BOX_WIDTH:-80}}" content="${2:-}" style="${3:-$ASH_BOX_DEFAULT_STYLE}"
+    # IFS is set explicitly: the caller may have redefined it (mode.sh uses
+    # IFS=$'\n\t'), and without this the whole style string lands in C[0] and
+    # every later index is unbound.
+    local -a C
+    IFS=' ' read -r -a C <<< "$(_ash_box_chars "$style")"
+
+    local inner=$(( width - 2 ))
+    (( inner < 1 )) && inner=1
+
+    # Measure in display columns, not bytes: the banner carries Nerd Font icons
+    # and an emoji, and %-*s would misjudge both, pushing the right border out.
+    local padded
+    padded="$(ash_table_pad "$content" "$inner" left)"
+    padded="$(ash_table_truncate "$padded" "$inner" "…")"
+
+    printf '%s%s%s' "${C[5]}" "$padded" "${C[5]}"
+}
+
 ash_box()      { shift 0; ash_box_render "${1:-}" "${2:-$ASH_BOX_DEFAULT_STYLE}"; }
 
 ash_box_title() {
