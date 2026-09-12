@@ -1,3 +1,53 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — wlogout.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — wlogout.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Power menu. wlogout reads a GTK CSS file, so this is a stylesheet rather
+# than a config.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+* {
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+    transition: all 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+window {
+    background-color: rgba({{base|strip_hash}}f2);
+}
+
+button {
+    color: {{text}};
+    background-color: {{surface}};
+    border: 2px solid {{overlay}};
+    border-radius: 18px;
+    margin: 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 22%;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+button:focus, button:active {
+    background-color: {{overlay}};
+    border-color: {{accent}};
+    outline: none;
+}
+
+#lock     { background-color: {{sky|alpha0.13}};    border-color: {{sky}};    color: {{sky}}; }
+#logout   { background-color: {{accent|alpha0.13}}; border-color: {{accent}}; color: {{accent}}; }
+#suspend  { background-color: {{gold|alpha0.13}};   border-color: {{gold}};   color: {{gold}}; }
+#hibernate{ background-color: {{violet|alpha0.13}}; border-color: {{violet}}; color: {{violet}}; }
+#shutdown { background-color: {{rose|alpha0.13}};   border-color: {{rose}};   color: {{rose}}; }
+#reboot   { background-color: {{mint|alpha0.13}};   border-color: {{mint}};   color: {{mint}}; }
+
+#lock:hover, #logout:hover, #suspend:hover,
+#hibernate:hover, #shutdown:hover, #reboot:hover {
+    background-color: {{overlay}};
+    color: {{text}};
+}

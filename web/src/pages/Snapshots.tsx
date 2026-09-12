@@ -1,15 +1,20 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Snapshots.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — snapshots route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import SnapshotManager from '../components/SnapshotManager'
+import DoctorReportPanel from '../components/DoctorReport'
+import { StoragePanel } from '../components/Dashboard'
 
-def main():
-    print("Running Snapshots.tsx (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+export default function Snapshots() {
+  return (
+    <div className="space-y-4">
+      <SnapshotManager />
+      <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+        <DoctorReportPanel />
+        <StoragePanel />
+      </div>
+    </div>
+  )
+}

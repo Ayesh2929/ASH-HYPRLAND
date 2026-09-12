@@ -1,15 +1,29 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Plugins.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — plugins route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import { useState } from 'react'
+import PluginManager from '../components/PluginManager'
+import PluginStore from '../components/PluginStore'
+import { Tabs } from '../components/ui'
+import KeybindViewer from '../components/KeybindViewer'
 
-def main():
-    print("Running Plugins.tsx (omega stub)")
-    sys.exit(0)
+export default function Plugins() {
+  const [tab, setTab] = useState<'installed' | 'store'>('installed')
 
-if __name__ == '__main__':
-    main()
+  return (
+    <div className="space-y-4">
+      <Tabs
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { id: 'installed', label: 'Installed', icon: '🧩' },
+          { id: 'store', label: 'Store', icon: '🏪' },
+        ]}
+      />
+      {tab === 'installed' ? <PluginManager /> : <PluginStore />}
+      {tab === 'installed' && <KeybindViewer />}
+    </div>
+  )
+}

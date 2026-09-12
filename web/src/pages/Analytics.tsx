@@ -1,15 +1,22 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Analytics.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — analytics route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import AnalyticsConsole from '../components/Analytics'
+import Terminal from '../components/Terminal'
+import NotificationCenter from '../components/NotificationCenter'
+import AIChatAssistant from '../components/AIChatAssistant'
 
-def main():
-    print("Running Analytics.tsx (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+export default function Analytics() {
+  return (
+    <div className="space-y-4">
+      <AnalyticsConsole />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Terminal />
+        <AIChatAssistant />
+      </div>
+      <NotificationCenter />
+    </div>
+  )
+}

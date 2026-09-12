@@ -109,4 +109,17 @@ snapshot::main() {
     esac
 }
 
-snapshot::main "$@"
+# Executing this file directly still works; sourcing it — which is how the
+# dispatcher loads it — must only define the entry point. The unconditional
+# `snapshot::main "$@"` that used to sit here ran the entire command at source time.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    snapshot::main "$@"
+fi
+
+# ── Dispatcher entry point ────────────────────────────────────────────────────
+# The ash dispatcher sources this file and calls ash_cmd_<category>. Without
+# this function the command reported "Command function not found" after already
+# having run itself once at source time.
+ash_cmd_snapshot() {
+    snapshot::main "$@"
+}

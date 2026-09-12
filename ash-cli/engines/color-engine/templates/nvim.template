@@ -1,3 +1,93 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — nvim.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — nvim.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Neovim colourscheme, written as a self-contained Lua module so it needs no
+# plugin manager. Tree-sitter captures use the same semantic mapping as the
+# terminal palette, so a buffer looks the same in nvim as in the shell.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+-- Generated from the "{{theme_name}}" theme. Do not edit by hand; the source of
+-- truth is themes/{{theme_name|lower|trim}}.json. Run `ash theme apply` to refresh.
+
+local M = {}
+
+M.palette = {
+    base    = "{{base}}",    mantle = "{{mantle}}",  crust   = "{{crust}}",
+    surface = "{{surface}}", overlay = "{{overlay}}",
+    text    = "{{text}}",    subtext = "{{subtext}}",
+    accent  = "{{accent}}",  mint   = "{{mint}}",    sky     = "{{sky}}",
+    gold    = "{{gold}}",    rose   = "{{rose}}",    violet  = "{{violet}}",
+}
+
+function M.setup()
+    vim.cmd("highlight clear")
+    if vim.fn.exists("syntax_on") == 1 then vim.cmd("syntax reset") end
+    vim.o.termguicolors = true
+    vim.o.background = "{{variant}}"
+    vim.g.colors_name = "ash-{{theme_name|lower|trim}}"
+
+    local p = M.palette
+    local function hi(group, opts) vim.api.nvim_set_hl(0, group, opts) end
+
+    -- Editor chrome
+    hi("Normal",       { fg = p.text,      bg = p.base })
+    hi("NormalFloat",  { fg = p.text,      bg = p.mantle })
+    hi("FloatBorder",  { fg = p.accent,    bg = p.mantle })
+    hi("Cursor",       { fg = p.base,      bg = p.accent })
+    hi("CursorLine",   { bg = p.surface })
+    hi("CursorColumn", { bg = p.surface })
+    hi("ColorColumn",  { bg = p.mantle })
+    hi("LineNr",       { fg = p.overlay })
+    hi("CursorLineNr", { fg = p.accent,    bold = true })
+    hi("SignColumn",   { bg = p.base })
+    hi("Visual",       { bg = p.accent,    fg = p.base })
+    hi("Search",       { bg = p.gold,      fg = p.base })
+    hi("IncSearch",    { bg = p.rose,      fg = p.base })
+    hi("MatchParen",   { fg = p.accent,    bold = true, underline = true })
+    hi("WinSeparator", { fg = p.surface })
+    hi("Pmenu",        { fg = p.subtext,   bg = p.mantle })
+    hi("PmenuSel",     { fg = p.base,      bg = p.accent })
+    hi("PmenuSbar",    { bg = p.surface })
+    hi("PmenuThumb",   { bg = p.overlay })
+
+    -- Syntax
+    hi("Comment",      { fg = p.overlay,   italic = true })
+    hi("Constant",     { fg = p.gold })
+    hi("String",       { fg = p.mint })
+    hi("Identifier",   { fg = p.sky })
+    hi("Function",     { fg = p.accent })
+    hi("Statement",    { fg = p.violet })
+    hi("Keyword",      { fg = p.violet,    italic = true })
+    hi("PreProc",      { fg = p.rose })
+    hi("Type",         { fg = p.gold })
+    hi("Special",      { fg = p.sky })
+    hi("Underlined",   { underline = true })
+    hi("Error",        { fg = p.rose,      bold = true })
+    hi("Todo",         { fg = p.base,      bg = p.gold, bold = true })
+
+    -- Diagnostics
+    hi("DiagnosticError", { fg = p.rose })
+    hi("DiagnosticWarn",  { fg = p.gold })
+    hi("DiagnosticInfo",  { fg = p.sky })
+    hi("DiagnosticHint",  { fg = p.mint })
+    hi("DiagnosticOk",    { fg = p.mint })
+
+    -- Tree-sitter captures: use @-prefixed groups so both the modern and the
+    -- legacy capture names resolve to the same colours.
+    for _, group in ipairs({ "TSComment", "@comment" }) do hi(group, { fg = p.overlay, italic = true }) end
+    for _, group in ipairs({ "TSString", "@string" }) do hi(group, { fg = p.mint }) end
+    for _, group in ipairs({ "TSFunction", "@function" }) do hi(group, { fg = p.accent }) end
+    for _, group in ipairs({ "TSKeyword", "@keyword" }) do hi(group, { fg = p.violet }) end
+    for _, group in ipairs({ "TSNumber", "@number" }) do hi(group, { fg = p.gold }) end
+    for _, group in ipairs({ "TSVariable", "@variable" }) do hi(group, { fg = p.text }) end
+
+    -- Statusline
+    hi("StatusLine",   { fg = p.text,   bg = p.surface })
+    hi("StatusLineNC", { fg = p.overlay, bg = p.mantle })
+end
+
+return M

@@ -7,6 +7,14 @@
 [[ "${_ASH_CORE_LOADED:-}" == "1" ]] && return 0
 readonly _ASH_CORE_LOADED=1
 
+# ── Declared dependency ───────────────────────────────────────────────────────
+# core.sh calls ash_log_debug/error/fatal/info/warn throughout. It previously
+# relied on _ash_bootstrap sourcing logger.sh first — an implicit ordering
+# requirement between two files that never referenced each other, which breaks
+# the moment anything sources core.sh directly. logger.sh guards itself, so
+# this is a no-op when it is already loaded.
+source "${BASH_SOURCE[0]%/*}/logger.sh"
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔷 SHELL COMPATIBILITY ASSERTION
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

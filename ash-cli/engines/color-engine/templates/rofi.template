@@ -1,3 +1,44 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — rofi.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — rofi.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Rofi theme. The numbers are deliberately modest: heavy rounding and large
+# padding look wrong at the 60% width the launcher opens at.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+* {
+    bg0:    {{base}};
+    bg1:    {{mantle}};
+    bg2:    {{surface}};
+    fg0:    {{text}};
+    fg1:    {{subtext}};
+    accent: {{accent}};
+    urgent: {{rose}};
+    bg0-transparent: {{base|alpha0.80}};
+    bg1-transparent: {{mantle|alpha0.80}};
+    accent-transparent: {{accent|alpha0.27}};
+
+    background-color: @bg0-transparent;
+    text-color:       @fg0;
+    border:           2px;
+    border-color:     @accent-transparent;
+    border-radius:    14px;
+    margin:           0;
+    padding:          14px;
+    spacing:          10px;
+}
+
+window            { width: 46%; }
+listview          { lines: 8; columns: 1; fixed-height: false; }
+element           { padding: 8px 10px; border-radius: 10px; }
+element normal.normal   { background-color: transparent;       text-color: @fg1; }
+element selected.normal { background-color: @accent-transparent; text-color: @fg0; }
+element-text      { vertical-align: 0.5; }
+element-icon      { size: 1.1em; }
+inputbar          { padding: 6px 10px; spacing: 10px; border-radius: 10px;
+                    background-color: @bg1-transparent; }
+prompt            { text-color: @accent; }
+entry             { text-color: @fg0; placeholder-color: @fg1; }

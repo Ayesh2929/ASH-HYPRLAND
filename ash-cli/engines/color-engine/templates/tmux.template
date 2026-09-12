@@ -1,3 +1,43 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — tmux.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — tmux.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# tmux status bar and pane borders, including the copy-mode and message styles
+# that are easy to forget and then look broken when triggered.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+# ── Base ─────────────────────────────────────────────────────────────────────
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+
+set -g status-style          "bg={{mantle|strip_hash}},fg={{subtext|strip_hash}}"
+set -g status-left-style     "bg={{accent|strip_hash}},fg={{base|strip_hash}},bold"
+set -g status-right-style    "bg={{surface|strip_hash}},fg={{text|strip_hash}}"
+set -g status-left-length 40
+set -g status-right-length 80
+
+set -g window-status-style          "bg={{base|strip_hash}},fg={{overlay|strip_hash}}"
+set -g window-status-current-style  "bg={{surface|strip_hash}},fg={{accent|strip_hash}},bold"
+set -g window-status-activity-style "bg={{base|strip_hash}},fg={{gold|strip_hash}}"
+set -g window-status-bell-style     "bg={{base|strip_hash}},fg={{rose|strip_hash}},bold"
+
+# ── Panes ────────────────────────────────────────────────────────────────────
+set -g pane-border-style        "fg={{surface|strip_hash}}"
+set -g pane-active-border-style "fg={{accent|strip_hash}}"
+set -g pane-border-status top
+set -g pane-border-format " #[bold]{{accent|strip_hash}}#{pane_index} #[default]#{pane_title} "
+
+# ── Modes and messages ───────────────────────────────────────────────────────
+set -g message-style          "bg={{accent|strip_hash}},fg={{base|strip_hash}},bold"
+set -g message-command-style  "bg={{surface|strip_hash}},fg={{text|strip_hash}}"
+set -g mode-style             "bg={{accent|strip_hash}},fg={{base|strip_hash}}"
+
+setw -g clock-mode-colour {{sky|strip_hash}}
+setw -g clock-mode-style 24
+
+# ── Copy mode ────────────────────────────────────────────────────────────────
+setw -g mode-keys vi
+set -g @ash_theme "{{theme_name}}"

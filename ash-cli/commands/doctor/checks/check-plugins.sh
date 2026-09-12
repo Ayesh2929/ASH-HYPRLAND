@@ -16,7 +16,14 @@
 [[ "${_ASH_CHECK_PLUGINS_LOADED:-}" == "1" ]] && return 0
 readonly _ASH_CHECK_PLUGINS_LOADED=1
 
-set -euo pipefail
+# Sourced as a library by _common.sh, so shell options are only
+# tightened when this file is EXECUTED directly. A sourced file that
+# sets -e/-u rewrites the options of whoever loaded it — the first
+# module would make the whole doctor process abort on any non-zero
+# status or unset variable.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 IFS=$'\n\t'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

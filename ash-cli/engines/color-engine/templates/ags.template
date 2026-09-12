@@ -1,3 +1,94 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — ags.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — ags.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Aylur's GTK Shell. A full bar is emitted as SCSS variables plus the widget
+# styling, so a themed shell can be dropped straight into ~/.config/ags.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ASH {{theme_name}} — AGS (Aylur's GTK Shell)
+//
+//  Import this from style.scss, then use $ash-* in your widgets.
+// ════════════════════════════════════════════════════════════════════════════
+
+$ash-base:    {{base}};
+$ash-mantle:  {{mantle}};
+$ash-crust:   {{crust}};
+$ash-surface: {{surface}};
+$ash-overlay: {{overlay}};
+$ash-text:    {{text}};
+$ash-subtext: {{subtext}};
+$ash-accent:  {{accent}};
+$ash-mint:    {{mint}};
+$ash-sky:     {{sky}};
+$ash-gold:    {{gold}};
+$ash-rose:    {{rose}};
+$ash-violet:  {{violet}};
+
+$ash-radius: 12px;
+$ash-pad: 8px;
+$ash-transition: 180ms cubic-bezier(0.2, 0, 0, 1);
+
+window.Bar {
+    background: transparent;
+    color: $ash-text;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    min-height: 34px;
+}
+
+.Bar .panel {
+    background: $ash-base;
+    border-bottom: 2px solid $ash-surface;
+    padding: 0 $ash-pad;
+}
+
+.Bar .workspace {
+    min-width: 22px;
+    min-height: 22px;
+    margin: 6px 3px;
+    border-radius: 7px;
+    background: transparent;
+    transition: background $ash-transition, color $ash-transition;
+
+    label { color: $ash-subtext; }
+
+    &:hover   { background: $ash-surface; label { color: $ash-text; } }
+    &.active  { background: {{accent|alpha0.20}}; label { color: $ash-accent; font-weight: bold; } }
+    &.urgent  { background: {{rose|alpha0.20}};   label { color: $ash-rose; } }
+    &.occupied label { color: $ash-text; }
+}
+
+.Bar .module {
+    background: $ash-mantle;
+    border-radius: $ash-radius;
+    padding: 4px 10px;
+    margin: 4px 3px;
+    transition: background $ash-transition;
+    &:hover { background: $ash-surface; }
+}
+
+.Bar .clock      { color: $ash-accent;  font-weight: bold; }
+.Bar .battery    { color: $ash-mint; }
+.Bar .battery.low{ color: $ash-rose; }
+.Bar .cpu        { color: $ash-sky; }
+.Bar .memory     { color: $ash-gold; }
+.Bar .tray       { padding: 0 4px; }
+.Bar .network    { color: $ash-violet; }
+
+tooltip {
+    background: $ash-mantle;
+    border: 1px solid $ash-surface;
+    border-radius: $ash-radius;
+    color: $ash-text;
+}
+
+popover {
+    background: $ash-base;
+    border: 1px solid $ash-surface;
+    border-radius: $ash-radius;
+}

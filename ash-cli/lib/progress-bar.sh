@@ -4,7 +4,19 @@
 # ║  📦 ASH PROGRESS-BAR ENGINE — Progress bar utilities for the ASH ecosystem     ║
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
+# A sourced library must not mutate the caller's shell options.
+# `set -e` inside a sourced file silently aborts the *parent* script
+# on the next non-zero test, which is a nightmare to debug.
+# ── Double-source guard ────────────────────────────────────────────────────
+# Every declaration below is readonly, so a second `source` of this file
+# fails with "readonly variable" before any function is defined. Returning
+# early makes the library safe to load from anywhere.
+[[ -n "${_ASH_PROGRESS_BAR_LOADED:-}" ]] && return 0
+readonly _ASH_PROGRESS_BAR_LOADED=1
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 
 readonly ASH_PROGRESS_BAR_VERSION="5.0.0"
 
@@ -134,7 +146,7 @@ ash_progress_bar_multi() {
     local item_count=0
     local i=0
     for item in ${items}; do
-        (( item_count++ ))
+        (( item_count += 1 ))
     done
 
     local index=0
@@ -187,7 +199,7 @@ ash_progress_bar_multi() {
         fi
         echo
 
-        (( index++ ))
+        (( index += 1 ))
     done
 }
 

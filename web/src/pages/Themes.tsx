@@ -1,15 +1,29 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Themes.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — themes route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import { useState } from 'react'
+import type { Theme } from '../lib/types'
+import ThemeGallery from '../components/ThemeGallery'
+import ThemeEditor from '../components/ThemeEditor'
+import ThemeManager from '../components/ThemeManager'
+import WallpaperPicker from '../components/WallpaperPicker'
 
-def main():
-    print("Running Themes.tsx (omega stub)")
-    sys.exit(0)
+export default function Themes() {
+  const [editing, setEditing] = useState<Theme | null>(null)
 
-if __name__ == '__main__':
-    main()
+  return (
+    <div className="space-y-4">
+      {editing ? (
+        <ThemeEditor theme={editing} onClose={() => setEditing(null)} />
+      ) : (
+        <ThemeGallery onEdit={setEditing} />
+      )}
+      <div className="grid gap-4 xl:grid-cols-2">
+        <ThemeManager />
+        <WallpaperPicker />
+      </div>
+    </div>
+  )
+}

@@ -4,12 +4,29 @@
 # ║  📡 ASH IPC ENGINE — Inter-process communication system for the ASH ecosystem    ║
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
+# A sourced library must not mutate the caller's shell options.
+# `set -e` inside a sourced file silently aborts the *parent* script
+# on the next non-zero test, which is a nightmare to debug.
+# ── Double-source guard ────────────────────────────────────────────────────
+# Every declaration below is readonly, so a second `source` of this file
+# fails with "readonly variable" before any function is defined. Returning
+# early makes the library safe to load from anywhere.
+[[ -n "${_ASH_IPC_LOADED:-}" ]] && return 0
+readonly _ASH_IPC_LOADED=1
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 
 readonly ASH_IPC_VERSION="5.0.0"
 
 # IPC socket configuration
-readonly ASH_IPC_SOCKET="${XDG_RUNTIME_DIR:-/tmp}/ash.sock"
+# Keep this in step with the dispatcher (ash:54 declares
+# ASH_SOCKET="${ASH_RUNTIME_DIR}/ash.sock") and with this file's own PID path
+# below, which has always used ${ASH_RUNTIME_DIR}. Spelling it as
+# "${XDG_RUNTIME_DIR:-/tmp}/ash.sock" put the socket in /run/user/N/ while its
+# PID file went to /run/user/N/ash/, so nothing ever found the socket.
+readonly ASH_IPC_SOCKET="${ASH_RUNTIME_DIR:-${XDG_RUNTIME_DIR:-/tmp}/ash}/ash.sock"
 readonly ASH_IPC_BUFFER_SIZE="8192"
 readonly ASH_IPC_TIMEOUT="30"
 
