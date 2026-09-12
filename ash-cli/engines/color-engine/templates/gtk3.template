@@ -1,3 +1,83 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — gtk3.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — gtk3.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# GTK3 reads @define-color in CSS. The matching gtk.css is emitted alongside
+# gtk4.template because the two toolkits use different selector syntax.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+@define-color theme_bg_color        {{base}};
+@define-color theme_base_color      {{base}};
+@define-color theme_fg_color        {{text}};
+@define-color theme_text_color      {{text}};
+@define-color theme_selected_bg_color {{accent}};
+@define-color theme_selected_fg_color {{base|contrast_fg}};
+@define-color insensitive_bg_color  {{mantle}};
+@define-color insensitive_fg_color  {{overlay}};
+@define-color borders               {{surface}};
+@define-color warning_color         {{gold}};
+@define-color error_color           {{rose}};
+@define-color success_color         {{mint}};
+
+@define-color accent_color          {{accent}};
+@define-color accent_bg_color       {{accent}};
+@define-color accent_fg_color       {{base|contrast_fg}};
+@define-color window_bg_color       {{base}};
+@define-color window_fg_color       {{text}};
+@define-color view_bg_color         {{base}};
+@define-color view_fg_color         {{text}};
+@define-color headerbar_bg_color    {{mantle}};
+@define-color headerbar_fg_color    {{text}};
+@define-color headerbar_border_color {{surface}};
+@define-color card_bg_color         {{surface}};
+@define-color card_fg_color         {{text}};
+@define-color popover_bg_color      {{mantle}};
+@define-color popover_fg_color      {{text}};
+@define-color destructive_bg_color  {{rose}};
+@define-color destructive_fg_color  {{base|contrast_fg}};
+@define-color sidebar_bg_color      {{mantle}};
+@define-color sidebar_fg_color      {{text}};
+
+* {
+    outline-color: alpha({{accent}}, 0.6);
+    outline-style: dashed;
+    outline-offset: -3px;
+    outline-width: 1px;
+    -gtk-secondary-caret-color: {{accent}};
+}
+
+window, .background { background-color: @theme_bg_color; color: @theme_fg_color; }
+
+headerbar {
+    background-color: @headerbar_bg_color;
+    border-bottom: 1px solid @headerbar_border_color;
+    box-shadow: none;
+}
+
+button {
+    border-radius: 8px;
+    border: 1px solid @borders;
+    background-image: none;
+    background-color: {{surface}};
+    transition: all 160ms ease;
+}
+button:hover   { background-color: {{overlay}}; }
+button:active,
+button:checked { background-color: @accent_bg_color; color: @accent_fg_color; }
+button:disabled { background-color: @insensitive_bg_color; color: @insensitive_fg_color; }
+
+entry, spinbutton, .entry {
+    border-radius: 8px;
+    border: 1px solid @borders;
+    background-color: {{mantle}};
+    color: {{text}};
+}
+entry:focus, spinbutton:focus { border-color: {{accent}}; }
+
+scrollbar slider { background-color: {{overlay}}; border-radius: 999px; min-width: 6px; min-height: 6px; }
+scrollbar slider:hover { background-color: {{accent}}; }
+
+selection { background-color: {{accent}}; color: {{base|contrast_fg}}; }

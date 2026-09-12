@@ -1,3 +1,73 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — waybar.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — waybar.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Waybar accepts both #rrggbb and @name references. Named colours are emitted so
+# the stylesheet stays readable and one change to a slot propagates everywhere.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+@define-color base    {{base}};
+@define-color mantle  {{mantle}};
+@define-color crust   {{crust}};
+@define-color surface {{surface}};
+@define-color overlay {{overlay}};
+@define-color text    {{text}};
+@define-color subtext {{subtext}};
+@define-color accent  {{accent}};
+@define-color mint    {{mint}};
+@define-color sky     {{sky}};
+@define-color gold    {{gold}};
+@define-color rose    {{rose}};
+@define-color violet  {{violet}};
+
+window#waybar {
+    background: alpha(@base, 0.92);
+    color: @text;
+    border-bottom: 2px solid alpha(@accent, 0.45);
+}
+
+.modules-left, .modules-center, .modules-right { padding: 0 6px; }
+
+#workspaces button {
+    padding: 0 8px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    background: transparent;
+    color: @subtext;
+    transition: all 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+#workspaces button:hover    { background: alpha(@surface, 0.80); color: @text; }
+#workspaces button.active   { background: alpha(@accent, 0.22); color: @accent; }
+#workspaces button.urgent   { background: alpha(@rose, 0.28);   color: @rose; }
+
+#clock, #battery, #cpu, #memory, #network, #pulseaudio, #tray, #custom-* {
+    padding: 0 10px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    background: alpha(@surface, 0.55);
+    color: @text;
+}
+
+#cpu.warning, #memory.warning, #battery.warning { color: @gold; }
+#cpu.critical, #memory.critical,
+#battery.critical, #network.disconnected       { color: @rose; }
+#battery.charging, #battery.plugged            { color: @mint; }
+#network.linked                                { color: @sky; }
+
+tooltip {
+    background: @mantle;
+    border: 1px solid @overlay;
+    border-radius: 10px;
+}
+tooltip label { color: @text; padding: 6px; }

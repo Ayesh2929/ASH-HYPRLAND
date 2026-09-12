@@ -1,3 +1,62 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — gtk4.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — gtk4.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# GTK4 variant. libadwaita in GTK4 hardcodes some colours, so the named colour
+# overrides below are what actually take effect for those widgets.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+@define-color accent_color          {{accent}};
+@define-color accent_bg_color       {{accent}};
+@define-color accent_fg_color       {{base|contrast_fg}};
+@define-color destructive_color     {{rose}};
+@define-color destructive_bg_color  {{rose}};
+@define-color destructive_fg_color  {{base|contrast_fg}};
+@define-color success_color         {{mint}};
+@define-color warning_color         {{gold}};
+@define-color error_color           {{rose}};
+
+@define-color window_bg_color       {{base}};
+@define-color window_fg_color       {{text}};
+@define-color view_bg_color         {{base}};
+@define-color view_fg_color         {{text}};
+@define-color headerbar_bg_color    {{mantle}};
+@define-color headerbar_fg_color    {{text}};
+@define-color headerbar_border_color {{surface}};
+@define-color headerbar_backdrop_color {{crust}};
+@define-color sidebar_bg_color      {{mantle}};
+@define-color sidebar_fg_color      {{text}};
+@define-color secondary_sidebar_bg_color {{crust}};
+@define-color card_bg_color         {{surface}};
+@define-color card_fg_color         {{text}};
+@define-color popover_bg_color      {{mantle}};
+@define-color popover_fg_color      {{text}};
+@define-color dialog_bg_color       {{mantle}};
+@define-color dialog_fg_color       {{text}};
+@define-color shade_color           alpha({{crust}}, 0.5);
+@define-color scrollbar_outline_color alpha({{overlay}}, 0.5);
+
+* { outline-color: alpha({{accent}}, 0.6); }
+
+window, .background { background-color: @window_bg_color; color: @window_fg_color; }
+
+headerbar {
+    background-color: @headerbar_bg_color;
+    color: @headerbar_fg_color;
+    box-shadow: none;
+    border-bottom: 1px solid @headerbar_border_color;
+}
+
+.card, .osd { background-color: @card_bg_color; color: @card_fg_color; border-radius: 12px; }
+
+button {
+    border-radius: 9px;
+    background-image: none;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+button.suggested-action { background-color: @accent_bg_color; color: @accent_fg_color; }
+button.destructive-action { background-color: @destructive_bg_color; color: @destructive_fg_color; }
+button.flat:hover { background-color: alpha({{accent}}, 0.14); }

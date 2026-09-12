@@ -1,3 +1,87 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — swaync.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — swaync.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Notification centre. Separate stylesheets are emitted for the control centre
+# and the popups so each can be tuned independently.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+* {
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+.control-center {
+    background: {{base}};
+    border: 2px solid {{surface}};
+    border-radius: 16px;
+    padding: 8px;
+}
+
+.widget-title {
+    color: {{accent}};
+    font-size: 15px;
+    font-weight: bold;
+    margin: 6px 0;
+}
+
+.widget-dnd {
+    color: {{text}};
+    background: {{mantle}};
+    border-radius: 10px;
+    padding: 6px;
+}
+.widget-dnd > switch {
+    background: {{surface}};
+    border-radius: 999px;
+}
+.widget-dnd > switch:checked { background: {{accent}}; }
+
+.notification-row {
+    outline: none;
+    margin: 4px 0;
+}
+
+.notification {
+    background: {{mantle}};
+    border: 1px solid {{surface}};
+    border-radius: 12px;
+    padding: 10px;
+    transition: all 180ms ease;
+}
+.notification:hover { border-color: {{accent}}; }
+
+.notification-content { color: {{text}}; }
+.summary { color: {{text}}; font-weight: bold; }
+.body    { color: {{subtext}}; }
+.time    { color: {{overlay}}; font-size: 11px; }
+
+.critical { border-color: {{rose}}; }
+.critical .summary { color: {{rose}}; }
+.low      { border-color: {{sky}}; }
+
+.close-button {
+    background: {{surface}};
+    color: {{text}};
+    border-radius: 999px;
+    padding: 2px;
+}
+.close-button:hover { background: {{rose}}; color: {{base}}; }
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+    background: {{surface}};
+    color: {{text}};
+    border-radius: 10px;
+    padding: 8px;
+}
+.widget-buttons-grid > flowbox > flowboxchild > button:hover { background: {{accent}}; color: {{base}}; }
+
+.widget-volume, .widget-backlight {
+    background: {{mantle}};
+    color: {{text}};
+    border-radius: 10px;
+    padding: 6px;
+}
