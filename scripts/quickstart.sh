@@ -1,14 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH'S HYPRLAND DOTFILES v3.0 — QUICKSTART                         ║
+# ║           ASH'S HYPRLAND DOTFILES v5.0 OMEGA — QUICKSTART                   ║
 # ║           One-Command Setup Script                                           ║
 # ║           Usage: bash <(curl -sSL https://raw.githubusercontent.com/...)    ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-readonly REPO_URL="https://github.com/yourusername/ash-dots"
+readonly REPO_URL="https://github.com/Ayesh2929/ASH-HYPRLAND"
 readonly DOTFILES_DIR="${HOME}/.dotfiles"
 readonly BOLD='\033[1m'
 readonly RESET='\033[0m'
@@ -29,7 +29,7 @@ print_quick_banner() {
     ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ███████║
     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝
 
-              🚀 QUICKSTART — ASH HYPRLAND DOTFILES v3.0 🚀
+              🚀 QUICKSTART — ASH HYPRLAND DOTFILES v5.0 OMEGA 🚀
 BANNER
     echo -e "${RESET}"
 }
@@ -91,7 +91,7 @@ run_installer() {
 main() {
     print_quick_banner
 
-    echo -e "  ${CYAN}This will install ASH Hyprland Dotfiles v3.0${RESET}"
+    echo -e "  ${CYAN}This will install ASH Hyprland Dotfiles v5.0 OMEGA${RESET}"
     echo -e "  ${CYAN}Repository: ${REPO_URL}${RESET}"
     echo -e "  ${CYAN}Target: ${DOTFILES_DIR}${RESET}"
     echo ""

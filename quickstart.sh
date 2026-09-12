@@ -1,14 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║           ASH DOTFILES v3.1.0 — QUICKSTART                                 ║
+# ║           ASH DOTFILES v5.0 OMEGA — QUICKSTART                             ║
 # ║           One-command setup: bash <(curl -sSL URL/quickstart.sh)           ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-readonly ASH_VERSION="3.1.0"
-readonly REPO_URL="https://github.com/yourusername/ash-dots"
+readonly ASH_VERSION="5.0.0-omega"
+readonly REPO_URL="https://github.com/Ayesh2929/ASH-HYPRLAND"
 readonly DOTFILES_DIR="${HOME}/.dotfiles"
 readonly INSTALL_LOG="/tmp/ash-quickstart.log"
 
@@ -40,11 +40,11 @@ print_banner() {
     ║   ██║  ██║███████║██║  ██║    ██████╔╝╚██████╔╝   ██║   ███████║ ║
     ║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝ ║
     ║                                                                   ║
-    ║        🚀 QUICKSTART — ASH HYPRLAND DOTFILES v3.1.0 🚀           ║
+    ║        🚀 QUICKSTART — ASH HYPRLAND DOTFILES v5.0 OMEGA 🚀       ║
     ║                                                                   ║
     ║   ✨ Dynamic Themes  •  AI Color Gen  •  Music Reactive          ║
     ║   🎵 Health Score    •  Analytics     •  Smart Wallpapers        ║
-    ║   🤖 274+ Files      •  0 Known Bugs  •  Production Ready        ║
+    ║   🤖 2600+ Files      •  0 Known Bugs  •  Production Ready       ║
     ║                                                                   ║
     ╚═══════════════════════════════════════════════════════════════════╝
 BANNER
