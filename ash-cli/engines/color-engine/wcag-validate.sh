@@ -187,11 +187,22 @@ ash_wcag_sweep() {
     local dir="$1" mode="${2:-text}"
     [[ -d "$dir" ]] || { printf 'ash wcag: not a directory: %s\n' "$dir" >&2; return 2; }
 
-    local total=0 failed=0 unreadable=0 file
+    local total=0 failed=0 unreadable=0 skipped=0 file
     local -a failed_files=()
 
     while IFS= read -r file || [[ -n "$file" ]]; do
         [[ -n "$file" ]] || continue
+
+        # A theme library directory also holds its JSON Schema and any number of
+        # index or manifest files. Counting those as "malformed themes" makes
+        # the gate cry wolf, and a gate that cries wolf gets ignored. Skip
+        # anything that is not a palette and say so separately.
+        if ! grep -q '"base"' "$file" 2>/dev/null; then
+            (( skipped += 1 ))
+            [[ "$mode" == "--json" ]] || printf -- '- %s (not a theme, skipped)\n' "${file#"$dir"/}"
+            continue
+        fi
+
         (( total += 1 ))
 
         local rc=0
@@ -212,12 +223,14 @@ ash_wcag_sweep() {
     done < <(find "$dir" -type f -name '*.json' | sort)
 
     if [[ "$mode" == "--json" ]]; then
-        printf '{"total":%s,"failed":%s,"malformed":%s,"passed":%s}\n' \
-            "$total" "$failed" "$unreadable" "$(( total - failed - unreadable ))"
+        printf '{"total":%s,"failed":%s,"malformed":%s,"skipped":%s,"passed":%s}\n' \
+            "$total" "$failed" "$unreadable" "$skipped" "$(( total - failed - unreadable ))"
     else
-        printf '\n%s  %s themes: %s pass, %s fail, %s malformed\n' \
+        printf '\n%s  %s themes: %s pass, %s fail, %s malformed' \
             "$([ $(( failed + unreadable )) -eq 0 ] && echo '✅' || echo '❌')" \
             "$total" "$(( total - failed - unreadable ))" "$failed" "$unreadable"
+        (( skipped > 0 )) && printf ' (%s non-theme files skipped)' "$skipped"
+        printf '\n' 
 
         if (( failed + unreadable > 0 )); then
             printf '\nfirst failures:\n'

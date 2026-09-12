@@ -258,31 +258,50 @@ ash_palette_accents() {
 
     # ── Resolve the six final hues ───────────────────────────────────────
     #
-    # Order matters, and getting it wrong produced a 15-degree collision that
-    # the test suite caught. The five semantic slots first take their cohesion
-    # nudge toward the seed; only then is accent placed against the hues that
-    # will ACTUALLY be emitted.
+    # Which colour moves, when two would collide, is the whole design question
+    # here, and the first two attempts got it wrong in opposite directions.
     #
-    # The first version checked accent against the un-nudged targets, so a
-    # violet target of 292 looked 28 degrees clear of a 264 seed — but cohesion
-    # then pulled violet to 280 and the real gap was 15 degrees.
-    local mint_h sky_h gold_h rose_h violet_h accent_hue
-    mint_h="$(_ash_palette_cohere 145 "$seed_hue")"
-    sky_h="$(_ash_palette_cohere 220 "$seed_hue")"
-    gold_h="$(_ash_palette_cohere 85 "$seed_hue")"
-    rose_h="$(_ash_palette_cohere 8 "$seed_hue")"
-    violet_h="$(_ash_palette_cohere 292 "$seed_hue")"
+    # Attempt 1 moved accent to the midpoint of the widest gap: a purple theme
+    # shipped with a chartreuse primary. Attempt 2 spiralled accent to the
+    # nearest free angle, which was better, but accent is the SEED hue — it is
+    # the theme's identity — and blue seeds sit close to the violet target, so
+    # every blue theme came out with a purple accent. Nord is a blue palette and
+    # was rendering its primary colour as #d1a2ff.
+    #
+    # Attempt 3, here: accent stays on the seed hue, and the SEMANTIC slots move
+    # to make room. That is the right way round — "accent" has no meaning beyond
+    # "the theme's colour", while "mint" has to stay green and "sky" has to stay
+    # blue, so it is the latter that should yield.
+    local accent_hue="$seed_hue"
+    local -a placed=("$accent_hue")
+    local -a final_hues=()
 
-    accent_hue="$(_ash_palette_separate_accent "$seed_hue"         "$mint_h" "$sky_h" "$gold_h" "$rose_h" "$violet_h")"
+    # slot:target-hue. Targets are absolute; cohesion pulls each up to 12
+    # degrees toward the seed without letting it stop being its own colour.
+    local -a spec=(mint:145 sky:220 gold:85 rose:8 violet:292)
 
-    #: slot:final-hue — conventional colour meanings.
-    local -a spec=(
-        accent:"$accent_hue" mint:"$mint_h" sky:"$sky_h"
-        gold:"$gold_h" rose:"$rose_h" violet:"$violet_h"
-    )
-
-    local entry slot hue
+    local entry slot target h
     for entry in "${spec[@]}"; do
+        slot="${entry%%:*}"
+        target="${entry##*:}"
+
+        h="$(_ash_palette_cohere "$target" "$seed_hue")"
+
+        # Avoid the accent and everything already placed.
+        if [[ ${#placed[@]} -gt 0 ]]; then
+            h="$(_ash_palette_avoid "$h" "${placed[@]}")"
+        fi
+
+        placed+=("$h")
+        final_hues+=("$slot:$h")
+    done
+
+    # Accent last, so it is unaffected by the semantic slots moving.
+    local -a all_spec=("accent:$accent_hue")
+    local item
+    for item in "${final_hues[@]}"; do all_spec+=("$item"); done
+
+    for entry in "${all_spec[@]}"; do
         slot="${entry%%:*}"
         hue="${entry##*:}"
 
@@ -333,7 +352,7 @@ _ash_palette_cohere() {
     }'
 }
 
-# _ash_palette_separate_accent <seed-hue> <occupied-hues...> → accent hue
+# _ash_palette_avoid <hue> <occupied-hues...> → the nearest separation
 #
 #   Keeps accent as close to the seed as possible.
 #
@@ -347,7 +366,7 @@ _ash_palette_cohere() {
 #   take the first angle that clears MIN_SEP from every occupied hue. The
 #   result is normally the seed itself, and otherwise the smallest possible
 #   deviation from it.
-_ash_palette_separate_accent() {
+_ash_palette_avoid() {
     local seed="$1"; shift
     _ash_ok_awk -v seed="$seed" -v others="$*" '
     function wrap(h) {
