@@ -1,3 +1,87 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — discord-betterdiscord.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — discord-betterdiscord.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# BetterDiscord CSS. Discord's own variables are overridden so third-party
+# plugins that read them inherit the theme automatically.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+/**
+ * ASH {{theme_name}} for BetterDiscord.
+ * @name ASH {{theme_name}}
+ * @author ASH Dotfiles
+ * @description A theme generated from the ASH v5.0 palette.
+ * @version 5.0.0
+ */
+
+:root {
+    --ash-base:    {{base}};
+    --ash-mantle:  {{mantle}};
+    --ash-crust:   {{crust}};
+    --ash-surface: {{surface}};
+    --ash-overlay: {{overlay}};
+    --ash-text:    {{text}};
+    --ash-subtext: {{subtext}};
+    --ash-accent:  {{accent}};
+    --ash-mint:    {{mint}};
+    --ash-sky:     {{sky}};
+    --ash-gold:    {{gold}};
+    --ash-rose:    {{rose}};
+    --ash-violet:  {{violet}};
+
+    /* Discord's own tokens. Third-party plugins read these, so overriding
+       them here themes plugins we have never seen. */
+    --background-primary:         var(--ash-base);
+    --background-secondary:       var(--ash-mantle);
+    --background-secondary-alt:   var(--ash-crust);
+    --background-tertiary:        var(--ash-crust);
+    --background-accent:          var(--ash-surface);
+    --background-floating:        var(--ash-mantle);
+    --background-modifier-hover:  rgba(255, 255, 255, 0.04);
+    --background-modifier-active: rgba(255, 255, 255, 0.06);
+    --background-modifier-selected: var(--ash-surface);
+    --text-normal:                var(--ash-text);
+    --text-muted:                 var(--ash-subtext);
+    --text-link:                  var(--ash-sky);
+    --header-primary:             var(--ash-text);
+    --header-secondary:           var(--ash-subtext);
+    --interactive-normal:         var(--ash-subtext);
+    --interactive-hover:          var(--ash-text);
+    --interactive-active:         var(--ash-accent);
+    --interactive-muted:          var(--ash-overlay);
+    --brand-experiment:           var(--ash-accent);
+    --status-positive:            var(--ash-mint);
+    --status-warning:             var(--ash-gold);
+    --status-danger:              var(--ash-rose);
+    --info-positive-text:         var(--ash-mint);
+    --info-warning-text:          var(--ash-gold);
+    --info-danger-text:           var(--ash-rose);
+    --scrollbar-thin-thumb:       var(--ash-overlay);
+    --scrollbar-auto-thumb:       var(--ash-overlay);
+    --scrollbar-auto-track:       var(--ash-crust);
+    --channeltextarea-background: var(--ash-surface);
+}
+
+.theme-dark, .theme-light {
+    --background-primary: var(--ash-base);
+    --background-secondary: var(--ash-mantle);
+}
+
+/* Smooth the transition so switching themes does not flash. */
+.app-3xd6d0, .bg-1Qv33p, .chat-2ZfjoI {
+    transition: background-color 240ms ease, color 240ms ease;
+}
+
+/* Rounded, subtly-tinted message hover rather than a flat grey block. */
+.message-2CShn3:hover { background-color: rgba(255, 255, 255, 0.025); border-radius: 8px; }
+.message-2CShn3.selected-2LX7Jy { background-color: var(--ash-surface); border-radius: 8px; }
+
+/* Accent ring on focus, matching the desktop's focus colour. */
+:focus-visible { outline: 2px solid var(--ash-accent); outline-offset: 2px; }
+
+/* Unread and mention pills. */
+.numberBadge-2s8kKX { background-color: var(--ash-rose) !important; color: var(--ash-base); }
+.mention-1f5kbO { background-color: {{accent|alpha0.20}}; color: var(--ash-accent); }

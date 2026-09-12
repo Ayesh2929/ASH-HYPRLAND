@@ -1,4 +1,239 @@
-/* ⚡ ASH DOTFILES v5.0 OMEGA — globals.css */
-:root {
-    --ash-omega-version: "5.0.0-omega";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  🌐 ASH DOTFILES v5.0 OMEGA — Design tokens & motion system               ║
+   ║                                                                           ║
+   ║  Every colour is stored as a bare "R G B" triplet so Tailwind's           ║
+   ║  `<alpha-value>` syntax works. Swapping a theme rewrites these variables  ║
+   ║  and the entire dashboard repaints — no recompile, no FOUC.               ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+@layer base {
+  :root {
+    /* Catppuccin Mocha — the OMEGA default */
+    --ash-base:    30 30 46;      /* #1e1e2e */
+    --ash-mantle:  24 24 37;      /* #181825 */
+    --ash-crust:   17 17 27;      /* #11111b */
+    --ash-surface: 49 50 68;      /* #313244 */
+    --ash-overlay: 69 71 90;      /* #45475a */
+    --ash-text:    205 214 244;   /* #cdd6f4 */
+    --ash-subtext: 166 173 200;   /* #a6adc8 */
+    --ash-accent:  203 166 247;   /* #cba6f7 mauve */
+    --ash-mint:    166 227 161;   /* #a6e3a1 green */
+    --ash-sky:     137 220 235;   /* #89dceb sky */
+    --ash-gold:    249 226 175;   /* #f9e2af yellow */
+    --ash-rose:    243 139 168;   /* #f38ba8 red */
+    --ash-violet:  180 190 254;   /* #b4befe lavender */
+
+    /* Motion — one place to tune the whole feel of the product */
+    --ash-ease-swift: cubic-bezier(.22, 1, .36, 1);
+    --ash-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --ash-dur-fast: 140ms;
+    --ash-dur: 240ms;
+    --ash-dur-slow: 420ms;
+
+    --ash-radius: 14px;
+    --ash-ring: 0 0 0 2px rgb(var(--ash-accent) / .55);
+    color-scheme: dark;
+  }
+
+  /* Light theme — applied by ThemeProvider via data-theme="latte" */
+  [data-theme='latte'] {
+    --ash-base:    239 241 245;   /* #eff1f5 */
+    --ash-mantle:  230 233 239;   /* #e6e9ef */
+    --ash-crust:   220 224 232;   /* #dce0e8 */
+    --ash-surface: 204 208 218;   /* #ccd0da */
+    --ash-overlay: 156 160 176;   /* #9ca0b0 */
+    --ash-text:    76 79 105;     /* #4c4f69 */
+    --ash-subtext: 92 95 119;     /* #5c5f77 */
+    --ash-accent:  136 57 239;    /* #8839ef */
+    --ash-mint:    64 160 43;     /* #40a02b */
+    --ash-sky:     4 165 229;     /* #04a5e5 */
+    --ash-gold:    223 142 29;    /* #df8e1d */
+    --ash-rose:    210 15 57;     /* #d20f39 */
+    --ash-violet:  114 135 253;   /* #7287fd */
+    color-scheme: light;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-crust text-text font-sans antialiased;
+    /* Two radial washes give the flat dark base depth without a raster asset. */
+    background-image:
+      radial-gradient(1200px 600px at 12% -8%, rgb(var(--ash-accent) / .16), transparent 60%),
+      radial-gradient(900px 500px at 92% 4%, rgb(var(--ash-sky) / .12), transparent 62%);
+    background-attachment: fixed;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgb(var(--ash-accent) / .35);
+  }
+
+  /* ── Scrollbars ────────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--ash-overlay) / .55);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background var(--ash-dur-fast);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--ash-accent) / .7); background-clip: content-box; }
+  * { scrollbar-width: thin; scrollbar-color: rgb(var(--ash-overlay) / .6) transparent; }
+
+  /* ── Focus: visible, never a browser default ring ─────────────────────── */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ash-ring);
+    border-radius: 8px;
+  }
+
+  /* Respect the OS "reduce motion" switch — non-negotiable for a11y. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   § 2  COMPONENT PRIMITIVES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* Frosted panel — the workhorse container */
+  .ash-panel {
+    @apply relative rounded-2xl border border-white/[0.06] bg-mantle/70 backdrop-blur-xl;
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / .04) inset, 0 12px 40px -12px rgb(0 0 0 / .65);
+  }
+
+  /* Gradient hairline border. Uses a padded background-clip trick so the
+     border can be a gradient without an extra wrapper element. */
+  .ash-panel-glow {
+    @apply relative rounded-2xl p-px;
+    background: linear-gradient(135deg, rgb(var(--ash-accent) / .55), rgb(var(--ash-sky) / .28) 45%, transparent 70%);
+  }
+  .ash-panel-glow > * {
+    @apply rounded-[calc(1rem-1px)] bg-mantle/90 backdrop-blur-xl;
+  }
+
+  .ash-btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-4 py-2
+           text-sm font-medium transition-all duration-200 active:scale-[.97]
+           disabled:pointer-events-none disabled:opacity-45;
+    transition-timing-function: var(--ash-ease-swift);
+  }
+  .ash-btn-primary {
+    @apply ash-btn text-crust;
+    background: linear-gradient(135deg, rgb(var(--ash-accent)), rgb(var(--ash-violet)));
+    box-shadow: 0 6px 20px -8px rgb(var(--ash-accent) / .8);
+  }
+  .ash-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.09);
+    box-shadow: 0 10px 28px -8px rgb(var(--ash-accent) / .95);
+    transform: translateY(-1px);
+  }
+  .ash-btn-ghost {
+    @apply ash-btn border border-white/[0.07] bg-white/[0.02] text-subtext;
+  }
+  .ash-btn-ghost:hover:not(:disabled) {
+    @apply border-accent/40 bg-accent/10 text-text;
+    transform: translateY(-1px);
+  }
+  .ash-btn-danger {
+    @apply ash-btn border border-rose/30 bg-rose/10 text-rose;
+  }
+  .ash-btn-danger:hover:not(:disabled) { @apply bg-rose/20; }
+
+  .ash-input {
+    @apply w-full rounded-xl border border-white/[0.08] bg-crust/70 px-3.5 py-2.5 text-sm
+           text-text placeholder:text-subtext/45 transition-all duration-200;
+  }
+  .ash-input:focus {
+    @apply border-accent/55 bg-crust;
+    box-shadow: 0 0 0 3px rgb(var(--ash-accent) / .13);
+  }
+
+  .ash-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px]
+           font-semibold uppercase tracking-wider;
+  }
+
+  /* Skeleton shimmer — a moving highlight rather than a pulsing block. */
+  .ash-skeleton {
+    @apply relative overflow-hidden rounded-lg bg-white/[0.045];
+  }
+  .ash-skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / .07), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  .ash-divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-white/[0.09] to-transparent;
+  }
+
+  /* Tooltip: pure CSS, appears on hover/focus with a short delay. */
+  .ash-tip { @apply relative; }
+  .ash-tip::after {
+    content: attr(data-tip);
+    @apply pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 whitespace-nowrap
+           rounded-lg border border-white/10 bg-crust px-2.5 py-1.5 text-[11px] font-medium text-text
+           opacity-0 shadow-lift transition-all duration-200;
+    transform: translate(-50%, -4px);
+  }
+  .ash-tip:hover::after,
+  .ash-tip:focus-visible::after { @apply opacity-100; transform: translate(-50%, 0); }
+
+  /* Animated aurora backdrop. Three blurred blobs, GPU-composited only. */
+  .ash-aurora {
+    @apply pointer-events-none fixed inset-0 -z-10 overflow-hidden;
+  }
+  .ash-aurora span {
+    @apply absolute block rounded-full opacity-30 blur-3xl;
+    will-change: transform;
+    animation: aurora 22s ease-in-out infinite;
+  }
+
+  /* Staggered entrance: children animate in sequence via --i. */
+  .ash-stagger > * {
+    animation: fade-up .5s var(--ash-ease-swift) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+
+  .ash-scroll-fade {
+    mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   § 3  UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, rgb(var(--ash-accent)), rgb(var(--ash-sky)) 55%, rgb(var(--ash-mint)));
+  }
+  .glass { @apply bg-white/[0.035] backdrop-blur-xl; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .gpu { transform: translateZ(0); will-change: transform, opacity; }
 }

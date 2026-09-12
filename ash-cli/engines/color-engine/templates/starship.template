@@ -1,3 +1,78 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — starship.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — starship.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Prompt. Starship uses TOML and its own ANSI names rather than hex in most
+# places, so the colours are given both ways.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+add_newline = false
+
+format = """
+[╭─]({{overlay|strip_hash}})$os$username$hostname$directory$git_branch$git_status$python$nodejs$rust$golang
+[╰─]({{overlay|strip_hash}})$character"""
+
+[os]
+disabled = false
+style = "fg:{{accent|strip_hash}} bg:none"
+format = "[$symbol]($style) "
+
+[username]
+show_always = false
+style_user = "fg:{{subtext|strip_hash}} bg:none"
+style_root = "fg:{{rose|strip_hash}} bg:none"
+format = "[$user]($style) "
+
+[hostname]
+ssh_only = true
+style = "fg:{{overlay|strip_hash}} bg:none"
+format = "[@$hostname]($style) "
+
+[directory]
+style = "fg:{{sky|strip_hash}} bg:none"
+read_only = " 🔒"
+truncation_length = 4
+truncate_to_repo = true
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[git_branch]
+symbol = ""
+style = "fg:{{mint|strip_hash}} bg:none"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "fg:{{gold|strip_hash}} bg:none"
+format = "[$all_status$ahead_behind]($style) "
+
+[python]
+symbol = "🐍 "
+style = "fg:{{gold|strip_hash}} bg:none"
+
+[nodejs]
+symbol = "⬢ "
+style = "fg:{{mint|strip_hash}} bg:none"
+
+[rust]
+symbol = "🦀 "
+style = "fg:{{rose|strip_hash}} bg:none"
+
+[golang]
+symbol = "🐹 "
+style = "fg:{{sky|strip_hash}} bg:none"
+
+[character]
+success_symbol = "[❯](bold {{mint|strip_hash}})"
+error_symbol   = "[❯](bold {{rose|strip_hash}})"
+vimcmd_symbol  = "[❮](bold {{gold|strip_hash}})"
+
+[cmd_duration]
+min_time = 500
+style = "fg:{{overlay|strip_hash}} bg:none"
+format = "[$duration]($style) "
+
+[time]
+disabled = true
+style = "fg:{{overlay|strip_hash}}"

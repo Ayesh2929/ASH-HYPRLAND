@@ -149,9 +149,13 @@ __focus_apply_extras() {
                 # Try online sources
                 case "${__focus_ambient}" in
                     rain)
+                        # `&` and `||` cannot be combined — the parser rejects
+                        # the list operator after a background job. The
+                        # backgrounding already makes the exit status
+                        # irrelevant here, which is what `|| true` was for.
                         mpv --loop=inf --volume=40 --no-video \
                             "https://myinstants.com/media/sounds/rain.mp3" \
-                            &>/dev/null & || true
+                            &>/dev/null &
                         ;;
                     *)
                         ash_log_warn "Unknown ambient sound: ${__focus_ambient}"

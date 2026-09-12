@@ -1,15 +1,22 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — main.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ╔═══════════════════════════════════════════════════════════════════════════╗
+ * ║  🌐 ASH DOTFILES v5.0 OMEGA — application entrypoint                      ║
+ * ╚═══════════════════════════════════════════════════════════════════════════╝
+ */
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App'
+import './styles/globals.css'
+import './styles/themes.css'
 
-def main():
-    print("Running main.tsx (omega stub)")
-    sys.exit(0)
+const container = document.getElementById('root')
+if (!container) throw new Error('#root missing from index.html')
 
-if __name__ == '__main__':
-    main()
+ReactDOM.createRoot(container).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+)

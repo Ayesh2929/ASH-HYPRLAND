@@ -1,4 +1,63 @@
-/* ⚡ ASH DOTFILES v5.0 OMEGA — themes.css */
-:root {
-    --ash-omega-version: "5.0.0-omega";
+/* ═══════════════════════════════════════════════════════════════════════════
+   🌐 ASH DOTFILES v5.0 OMEGA — theme overrides & accessibility modes
+   ═══════════════════════════════════════════════════════════════════════════
+   Loaded after globals.css. The runtime theme lives in CSS custom properties
+   on <html> (written by themeStore.applyPaletteToDom); this file only carries
+   the user-selected accessibility variants, which are class toggles.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Reduce motion / animations off ──────────────────────────────────────── */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+html.reduce-motion .ash-aurora { display: none; }
+
+/* ── High contrast ───────────────────────────────────────────────────────── */
+html.high-contrast {
+  --ash-text: 255 255 255;
+  --ash-subtext: 226 232 240;
+}
+html.high-contrast .ash-panel,
+html.high-contrast .ash-panel-glow > * {
+  border-color: rgb(255 255 255 / 0.22) !important;
+  backdrop-filter: none;
+  background-color: rgb(var(--ash-mantle)) !important;
+}
+html.high-contrast .text-subtext\/45,
+html.high-contrast .text-subtext\/50,
+html.high-contrast .text-subtext\/55,
+html.high-contrast .text-subtext\/60 {
+  color: rgb(var(--ash-subtext)) !important;
+}
+html.high-contrast .ash-btn-ghost { border-color: rgb(255 255 255 / 0.3); }
+html.high-contrast :focus-visible { box-shadow: 0 0 0 3px rgb(var(--ash-accent)); }
+
+/* ── Compact density ─────────────────────────────────────────────────────── */
+html.compact .ash-panel { padding: 0.75rem; }
+html.compact .ash-btn { padding: 0.35rem 0.7rem; font-size: 12px; }
+html.compact .ash-input { padding: 0.4rem 0.65rem; font-size: 12px; }
+
+/* ── Per-theme accent washes for the aurora backdrop ──────────────────────
+   The aurora reads the same variables as everything else, so a theme swap
+   recolours the background for free. These rules only tune intensity. */
+[data-theme='latte'] .ash-aurora span { opacity: 0.16; }
+[data-theme='latte'] body {
+  background-image:
+    radial-gradient(1200px 600px at 12% -8%, rgb(var(--ash-accent) / 0.10), transparent 60%),
+    radial-gradient(900px 500px at 92% 4%, rgb(var(--ash-sky) / 0.08), transparent 62%);
+}
+
+/* ── Print: strip chrome, keep the data ──────────────────────────────────── */
+@media print {
+  .ash-aurora,
+  aside,
+  header,
+  footer,
+  form { display: none !important; }
+  body { background: #fff; color: #000; }
+  .ash-panel { border: 1px solid #ccc; box-shadow: none; background: #fff; }
 }

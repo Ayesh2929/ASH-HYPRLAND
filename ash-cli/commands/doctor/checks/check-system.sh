@@ -12,13 +12,26 @@
 # ║  users, locale, timezone, processes, limits & environment variables                   ║
 # ╚══════════════════════════════════════════════════════════════════════════════════════════╝
 # shellcheck disable=SC2154,SC1090,SC1091
-set -euo pipefail
+# Sourced as a library by _common.sh, so shell options are only
+# tightened when this file is EXECUTED directly. A sourced file that
+# sets -e/-u rewrites the options of whoever loaded it — the first
+# module would make the whole doctor process abort on any non-zero
+# status or unset variable.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 IFS=$'\n\t'
 
 # ── Guard: must be sourced from doctor.sh ─────────────────────────────────────
-[[ -z "${DOC_VERSION:-}" ]] && {
-    printf 'ERROR: This check must be sourced via ash doctor\n' >&2; exit 1
-}
+# Guard against being sourced outside the doctor environment. This must NOT
+# `exit`: a sourced file that exits takes its caller with it, so one missed
+# dependency would kill doctor and the whole ash process instead of skipping one
+# module. `return 0` leaves the module unloaded, which _ash_check_load_all
+# reports as a skip.
+if [[ -z "${DOC_VERSION:-}" ]]; then
+    printf 'SKIP: %s needs the ash doctor environment — not sourced\n' "${BASH_SOURCE[0]##*/}" >&2
+    return 0
+fi
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # § HELPERS — system-specific
@@ -521,4 +534,19 @@ check_system::run() {
     check_system::security
 }
 
-check_system::run
+
+# ── Entry points ──────────────────────────────────────────────────────────────
+# Nineteen of the check modules expose ash_check_<area>() and a _quick variant.
+# This one predates that convention and used a bare top-level call to check_system::run,
+# which meant sourcing it ran the whole check. These wrappers give the loader a
+# single, uniform interface to drive.
+ash_check_system() {
+    check_system::run
+}
+
+# The doc:: API records its own results and has no cheap subset, so the quick
+# variant reports on the same areas. It exists so `ash doctor quick` can reach
+# this module at all.
+ash_check_system_quick() {
+    check_system::run
+}

@@ -1,3 +1,107 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — wezterm.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — wezterm.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# WezTerm is configured in Lua. This is a module that returns a colour table,
+# so it can be required from wezterm.lua alongside user settings rather than
+# replacing the whole configuration.
+#
+# Rendered by `ash theme apply`. Filters: upper, lower, strip_hash, add_hash,
+# hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+local M = {}
+
+M.colors = {
+    foreground    = "{{text}}",
+    background    = "{{base}}",
+    cursor_bg     = "{{accent}}",
+    cursor_fg     = "{{base}}",
+    cursor_border = "{{accent}}",
+    selection_bg  = "{{surface}}",
+    selection_fg  = "{{text}}",
+    split         = "{{surface}}",
+    compose_cursor = "{{gold}}",
+    scrollbar_thumb = "{{overlay}}",
+
+    -- The 16 ANSI slots. Terminals, TUIs and shell prompts all read these, so
+    -- they are what makes the shell match the desktop.
+    ansi = {
+        "{{crust}}",    -- black
+        "{{rose}}",     -- red
+        "{{mint}}",     -- green
+        "{{gold}}",     -- yellow
+        "{{sky}}",      -- blue
+        "{{accent}}",   -- magenta
+        "{{violet}}",   -- cyan
+        "{{subtext}}",  -- white
+    },
+    brights = {
+        "{{overlay}}",           -- bright black
+        "{{rose|lighten12}}",    -- bright red
+        "{{mint|lighten12}}",    -- bright green
+        "{{gold|lighten12}}",    -- bright yellow
+        "{{sky|lighten12}}",     -- bright blue
+        "{{accent|lighten12}}",  -- bright magenta
+        "{{violet|lighten12}}",  -- bright cyan
+        "{{text}}",              -- bright white
+    },
+
+    -- Semantic names, for use in user configuration.
+    ash = {
+        base    = "{{base}}",
+        mantle  = "{{mantle}}",
+        crust   = "{{crust}}",
+        surface = "{{surface}}",
+        overlay = "{{overlay}}",
+        text    = "{{text}}",
+        subtext = "{{subtext}}",
+        accent  = "{{accent}}",
+        mint    = "{{mint}}",
+        sky     = "{{sky}}",
+        gold    = "{{gold}}",
+        rose    = "{{rose}}",
+        violet  = "{{violet}}",
+    },
+}
+
+-- Tab bar styling. `is_active` uses the accent so the current tab is obvious
+-- without being loud — the bar sits behind text all day.
+function M.tab_bar(config)
+    config.window_frame = {
+        font = wezterm.font({ family = "JetBrainsMono Nerd Font", weight = "Bold" }),
+        font_size = 11.0,
+        active_titlebar_bg = "{{mantle}}",
+        inactive_titlebar_bg = "{{crust}}",
+        border_left_width = "1px",
+        border_right_width = "1px",
+        border_bottom_height = "1px",
+        border_top_height = "1px",
+        border_left_color = "{{surface}}",
+        border_right_color = "{{surface}}",
+        border_bottom_color = "{{surface}}",
+        border_top_color = "{{surface}}",
+    }
+
+    config.colors.tab_bar = {
+        background = "{{crust}}",
+        active_tab = {
+            bg_color = "{{accent}}", fg_color = "{{base}}",
+            intensity = "Bold",
+        },
+        inactive_tab = {
+            bg_color = "{{mantle}}", fg_color = "{{overlay}}",
+        },
+        inactive_tab_hover = {
+            bg_color = "{{surface}}", fg_color = "{{text}}", italic = true,
+        },
+        new_tab = {
+            bg_color = "{{mantle}}", fg_color = "{{subtext}}",
+        },
+        new_tab_hover = {
+            bg_color = "{{accent}}", fg_color = "{{base}}", italic = true,
+        },
+    }
+    return config
+end
+
+return M

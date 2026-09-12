@@ -110,7 +110,10 @@ _fca_clean_dir() {
     if (( max_age_days > 0 )); then
         find_args+=( -mtime "+${max_age_days}" )
     fi
-    find_args+=( -type f -delete 2>/dev/null )
+    # The redirection belongs on the find call, not inside the array literal:
+    # inside the parens the parser treats it as redirection of the assignment
+    # and chokes on the stray `2`.
+    find_args+=( -type f -delete )
 
     find "${find_args[@]}" 2>/dev/null || true
 

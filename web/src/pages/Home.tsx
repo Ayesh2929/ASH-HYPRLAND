@@ -1,15 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Home.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — home route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import Dashboard from '../components/Dashboard'
 
-def main():
-    print("Running Home.tsx (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+export default function Home() {
+  return <Dashboard />
+}

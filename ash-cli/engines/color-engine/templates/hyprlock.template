@@ -1,3 +1,66 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — hyprlock.template                                            ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — hyprlock.template
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
+#
+# Lock screen. Hyprlock uses rgba() with a 0-1 alpha in addition to plain hex,
+# so the alphaNN filter is used for the translucent panel.
+#
+# Rendered by `ash theme apply`, which substitutes the 13 palette slots plus
+# {theme_name} and {variant}. Filters available: upper, lower, strip_hash,
+# add_hash, hex2rgb, hex2rgbns, contrast_fg, lightenNN, darkenNN, alphaNN.
+
+background {
+    monitor =
+    path = {{wallpaper:-/usr/share/backgrounds/ash-default.png}}
+    color = rgba({{crust|strip_hash}}ff)
+    blur_passes = 3
+    blur_size = 8
+    brightness = 0.85
+    contrast = 1.0
+    vibrancy = 0.2
+}
+
+input-field {
+    monitor =
+    size = 320, 52
+    outline_thickness = 3
+    dots_size = 0.26
+    dots_spacing = 0.3
+    dots_center = true
+    dots_rounding = -1
+    outer_color = rgba({{accent|strip_hash}}ff)
+    inner_color = rgba({{surface|strip_hash}}e6)
+    font_color = rgba({{text|strip_hash}}ff)
+    fade_on_empty = true
+    placeholder_text = <i>Password…</i>
+    hide_input = false
+    rounding = 14
+    check_color = rgba({{gold|strip_hash}}ff)
+    fail_color = rgba({{rose|strip_hash}}ff)
+    fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i>
+    capslock_color = rgba({{gold|strip_hash}}ff)
+    position = 0, 0
+    halign = center
+    valign = center
+}
+
+label {
+    monitor =
+    text = $TIME
+    font_size = 76
+    font_family = JetBrainsMono Nerd Font
+    color = rgba({{text|strip_hash}}ff)
+    position = 0, 140
+    halign = center
+    valign = center
+}
+
+label {
+    monitor =
+    text = cmd[update:1000] echo "$(date +'%A, %d %B')"
+    font_size = 18
+    color = rgba({{subtext|strip_hash}}ff)
+    position = 0, 60
+    halign = center
+    valign = center
+}

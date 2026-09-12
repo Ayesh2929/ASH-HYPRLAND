@@ -97,11 +97,11 @@ net_signal_bar() {
     local dbm="$1"  label="${2:-Signal}"
     local dbm_abs="${dbm#-}"
     local pct sc bars desc
-    if   (( dbm_abs <= 50 )); then pct=100; sc="$(_ngreen)";   bars="▂▄▆█"; desc="Excellent" ;;
-    elif (( dbm_abs <= 60 )); then pct=75;  sc="$(_ngreen)";   bars="▂▄▆░"; desc="Good"      ;;
-    elif (( dbm_abs <= 70 )); then pct=50;  sc="$(_nyellow)";  bars="▂▄░░"; desc="Fair"      ;;
-    elif (( dbm_abs <= 80 )); then pct=25;  sc="$(_npeach)";   bars="▂░░░"; desc="Weak"      ;;
-    else                           pct=10;  sc="$(_nred)";     bars="░░░░"; desc="Poor"      ;;
+    if   (( dbm_abs <= 50 )); then pct=100; sc="$(_ngreen)";   bars="▂▄▆█"; desc="Excellent" ;
+    elif (( dbm_abs <= 60 )); then pct=75;  sc="$(_ngreen)";   bars="▂▄▆░"; desc="Good" ;
+    elif (( dbm_abs <= 70 )); then pct=50;  sc="$(_nyellow)";  bars="▂▄░░"; desc="Fair" ;
+    elif (( dbm_abs <= 80 )); then pct=25;  sc="$(_npeach)";   bars="▂░░░"; desc="Weak" ;
+    else                           pct=10;  sc="$(_nred)";     bars="░░░░"; desc="Poor" ;
     fi
     printf '  %s%-24s%s %s%s%s  %s%d dBm%s  %s%s%s\n' \
         "$(_ndim)" "${label}:" "$(_nr)" \

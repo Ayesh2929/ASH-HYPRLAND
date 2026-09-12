@@ -10,10 +10,13 @@ source "${BASH_SOURCE[0]%/*}/colors.sh"
 source "${BASH_SOURCE[0]%/*}/logger.sh"
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-ASH_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ash"
-ASH_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ash"
-ASH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/ash"
-ASH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ash"
+# These are load-bearing paths that operators and test harnesses legitimately
+# override, so each assigns only when unset. A plain assignment here would
+# silently discard a value the caller deliberately exported.
+: "${ASH_DATA_DIR:=${XDG_DATA_HOME:-$HOME/.local/share}/ash}"
+: "${ASH_STATE_DIR:=${XDG_STATE_HOME:-$HOME/.local/state}/ash}"
+: "${ASH_CACHE_DIR:=${XDG_CACHE_HOME:-$HOME/.cache}/ash}"
+: "${ASH_CONFIG_DIR:=${XDG_CONFIG_HOME:-$HOME/.config}/ash}"
 ASH_SNAPSHOT_DIR="${ASH_DATA_DIR}/snapshots"
 ASH_SNAPSHOT_INDEX="${ASH_SNAPSHOT_DIR}/.index.json"
 ASH_SNAPSHOT_LOCK="${ASH_STATE_DIR}/.snapshot.lock"
@@ -165,7 +168,7 @@ lock::acquire() {
 
         log::debug "Waiting for lock… (${waited}s)"
         sleep 1
-        (( waited++ ))
+        (( waited += 1 ))
     done
 
     printf '%d' "$$" > "${ASH_SNAPSHOT_LOCK}"
