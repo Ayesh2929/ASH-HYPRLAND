@@ -337,12 +337,18 @@ ${ASH_MUTED}# Build config files from a theme, and keep a record${RST}
   ash theme history --limit 10
 
 ${ASH_MUTED}# Derive a theme from a wallpaper or from words${RST}
-  ash theme wallpaper ~/Pictures/dusk.jpg --save
-  ash theme ai-mood "calm oceanic dusk"
+  ash theme wallpaper ~/Pictures/dusk.jpg --apply
+  ash theme ai-generate "deep forest at dusk"
+  ash theme ai-mood calm
 
 ${ASH_MUTED}# Keep a theme and share it${RST}
-  ash theme favorite nord
-  ash theme export nord --out ~/nord.json
+  ash theme favorite add nord
+  ash theme export nord --format base16 --out ~/nord.yaml
+
+${ASH_MUTED}# Keep it honest${RST}
+  ash theme validate --all
+  ash theme wcag --sweep
+  ash theme reset --undo
 
 ${BOLD}${ASH_PRIMARY}CATALOGUE${RST}
   ${ASH_MUTED}Built-in : ${THEME_CATALOGUE_DIR}${RST}

@@ -72,7 +72,7 @@ _theme_preview_mock() {
     local w=64 seg pad
     pad="$(printf '%*s' "$(( w - 20 ))" '')"
 
-    printf '\n  %s%s\n' "${BOLD}${ASH_PRIMARY}" "Mock desktop" "${RST}"
+    printf '\n  %s%s\n' "${BOLD}${ASH_PRIMARY}Mock desktop" "${RST}"
     printf '  '
     _theme_preview_seg "$base" "$fg_bar" "  ◉ 1 "
     _theme_preview_seg "$accent" "$fg_acc" " 2 "
@@ -105,7 +105,7 @@ _theme_preview_gradient() {
     # With colour off a wall of blank spaces tells you nothing, so print the
     # ramp as hex instead — the same information in a form that survives a pipe.
     if [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 1 || ! -t 1 ]]; then
-        printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}" "Gradient" "${RST}"
+        printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}Gradient" "${RST}"
         local -a hexes=()
         if declare -f ash_gradient_from_palette >/dev/null 2>&1; then
             mapfile -t hexes < <(ash_gradient_from_palette _pv "$width" 2>/dev/null) || true
@@ -127,7 +127,7 @@ _theme_preview_gradient() {
         local -a ramp=()
         mapfile -t ramp < <(ash_gradient_from_palette _pv "$width" 2>/dev/null) || true
         if (( ${#ramp[@]} )); then
-            printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}" "Gradient" "${RST}"
+            printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}Gradient" "${RST}"
             local c
             for c in "${ramp[@]}"; do
                 [[ -n "$c" ]] && _theme_preview_seg "$c" "" " "
@@ -139,7 +139,7 @@ _theme_preview_gradient() {
 
     # Fallback: interpolate between the accent slots directly.
     local -a stops=("${_pv[accent]}" "${_pv[mint]}" "${_pv[sky]}" "${_pv[gold]}" "${_pv[rose]}" "${_pv[violet]}")
-    printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}" "Gradient" "${RST}"
+    printf '\n  %s%s\n  ' "${BOLD}${ASH_PRIMARY}Gradient" "${RST}"
     local i steps=$(( width / 5 )) s
     for s in "${stops[@]:0:5}"; do
         [[ "$s" =~ ^#[0-9a-fA-F]{6}$ ]] || continue
