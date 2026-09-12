@@ -458,7 +458,11 @@ ash_palette_render_json() {
     local i slot
     for i in "${!ASH_PALETTE_SLOTS[@]}"; do
         slot="${ASH_PALETTE_SLOTS[$i]}"
-        printf '%s"%-8s": "%s"' "$indent" "$slot" "${_p[$slot]:-}"
+        # Keys are emitted unpadded. A width here would put the padding INSIDE
+        # the key name ("base    "), which reads as valid JSON but cannot be
+        # looked up — and this renderer is also what wcag-validate.sh writes
+        # repaired theme files with.
+        printf '%s"%s": "%s"' "$indent" "$slot" "${_p[$slot]:-}"
         (( i < ${#ASH_PALETTE_SLOTS[@]} - 1 )) && printf ','
         printf '\n'
     done

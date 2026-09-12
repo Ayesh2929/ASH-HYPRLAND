@@ -301,7 +301,27 @@ ash_wcag_fix_file() {
         done
     done
 
-    ash_palette_render_json p > "${file}.fixed"
+    # Merge the repaired colours into the document rather than replacing it.
+    #
+    # Theme files are nested — metadata at the top level, the thirteen slots
+    # under "colors" — while ash_palette_render_json emits a flat object. Writing
+    # that straight over the file discarded name, slug, variant, family, seed,
+    # hue, version, generator and description, leaving a palette with no
+    # identity. Only the "colors" object should be touched.
+    local repaired
+    repaired="$(ash_palette_render_json p)"
+
+    if jq -e 'has("colors")' "$file" >/dev/null 2>&1; then
+        # Nested: replace only the colors object.
+        jq --argjson c "$repaired" '.colors = $c' "$file" > "${file}.fixed" 2>/dev/null \
+            || printf '%s\n' "$repaired" > "${file}.fixed"
+    elif jq -e 'type == "object"' "$file" >/dev/null 2>&1; then
+        # A flat document that also carries metadata: overlay the slots.
+        jq --argjson c "$repaired" '. + $c' "$file" > "${file}.fixed" 2>/dev/null \
+            || printf '%s\n' "$repaired" > "${file}.fixed"
+    else
+        printf '%s\n' "$repaired" > "${file}.fixed"
+    fi
 
     case "$mode" in
         --in-place) mv "${file}.fixed" "$file" ;;
