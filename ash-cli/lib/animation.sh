@@ -4,7 +4,12 @@
 # ║  🎨 ASH ANIMATION ENGINE — Animation utilities for the ASH ecosystem             ║
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
+# A sourced library must not mutate the caller's shell options.
+# `set -e` inside a sourced file silently aborts the *parent* script
+# on the next non-zero test, which is a nightmare to debug.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 
 readonly ASH_ANIMATION_VERSION="5.0.0"
 
@@ -191,8 +196,8 @@ ash_animation_custom() {
     local iteration_count="${4:-1}"
     local element="${5:-}"
 
-    if [[ -n "${element}" ]];n
-1      echo "element.style.animation = \"${name} ${duration}s ${iteration_count} ease;\""
+    if [[ -n "${element}" ]]; then
+        echo "element.style.animation = \"${name} ${duration}s ${iteration_count} ease;\""
         echo "@keyframes ${name} {"
         echo "${keyframes}"
         echo "};"

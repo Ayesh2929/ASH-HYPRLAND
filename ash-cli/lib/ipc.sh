@@ -4,7 +4,12 @@
 # ║  📡 ASH IPC ENGINE — Inter-process communication system for the ASH ecosystem    ║
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
+# A sourced library must not mutate the caller's shell options.
+# `set -e` inside a sourced file silently aborts the *parent* script
+# on the next non-zero test, which is a nightmare to debug.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    set -euo pipefail
+fi
 
 readonly ASH_IPC_VERSION="5.0.0"
 

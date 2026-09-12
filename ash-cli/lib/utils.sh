@@ -165,7 +165,7 @@ lock::acquire() {
 
         log::debug "Waiting for lock… (${waited}s)"
         sleep 1
-        (( waited++ ))
+        (( waited += 1 ))
     done
 
     printf '%d' "$$" > "${ASH_SNAPSHOT_LOCK}"

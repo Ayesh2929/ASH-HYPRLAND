@@ -1,15 +1,20 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — Settings.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  🌐 ASH OMEGA — settings route
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+import SettingsPanel from '../components/Settings'
+import HardwareReport from '../components/HardwareReport'
+import ModeSelector from '../components/ModeSelector'
 
-def main():
-    print("Running Settings.tsx (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+export default function Settings() {
+  return (
+    <div className="space-y-4">
+      <SettingsPanel />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <HardwareReport />
+        <ModeSelector />
+      </div>
+    </div>
+  )
+}
