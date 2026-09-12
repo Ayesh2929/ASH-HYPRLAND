@@ -1,0 +1,383 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — NEWSBOAT ULTRA CONFIG                        ║
+# ║  📰 RSS/Atom reader • Vim keybinds • ASH theme • Full-featured              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📁  PATHS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Cache database location
+cache-file          "~/.local/share/newsboat/cache.db"
+
+# Error log
+error-log           "~/.local/share/newsboat/error.log"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔄  REFRESH & SYNC
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Auto-reload feeds on startup
+auto-reload         yes
+
+# Reload interval (minutes)
+reload-time         30
+
+# Number of parallel download threads
+reload-threads      8
+
+# Download timeout (seconds)
+download-timeout    30
+
+# Maximum items per feed to download
+download-full-page  no
+
+# Maximum number of articles per feed to keep in cache
+max-items           500
+
+# Keep articles for N days (0 = forever)
+keep-articles-days  30
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  BROWSER & CONTENT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Browser to open articles
+# Use xdg-open for system default
+browser              "xdg-open %u"
+
+# Alternative: open in specific browser
+# browser            "firefox %u"
+# browser            "qutebrowser %u"
+
+# Text-mode browser for reading inside newsboat
+# (readable, clean articles inline)
+# browser            "w3m %u"
+# browser            "lynx %u"
+# browser            "elinks %u"
+
+# Open articles with readable view (via readable cli)
+# browser            "readable %u | less -R"
+
+# Open with mpv (for podcast feeds / YouTube RSS)
+# macro p set browser "mpv %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# Use clipboard to copy URL
+# macro y set browser "echo %u | wl-copy" ; open-in-browser ; set browser "xdg-open %u"
+
+# HTML renderer
+html-renderer        "w3m -T text/html"
+
+# External pager for reading articles
+# pager              "nvim -R -"
+
+# Use internal pager (default)
+# pager              internal
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  FORMATTING & DISPLAY
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Feed list format ──────────────────────────────────────────────────────────
+# %n = feed name
+# %u = feed URL
+# %t = total items
+# %U = unread items
+# %T = tags
+# %d = description
+# %l = last fetch time
+feedlist-format      "%4i %n %> (%U/%t)"
+
+# ── Article list format ────────────────────────────────────────────────────────
+# %i = index
+# %f = flags
+# %T = tags
+# %t = title
+# %a = author
+# %d = date
+# %L = article link
+# %c = content
+articlelist-format   "%4i %f %D  %-30t  %T  %a"
+
+# Date format (strftime)
+articlelist-title-format "Articles in feed '%T' (%u unread, %t total) - %U"
+
+# Date format for articles
+datetime-format      "%b %d, %Y  %H:%M"
+
+# Feed list title
+feedlist-title-format "Your feeds (%u unread, %t total)"
+
+# Search result title
+searchresult-title-format "Search result (%u unread, %t total)"
+
+# File dialog title
+filebrowser-title-format "%?O?Open File&Save File? - %f"
+
+# Help title
+help-title-format    "Help"
+
+# Select tag title
+selecttag-title-format "Select tag"
+
+# Select filter title
+selectfilter-title-format "Select filter"
+
+# URL view title
+urlview-title-format "URLs"
+
+# Dialog title for tag
+dirbrowser-title-format "%?O?Open Directory&Save File? - %f"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔤  TEXT WRAPPING
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Article text wrap width (0 = terminal width)
+text-width           88
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔔  NOTIFICATIONS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Show desktop notification when new articles arrive
+notify-always        no
+notify-screen        no
+notify-xterm         no
+
+# Notification format
+notify-format        "📰 newsboat: %d new articles in %f feeds"
+
+# Notification program (dunst / libnotify)
+notify-program       "notify-send"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔍  SEARCH & FILTER
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Default search field (title | content | both)
+# Affects: / search
+# search-highlight-colors        white black
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔐  PROXY & NETWORK
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# HTTP proxy (if needed)
+# proxy               socks5://127.0.0.1:1080
+# proxy-type          socks5
+
+# User agent string
+user-agent           "Newsboat/2.33 (ASH Dotfiles v5.0; Linux)"
+
+# SSL certificate verification
+ssl-verifyhost       yes
+ssl-verifypeer       yes
+
+# HTTP authentication credentials (stored per-feed in urls file)
+# http-auth-method    any
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⌨️  KEYBINDINGS — VIM-NATIVE ULTRA
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Unbind defaults to reassign ────────────────────────────────────────────────
+unbind-key          k
+unbind-key          j
+unbind-key          h
+unbind-key          l
+unbind-key          g
+unbind-key          G
+unbind-key          ^
+unbind-key          $
+unbind-key          /
+unbind-key          ?
+unbind-key          n
+unbind-key          N
+unbind-key          d
+unbind-key          u
+unbind-key          a
+unbind-key          s
+unbind-key          R
+
+# ── Navigation ─────────────────────────────────────────────────────────────────
+bind-key            j     down            feedlist
+bind-key            k     up              feedlist
+bind-key            j     next            articlelist
+bind-key            k     prev            articlelist
+bind-key            j     scroll-down     article
+bind-key            k     scroll-up       article
+bind-key            J     next-unread     feedlist
+bind-key            K     prev-unread     feedlist
+bind-key            J     next-unread     articlelist
+bind-key            K     prev-unread     articlelist
+bind-key            ctrl-d pagedown       feedlist
+bind-key            ctrl-u pageup         feedlist
+bind-key            ctrl-d pagedown       articlelist
+bind-key            ctrl-u pageup         articlelist
+bind-key            ctrl-d scroll-halfpage-down article
+bind-key            ctrl-u scroll-halfpage-up   article
+bind-key            ctrl-f pagedown       article
+bind-key            ctrl-b pageup         article
+bind-key            gg    goto-first      feedlist
+bind-key            G     goto-last       feedlist
+bind-key            gg    goto-first      articlelist
+bind-key            G     goto-last       articlelist
+bind-key            H     first-line      article
+bind-key            M     middle-line     article
+bind-key            L     last-line       article
+bind-key            0     beginning-of-line article
+bind-key            $     end-of-line     article
+
+# ── Open ───────────────────────────────────────────────────────────────────────
+bind-key            l     open            feedlist
+bind-key            l     open            articlelist
+bind-key            h     quit            feedlist
+bind-key            h     quit            articlelist
+bind-key            h     quit            article
+bind-key            ENTER open            feedlist
+bind-key            ENTER open            articlelist
+bind-key            o     open-in-browser article
+bind-key            O     open-in-browser-and-mark-read article
+bind-key            v     open-in-browser articlelist
+
+# ── Search ─────────────────────────────────────────────────────────────────────
+bind-key            /     open-search     feedlist
+bind-key            /     open-search     articlelist
+bind-key            /     open-search     article
+bind-key            n     search-next     feedlist
+bind-key            n     search-next     articlelist
+bind-key            n     search-next     article
+bind-key            N     search-prev     feedlist
+bind-key            N     search-prev     articlelist
+bind-key            N     search-prev     article
+
+# ── Mark & Read ────────────────────────────────────────────────────────────────
+bind-key            a     toggle-article-read   articlelist
+bind-key            A     mark-feed-read        feedlist
+bind-key            A     mark-feed-read        articlelist
+bind-key            m     mark-article-read     articlelist
+bind-key            c     catch-up              feedlist
+
+# ── Refresh ────────────────────────────────────────────────────────────────────
+bind-key            r     reload          feedlist
+bind-key            R     reload-all      feedlist
+bind-key            r     reload          articlelist
+
+# ── Save & Export ──────────────────────────────────────────────────────────────
+bind-key            s     save-article    articlelist
+bind-key            s     save-article    article
+bind-key            S     save-article    feedlist
+
+# ── Tags ───────────────────────────────────────────────────────────────────────
+bind-key            t     select-tag      feedlist
+bind-key            T     select-filter   feedlist
+bind-key            ^T    clear-tag       feedlist
+
+# ── Miscellaneous ──────────────────────────────────────────────────────────────
+bind-key            q     quit            feedlist
+bind-key            q     quit            articlelist
+bind-key            q     quit            article
+bind-key            ?     help            feedlist
+bind-key            ?     help            articlelist
+bind-key            ?     help            article
+bind-key            i     article-info    article
+bind-key            e     enqueue         article
+bind-key            d     delete-article  articlelist
+bind-key            D     purge-deleted   feedlist
+bind-key            ;     cmdline         feedlist
+bind-key            :     cmdline         feedlist
+bind-key            :     cmdline         articlelist
+
+# ── Macros (leader = , ) ────────────────────────────────────────────────────
+macro-prefix         ,
+
+# Open in Firefox
+macro f set browser "firefox %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# Open in qutebrowser
+macro q set browser "qutebrowser %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# Play with mpv
+macro p set browser "mpv --ytdl-format='bestvideo[height<=1080]+bestaudio/best' %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# Download with yt-dlp
+macro y set browser "yt-dlp -o '~/Videos/%(title)s.%(ext)s' %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# Copy URL to clipboard (Wayland)
+macro c set browser "wl-copy < /dev/null; echo %u | wl-copy" ; open-in-browser ; set browser "xdg-open %u"
+
+# Read article with readable CLI
+macro r set browser "readable %u | nvim -R -" ; open-in-browser ; set browser "xdg-open %u"
+
+# Pocket / read-later
+macro w set browser "~/.local/bin/pocket-add %u" ; open-in-browser ; set browser "xdg-open %u"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🗑️  CLEANUP
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Remove articles after they've been read
+# cleanup-on-quit    no
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎨  COLORS (sourced from colors file)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Colors are defined in the separate colors file
+# Include colors:
+include             "~/.config/newsboat/colors"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📱  PODCAST / ENQUEUE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Podcast/media player queue file
+podurl-queue        "~/.local/share/newsboat/queue"
+
+# Podcast download path
+# download-path      "~/Podcasts/%n"
+
+# Max parallel podcast downloads
+# max-downloads      3
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔌  EXTERNAL TOOLS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Image viewer for inline images
+# image-viewer       "feh -"
+
+# External command for sharing
+# goto-next-feed     yes
+
+# External filter for processing articles
+# articlefilter      "~/.config/newsboat/filter.py"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌍  DISPLAY OPTIONS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Show read feeds in feed list
+show-read-feeds      yes
+
+# Show read articles in article list
+show-read-articles   yes
+
+# Mark all as read on exit
+# mark-as-read-on-hover no
+
+# Confirm quit
+confirm-exit         no
+
+# Confirm mark-all-read
+confirm-mark-feed-read yes
+
+# Ask before deleting
+# confirm-exit       no
+
+# Go to first unread on open
+goto-first-unread    yes
+
+# Jump to next unread after opening article
+# goto-next-feed     yes

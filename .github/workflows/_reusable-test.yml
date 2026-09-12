@@ -42,11 +42,49 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.12
       - run: pip install Pillow --quiet
-      - run: echo "Test theme engine mocked"
+      - name: "🎨 Validate theme color files"
+        run: |
+          set -euo pipefail
+          ERRORS=0
+          TESTED=0
+          REQUIRED_KEYS='["background","foreground","accent"]'
+
+          for colors_file in $(find themes/presets -name "colors.json" 2>/dev/null); do
+            TESTED=$((TESTED + 1))
+            THEME=$(basename "$(dirname "$colors_file")")
+
+            # 1. Valid JSON
+            if ! jq empty "$colors_file" 2>/dev/null; then
+              echo "❌ $THEME: Invalid JSON"
+              ERRORS=$((ERRORS + 1))
+              continue
+            fi
+
+            # 2. Required keys present
+            for key in background foreground accent; do
+              if ! jq -e ".$key" "$colors_file" >/dev/null 2>&1; then
+                echo "❌ $THEME: Missing required key '$key'"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+
+            # 3. Valid hex color format
+            for key in $(jq -r 'keys[]' "$colors_file"); do
+              val=$(jq -r ".$key" "$colors_file")
+              if [[ "$val" =~ ^# ]] && [[ ! "$val" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+                echo "⚠️ $THEME: Invalid hex color '$key': $val"
+              fi
+            done
+          done
+
+          echo "## 🎨 Theme Engine Tests" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tested $TESTED themes, $ERRORS errors" >> "$GITHUB_STEP_SUMMARY"
+          [[ $ERRORS -gt 0 ]] && exit 1 || echo "✅ All theme colors valid"
 
   test-plugins:
     name: "🔌 Plugin Tests"

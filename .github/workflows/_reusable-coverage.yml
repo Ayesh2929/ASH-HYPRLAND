@@ -1,0 +1,87 @@
+name: "📊 Coverage"
+on:
+  workflow_call:
+    inputs:
+      api_exists:
+        type: string
+        required: true
+      web_exists:
+        type: string
+        required: true
+      has_api:
+        type: string
+        required: true
+      has_web:
+        type: string
+        required: true
+      run_full:
+        type: string
+        required: true
+
+jobs:
+  coverage-report:
+    name: "📊 Coverage Report"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "📥 Download coverage artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*coverage*"
+          path: /tmp/coverage/
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: "📊 Upload to Codecov"
+        if: env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: /tmp/coverage/
+          flags: unittests
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
+
+      - name: "📊 Coverage summary"
+        run: |
+          set -euo pipefail
+          echo "## 📊 Code Coverage" >> "$GITHUB_STEP_SUMMARY"
+
+          # Parse pytest coverage XML if available
+          COV_XML=$(find /tmp/coverage -name 'coverage.xml' 2>/dev/null | head -1)
+          if [[ -n "$COV_XML" ]] && [[ -f "$COV_XML" ]]; then
+            RATE=$(python3 -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('$COV_XML')
+          root = tree.getroot()
+          rate = float(root.attrib.get('line-rate', 0)) * 100
+          print(f'{rate:.1f}')
+          " 2>/dev/null || echo "N/A")
+            echo "- **API Coverage**: ${RATE}%" >> "$GITHUB_STEP_SUMMARY"
+            if [[ "$RATE" != "N/A" ]]; then
+              BELOW=$(python3 -c "print('yes' if float('$RATE') < 70 else 'no')" 2>/dev/null || echo "no")
+              if [[ "$BELOW" == "yes" ]]; then
+                echo "  - ⚠️ Below 70% threshold" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "  - ✅ Meets threshold" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+          else
+            echo "- **API Coverage**: No coverage data found" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Parse vitest coverage if available
+          COV_JSON=$(find /tmp/coverage -name 'coverage-summary.json' 2>/dev/null | head -1)
+          if [[ -n "$COV_JSON" ]] && [[ -f "$COV_JSON" ]]; then
+            RATE=$(python3 -c "
+          import json
+          d = json.load(open('$COV_JSON'))
+          print(f'{d[\"total\"][\"lines\"][\"pct\"]:.1f}')
+          " 2>/dev/null || echo "N/A")
+            echo "- **Web Coverage**: ${RATE}%" >> "$GITHUB_STEP_SUMMARY"
+          fi

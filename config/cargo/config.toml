@@ -1,0 +1,294 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — CARGO CONFIG ULTRA                           ║
+# ║  🦀 Rust package manager • Mirrors • Build opts • Profiles • Tools          ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  REGISTRIES & SOURCES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[source.crates-io]
+# Use a faster mirror or sparse index (recommended for faster resolution)
+# Options:
+#   "registry+https://github.com/rust-lang/crates.io-index"  (default)
+#   "sparse+https://index.crates.io/"                        (sparse, faster)
+replace-with = "crates-io-sparse"
+
+# ── Sparse registry cache ─────────────────────────────────────────────────────
+
+[source.crates-io-sparse]
+registry = "sparse+https://index.crates.io/"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🎯  BUILD TARGETS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Linux x86_64 (native) ─────────────────────────────────────────────────────
+[target.x86_64-unknown-linux-gnu]
+# Use mold linker for much faster linking (install: pacman -S mold)
+linker = "clang"
+rustflags = [
+    "-C", "link-arg=-fuse-ld=mold",
+    "-C", "target-cpu=native",
+]
+
+# ── Linux aarch64 (cross-compile for ARM servers / Raspberry Pi) ──────────────
+[target.aarch64-unknown-linux-gnu]
+
+# ── WebAssembly ───────────────────────────────────────────────────────────────
+[target.wasm32-unknown-unknown]
+# No special linker needed for WASM
+
+[target.wasm32-wasi]
+# WASI target
+
+# ── macOS (cross-compile) ─────────────────────────────────────────────────────
+# [target.x86_64-apple-darwin]
+# linker = "x86_64-apple-darwin-cc"
+# [target.aarch64-apple-darwin]
+# linker = "aarch64-apple-darwin-cc"
+
+# ── Windows (cross-compile) ───────────────────────────────────────────────────
+# [target.x86_64-pc-windows-gnu]
+# linker = "x86_64-w64-mingw32-gcc"
+# ar = "x86_64-w64-mingw32-ar"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🛠️  BUILD PROFILES
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ── Dev profile (cargo build) ─────────────────────────────────────────────────
+
+[profile.dev]
+# Debug info level (0 = none, 1 = line tables, 2 = full)
+debug = 2
+# Split debug info (faster linking on Linux)
+split-debuginfo = "unpacked"
+# Incremental compilation
+incremental = true
+# Overflow checks (panic on integer overflow)
+overflow-checks = true
+# Link-time optimization
+lto = false
+# Codegen units (more = faster compile, less = better optimization)
+codegen-units = 256
+# Panic strategy
+panic = "unwind"
+# Rpath (embed library search path)
+rpath = false
+
+# ── Dev profile dependencies (compile dependencies faster) ────────────────────
+[profile.dev.package."*"]
+# Compile dependencies with optimizations for faster runtime during dev
+opt-level = 3
+debug = false
+
+# ── Release profile (cargo build --release) ────────────────────────────────────
+[profile.release]
+opt-level = 3
+debug = false
+split-debuginfo = "off"
+incremental = false
+overflow-checks = false
+# Full LTO for maximum performance (slower compile, faster binary)
+lto = "fat"
+strip = "symbols"
+# Rpath
+rpath = false
+
+# ── Release with debug info (profiling) ───────────────────────────────────────
+[profile.release-with-debug]
+inherits = "release"
+debug = true
+strip = "none"
+
+# ── Fast release (compromise: fast compile + good optimization) ────────────────
+[profile.fast-release]
+inherits = "release"
+lto = "thin"
+codegen-units = 8
+strip = "debuginfo"
+
+# ── Size-optimized profile ────────────────────────────────────────────────────
+[profile.min-size]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+# ── Test profile (cargo test) ─────────────────────────────────────────────────
+[profile.test]
+opt-level = 0
+debug = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🆕  CARGO-NEW
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[cargo-new]
+# Default edition for new crates
+edition = "2021"
+# Default name for new crates (use dir name)
+# name = ""
+# Default version control
+vcs = "git"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  HTTP
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[http]
+# Number of parallel HTTP requests for downloading
+# (default is fairly conservative)
+multiplexing = true
+
+# SSL verification
+check-revoke = true
+
+# Timeout for HTTP requests (seconds)
+timeout = 30
+
+# HTTP proxy (if needed)
+# proxy = "http://proxy.example.com:8080"
+
+# Low speed limit (bytes per second, 0 = no limit)
+low-speed-limit = 0
+
+# Debug HTTP connections
+# debug = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔑  CREDENTIALS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[credentials]
+# Store credentials encrypted (recommended)
+# Uses libsecret / GNOME keyring on Linux
+# token = stored-in-keychain
+
+# Private registry example:
+# [registry]
+# token = "YOUR_CRATES_IO_TOKEN"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔮  UNSTABLE FEATURES (nightly only)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# [unstable]
+# # Mtime-based change detection (faster builds)
+# mtime-on-use = true
+# # Avoid dev-dep rebuild
+# avoid-dev-deps = true
+# # Minimal versions resolution
+# minimal-versions = false
+# # Direct minimal versions
+# direct-minimal-versions = false
+# # Build std (compile std from source)
+# build-std = ["std", "panic_abort"]
+# # Sparse protocol
+# sparse-registry = true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🛠️  TOOLS — cargo-* overrides
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[alias]
+# Shorthand aliases for cargo subcommands
+
+# Build aliases
+b     = "build"
+br    = "build --release"
+bf    = "build --profile fast-release"
+bw    = "build --target wasm32-unknown-unknown"
+bms   = "build --profile min-size"
+brd   = "build --profile release-with-debug"
+
+# Run aliases
+r     = "run"
+rr    = "run --release"
+rrf   = "run --profile fast-release"
+
+# Test aliases
+t     = "test"
+tr    = "test --release"
+td    = "test --doc"
+tl    = "test -- --nocapture"
+tw    = "test --workspace"
+
+# Clippy aliases
+cl    = "clippy"
+cla   = "clippy --all-targets --all-features"
+clf   = "clippy --fix --allow-dirty --allow-staged"
+clr   = "clippy -- -D warnings"
+clp   = "clippy -- -W clippy::pedantic -W clippy::nursery"
+
+# Format aliases
+fmt   = "fmt"
+fmtc  = "fmt --check"
+fmta  = "fmt --all"
+
+# Documentation
+d     = "doc"
+do    = "doc --open"
+dpa   = "doc --no-deps --all-features --open"
+
+# Dependency tools
+tree  = "tree"
+udeps = "udeps"
+audit = "audit"
+deny  = "deny check"
+bloat = "bloat --release --crates"
+asm   = "asm"
+
+# Publish workflow
+pub   = "publish --dry-run"
+"pub!"  = "publish"
+
+# Workspace
+ws    = "workspace"
+wsbuild = "build --workspace"
+wstest  = "test --workspace"
+wsclip  = "clippy --workspace --all-targets --all-features"
+
+# Update dependencies
+up    = "update"
+upa   = "upgrade --incompatible"
+
+# Clean
+c     = "clean"
+ca    = "clean --doc"
+
+# Expand macros (requires cargo-expand)
+ex    = "expand"
+
+# Size analysis
+sz    = "bloat --release --crates"
+
+# Flamegraph profiling (requires cargo-flamegraph)
+flame = "flamegraph"
+
+# Watch mode (requires cargo-watch)
+w     = "watch -x check"
+wt    = "watch -x test"
+wr    = "watch -x run"
+
+# Bench
+bench = "bench"
+
+# Cross-compilation (requires cross)
+cross-aarch64  = "build --target aarch64-unknown-linux-gnu --release"
+cross-arm      = "build --target armv7-unknown-linux-gnueabihf --release"
+cross-musl     = "build --target x86_64-unknown-linux-musl --release"
+cross-windows  = "build --target x86_64-pc-windows-gnu --release"
+cross-wasm     = "build --target wasm32-unknown-unknown --release"
+
+# Miri (undefined behavior detection)
+miri-test = "+nightly miri test"
+miri-run  = "+nightly miri run"
+
+# Coverage (requires llvm-cov)
+cov        = "llvm-cov"
+cov-html   = "llvm-cov --open"
+cov-report = "llvm-cov report"

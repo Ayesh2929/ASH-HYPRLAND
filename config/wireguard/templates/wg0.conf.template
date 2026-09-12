@@ -1,0 +1,125 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — WIREGUARD CONFIG TEMPLATE ULTRA              ║
+# ║  🔒 Modern VPN • Zero-trust • Multi-peer • Kill-switch • DNS               ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📋  USAGE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#  1. Copy to: /etc/wireguard/wg0.conf
+#  2. Fill in ALL placeholder values (marked with < >)
+#  3. Set permissions: chmod 600 /etc/wireguard/wg0.conf
+#  4. Enable: systemctl enable --now wg-quick@wg0
+#
+#  Generate keys:
+#    Private key:  wg genkey | tee /etc/wireguard/privatekey
+#    Public key:   cat /etc/wireguard/privatekey | wg pubkey
+#    Pre-shared:   wg genpsk
+#
+#  ASH integration:
+#    ash net vpn connect   — bring up WireGuard
+#    ash net vpn status    — show connection status
+#    ash net vpn disconnect — bring down WireGuard
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔑  INTERFACE — This machine
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Interface]
+# Optimal MTU for WireGuard over most connections
+# Lower to 1280 if experiencing packet loss over PPPoE or mobile
+MTU = 1420
+
+# ── Scripts — PreUp / PostUp / PreDown / PostDown ─────────────────────────────
+
+# PreUp: Run before interface comes up
+# Example: load kernel modules, set kernel params
+PreUp = sysctl -w net.ipv4.conf.all.src_valid_mark=1 2>/dev/null || true
+
+# PostUp: Run after interface comes up
+# ─ Kill switch: block all traffic not through WireGuard
+# ─ Mark WireGuard traffic to bypass routing table
+PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+PostUp = ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+# Optional: notify ASH on connect
+PostUp = notify-send "🔒 WireGuard" "VPN connected via %i" --icon=network-vpn --urgency=low 2>/dev/null || true
+
+# PreDown: Run before interface goes down
+# Remove kill switch rules
+PreDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT 2>/dev/null || true
+PreDown = ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT 2>/dev/null || true
+
+# PostDown: Run after interface goes down
+PostDown = notify-send "🔓 WireGuard" "VPN disconnected" --icon=network-vpn-acquiring --urgency=low 2>/dev/null || true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  PEER 01 — VPN Server / Gateway (full tunnel)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Peer]
+
+# Friendly comment (not parsed by WireGuard)
+# Name: VPN-Gateway-01 (Hetzner, Frankfurt)
+
+# Server's public key
+PublicKey = <SERVER_PUBLIC_KEY>
+
+# Pre-shared key for post-quantum resistance (recommended)
+# Generate: wg genpsk
+PresharedKey = <PRE_SHARED_KEY>
+
+# Server endpoint: IP:port or domain:port
+# Use IP to avoid DNS resolution failure before VPN is up
+Endpoint = <SERVER_IP_OR_DOMAIN>:51820
+
+# ── Routing ───────────────────────────────────────────────────────────────────
+# Full tunnel (route ALL traffic through VPN):
+AllowedIPs = 0.0.0.0/0, ::/0
+
+# Split tunnel (only route specific networks through VPN — uncomment to use):
+# AllowedIPs = 10.8.0.0/24, 192.168.100.0/24, fd86:ea04:1115::/48
+
+# ── Keepalive ─────────────────────────────────────────────────────────────────
+# Send keepalive packet every 25 seconds
+# Required if client is behind NAT (most home connections)
+# Keeps the NAT mapping alive
+PersistentKeepalive = 25
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  PEER 02 — Secondary / Backup VPN Server (optional)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# Uncomment to add a second peer (e.g., backup server or different region)
+#
+# [Peer]
+# # Name: VPN-Gateway-02 (Hetzner, Nuremberg - backup)
+# PublicKey = <SERVER_2_PUBLIC_KEY>
+# PresharedKey = <PRE_SHARED_KEY_2>
+# Endpoint = <SERVER_2_IP>:51820
+# AllowedIPs = 10.8.0.0/24
+# PersistentKeepalive = 25
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🏠  PEER 03 — Home Lab (site-to-site, no default route)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# [Peer]
+# # Name: Homelab (192.168.1.0/24 network)
+# PublicKey = <HOMELAB_PUBLIC_KEY>
+# PresharedKey = <HOMELAB_PSK>
+# Endpoint = <HOMELAB_PUBLIC_IP>:51821
+# # Only route homelab subnet through this peer
+# AllowedIPs = 10.8.0.1/32, 192.168.1.0/24
+# PersistentKeepalive = 25
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  👥  PEER 04 — Another device (mobile phone, laptop, etc.)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# [Peer]
+# # Name: Phone (Pixel 8 Pro)
+# PublicKey = <PHONE_PUBLIC_KEY>
+# AllowedIPs = 10.8.0.5/32
+# # No endpoint needed — phone connects outbound
+# # No keepalive — battery optimization

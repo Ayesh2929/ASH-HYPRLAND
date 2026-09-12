@@ -22,53 +22,150 @@ permissions:
   actions: read
 
 jobs:
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 01: AUDIT WORKFLOWS
-  # ────────────────────────────────────────────────────────────────────────────
   audit-workflows:
-    name: "🕵️ Audit Workflows"
+    name: "🕵️ Audit Workflows & Compute Health Score"
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: "🕵️ Run Workflow Audits"
+      - name: "🕵️ Run Workflow File Audits"
+        id: file-audit
         run: |
-          echo "Auditing workflows for unpinned actions and deprecations..."
-          # Pseudo-logic for detecting @master/@main tags and zombie workflows
-          grep -R "uses:.*@main" .github/workflows || true
+          echo "Auditing workflows for unpinned actions, deprecations, and missing concurrency..."
+          score=100
+          
+          # 1. Unpinned action detection (@main, @master, @latest)
+          echo "## ──── Checking for Unpinned Actions ────"
+          unpinned=$(grep -rn "uses:.*@[main|master|latest]" .github/workflows/ || true)
+          if [ -n "$unpinned" ]; then
+            echo "❌ Found unpinned actions:"
+            echo "$unpinned"
+            count=$(echo "$unpinned" | wc -l)
+            score=$((score - count * 5))
+            echo "unpinned_count=$count" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No unpinned actions found."
+            echo "unpinned_count=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # 2. Deprecated pattern detection
+          echo "## ──── Checking for Deprecated Patterns ────"
+          deprecated=$(grep -rn "::set-output\|save-state" .github/workflows/ || true)
+          if [ -n "$deprecated" ]; then
+            echo "❌ Found deprecated ::set-output or save-state:"
+            echo "$deprecated"
+            count=$(echo "$deprecated" | wc -l)
+            score=$((score - count * 5))
+            echo "deprecated_count=$count" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No deprecated patterns found."
+            echo "deprecated_count=0" >> $GITHUB_OUTPUT
+          fi
+          
+          # 3. Concurrency group check
+          echo "## ──── Checking for Missing Concurrency Groups ────"
+          missing_concurrency=0
+          for file in .github/workflows/*.yml; do
+            if ! grep -q "concurrency:" "$file"; then
+              echo "⚠️ Missing concurrency group in $file"
+              missing_concurrency=$((missing_concurrency + 1))
+              score=$((score - 2))
+            fi
+          done
+          echo "missing_concurrency=$missing_concurrency" >> $GITHUB_OUTPUT
+          
+          echo "base_score=$score" >> $GITHUB_OUTPUT
 
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 02: CHECK REDUNDANCY
-  # ────────────────────────────────────────────────────────────────────────────
-  check-redundancy:
-    name: "♻️ Check Redundancy"
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: "📥 Checkout"
-        uses: actions/checkout@v7
-
-      - name: "♻️ Verify Concurrency and Triggers"
-        run: |
-          echo "Checking for overly broad triggers..."
-
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 03: REPORT
-  # ────────────────────────────────────────────────────────────────────────────
-  report:
-    name: "📊 Generate Health Report"
-    needs: [audit-workflows, check-redundancy]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: "📊 Create Health Report"
-        run: |
-          echo "Health score: 95/100" > health_score.md
-      
-      - name: "📤 Upload Artifact"
-        uses: actions/upload-artifact@v6
+      - name: "🧟 Zombie Workflow Detection via API"
+        id: api-audit
+        uses: actions/github-script@v7
         with:
-          name: health-report
+          script: |
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+            const workflows = await github.paginate(github.rest.actions.listRepoWorkflows, {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            let zombieCount = 0;
+            let zombies = [];
+            
+            for (const wf of workflows) {
+              if (wf.state !== 'active') continue;
+              
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: wf.id,
+                per_page: 1
+              });
+              
+              if (runs.data.total_count === 0) continue; // Never run
+              
+              const lastRun = runs.data.workflow_runs[0];
+              if (new Date(lastRun.created_at) < new Date(thirtyDaysAgo)) {
+                zombieCount++;
+                zombies.push(wf.name);
+              }
+            }
+            
+            core.setOutput('zombie_count', zombieCount);
+            if (zombieCount > 0) {
+              core.notice(`Zombie workflows found: ${zombies.join(', ')}`);
+            }
+
+      - name: "📊 Calculate Final Health Score"
+        id: final-score
+        run: |
+          base_score=${{ steps.file-audit.outputs.base_score }}
+          zombie_count=${{ steps.api-audit.outputs.zombie_count }}
+          
+          final_score=$((base_score - zombie_count * 5))
+          if [ "$final_score" -lt 0 ]; then final_score=0; fi
+          
+          echo "final_score=$final_score" >> $GITHUB_OUTPUT
+          
+          report="# 🩺 CI Health Report\n\n"
+          report+="**Final Health Score**: $final_score/100\n\n"
+          report+="### Audit Details\n"
+          report+="- Unpinned Actions: ${{ steps.file-audit.outputs.unpinned_count }}\n"
+          report+="- Deprecated Patterns: ${{ steps.file-audit.outputs.deprecated_count }}\n"
+          report+="- Missing Concurrency: ${{ steps.file-audit.outputs.missing_concurrency }}\n"
+          report+="- Zombie Workflows (>30 days inactive): $zombie_count\n"
+          
+          echo -e "$report" > health_score.md
+          cat health_score.md >> $GITHUB_STEP_SUMMARY
+
+      - name: "📤 Upload Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "ci-health-report"
           path: health_score.md
+          retention-days: 14
+
+      - name: "🔔 Notify Discord if Health < 80"
+        if: ${{ steps.final-score.outputs.final_score < 80 && env.DISCORD_WEBHOOK != '' }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          PAYLOAD=$(cat <<EOF
+          {
+            "embeds": [{
+              "title": "⚠️ CI Health Alert",
+              "description": "CI Health score has dropped below 80.",
+              "color": 16711680,
+              "fields": [
+                {"name": "Health Score", "value": "${{ steps.final-score.outputs.final_score }}/100", "inline": true},
+                {"name": "Unpinned Actions", "value": "${{ steps.file-audit.outputs.unpinned_count }}", "inline": true},
+                {"name": "Deprecated Patterns", "value": "${{ steps.file-audit.outputs.deprecated_count }}", "inline": true},
+                {"name": "Zombie Workflows", "value": "${{ steps.api-audit.outputs.zombie_count }}", "inline": true}
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }]
+          }
+          EOF
+          )
+          curl -sSf -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK" || true

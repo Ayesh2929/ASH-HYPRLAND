@@ -1,0 +1,650 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  🔥 ASH DOTFILES v5.0 OMEGA — ESPANSO ULTRA CONFIG                         ║
+# ║  ⚡ Text expander • Snippets • Templates • Productivity engine               ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔧  BACKEND
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Backend: Auto | Clipboard | Inject (Wayland requires Clipboard)
+backend: Clipboard
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⌨️  TOGGLE & SEARCH
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Toggle key combination
+toggle_key: ALT+SPACE
+
+# Search shortcut
+search_shortcut: ALT+SHIFT+SPACE
+
+# Search trigger (type this to open search)
+search_trigger: "::search"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  ⚙️  GENERAL
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Detect active match
+active_match_detection: true
+
+# Whether to auto-restart after configuration changes
+auto_restart: true
+
+# Show notifications
+show_notifications: true
+
+# Notification icon
+# notification_icon: ""
+
+# Enable regex matching
+enable_regex: true
+
+# Word separators (what counts as word boundary)
+word_separators:
+  - " "
+  - "\t"
+  - "\n"
+  - "."
+  - ","
+  - "!"
+  - "?"
+  - ";"
+  - ":"
+  - "("
+  - ")"
+  - "["
+  - "]"
+  - "{"
+  - "}"
+  - "'"
+  - "\""
+  - "/"
+  - "\\"
+  - "|"
+  - "-"
+  - "_"
+  - "="
+  - "+"
+  - "@"
+  - "#"
+  - "$"
+  - "%"
+  - "^"
+  - "&"
+  - "*"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔕  EXCLUSIONS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Disable in these apps (title contains)
+filter_title:
+  - "Espanso"
+
+# Disable for specific executables (add game clients etc.)
+# filter_exec:
+#   - "steam"
+#   - "lutris"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🔧  LOGGING
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Log level: ERROR | WARN | INFO | DEBUG | TRACE
+log_level: WARN
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  🌐  WAYLAND
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Wayland requires the Clipboard backend (set above).
+# See: https://espanso.org/docs/configuration/options/#backend
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  📅  MATCHES — DATE & TIME
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+matches:
+
+  # Date: 2024-01-15
+  - trigger: ":date"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y-%m-%d"
+
+  # Full date: Monday, January 15, 2024
+  - trigger: ":datefull"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%A, %B %-d, %Y"
+
+  # Short date: 15/01/2024
+  - trigger: ":dateshort"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%d/%m/%Y"
+
+  # US date: 01/15/2024
+  - trigger: ":dateus"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%m/%d/%Y"
+
+  # Current time: 14:30
+  - trigger: ":time"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%H:%M"
+
+  # Current time with seconds: 14:30:45
+  - trigger: ":times"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%H:%M:%S"
+
+  # 12-hour time: 2:30 PM
+  - trigger: ":time12"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%-I:%M %p"
+
+  # Date + time: 2024-01-15 14:30
+  - trigger: ":datetime"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y-%m-%d %H:%M"
+
+  # ISO 8601 full timestamp: 2024-01-15T14:30:45Z
+  - trigger: ":ts"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y-%m-%dT%H:%M:%SZ"
+
+  # Unix timestamp
+  - trigger: ":unix"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%s"
+
+  # Year only: 2024
+  - trigger: ":year"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y"
+
+  # Month: January
+  - trigger: ":month"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%B"
+
+  # Week number: Week 03
+  - trigger: ":week"
+    replace: "Week {{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%V"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🆔  IDs & GENERATORS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # UUID v4
+  - trigger: ":uuid"
+    replace: "{{uuid}}"
+    vars:
+      - name: uuid
+        type: shell
+        params:
+          cmd: "cat /proc/sys/kernel/random/uuid"
+
+  # Random hex color
+  - trigger: ":hexcolor"
+    replace: "#{{color}}"
+    vars:
+      - name: color
+        type: shell
+        params:
+          cmd: "printf '%06X' $((RANDOM * RANDOM % 16777216))"
+
+  # Random 16-char password
+  - trigger: ":pw16"
+    replace: "{{pw}}"
+    vars:
+      - name: pw
+        type: shell
+        params:
+          cmd: "tr -dc 'A-Za-z0-9!@#$%^&*' < /dev/urandom | head -c 16"
+
+  # Random 32-char password
+  - trigger: ":pw32"
+    replace: "{{pw}}"
+    vars:
+      - name: pw
+        type: shell
+        params:
+          cmd: "tr -dc 'A-Za-z0-9!@#$%^&*' < /dev/urandom | head -c 32"
+
+  # Random 6-digit OTP
+  - trigger: ":otp"
+    replace: "{{otp}}"
+    vars:
+      - name: otp
+        type: shell
+        params:
+          cmd: "printf '%06d' $((RANDOM % 1000000))"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🖥️  SYSTEM INFO
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Local IP address
+  - trigger: ":myip"
+    replace: "{{ip}}"
+    vars:
+      - name: ip
+        type: shell
+        params:
+          cmd: "ip route get 1 | awk '{print $7; exit}'"
+
+  # Public IP address
+  - trigger: ":pubip"
+    replace: "{{ip}}"
+    vars:
+      - name: ip
+        type: shell
+        params:
+          cmd: "curl -s https://api.ipify.org"
+
+  # Hostname
+  - trigger: ":hostname"
+    replace: "{{host}}"
+    vars:
+      - name: host
+        type: shell
+        params:
+          cmd: "hostname"
+
+  # Username
+  - trigger: ":whoami"
+    replace: "{{user}}"
+    vars:
+      - name: user
+        type: shell
+        params:
+          cmd: "whoami"
+
+  # OS info
+  - trigger: ":osinfo"
+    replace: "{{os}}"
+    vars:
+      - name: os
+        type: shell
+        params:
+          cmd: "uname -srm"
+
+  # Uptime
+  - trigger: ":uptime"
+    replace: "{{up}}"
+    vars:
+      - name: up
+        type: shell
+        params:
+          cmd: "uptime -p"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  📐  LOREM IPSUM
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - trigger: ":lorem"
+    replace: >
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+      eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+      ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+      aliquip ex ea commodo consequat.
+
+  - trigger: ":lorem2"
+    replace: >
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+      occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+      mollit anim id est laborum.
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🔥  ASH DOTFILES SNIPPETS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # ASH version
+  - trigger: ":ashver"
+    replace: "ASH Dotfiles v5.0 Omega"
+
+  # ASH repo URL
+  - trigger: ":ashrepo"
+    replace: "https://github.com/ash-dotfiles/ash-dotfiles"
+
+  # ASH theme apply command
+  - trigger: ":ashtheme"
+    replace: "ash theme apply "
+
+  # ASH snapshot
+  - trigger: ":ashsnap"
+    replace: "ash snapshot create "
+
+  # Hyprland reload
+  - trigger: ":hreload"
+    replace: "hyprctl reload"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🔤  TEXT TRANSFORMATIONS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Clipboard to uppercase
+  - trigger: ":upper"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | tr '[:lower:]' '[:upper:]'"
+
+  # Clipboard to lowercase
+  - trigger: ":lower"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | tr '[:upper:]' '[:lower:]'"
+
+  # URL-encode clipboard
+  - trigger: ":urlencode"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.stdin.read().strip()))'"
+
+  # Base64 encode clipboard
+  - trigger: ":b64enc"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | base64 -w0"
+
+  # Base64 decode clipboard
+  - trigger: ":b64dec"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | base64 -d"
+
+  # Word count of clipboard
+  - trigger: ":wc"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "xclip -o | wc -w"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🧮  MATH
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Inline calculator: :=2+2 → 4
+  - regex: ":=(?P<expr>.+)"
+    replace: "{{result}}"
+    vars:
+      - name: result
+        type: shell
+        params:
+          cmd: "echo '{{expr}}' | bc -l | sed 's/\\.\\?0*$//'"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  📋  COMMON PHRASES
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - trigger: ":ty"
+    replace: "Thank you"
+
+  - trigger: ":tvm"
+    replace: "Thank you very much"
+
+  - trigger: ":yw"
+    replace: "You're welcome"
+
+  - trigger: ":np"
+    replace: "No problem"
+
+  - trigger: ":btw"
+    replace: "by the way"
+
+  - trigger: ":asap"
+    replace: "as soon as possible"
+
+  - trigger: ":fwiw"
+    replace: "for what it's worth"
+
+  - trigger: ":afaik"
+    replace: "as far as I know"
+
+  - trigger: ":iirc"
+    replace: "if I recall correctly"
+
+  - trigger: ":lmk"
+    replace: "let me know"
+
+  - trigger: ":tbh"
+    replace: "to be honest"
+
+  - trigger: ":imo"
+    replace: "in my opinion"
+
+  - trigger: ":imho"
+    replace: "in my humble opinion"
+
+  - trigger: ":wrt"
+    replace: "with respect to"
+
+  - trigger: ":aka"
+    replace: "also known as"
+
+  - trigger: ":eta"
+    replace: "estimated time of arrival"
+
+  - trigger: ":tba"
+    replace: "to be announced"
+
+  - trigger: ":tbc"
+    replace: "to be confirmed"
+
+  - trigger: ":tbd"
+    replace: "to be determined"
+
+  - trigger: ":wip"
+    replace: "work in progress"
+
+  - trigger: ":poc"
+    replace: "proof of concept"
+
+  - trigger: ":mvp"
+    replace: "minimum viable product"
+
+  - trigger: ":pov"
+    replace: "point of view"
+
+  - trigger: ":irl"
+    replace: "in real life"
+
+  - trigger: ":afk"
+    replace: "away from keyboard"
+
+  - trigger: ":brb"
+    replace: "be right back"
+
+  - trigger: ":g2g"
+    replace: "got to go"
+
+  - trigger: ":omw"
+    replace: "on my way"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  #  🌐  SPECIAL CHARACTERS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - trigger: "::arrow"
+    replace: "→"
+
+  - trigger: "::darrow"
+    replace: "⇒"
+
+  - trigger: "::larrow"
+    replace: "←"
+
+  - trigger: "::uarrow"
+    replace: "↑"
+
+  - trigger: "::darrw"
+    replace: "↓"
+
+  - trigger: "::check"
+    replace: "✓"
+
+  - trigger: "::cross"
+    replace: "✗"
+
+  - trigger: "::star"
+    replace: "★"
+
+  - trigger: "::heart"
+    replace: "♥"
+
+  - trigger: "::bullet"
+    replace: "•"
+
+  - trigger: "::mdash"
+    replace: "—"
+
+  - trigger: "::ndash"
+    replace: "–"
+
+  - trigger: "::ellip"
+    replace: "…"
+
+  - trigger: "::copy"
+    replace: "©"
+
+  - trigger: "::tm"
+    replace: "™"
+
+  - trigger: "::reg"
+    replace: "®"
+
+  - trigger: "::deg"
+    replace: "°"
+
+  - trigger: "::inf"
+    replace: "∞"
+
+  - trigger: "::pm"
+    replace: "±"
+
+  - trigger: "::ne"
+    replace: "≠"
+
+  - trigger: "::lte"
+    replace: "≤"
+
+  - trigger: "::gte"
+    replace: "≥"
+
+  - trigger: "::approx"
+    replace: "≈"
+
+  - trigger: "::pi"
+    replace: "π"
+
+  - trigger: "::mu"
+    replace: "μ"
+
+  - trigger: "::sigma"
+    replace: "Σ"
+
+  - trigger: "::delta"
+    replace: "Δ"
+
+  - trigger: "::lambda"
+    replace: "λ"
+
+  - trigger: "::alpha"
+    replace: "α"
+
+  - trigger: "::beta"
+    replace: "β"
+
+  - trigger: "::gamma"
+    replace: "γ"
+
+  - trigger: "::omega"
+    replace: "Ω"
+
+  - trigger: "::euro"
+    replace: "€"
+
+  - trigger: "::pound"
+    replace: "£"
+
+  - trigger: "::yen"
+    replace: "¥"
+
+  - trigger: "::bitcoin"
+    replace: "₿"
