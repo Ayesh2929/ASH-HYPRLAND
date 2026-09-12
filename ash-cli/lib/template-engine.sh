@@ -51,15 +51,34 @@ ash_tpl_load_json() {
         while IFS=$'\t' read -r key value; do
             [[ -z "$key" ]] && continue
             ASH_TPL_VARS["${prefix}${key}"]="$value"
+        # Flatten nested objects and arrays to dotted keys.
+        #
+        # The previous version could not work at all: `to_entries[]` emits entry
+        # OBJECTS ({key, value}), so `flat`'s `type == "object"` branch was taken
+        # for every input, including leaves — it recursed until the kernel killed
+        # jq with SIGKILL (observed rc 137). Two further faults were hidden behind
+        # it: the leaf branch emitted `"\($p)\(.)"` with no TAB, so the caller's
+        # `read -r key value` put the whole line in `key`; and `flat($p + .key…)`
+        # read `.key` AFTER the `.value` pipe, where the input is the value.
+        #
+        # `stderr` is no longer discarded: a failing loader that reports nothing
+        # is how this stayed invisible.
         done < <(jq -r '
             def flat($p):
-                if type == "object" then to_entries[] | flat($p + .key + ".")
-                elif type == "array"  then .[] | tostring
-                else "\($p)\(.)" end;
-            to_entries[] | if (.value|type) == "object" or (.value|type) == "array"
-                           then (.value | flat(.key + "."))
-                           else "\(.key)\t\(.value)" end
-        ' "$file" 2>/dev/null)
+                if type == "object" then
+                    to_entries[] | (.key as $k | (.value | flat($p + "." + $k)))
+                elif type == "array" then
+                    to_entries[] | (.key as $i | (.value | tostring | "\($p).\($i)\t\(.)"))
+                else
+                    "\($p)\t\(.)"
+                end;
+
+            to_entries[] as $e
+            | $e.value
+            | if type == "object" or type == "array"
+              then flat($e.key)
+              else "\($e.key)\t\($e.value)" end
+        ' "$file")
     else
         local line
         while IFS= read -r line || [[ -n "$line" ]]; do

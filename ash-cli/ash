@@ -309,10 +309,41 @@ declare -g ASH_FLAG_LOG_LEVEL="INFO"
 declare -g ASH_FLAG_OUTPUT_FORMAT="text"
 declare -g ASH_FLAG_CONFIG_OVERRIDE=""
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Global flag parsing
+#
+# Global flags are CONSUMED only up to the command word. Everything after it is
+# the command's own argv and is passed through untouched.
+#
+# The reason is that these names are not exclusively global. `-n`/`--dry-run`,
+# `-f`/`--force` and `--json` are flags of individual commands too, and the old
+# parser stripped them from anywhere in argv — so `ash theme edit x --dry-run`
+# never reached a dry run, it told the *dispatcher* not to execute anything, and
+# `ash theme delete x --force` silently dropped the flag the command was
+# checking. Because the old scan also consumed them, a command could not have
+# fixed this on its own side.
+#
+# Commands and libraries still read the ASH_FLAG_* variables, so the tokens are
+# also PEEKED at (see _ash_peek_global_flags) — recognised, act on the
+# environment, but left in argv. That keeps `ash monitor list --json` working
+# for the commands that never parse the flag themselves.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Set when --dry-run appears BEFORE the command word. Only then does the
+# dispatcher short-circuit without running anything; after the command word it
+# means "dry run the command", which is a different thing entirely.
+declare -g ASH_FLAG_DRY_RUN_EARLY=0
+
 _ash_parse_global_flags() {
     local -a remaining_args=()
+    local seen_command=0
+    local cmd_index=0
 
     while [[ $# -gt 0 ]]; do
+        # Past the command word: stop consuming. The remaining tokens are
+        # handed over verbatim below.
+        [[ $seen_command -eq 1 ]] && break
+
         case "$1" in
             -v|--verbose)
                 ASH_FLAG_VERBOSE=1
@@ -332,6 +363,7 @@ _ash_parse_global_flags() {
                 ;;
             -n|--dry-run)
                 ASH_FLAG_DRY_RUN=1
+                ASH_FLAG_DRY_RUN_EARLY=1
                 shift
                 ;;
             --no-color|--no-colour)
@@ -354,9 +386,6 @@ _ash_parse_global_flags() {
             --porcelain)
                 ASH_FLAG_PORCELAIN=1
                 ASH_FLAG_OUTPUT_FORMAT="porcelain"
-                ASH_FLAG_NO_COLOR=1
-                ASH_FLAG_NO_UNICODE=1
-                ASH_FLAG_NO_ANIMATION=1
                 shift
                 ;;
             -f|--force)
@@ -375,45 +404,94 @@ _ash_parse_global_flags() {
                 ASH_FLAG_NO_NOTIFY=1
                 shift
                 ;;
+            --profile)
+                ASH_FLAG_PROFILE="${2:-}"
+                shift 2
+                ;;
             --profile=*)
                 ASH_FLAG_PROFILE="${1#*=}"
                 shift
                 ;;
-            --profile)
-                ASH_FLAG_PROFILE="$2"
+            --config)
+                ASH_FLAG_CONFIG_OVERRIDE="${2:-}"
                 shift 2
                 ;;
             --config=*)
                 ASH_FLAG_CONFIG_OVERRIDE="${1#*=}"
                 shift
                 ;;
-            --config)
-                ASH_FLAG_CONFIG_OVERRIDE="$2"
-                shift 2
-                ;;
-            --log-level=*)
-                ASH_FLAG_LOG_LEVEL="${1#*=}"
-                shift
-                ;;
             --)
+                # Explicit end of global options: everything after it is argv.
                 shift
                 remaining_args+=("$@")
-                break
+                ASH_REMAINING_ARGS=("${remaining_args[@]:-}")
+                return 0
                 ;;
             -*)
-                # Unknown global flag — pass to subcommand
+                # Unknown global flag — hand it to the command rather than
+                # swallowing it.
                 remaining_args+=("$1")
                 shift
                 ;;
             *)
+                seen_command=1
+                cmd_index=${#remaining_args[@]}
                 remaining_args+=("$1")
                 shift
                 ;;
         esac
     done
 
+    # Everything from the command word onward.
+    (( $# )) && remaining_args+=("$@")
+
+    # Recognise globals that were written after the command, so the environment
+    # agrees with what the command is about to parse for itself.
+    if (( ${#remaining_args[@]} > cmd_index )); then
+        _ash_peek_global_flags "${remaining_args[@]:cmd_index}"
+    fi
+
     # Export remaining args for subcommand consumption
     ASH_REMAINING_ARGS=("${remaining_args[@]:-}")
+}
+
+# Read global flags out of the command's argv WITHOUT removing them.
+#
+# Commands and libraries test the ASH_FLAG_* variables directly, so a flag
+# written after the command still has to reach the environment — but the token
+# itself must survive into the command's argv, because that is where a command
+# that defines the flag for itself will look for it.
+#
+# Deliberately excluded:
+#   --profile/--config  take a value; still recognised, handled below.
+#   -h/--help           never global.
+_ash_peek_global_flags() {
+    local -a a=("$@")
+    local i=0 n=$# t
+
+    while (( i < n )); do
+        t="${a[i]}"
+        case "$t" in
+            --json)                 ASH_FLAG_JSON_OUTPUT=1; ASH_FLAG_OUTPUT_FORMAT="json" ;;
+            --porcelain)            ASH_FLAG_PORCELAIN=1; ASH_FLAG_OUTPUT_FORMAT="porcelain" ;;
+            --no-color|--no-colour) ASH_FLAG_NO_COLOR=1 ;;
+            --no-unicode)           ASH_FLAG_NO_UNICODE=1 ;;
+            --no-animation)         ASH_FLAG_NO_ANIMATION=1 ;;
+            --no-hooks)             ASH_FLAG_NO_HOOKS=1 ;;
+            --no-notify)            ASH_FLAG_NO_NOTIFY=1 ;;
+            -f|--force)             ASH_FLAG_FORCE=1 ;;
+            -y|--yes)               ASH_FLAG_YES=1 ;;
+            -q|--quiet)             ASH_FLAG_QUIET=1; ASH_FLAG_LOG_LEVEL="ERROR" ;;
+            -v|--verbose)           ASH_FLAG_VERBOSE=1; ASH_FLAG_LOG_LEVEL="DEBUG" ;;
+            -d|--debug)             ASH_FLAG_DEBUG=1; ASH_FLAG_LOG_LEVEL="TRACE" ;;
+            -n|--dry-run)           ASH_FLAG_DRY_RUN=1 ;;
+            --profile)              ASH_FLAG_PROFILE="${a[i+1]:-}"; (( i++ )) || true ;;
+            --profile=*)            ASH_FLAG_PROFILE="${t#*=}" ;;
+            --config)               ASH_FLAG_CONFIG_OVERRIDE="${a[i+1]:-}"; (( i++ )) || true ;;
+            --config=*)             ASH_FLAG_CONFIG_OVERRIDE="${t#*=}" ;;
+        esac
+        (( i++ )) || true
+    done
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -794,7 +872,7 @@ _ash_dispatch() {
     # ── Execute command ──────────────────────────────────────────────────
     local exit_code=0
 
-    if [[ $ASH_FLAG_DRY_RUN -eq 1 ]]; then
+    if [[ $ASH_FLAG_DRY_RUN_EARLY -eq 1 ]]; then
         ash_log_info "[DRY RUN] Would execute: ${cmd_file} ${args[*]:-}"
     else
         ASH_CURRENT_COMMAND="$command"

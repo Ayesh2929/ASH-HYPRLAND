@@ -176,7 +176,12 @@ ash_wcag_check_file() {
         return 2
     fi
 
-    [[ "$mode" == "--quiet" ]] || printf '\n%s\n' "$file"
+    # A filename header is helpful in text mode and fatal in JSON mode: it makes
+    # `ash wcag --json x | jq` fail on the leading blank line and path.
+    case "$mode" in
+        --quiet|--json) : ;;
+        *) printf '\n%s\n' "$file" ;;
+    esac
     ash_wcag_check_palette p "$mode"
 }
 
