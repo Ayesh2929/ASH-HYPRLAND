@@ -74,9 +74,19 @@ function oklab_to_rgb(L, A, B,   l, m, s) {
 }
 '
 
-#: Inject `_ASH_OK_MATH` plus the body, and run it.
+#: Inject `_ASH_OK_MATH` plus the program body, and run it.
+#:
+#: Leading `-v name=value` and `-F sep` options are passed through to awk.
+#: Without this, a caller writing `_ash_ok_awk -v x=1 'BEGIN{...}'` had `-v`
+#: injected as the *program* and got a syntax error pointing at the wrong line.
 _ash_ok_awk() {
-    awk "$_ASH_OK_MATH
+    local -a opts=()
+    while (( $# )) && [[ "$1" == "-v" || "$1" == "-F" ]]; do
+        opts+=("$1" "${2:-}")
+        shift 2
+    done
+
+    awk "${opts[@]}" "$_ASH_OK_MATH
 $1"
 }
 
