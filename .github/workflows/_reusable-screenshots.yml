@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 10
     if: inputs.has_screenshots == 'true' || inputs.run_screenshots == 'true' || inputs.run_full == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: |
           sudo apt-get install -y libxml2-utils --no-install-recommends
           npm install -g svgo --silent 2>/dev/null || true
@@ -66,7 +66,7 @@ jobs:
       matrix:
         theme: ${{ fromJSON(inputs.matrix_themes) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "⚙️ Install rendering tools"
         run: |
@@ -193,7 +193,7 @@ jobs:
           done
 
       - name: "📤 Upload theme screenshots"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "shots-${{ matrix.theme }}-${{ github.run_id }}"
           path: output/${{ matrix.theme }}/
@@ -205,10 +205,10 @@ jobs:
     timeout-minutes: 15
     needs: shots-generate
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "📥 Download all theme artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: "shots-*-${{ github.run_id }}"
           path: all-shots/
@@ -227,7 +227,7 @@ jobs:
           echo "Total WebP files: $TOTAL" >> "$GITHUB_STEP_SUMMARY"
 
       - name: "📤 Upload combined artifact"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "shots-all-${{ github.run_id }}"
           path: all-shots/
@@ -244,13 +244,13 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "⚙️ Install dependencies"
         run: pip install Pillow numpy --quiet
 
       - name: "📥 Download current screenshots"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: "shots-all-${{ github.run_id }}"
           path: current-shots/

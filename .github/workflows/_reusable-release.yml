@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -68,10 +68,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "📥 Download build artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release-artifacts/
           pattern: "*-${{ github.run_id }}"
@@ -105,7 +105,7 @@ jobs:
     needs: [prepare-release, create-release]
     if: inputs.is_release == 'true' && !contains(needs.prepare-release.outputs.version, '-')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "📦 Publish AUR package"
         if: hashFiles('.github/actions/publish-aur/action.yml') != ''

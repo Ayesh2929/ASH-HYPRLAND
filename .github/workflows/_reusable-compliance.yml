@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "🐍 Python license check"
         if: inputs.api_exists == 'true'
@@ -72,7 +72,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "📋 Generate CycloneDX SBOM"
         uses: anchore/sbom-action@v0
@@ -84,12 +84,12 @@ jobs:
 
       - name: "🔏 Attest SBOM"
         if: github.ref == 'refs/heads/main'
-        uses: actions/attest-sbom@v1
+        uses: actions/attest-sbom@v4
         with:
           subject-path: sbom.cyclonedx.json
 
       - name: "📤 Upload SBOM"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "sbom-${{ github.run_id }}"
           path: sbom.cyclonedx.json
