@@ -27,8 +27,9 @@ listed separately in [False positives](#false-positives--not-bugs) so they don't
 | 11 | 🟡 Medium | `.git-hooks/validate-plugin.sh` `((x++=0))` | Arithmetic error printed on every check |
 | 12 | 🟡 Medium | `validate.py` rejects valid JSONC | CI fails on `config/vscode`, `config/zed` |
 | 13 | 🟡 Medium | Invalid action `superfly/flyctl-actions@v1.5.1` | Deploy/rollback workflows fail to resolve |
-| 14 | 🟢 Low | Duplicate function definitions | Buggy copy silently shadowed |
-| 15 | 🟢 Low | `tr` + multibyte in score bar | Mojibake under non-UTF-8 locales |
+| 14 | 🟡 Medium | `themes/presets/.../colors.json` has no colors | `test / 🎨 Theme Engine Tests` can **never** pass |
+| 15 | 🟢 Low | Duplicate function definitions | Buggy copy silently shadowed |
+| 16 | 🟢 Low | `tr` + multibyte in score bar | Mojibake under non-UTF-8 locales |
 
 **Clean:** all 46 Python files, all 183 Lua files, all 165 YAML files, and 471/472 JSON
 files pass. Only **one** of 769 shell scripts has a genuine syntax error.
@@ -455,9 +456,51 @@ e.g. `marocchino/sticky-pull-request-comment@v2`/`@v3` — valid).
 
 ---
 
+### 14. The only theme preset has no colour data — its CI job can never pass
+
+**File:** `themes/presets/dark/catppuccin-mocha/colors.json`
+
+```json
+{
+  "name": "colors.json",
+  "version": "5.0.0-omega",
+  "description": "ASH Dotfiles OMEGA component: colors.json",
+  "status": "ready"
+}
+```
+
+The file is a metadata stub — it contains **no colour values at all**. It is also the
+**only** `colors.json` in the repository:
+
+```
+$ find themes -name "colors.json" | wc -l
+1
+```
+
+The CI job `test-theme-engine` (`.github/workflows/_reusable-test.yml:50`) requires
+`background`, `foreground` and `accent` and then `exit 1`s on any error:
+
+```
+❌ catppuccin-mocha: Missing required key 'background'
+❌ catppuccin-mocha: Missing required key 'foreground'
+❌ catppuccin-mocha: Missing required key 'accent'
+Tested 1 themes, 3 errors      → exit 1
+```
+
+**Impact:** `test / 🎨 Theme Engine Tests` is **permanently red** — it cannot pass on any
+commit, and because it's the only data file it scans, the check carries no signal. Verified
+present on `main` at `762142c` as well (unrelated to any docs change).
+
+**Fix:** populate real `background` / `foreground` / `accent` values, or point the job at
+the actual theme colour schema (`themes/**/theme.json` etc.) and drop the stub. The job also
+pins `actions/checkout@v4` / `actions/setup-python@v4` while the rest of the repo is on
+`@v7`.
+
+---
+
 ## 🟢 Low
 
-### 14. Duplicate function definitions (later silently shadows earlier)
+### 15. Duplicate function definitions (later silently shadows earlier)
 
 | File | Line | Function |
 |------|------|----------|
@@ -479,7 +522,7 @@ section() {
 It is dead code today, but it will resurface if the (correct) second definition is ever
 removed.
 
-### 15. `tr` + multibyte in the health score bar
+### 16. `tr` + multibyte in the health score bar
 
 **File:** `ash-cli/commands/doctor/doctor.sh:168` (`doc::score_bar`)
 
