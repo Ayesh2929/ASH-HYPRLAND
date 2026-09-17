@@ -545,6 +545,21 @@ is worth making robust:
 
 ---
 
+## Companion report: missing files
+
+A separate pass looked for **files that are referenced but do not exist**. Findings are in
+[`MISSING_FILES.md`](MISSING_FILES.md): **93 missing referenced files** (68 of them
+`config/swaync/scripts/`), **47 present-but-empty JSON stubs**, and 9 files shipped with the
+wrong mode. Headline items:
+
+- `config/hypr/render.conf` — the only one of 34 Hyprland `source =` targets that is absent.
+- `config/waybar/scripts/do-not-disturb.sh` — runs on a 5-second interval.
+- `themes/schema/*.json`, `plugins/schema/plugin-schema.json` — empty stubs, so schema
+  validation is a silent no-op.
+- `.local/bin/*` — all nine tracked non-executable (`100644`).
+
+---
+
 ## False positives — *not* bugs
 
 These were flagged by tooling but are correct code. **Do not "fix" them.**
