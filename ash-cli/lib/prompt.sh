@@ -103,7 +103,13 @@ ash_prompt_input() {
 
     if ! _ash_prompt_interactive; then
         printf '%s' "$default"
-        return $(( required == 1 && -z "$default" ? 1 : 0 ))
+        # Non-interactive: a required prompt with no default is a failure.
+        # (This cannot be written as "$(( required == 1 && -z "$default" ))"
+        #  because -z is a test operator, not arithmetic.)
+        if (( required == 1 )) && [[ -z "$default" ]]; then
+            return 1
+        fi
+        return 0
     fi
 
     local c r m

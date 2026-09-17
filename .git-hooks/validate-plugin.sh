@@ -170,7 +170,7 @@ section() {
 check() {
     local name="$1" result="$2" detail="${3:-}" points="${4:-1}"
     local icon="$5"
-    ((MAX_SCORE += points)) || true; ((CHECKS_TOTAL++=0)) || true
+    ((MAX_SCORE += points)) || true; ((CHECKS_TOTAL++)) || true
 
     local color label
     case "$result" in

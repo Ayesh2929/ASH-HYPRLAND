@@ -320,7 +320,8 @@ mon_save_config() {
 
     # Generate new config from current Hyprland state
     if [[ "$MON_BACKEND" == "hyprland" ]]; then
-        hyprctl monitors -j 2>/dev/null | python3 - "$monitors_conf" << 'PYEOF'
+        # NOTE: JSON on stdin, program on fd 3 — see refresh_rate.sh.
+        hyprctl monitors -j 2>/dev/null | python3 /dev/fd/3 "$monitors_conf" 3<< 'PYEOF'
 import json, sys
 
 monitors = json.load(sys.stdin)

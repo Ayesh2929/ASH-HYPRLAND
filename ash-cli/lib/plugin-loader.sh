@@ -255,7 +255,7 @@ ash_plugin_install() {
     fi
 
     local rc=0
-    ash_plugin_exec "$name" "init.sh" 2>/dev/null || rc=$?
+    _ash_plugin_exec "$name" "init.sh" 2>/dev/null || rc=$?
     (( rc == 127 )) && rc=0    # init.sh is optional
 
     if (( rc == 0 )); then
@@ -274,7 +274,7 @@ ash_plugin_enable() {
     [[ -f "${dir}/enable.sh" ]] || { ash_log_error "plugin '${name}' has no enable.sh" 2>/dev/null || true; return 1; }
 
     local rc=0
-    ash_plugin_exec "$name" "enable.sh" 2>/dev/null || rc=$?
+    _ash_plugin_exec "$name" "enable.sh" 2>/dev/null || rc=$?
 
     if (( rc == 0 )); then
         _ash_plugin_state_write "$name" "enabled" >/dev/null 2>&1 || true
@@ -298,7 +298,7 @@ ash_plugin_disable() {
     fi
 
     local rc=0
-    ash_plugin_exec "$name" "disable.sh" 2>/dev/null || rc=$?
+    _ash_plugin_exec "$name" "disable.sh" 2>/dev/null || rc=$?
 
     # Record the intent regardless — otherwise a failing disable leaves the
     # plugin marked enabled forever and it can never be removed.

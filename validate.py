@@ -1,8 +1,59 @@
 #!/usr/bin/env python3
 import sys
 import json
+import re
 import argparse
 from pathlib import Path
+
+
+def strip_jsonc(text):
+    """Remove // and /* */ comments plus trailing commas from JSONC.
+
+    VS Code and Zed both allow comments in their config files, so parsing them
+    with a plain json.load() reports valid files as broken. String-aware: a //
+    inside a string literal (e.g. "xdg-open https://wttr.in") is left alone.
+    """
+    out = []
+    i, n = 0, len(text)
+    in_string = False
+    escaped = False
+
+    while i < n:
+        char = text[i]
+
+        if in_string:
+            out.append(char)
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if char == '"':
+            in_string = True
+            out.append(char)
+            i += 1
+            continue
+
+        if char == '/' and i + 1 < n and text[i + 1] == '/':
+            while i < n and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if char == '/' and i + 1 < n and text[i + 1] == '*':
+            i += 2
+            while i + 1 < n and not (text[i] == '*' and text[i + 1] == '/'):
+                i += 1
+            i += 2
+            continue
+
+        out.append(char)
+        i += 1
+
+    return re.sub(r',(\s*[}\]])', r'\1', ''.join(out))
 
 def main():
     parser = argparse.ArgumentParser(description="ASH Dotfiles Validation Script")
@@ -132,7 +183,10 @@ def main():
             if p.is_file() and not p.is_symlink():
                 try:
                     with open(p, 'r', encoding='utf-8') as f:
-                        json.load(f)
+                        raw = f.read()
+                    # Accept JSONC (comments / trailing commas) — VS Code and
+                    # Zed configs are JSONC by design.
+                    json.loads(strip_jsonc(raw))
                 except json.JSONDecodeError as e:
                     print(f"  ❌ Invalid JSON in {p}: {e}")
                     invalid_json += 1

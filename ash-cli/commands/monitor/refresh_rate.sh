@@ -19,7 +19,10 @@ _rr_get_rates() {
 
     case "$MON_BACKEND" in
         hyprland)
-            hyprctl monitors -j 2>/dev/null | python3 - << PYEOF
+            # NOTE: the JSON arrives on stdin via the pipe, so the program is fed on
+            # fd 3 instead of stdin — `python3 - <<EOF` would let the heredoc
+            # replace the pipe and json.load(sys.stdin) would read nothing.
+            hyprctl monitors -j 2>/dev/null | python3 /dev/fd/3 3<< PYEOF
 import json, sys
 
 mons = json.load(sys.stdin)

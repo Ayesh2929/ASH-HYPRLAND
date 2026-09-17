@@ -737,9 +737,12 @@ print_suite_heatmap() {
             "${D}${SLATE}" "$dur" "$R" >&2
 
         ((col++)) || true
-        [[ $((col % 2)) -eq 0 ]] && printf "\n" >&2
+        # `[[ … ]] && cmd` yields 1 when the test is false; without the trailing
+        # `|| true` that becomes the loop's — and then the function's — exit
+        # status, and `set -e` aborts the run before print_summary ever fires.
+        [[ $((col % 2)) -eq 0 ]] && printf "\n" >&2 || true
     done
-    [[ $((col % 2)) -ne 0 ]] && printf "\n" >&2
+    [[ $((col % 2)) -ne 0 ]] && printf "\n" >&2 || true
 }
 
 # ── SUMMARY ───────────────────────────────────────────────────────────────────

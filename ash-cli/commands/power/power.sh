@@ -314,7 +314,7 @@ pwr_system_snapshot() {
     pwr_kv "Uptime"   "$uptime_str"
     pwr_kv "Load avg" "${load_avg:-?}"
     [[ -n "${mem_pct:-}" ]] && \
-        pwr_kv "Memory" "${mem_pct}%  ($(( mem_used / 1024 ))/${$(( mem_total / 1024 ))}MB)"
+        pwr_kv "Memory" "${mem_pct}%  ($(( mem_used / 1024 ))/$(( mem_total / 1024 ))MB)"
     [[ -n "$battery_info" ]] && pwr_kv "Battery" "$battery_info"
     pwr_kv "User"   "${USER:-?}  @  $(hostname 2>/dev/null || echo '?')"
 }
