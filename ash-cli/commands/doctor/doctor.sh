@@ -171,10 +171,13 @@ doc::score_bar() {
     local empty=$(( width - filled ))
     local color; color=$(doc::score_color "${score}")
 
+    # Build the bar with printf repetition rather than `printf '%*s' | tr`:
+    # tr is byte-oriented on some coreutils builds, which would emit only the
+    # first byte of the multibyte block characters (mojibake).
     printf '%s' "${color}"
-    printf '%*s' "${filled}" '' | tr ' ' '█'
+    (( filled > 0 )) && printf '█%.0s' $(seq 1 "${filled}")
     printf '%s' "${ASH_MUTED}"
-    printf '%*s' "${empty}"  '' | tr ' ' '░'
+    (( empty > 0 )) && printf '░%.0s' $(seq 1 "${empty}")
     printf '%s' "${RST}"
 }
 

@@ -13,7 +13,8 @@ IFS=$'\n\t'
 _extend_calculate_positions() {
     local direction="$1"
     # Returns space-separated: "name w h hz x y scale" lines
-    mon_get_monitors_json | python3 - "$direction" << 'PYEOF'
+    # NOTE: JSON on stdin, program on fd 3 — see refresh_rate.sh.
+    mon_get_monitors_json | python3 /dev/fd/3 "$direction" 3<< 'PYEOF'
 import json, sys
 
 mons_raw = json.load(sys.stdin)
