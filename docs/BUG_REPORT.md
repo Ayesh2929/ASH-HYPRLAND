@@ -30,6 +30,7 @@ listed separately in [False positives](#false-positives--not-bugs) so they don't
 | 14 | 🟡 Medium | `themes/presets/.../colors.json` has no colors | `test / 🎨 Theme Engine Tests` can **never** pass |
 | 15 | 🟢 Low | Duplicate function definitions | Buggy copy silently shadowed |
 | 16 | 🟢 Low | `tr` + multibyte in score bar | Mojibake under non-UTF-8 locales |
+| 17 | 🔴 Critical | `.git-hooks/run-tests.sh` always exits 1 | Test gate permanently red; summary never prints |
 
 **Clean:** all 46 Python files, all 183 Lua files, all 165 YAML files, and 471/472 JSON
 files pass. Only **one** of 769 shell scripts has a genuine syntax error.
@@ -542,6 +543,47 @@ Observed live — `ash doctor` prints `Health Score  D  55/100  ������
 This is locale/coreutils-dependent (some builds handle the multibyte set correctly), so it
 is worth making robust:
 `printf '█%.0s' $(seq 1 "$filled")` or `awk`.
+
+---
+
+## Fix status — applied in this PR
+
+The following findings are **fixed** on this branch. Each was re-verified after the change;
+the "before" column records the reproduction from the analysis above.
+
+| # | Finding | Fix | Verified |
+|---|---------|-----|----------|
+| 1 | `.husky/pre-push` syntax error | `;` separator before each `(( … ))` | `bash -n` passes; 0 syntax errors across all 771 scripts |
+| 3 | `log::*` undefined (368 sites) | `log::*` → `ash_log_*` shims in new `ash-cli/lib/compat.sh` | `ash config get` now prints the real error instead of `command not found` |
+| 4 | `ash_truncate` undefined (26 sites) | Delegates to `ash_table_truncate` | `ash doctor` renders aligned columns, 0 stderr noise |
+| 5 | 8 more `ash_*` helpers (92 sites) | Implemented in `compat.sh` | Undefined call sites: ~490 → 16 |
+| 6 | `cmd \| python3 - << HEREDOC` (3 sites) | Program fed on fd 3, so the pipe stays on stdin | `bash -n` passes; construct verified against a real JSON payload |
+| 7 | `${$(( … ))}` in `power.sh:317` | Removed the stray `${…}` | Bad substitution gone |
+| 8 | `-z` as arithmetic in `prompt.sh:106` | Rewritten as `(( required == 1 )) && [[ -z … ]]` | required+empty → rc=1 (was always 0) |
+| 9 | `ash_plugin_exec` typo (3 sites) | Renamed to `_ash_plugin_exec` | Plugin hooks now execute |
+| 11 | `((CHECKS_TOTAL++=0))` | `((CHECKS_TOTAL++))` | No arithmetic error per check |
+| 12 | `validate.py` rejects JSONC | String-aware comment/trailing-comma stripper | 5 errors → **0**, still rejects genuinely malformed JSON |
+| 13 | `flyctl-actions@v1.5.1` (invalid tag) | → `@v1` (verified tag, `setup-flyctl/action.yml` present) | Both workflows updated |
+| 16 | `tr` multibyte mojibake | `printf '█%.0s'` repetition + `seq` | Bar renders valid UTF-8: `███████░░░░░` |
+| — | **new:** `run-tests.sh` always exited 1 | `\|\| true` on the heatmap's trailing `[[ ]]` | 8/8 suites, 31 tests, **exit 0** (was exit 1) |
+
+### Finding 15, reclassified
+
+While fixing, `run-tests.sh` was found to abort under `set -e` before `print_summary`:
+`print_suite_heatmap` ended on `[[ $((col % 2)) -ne 0 ]] && printf …`, which returns 1 when
+the suite count is even (there are 8). That non-zero status became the function's — and
+then the script's — exit code, so **the test gate was permanently red and the summary never
+printed**. This is now finding #17 below and is fixed.
+
+### Still open
+
+| # | Finding | Why not fixed here |
+|---|---------|--------------------|
+| 2 | `crypto.sh` competing redirects | Needs a decision on how the `age` backend should receive a passphrase non-interactively (`age -p` reads from the TTY). Removing the bad redirect alone would change encrypt/decrypt behaviour, so this is left for a maintainer. |
+| 5b | 15 `ash_*_set_*` hooks in `mode.sh` | The desktop-mode apply path. These need real integration with the corresponding subsystems, not aliases — implementing them means inventing behaviour. |
+| 10 | 54 × `${_func}` used as a variable | Mechanical but touches 10 files; best done with the colour-helper refactor. |
+| 14 | Theme preset has no colour data | Needs real colour values. |
+
 
 ---
 
