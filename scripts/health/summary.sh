@@ -84,7 +84,7 @@ get_running_services() {
 }
 
 get_waybar_modules() {
-    local top_jsonc="${CONFIG_DIR}/waybar/configs/top.jsonc"
+    local top_jsonc="${CONFIG_DIR}/waybar/config.jsonc"
     if [[ -f "${top_jsonc}" ]]; then
         local count
         count=$(grep -c '"custom/' "${top_jsonc}" 2>/dev/null || echo "0")

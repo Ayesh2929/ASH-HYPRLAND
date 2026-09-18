@@ -533,11 +533,19 @@ _chk_cfg_notif_lock() {
     _cfg_file "swaync style.css"   "${swaync_dir}/style.css"   0 5
 
     # Hyprlock
-    local hyprlock_dir="${_CFG}/hypr"
-    _cfg_file "hyprlock.conf" "${hyprlock_dir}/hyprlock.conf" 1 5
+    # hyprlock + hypridle ship in their own config directories, while both tools
+    # default to ~/.config/hypr — accept either location.
+    local lock_conf="" idle_conf="" candidate
+    for candidate in "${_CFG}/hyprlock/hyprlock.conf" "${_CFG}/hypr/hyprlock.conf"; do
+        [[ -f "$candidate" ]] && { lock_conf="$candidate"; break; }
+    done
+    _cfg_file "hyprlock.conf" "${lock_conf:-${_CFG}/hyprlock/hyprlock.conf}" 1 5
 
     # Hypridle
-    _cfg_file "hypridle.conf" "${hyprlock_dir}/hypridle.conf" 1 5
+    for candidate in "${_CFG}/hypridle/hypridle.conf" "${_CFG}/hypr/hypridle.conf"; do
+        [[ -f "$candidate" ]] && { idle_conf="$candidate"; break; }
+    done
+    _cfg_file "hypridle.conf" "${idle_conf:-${_CFG}/hypridle/hypridle.conf}" 1 5
 
     # Wlogout
     local wlogout_dir="${_CFG}/wlogout"

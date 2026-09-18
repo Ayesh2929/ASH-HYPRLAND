@@ -11,10 +11,16 @@ set -euo pipefail
 IFS=$'\n\t'
 
 _lock_hyprlock() {
-    local hyprlock_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprlock.conf"
+    # hyprlock looks in ~/.config/hypr by default, but ASH ships its config in
+    # ~/.config/hyprlock — use whichever exists and pass it explicitly.
+    local cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+    local hyprlock_cfg="" candidate
+    for candidate in "${cfg_dir}/hypr/hyprlock.conf" "${cfg_dir}/hyprlock/hyprlock.conf"; do
+        [[ -f "$candidate" ]] && { hyprlock_cfg="$candidate"; break; }
+    done
 
-    if [[ -f "$hyprlock_cfg" ]]; then
-        hyprlock 2>/dev/null
+    if [[ -n "$hyprlock_cfg" ]]; then
+        hyprlock --config "$hyprlock_cfg" 2>/dev/null || hyprlock 2>/dev/null
     else
         # Basic invocation without config
         hyprlock 2>/dev/null
