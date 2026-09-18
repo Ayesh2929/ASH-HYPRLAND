@@ -71,13 +71,13 @@ _sens_render_temp() {
         # Color coding
         local temp_color temp_icon
         if   (( val_c >= crit_c )); then
-            temp_color="\033[1;38;2;243;139;168m"; temp_icon="🔥"
+            temp_color=$'\033[1;38;2;243;139;168m'; temp_icon="🔥"
         elif (( val_c >= max_c  )); then
-            temp_color="\033[38;2;249;226;175m";   temp_icon="🌡"
+            temp_color=$'\033[38;2;249;226;175m';   temp_icon="🌡"
         elif (( val_c >= 60     )); then
-            temp_color="\033[38;2;250;179;135m";   temp_icon="🟠"
+            temp_color=$'\033[38;2;250;179;135m';   temp_icon="🟠"
         else
-            temp_color="\033[38;2;166;227;161m";   temp_icon="❄"
+            temp_color=$'\033[38;2;166;227;161m';   temp_icon="❄"
         fi
 
         # Mini thermometer bar
@@ -91,7 +91,7 @@ _sens_render_temp() {
         printf '  %s  \033[38;2;108;112;134m%-18s\033[0m  %s%s%3d°C\033[0m  %s' \
             "$temp_icon" \
             "${label:0:17}" \
-            "$temp_color" "$(\033[1m)" \
+            "$temp_color" $'\033[1m' \
             "$val_c" \
             "$bar"
 
@@ -124,13 +124,13 @@ _sens_render_fans() {
 
         local rpm_color
         if   (( rpm == 0 )); then
-            rpm_color="\033[38;2;108;112;134m"
+            rpm_color=$'\033[38;2;108;112;134m'
         elif (( rpm < 800 )); then
-            rpm_color="\033[38;2;166;227;161m"
+            rpm_color=$'\033[38;2;166;227;161m'
         elif (( rpm < 2000 )); then
-            rpm_color="\033[38;2;249;226;175m"
+            rpm_color=$'\033[38;2;249;226;175m'
         else
-            rpm_color="\033[38;2;250;179;135m"
+            rpm_color=$'\033[38;2;250;179;135m'
         fi
 
         printf '  🌀  \033[38;2;108;112;134m%-18s\033[0m  %s%4d RPM\033[0m' \
@@ -159,17 +159,17 @@ _sens_render_voltages() {
         [[ -z "$label" ]] && label="in${num}"
 
         local volt
-        volt="$(printf '%.3f' "$(echo "$mv / 1000" | bc -l 2>/dev/null || echo 0)")"
+        volt="$(hw_div "$mv" 1000 3)"
 
         local min_mv max_mv
         min_mv="$(_sens_read_int "$hwmon_dir" "in${num}_min")"
         max_mv="$(_sens_read_int "$hwmon_dir" "in${num}_max")"
 
-        local volt_color="\033[38;2;180;190;254m"
+        local volt_color=$'\033[38;2;180;190;254m'
         if [[ "$max_mv" -gt 0 ]] && (( mv > max_mv )); then
-            volt_color="\033[38;2;243;139;168m"
+            volt_color=$'\033[38;2;243;139;168m'
         elif [[ "$min_mv" -gt 0 ]] && (( mv < min_mv )); then
-            volt_color="\033[38;2;249;226;175m"
+            volt_color=$'\033[38;2;249;226;175m'
         fi
 
         printf '  ⚡  \033[38;2;108;112;134m%-18s\033[0m  %s%5sV\033[0m\n' \
@@ -195,7 +195,7 @@ _sens_render_power() {
         local uw
         uw="$(_sens_read_int "$hwmon_dir" "$basename_f")"
         local watts
-        watts="$(printf '%.2f' "$(echo "$uw / 1000000" | bc -l 2>/dev/null || echo 0)")"
+        watts="$(hw_div "$uw" 1000000 2)"
 
         local label
         label="$(_sens_read "$hwmon_dir" "power${num}_label")"
@@ -229,39 +229,39 @@ _sens_render_all() {
         case "${hw_name,,}" in
             coretemp|cpu_thermal)
                 hw_label="CPU Temperature"
-                hw_color="\033[38;2;243;139;168m"
+                hw_color=$'\033[38;2;243;139;168m'
                 hw_icon="🔲" ;;
             k10temp|zenpower)
                 hw_label="CPU Temperature  (AMD)"
-                hw_color="\033[38;2;250;179;135m"
+                hw_color=$'\033[38;2;250;179;135m'
                 hw_icon="🔲" ;;
             amdgpu|radeon)
                 hw_label="GPU Temperature  (AMD)"
-                hw_color="\033[38;2;250;179;135m"
+                hw_color=$'\033[38;2;250;179;135m'
                 hw_icon="🎮" ;;
             nouveau|nvidia*)
                 hw_label="GPU Temperature  (NVIDIA)"
-                hw_color="\033[38;2;166;227;161m"
+                hw_color=$'\033[38;2;166;227;161m'
                 hw_icon="🎮" ;;
             i915|xe)
                 hw_label="GPU Temperature  (Intel)"
-                hw_color="\033[38;2;137;180;250m"
+                hw_color=$'\033[38;2;137;180;250m'
                 hw_icon="🔵" ;;
             it87|w83*|nct*|asus*)
                 hw_label="Motherboard / Super-I/O"
-                hw_color="\033[38;2;148;226;213m"
+                hw_color=$'\033[38;2;148;226;213m'
                 hw_icon="🔧" ;;
             acpi*|bat*)
                 hw_label="ACPI / Battery"
-                hw_color="\033[38;2;166;227;161m"
+                hw_color=$'\033[38;2;166;227;161m'
                 hw_icon="🔋" ;;
             nvme*)
                 hw_label="NVMe Thermal"
-                hw_color="\033[38;2;203;166;247m"
+                hw_color=$'\033[38;2;203;166;247m'
                 hw_icon="💿" ;;
             *)
                 hw_label="${hw_name:-$hw_basename}"
-                hw_color="\033[38;2;108;112;134m"
+                hw_color=$'\033[38;2;108;112;134m'
                 hw_icon="🔬" ;;
         esac
 
@@ -302,7 +302,7 @@ ash_hw_sensors() {
         esac
     done
 
-    hw_section "🌡" "Hardware Sensors" "\033[38;2;243;139;168m"
+    hw_section "🌡" "Hardware Sensors" $'\033[38;2;243;139;168m'
 
     printf '  \033[38;2;108;112;134mSource: /sys/class/hwmon  •  All values read directly from kernel\033[0m\n'
 

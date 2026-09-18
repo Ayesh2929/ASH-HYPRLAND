@@ -15,8 +15,8 @@ readonly LOG_FILE="${CACHE_DIR}/logs/doctor.log"
 readonly START_TIME=$(date +%s)
 
 # Colors
-readonly R='\033[0m' B='\033[1m' G='\033[92m' Y='\033[93m'
-readonly RED='\033[91m' C='\033[96m' M='\033[95m' DIM='\033[2m'
+readonly R=$'\033[0m' B=$'\033[1m' G=$'\033[92m' Y=$'\033[93m'
+readonly RED=$'\033[91m' C=$'\033[96m' M=$'\033[95m' DIM=$'\033[2m'
 
 declare -i PASS=0 FAIL=0 WARN=0
 declare -a FAILURES=()

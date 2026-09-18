@@ -13,14 +13,14 @@ readonly CACHE_DIR="${HOME}/.cache/ash-dots"
 readonly LOG_FILE="${CACHE_DIR}/logs/validate.log"
 
 # Colors
-readonly R='\033[0m'
-readonly B='\033[1m'
-readonly G='\033[92m'
-readonly Y='\033[93m'
-readonly RED='\033[91m'
-readonly C='\033[96m'
-readonly M='\033[95m'
-readonly DIM='\033[2m'
+readonly R=$'\033[0m'
+readonly B=$'\033[1m'
+readonly G=$'\033[92m'
+readonly Y=$'\033[93m'
+readonly RED=$'\033[91m'
+readonly C=$'\033[96m'
+readonly M=$'\033[95m'
+readonly DIM=$'\033[2m'
 
 declare -i PASS=0 FAIL=0 WARN=0 SKIP=0
 declare -a MISSING=()

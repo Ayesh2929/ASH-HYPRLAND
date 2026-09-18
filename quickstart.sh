@@ -13,8 +13,8 @@ readonly DOTFILES_DIR="${HOME}/.dotfiles"
 readonly INSTALL_LOG="/tmp/ash-quickstart.log"
 
 # Colors
-readonly R='\033[0m' B='\033[1m' G='\033[92m' Y='\033[93m'
-readonly RED='\033[91m' C='\033[96m' M='\033[95m' DIM='\033[2m'
+readonly R=$'\033[0m' B=$'\033[1m' G=$'\033[92m' Y=$'\033[93m'
+readonly RED=$'\033[91m' C=$'\033[96m' M=$'\033[95m' DIM=$'\033[2m'
 
 log()    { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${INSTALL_LOG}" 2>/dev/null || true; }
 info()   { echo -e "  ${C}→${R} $*"; log "INFO" "$*"; }

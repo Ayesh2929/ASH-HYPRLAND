@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 usage() {
-    cat <<'EOF'
+    cat <<EOF
 ${SCRIPT_NAME} — ASH helper
 
 Usage:

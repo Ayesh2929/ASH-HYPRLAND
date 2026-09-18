@@ -230,7 +230,7 @@ ash_progress_bar_animated() {
                 if (( i <= filled )); then
                     echo -n "\033[38;2 ${hue} 100 100m█\033[0m"
                 else
-                    echo -n "\033[38;2 50 50 50m░\033[0m"
+                    echo -n $'\033[38;2 50 50 50m░\033[0m'
                 fi
             done
             ;;

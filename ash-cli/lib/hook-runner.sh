@@ -127,6 +127,43 @@ ash_hook_run() {
     [[ "${ASH_HOOKS_ENABLED:-1}" != "1" ]] && return 0
     [[ "${ASH_FLAG_NO_HOOKS:-0}" == "1" ]] && return 0
 
+    # ── Runner-level flags consumed here, never forwarded to hooks ──────────
+    #   --env KEY=VAL     legacy alias for the plain KEY=VAL form
+    #   --timeout N       per-run override of the hook header timeout
+    #   --on-error MODE   continue | fail  (overrides ASH_HOOKS_STRICT)
+    #   --strict          shorthand for --on-error fail
+    local -a pairs=()
+    local timeout_override="" on_error=""
+    while (( $# )); do
+        case "${1:-}" in
+            --env)
+                shift || true
+                [[ -n "${1:-}" ]] && pairs+=("$1") && shift
+                ;;
+            --timeout)
+                shift || true
+                [[ "${1:-}" =~ ^[0-9]+$ ]] && timeout_override="$1"
+                shift || true
+                ;;
+            --on-error)
+                shift || true
+                on_error="${1:-}"
+                shift || true
+                ;;
+            --strict)      on_error="fail"; shift ;;
+            --no-strict)   on_error="continue"; shift ;;
+            --*=*)         pairs+=("${1#--}"); shift ;;
+            "")            shift ;;
+            *)             pairs+=("$1"); shift ;;
+        esac
+    done
+    [[ -n "$timeout_override" ]] && ASH_HOOK_TIMEOUT="$timeout_override"
+    case "$on_error" in
+        fail|strict) ASH_HOOKS_STRICT=1 ;;
+        continue)    ASH_HOOKS_STRICT=0 ;;
+    esac
+    set -- "${pairs[@]:-}"
+
     local -a hooks
     mapfile -t hooks < <(ash_hook_resolve "$name")
     (( ${#hooks[@]} == 0 )) && return 0

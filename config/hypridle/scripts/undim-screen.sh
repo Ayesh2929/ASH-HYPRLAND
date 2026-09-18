@@ -53,14 +53,14 @@ readonly ICON_RESTORE="󰑓"
 readonly ICON_WAKE="󰖙"
 
 # Colors
-readonly CLR_RESET='\033[0m'
-readonly CLR_BOLD='\033[1m'
-readonly CLR_RED='\033[0;31m'
-readonly CLR_GREEN='\033[0;32m'
-readonly CLR_YELLOW='\033[0;33m'
-readonly CLR_CYAN='\033[0;36m'
-readonly CLR_GRAY='\033[0;90m'
-readonly CLR_WHITE='\033[0;37m'
+readonly CLR_RESET=$'\033[0m'
+readonly CLR_BOLD=$'\033[1m'
+readonly CLR_RED=$'\033[0;31m'
+readonly CLR_GREEN=$'\033[0;32m'
+readonly CLR_YELLOW=$'\033[0;33m'
+readonly CLR_CYAN=$'\033[0;36m'
+readonly CLR_GRAY=$'\033[0;90m'
+readonly CLR_WHITE=$'\033[0;37m'
 
 # Undim defaults
 readonly DEFAULT_UNDIM_DURATION=1500    # ms — faster restore feels snappier

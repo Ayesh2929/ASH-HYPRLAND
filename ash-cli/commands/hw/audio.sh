@@ -103,7 +103,7 @@ _audio_wpctl_sinks() {
 
         if (( in_sinks )); then
             local star=""
-            [[ "$line" == *'*'* ]] && star="\033[1;38;2;166;227;161m★ DEFAULT  \033[0m"
+            [[ "$line" == *'*'* ]] && star=$'\033[1;38;2;166;227;161m★ DEFAULT  \033[0m'
             local clean
             clean="$(printf '%s' "$line" | sed 's/\*//' | sed 's/^[[:space:]]*//')"
             [[ -n "$clean" ]] && \
@@ -126,7 +126,7 @@ _audio_volume_display() {
     local vol_num
     vol_num="$(printf '%s' "$vol_out" | grep -oP '[\d.]+')"
     local vol_pct
-    vol_pct="$(printf '%.0f' "$(echo "$vol_num * 100" | bc -l 2>/dev/null || echo 0)")"
+    vol_pct="$(hw_div "$vol_num" 1 0)"
     local muted=0
     printf '%s' "$vol_out" | grep -q '\[MUTED\]' && muted=1
 
@@ -136,10 +136,10 @@ _audio_volume_display() {
     local empty=$(( bar_width - filled ))
 
     local vol_color
-    if   [[ $muted -eq 1 ]]; then vol_color="\033[38;2;108;112;134m"
-    elif (( vol_pct >= 100 )); then vol_color="\033[38;2;243;139;168m"
-    elif (( vol_pct >= 80 ));  then vol_color="\033[38;2;249;226;175m"
-    else                            vol_color="\033[38;2;166;227;161m"
+    if   [[ $muted -eq 1 ]]; then vol_color=$'\033[38;2;108;112;134m'
+    elif (( vol_pct >= 100 )); then vol_color=$'\033[38;2;243;139;168m'
+    elif (( vol_pct >= 80 ));  then vol_color=$'\033[38;2;249;226;175m'
+    else                            vol_color=$'\033[38;2;166;227;161m'
     fi
 
     local mute_icon
@@ -178,17 +178,17 @@ _audio_node_table() {
 
         local class_color
         case "$class" in
-            *Sink*)   class_color="\033[38;2;137;180;250m" ;;
-            *Source*) class_color="\033[38;2;166;227;161m" ;;
-            *)        class_color="\033[38;2;148;226;213m" ;;
+            *Sink*)   class_color=$'\033[38;2;137;180;250m' ;;
+            *Source*) class_color=$'\033[38;2;166;227;161m' ;;
+            *)        class_color=$'\033[38;2;148;226;213m' ;;
         esac
 
         local state_color
         case "$state" in
-            running) state_color="\033[38;2;166;227;161m" ;;
-            idle)    state_color="\033[38;2;108;112;134m" ;;
-            error)   state_color="\033[38;2;243;139;168m" ;;
-            *)       state_color="\033[38;2;205;214;244m" ;;
+            running) state_color=$'\033[38;2;166;227;161m' ;;
+            idle)    state_color=$'\033[38;2;108;112;134m' ;;
+            error)   state_color=$'\033[38;2;243;139;168m' ;;
+            *)       state_color=$'\033[38;2;205;214;244m' ;;
         esac
 
         printf '  %s%-30s\033[0m \033[38;2;205;214;244m%-25s\033[0m %-8s %s%-8s\033[0m\n' \
@@ -210,7 +210,7 @@ ash_hw_audio() {
         [[ "$arg" == "--short" ]] && short=1
     done
 
-    hw_section "🔊" "Audio Subsystem" "\033[38;2;250;179;135m"
+    hw_section "🔊" "Audio Subsystem" $'\033[38;2;250;179;135m'
 
     # ── PipeWire ──────────────────────────────────────────────────────────────────
     if pgrep -x pipewire &>/dev/null; then
@@ -230,24 +230,24 @@ ash_hw_audio() {
             [[ -n "$pw_quantum" ]] && hw_kv "Quantum"      "$pw_quantum  (buffer size)"
             if [[ -n "$pw_clock" ]] && [[ -n "$pw_quantum" ]]; then
                 local latency_ms
-                latency_ms="$(printf '%.2f' "$(echo "$pw_quantum * 1000 / $pw_clock" | bc -l 2>/dev/null || echo 0)")"
+                latency_ms="$(hw_div "$(( pw_quantum * 1000 ))" "${pw_clock:-48000}" 2)"
                 hw_kv "Latency"  "${latency_ms} ms"
             fi
         fi
     else
-        hw_kv "PipeWire" "\033[38;2;243;139;168m✗  not running\033[0m"
+        hw_kv "PipeWire" $'\033[38;2;243;139;168m✗  not running\033[0m'
     fi
 
     pgrep -x wireplumber &>/dev/null && \
-        hw_kv "WirePlumber" "\033[38;2;166;227;161m●  running\033[0m" || \
-        hw_kv "WirePlumber" "\033[38;2;243;139;168m✗  not running\033[0m"
+        hw_kv "WirePlumber" $'\033[38;2;166;227;161m●  running\033[0m' || \
+        hw_kv "WirePlumber" $'\033[38;2;243;139;168m✗  not running\033[0m'
 
     # ── Volume ────────────────────────────────────────────────────────────────────
-    hw_section "🔉" "Volume" "\033[38;2;249;226;175m"
+    hw_section "🔉" "Volume" $'\033[38;2;249;226;175m'
     _audio_volume_display
 
     # ── ALSA Cards ────────────────────────────────────────────────────────────────
-    hw_section "🎛" "ALSA Sound Cards" "\033[38;2;148;226;213m"
+    hw_section "🎛" "ALSA Sound Cards" $'\033[38;2;148;226;213m'
 
     local card_found=0
     while IFS='|' read -r num desc; do
@@ -261,11 +261,11 @@ ash_hw_audio() {
         printf '  \033[38;2;108;112;134mNo ALSA cards detected\033[0m\n'
 
     # ── WirePlumber device list ────────────────────────────────────────────────────
-    hw_section "📋" "Sinks & Sources" "\033[38;2;137;220;235m"
+    hw_section "📋" "Sinks & Sources" $'\033[38;2;137;220;235m'
     _audio_wpctl_sinks
 
     if [[ $short -eq 0 ]]; then
-        hw_section "🔬" "PipeWire Node Graph" "\033[38;2;203;166;247m"
+        hw_section "🔬" "PipeWire Node Graph" $'\033[38;2;203;166;247m'
         _audio_node_table
     fi
 

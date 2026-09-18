@@ -51,15 +51,15 @@ readonly SCRIPT_PID=$$
 
 # ── Colours (check terminal support) ─────────────────────────────────────────────
 if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
-  readonly COL_RED='\033[0;31m'
-  readonly COL_GRN='\033[0;32m'
-  readonly COL_YLW='\033[0;33m'
-  readonly COL_BLU='\033[0;34m'
-  readonly COL_MAG='\033[0;35m'
-  readonly COL_CYN='\033[0;36m'
-  readonly COL_BLD='\033[1m'
-  readonly COL_DIM='\033[2m'
-  readonly COL_RST='\033[0m'
+  readonly COL_RED=$'\033[0;31m'
+  readonly COL_GRN=$'\033[0;32m'
+  readonly COL_YLW=$'\033[0;33m'
+  readonly COL_BLU=$'\033[0;34m'
+  readonly COL_MAG=$'\033[0;35m'
+  readonly COL_CYN=$'\033[0;36m'
+  readonly COL_BLD=$'\033[1m'
+  readonly COL_DIM=$'\033[2m'
+  readonly COL_RST=$'\033[0m'
 else
   readonly COL_RED='' COL_GRN='' COL_YLW='' COL_BLU=''
   readonly COL_MAG='' COL_CYN='' COL_BLD='' COL_DIM='' COL_RST=''

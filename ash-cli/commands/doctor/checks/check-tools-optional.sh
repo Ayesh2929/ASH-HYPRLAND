@@ -402,9 +402,9 @@ _chk_opt_score_report() {
     for (( i=0; i<empty;  i++ )); do bar+="░"; done
 
     local score_color
-    if   (( score_pct >= 80 )); then score_color='\033[38;2;166;227;161m'
-    elif (( score_pct >= 50 )); then score_color='\033[38;2;249;226;175m'
-    else                             score_color='\033[38;2;243;139;168m'
+    if   (( score_pct >= 80 )); then score_color=$'\033[38;2;166;227;161m'
+    elif (( score_pct >= 50 )); then score_color=$'\033[38;2;249;226;175m'
+    else                             score_color=$'\033[38;2;243;139;168m'
     fi
 
     if [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && [[ -t 1 ]]; then

@@ -75,16 +75,16 @@ readonly ICON_VPN="󰌾"
 readonly ICON_CLOCK="󰅐"
 
 # ANSI colors
-readonly CLR_RESET='\033[0m'
-readonly CLR_BOLD='\033[1m'
-readonly CLR_RED='\033[0;31m'
-readonly CLR_GREEN='\033[0;32m'
-readonly CLR_YELLOW='\033[0;33m'
-readonly CLR_BLUE='\033[0;34m'
-readonly CLR_MAGENTA='\033[0;35m'
-readonly CLR_CYAN='\033[0;36m'
-readonly CLR_WHITE='\033[0;37m'
-readonly CLR_GRAY='\033[0;90m'
+readonly CLR_RESET=$'\033[0m'
+readonly CLR_BOLD=$'\033[1m'
+readonly CLR_RED=$'\033[0;31m'
+readonly CLR_GREEN=$'\033[0;32m'
+readonly CLR_YELLOW=$'\033[0;33m'
+readonly CLR_BLUE=$'\033[0;34m'
+readonly CLR_MAGENTA=$'\033[0;35m'
+readonly CLR_CYAN=$'\033[0;36m'
+readonly CLR_WHITE=$'\033[0;37m'
+readonly CLR_GRAY=$'\033[0;90m'
 
 # Lock timeout & retry
 readonly MAX_LOCK_WAIT=10       # seconds to wait for locker to start

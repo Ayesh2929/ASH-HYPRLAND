@@ -712,9 +712,9 @@ _chk_dep_report() {
     for (( i=0; i<empty;  i++ )); do bar+='░'; done
 
     local bar_color
-    if   (( pass_pct >= 90 )); then bar_color='\033[38;2;166;227;161m'
-    elif (( pass_pct >= 75 )); then bar_color='\033[38;2;249;226;175m'
-    else                            bar_color='\033[38;2;243;139;168m'
+    if   (( pass_pct >= 90 )); then bar_color=$'\033[38;2;166;227;161m'
+    elif (( pass_pct >= 75 )); then bar_color=$'\033[38;2;249;226;175m'
+    else                            bar_color=$'\033[38;2;243;139;168m'
     fi
 
     if [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && [[ -t 1 ]]; then

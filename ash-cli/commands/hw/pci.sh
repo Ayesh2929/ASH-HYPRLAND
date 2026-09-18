@@ -131,8 +131,8 @@ _pci_lspci_grouped() {
 
         local drv_color
         [[ "$drv" == "none" ]] && \
-            drv_color="\033[38;2;249;226;175m" || \
-            drv_color="\033[38;2;148;226;213m"
+            drv_color=$'\033[38;2;249;226;175m' || \
+            drv_color=$'\033[38;2;148;226;213m'
 
         printf '  \033[38;2;108;112;134m  [%s]\033[0m  \033[38;2;205;214;244m%-55s\033[0m  %s%s\033[0m\n' \
             "$pci_id" \
@@ -171,7 +171,7 @@ ash_hw_pci() {
         esac
     done
 
-    hw_section "🚌" "PCI Devices" "\033[38;2;250;179;135m"
+    hw_section "🚌" "PCI Devices" $'\033[38;2;250;179;135m'
 
     if [[ -n "$filter" ]]; then
         printf '\n  \033[38;2;108;112;134mFilter: %s\033[0m\n' "$filter"
@@ -189,7 +189,7 @@ ash_hw_pci() {
     fi
 
     if [[ $show_verbose -eq 1 ]] && command -v lspci &>/dev/null; then
-        hw_section "🔬" "Verbose PCI Detail" "\033[38;2;137;180;250m"
+        hw_section "🔬" "Verbose PCI Detail" $'\033[38;2;137;180;250m'
         lspci -v 2>/dev/null | head -80 | while IFS= read -r line; do
             printf '  \033[38;2;108;112;134m%s\033[0m\n' "$line"
         done

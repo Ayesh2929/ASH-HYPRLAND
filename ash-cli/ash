@@ -820,13 +820,24 @@ _ash_dispatch() {
             _ash_print_version
             return 0
             ;;
-        --completions|completions)
+        --completions|completions|completion)
             local shell="${args[0]:-bash}"
+            case "$shell" in
+                ""|--help|-h|help)
+                    printf '\nUsage: ash completion <shell>\n\n'
+                    printf 'Print the shell completion script for bash, zsh, fish or powershell.\n\n'
+                    printf 'Examples:\n'
+                    printf '  ash completion bash > ~/.local/share/bash-completion/completions/ash\n'
+                    printf '  ash completion fish > ~/.config/fish/completions/ash.fish\n\n'
+                    return 0
+                    ;;
+            esac
             local comp_file="${ASH_CMD_DIR}/completion/ash.${shell}"
             if [[ -f "$comp_file" ]]; then
                 cat "$comp_file"
             else
                 ash_log_error "No completions available for shell: ${shell}"
+                printf 'Available: bash, zsh, fish, ps1\n' >&2
                 return 1
             fi
             return 0

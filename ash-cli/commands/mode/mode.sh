@@ -156,40 +156,40 @@ readonly ASH_MODE_SPINNER_STYLE="dots"    # dots|line|circle|bounce
 readonly ASH_MODE_TRANSITION_SOUND=true
 
 # Color palette for mode display (256-color + truecolor)
-readonly MODE_COLOR_RESET='\033[0m'
-readonly MODE_COLOR_BOLD='\033[1m'
-readonly MODE_COLOR_DIM='\033[2m'
-readonly MODE_COLOR_ITALIC='\033[3m'
-readonly MODE_COLOR_UNDERLINE='\033[4m'
-readonly MODE_COLOR_BLINK='\033[5m'
+readonly MODE_COLOR_RESET=$'\033[0m'
+readonly MODE_COLOR_BOLD=$'\033[1m'
+readonly MODE_COLOR_DIM=$'\033[2m'
+readonly MODE_COLOR_ITALIC=$'\033[3m'
+readonly MODE_COLOR_UNDERLINE=$'\033[4m'
+readonly MODE_COLOR_BLINK=$'\033[5m'
 
 # Truecolor definitions
-readonly COLOR_ASH_PRIMARY='\033[38;2;137;180;250m'     # #89b4fa Catppuccin Blue
-readonly COLOR_ASH_SECONDARY='\033[38;2;203;166;247m'   # #cba6f7 Catppuccin Mauve
-readonly COLOR_ASH_SUCCESS='\033[38;2;166;227;161m'     # #a6e3a1 Catppuccin Green
-readonly COLOR_ASH_WARNING='\033[38;2;249;226;175m'     # #f9e2af Catppuccin Yellow
-readonly COLOR_ASH_ERROR='\033[38;2;243;139;168m'       # #f38ba8 Catppuccin Red
-readonly COLOR_ASH_INFO='\033[38;2;148;226;213m'        # #94e2d5 Catppuccin Teal
-readonly COLOR_ASH_MUTED='\033[38;2;88;91;112m'         # #58596f Catppuccin Overlay
-readonly COLOR_ASH_SURFACE='\033[38;2;49;50;68m'        # #313244 Catppuccin Surface
-readonly COLOR_ASH_TEXT='\033[38;2;205;214;244m'        # #cdd6f4 Catppuccin Text
+readonly COLOR_ASH_PRIMARY=$'\033[38;2;137;180;250m'     # #89b4fa Catppuccin Blue
+readonly COLOR_ASH_SECONDARY=$'\033[38;2;203;166;247m'   # #cba6f7 Catppuccin Mauve
+readonly COLOR_ASH_SUCCESS=$'\033[38;2;166;227;161m'     # #a6e3a1 Catppuccin Green
+readonly COLOR_ASH_WARNING=$'\033[38;2;249;226;175m'     # #f9e2af Catppuccin Yellow
+readonly COLOR_ASH_ERROR=$'\033[38;2;243;139;168m'       # #f38ba8 Catppuccin Red
+readonly COLOR_ASH_INFO=$'\033[38;2;148;226;213m'        # #94e2d5 Catppuccin Teal
+readonly COLOR_ASH_MUTED=$'\033[38;2;88;91;112m'         # #58596f Catppuccin Overlay
+readonly COLOR_ASH_SURFACE=$'\033[38;2;49;50;68m'        # #313244 Catppuccin Surface
+readonly COLOR_ASH_TEXT=$'\033[38;2;205;214;244m'        # #cdd6f4 Catppuccin Text
 
 # Background colors
-readonly BG_ASH_SURFACE='\033[48;2;30;30;46m'           # #1e1e2e Catppuccin Base
-readonly BG_ASH_OVERLAY='\033[48;2;49;50;68m'           # #313244 Catppuccin Surface
+readonly BG_ASH_SURFACE=$'\033[48;2;30;30;46m'           # #1e1e2e Catppuccin Base
+readonly BG_ASH_OVERLAY=$'\033[48;2;49;50;68m'           # #313244 Catppuccin Surface
 
 # Mode-specific accent colors (truecolor)
 declare -A MODE_ACCENT_COLORS=(
-    [game]='\033[38;2;243;139;168m'       # Red    — aggressive/performance
-    [work]='\033[38;2;137;180;250m'       # Blue   — calm/productive
-    [focus]='\033[38;2;148;226;213m'      # Teal   — clarity/zen
-    [cinema]='\033[38;2;203;166;247m'     # Purple — creative/immersive
-    [present]='\033[38;2;249;226;175m'    # Yellow — attention/professional
-    [battery]='\033[38;2;166;227;161m'    # Green  — eco/efficient
-    [stream]='\033[38;2;250;179;135m'     # Peach  — warm/engaging
-    [privacy]='\033[38;2;88;91;112m'      # Gray   — subtle/secure
-    [accessibility]='\033[38;2;116;199;236m' # Sky — clear/accessible
-    [default]='\033[38;2;205;214;244m'    # White  — neutral/balanced
+    [game]=$'\033[38;2;243;139;168m'       # Red    — aggressive/performance
+    [work]=$'\033[38;2;137;180;250m'       # Blue   — calm/productive
+    [focus]=$'\033[38;2;148;226;213m'      # Teal   — clarity/zen
+    [cinema]=$'\033[38;2;203;166;247m'     # Purple — creative/immersive
+    [present]=$'\033[38;2;249;226;175m'    # Yellow — attention/professional
+    [battery]=$'\033[38;2;166;227;161m'    # Green  — eco/efficient
+    [stream]=$'\033[38;2;250;179;135m'     # Peach  — warm/engaging
+    [privacy]=$'\033[38;2;88;91;112m'      # Gray   — subtle/secure
+    [accessibility]=$'\033[38;2;116;199;236m' # Sky — clear/accessible
+    [default]=$'\033[38;2;205;214;244m'    # White  — neutral/balanced
 )
 
 # Mode icons (Nerd Font glyphs with Unicode fallbacks)
@@ -578,10 +578,8 @@ ash_mode_activate() {
     # ── Pre-activation Hooks ────────────────────────────────────────────────
     ash_log_debug "Running pre-mode-change hooks for: ${mode}"
     ash_hook_run "pre-mode-change" \
-        --env "ASH_MODE_NAME=${mode}" \
-        --env "ASH_PREVIOUS_MODE=${current_mode}" \
-        --timeout 10 \
-        --on-error continue
+        "MODE_NAME=${mode}" \
+        "PREVIOUS_MODE=${current_mode}"
 
     # ── Display Activation Header ───────────────────────────────────────────
     if [[ "${ASH_QUIET}" != "true" ]]; then
@@ -626,10 +624,8 @@ ash_mode_activate() {
 
     # ── Post-activation Hooks ────────────────────────────────────────────────
     ash_hook_run "post-mode-change" \
-        --env "ASH_MODE_NAME=${mode}" \
-        --env "ASH_PREVIOUS_MODE=${current_mode}" \
-        --timeout 10 \
-        --on-error continue
+        "MODE_NAME=${mode}" \
+        "PREVIOUS_MODE=${current_mode}"
 
     # ── Schedule Auto-revert ─────────────────────────────────────────────────
     if [[ -n "${_settings[duration]:-}" ]]; then
@@ -1550,6 +1546,31 @@ ash_mode_version() {
 # SECTION 14 — MAIN DISPATCHER
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Usage block for a single built-in mode (used by `ash mode <mode> --help`).
+ash_mode_print_subcommand_help() {
+    local mode="${1:-}"
+    local desc="${MODE_DESCRIPTIONS[$mode]:-Switch the desktop into the ${mode} profile}"
+
+    printf '\n%s%sash mode %s%s\n' \
+        "${MODE_COLOR_BOLD:-}" "${COLOR_ASH_PRIMARY:-}" "${mode}" "${MODE_COLOR_RESET:-}"
+    printf '%s%s%s\n\n' "${MODE_COLOR_DIM:-}" "${desc}" "${MODE_COLOR_RESET:-}"
+    printf '%sUSAGE%s\n' "${MODE_COLOR_BOLD:-}" "${MODE_COLOR_RESET:-}"
+    printf '  ash mode %s [options]\n\n' "${mode}"
+    printf '%sOPTIONS%s\n' "${MODE_COLOR_BOLD:-}" "${MODE_COLOR_RESET:-}"
+    printf '  %-24s %s\n' '--dry-run'        'Preview the changes without applying them'
+    printf '  %-24s %s\n' '--duration <time>' 'Auto-revert after e.g. 30m, 2h'
+    printf '  %-24s %s\n' '--no-notify'      'Do not send a desktop notification'
+    printf '  %-24s %s\n' '--no-animation'   'Skip the transition animation'
+    printf '  %-24s %s\n' '--force, -f'      'Re-apply even if already active'
+    printf '  %-24s %s\n' '--verbose, -v'    'Show detailed progress'
+    printf '  %-24s %s\n' '--quiet, -q'      'Suppress non-error output'
+    printf '  %-24s %s\n' '--json'           'Machine-readable result'
+    printf '  %-24s %s\n' '--help, -h'       'Show this help'
+    printf '\n%sGlobal: ash mode list | status | create | help%s\n\n' \
+        "${MODE_COLOR_DIM:-}" "${MODE_COLOR_RESET:-}"
+    return 0
+}
+
 ash_mode_main() {
     # Initialize state directories
     ash_mode_init_state
@@ -1606,8 +1627,26 @@ ash_mode_main() {
         battery | stream | privacy | accessibility | default)
             local mode_script="${__ASH_MODE_DIR}/${subcommand}.sh"
             ash_mode_validate_script "${subcommand}"
+            # `--help` must show usage, not apply the mode. The mode scripts run
+            # their entry point as soon as they are sourced, so help is handled
+            # here, before any file is loaded.
+            local _arg
+            for _arg in "${subcommand_args[@]:-}"; do
+                case "${_arg}" in
+                    --help|-h)
+                        ash_mode_print_subcommand_help "${subcommand}"
+                        return 0
+                        ;;
+                esac
+            done
             # shellcheck source=/dev/null
             source "${mode_script}" "${subcommand_args[@]:-}"
+            ;;
+
+        # Help — must never fall through to activation
+        help | -h | --help)
+            ash_mode_help
+            return 0
             ;;
 
         # Management commands

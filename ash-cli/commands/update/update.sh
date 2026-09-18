@@ -38,20 +38,20 @@ declare -gr _UPD_SNAPSHOT_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ash/snapshot
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _u()       { [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && printf '%s' "$1" || true; }
-_ur()      { _u '\033[0m';                          }   # reset
-_ubold()   { _u '\033[1m';                          }   # bold
-_udim()    { _u '\033[38;2;108;112;134m';           }   # overlay0
-_umauve()  { _u '\033[1;38;2;203;166;247m';         }   # mauve bold
-_ublue()   { _u '\033[38;2;137;180;250m';           }   # blue
-_ugreen()  { _u '\033[38;2;166;227;161m';           }   # green
-_upeach()  { _u '\033[38;2;250;179;135m';           }   # peach
-_uyellow() { _u '\033[1;38;2;249;226;175m';         }   # yellow bold
-_ured()    { _u '\033[1;38;2;243;139;168m';         }   # red bold
-_uteal()   { _u '\033[38;2;148;226;213m';           }   # teal
-_usky()    { _u '\033[38;2;137;220;235m';           }   # sky
-_ulav()    { _u '\033[38;2;180;190;254m';           }   # lavender
-_upink()   { _u '\033[38;2;245;194;231m';           }   # pink
-_usapph()  { _u '\033[38;2;116;199;236m';           }   # sapphire
+_ur()      { _u $'\033[0m';                          }   # reset
+_ubold()   { _u $'\033[1m';                          }   # bold
+_udim()    { _u $'\033[38;2;108;112;134m';           }   # overlay0
+_umauve()  { _u $'\033[1;38;2;203;166;247m';         }   # mauve bold
+_ublue()   { _u $'\033[38;2;137;180;250m';           }   # blue
+_ugreen()  { _u $'\033[38;2;166;227;161m';           }   # green
+_upeach()  { _u $'\033[38;2;250;179;135m';           }   # peach
+_uyellow() { _u $'\033[1;38;2;249;226;175m';         }   # yellow bold
+_ured()    { _u $'\033[1;38;2;243;139;168m';         }   # red bold
+_uteal()   { _u $'\033[38;2;148;226;213m';           }   # teal
+_usky()    { _u $'\033[38;2;137;220;235m';           }   # sky
+_ulav()    { _u $'\033[38;2;180;190;254m';           }   # lavender
+_upink()   { _u $'\033[38;2;245;194;231m';           }   # pink
+_usapph()  { _u $'\033[38;2;116;199;236m';           }   # sapphire
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔷  SHARED DISPLAY PRIMITIVES  (exported for sub-commands)

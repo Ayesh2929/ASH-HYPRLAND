@@ -36,20 +36,20 @@ declare -gr _NET_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ash/net"
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _n()       { [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && printf '%s' "$1" || true; }
-_nr()      { _n '\033[0m';                          }  # reset
-_nbold()   { _n '\033[1m';                          }  # bold
-_ndim()    { _n '\033[38;2;108;112;134m';           }  # overlay0
-_nmauve()  { _n '\033[1;38;2;203;166;247m';         }  # mauve bold
-_nblue()   { _n '\033[38;2;137;180;250m';           }  # blue
-_ngreen()  { _n '\033[38;2;166;227;161m';           }  # green
-_npeach()  { _n '\033[38;2;250;179;135m';           }  # peach
-_nyellow() { _n '\033[1;38;2;249;226;175m';         }  # yellow bold
-_nred()    { _n '\033[1;38;2;243;139;168m';         }  # red bold
-_nteal()   { _n '\033[38;2;148;226;213m';           }  # teal
-_nsky()    { _n '\033[38;2;137;220;235m';           }  # sky
-_nlav()    { _n '\033[38;2;180;190;254m';           }  # lavender
-_npink()   { _n '\033[38;2;245;194;231m';           }  # pink
-_nsapph()  { _n '\033[38;2;116;199;236m';           }  # sapphire
+_nr()      { _n $'\033[0m';                          }  # reset
+_nbold()   { _n $'\033[1m';                          }  # bold
+_ndim()    { _n $'\033[38;2;108;112;134m';           }  # overlay0
+_nmauve()  { _n $'\033[1;38;2;203;166;247m';         }  # mauve bold
+_nblue()   { _n $'\033[38;2;137;180;250m';           }  # blue
+_ngreen()  { _n $'\033[38;2;166;227;161m';           }  # green
+_npeach()  { _n $'\033[38;2;250;179;135m';           }  # peach
+_nyellow() { _n $'\033[1;38;2;249;226;175m';         }  # yellow bold
+_nred()    { _n $'\033[1;38;2;243;139;168m';         }  # red bold
+_nteal()   { _n $'\033[38;2;148;226;213m';           }  # teal
+_nsky()    { _n $'\033[38;2;137;220;235m';           }  # sky
+_nlav()    { _n $'\033[38;2;180;190;254m';           }  # lavender
+_npink()   { _n $'\033[38;2;245;194;231m';           }  # pink
+_nsapph()  { _n $'\033[38;2;116;199;236m';           }  # sapphire
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔷  SHARED DISPLAY PRIMITIVES  (exported for sub-commands)

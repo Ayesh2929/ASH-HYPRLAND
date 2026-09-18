@@ -15,15 +15,15 @@ readonly LOCAL_DIR="${HOME}/.local"
 readonly LOG_FILE="${CACHE_DIR}/logs/final-check.log"
 
 # Colors
-readonly R='\033[0m'
-readonly B='\033[1m'
-readonly G='\033[92m'
-readonly Y='\033[93m'
-readonly C='\033[96m'
-readonly M='\033[95m'
-readonly RED='\033[91m'
-readonly DIM='\033[2m'
-readonly BWHITE='\033[97m'
+readonly R=$'\033[0m'
+readonly B=$'\033[1m'
+readonly G=$'\033[92m'
+readonly Y=$'\033[93m'
+readonly C=$'\033[96m'
+readonly M=$'\033[95m'
+readonly RED=$'\033[91m'
+readonly DIM=$'\033[2m'
+readonly BWHITE=$'\033[97m'
 
 declare -i PASS=0 FAIL=0 WARN=0
 readonly START_TIME=$(date +%s)
