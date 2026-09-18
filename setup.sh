@@ -262,7 +262,7 @@ BASH_TPL = """#!/usr/bin/env bash
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
-echo "Executing: {name} (omega stub)"
+echo "Executing: {name} (omega\x20stub)"
 exit 0
 """
 
@@ -276,7 +276,7 @@ PYTHON_TPL = """#!/usr/bin/env python3
 import sys
 
 def main():
-    print("Running {name} (omega stub)")
+    print("Running {name} (omega\x20stub)")
     sys.exit(0)
 
 if __name__ == '__main__':

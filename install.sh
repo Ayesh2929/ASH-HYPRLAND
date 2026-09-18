@@ -23,8 +23,8 @@ if [[ -z "${MAIN_INSTALLER}" ]]; then
   exit 1
 fi
 
-# If the chosen installer is a stub (contains omega stub), prefer the canonical one
-if grep -q "omega stub" "${MAIN_INSTALLER}" 2>/dev/null && [[ -f "${SCRIPT_DIR}/scripts/core/install.sh" ]] && ! grep -q "omega stub" "${SCRIPT_DIR}/scripts/core/install.sh" 2>/dev/null; then
+# If the chosen installer is a stub (contains omega-stub), prefer the canonical one
+if grep -q "omega.*stub" "${MAIN_INSTALLER}" 2>/dev/null && [[ -f "${SCRIPT_DIR}/scripts/core/install.sh" ]] && ! grep -q "omega.*stub" "${SCRIPT_DIR}/scripts/core/install.sh" 2>/dev/null; then
   MAIN_INSTALLER="${SCRIPT_DIR}/scripts/core/install.sh"
 fi
 

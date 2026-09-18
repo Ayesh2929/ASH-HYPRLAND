@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — api_service.dart                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
-
-def main():
-    print("Running api_service.dart (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+class ApiService {
+  final String base = 'http://localhost:8787/api/v1';
+  Future<Map<String,dynamic>> health() async {
+    final res = await http.get(Uri.parse('$base/../health'));
+    return jsonDecode(res.body);
+  }
+}

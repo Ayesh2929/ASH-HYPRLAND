@@ -1,15 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — StatusBar.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+import React from 'react';
 
-def main():
-    print("Running StatusBar.tsx (omega stub)")
-    sys.exit(0)
+type Props = { /* ash StatusBar */ };
 
-if __name__ == '__main__':
-    main()
+export const StatusBar: React.FC<Props> = () => {
+  return <div className="ash-statusbar">ASH StatusBar — placeholder component</div>;
+};
+export default StatusBar;

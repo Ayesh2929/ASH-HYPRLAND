@@ -1,15 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — ThemeSelector.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+import React from 'react';
 
-def main():
-    print("Running ThemeSelector.tsx (omega stub)")
-    sys.exit(0)
+type Props = { /* ash ThemeSelector */ };
 
-if __name__ == '__main__':
-    main()
+export const ThemeSelector: React.FC<Props> = () => {
+  return <div className="ash-themeselector">ASH ThemeSelector — placeholder component</div>;
+};
+export default ThemeSelector;

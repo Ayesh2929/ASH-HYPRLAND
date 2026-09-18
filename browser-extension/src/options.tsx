@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — options.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 
-def main():
-    print("Running options.tsx (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+const Options: React.FC = () => {
+  return (
+    <div style={{ padding: 16 }}>
+      <h1>ASH Options</h1>
+      <p>Configure theme sync and API endpoint.</p>
+      <label>API Base <input defaultValue="http://localhost:8787/api/v1" /></label>
+    </div>
+  );
+};
+const el = document.getElementById('root');
+if (el) createRoot(el).render(<Options />);
+export default Options;

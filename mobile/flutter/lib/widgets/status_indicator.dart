@@ -1,15 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — status_indicator.dart                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
-
-def main():
-    print("Running status_indicator.dart (omega stub)")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    main()
+import 'package:flutter/material.dart';
+class StatusIndicator extends StatelessWidget {
+  final String status;
+  const StatusIndicator({super.key, required this.status});
+  @override Widget build(BuildContext context) => Chip(label: Text(status));
+}
