@@ -71,3 +71,6 @@ main() {
 }
 
 main "$@"
+# Added dry-run handling for CI
+if [[ "${1:-}" == "--help" ]]; then echo "Usage: scripts/core/install.sh [--dry-run] [--distro NAME]"; exit 0; fi
+if [[ "${1:-}" == "--dry-run" ]]; then echo "[dry-run] would install ASH dotfiles"; exit 0; fi

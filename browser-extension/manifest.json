@@ -1,6 +1,41 @@
 {
-  "name": "manifest.json",
-  "version": "5.0.0-omega",
-  "description": "ASH Dotfiles OMEGA component: manifest.json",
-  "status": "ready"
+  "manifest_version": 3,
+  "name": "ASH Dotfiles",
+  "version": "5.0.0",
+  "description": "Theme & wallpaper companion for ASH Dotfiles \u2014 sync themes with your browser.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://localhost:8787/*",
+    "https://ash-dotfiles.dev/*"
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
 }

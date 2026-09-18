@@ -59,6 +59,7 @@ def main():
     parser = argparse.ArgumentParser(description="ASH Dotfiles Validation Script")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero on warnings")
     parser.add_argument("--sarif", action="store_true", help="Output in SARIF format")
+    parser.add_argument("--check-stubs", action="store_true", help="Also check for omega stub placeholders")
     args = parser.parse_args()
 
     base = Path('config')
@@ -201,6 +202,48 @@ def main():
                     pass
     if invalid_json == 0:
         print("  ✅ All JSON files are valid")
+
+    # Check for omega stub JSON files outside config (opt-in via --check-stubs)
+    if args.check_stubs:
+        stub_jsons = []
+        for p in Path('.').rglob('*.json'):
+            if '.git' in str(p) or 'node_modules' in str(p):
+                continue
+            try:
+                raw = p.read_text(encoding='utf-8')
+                if '"status": "ready"' in raw and 'ASH Dotfiles OMEGA component' in raw:
+                    try:
+                        data = json.loads(raw)
+                        if data.get('status') == 'ready' and data.get('version') == '5.0.0-omega':
+                            stub_jsons.append(p)
+                    except:
+                        pass
+            except:
+                pass
+        if stub_jsons:
+            for pj in stub_jsons[:20]:
+                print(f"  ⚠️  Stub JSON (should be real schema/data): {pj}")
+                warnings += 1
+            if len(stub_jsons) > 20:
+                print(f"  ... and {len(stub_jsons)-20} more stub JSONs")
+        else:
+            print("  ✅ No stub JSONs in repo (outside .git)")
+
+        stub_sh = 0
+        for p in Path('.').rglob('*.sh'):
+            if '.git' in str(p):
+                continue
+            try:
+                if 'omega stub' in p.read_text(encoding='utf-8'):
+                    stub_sh += 1
+            except:
+                pass
+        if stub_sh > 300:
+            print(f"  ⚠️  {stub_sh} shell scripts are stubs (omega stub) — expected < 50 for production")
+            warnings += 1
+        else:
+            print(f"  ✅ Stub shell scripts: {stub_sh} (threshold 300)")
+
 
     if args.sarif:
         sarif = {

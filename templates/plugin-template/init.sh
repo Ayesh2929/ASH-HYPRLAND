@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — init.sh                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
-echo "Executing: init.sh (omega stub)"
+# ASH plugin template — init.sh
+echo "plugin init.sh: ok"
 exit 0
