@@ -13,13 +13,13 @@ readonly CACHE_DIR="${HOME}/.cache/ash-dots"
 readonly LOG_FILE="${CACHE_DIR}/logs/migrate.log"
 readonly BACKUP_DIR="${HOME}/.local/share/ash-dots/backups"
 
-readonly RESET='\033[0m'
-readonly BOLD='\033[1m'
-readonly GREEN='\033[92m'
-readonly YELLOW='\033[93m'
-readonly RED='\033[91m'
-readonly CYAN='\033[96m'
-readonly MAGENTA='\033[95m'
+readonly RESET=$'\033[0m'
+readonly BOLD=$'\033[1m'
+readonly GREEN=$'\033[92m'
+readonly YELLOW=$'\033[93m'
+readonly RED=$'\033[91m'
+readonly CYAN=$'\033[96m'
+readonly MAGENTA=$'\033[95m'
 
 log()     { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 info()    { echo -e "  ${CYAN}→${RESET} $*"; log "INFO" "$*"; }

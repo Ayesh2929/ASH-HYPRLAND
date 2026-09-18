@@ -527,6 +527,33 @@ fi)
 EOF
 }
 
+# Topic list for the `ash doctor check --<topic>` compatibility subcommand.
+doctor::print_check_topics() {
+    cat <<EOF
+
+${BOLD}${ASH_PRIMARY}USAGE${RST}
+  ash doctor check --<topic>
+
+${BOLD}${ASH_PRIMARY}TOPICS${RST}
+  ${ASH_MUTED}--binds, --custom-binds${RST}  Hyprland keybind syntax and conflicts
+  ${ASH_MUTED}--env, --misc${RST}           Environment and misc.conf sanity
+  ${ASH_MUTED}--cursor, --decorations${RST} Look-and-feel settings
+  ${ASH_MUTED}--animations${RST}            Animation curves and definitions
+  ${ASH_MUTED}--ecosystem, --plugins${RST}  Companion tools and plugins
+  ${ASH_MUTED}--versions${RST}              Version compatibility report
+  ${ASH_MUTED}--accessibility${RST}         Contrast / accessibility colours
+  ${ASH_MUTED}--<category>${RST}            Any category: system, wayland, hyprland,
+                              gpu, audio, network, fonts, tools, config,
+                              theme, performance, security, services,
+                              portals, disk, dependencies
+
+${BOLD}${ASH_PRIMARY}EXAMPLES${RST}
+  ash doctor check --binds
+  ash doctor check --versions
+  ash doctor quick --category gpu
+EOF
+}
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # § DISPATCHER
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -557,6 +584,48 @@ doctor::main() {
         full)    source "${_DOC_DIR}/full.sh";   doctor::full   "$@" ;;
         fix)     source "${_DOC_DIR}/fix.sh";    doctor::fix    "$@" ;;
         report)  source "${_DOC_DIR}/report.sh"; doctor::report "$@" ;;
+        # `ash doctor check --<topic>` is what the Hyprland configs document
+        # (env.conf, cursor.conf, decorations.conf, binds.conf, …). It maps the
+        # topic onto a check category and runs the quick suite for it.
+        check)
+            local topic="" arg
+            for arg in "$@"; do
+                case "$arg" in
+                    --help|-h|help)  doctor::print_check_topics; return 0 ;;
+                    --*=*)           topic="${arg#--}"; topic="${topic%%=*}" ;;
+                    --*)             topic="${arg#--}" ;;
+                esac
+            done
+
+            if [[ -z "$topic" ]]; then
+                doctor::print_check_topics
+                return 0
+            fi
+
+            case "$topic" in
+                binds|custom-binds|keybinds|env|misc|input|monitors|gestures|group|\
+                cursor|decorations|animations|windowrules|workspacerules|layerrules|\
+                autostart|xwayland|shaders|plugins|ecosystem|hyprland)
+                    DOC_CATEGORY_FILTER="hyprland" ;;
+                versions|version|kernel|distro|system)
+                    DOC_CATEGORY_FILTER="system" ;;
+                accessibility|theme|colors|wallpaper)
+                    DOC_CATEGORY_FILTER="theme" ;;
+                wayland|waybar|gpu|audio|network|fonts|tools|optional|config|\
+                performance|security|permissions|services|portals|disk|dependencies)
+                    DOC_CATEGORY_FILTER="$topic" ;;
+                *)
+                    log::error "Unknown check topic: '${topic}'"
+                    doctor::print_check_topics
+                    return 1
+                    ;;
+            esac
+
+            log::info "Running doctor checks for: ${topic} (category: ${DOC_CATEGORY_FILTER})"
+            source "${_DOC_DIR}/quick.sh"
+            doctor::quick --issues-only
+            ;;
+        checks)  source "${_DOC_DIR}/full.sh";   doctor::full   "$@" ;;
         help|--help|-h) doctor::help ;;
         *)
             log::error "Unknown subcommand: '${subcmd}'"

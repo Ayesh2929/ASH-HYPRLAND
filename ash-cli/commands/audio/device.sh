@@ -173,9 +173,9 @@ for obj in data:
     rate  = props.get('audio.rate','')
     state = obj.get('info',{}).get('state','?')
     if mc:
-        col = '\033[38;2;137;180;250m' if 'Sink' in mc else '\033[38;2;166;227;161m'
-        r = '\033[0m'
-        d = '\033[38;2;108;112;134m'
+        col = $'\033[38;2;137;180;250m' if 'Sink' in mc else $'\033[38;2;166;227;161m'
+        r = $'\033[0m'
+        d = $'\033[38;2;108;112;134m'
         print(f'  {col}{mc:<30}{r}  {name[:35]:<35}  {d}{rate}Hz  {state}{r}')
 " 2>/dev/null | head -20 || true
 }

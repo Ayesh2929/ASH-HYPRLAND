@@ -778,11 +778,11 @@ _chk_perf_score_report() {
     (( score < 0 )) && score=0
 
     local grade grade_icon color
-    if   (( score >= 90 )); then grade="A+"; grade_icon="🚀"; color='\033[1;38;2;166;227;161m'
-    elif (( score >= 80 )); then grade="A";  grade_icon="⚡"; color='\033[38;2;166;227;161m'
-    elif (( score >= 70 )); then grade="B";  grade_icon="📊"; color='\033[38;2;249;226;175m'
-    elif (( score >= 60 )); then grade="C";  grade_icon="⚠️ "; color='\033[38;2;250;179;135m'
-    else                         grade="D";  grade_icon="🐌"; color='\033[1;38;2;243;139;168m'
+    if   (( score >= 90 )); then grade="A+"; grade_icon="🚀"; color=$'\033[1;38;2;166;227;161m'
+    elif (( score >= 80 )); then grade="A";  grade_icon="⚡"; color=$'\033[38;2;166;227;161m'
+    elif (( score >= 70 )); then grade="B";  grade_icon="📊"; color=$'\033[38;2;249;226;175m'
+    elif (( score >= 60 )); then grade="C";  grade_icon="⚠️ "; color=$'\033[38;2;250;179;135m'
+    else                         grade="D";  grade_icon="🐌"; color=$'\033[1;38;2;243;139;168m'
     fi
 
     local bar_w=40

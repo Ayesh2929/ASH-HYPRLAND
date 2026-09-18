@@ -1,6 +1,68 @@
 {
-  "name": "plugin-schema.json",
-  "version": "5.0.0-omega",
-  "description": "ASH Dotfiles OMEGA component: plugin-schema.json",
-  "status": "ready"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ash-dotfiles.dev/schemas/plugin.json",
+  "title": "ASH Plugin Manifest",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+"
+    },
+    "author": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "productivity",
+        "appearance",
+        "system",
+        "integration",
+        "fun",
+        "security"
+      ]
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "requires": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "official": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
 }

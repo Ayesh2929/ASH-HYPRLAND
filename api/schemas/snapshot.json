@@ -1,6 +1,49 @@
 {
-  "name": "snapshot.json",
-  "version": "5.0.0-omega",
-  "description": "ASH Dotfiles OMEGA component: snapshot.json",
-  "status": "ready"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ash-dotfiles.dev/schemas/api-snapshot.json",
+  "title": "ASH Snapshot",
+  "type": "object",
+  "required": [
+    "id",
+    "label",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "auto",
+        "pre-update",
+        "pre-rollback"
+      ]
+    },
+    "restorable": {
+      "type": "boolean"
+    },
+    "managed": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
 }

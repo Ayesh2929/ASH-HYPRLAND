@@ -49,14 +49,14 @@ _disk_bar() {
     local empty=$(( width - filled ))
 
     local color
-    if   (( pct >= 90 )); then color='\033[1;38;2;243;139;168m'  # Red
-    elif (( pct >= 75 )); then color='\033[1;38;2;249;226;175m'  # Yellow
-    elif (( pct >= 50 )); then color='\033[38;2;250;179;135m'    # Peach
-    else                       color='\033[38;2;166;227;161m'    # Green
+    if   (( pct >= 90 )); then color=$'\033[1;38;2;243;139;168m'  # Red
+    elif (( pct >= 75 )); then color=$'\033[1;38;2;249;226;175m'  # Yellow
+    elif (( pct >= 50 )); then color=$'\033[38;2;250;179;135m'    # Peach
+    else                       color=$'\033[38;2;166;227;161m'    # Green
     fi
 
-    local reset='\033[0m'
-    local dim='\033[38;2;88;91;112m'
+    local reset=$'\033[0m'
+    local dim=$'\033[38;2;88;91;112m'
 
     if [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]]; then
         printf '%s' "$color"

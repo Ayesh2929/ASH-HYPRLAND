@@ -138,19 +138,19 @@ declare -A CAT_ICONS=(
 
 # ── Category colors (ANSI for terminal output) ────────────────────────────────
 declare -A CAT_COLORS=(
-    [theme]="\033[35m"        # magenta
-    [productivity]="\033[34m" # blue
-    [system]="\033[36m"       # cyan/teal
-    [integration]="\033[94m"  # lavender
-    [gaming]="\033[32m"       # green
-    [media]="\033[96m"        # sky
-    [security]="\033[31m"     # red
-    [ai]="\033[95m"           # pink
-    [network]="\033[34m"      # sapphire
-    [utility]="\033[33m"      # peach
-    [unknown]="\033[37m"      # white
+    [theme]=$'\033[35m'        # magenta
+    [productivity]=$'\033[34m' # blue
+    [system]=$'\033[36m'       # cyan/teal
+    [integration]=$'\033[94m'  # lavender
+    [gaming]=$'\033[32m'       # green
+    [media]=$'\033[96m'        # sky
+    [security]=$'\033[31m'     # red
+    [ai]=$'\033[95m'           # pink
+    [network]=$'\033[34m'      # sapphire
+    [utility]=$'\033[33m'      # peach
+    [unknown]=$'\033[37m'      # white
 )
-readonly RESET="\033[0m"
+readonly RESET=$'\033[0m'
 
 # ══════════════════════════════════════════════════════════════════════════════
 # § 3  LOGGING

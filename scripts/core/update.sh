@@ -13,13 +13,13 @@ readonly LOG_FILE="${CACHE_DIR}/logs/update.log"
 readonly BACKUP_BEFORE_UPDATE=true
 
 # Colors
-readonly R='\033[0m'
-readonly B='\033[1m'
-readonly G='\033[92m'
-readonly Y='\033[93m'
-readonly C='\033[96m'
-readonly M='\033[95m'
-readonly DIM='\033[2m'
+readonly R=$'\033[0m'
+readonly B=$'\033[1m'
+readonly G=$'\033[92m'
+readonly Y=$'\033[93m'
+readonly C=$'\033[96m'
+readonly M=$'\033[95m'
+readonly DIM=$'\033[2m'
 
 log()     { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 info()    { echo -e "  ${C}→${R} $*"; log "INFO" "$*"; }

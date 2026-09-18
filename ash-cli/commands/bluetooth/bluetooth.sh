@@ -37,20 +37,20 @@ declare -gr _BT_SCAN_CACHE="${_BT_CACHE_DIR}/last-scan.json"
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _bt()      { [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && printf '%s' "$1" || true; }
-_btr()     { _bt '\033[0m';                          }
-_btbold()  { _bt '\033[1m';                          }
-_btdim()   { _bt '\033[38;2;108;112;134m';           }
-_btmauve() { _bt '\033[1;38;2;203;166;247m';         }
-_btblue()  { _bt '\033[38;2;137;180;250m';           }
-_btgreen() { _bt '\033[38;2;166;227;161m';           }
-_btpeach() { _bt '\033[38;2;250;179;135m';           }
-_btyellow(){ _bt '\033[1;38;2;249;226;175m';         }
-_btred()   { _bt '\033[1;38;2;243;139;168m';         }
-_btteal()  { _bt '\033[38;2;148;226;213m';           }
-_btsky()   { _bt '\033[38;2;137;220;235m';           }
-_btlav()   { _bt '\033[38;2;180;190;254m';           }
-_btpink()  { _bt '\033[38;2;245;194;231m';           }
-_btsapph() { _bt '\033[38;2;116;199;236m';           }
+_btr()     { _bt $'\033[0m';                          }
+_btbold()  { _bt $'\033[1m';                          }
+_btdim()   { _bt $'\033[38;2;108;112;134m';           }
+_btmauve() { _bt $'\033[1;38;2;203;166;247m';         }
+_btblue()  { _bt $'\033[38;2;137;180;250m';           }
+_btgreen() { _bt $'\033[38;2;166;227;161m';           }
+_btpeach() { _bt $'\033[38;2;250;179;135m';           }
+_btyellow(){ _bt $'\033[1;38;2;249;226;175m';         }
+_btred()   { _bt $'\033[1;38;2;243;139;168m';         }
+_btteal()  { _bt $'\033[38;2;148;226;213m';           }
+_btsky()   { _bt $'\033[38;2;137;220;235m';           }
+_btlav()   { _bt $'\033[38;2;180;190;254m';           }
+_btpink()  { _bt $'\033[38;2;245;194;231m';           }
+_btsapph() { _bt $'\033[38;2;116;199;236m';           }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔷  SHARED DISPLAY PRIMITIVES  (exported to sub-commands)
@@ -450,10 +450,19 @@ ash_cmd_bluetooth() {
     done
 
     bt_ensure_dirs
+
+    # Help must work on machines without BlueZ installed.
+    case "$sub" in
+        help|-h|--help)
+            _bt_help
+            printf '\n'
+            return 0
+            ;;
+    esac
+
     bt_check_prereqs || return 1
 
     case "$sub" in
-        help|-h|--help) _bt_help ;;
 
         status|info)
             if [[ $watch_mode -eq 1 ]]; then

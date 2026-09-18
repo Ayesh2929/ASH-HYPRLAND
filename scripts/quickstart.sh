@@ -10,13 +10,13 @@ set -euo pipefail
 
 readonly REPO_URL="https://github.com/Ayesh2929/ASH-HYPRLAND"
 readonly DOTFILES_DIR="${HOME}/.dotfiles"
-readonly BOLD='\033[1m'
-readonly RESET='\033[0m'
-readonly GREEN='\033[92m'
-readonly CYAN='\033[96m'
-readonly MAGENTA='\033[95m'
-readonly YELLOW='\033[93m'
-readonly RED='\033[91m'
+readonly BOLD=$'\033[1m'
+readonly RESET=$'\033[0m'
+readonly GREEN=$'\033[92m'
+readonly CYAN=$'\033[96m'
+readonly MAGENTA=$'\033[95m'
+readonly YELLOW=$'\033[93m'
+readonly RED=$'\033[91m'
 
 print_quick_banner() {
     clear

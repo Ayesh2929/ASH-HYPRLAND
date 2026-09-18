@@ -1,15 +1,18 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — main.dart                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+import 'package:flutter/material.dart';
+import 'screens/home.dart';
 
-def main():
-    print("Running main.dart (omega stub)")
-    sys.exit(0)
+void main() {
+  runApp(const AshApp());
+}
 
-if __name__ == '__main__':
-    main()
+class AshApp extends StatelessWidget {
+  const AshApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ASH',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF7C3AED)),
+      home: const HomeScreen(),
+    );
+  }
+}

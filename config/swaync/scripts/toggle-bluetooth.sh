@@ -82,18 +82,18 @@ readonly ICON_ASH="󱎫"
 readonly ICON_SEND="󰈔"
 
 # ANSI colors
-readonly CLR_RESET='\033[0m'
-readonly CLR_BOLD='\033[1m'
-readonly CLR_DIM='\033[2m'
-readonly CLR_RED='\033[0;31m'
-readonly CLR_GREEN='\033[0;32m'
-readonly CLR_YELLOW='\033[0;33m'
-readonly CLR_BLUE='\033[0;34m'
-readonly CLR_MAGENTA='\033[0;35m'
-readonly CLR_CYAN='\033[0;36m'
-readonly CLR_WHITE='\033[0;37m'
-readonly CLR_GRAY='\033[0;90m'
-readonly CLR_BRIGHT_BLUE='\033[0;94m'
+readonly CLR_RESET=$'\033[0m'
+readonly CLR_BOLD=$'\033[1m'
+readonly CLR_DIM=$'\033[2m'
+readonly CLR_RED=$'\033[0;31m'
+readonly CLR_GREEN=$'\033[0;32m'
+readonly CLR_YELLOW=$'\033[0;33m'
+readonly CLR_BLUE=$'\033[0;34m'
+readonly CLR_MAGENTA=$'\033[0;35m'
+readonly CLR_CYAN=$'\033[0;36m'
+readonly CLR_WHITE=$'\033[0;37m'
+readonly CLR_GRAY=$'\033[0;90m'
+readonly CLR_BRIGHT_BLUE=$'\033[0;94m'
 
 # Timeouts
 readonly CONNECT_TIMEOUT=15

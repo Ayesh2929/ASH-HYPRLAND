@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — init.sh                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
+# ASH game-mode — init: prepare gaming profile
 set -euo pipefail
-echo "Executing: init.sh (omega stub)"
+IFS=$'\n\t'
+ROOT="${ASH_ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ash"
+mkdir -p "$STATE_DIR"
+# Record that game-mode was initialized
+printf '{"plugin":"game-mode","initialized":"%s","ts":%s}\n' "$(date -Iseconds)" "$(date +%s)" > "$STATE_DIR/game-mode-init.json"
+echo "game-mode: initialized"
 exit 0

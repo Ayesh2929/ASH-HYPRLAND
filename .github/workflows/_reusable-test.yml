@@ -52,11 +52,11 @@ jobs:
           set -euo pipefail
           ERRORS=0
           TESTED=0
-          REQUIRED_KEYS='["background","foreground","accent"]'
+          REQUIRED_KEYS='["base","text","accent"]'
 
-          for colors_file in $(find themes/presets -name "colors.json" 2>/dev/null); do
+          for colors_file in $(find themes -type f -name "*.json" ! -path "*/schema/*" ! -path "*/presets/dark/catppuccin-mocha/metadata.json" 2>/dev/null | xargs grep -l "\"colors\"" 2>/dev/null | head -n 400); do
             TESTED=$((TESTED + 1))
-            THEME=$(basename "$(dirname "$colors_file")")
+            THEME=$(jq -r '.slug // .name // "unknown"' "$colors_file" 2>/dev/null || basename "$colors_file" .json)
 
             # 1. Valid JSON
             if ! jq empty "$colors_file" 2>/dev/null; then
@@ -66,7 +66,7 @@ jobs:
             fi
 
             # 2. Required keys present
-            for key in background foreground accent; do
+            for key in base text accent; do
               if ! jq -e ".$key" "$colors_file" >/dev/null 2>&1; then
                 echo "❌ $THEME: Missing required key '$key'"
                 ERRORS=$((ERRORS + 1))

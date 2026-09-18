@@ -13,14 +13,14 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Catppuccin Mocha colors
-C_MAUVE='\033[38;2;203;166;247m'
-C_BLUE='\033[38;2;137;180;250m'
-C_GREEN='\033[38;2;166;227;161m'
-C_RED='\033[38;2;243;139;168m'
-C_YELLOW='\033[38;2;249;226;175m'
-C_RESET='\033[0m'
-C_BOLD='\033[1m'
-C_DIM='\033[2m'
+C_MAUVE=$'\033[38;2;203;166;247m'
+C_BLUE=$'\033[38;2;137;180;250m'
+C_GREEN=$'\033[38;2;166;227;161m'
+C_RED=$'\033[38;2;243;139;168m'
+C_YELLOW=$'\033[38;2;249;226;175m'
+C_RESET=$'\033[0m'
+C_BOLD=$'\033[1m'
+C_DIM=$'\033[2m'
 
 log_info()    { echo -e "${C_BLUE}ℹ️ ${C_RESET} ${C_BOLD}$*${C_RESET}"; }
 log_success() { echo -e "${C_GREEN}✅${C_RESET} ${C_BOLD}$*${C_RESET}"; }
@@ -262,7 +262,7 @@ BASH_TPL = """#!/usr/bin/env bash
 # ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
-echo "Executing: {name} (omega stub)"
+echo "Executing: {name} (omega\x20stub)"
 exit 0
 """
 
@@ -276,7 +276,7 @@ PYTHON_TPL = """#!/usr/bin/env python3
 import sys
 
 def main():
-    print("Running {name} (omega stub)")
+    print("Running {name} (omega\x20stub)")
     sys.exit(0)
 
 if __name__ == '__main__':

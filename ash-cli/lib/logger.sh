@@ -82,17 +82,17 @@ _ash_log_write() {
     # ── Color & Icon definitions per level ───────────────────────────────
     local icon color
     case "$level" in
-        TRACE)  icon="◈"; color="\033[38;2;108;112;134m"   ;;  # Overlay0
-        DEBUG)  icon="◉"; color="\033[38;2;116;199;236m"   ;;  # Sapphire
-        INFO)   icon="●"; color="\033[38;2;137;180;250m"   ;;  # Blue
-        WARN)   icon="▲"; color="\033[1;38;2;249;226;175m" ;;  # Bold Yellow
-        ERROR)  icon="✗"; color="\033[1;38;2;243;139;168m" ;;  # Bold Red
-        FATAL)  icon="☠"; color="\033[1;38;2;243;139;168m" ;;  # Bold Red
-        *)      icon="·"; color="\033[0m"                  ;;
+        TRACE)  icon="◈"; color=$'\033[38;2;108;112;134m'   ;;  # Overlay0
+        DEBUG)  icon="◉"; color=$'\033[38;2;116;199;236m'   ;;  # Sapphire
+        INFO)   icon="●"; color=$'\033[38;2;137;180;250m'   ;;  # Blue
+        WARN)   icon="▲"; color=$'\033[1;38;2;249;226;175m' ;;  # Bold Yellow
+        ERROR)  icon="✗"; color=$'\033[1;38;2;243;139;168m' ;;  # Bold Red
+        FATAL)  icon="☠"; color=$'\033[1;38;2;243;139;168m' ;;  # Bold Red
+        *)      icon="·"; color=$'\033[0m'                  ;;
     esac
 
-    local reset="\033[0m"
-    local dim="\033[38;2;108;112;134m"
+    local reset=$'\033[0m'
+    local dim=$'\033[38;2;108;112;134m'
 
     # ── Console output ────────────────────────────────────────────────────
     local use_color=1

@@ -15,8 +15,8 @@ readonly LOG_FILE="${CACHE_DIR}/logs/doctor.log"
 readonly START_TIME=$(date +%s)
 
 # Colors
-readonly R='\033[0m' B='\033[1m' G='\033[92m' Y='\033[93m'
-readonly RED='\033[91m' C='\033[96m' M='\033[95m' DIM='\033[2m'
+readonly R=$'\033[0m' B=$'\033[1m' G=$'\033[92m' Y=$'\033[93m'
+readonly RED=$'\033[91m' C=$'\033[96m' M=$'\033[95m' DIM=$'\033[2m'
 
 declare -i PASS=0 FAIL=0 WARN=0
 declare -a FAILURES=()
@@ -178,22 +178,24 @@ run_all_checks() {
     section "📋 Core Config Files"
     local configs=(
         "${CONFIG_DIR}/hypr/hyprland.conf"
-        "${CONFIG_DIR}/hypr/core/env.conf"
-        "${CONFIG_DIR}/hypr/core/monitors.conf"
-        "${CONFIG_DIR}/hypr/modules/keybinds.conf"
-        "${CONFIG_DIR}/hypr/modules/autostart.conf"
-        "${CONFIG_DIR}/hypr/UserOverrides/user.conf"
-        "${CONFIG_DIR}/hypr/scripts/theme/theme-engine.sh"
-        "${CONFIG_DIR}/waybar/configs/top.jsonc"
-        "${CONFIG_DIR}/waybar/styles/main.css"
+        "${CONFIG_DIR}/hypr/env.conf"
+        "${CONFIG_DIR}/hypr/monitors.conf"
+        "${CONFIG_DIR}/hypr/input.conf"
+        "${CONFIG_DIR}/hypr/misc.conf"
+        "${CONFIG_DIR}/hypr/keybinds/default.conf"
+        "${CONFIG_DIR}/hypr/keybinds/custom.conf"
+        "${CONFIG_DIR}/hypr/autostart.conf"
+        "${CONFIG_DIR}/waybar/config.jsonc"
+        "${CONFIG_DIR}/waybar/style.css"
         "${CONFIG_DIR}/rofi/config.rasi"
         "${CONFIG_DIR}/fish/config.fish"
         "${CONFIG_DIR}/kitty/kitty.conf"
         "${CONFIG_DIR}/dunst/dunstrc"
+        "${CONFIG_DIR}/swaync/config.json"
         "${CONFIG_DIR}/hypridle/hypridle.conf"
         "${CONFIG_DIR}/hyprlock/hyprlock.conf"
+        "${CONFIG_DIR}/hyprlock/colors.conf"
         "${CONFIG_DIR}/nvim/init.lua"
-        "${CONFIG_DIR}/starship.toml"
     )
 
     for cfg in "${configs[@]}"; do
@@ -203,23 +205,24 @@ run_all_checks() {
 
     # ── Unique Feature Scripts ────────────────────────────────────────────────
     section "🌟 Unique Feature Scripts"
-    local unique_scripts=(
-        "${CONFIG_DIR}/hypr/scripts/theme/album-art-theme.sh:ash music"
-        "${CONFIG_DIR}/hypr/scripts/theme/health-score.sh:ash score"
-        "${CONFIG_DIR}/hypr/scripts/theme/workspace-profiles.sh:ash workspace"
-        "${CONFIG_DIR}/hypr/scripts/theme/smart-wallpaper.sh:ash smart"
-        "${CONFIG_DIR}/hypr/scripts/analytics/desktop-analytics.sh:ash analytics"
-        "${CONFIG_DIR}/hypr/scripts/theme/ai-theme.sh:ash theme ai"
-        "${CONFIG_DIR}/hypr/scripts/theme/theme-undo.sh:ash theme undo"
-        "${CONFIG_DIR}/hypr/scripts/theme/light-theme.sh:ash theme mode"
-        "${CONFIG_DIR}/hypr/scripts/theme/context-theme.sh:ash context"
+    # These capabilities live in the ash CLI in v5 — the standalone
+    # ~/.config/hypr/scripts/theme/* helpers no longer exist.
+    local features=(
+        "ash theme:ash theme list"
+        "ash wallpaper:ash wallpaper list"
+        "ash snapshot:ash snapshot list"
+        "ash analytics:ash analytics --help"
+        "ash workspace:ash workspace list"
+        "ash plugin:ash plugin list"
+        "ash ai:ash ai --help"
+        "ash gaming:ash gaming --help"
+        "ash doctor:ash doctor --help"
     )
 
-    for entry in "${unique_scripts[@]}"; do
-        local path="${entry%%:*}" cmd="${entry##*:}"
-        local short="${path/$HOME/~}"
-        chk "${cmd} (${short##*/})" "test -x '${path}'" required \
-            "chmod +x '${path}'"
+    for entry in "${features[@]}"; do
+        local label="${entry%%:*}" cmd="${entry#*:}"
+        chk "${label}" "command -v ash && ${cmd}" required \
+            "Reinstall the dotfiles (ash is missing from PATH)"
     done
 
     # ── Script Permissions ───────────────────────────────────────────────────
@@ -244,8 +247,8 @@ run_all_checks() {
     section "🎨 Theme Engine"
     chk "Color cache (JSON)"   "test -f '${CACHE_DIR}/colors/current.json'"  optional "ash theme pick"
     chk "Color cache (shell)"  "test -f '${CACHE_DIR}/colors/current.sh'"    optional "ash theme pick"
-    chk "Hyprland active theme" "test -f '${CONFIG_DIR}/hypr/themes/active.conf'" optional
-    chk "Waybar colors.css"    "test -f '${CONFIG_DIR}/waybar/styles/colors.css'" optional
+    chk "Hyprland active theme" "test -f '${CONFIG_DIR}/hypr/themes/active-theme.conf'" optional
+    chk "Waybar colors.css"    "test -f '${CONFIG_DIR}/waybar/colors.css'" optional
     chk "Kitty current.conf"   "test -f '${CONFIG_DIR}/kitty/themes/current.conf'" optional
     chk "Rofi dynamic theme"   "test -f '${CONFIG_DIR}/rofi/themes/ash-dynamic.rasi'" optional
     chk "Fish current.fish"    "test -f '${CONFIG_DIR}/fish/themes/current.fish'" optional

@@ -249,14 +249,14 @@ ash_hw_battery() {
 
         # Energy
         if (( energy_full > 0 )); then
-            hw_kv "Energy now"  "$(printf '%.1f Wh' "$(echo "$energy_now / 1000000" | bc -l 2>/dev/null || echo 0)")"
-            hw_kv "Energy full" "$(printf '%.1f Wh' "$(echo "$energy_full / 1000000" | bc -l 2>/dev/null || echo 0)")"
+            hw_kv "Energy now"  "$(printf '%s Wh' "$(hw_div "$energy_now" 1000000 1)")"
+            hw_kv "Energy full" "$(printf '%s Wh' "$(hw_div "$energy_full" 1000000 1)")"
         fi
 
         # Power draw
         if (( power_now > 0 )); then
             hw_kv "Power draw" \
-                "$(printf '%.2f W' "$(echo "$power_now / 1000000" | bc -l 2>/dev/null || echo 0)")"
+                "$(printf '%s W' "$(hw_div "$power_now" 1000000 2)")"
         fi
 
         # Time remaining

@@ -75,9 +75,9 @@ _bench_result_bar() {
     local empty=$(( bar_w - filled ))
 
     local bar_color
-    if   (( pct >= 80 )); then bar_color="\033[38;2;166;227;161m"
-    elif (( pct >= 50 )); then bar_color="\033[38;2;249;226;175m"
-    else                       bar_color="\033[38;2;243;139;168m"
+    if   (( pct >= 80 )); then bar_color=$'\033[38;2;166;227;161m'
+    elif (( pct >= 50 )); then bar_color=$'\033[38;2;249;226;175m'
+    else                       bar_color=$'\033[38;2;243;139;168m'
     fi
 
     printf '  \033[38;2;108;112;134m%-22s\033[0m  %s%s\033[38;2;88;91;112m%s\033[0m  \033[1m%s %s\033[0m\n' \
@@ -236,7 +236,7 @@ _bench_dashboard() {
         printf '  ╚══════════════════════════════════════════════════════════╝\033[0m\n'
     fi
 
-    hw_section "🔲" "CPU Performance" "\033[38;2;137;180;250m"
+    hw_section "🔲" "CPU Performance" $'\033[38;2;137;180;250m'
     local cpu_ms="${_BENCH_RESULTS[cpu_ms]:-?}"
     local cpu_score="${_BENCH_RESULTS[cpu_score]:-0}"
     local cpu_cores="${_BENCH_RESULTS[cpu_cores]:-?}"
@@ -244,15 +244,15 @@ _bench_dashboard() {
     hw_kv "Prime sieve (10M)" "${cpu_ms}ms  (${cpu_cores} cores)"
     _bench_result_bar "CPU Score" "$cpu_score" "pts" 200
 
-    hw_section "🧠" "Memory Bandwidth" "\033[38;2;203;166;247m"
+    hw_section "🧠" "Memory Bandwidth" $'\033[38;2;203;166;247m'
     local mem_speed="${_BENCH_RESULTS[mem_speed]:-?}"
     hw_kv "Sequential R/W" "$mem_speed"
 
-    hw_section "💿" "Disk I/O" "\033[38;2;148;226;213m"
+    hw_section "💿" "Disk I/O" $'\033[38;2;148;226;213m'
     hw_kv "Sequential Write" "${_BENCH_RESULTS[disk_write]:-?}"
     hw_kv "Sequential Read"  "${_BENCH_RESULTS[disk_read]:-?}"
 
-    hw_section "🌐" "Network Latency" "\033[38;2;137;220;235m"
+    hw_section "🌐" "Network Latency" $'\033[38;2;137;220;235m'
     for key in "${!_BENCH_RESULTS[@]}"; do
         [[ "$key" =~ ^net_ ]] || continue
         local net_label="${key#net_}"
@@ -260,24 +260,24 @@ _bench_dashboard() {
         hw_kv "$net_label" "${net_ms}ms"
     done
 
-    hw_section "🐚" "Shell Performance" "\033[38;2;249;226;175m"
+    hw_section "🐚" "Shell Performance" $'\033[38;2;249;226;175m'
     hw_kv "Bash ops" "${_BENCH_RESULTS[shell_ops_ms]:-?} ops/ms  (${_BENCH_RESULTS[shell_ms]:-?}ms for 10k loops)"
 
     # ── Overall Grade ──────────────────────────────────────────────────────────────
     local total_score="${cpu_score:-0}"
     local grade grade_color
-    if   (( total_score >= 150 )); then grade="S+"; grade_color="\033[1;38;2;203;166;247m"
-    elif (( total_score >= 120 )); then grade="A";  grade_color="\033[1;38;2;166;227;161m"
-    elif (( total_score >= 90  )); then grade="B";  grade_color="\033[1;38;2;249;226;175m"
-    elif (( total_score >= 60  )); then grade="C";  grade_color="\033[1;38;2;250;179;135m"
-    else                               grade="D";  grade_color="\033[1;38;2;243;139;168m"
+    if   (( total_score >= 150 )); then grade="S+"; grade_color=$'\033[1;38;2;203;166;247m'
+    elif (( total_score >= 120 )); then grade="A";  grade_color=$'\033[1;38;2;166;227;161m'
+    elif (( total_score >= 90  )); then grade="B";  grade_color=$'\033[1;38;2;249;226;175m'
+    elif (( total_score >= 60  )); then grade="C";  grade_color=$'\033[1;38;2;250;179;135m'
+    else                               grade="D";  grade_color=$'\033[1;38;2;243;139;168m'
     fi
 
     printf '\n'
     if [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]]; then
         printf '  %s╔══════════════════════╗\033[0m\n' "$grade_color"
         printf '  %s║  Overall Grade: %s%-3s%s  ║\033[0m\n' \
-            "$grade_color" "\033[1m" "$grade" "" 
+            "$grade_color" $'\033[1m' "$grade" "" 
         printf '  %s╚══════════════════════╝\033[0m\n' "$grade_color"
     else
         printf '  Overall Grade: %s\n' "$grade"
@@ -302,7 +302,7 @@ ash_hw_benchmark() {
         esac
     done
 
-    hw_section "⚡" "Hardware Benchmark" "\033[38;2;250;179;135m"
+    hw_section "⚡" "Hardware Benchmark" $'\033[38;2;250;179;135m'
 
     printf '  \033[38;2;249;226;175m⚠  Benchmark will take 15-60 seconds\033[0m\n'
     printf '  \033[38;2;108;112;134mClose heavy applications for accurate results\033[0m\n\n'

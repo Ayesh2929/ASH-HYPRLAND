@@ -1,6 +1,132 @@
 {
-  "name": "theme-schema.json",
-  "version": "5.0.0-omega",
-  "description": "ASH Dotfiles OMEGA component: theme-schema.json",
-  "status": "ready"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ash-dotfiles.dev/schemas/theme.json",
+  "title": "ASH Theme",
+  "description": "13-slot ASH palette \u2014 every theme must define the same slots so templates are universal.",
+  "type": "object",
+  "required": [
+    "name",
+    "slug",
+    "variant",
+    "colors"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "variant": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light"
+      ]
+    },
+    "family": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "hue": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 360
+    },
+    "description": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "colors": {
+      "type": "object",
+      "required": [
+        "base",
+        "mantle",
+        "crust",
+        "surface",
+        "overlay",
+        "text",
+        "subtext",
+        "accent",
+        "mint",
+        "sky",
+        "gold",
+        "rose",
+        "violet"
+      ],
+      "properties": {
+        "base": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "mantle": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "crust": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "surface": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "overlay": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "text": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "subtext": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "mint": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "sky": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "gold": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "rose": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "violet": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
 }

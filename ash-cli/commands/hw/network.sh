@@ -166,10 +166,10 @@ _net_render_iface() {
     state="$(_net_operstate "$iface")"
     local state_color
     case "$state" in
-        up)       state_color="\033[38;2;166;227;161m" ;;
-        down)     state_color="\033[38;2;243;139;168m" ;;
-        dormant)  state_color="\033[38;2;249;226;175m" ;;
-        *)        state_color="\033[38;2;108;112;134m" ;;
+        up)       state_color=$'\033[38;2;166;227;161m' ;;
+        down)     state_color=$'\033[38;2;243;139;168m' ;;
+        dormant)  state_color=$'\033[38;2;249;226;175m' ;;
+        *)        state_color=$'\033[38;2;108;112;134m' ;;
     esac
 
     printf '\n  %s  \033[1;38;2;137;220;235m%-12s\033[0m  %s%s\033[0m  \033[38;2;108;112;134m(%s)\033[0m\n' \
@@ -198,10 +198,10 @@ _net_render_iface() {
         local duplex
         duplex="$(_net_duplex "$iface")"
         local speed_color
-        if   (( speed >= 10000 )); then speed_color="\033[38;2;203;166;247m"
-        elif (( speed >= 1000  )); then speed_color="\033[38;2;166;227;161m"
-        elif (( speed >= 100   )); then speed_color="\033[38;2;249;226;175m"
-        else                           speed_color="\033[38;2;108;112;134m"
+        if   (( speed >= 10000 )); then speed_color=$'\033[38;2;203;166;247m'
+        elif (( speed >= 1000  )); then speed_color=$'\033[38;2;166;227;161m'
+        elif (( speed >= 100   )); then speed_color=$'\033[38;2;249;226;175m'
+        else                           speed_color=$'\033[38;2;108;112;134m'
         fi
         hw_kv "Link speed" "${speed_color}${speed} Mbps  (${duplex})\033[0m"
     fi
@@ -268,7 +268,7 @@ ash_hw_network() {
         esac
     done
 
-    hw_section "🌐" "Network Interfaces" "\033[38;2;137;220;235m"
+    hw_section "🌐" "Network Interfaces" $'\033[38;2;137;220;235m'
 
     local -a ifaces=()
 
@@ -314,7 +314,7 @@ ash_hw_network() {
 
     # ── DNS ───────────────────────────────────────────────────────────────────────
     if [[ $short -eq 0 ]]; then
-        hw_section "🔍" "DNS Configuration" "\033[38;2;148;226;213m"
+        hw_section "🔍" "DNS Configuration" $'\033[38;2;148;226;213m'
 
         if command -v resolvectl &>/dev/null; then
             local dns_out

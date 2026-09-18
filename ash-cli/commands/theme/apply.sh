@@ -194,8 +194,7 @@ theme::apply() {
             ash_ipc_broadcast "theme_changed" "{\"slug\":\"${slug}\"}" 2>/dev/null || true
         fi
         if declare -f ash_hook_run >/dev/null 2>&1; then
-            ash_hook_run "post-theme-change" --env "ASH_THEME=${slug}" --timeout 10 \
-                --on-error continue 2>/dev/null || true
+            ash_hook_run "post-theme-change" "THEME=${slug}" 2>/dev/null || true
         fi
     else
         printf '  %s%s%s %s\n' "$ASH_WARNING" "${ICO_WARN}" "${RST}" "Nothing was written"

@@ -117,10 +117,10 @@ _bt_render_devices() {
 
         local conn_color conn_symbol
         if [[ "$connected" == "yes" ]]; then
-            conn_color="\033[38;2;166;227;161m"
+            conn_color=$'\033[38;2;166;227;161m'
             conn_symbol="●  CONNECTED"
         else
-            conn_color="\033[38;2;108;112;134m"
+            conn_color=$'\033[38;2;108;112;134m'
             conn_symbol="○  disconnected"
         fi
 
@@ -152,7 +152,7 @@ ash_hw_bluetooth() {
         [[ "$arg" == "--short" ]] && short=1
     done
 
-    hw_section "📡" "Bluetooth" "\033[38;2;180;190;254m"
+    hw_section "📡" "Bluetooth" $'\033[38;2;180;190;254m'
 
     # ── HCI Adapters from sysfs ──────────────────────────────────────────────────
     local -a hci_devs=()
@@ -207,11 +207,11 @@ ash_hw_bluetooth() {
     fi
 
     if [[ $short -eq 0 ]]; then
-        hw_section "🔗" "Paired Devices" "\033[38;2;148;226;213m"
+        hw_section "🔗" "Paired Devices" $'\033[38;2;148;226;213m'
         _bt_render_devices
 
         # ── Codec support ─────────────────────────────────────────────────────────
-        hw_section "🎵" "Bluetooth Audio Codecs" "\033[38;2;203;166;247m"
+        hw_section "🎵" "Bluetooth Audio Codecs" $'\033[38;2;203;166;247m'
         local -a codecs=( "libsbc.so:SBC (standard)" "libldacBT_enc.so:LDAC (hi-res)" \
                           "libfreeaptx.so:aptX (open)" "libaptx.so:aptX (Qualcomm)" \
                           "libLC3.so:LC3 (LE Audio)" )

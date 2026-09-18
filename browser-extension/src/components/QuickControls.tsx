@@ -1,15 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — QuickControls.tsx                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+import React from 'react';
 
-def main():
-    print("Running QuickControls.tsx (omega stub)")
-    sys.exit(0)
+type Props = { /* ash QuickControls */ };
 
-if __name__ == '__main__':
-    main()
+export const QuickControls: React.FC<Props> = () => {
+  return <div className="ash-quickcontrols">ASH QuickControls — placeholder component</div>;
+};
+export default QuickControls;

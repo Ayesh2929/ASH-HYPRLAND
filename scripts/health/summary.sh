@@ -12,14 +12,14 @@ readonly CONFIG_DIR="${HOME}/.config"
 readonly LOG_FILE="${CACHE_DIR}/logs/summary.log"
 
 # Colors
-readonly R='\033[0m'
-readonly B='\033[1m'
-readonly G='\033[92m'
-readonly Y='\033[93m'
-readonly C='\033[96m'
-readonly M='\033[95m'
-readonly DIM='\033[2m'
-readonly RED='\033[91m'
+readonly R=$'\033[0m'
+readonly B=$'\033[1m'
+readonly G=$'\033[92m'
+readonly Y=$'\033[93m'
+readonly C=$'\033[96m'
+readonly M=$'\033[95m'
+readonly DIM=$'\033[2m'
+readonly RED=$'\033[91m'
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "${LOG_FILE}" 2>/dev/null || true; }
 
@@ -84,7 +84,7 @@ get_running_services() {
 }
 
 get_waybar_modules() {
-    local top_jsonc="${CONFIG_DIR}/waybar/configs/top.jsonc"
+    local top_jsonc="${CONFIG_DIR}/waybar/config.jsonc"
     if [[ -f "${top_jsonc}" ]]; then
         local count
         count=$(grep -c '"custom/' "${top_jsonc}" 2>/dev/null || echo "0")

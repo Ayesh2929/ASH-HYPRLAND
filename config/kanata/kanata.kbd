@@ -1,0 +1,59 @@
+;; ╔════════════════════════════════════════════════════════════════════════════╗
+;; ║  ASH DOTFILES v5.0 OMEGA — kanata default keymap                           ║
+;; ╚════════════════════════════════════════════════════════════════════════════╝
+;;
+;; Started by config/hypr/autostart.conf:
+;;     exec-once = kanata --cfg ~/.config/kanata/kanata.kbd &
+;;
+;; The default layer below is a 1:1 mapping, so enabling kanata never changes
+;; how the keyboard behaves. Add your own remaps in the `custom` layer and
+;; reference it from `deflayer base`, e.g.
+;;
+;;     (deflayer base
+;;       caps  (layer-toggle custom)   ;; hold/tap caps to reach the layer
+;;       ...)
+;;
+;; Linux needs uinput access for kanata:
+;;     sudo usermod -aG input "$USER"        # then log out and back in
+;;     echo 'KERNEL=="uinput", GROUP="input", MODE="0660"' | \
+;;         sudo tee /etc/udev/rules.d/99-uinput.rules
+;;
+;; Check the mapping before you trust it:
+;;     kanata --check --cfg ~/.config/kanata/kanata.kbd
+
+(defcfg
+  ;; Use the evdev backend on Linux; the tcp server lets `ash` reload the map.
+  linux-dev /dev/input/by-id/keyboard
+  linux-continue-if-no-devs-found yes
+  process-unmapped-keys yes
+  log-layer-changes no
+)
+
+(defsrc
+  esc   f1  f2  f3  f4  f5  f6  f7  f8  f9  f10 f11 f12
+  grv   1   2   3   4   5   6   7   8   9   0   -   =   bspc
+  tab   q   w   e   r   t   y   u   i   o   p   [   ]   \
+  caps  a   s   d   f   g   h   j   k   l   ;   '   ret
+  lsft  z   x   c   v   b   n   m   ,   .   /   rsft
+  lctl  lmet lalt           spc            ralt rmet rctl
+)
+
+;; Identical mapping — nothing is remapped until you edit the `custom` layer.
+(deflayer base
+  esc   f1  f2  f3  f4  f5  f6  f7  f8  f9  f10 f11 f12
+  grv   1   2   3   4   5   6   7   8   9   0   -   =   bspc
+  tab   q   w   e   r   t   y   u   i   o   p   [   ]   \
+  caps  a   s   d   f   g   h   j   k   l   ;   '   ret
+  lsft  z   x   c   v   b   n   m   ,   .   /   rsft
+  lctl  lmet lalt           spc            ralt rmet rctl
+)
+
+;; Optional extras: uncomment and map them from `base` when you want them.
+(deflayer custom
+  _     _   _   _   _   _   _   _   _   _   _   _   _
+  _     _   _   _   _   _   _   _   _   _   _   _   _   _
+  _     _   _   _   _   _   _   _   _   _   _   _   _   _
+  _     _   _   _   _   _   _   _   _   _   _   _   _
+  _     _   _   _   _   _   _   _   _   _   _
+  _     _   _              _              _   _   _
+)

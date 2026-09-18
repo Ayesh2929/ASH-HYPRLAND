@@ -1,9 +1,35 @@
 #!/usr/bin/env bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  ⚡ ASH DOTFILES v5.0 OMEGA — reload-discord.sh                                            ║
-# ║                                                                               ║
+# ║  ⚡ ASH DOTFILES v5.0 OMEGA — ash-cli/engines/hot-reload-engine/reload-discord.sh                              ║
+# ║  Library: sourced, never executed directly. Provides reload discord helpers.      ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
-set -euo pipefail
-echo "Executing: reload-discord.sh (omega stub)"
-exit 0
+
+[[ -n "${_ASH_HOT_RELOAD_ENGINE_RELOAD_DISCORD_LOADED:-}" ]] && return 0
+readonly _ASH_HOT_RELOAD_ENGINE_RELOAD_DISCORD_LOADED=1
+
+# ── reload discord — primary entry ───────────────────────────────────────────────
+ash_hot_reload_engine_reload_discord() {
+    local sub="${1:-help}"
+    case "$sub" in
+        help|--help|-h) ash_hot_reload_engine_reload_discord::help ;;
+        *) ash_log_warn "reload discord: unknown subcommand '$sub' — see help" 2>/dev/null || echo "reload discord: unknown subcommand '$sub'" >&2; return 2 ;;
+    esac
+}
+
+ash_hot_reload_engine_reload_discord::help() {
+    cat <<'EOF'
+ash-cli/engines/hot-reload-engine/reload-discord.sh — reload discord engine helper
+
+Usage: ash_hot_reload_engine_reload_discord [help]
+
+This engine is part of ASH's modular system. It is sourced as a library;
+its functions are called by the ash CLI dispatchers.
+
+EOF
+}
+
+# Placeholder implementations — preserve API surface so callers do not break.
+ash_hot_reload_engine_reload_discord::run() {
+    ash_log_info "reload discord: run (placeholder — engine not yet wired)" 2>/dev/null || echo "reload discord: run placeholder"
+    return 0
+}

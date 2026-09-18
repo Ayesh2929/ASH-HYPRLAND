@@ -123,41 +123,41 @@ readonly FINAL_WQ
 # CATPPUCCIN MOCHA — FULL 26-COLOR ANSI PALETTE
 # ─────────────────────────────────────────────────────────────────────────────
 # 8-bit truecolor ANSI escape sequences
-C_RST='\033[0m'   C_BLD='\033[1m'   C_DIM='\033[2m'   C_ITL='\033[3m'
-C_UNL='\033[4m'   C_BLK='\033[5m'   C_INV='\033[7m'
+C_RST=$'\033[0m'   C_BLD=$'\033[1m'   C_DIM=$'\033[2m'   C_ITL=$'\033[3m'
+C_UNL=$'\033[4m'   C_BLK=$'\033[5m'   C_INV=$'\033[7m'
 
 # Catppuccin Mocha foreground colors
-C_ROSEWATER='\033[38;2;245;224;220m'   # #f5e0dc
-C_FLAMINGO='\033[38;2;242;205;205m'    # #f2cdcd
-C_PINK='\033[38;2;245;194;231m'        # #f5c2e7
-C_MAUVE='\033[38;2;203;166;247m'       # #cba6f7
-C_RED='\033[38;2;243;139;168m'         # #f38ba8
-C_MAROON='\033[38;2;235;160;172m'      # #eba0ac
-C_PEACH='\033[38;2;250;179;135m'       # #fab387
-C_YELLOW='\033[38;2;249;226;175m'      # #f9e2af
-C_GREEN='\033[38;2;166;227;161m'       # #a6e3a1
-C_TEAL='\033[38;2;148;226;213m'        # #94e2d5
-C_SKY='\033[38;2;137;220;235m'         # #89dceb
-C_SAPPHIRE='\033[38;2;116;199;236m'    # #74c7ec
-C_BLUE='\033[38;2;137;180;250m'        # #89b4fa
-C_LAVENDER='\033[38;2;180;190;254m'    # #b4befe
-C_TEXT='\033[38;2;205;214;244m'        # #cdd6f4
-C_SUBTEXT1='\033[38;2;186;194;222m'    # #bac2de
-C_SUBTEXT0='\033[38;2;166;173;200m'    # #a6adc8
-C_OVERLAY2='\033[38;2;147;153;178m'    # #9399b2
-C_OVERLAY1='\033[38;2;127;132;156m'    # #7f849c
-C_OVERLAY0='\033[38;2;108;112;134m'    # #6c7086
-C_SURFACE2='\033[38;2;88;91;112m'      # #585b70
-C_SURFACE1='\033[38;2;69;71;90m'       # #45475a
-C_SURFACE0='\033[38;2;49;50;68m'       # #313244
-C_BASE='\033[38;2;30;30;46m'           # #1e1e2e
-C_MANTLE='\033[38;2;24;24;37m'         # #181825
-C_CRUST='\033[38;2;17;17;27m'          # #11111b
+C_ROSEWATER=$'\033[38;2;245;224;220m'   # #f5e0dc
+C_FLAMINGO=$'\033[38;2;242;205;205m'    # #f2cdcd
+C_PINK=$'\033[38;2;245;194;231m'        # #f5c2e7
+C_MAUVE=$'\033[38;2;203;166;247m'       # #cba6f7
+C_RED=$'\033[38;2;243;139;168m'         # #f38ba8
+C_MAROON=$'\033[38;2;235;160;172m'      # #eba0ac
+C_PEACH=$'\033[38;2;250;179;135m'       # #fab387
+C_YELLOW=$'\033[38;2;249;226;175m'      # #f9e2af
+C_GREEN=$'\033[38;2;166;227;161m'       # #a6e3a1
+C_TEAL=$'\033[38;2;148;226;213m'        # #94e2d5
+C_SKY=$'\033[38;2;137;220;235m'         # #89dceb
+C_SAPPHIRE=$'\033[38;2;116;199;236m'    # #74c7ec
+C_BLUE=$'\033[38;2;137;180;250m'        # #89b4fa
+C_LAVENDER=$'\033[38;2;180;190;254m'    # #b4befe
+C_TEXT=$'\033[38;2;205;214;244m'        # #cdd6f4
+C_SUBTEXT1=$'\033[38;2;186;194;222m'    # #bac2de
+C_SUBTEXT0=$'\033[38;2;166;173;200m'    # #a6adc8
+C_OVERLAY2=$'\033[38;2;147;153;178m'    # #9399b2
+C_OVERLAY1=$'\033[38;2;127;132;156m'    # #7f849c
+C_OVERLAY0=$'\033[38;2;108;112;134m'    # #6c7086
+C_SURFACE2=$'\033[38;2;88;91;112m'      # #585b70
+C_SURFACE1=$'\033[38;2;69;71;90m'       # #45475a
+C_SURFACE0=$'\033[38;2;49;50;68m'       # #313244
+C_BASE=$'\033[38;2;30;30;46m'           # #1e1e2e
+C_MANTLE=$'\033[38;2;24;24;37m'         # #181825
+C_CRUST=$'\033[38;2;17;17;27m'          # #11111b
 
 # Background variants
-CB_BASE='\033[48;2;30;30;46m'
-CB_SURFACE0='\033[48;2;49;50;68m'
-CB_MANTLE='\033[48;2;24;24;37m'
+CB_BASE=$'\033[48;2;30;30;46m'
+CB_SURFACE0=$'\033[48;2;49;50;68m'
+CB_MANTLE=$'\033[48;2;24;24;37m'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING ENGINE — Premium structured output
@@ -1950,7 +1950,7 @@ if [[ $EXIT_CODE -ne 0 ]]; then
   echo ""
   echo -e "\033[38;2;243;139;168m❌ generate.sh exited with code ${EXIT_CODE}\033[0m"
   if [[ -f "${ERROR_LOG}" ]] && [[ -s "${ERROR_LOG}" ]]; then
-    echo -e "\033[38;2;108;112;134m── Last errors ──────────────────────────────\033[0m"
+    echo -e $'\033[38;2;108;112;134m── Last errors ──────────────────────────────\033[0m'
     tail -10 "${ERROR_LOG}" | sed "s/^/   /"
   fi
   # Emit partial outputs even on failure

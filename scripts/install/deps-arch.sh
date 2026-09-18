@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
 # ║  ⚡ ASH DOTFILES v5.0 OMEGA — deps-arch.sh                                            ║
-# ║                                                                               ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
-echo "Executing: deps-arch.sh (omega stub)"
+IFS=$'\n\t'
+# Minimal dep installer — lists packages that would be installed.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+CORE="${ROOT}/scripts/core/install.sh"
+if [[ -f "${CORE}" ]]; then
+  if bash "${CORE}" --help 2>&1 | grep -q "dry-run"; then
+    exec bash "${CORE}" --dry-run --distro arch "$@"
+  fi
+fi
+echo "ASH deps (arch): would install base packages for arch"
+PACKAGES=(hyprland waybar rofi-wayland kitty fish jq python)
+printf '  - %s\n' "${PACKAGES[@]}"
 exit 0

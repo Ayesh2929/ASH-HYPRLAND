@@ -16,7 +16,7 @@ _mem_parse_meminfo() {
     while IFS=':' read -r key val; do
         local k="${key// /}"
         local v
-        v="$(printf '%s' "$val" | awk '{print $1 * 1024}')"
+        v="$(printf '%s' "$val" | awk '{printf "%.0f", $1 * 1024}')"
         _MEMINFO["$k"]="$v"
     done < <(grep -E '^(MemTotal|MemFree|MemAvailable|Buffers|Cached|SwapTotal|SwapFree|Active|Inactive|Dirty|Shmem|Mapped|HugePages_Total|HugePages_Free)' \
                   /proc/meminfo 2>/dev/null)

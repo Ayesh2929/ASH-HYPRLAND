@@ -19,10 +19,10 @@ readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 readonly LOG_FILE="${HOME}/.local/state/ash-dotfiles/logs/workspace-init.log"
 readonly SESSION_FILE="${HOME}/.local/state/ash-dotfiles/session-history.json"
 
-readonly C_RESET='\033[0m'
-readonly C_GREEN='\033[38;2;166;227;161m'
-readonly C_BLUE='\033[38;2;137;180;250m'
-readonly C_MAUVE='\033[38;2;203;164;247m'
+readonly C_RESET=$'\033[0m'
+readonly C_GREEN=$'\033[38;2;166;227;161m'
+readonly C_BLUE=$'\033[38;2;137;180;250m'
+readonly C_MAUVE=$'\033[38;2;203;164;247m'
 
 _log() {
     printf "[%s] [WS-INIT] %s\n" \

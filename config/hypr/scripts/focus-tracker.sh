@@ -21,11 +21,11 @@ readonly FOCUS_DB="${HOME}/.local/share/ash-dotfiles/analytics/focus.db"
 readonly SOCKET="${XDG_RUNTIME_DIR:-/tmp}/hypr/${HYPRLAND_INSTANCE_SIGNATURE:-}/.socket2.sock"
 readonly STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/ash-focus"
 
-readonly C_RESET='\033[0m'
-readonly C_GREEN='\033[38;2;166;227;161m'
-readonly C_BLUE='\033[38;2;137;180;250m'
-readonly C_MAUVE='\033[38;2;203;164;247m'
-readonly C_YELLOW='\033[38;2;249;226;175m'
+readonly C_RESET=$'\033[0m'
+readonly C_GREEN=$'\033[38;2;166;227;161m'
+readonly C_BLUE=$'\033[38;2;137;180;250m'
+readonly C_MAUVE=$'\033[38;2;203;164;247m'
+readonly C_YELLOW=$'\033[38;2;249;226;175m'
 
 _log() {
     printf "[%s] [FOCUS] %s\n" "$(date '+%Y-%m-%dT%H:%M:%S')" "$*" \

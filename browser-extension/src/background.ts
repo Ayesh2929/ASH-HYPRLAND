@@ -1,15 +1,13 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║                                                                               ║
-# ║  🌐 ASH DOTFILES v5.0 OMEGA — background.ts                                            ║
-# ║                                                                               ║
-# ╚═══════════════════════════════════════════════════════════════════════════════╝
-import sys
+// ASH background service worker — MV3
+// Listens for theme changes from the dashboard and applies to the extension popup.
+chrome.runtime.onInstalled.addListener(() => {
+  console.log('[ASH] extension installed');
+});
 
-def main():
-    print("Running background.ts (omega stub)")
-    sys.exit(0)
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.ashTheme) {
+    console.log('[ASH] theme updated', changes.ashTheme.newValue);
+  }
+});
 
-if __name__ == '__main__':
-    main()
+export {};

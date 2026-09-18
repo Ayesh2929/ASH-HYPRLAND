@@ -32,19 +32,19 @@ declare -gr _HW_VERSION="5.0.0-omega"
 
 _hw_nc() { [[ "${ASH_FLAG_NO_COLOR:-0}" -eq 0 ]] && printf '%s' "$1" || true; }
 
-_hw_r()       { _hw_nc '\033[0m';                         }  # reset
-_hw_bold()    { _hw_nc '\033[1m';                         }
-_hw_mauve()   { _hw_nc '\033[38;2;203;166;247m';          }
-_hw_blue()    { _hw_nc '\033[38;2;137;180;250m';          }
-_hw_green()   { _hw_nc '\033[38;2;166;227;161m';          }
-_hw_peach()   { _hw_nc '\033[38;2;250;179;135m';          }
-_hw_yellow()  { _hw_nc '\033[38;2;249;226;175m';          }
-_hw_red()     { _hw_nc '\033[1;38;2;243;139;168m';        }
-_hw_teal()    { _hw_nc '\033[38;2;148;226;213m';          }
-_hw_sky()     { _hw_nc '\033[38;2;137;220;235m';          }
-_hw_dim()     { _hw_nc '\033[38;2;108;112;134m';          }
-_hw_lavender(){ _hw_nc '\033[38;2;180;190;254m';          }
-_hw_pink()    { _hw_nc '\033[38;2;245;194;231m';          }
+_hw_r()       { _hw_nc $'\033[0m';                         }  # reset
+_hw_bold()    { _hw_nc $'\033[1m';                         }
+_hw_mauve()   { _hw_nc $'\033[38;2;203;166;247m';          }
+_hw_blue()    { _hw_nc $'\033[38;2;137;180;250m';          }
+_hw_green()   { _hw_nc $'\033[38;2;166;227;161m';          }
+_hw_peach()   { _hw_nc $'\033[38;2;250;179;135m';          }
+_hw_yellow()  { _hw_nc $'\033[38;2;249;226;175m';          }
+_hw_red()     { _hw_nc $'\033[1;38;2;243;139;168m';        }
+_hw_teal()    { _hw_nc $'\033[38;2;148;226;213m';          }
+_hw_sky()     { _hw_nc $'\033[38;2;137;220;235m';          }
+_hw_dim()     { _hw_nc $'\033[38;2;108;112;134m';          }
+_hw_lavender(){ _hw_nc $'\033[38;2;180;190;254m';          }
+_hw_pink()    { _hw_nc $'\033[38;2;245;194;231m';          }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔷  SHARED DISPLAY HELPERS  (used by all hw sub-commands)
@@ -138,13 +138,33 @@ hw_badge() {
     printf '%s%s \033[38;2;30;30;46m%s %s\033[0m' "$(_hw_bold)" "$bg" "$text" "$(_hw_r)"
 }
 
-# Human-readable bytes
+# Divide two integers, printing <scale> decimal places — no bc required.
+# hw_div <numerator> <denominator> [scale]
+hw_div() {
+    local num="${1:-0}" den="${2:-1}" scale="${3:-1}"
+    local mult=1 i
+    for (( i = 0; i < scale; i++ )); do mult=$(( mult * 10 )); done
+    # awk handles "4.13e+09", "12 kB", leading +/-, etc.
+    awk -v n="$num" -v d="$den" -v m="$mult" '
+        BEGIN {
+            n += 0; d += 0
+            if (d == 0) { print "0"; exit }
+            if (n < 0)  { n = -n }
+            printf "%.*f", (m == 1000 ? 3 : (m == 100 ? 2 : (m == 10 ? 1 : 0))), n / d
+        }' 2>/dev/null || printf '0'
+}
+
+# Human-readable bytes. Tolerates scientific notation, units and empty input.
 hw_human_bytes() {
-    local bytes="${1:-0}"
-    if   (( bytes >= 1099511627776 )); then printf '%.1f TB' "$(echo "scale=1; $bytes/1099511627776" | bc -l 2>/dev/null || echo 0)"
-    elif (( bytes >= 1073741824    )); then printf '%.1f GB' "$(echo "scale=1; $bytes/1073741824"    | bc -l 2>/dev/null || echo 0)"
-    elif (( bytes >= 1048576       )); then printf '%.1f MB' "$(echo "scale=1; $bytes/1048576"       | bc -l 2>/dev/null || echo 0)"
-    elif (( bytes >= 1024          )); then printf '%.1f KB' "$(echo "scale=1; $bytes/1024"          | bc -l 2>/dev/null || echo 0)"
+    local raw="${1:-0}"
+    local bytes
+    bytes="$(printf '%s' "$raw" | awk '{ v = $1 + 0; if (v < 0) v = 0; printf "%.0f", v }' 2>/dev/null)"
+    [[ "$bytes" =~ ^[0-9]+$ ]] || bytes=0
+
+    if   (( bytes >= 1099511627776 )); then printf '%s TB' "$(hw_div "$bytes" 1099511627776 1)"
+    elif (( bytes >= 1073741824    )); then printf '%s GB' "$(hw_div "$bytes" 1073741824    1)"
+    elif (( bytes >= 1048576       )); then printf '%s MB' "$(hw_div "$bytes" 1048576       1)"
+    elif (( bytes >= 1024          )); then printf '%s KB' "$(hw_div "$bytes" 1024          1)"
     else printf '%d B' "$bytes"
     fi
 }

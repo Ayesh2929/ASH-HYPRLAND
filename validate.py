@@ -59,6 +59,7 @@ def main():
     parser = argparse.ArgumentParser(description="ASH Dotfiles Validation Script")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero on warnings")
     parser.add_argument("--sarif", action="store_true", help="Output in SARIF format")
+    parser.add_argument("--check-stubs", action="store_true", help="Also check for omega stub placeholders")
     args = parser.parse_args()
 
     base = Path('config')
@@ -131,11 +132,13 @@ def main():
     if broken_symlinks == 0:
         print("  ✅ No broken symlinks")
 
-    # Windows line endings
+    # Windows line endings — skip binary/cache dirs and compiled python
     crlf_files = 0
     if base.exists():
         for p in base.rglob('*'):
             if p.is_file() and not p.is_symlink():
+                if '__pycache__' in str(p) or p.suffix in ('.pyc','.pyo','.png','.jpg','.jpeg','.webp','.gif','.ico','.icns','.ttf','.woff','.woff2','.eot','.pdf','.zip','.gz'):
+                    continue
                 try:
                     with open(p, 'rb') as f:
                         if b'\r\n' in f.read():
@@ -176,10 +179,12 @@ def main():
     if missing_shebang == 0:
         print("  ✅ All shell scripts have shebangs")
 
-    # JSON syntax validation
+    # JSON syntax validation (excluding intentionally malformed fixtures)
     invalid_json = 0
     if base.exists():
         for p in base.rglob('*.json'):
+            if 'malformed' in str(p) or 'broken' in str(p):
+                continue
             if p.is_file() and not p.is_symlink():
                 try:
                     with open(p, 'r', encoding='utf-8') as f:
@@ -201,6 +206,66 @@ def main():
                     pass
     if invalid_json == 0:
         print("  ✅ All JSON files are valid")
+
+    # Check for omega stub JSON files outside config (opt-in via --check-stubs)
+    if args.check_stubs:
+        stub_jsons = []
+        for p in Path('.').rglob('*.json'):
+            if '.git' in str(p) or 'node_modules' in str(p):
+                continue
+            try:
+                raw = p.read_text(encoding='utf-8')
+                if '"status": "ready"' in raw and 'ASH Dotfiles OMEGA component' in raw:
+                    try:
+                        data = json.loads(raw)
+                        if data.get('status') == 'ready' and data.get('version') == '5.0.0-omega':
+                            stub_jsons.append(p)
+                    except:
+                        pass
+            except:
+                pass
+        if stub_jsons:
+            for pj in stub_jsons[:20]:
+                print(f"  ⚠️  Stub JSON (should be real schema/data): {pj}")
+                warnings += 1
+            if len(stub_jsons) > 20:
+                print(f"  ... and {len(stub_jsons)-20} more stub JSONs")
+        else:
+            print("  ✅ No stub JSONs in repo (outside .git)")
+
+        # Smart stub detection: a stub executes `echo "Executing: … (omega stub)"` and exits 0,
+        # and is short (<20 lines). Files that merely mention the phrase (e.g., setup.sh's
+        # generator template or install.sh's grep pattern) are not counted.
+        stub_sh = 0
+        stub_list = []
+        for p in Path('.').rglob('*.sh'):
+            if '.git' in str(p):
+                continue
+            # setup.sh and install.sh are generators / wrappers that reference the phrase
+            if p.name in ('setup.sh', 'install.sh'):
+                continue
+            try:
+                text = p.read_text(encoding='utf-8')
+                if 'omega stub' in text and 'Executing:' in text:
+                    # Heuristic: stub files are exactly 9 lines (BASH_TPL)
+                    lines = text.strip().splitlines()
+                    if len(lines) <= 15 and any('exit 0' in l for l in lines):
+                        stub_sh += 1
+                        stub_list.append(p)
+            except:
+                pass
+        if stub_sh > 50:
+            print(f"  ⚠️  {stub_sh} shell scripts are stubs (omega stub) — expected < 50 for production")
+            for pj in stub_list[:10]:
+                print(f"     - {pj}")
+            warnings += 1
+        else:
+            print(f"  ✅ Stub shell scripts: {stub_sh} (threshold 50)")
+            if stub_sh:
+                for pj in stub_list:
+                    print(f"     - {pj}")
+
+
 
     if args.sarif:
         sarif = {

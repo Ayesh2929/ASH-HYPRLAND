@@ -630,15 +630,15 @@ _chk_sec_score() {
 
     local grade color grade_icon
     if   (( score >= 90 )); then
-        grade="A+"  color='\033[1;38;2;166;227;161m'  grade_icon="🛡️ "
+        grade="A+"  color=$'\033[1;38;2;166;227;161m'  grade_icon="🛡️ "
     elif (( score >= 80 )); then
-        grade="A"   color='\033[38;2;166;227;161m'    grade_icon="🔒"
+        grade="A"   color=$'\033[38;2;166;227;161m'    grade_icon="🔒"
     elif (( score >= 70 )); then
-        grade="B"   color='\033[38;2;249;226;175m'    grade_icon="⚠️ "
+        grade="B"   color=$'\033[38;2;249;226;175m'    grade_icon="⚠️ "
     elif (( score >= 60 )); then
-        grade="C"   color='\033[38;2;250;179;135m'    grade_icon="⚠️ "
+        grade="C"   color=$'\033[38;2;250;179;135m'    grade_icon="⚠️ "
     else
-        grade="D"   color='\033[1;38;2;243;139;168m'  grade_icon="🚨"
+        grade="D"   color=$'\033[1;38;2;243;139;168m'  grade_icon="🚨"
     fi
 
     local bar_width=40
@@ -655,8 +655,8 @@ _chk_sec_score() {
         printf '  ║  🔐  SECURITY SCORE                                       ║\n'
         printf '  ╠══════════════════════════════════════════════════════════╣\n'
         printf '  ║  %s%s%s  %s%3d/100  %s%-3s%s                                 ║\n' \
-            "$color" "$bar" '\033[0m\033[1;38;2;243;139;168m' \
-            "$color" "$score" "$color" "${grade}" '\033[38;2;243;139;168m'
+            "$color" "$bar" $'\033[0m\033[1;38;2;243;139;168m' \
+            "$color" "$score" "$color" "${grade}" $'\033[38;2;243;139;168m'
         printf '  ║  %s findings  •  %d HIGH  •  %d MEDIUM  •  %d LOW        ║\n' \
             "$_SEC_FINDINGS" "${#_SEC_HIGH[@]}" "${#_SEC_MEDIUM[@]}" "${#_SEC_LOW[@]}"
         printf '  ╚══════════════════════════════════════════════════════════╝\033[0m\n'
