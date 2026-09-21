@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 30
     if: inputs.run_benchmarks == 'true' || github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: "⚙️ Install benchmark tools"
         run: |
@@ -126,7 +126,7 @@ jobs:
 
       - name: "📤 Upload artifacts"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "bench-results-${{ github.run_id }}"
           path: /tmp/bench-*.json
